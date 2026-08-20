@@ -32,6 +32,41 @@
 
 ---
 
+## 배포
+
+| | |
+|---|---|
+| 저장소 | https://github.com/lhs0609a-cpu/sajudang |
+| 프론트 | https://sajudang-three.vercel.app |
+
+`main` 에 push 하면 Vercel 이 자동 배포합니다. (Root Directory `apps/web`, npm workspaces)
+
+### ⚠ 지금 배포본은 명식을 세우지 못합니다
+
+프론트만 올라가 있고 **계산 API 는 아직 어디에도 없습니다.**
+`NEXT_PUBLIC_API_BASE` 가 없으면 화면 상단에 그 사실을 알리는 띠가 뜹니다
+(조용히 실패하지 않게). 화면·서사·릴레이 UI 는 볼 수 있습니다.
+
+FastAPI 는 `sxtwl`(C++ 확장)이 필요해 Vercel 서버리스에 맞지 않습니다.
+컨테이너 호스팅(Render·Railway·Fly·AWS ECS)에 `services/api` 를 올린 뒤:
+
+```bash
+# Vercel 환경변수 등록 후 재배포
+vercel env add NEXT_PUBLIC_API_BASE production   # 예: https://api.sajudang.com
+vercel --prod
+```
+
+API 쪽에는 CORS 허용 출처에 배포 도메인을 넣어야 합니다
+(`services/api/main.py` 의 `allow_origins`).
+
+### 배포 보호
+
+Vercel 팀 프로젝트는 기본으로 로그인해야 열립니다(Vercel Authentication).
+공개 사이트로 쓰려고 껐습니다. 다시 잠그려면
+Vercel 대시보드 → Project → Settings → Deployment Protection 에서 켜세요.
+
+---
+
 ## 개발 환경
 
 ### 왜 Python 3.11 인가
