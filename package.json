@@ -1,0 +1,18 @@
+{
+  "name": "sajudang",
+  "private": true,
+  "version": "0.1.0",
+  "description": "사주당 四柱堂 — 웹 사주 서비스 모노레포",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @sajudang/web",
+    "build": "npm run build --workspace @sajudang/web",
+    "typecheck": "npm run typecheck --workspace @sajudang/web"
+  },
+  "engines": {
+    "node": ">=18.17"
+  }
+}

@@ -1,0 +1,123 @@
+/*
+ * 디자인 토큰 — docs/09_디자인가이드.md §2, §3
+ *
+ * --c 는 런타임에 JS 가 바꿉니다 (캐릭터/일간 테마색).
+ * 성좌 원륜·입자·강조선이 전부 이 변수를 따라옵니다.
+ */
+:root {
+  /* 배경 — 자줏빛 검정 */
+  --bg: #0c0a12;
+  --bg2: #151220;
+  --bg3: #1d1829;
+  --line: #2e2740;
+  --line2: #3a3150;
+
+  /* 텍스트 */
+  --paper: #f2ece4;
+  --paper2: #b5abbe;
+  --paper3: #726a80;
+
+  /* 강조 */
+  --gold: #e5b87a;
+  --rose: #d98ba5;
+  --lav: #a896d4;
+  --teal: #7fc4bc;
+  --ember: #c9707a;
+
+  /* 런타임 교체 — 캐릭터/일간 테마색 */
+  --c: #e5b87a;
+
+  --serif: "Gowun Batang", serif;
+  --sans: "Noto Sans KR", sans-serif;
+  --mono: "IBM Plex Mono", monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #08060d;
+  color: var(--paper);
+  font-family: var(--sans);
+  font-weight: 300;
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 모바일이 기본. 데스크톱은 모바일 뷰를 중앙에 놓는다. (docs/08 §5) */
+.stage {
+  display: flex;
+  justify-content: center;
+  padding: 22px 16px 100px;
+  background: radial-gradient(70% 45% at 50% 0%, rgba(229, 184, 122, 0.05), transparent 70%);
+}
+.phone {
+  width: 100%;
+  max-width: 440px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  min-height: 88vh;
+  position: relative;
+  overflow: hidden;
+}
+@media (max-width: 480px) {
+  .stage { padding: 0 0 80px; }
+  .phone { border: none; min-height: 100vh; }
+}
+
+/* 하단 고지 — h1, d2, r1 에 붙인다. (docs/08 §4) */
+.legal {
+  margin: 26px -22px -26px;
+  padding: 16px 22px 26px;
+  border-top: 1px solid var(--line);
+  background: #0a0810;
+  font-size: 10.5px;
+  line-height: 1.75;
+  color: var(--paper3);
+}
+
+/* 일간 10색 (docs/09 §2) */
+[data-ilgan="甲"] { --c: #7fb08a; }
+[data-ilgan="乙"] { --c: #a8c97f; }
+[data-ilgan="丙"] { --c: #e5b87a; }
+[data-ilgan="丁"] { --c: #d98ba5; }
+[data-ilgan="戊"] { --c: #c9a87f; }
+[data-ilgan="己"] { --c: #d4c29a; }
+[data-ilgan="庚"] { --c: #a9b3c4; }
+[data-ilgan="辛"] { --c: #dcd6e2; }
+[data-ilgan="壬"] { --c: #7fa0c4; }
+[data-ilgan="癸"] { --c: #7fc4bc; }
+
+/* 장면 — 무채색 클립에 색 입히기 (docs/10 §4) */
+.scene-video { filter: grayscale(1) brightness(1.15); width: 100%; display: block; }
+.scene-tint {
+  position: absolute; inset: 0; background: var(--c);
+  mix-blend-mode: color; opacity: 0.62; pointer-events: none;
+}
+.sceneart video, .sceneart img { width: 100%; height: auto; display: block; }
+
+/* 자리표시 모션 — 움직임은 화면의 20% 이내 (docs/09 §6) */
+.scnRing { animation: scnSpin 40s linear infinite; transform-origin: center; }
+@keyframes scnSpin { to { transform: rotate(360deg); } }
+.scnDust { animation: scnRise 6s ease-in-out infinite; }
+@keyframes scnRise {
+  0%, 100% { transform: translateY(0); opacity: 0.5; }
+  50% { transform: translateY(-10px); opacity: 0.85; }
+}
+
+/* 상단바 (docs/08 §4) */
+.top {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-bottom: 1px solid var(--line);
+  background: #0a0810; font-family: var(--mono); font-size: 10.5px;
+}
+.top .tt { flex: 1; color: var(--paper2); font-family: var(--sans); font-size: 12px; }
+.top .tb {
+  background: none; border: 1px solid var(--line); color: var(--paper3);
+  padding: 4px 7px; cursor: pointer; text-decoration: none; font-size: 10px;
+}
+.top .tb:hover { color: var(--paper); border-color: var(--line2); }
+.top .tb.sk { color: var(--gold); border-color: transparent; }
+
+@media (prefers-reduced-motion: reduce) {
+  .scnRing, .scnDust { animation: none !important; }
+}

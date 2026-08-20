@@ -1,0 +1,110 @@
+/**
+ * API 클라이언트.
+ *
+ * ★ 계산과 문장은 전부 서버에 있습니다. 여기서 사주를 계산하거나
+ *   문장을 만들지 마세요. (docs/02 §7 · CLAUDE.md 절대 규칙 5)
+ */
+import type {
+  ChartRequest, ChartResponse, DailyResponse, Features,
+  HookResponse, RelayResponse, ReportResponse,
+} from "@shared/chart";
+
+const BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
+
+export const API_BASE = BASE;
+
+/**
+ * 배포된 사이트인데 API 주소가 localhost 로 남아 있으면 아무것도 못 합니다.
+ * 조용히 실패하지 말고 그 사실을 화면에 알립니다.
+ */
+export function apiMisconfigured(): boolean {
+  if (typeof window === "undefined") return false;
+  const localApi = /^https?:\/\/(localhost|127\.0\.0\.1)/.test(BASE);
+  const localSite = /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname);
+  return localApi && !localSite;
+}
+
+export class ApiError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
+  }
+}
+
+async function call<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(BASE + path, {
+    ...init,
+    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+  });
+  if (!res.ok) {
+    let detail = res.statusText;
+    try {
+      const body = await res.json();
+      detail = typeof body.detail === "string" ? body.detail : JSON.stringify(body.detail);
+    } catch {
+      /* 본문이 JSON 이 아니면 statusText 로 둔다 */
+    }
+    throw new ApiError(res.status, detail);
+  }
+  return res.json() as Promise<T>;
+}
+
+const post = <T>(path: string, body: unknown) =>
+  call<T>(path, { method: "POST", body: JSON.stringify(body) });
+
+export const api = {
+  chart: (req: ChartRequest) => post<ChartResponse>("/v1/chart", req),
+
+  hook: (req: {
+    chart_id: string; concern: string; axis4?: string | null;
+    name?: string; lens_id?: string | null;
+  }) => post<HookResponse>("/v1/hook", req),
+
+  report: (req: {
+    chart_id: string; lens_id: string; tier: string;
+    concern: string; axis4?: string | null;
+  }) => post<ReportResponse>("/v1/report", req),
+
+  relay: (req: {
+    chart_id: string; session_id: string;
+    read?: string[]; skipped?: string[]; last_lens?: string | null;
+  }) => post<RelayResponse>("/v1/relay", req),
+
+  /** 실제로 다음 캐릭터로 넘어갈 때. 세션 브레이크 카운터를 올린다. */
+  consumeRelay: (sessionId: string) =>
+    post<{ used: number; limit: number; blocked: boolean }>(
+      `/v1/relay/consume?session_id=${encodeURIComponent(sessionId)}`, {}),
+
+  feedback: (req: {
+    statement_id: string; chart_id: string; answer: 0 | 1;
+    stage?: string; lens_id?: string | null; concern?: string; axis4?: string | null;
+  }) => post<{ ok: boolean; recorded: number }>("/v1/feedback", req),
+
+  /** 공감률. 응답 100건 미만이면 shown=false — 숫자를 지어내지 말 것. */
+  agreement: (statementId: string) =>
+    call<{ shown: boolean; rate?: number; total?: number; min_responses?: number }>(
+      `/v1/agreement?statement_id=${encodeURIComponent(statementId)}`),
+
+  /* ── 결제 ── */
+  payConfig: () =>
+    call<{ enabled: boolean; client_key: string | null; refund_notice: string }>(
+      "/v1/pay/config"),
+
+  /** 금액은 서버가 정합니다. 여기서 금액을 보내지 마세요. */
+  payPrepare: (req: {
+    session_id: string; chart_id: string; lens_id: string;
+    tier: string; concern?: string;
+  }) => post<{
+    order_id: string; amount: number; tier: string;
+    client_key: string | null; enabled: boolean; refund_notice: string;
+    purchases_today: number; per_day_limit: number;
+  }>("/v1/pay/prepare", req),
+
+  payConfirm: (req: { session_id: string; order_id: string; payment_key: string }) =>
+    post<{ ok: boolean; tier: string; unlocked: string[]; seal: string }>(
+      "/v1/pay/confirm", req),
+
+  daily: (chartId: string) =>
+    call<DailyResponse>(`/v1/daily?chart_id=${encodeURIComponent(chartId)}`),
+};
+
+export type { Features };

@@ -1,0 +1,2951 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사주당 四柱堂</title>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ══════════ 로판 팔레트 ══════════ */
+:root{
+  --bg:#0C0A12; --bg2:#151220; --bg3:#1D1829;
+  --line:#2E2740; --line2:#3A3150;
+  --paper:#F2ECE4; --paper2:#B5ABBE; --paper3:#726A80;
+  --gold:#E5B87A; --rose:#D98BA5; --lav:#A896D4; --teal:#7FC4BC;
+  --ember:#C9707A;
+  --c:#E5B87A;              /* 캐릭터 테마 — JS가 교체 */
+  --serif:"Gowun Batang",serif; --sans:"Noto Sans KR",sans-serif;
+  --mono:"IBM Plex Mono",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#08060D;color:var(--paper);font-family:var(--sans);font-weight:300;
+ line-height:1.85;-webkit-font-smoothing:antialiased}
+
+/* ══════════ RAIL ══════════ */
+.rail{position:fixed;left:0;top:0;bottom:0;width:216px;z-index:90;background:#06040A;
+ border-right:1px solid var(--line);padding:18px 13px;font-family:var(--mono);
+ font-size:10px;color:var(--paper3);overflow-y:auto}
+.rail h1{font-family:var(--serif);font-size:15px;color:var(--gold);letter-spacing:.1em}
+.rail .v{font-size:9px;margin-bottom:14px;opacity:.6}
+.rail .gh{display:block;font-size:8.5px;letter-spacing:.16em;color:var(--gold);
+ margin:14px 0 5px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+.rail a{display:flex;gap:6px;color:var(--paper3);text-decoration:none;padding:3px 4px;font-size:10px}
+.rail a:hover{color:var(--paper2)}.rail a.on{color:var(--gold)}
+.rail a b{font-weight:400;opacity:.45;width:20px;flex:none}
+.inrow{display:flex;gap:3px;margin-bottom:5px}
+.inrow input,.inrow select{flex:1;min-width:0;background:var(--bg2);border:1px solid var(--line);
+ color:var(--paper);padding:6px 2px;font-family:var(--mono);font-size:10px;text-align:center;outline:none}
+.mini{width:100%;background:var(--gold);border:none;color:#08060D;padding:7px;
+ font-family:var(--mono);font-size:9.5px;cursor:pointer;margin-top:2px}
+.gg{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-top:5px}
+.gg button{background:none;border:1px solid var(--line);font-family:var(--serif);
+ font-size:11px;padding:4px 0;cursor:pointer}
+.fx{margin-top:11px;padding-top:9px;border-top:1px solid var(--line);line-height:1.9}
+.fx b{color:var(--c);font-weight:400}
+.rtog{display:none}
+
+/* ══════════ STAGE ══════════ */
+.stage{margin-left:216px;display:flex;justify-content:center;padding:22px 16px 100px;
+ background:radial-gradient(70% 45% at 50% 0%,rgba(229,184,122,.05),transparent 70%)}
+.phone{width:100%;max-width:440px;background:var(--bg);border:1px solid var(--line);
+ min-height:88vh;position:relative;overflow:hidden}
+/* ══════════ 장면 아트 ══════════ */
+.sceneart{position:relative;width:100%;margin-bottom:18px;cursor:pointer}
+.sceneart svg{width:100%;height:auto;display:block}
+.sceneart .slot{position:absolute;top:5px;right:5px;font-family:var(--mono);font-size:7.5px;
+ color:var(--c);border:1px dashed var(--c);padding:2px 6px;opacity:.55;
+ background:rgba(12,10,18,.7);transition:.16s}
+.sceneart:hover .slot{opacity:1}
+.sceneart.inline{margin-bottom:12px}
+.sceneart.hero{margin:-26px -22px 20px;width:calc(100% + 44px)}
+
+/* 장면 모션 */
+@keyframes flicker{0%,100%{opacity:.55}45%{opacity:.85}70%{opacity:.5}}
+@keyframes drift{from{transform:translateX(0);opacity:.25}to{transform:translateX(26px);opacity:0}}
+@keyframes doorOpen{from{transform:scaleX(1)}to{transform:scaleX(.18)}}
+@keyframes inkSpread{from{r:0;opacity:.7}to{r:13;opacity:0}}
+@keyframes unroll{from{width:14%}to{width:100%}}
+.sFlick{animation:flicker 3.4s ease-in-out infinite}
+.sDrift{animation:drift 7s linear infinite}
+.sDoor{animation:doorOpen 2.4s ease-out forwards;transform-origin:left center}
+.sInk{animation:inkSpread 3s ease-out infinite}
+.sUnroll{animation:unroll 1.6s cubic-bezier(.2,.8,.3,1) forwards}
+@keyframes floatUp{0%{transform:translateY(0);opacity:0}
+ 18%{opacity:.85}100%{transform:translateY(-46px);opacity:0}}
+@keyframes hover{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes spinSlow{to{transform:rotate(360deg)}}
+@keyframes shaft{0%,100%{opacity:.18}50%{opacity:.38}}
+@keyframes beadSway{0%,100%{transform:rotate(-.8deg)}50%{transform:rotate(.8deg)}}
+.sMote{animation:floatUp 6s linear infinite}
+.sHover{animation:hover 4.6s ease-in-out infinite}
+.sSpin{animation:spinSlow 40s linear infinite;transform-origin:center}
+.sShaft{animation:shaft 5s ease-in-out infinite}
+.sBead{animation:beadSway 6s ease-in-out infinite;transform-origin:top center}
+
+/* 프롬프트 모달 */
+.pmod{position:fixed;inset:0;z-index:120;background:rgba(8,6,13,.94);display:none;
+ align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(5px)}
+.pmod.on{display:flex}
+.pmod .in{background:var(--bg2);border:1px solid var(--line);width:100%;max-width:640px;
+ max-height:86vh;overflow-y:auto;padding:24px}
+.pmod .x{float:right;background:none;border:none;color:var(--paper3);
+ font-family:var(--mono);font-size:11px;cursor:pointer}
+.pmod h3{font-family:var(--serif);font-size:19px;font-weight:700;margin-bottom:3px}
+.pmod .m1{font-family:var(--mono);font-size:10px;color:var(--paper3);margin-bottom:14px}
+.pmod .sp{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.pmod .sp span{font-family:var(--mono);font-size:9.5px;color:var(--paper2);
+ border:1px solid var(--line);padding:4px 9px}
+.pmod .pl{font-family:var(--mono);font-size:9px;letter-spacing:.16em;color:var(--gold);
+ margin:15px 0 7px;display:flex;justify-content:space-between;align-items:center}
+.pmod .pl button{background:none;border:1px solid var(--line);color:var(--paper3);
+ font-family:var(--mono);font-size:9px;padding:3px 10px;cursor:pointer}
+.pmod pre{background:#08060D;border:1px solid var(--line);padding:13px 15px;
+ font-family:var(--mono);font-size:10.5px;line-height:1.75;color:var(--paper2);
+ white-space:pre-wrap;word-break:break-word}
+.pmod .hint{border-left:2px solid var(--teal);padding:2px 0 2px 13px;margin-top:14px;
+ font-size:12px;color:var(--paper2);line-height:1.85}
+
+.lab{position:absolute;top:0;left:0;background:var(--gold);color:#08060D;
+ font-family:var(--mono);font-size:8px;letter-spacing:.1em;padding:3px 8px;z-index:40}
+
+/* 상단 네비 */
+.topbar{position:sticky;top:0;z-index:35;background:rgba(12,10,18,.96);
+ border-bottom:1px solid var(--line);display:flex;align-items:center;gap:4px;
+ padding:10px 12px;backdrop-filter:blur(6px)}
+.topbar button{background:none;border:1px solid var(--line);color:var(--paper2);
+ font-family:var(--mono);font-size:10px;padding:6px 10px;cursor:pointer;
+ transition:.16s;white-space:nowrap}
+.topbar button:hover{border-color:var(--c);color:var(--c)}
+.topbar button:disabled{opacity:.25;cursor:default;border-color:var(--line)}
+.topbar .ttl{flex:1;text-align:center;font-family:var(--serif);font-size:13px;
+ color:var(--paper2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.topbar.hide{display:none}
+
+.snd{position:absolute;top:7px;right:7px;z-index:40;background:rgba(21,18,32,.9);
+ border:1px solid var(--line);color:var(--paper3);font-family:var(--mono);font-size:9px;
+ padding:5px 8px;cursor:pointer}
+.snd.on{border-color:var(--gold);color:var(--gold)}
+.scr{padding:26px 22px 44px;position:relative;z-index:2}
+
+/* ══════════ 타이포 ══════════ */
+.eb{font-family:var(--mono);font-size:9px;letter-spacing:.22em;color:var(--c);margin-bottom:11px}
+.h1{font-family:var(--serif);font-size:24px;font-weight:700;line-height:1.5;margin-bottom:12px}
+.h2{font-family:var(--serif);font-size:18px;font-weight:700;line-height:1.5;margin-bottom:9px}
+.tx{font-size:13.5px;color:var(--paper2);line-height:1.92}
+.tx+.tx{margin-top:11px}
+.tx b{color:var(--paper);font-weight:400}
+.sm{font-family:var(--mono);font-size:9.5px;color:var(--paper3);line-height:1.8}
+.mt{margin-top:16px}
+
+.nr{font-family:var(--serif);font-size:16px;line-height:1.98;color:var(--paper2);margin-bottom:18px}
+.nr .l{display:block;opacity:0;animation:up .85s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes up{from{opacity:0;transform:translateY(13px)}to{opacity:1;transform:none}}
+.nr .ps{display:block;height:10px}
+.say{font-family:var(--serif);font-size:17px;line-height:1.82;color:var(--paper);
+ border-left:2px solid var(--c);padding-left:16px;margin-bottom:17px}
+.say small{display:block;font-family:var(--mono);font-size:9px;color:var(--c);
+ letter-spacing:.14em;margin-bottom:6px}
+.say b{color:var(--c);font-weight:400}
+
+.btn{width:100%;background:var(--c);border:none;color:#08060D;padding:15px;
+ font-family:var(--sans);font-weight:700;font-size:14px;cursor:pointer;margin-top:8px;
+ letter-spacing:.02em}
+.btn.gh{background:none;border:1px solid var(--line2);color:var(--paper2);font-weight:300}
+.btn.gh:hover{border-color:var(--c);color:var(--c)}
+
+.fld{width:100%;background:var(--bg2);border:1px solid var(--line);color:var(--paper);
+ padding:15px 14px;font-family:var(--mono);font-size:15px;outline:none;text-align:center}
+.fld.ser{font-family:var(--serif);font-size:19px}
+.fld:focus{border-color:var(--gold)}
+.f3{display:flex;gap:7px;margin-bottom:11px}
+.f3>div{flex:1;position:relative}
+.f3 label{position:absolute;top:-8px;left:9px;background:var(--bg);padding:0 5px;
+ font-family:var(--mono);font-size:8.5px;color:var(--paper3)}
+.og{display:grid;gap:7px}.og.c2{grid-template-columns:repeat(2,1fr)}
+.op{background:var(--bg2);border:1px solid var(--line);color:var(--paper);padding:13px 11px;
+ cursor:pointer;font-family:var(--sans);font-size:13px;text-align:left;transition:.16s}
+.op:hover,.op.on{border-color:var(--gold);color:var(--gold)}
+.op b{display:block;font-family:var(--serif);font-size:15px;font-weight:700;margin-bottom:2px}
+.op span{font-size:10.5px;color:var(--paper3)}
+.prog{display:flex;gap:4px;margin-bottom:20px}
+.prog i{height:2px;flex:1;background:var(--line)}
+.prog i.d{background:var(--gold)}
+
+/* ══════════ 캐릭터 ══════════ */
+.figwrap{display:flex;justify-content:center;position:relative;margin-bottom:16px}
+.figwrap .glow{position:absolute;inset:auto 0 4% 0;height:70%;
+ background:radial-gradient(ellipse at 50% 72%,var(--c),transparent 66%);opacity:.16}
+.figwrap svg{position:relative;z-index:1}
+.imgtag{position:absolute;top:2px;right:4px;font-family:var(--mono);font-size:7.5px;
+ color:var(--c);border:1px dashed;padding:1px 5px;opacity:.65;z-index:2}
+
+/* 모션툰 */
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.011)}}
+@keyframes blinkk{0%,93%,100%{opacity:0}95%,98%{opacity:1}}
+@keyframes swayP{0%,100%{transform:rotate(-1.6deg)}50%{transform:rotate(1.6deg)}}
+@keyframes riseF{from{transform:translateY(0);opacity:.5}to{transform:translateY(-38px);opacity:0}}
+.mBody{animation:breathe 4.6s ease-in-out infinite;transform-origin:bottom center}
+.mEye{animation:blinkk 5.4s steps(1) infinite}
+.mProp{animation:swayP 4.2s ease-in-out infinite;transform-origin:top center}
+.mFx{animation:riseF 5.2s linear infinite}
+
+/* ══════════ 명식 ══════════ */
+.ms{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:15px 0 9px}
+.pil{border:1px solid var(--line);background:var(--bg2);padding:12px 0 10px;text-align:center;
+ transform:rotateY(90deg);opacity:0}
+.pil.flip{animation:flipIn .55s cubic-bezier(.2,.7,.3,1) forwards}
+.ms.static .pil{transform:none;opacity:1}
+@keyframes flipIn{to{transform:none;opacity:1}}
+.pil .p{font-family:var(--mono);font-size:8px;color:var(--paper3);margin-bottom:5px}
+.pil .g,.pil .j{font-family:var(--serif);font-size:22px;font-weight:700;line-height:1.15}
+.pil .j{color:var(--paper2)}
+.pil.self{border-color:var(--c);background:linear-gradient(180deg,rgba(229,184,122,.09),transparent)}
+.pil.self .p{color:var(--c)}
+.pil.self .g{color:var(--c)}
+.pil.self.lit .g{animation:ignite 1.3s ease forwards}
+.pil.lk{border-style:dashed;border-color:rgba(229,184,122,.35);background:none}
+.pil.lk .g,.pil.lk .j{color:var(--paper3);font-size:18px;opacity:.5}
+.pil.lk .p{color:rgba(229,184,122,.7)}
+.pil.lk .key{font-family:var(--mono);font-size:7.5px;color:var(--gold);
+ margin-top:6px;letter-spacing:.06em}
+@keyframes ignite{0%{text-shadow:none}60%{text-shadow:0 0 32px var(--c),0 0 8px var(--c)}
+ 100%{text-shadow:0 0 16px var(--c)}}
+.msnote{font-size:11.5px;color:var(--paper3);line-height:1.75;
+ border-left:1px solid var(--line);padding-left:11px}
+.msnote b{color:var(--c);font-weight:400}
+.calc{border:1px solid rgba(127,196,188,.35);background:rgba(127,196,188,.04);
+ padding:13px 15px;margin-top:13px}
+.calc .t{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;color:var(--teal);
+ margin-bottom:9px;display:flex;justify-content:space-between}
+.calc .r{display:flex;gap:9px;padding:4px 0;font-family:var(--mono);font-size:9.5px;line-height:1.7}
+.calc .r .k{width:66px;flex:none;color:var(--paper3)}
+.calc .r .v{flex:1;color:var(--paper2)}
+.calc .r .v b{color:var(--teal);font-weight:500}
+.calc .r .v s{color:var(--paper3);opacity:.6}
+
+.mec{border:1px solid var(--line);padding:14px;display:flex;gap:13px;align-items:center;
+ position:relative;overflow:hidden;margin-bottom:16px}
+.mec::before{content:"";position:absolute;inset:0;
+ background:radial-gradient(70% 100% at 8% 50%,var(--c),transparent 62%);opacity:.14}
+.mec>*{position:relative;z-index:1}
+.mec .gz{font-family:var(--mono);font-size:9px;color:var(--c);letter-spacing:.1em}
+.mec .nm{font-family:var(--serif);font-size:17px;font-weight:700;margin-top:2px}
+.mec .tr{font-size:11px;color:var(--paper2);margin-top:3px;line-height:1.6}
+
+/* ══════════ 훅 블록 ══════════ */
+.blk{opacity:0;transform:translateY(20px);transition:.65s;padding:19px 0;
+ border-bottom:1px solid rgba(46,39,64,.7)}
+.blk.in{opacity:1;transform:none}.blk.hide{display:none}
+.blk .lab{font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;margin-bottom:10px;color:var(--paper3)}
+.blk .lab:empty{display:none}
+.stab{border-left:3px solid var(--c);padding:4px 0 4px 18px;margin:6px 0 4px}
+.stab p{font-family:var(--serif);font-size:22px;line-height:1.72;color:var(--paper)}
+@media(max-width:480px){.stab p{font-size:19px}}
+.src{display:inline-block;font-family:var(--mono);font-size:8.5px;color:var(--teal);
+ border:1px solid rgba(127,196,188,.35);padding:3px 8px;margin-bottom:11px;letter-spacing:.04em}
+.tale{font-family:var(--serif);font-size:16.5px;line-height:1.92;color:var(--paper2)}
+.tale+.tale{margin-top:11px}.tale b{color:var(--paper);font-weight:400}
+.neg{font-family:var(--serif);font-size:16.5px;line-height:1.92;color:var(--paper2)}
+.neg b{color:var(--lav);font-weight:400}
+.strk{position:relative;display:inline-block}
+.strk::after{content:"";position:absolute;left:0;top:53%;height:1.5px;background:var(--ember);
+ width:0;animation:strike .5s ease forwards}
+@keyframes strike{to{width:100%}}
+
+.scene{border:1px solid rgba(229,184,122,.32);
+ background:linear-gradient(180deg,rgba(229,184,122,.07),transparent 72%);
+ padding:20px 18px;position:relative}
+.scene::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--c)}
+.scene p{font-family:var(--serif);font-size:18px;line-height:1.88}
+.scene p+p{margin-top:13px}.scene p.hit{color:var(--c)}
+.seq{display:flex;margin:15px 0 5px}
+.seq div{flex:1;text-align:center;position:relative;padding-top:17px}
+.seq div::before{content:"";position:absolute;top:5px;left:50%;width:8px;height:8px;
+ border-radius:50%;background:var(--c);transform:translateX(-50%) scale(0);
+ animation:dotIn .35s cubic-bezier(.2,1.4,.4,1) forwards}
+.seq div::after{content:"";position:absolute;top:8.5px;left:50%;height:1.5px;
+ background:rgba(229,184,122,.45);width:0;animation:lineIn .45s ease forwards}
+.seq div:last-child::after{display:none}
+.seq div span{font-size:11.5px;color:var(--paper2);opacity:0;animation:fIn .4s forwards}
+@keyframes dotIn{to{transform:translateX(-50%) scale(1)}}
+@keyframes lineIn{to{width:100%}}
+@keyframes fIn{to{opacity:1}}
+.seq div:nth-child(1)::before{animation-delay:0s}.seq div:nth-child(2)::before{animation-delay:.4s}
+.seq div:nth-child(3)::before{animation-delay:.8s}
+.seq div:nth-child(1)::after{animation-delay:.15s}.seq div:nth-child(2)::after{animation-delay:.55s}
+.seq div:nth-child(1) span{animation-delay:.15s}.seq div:nth-child(2) span{animation-delay:.55s}
+.seq div:nth-child(3) span{animation-delay:.95s}
+
+.nameB{text-align:center;padding:6px 0}
+.nameB .pre{font-family:var(--serif);font-size:15px;color:var(--paper2);margin-bottom:12px}
+.nameB .word{font-family:var(--serif);font-size:27px;font-weight:700;color:var(--c);
+ line-height:1.4;margin-bottom:12px;animation:spread 1.15s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes spread{0%{transform:scale(.25);opacity:0;filter:blur(14px)}
+ 55%{transform:scale(1.06);opacity:1;filter:blur(3px)}
+ 100%{transform:scale(1);opacity:1;filter:blur(0)}}
+.nameB .post{font-size:13px;color:var(--paper2);line-height:1.9}
+
+.vt{display:flex;gap:6px;margin-top:18px}
+.vt button{flex:1;background:none;border:1px solid var(--line2);color:var(--paper2);
+ padding:13px;cursor:pointer;font-size:13.5px;transition:.16s}
+.vt button:hover{border-color:var(--c);color:var(--c)}
+.react{display:none;margin-top:15px;animation:pop .5s cubic-bezier(.2,.7,.3,1)}
+.react.on{display:block}
+@keyframes pop{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.ripple{position:fixed;left:50%;top:50%;width:8px;height:8px;border-radius:50%;
+ border:1.5px solid var(--c);pointer-events:none;z-index:99;
+ animation:rp 1s cubic-bezier(.15,.7,.3,1) forwards}
+@keyframes rp{to{width:540px;height:540px;margin:-270px 0 0 -270px;opacity:0;border-width:.5px}}
+.agr{display:flex;align-items:center;gap:8px;margin-top:12px;
+ font-family:var(--mono);font-size:9px;color:var(--paper3)}
+.agr .bar{flex:1;height:2px;background:var(--line);max-width:110px}
+.agr .bar i{display:block;height:100%;background:var(--c);width:0;animation:agrIn 1s ease .2s forwards}
+@keyframes agrIn{to{width:var(--w)}}
+.agr b{color:var(--c);font-weight:500}
+.soc{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:9px;
+ color:var(--paper3);margin-top:12px}
+.soc .dot{width:5px;height:5px;border-radius:50%;background:var(--teal);
+ box-shadow:0 0 8px var(--teal);animation:pl 2.2s ease-in-out infinite}
+@keyframes pl{50%{opacity:.35}}
+.soc b{color:var(--c);font-weight:400}
+
+/* 잠금 */
+.dz{padding:14px 0;border-bottom:1px solid rgba(46,39,64,.7)}
+.dz .k{font-family:var(--mono);font-size:8.5px;letter-spacing:.16em;color:var(--c);margin-bottom:6px}
+.dz p{font-family:var(--serif);font-size:16px;line-height:1.8}
+.bl{display:inline-block;padding:0 3px;border-radius:2px;
+ animation:lock .7s ease .5s forwards;color:var(--paper)}
+@keyframes lock{to{filter:blur(4.5px);background:var(--paper3);color:transparent}}
+
+/* 티어 */
+.tier{border:1px solid var(--line);background:var(--bg2);padding:15px;margin-bottom:8px;
+ cursor:pointer;position:relative;transition:.16s}
+.tier:hover{border-color:var(--c)}.tier.free{border-color:var(--gold)}
+.tier .tp{display:flex;justify-content:space-between;align-items:baseline}
+.tier .nm{font-family:var(--serif);font-size:15.5px;font-weight:700}
+.tier .pr{font-family:var(--mono);font-size:12.5px;color:var(--c)}
+.tier.free .pr{color:var(--gold)}
+.tier .d{font-size:11px;color:var(--paper3);margin-top:5px;line-height:1.7}
+.tier .rec{position:absolute;top:-1px;right:-1px;background:var(--gold);color:#08060D;
+ font-family:var(--mono);font-size:8px;padding:2px 6px}
+
+/* 진열 */
+.shh{display:flex;align-items:baseline;gap:9px;margin:20px 0 9px}
+.shh h3{font-family:var(--serif);font-size:15px;font-weight:700}
+.shh span{font-family:var(--mono);font-size:8.5px;color:var(--paper3);letter-spacing:.1em}
+.beam{height:4px;background:linear-gradient(180deg,#3A2E22,#241B14);
+ border-top:1px solid rgba(229,184,122,.18)}
+.shelf{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-top:11px}
+.tag{padding-top:11px;position:relative;cursor:pointer;transform-origin:50% 0;transition:transform .35s}
+.tag::before{content:"";position:absolute;top:0;left:50%;width:1px;height:11px;
+ background:rgba(229,184,122,.35);transform:translateX(-50%)}
+.tag:hover{transform:rotate(-1.4deg)}.tag:nth-child(even):hover{transform:rotate(1.4deg)}
+.plk{background:linear-gradient(180deg,#3A2E22,#241B14);border:1px solid rgba(229,184,122,.18);
+ padding:12px 6px 10px;text-align:center;height:100%;display:flex;flex-direction:column}
+.tag:hover .plk{border-color:rgba(229,184,122,.55)}
+.plk .han{font-family:var(--serif);font-size:17px;font-weight:700;color:var(--gold)}
+.plk .ko{font-family:var(--serif);font-size:11.5px;margin-top:5px;flex:1}
+.plk .pr{font-family:var(--mono);font-size:8.5px;color:var(--paper2);margin-top:7px;
+ padding-top:6px;border-top:1px solid rgba(229,184,122,.15)}
+
+/* 캐릭터 그리드 */
+.cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.cnode{border:1px solid var(--line);background:var(--bg2);padding:10px 4px 8px;text-align:center;
+ cursor:pointer;transition:.18s;position:relative}
+.cnode:hover{border-color:var(--nc)}
+.cnode .n{font-family:var(--serif);font-size:11.5px;color:var(--nc);margin-top:5px;line-height:1.3}
+.cnode .s{font-family:var(--mono);font-size:7.5px;color:var(--paper3);margin-top:3px}
+.cnode.locked{opacity:.3}
+.cnode .gx{position:absolute;top:3px;right:4px;font-family:var(--mono);font-size:7px;
+ color:var(--paper3)}
+
+/* 릴레이 */
+.rel{border:1px solid var(--rc);background:var(--bg2);padding:17px;margin-bottom:10px;
+ position:relative;overflow:hidden}
+.rel::before{content:"";position:absolute;inset:0;
+ background:radial-gradient(80% 100% at 0% 50%,var(--rc),transparent 62%);opacity:.09}
+.rel>*{position:relative;z-index:1}
+.rel .why{font-family:var(--mono);font-size:8.5px;color:var(--rc);margin-bottom:9px;
+ padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.07);letter-spacing:.04em}
+.rel .hd{display:flex;gap:11px;align-items:center;margin-bottom:11px}
+.rel .hd .han{font-family:var(--mono);font-size:8px;color:var(--paper3)}
+.rel .hd .nm{font-family:var(--serif);font-size:16px;font-weight:700;color:var(--rc)}
+.rel .qt{font-family:var(--serif);font-size:15.5px;line-height:1.8;
+ border-left:2px solid var(--rc);padding-left:14px;margin-bottom:13px}
+.rel .row{display:flex;gap:6px}
+.rel .row button{flex:1;padding:11px 7px;font-size:12px;cursor:pointer;font-family:var(--sans)}
+.rel .row .go{border:none;color:#08060D;font-weight:700;background:var(--rc)}
+.rel .row .skip{background:none;border:1px solid var(--line2);color:var(--paper3)}
+.rel .free{position:absolute;top:0;right:0;background:var(--teal);color:#08060D;
+ font-family:var(--mono);font-size:7.5px;padding:3px 7px;z-index:2}
+
+/* 컷 */
+.cut{padding:26px 0;border-bottom:1px solid rgba(46,39,64,.6);position:relative}
+.cut::before{content:attr(data-n);position:absolute;top:6px;left:0;font-family:var(--mono);
+ font-size:8px;color:var(--paper3);opacity:.5}
+.cut.dk{background:#08060D;margin:0 -22px;padding:26px 22px}
+
+/* 기타 */
+.brake{border:1px solid rgba(127,196,188,.4);background:rgba(127,196,188,.05);
+ padding:13px 15px;margin-top:16px}
+.brake .t{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;color:var(--teal);margin-bottom:6px}
+.brake p{font-size:12px;color:var(--paper2);line-height:1.85}
+.legal{margin-top:22px;padding-top:15px;border-top:1px solid var(--line);
+ font-family:var(--mono);font-size:8.5px;color:var(--paper3);line-height:1.9}
+.legal b{color:var(--paper2);font-weight:400}
+.rvw{border:1px solid var(--line);background:var(--bg2);padding:13px 14px;margin-bottom:7px}
+.rvw .st{color:var(--gold);font-size:10px;letter-spacing:.14em;margin-bottom:5px}
+.rvw p{font-size:12.5px;color:var(--paper2);line-height:1.85}
+.rvw .who{font-family:var(--mono);font-size:8.5px;color:var(--paper3);margin-top:7px}
+.rvwtag{font-family:var(--mono);font-size:7.5px;color:var(--teal);
+ border:1px solid rgba(127,196,188,.4);padding:1px 5px;margin-left:5px}
+.dorbar{display:flex;gap:11px;align-items:center;border:1px solid var(--line);
+ background:var(--bg2);padding:11px 13px;margin-bottom:20px}
+.dorbar p{font-family:var(--serif);font-size:13px;color:var(--paper2);flex:1}
+.tagfree{font-family:var(--mono);font-size:8px;color:var(--gold);
+ border:1px solid rgba(229,184,122,.45);padding:3px 6px;white-space:nowrap}
+.elbar{display:flex;gap:5px;align-items:flex-end;height:64px;margin:12px 0 6px}
+.elbar>div{flex:1;text-align:center}
+.elbar i{display:block;width:66%;margin:0 auto;background:var(--c);height:2px;
+ animation:grow .8s cubic-bezier(.2,.8,.3,1) forwards}
+@keyframes grow{to{height:var(--h)}}
+.elbar .lb{font-family:var(--serif);font-size:11px;margin-top:5px}
+.elbar .vv{font-family:var(--mono);font-size:8px;color:var(--paper3)}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}
+ .blk,.nr .l,.seq div span{opacity:1;transform:none}.pil{transform:none;opacity:1}}
+@media(max-width:900px){
+ .rail{transform:translateX(-100%);transition:.3s}.rail.open{transform:none}
+ .rtog{display:block;position:fixed;left:9px;top:9px;z-index:95;background:var(--bg2);
+  border:1px solid var(--line);color:var(--paper2);font-family:var(--mono);font-size:10px;padding:8px 11px}
+ .stage{margin-left:0;padding:42px 6px 70px}.phone{border:none}
+}
+</style>
+</head>
+<body>
+<button class="rtog" id="rtog">MENU</button>
+<aside class="rail" id="rail">
+ <h1>四柱堂</h1><div class="v">사주당 · 통합 완성판</div>
+ <span class="gh">생년월일</span>
+ <div class="inrow"><input id="iy" value="1993"><input id="im" value="5"><input id="id_" value="15"></div>
+ <div class="inrow"><input id="ih" value="10"><input id="imi" value="20">
+  <select id="isx"><option value="F">여</option><option value="M">남</option></select></div>
+ <button class="mini" onclick="recalc()">다시 계산</button>
+ <div class="fx" id="fx"></div>
+ <span class="gh">계절</span>
+ <div id="seaSel" style="display:grid;grid-template-columns:1fr 1fr;gap:3px">
+  <button class="mini" data-k="spring" onclick="setSea('spring')" style="background:none;border:1px solid var(--line);color:var(--paper2)">봄 벚꽃</button>
+  <button class="mini on" data-k="summer" onclick="setSea('summer')" style="background:none;border:1px solid var(--line);color:var(--paper2)">여름 능소화</button>
+  <button class="mini" data-k="autumn" onclick="setSea('autumn')" style="background:none;border:1px solid var(--line);color:var(--paper2)">가을 국화</button>
+  <button class="mini" data-k="winter" onclick="setSea('winter')" style="background:none;border:1px solid var(--line);color:var(--paper2)">겨울 매화</button>
+ </div>
+ <span class="gh">일간 전환</span><div class="gg" id="gg"></div>
+ <div id="nav"></div>
+</aside>
+
+<div class="stage"><div class="phone" id="phone">
+ <div class="lab" id="lab">A1</div>
+ <button class="snd" id="snd" onclick="tsnd()">♪ 소리</button>
+ <div class="topbar hide" id="topbar">
+  <button id="btBack" onclick="back()">← 뒤로</button>
+  <span class="ttl" id="ttl">—</span>
+  <button id="btSkip" onclick="go('a7')" style="display:none">건너뛰기</button>
+  <button onclick="go('f2')">印 <span id="sealN">0</span></button>
+  <button onclick="go('g1')">日</button>
+  <button onclick="go('b1')">진열대</button>
+ </div>
+ <div id="view"></div>
+</div></div>
+
+<div class="pmod" id="pmod"><div class="in" id="pmodin"></div></div>
+
+<script>
+/* ══════════════════════════════════════════
+   1. 계산 엔진
+   ══════════════════════════════════════════ */
+const GAN="甲乙丙丁戊己庚辛壬癸".split(""),JI="子丑寅卯辰巳午未申酉戌亥".split("");
+const GE={甲:"목",乙:"목",丙:"화",丁:"화",戊:"토",己:"토",庚:"금",辛:"금",壬:"수",癸:"수"};
+const YY={甲:1,乙:0,丙:1,丁:0,戊:1,己:0,庚:1,辛:0,壬:1,癸:0};
+const JE={子:"수",丑:"토",寅:"목",卯:"목",辰:"토",巳:"화",午:"화",未:"토",申:"금",酉:"금",戌:"토",亥:"수"};
+const JJ={子:[["癸",1]],丑:[["己",1],["癸",.3],["辛",.2]],寅:[["甲",1],["丙",.3],["戊",.2]],
+ 卯:[["乙",1]],辰:[["戊",1],["乙",.3],["癸",.2]],巳:[["丙",1],["庚",.3],["戊",.2]],
+ 午:[["丁",1],["己",.3]],未:[["己",1],["丁",.3],["乙",.2]],申:[["庚",1],["壬",.3],["戊",.2]],
+ 酉:[["辛",1]],戌:[["戊",1],["辛",.3],["丁",.2]],亥:[["壬",1],["甲",.3]]};
+const SA={목:"화",화:"토",토:"금",금:"수",수:"목"},GK={목:"토",화:"금",토:"수",금:"목",수:"화"};
+const JEOL=[[2,4,"寅"],[3,6,"卯"],[4,5,"辰"],[5,6,"巳"],[6,6,"午"],[7,7,"未"],
+ [8,8,"申"],[9,8,"酉"],[10,8,"戌"],[11,7,"亥"],[12,7,"子"],[1,6,"丑"]];
+const OHO={甲:"丙",己:"丙",乙:"戊",庚:"戊",丙:"庚",辛:"庚",丁:"壬",壬:"壬",戊:"甲",癸:"甲"};
+const OSEO={甲:"甲",己:"甲",乙:"丙",庚:"丙",丙:"戊",辛:"戊",丁:"庚",壬:"庚",戊:"壬",癸:"壬"};
+const CHUNG={子:"午",丑:"未",寅:"申",卯:"酉",辰:"戌",巳:"亥",午:"子",未:"丑",申:"寅",酉:"卯",戌:"辰",亥:"巳"};
+const jdn=(y,m,d)=>{const a=~~((14-m)/12),yy=y+4800-a,mm=m+12*a-3;
+ return d+~~((153*mm+2)/5)+365*yy+~~(yy/4)-~~(yy/100)+~~(yy/400)-32045};
+function stdMer(y,m,d){const t=y*1e4+m*100+d;
+ if(t<19120101)return{deg:127.5,label:"1908~1911 · 127.5°"};
+ if(t<19540321)return{deg:135,label:"1912~1954 · 135°"};
+ if(t<19610810)return{deg:127.5,label:"1954~1961 · 127.5°"};
+ return{deg:135,label:"1961~ · 동경 135°"}}
+const DST=[[1948,6,1,1948,9,12],[1949,4,3,1949,9,10],[1950,4,1,1950,9,9],[1951,5,6,1951,9,8],
+ [1955,5,5,1955,9,8],[1956,5,20,1956,9,29],[1957,5,5,1957,9,21],[1958,5,4,1958,9,20],
+ [1959,5,3,1959,9,19],[1960,5,1,1960,9,17],[1987,5,10,1987,10,11],[1988,5,8,1988,10,9]];
+const isDST=(y,m,d)=>{const t=y*1e4+m*100+d;
+ return DST.some(r=>t>=r[0]*1e4+r[1]*100+r[2]&&t<=r[3]*1e4+r[4]*100+r[5])};
+
+function calc(y,m,d,h,mi,sex,lon=126.98,hourKnown=true){
+ const std=stdMer(y,m,d),dst=isDST(y,m,d),lc=(lon-std.deg)*4;
+ let mins=h*60+mi; if(dst)mins-=60; mins+=lc;
+ let sh=0; if(mins<0){mins+=1440;sh=-1} if(mins>=1440){mins-=1440;sh=1}
+ const th=~~(mins/60),tm=Math.round(mins%60);
+ const J0=jdn(y,m,d)+sh;
+ const dt=new Date(Date.UTC(y,m-1,d)); dt.setUTCDate(dt.getUTCDate()+sh);
+ const Y2=dt.getUTCFullYear(),M2=dt.getUTCMonth()+1,D2=dt.getUTCDate();
+ let Y=Y2; if(M2<2||(M2===2&&D2<4))Y=Y2-1;
+ const yG=GAN[((Y-4)%10+10)%10],yJ=JI[((Y-4)%12+12)%12];
+ let mJ="丑";
+ for(let i=0;i<12;i++){const[jm,jd,jj]=JEOL[i],nx=JEOL[(i+1)%12];let ok;
+  if(jm<=nx[0])ok=(M2>jm||(M2===jm&&D2>=jd))&&(M2<nx[0]||(M2===nx[0]&&D2<nx[1]));
+  else ok=(M2>jm||(M2===jm&&D2>=jd))||(M2<nx[0]||(M2===nx[0]&&D2<nx[1]));
+  if(ok){mJ=jj;break}}
+ const off=((JI.indexOf(mJ)-JI.indexOf("寅"))%12+12)%12;
+ const mG=GAN[(GAN.indexOf(OHO[yG])+off)%10];
+ const B=jdn(1900,1,1);
+ const dG=GAN[((J0-B)%10+GAN.indexOf("甲")+10)%10];
+ const dJ=JI[(((J0-B)%12)+JI.indexOf("戌")+12)%12];
+ const hi=~~(((th+1)%24)/2),hJ=JI[hi],hG=GAN[(GAN.indexOf(OSEO[dG])+hi)%10];
+ const P=[[yG,yJ,"년주"],[mG,mJ,"월주"],[dG,dJ,"일주"],
+  hourKnown?[hG,hJ,"시주"]:["◇","◇","시주"]];
+ const CP=hourKnown?P:P.slice(0,3);        // 셈에 쓰는 기둥
+ const el={목:0,화:0,토:0,금:0,수:0};
+ CP.forEach(p=>{el[GE[p[0]]]+=1;JJ[p[1]].forEach(([g,w])=>el[GE[g]]+=w)});
+ Object.keys(el).forEach(k=>el[k]=+el[k].toFixed(1));
+ const me=GE[dG],help=[me,Object.keys(SA).find(k=>SA[k]===me)];
+ const tot=Object.values(el).reduce((a,b)=>a+b,0);
+ const score=(help.includes(JE[mJ])?25:0)+(help.includes(JE[dJ])?18:0)
+  +Math.round((help.reduce((a,k)=>a+el[k],0)/tot-.4)*100);
+ const strength=score>=20?"신강":score<=-10?"신약":"중화";
+ const yong=strength==="신강"
+  ?[GK[me],SA[me],Object.keys(GK).find(k=>GK[k]===me)].reduce((a,b)=>el[a]<el[b]?a:b)
+  :help.reduce((a,b)=>el[a]<el[b]?a:b);
+ const TG=g=>{const e=GE[g],s=YY[g]===YY[dG];
+  if(e===me)return s?"비견":"겁재"; if(SA[me]===e)return s?"식신":"상관";
+  if(GK[me]===e)return s?"편재":"정재"; if(GK[e]===me)return s?"편관":"정관";
+  return s?"편인":"정인"};
+ const tg={};CP.forEach((p,i)=>{if(i!==2)tg[TG(p[0])]=(tg[TG(p[0])]||0)+1;
+  const b=JJ[p[1]][0][0];tg[TG(b)]=(tg[TG(b)]||0)+1});
+ const g=n=>tg[n]||0;
+ const fw=(YY[yG]===1)===(sex==="M");
+ const sAge=Math.max(1,(D2%3)+3),age=2026-y,deun=[];
+ for(let i=0;i<8;i++){const k=fw?i+1:-(i+1);
+  deun.push({gz:GAN[((GAN.indexOf(mG)+k)%10+10)%10]+JI[((JI.indexOf(mJ)+k)%12+12)%12],age:sAge+i*10})}
+ const nowI=Math.max(0,deun.findIndex(x=>x.age>age)-1);
+ const strong=Object.keys(el).reduce((a,b)=>el[a]>el[b]?a:b);
+ const weak=Object.keys(el).reduce((a,b)=>el[a]<el[b]?a:b);
+ return {P,dG,dJ,el,strength,score,yong,tg,g,deun,nowI,age,sex,strong,weak,
+  gap:+(el[strong]-el[weak]).toFixed(1),
+  hourKnown, iljiChung:CP.some((p,i)=>i!==2&&p[1]===CHUNG[dJ]),
+  gwan:g("정관")+g("편관"),jae:g("정재")+g("편재"),sik:g("식신")+g("상관"),
+  bi:g("비견")+g("겁재"),
+  topTG:Object.keys(tg).reduce((a,b)=>tg[a]>tg[b]?a:b,"비견"),
+  deunTG:TG(deun[nowI].gz[0]),
+  corr:{std,dst,lc:+lc.toFixed(1),before:`${String(h).padStart(2,"0")}:${String(mi).padStart(2,"0")}`,
+   after:`${String(th).padStart(2,"0")}:${String(tm).padStart(2,"0")}`,sh}};
+}
+
+/* ══════════════════════════════════════════
+   2. 데이터
+   ══════════════════════════════════════════ */
+const ILGAN={
+ "甲":{ko:"갑목",nm:"거목의 수호기사",c:"#7FB08A",tr:"방향을 정하면 되돌리지 않는 사람"},
+ "乙":{ko:"을목",nm:"덩굴의 책사",c:"#A8C97F",tr:"벽을 만나면 타고 오르는 사람"},
+ "丙":{ko:"병화",nm:"태양의 성기사",c:"#E5B87A",tr:"숨기려 해도 표면으로 올라오는 사람"},
+ "丁":{ko:"정화",nm:"촛불의 마도사",c:"#D98BA5",tr:"넓게 대신 깊이 비추는 사람"},
+ "戊":{ko:"무토",nm:"산의 방패병",c:"#C9A87F",tr:"먼저 나서지 않고 끝까지 남는 사람"},
+ "己":{ko:"기토",nm:"대지의 정원사",c:"#D4C29A",tr:"맡으면 결국 자라게 하는 사람"},
+ "庚":{ko:"경금",nm:"강철의 검사",c:"#A9B3C4",tr:"애매한 상태를 못 견디는 사람"},
+ "辛":{ko:"신금",nm:"보석 세공사",c:"#DCD6E2",tr:"남들이 넘기는 1mm가 보이는 사람"},
+ "壬":{ko:"임수",nm:"대양의 항해자",c:"#7FA0C4",tr:"흐르고 있을 때 가장 자기다운 사람"},
+ "癸":{ko:"계수",nm:"빗물의 점성술사",c:"#7FC4BC",tr:"알아챘을 땐 이미 안에 있는 사람"}};
+
+/* 20인 — v3 로판 / 걸크러쉬 반영 */
+const CH={
+ pungun:{n:"풍운도령",h:"風雲道令",c:"#E5B87A",p:19900,pg:25,sex:"M",ark:"차가운 미남",g:"정통",
+  qt:"월지에 巳가 있고 일간이 丙이오. 통근했다는 뜻이지. 그래서 그대는—"},
+ baegun:{n:"백운선사",h:"白雲禪師",c:"#BFD3D6",p:15900,sex:"M",ark:"백발 미청년",g:"정통",
+  qt:"나는 십신을 세지 않소. 계절과 온도만 보오."},
+ cheongam:{n:"청암거사",h:"靑巖居士",c:"#8FB582",p:15900,sex:"M",ark:"야성적인",g:"정통",
+  qt:"여덟 글자를 그림 한 폭으로 읽소. 그림이 보이오?"},
+ sigye:{n:"시계장이",h:"時計",c:"#8FA5C4",p:15900,sex:"M",ark:"지적인 안경",g:"정통",
+  qt:"인사는 됐소. 몇 년도부터 보시겠소."},
+ eunbyeol:{n:"은별 무녀",h:"銀星",c:"#A896D4",p:19900,sex:"F",ark:"차가운 분석가",g:"검사",
+  qt:"사주는 이렇게 나왔는데, 검사 결과랑 어긋나네요. 그게 제일 중요한 대목이에요."},
+ jeokhyeol:{n:"적혈랑",h:"赤血娘",c:"#D9607F",p:4900,sex:"F",ark:"위험한 매력",g:"검사",
+  qt:"피는 무슨 형이오? …믿지는 마시고."},
+ monghwa:{n:"몽화",h:"夢畵",c:"#8FA0C4",p:15900,sex:"F",ark:"서늘한 신비",g:"검사",
+  qt:"고르시오. 생각하지 말고."},
+ seoyeok:{n:"서역 별지기",h:"西域",c:"#7FB5CC",p:19900,sex:"M",ark:"이국적 미남",g:"술수",
+  qt:"동방의 셈은 땅에서 보고, 나는 하늘에서 보오."},
+ paeseon:{n:"패선생",h:"牌先生",c:"#D4B25C",p:4900,sex:"M",ark:"능글맞은 미남",g:"술수",
+  qt:"석 장 뽑으시오. 사주가 못 보는 걸 패가 보오."},
+ myeonsang:{n:"면상선생",h:"面相先生",c:"#B59A82",p:9900,sex:"M",ark:"날카로운 미남",g:"술수",
+  qt:"글자는 나중에. 얼굴부터 봅시다."},
+ wolha:{n:"월하선녀",h:"月下仙女",c:"#D98BA5",p:15900,sex:"F",ark:"인연을 매는 사람",g:"관계",
+  qt:"나는 기다리는 사람이 아니에요. 매는 사람이지."},
+ hongmae:{n:"홍매파",h:"紅媒婆",c:"#D96A72",p:19900,sex:"F",ark:"압도적인 언니",g:"관계",
+  qt:"됐고, 그 사람 생년월일이나 대봐."},
+ yeondam:{n:"연담",h:"戀曇",c:"#95A3C4",p:6900,sex:"M",ark:"상처 있는 미남",g:"관계",
+  qt:"지난 일을 보러 오셨군요. …먼저 그대 쪽을 보겠습니다."},
+ hwagyeong:{n:"화경",h:"和鏡",c:"#C4AE8A",p:15900,sex:"F",ark:"편들지 않는 판관",g:"관계",
+  qt:"둘이 아니라 하나의 구조로 봅니다."},
+ haengsu:{n:"상단 행수",h:"商團行首",c:"#D9B265",p:12900,sex:"M",ark:"우아한 귀공자",g:"맥락",
+  qt:"돈 얘기만 하겠소. 그대는 모으는 사주가 아니오."},
+ hunjang:{n:"훈장",h:"訓長",c:"#9AAABC",p:12900,sex:"M",ark:"엄격한 연상",g:"맥락",
+  qt:"재주는 있다. 헌데 쓰는 자리를 잘못 골랐어."},
+ yakcho:{n:"약초의원",h:"藥草醫員",c:"#A8BC95",p:9900,sex:"M",ark:"다정한 연상",g:"맥락",
+  qt:"나는 병을 보지 않소. 기운의 치우침을 보오."},
+ ilgwan:{n:"일관",h:"日官",c:"#C4C4BC",p:9900,sex:"M",ark:"무심한 미남",g:"맥락",
+  qt:"무슨 날을 잡으시오."},
+ nopa:{n:"삼거리 노파",h:"三巨里",c:"#C4857A",p:9900,sex:"F",ark:"원조 걸크러쉬",g:"정서",
+  qt:"듣기 좋은 소린 딴 데 가서 듣게."},
+ dongja:{n:"청동자",h:"靑童子",c:"#8FC4BC",p:0,sex:"M",ark:"청량한 소년",g:"정서",
+  qt:"괜찮아요. 진짜로요."}};
+
+/* 릴레이 규칙 */
+const RULES=[
+ {id:"nopa",p:95,test:F=>F.el[F.weak]<=1.0,
+  cond:F=>`${F.weak} ${F.el[F.weak]} ≤ 1.0 — 가장 약한 오행이 바닥`,
+  qt:F=>`${F.weak==="토"?"그릇이 없어":"받쳐줄 게 없어"}. ${F.el[F.strong]}대 ${F.el[F.weak]}야. 자네가 못 이룬 게 재능 탓인 줄 알았지?`},
+ {id:"yakcho",p:88,test:F=>F.gap>=3.5,
+  cond:F=>`오행 편차 ${F.gap} ≥ 3.5`,
+  qt:F=>`${F.strong}만 쓰고 ${F.weak}은 손도 안 대셨소. 그렇게 오래 못 가오.`},
+ {id:"wolha",p:86,test:F=>F.iljiChung,
+  cond:F=>`일지 ${F.dJ} 충 — 배우자궁 흔들림`,
+  qt:()=>`일지가 부딪히고 있어요. 사람 자리가 조용할 수가 없는 배치예요.`},
+ {id:"hunjang",p:84,test:F=>F.gwan>=2,
+  cond:F=>`관성 ${F.gwan}개`,
+  qt:()=>`관이 둘이오. 자리가 사람을 만드는 사주인데, 지금 그 자리가 맞소?`},
+ {id:"haengsu",p:82,test:F=>F.jae>=2,
+  cond:F=>`재성 ${F.jae}개`,
+  qt:F=>`재가 둘이오. 헌데 ${F.strength}이라 굴리는 방식이 갈리오.`},
+ {id:"sigye",p:80,test:F=>["편관","상관","겁재"].includes(F.deunTG),
+  cond:F=>`현 대운 ${F.deun[F.nowI].gz} = ${F.deunTG}`,
+  qt:F=>`${F.deun[F.nowI].gz} 대운이오. ${F.deunTG}이 앞에 선 구간은 조용히 지나가지 않소.`},
+ {id:"hongmae",p:74,test:F=>F.gwan>=1&&F.jae>=1,
+  cond:F=>`관 ${F.gwan} · 재 ${F.jae}`,
+  qt:()=>`둘 다 있으니 혼사 얘기가 나올 사주야. 그 사람 것도 가져와.`},
+ {id:"eunbyeol",p:72,test:F=>F.strength!=="중화",
+  cond:F=>`${F.strength} ${F.score}`,
+  qt:F=>`사주는 ${F.strength} 구조인데, 실제로도 그러신가요? 검사지 한 장 풀어보시겠어요?`},
+ {id:"paeseon",p:55,test:()=>true,cond:()=>`조건 없음`,
+  qt:()=>`석 장 뽑으시오. 사주가 못 보는 자리를 패가 보오.`},
+ {id:"jeokhyeol",p:50,test:()=>true,cond:()=>`재미 자리`,
+  qt:F=>`피는 무슨 형이오? ${F.dG}${GE[F.dG]}에 붙이면 이름이 하나 나오지.`}];
+const FORCED={nopa:"dongja",yeondam:"dongja"};
+
+
+/* ══════════════════════════════════════════
+   0단 찌르기 — 고민 6 × 약한 오행 5 = 30
+   첫 문장이 심장을 때려야 나머지가 읽힌다
+   ══════════════════════════════════════════ */
+const STAB={
+ money:{토:"적게 번 적이 없다. 그런데 통장에는 늘 없다.",
+  수:"지르고 후회하는 게 아니라, 후회할 걸 알면서 지른다.",
+  금:"안 쓰는 걸 못 버리듯, 안 되는 걸 못 접는다.",
+  목:"모으기는 하는데, 그걸로 뭘 할지가 없다.",
+  화:"계산은 다 끝났는데, 시작을 안 하고 있다."},
+ work:{토:"열심히 안 한 적이 없다. 그런데 남은 게 없다.",
+  수:"잘하고 싶어서 시작했는데, 어느새 안 지려고 하고 있다.",
+  금:"아닌 걸 아는데 몇 년째 그 자리에 있다.",
+  목:"그만두고 싶은 게 아니라, 그만두면 뭘 할지 몰라서 있는 것이다.",
+  화:"준비만 몇 년째다."},
+ love:{토:"먼저 좋아하고, 먼저 지치고, 먼저 정리했다.<br>그런데 헤어지자고 한 건 늘 상대였다.",
+  수:"아니라는 걸 알면서 연락을 기다린 밤이 있다.",
+  금:"정리했다고 말해놓고, 아직 그 사람 프로필을 본다.",
+  목:"다음 사람이 없어서 지금을 못 놓는다.",
+  화:"좋아하는 티를 못 내서 놓친 사람이 있다."},
+ people:{토:"다 맞춰주고, 혼자 서운해한다.",
+  수:"한 번 틀어지면 끝까지 간다.",
+  금:"손절해야 하는 걸 알면서 몇 년을 더 만났다.",
+  목:"정리하고 나면 남는 사람이 없다.",
+  화:"먼저 연락하지 못해서 멀어진 사람이 있다."},
+ dir:{토:"쌓아온 건 있는데, 어디에 쌓았는지 모르겠다.",
+  수:"쉬는 게 불안해서 계속 뭔가를 벌인다.",
+  금:"지금 자리가 아닌 걸 아는데 놓지를 못한다.",
+  목:"다음이 안 보여서 지금에 있다.",
+  화:"결심은 여러 번 했다. 시작을 안 했을 뿐이다."},
+ health:{토:"쉬어도 회복이 안 된다.",
+  수:"잠들기 전에 생각이 멈추지 않는다.",
+  금:"아픈 걸 알면서 미루고 있다.",
+  목:"예전 같지 않은데, 방법을 바꾸지 않았다.",
+  화:"다시 시작한 횟수만 열 번이 넘는다."}};
+
+
+
+
+/* 캐릭터별 렌즈 — 리포트 톤·초점·호칭 */
+const LENS={
+ monghwa:{you:"그대",call:"몽화",open:()=>`말로 묻지 않겠습니다. 고르신 것만 보겠습니다.`,
+  strong:g=>`${g}이 짙게 깔려 있습니다.`,weak:w=>`${w}이 비어, 그 자리를 다른 것으로 덮고 계십니다.`,
+  yong:y=>`덮개를 걷으려면 <b>${y}</b>이 필요합니다.`},
+ seoyeok:{you:"그대",call:"별지기",open:()=>`동방의 셈은 땅에서 보고, 나는 하늘에서 보오.`,
+  strong:g=>`${g}이 강하니 하늘에서도 같은 자리가 밝소.`,weak:w=>`${w}이 비었소. 별자리로도 그 자리가 비어 있지.`,
+  yong:y=>`<b>${y}</b>이 드는 해에 하늘이 열리오.`},
+ paeseon:{you:"그대",call:"패선생",open:()=>`긴 얘기는 도령한테 들으시고, 나는 짧게 보겠소.`,
+  strong:g=>`${g}이 세오. 패도 그렇게 나오는군.`,weak:w=>`${w}이 없소. 그래서 같은 패가 자꾸 나오지.`,
+  yong:y=>`<b>${y}</b>이 나오는 자리를 기다리시오.`},
+ myeonsang:{you:"그대",call:"면상선생",open:()=>`글자는 나중에. 얼굴부터 봅시다.`,
+  strong:g=>`${g}이 얼굴에 그대로 나와 있소.`,weak:w=>`${w}이 없는 건 눈매에서 보이오.`,
+  yong:y=>`<b>${y}</b>을 채우면 인상부터 달라지오.`},
+ yeondam:{you:"그대",call:"연담",open:()=>`지난 일을 보러 오셨군요. 먼저 그대 쪽을 보겠습니다.`,
+  strong:g=>`${g}이 강해 한 번에 다 주십니다.`,weak:w=>`${w}이 없어 그 뒤가 비어버립니다.`,
+  yong:y=>`사람에게서 구하지 마시고 <b>${y}</b>을 먼저 채우세요.`},
+ hwagyeong:{you:"그대",call:"화경",open:()=>`둘이 아니라 하나의 구조로 보겠습니다.`,
+  strong:g=>`${g}이 강한 쪽이 늘 먼저 움직입니다.`,weak:w=>`${w}이 없어 받아주는 자리가 없습니다.`,
+  yong:y=>`구조를 바꾸려면 <b>${y}</b>이 들어와야 합니다.`},
+ hunjang:{you:"자네",call:"훈장",open:()=>`재주가 아니라 쓰는 자리를 보겠다.`,
+  strong:g=>`${g}이 강하니 재주는 있어.`,weak:w=>`${w}이 없어. 그래서 자리를 잘못 고르는 게야.`,
+  yong:y=>`<b>${y}</b>이 있는 자리로 옮기게.`},
+ yakcho:{you:"그대",call:"의원",open:()=>`나는 병을 보지 않소. 기운의 치우침을 보오.`,
+  strong:g=>`${g}을 너무 많이 쓰고 계시오.`,weak:w=>`${w}이 바닥이오. 회복이 안 되는 이유요.`,
+  yong:y=>`<b>${y}</b>을 채우는 생활로 바꾸시오. 병원은 따로 가시고.`},
+ ilgwan:{you:"그대",call:"일관",open:()=>`성격은 안 보오. 날만 고르겠소.`,
+  strong:g=>`${g}이 강하니 그 기운이 드는 날은 피하시오.`,weak:w=>`${w}이 없으니 그 기운이 드는 날을 잡으시오.`,
+  yong:y=>`<b>${y}</b>이 드는 날이 그대의 날이오.`},
+ jeokhyeol:{you:"그대",call:"적혈랑",open:()=>`재미로 보는 자리요. 믿지는 마시고.`,
+  strong:g=>`${g}이 세네. 티가 나지.`,weak:w=>`${w}이 없어서 마무리가 흐려.`,
+  yong:y=>`<b>${y}</b> 쪽 사람이랑 붙어 다녀. 그게 다야.`},
+ pungun:{you:"그대",call:"도령",open:g=>`글자를 순서대로 보겠소. 십신이 어떻게 놓였는지부터.`,
+  strong:g=>`${g}이 그대를 이루는 뿌리요.`,weak:w=>`${w}이 얇소. 이게 이 명식의 결론이오.`,
+  yong:y=>`그대에게 필요한 건 <b>${y}</b>요.`},
+ baegun:{you:"그대",call:"선사",open:()=>`나는 십신을 세지 않소. 계절과 온도만 보오.`,
+  strong:g=>`${g}이 넘치오. 이 사주는 뜨겁소.`,weak:w=>`${w}이 없으니 식힐 것이 없지.`,
+  yong:y=>`약은 <b>${y}</b>요. 헌데 그대 것은 이슬비만 하오.`},
+ cheongam:{you:"그대",call:"거사",open:()=>`셈으로 보지 말고, 그림으로 보시오.`,
+  strong:g=>`${g}이 화폭의 대부분이오.`,weak:w=>`${w}이 비어 있소. 그 자리가 허하지.`,
+  yong:y=>`이 그림에 덧칠할 것은 <b>${y}</b>요.`},
+ wolha:{you:"그대",call:"선녀",open:()=>`나는 사람이 오고 가는 자리만 봅니다.`,
+  strong:g=>`${g}이 강하니 마음이 먼저 갑니다.`,weak:w=>`${w}이 없어 오래 못 붙듭니다.`,
+  yong:y=>`관계를 지키려면 <b>${y}</b>이 필요합니다.`},
+ hongmae:{you:"자네",call:"매파",open:()=>`빙빙 돌리지 않겠네. 붙는지 안 붙는지만 보지.`,
+  strong:g=>`${g}이 세. 끌어당기는 힘은 있어.`,weak:w=>`${w}이 없어. 그래서 오래 못 가는 거야.`,
+  yong:y=>`자네한테 붙일 건 <b>${y}</b>야.`},
+ nopa:{you:"자네",call:"노파",open:()=>`듣기 좋은 소린 딴 데 가서 듣게.`,
+  strong:g=>`${g}이 많다고 좋은 게 아니야.`,weak:w=>`${w}이 없어. 자네가 못 이룬 건 그것 때문이지.`,
+  yong:y=>`<b>${y}</b>을 밖에서 빌려오게. 자네 안엔 없어.`},
+ dongja:{you:"아저씨",call:"동자",open:()=>`괜찮아요. 진짜로요. 좋은 것부터 볼게요.`,
+  strong:g=>`${g}이 이렇게 많은 사람 잘 없어요.`,weak:w=>`${w}이 좀 적은데, 없는 게 아니라 아낀 거예요.`,
+  yong:y=>`<b>${y}</b>만 채우면 돼요. 그게 다예요.`},
+ haengsu:{you:"그대",call:"행수",open:()=>`돈 얘기만 하겠소. 나머지는 다른 사람에게.`,
+  strong:g=>`${g}이 세니 버는 힘은 있소.`,weak:w=>`${w}이 없으니 남는 게 없지.`,
+  yong:y=>`굴리려면 <b>${y}</b>이 있어야 하오.`},
+ sigye:{you:"그대",call:"시계장이",open:()=>`성격은 안 보오. 시기만 보겠소.`,
+  strong:g=>`${g}이 강한 구간이 길었소.`,weak:w=>`${w}이 없는 해에 특히 어긋나지.`,
+  yong:y=>`<b>${y}</b>이 드는 해를 기다리시오.`},
+ eunbyeol:{you:"그대",call:"무녀",open:()=>`사주와 검사가 어긋나는 지점부터 볼게요.`,
+  strong:g=>`사주는 ${g}이 강한 구조예요.`,weak:w=>`그런데 ${w}이 없어서 겉과 속이 달라져요.`,
+  yong:y=>`<b>${y}</b>을 채우면 그 간극이 줄어요.`}};
+const lens=()=>LENS[ST.cur]||LENS.pungun;
+
+
+
+
+/* ══════════════════════════════════════════
+   성향 4글자 ↔ 사주 4축 대조
+   ※ "MBTI" 는 등록상표 — 화면 표기는 "성향 4글자"
+   ══════════════════════════════════════════ */
+/* 사주에서 4축을 추정한다 */
+function sajuAxis(F){
+ const g=F.g;
+ const out=g("비견")+g("겁재")+g("식신")+g("상관");      // 밖으로 도는 힘
+ const inn=g("정인")+g("편인")+g("정관")+g("편관");      // 안으로 도는 힘
+ const real=g("정재")+g("편재")+g("정관")+g("편관");     // 현실·규칙
+ const idea=g("편인")+g("상관")+g("편재");               // 발상·확장
+ const logic=g("정관")+g("편관")+g("정재")+g("편재");    // 판단·통제
+ const feel=g("식신")+g("상관")+g("정인");               // 정서·표현
+ const plan=g("정관")+g("정재")+g("정인");               // 계획·정리
+ const flex=g("상관")+g("편재")+g("겁재");               // 즉흥·전환
+ const st=F.strength==="신강"?2:F.strength==="신약"?-2:0;
+ return {
+  EI:out+st>=inn?"E":"I",
+  SN:real>=idea?"S":"N",
+  TF:logic>=feel?"T":"F",
+  JP:plan>=flex?"J":"P",
+  raw:{out:out+st,inn,real,idea,logic,feel,plan,flex}};
+}
+const AXNAME={E:"드러나는",I:"안으로 도는",S:"현실을 딛는",N:"가능성을 보는",
+ T:"판단으로 가는",F:"마음으로 가는",J:"정해두는",P:"열어두는"};
+/* 어긋났을 때 무슨 뜻인가 — 사주값 → 검사값 */
+const GAP={
+ "E→I":{t:"타고난 건 드러나는 쪽인데, 스스로는 안으로 돈다고 하십니다.",
+  w:"드러나는 기질을 오래 눌러온 것입니다. 그래서 사람을 만나면 유독 피곤합니다."},
+ "I→E":{t:"타고난 건 안으로 도는 쪽인데, 스스로는 드러난다고 하십니다.",
+  w:"필요해서 배운 것입니다. 잘하지만, 끝나고 나면 혼자 있어야 회복됩니다."},
+ "S→N":{t:"타고난 건 현실을 딛는 쪽인데, 스스로는 가능성을 본다고 하십니다.",
+  w:"지금이 답답해서 멀리 보는 것일 수 있습니다. 그 사이가 지금의 피로입니다."},
+ "N→S":{t:"타고난 건 가능성을 보는 쪽인데, 스스로는 현실을 딛는다고 하십니다.",
+  w:"현실이 그렇게 만든 것입니다. 하고 싶던 것이 아직 남아 있습니다."},
+ "T→F":{t:"타고난 건 판단으로 가는 쪽인데, 스스로는 마음으로 간다고 하십니다.",
+  w:"차갑다는 말을 듣기 싫어 배운 것입니다. 그래서 결정이 늘 늦습니다."},
+ "F→T":{t:"타고난 건 마음으로 가는 쪽인데, 스스로는 판단으로 간다고 하십니다.",
+  w:"상처받지 않으려고 세운 벽입니다. 감정은 없어진 게 아니라 미뤄져 있습니다."},
+ "J→P":{t:"타고난 건 정해두는 쪽인데, 스스로는 열어둔다고 하십니다.",
+  w:"정해두고 어긋났을 때가 더 괴로워서 놓은 것입니다."},
+ "P→J":{t:"타고난 건 열어두는 쪽인데, 스스로는 정해둔다고 하십니다.",
+  w:"불안해서 만든 규칙입니다. 그 규칙이 지금 그대를 조이고 있습니다."}};
+function gapList(F){
+ if(!ST.mbti)return[];
+ const a=sajuAxis(F),m=ST.mbti,out=[];
+ [["EI",0],["SN",1],["TF",2],["JP",3]].forEach(([k,i])=>{
+  if(a[k]!==m[i])out.push({k,from:a[k],to:m[i],...GAP[a[k]+"→"+m[i]]});
+ });
+ return out;
+}
+
+/* ══════════════════════════════════════════
+   부정확인 — 오해는 십신에서, 정도는 신강약에서
+     오해① 주도 십신 × 고민   10 × 6
+     오해② 신강약 × 고민       3 × 6
+     진실  주도 십신           10
+   ══════════════════════════════════════════ */
+const MYTH_TG={
+ 정관:{love:"고지식하다",work:"융통성이 없다",money:"쪼잔하다",
+  people:"재미없다",dir:"답답하다",health:"유난이다"},
+ 편관:{love:"부담스럽다",work:"독하다",money:"무리한다",
+  people:"날이 서 있다",dir:"무모하다",health:"미련하다"},
+ 정재:{love:"계산적이다",work:"소극적이다",money:"인색하다",
+  people:"정이 없다",dir:"겁이 많다",health:"예민하다"},
+ 편재:{love:"금방 옮겨간다",work:"허풍이 있다",money:"헤프다",
+  people:"가볍다",dir:"일만 벌인다",health:"제멋대로다"},
+ 식신:{love:"무르다",work:"안일하다",money:"퍼준다",
+  people:"속이 없다",dir:"느긋하다",health:"게으르다"},
+ 상관:{love:"제멋대로다",work:"건방지다",money:"허세가 있다",
+  people:"말이 많다",dir:"튄다",health:"엄살이다"},
+ 비견:{love:"차갑다",work:"고집이 세다",money:"혼자만 안다",
+  people:"벽이 있다",dir:"독단적이다",health:"미련하다"},
+ 겁재:{love:"금방 식는다",work:"충동적이다",money:"손이 크다",
+  people:"변덕스럽다",dir:"줏대가 없다",health:"무리한다"},
+ 정인:{love:"미지근하다",work:"느리다",money:"소심하다",
+  people:"재미없다",dir:"우유부단하다",health:"엄살이다"},
+ 편인:{love:"속을 모르겠다",work:"까다롭다",money:"별나다",
+  people:"비딱하다",dir:"특이하다",health:"유별나다"}};
+const MYTH_ST={
+ 신강:{love:"너무 세다",work:"욕심이 많다",money:"무리한다",
+  people:"밀어붙인다",dir:"고집이 세다",health:"자기 몸을 안 아낀다"},
+ 신약:{love:"미지근하다",work:"끈기가 없다",money:"소심하다",
+  people:"우유부단하다",dir:"줏대가 없다",health:"약하다"},
+ 중화:{love:"속을 모르겠다",work:"애매하다",money:"애매하다",
+  people:"거리를 둔다",dir:"미적지근하다",health:"들쭉날쭉하다"}};
+
+/* 이름 — 약한 오행 × 흐름 (5 × 5 = 25) */
+const NAME2={
+ 토:{식상:"다 준 뒤의 빈손",재성:"쥐고도 허전한 손",관성:"버티고 남은 껍데기",
+  인성:"재다가 흘려보낸 것",비겁:"혼자 지고 온 무게"},
+ 수:{식상:"식힐 줄 모르는 열",재성:"놓지 못해 끓는 것",관성:"참다가 굳은 열",
+  인성:"생각이 멈추지 않는 밤",비겁:"혼자 타는 불"},
+ 금:{식상:"내주고도 못 끊은 자리",재성:"놓지 못하는 손",관성:"버티느라 못 자른 것",
+  인성:"재다가 못 끊은 것",비겁:"혼자 안고 있는 것"},
+ 목:{식상:"쏟고 나서 멈춘 발",재성:"붙들려 멈춘 발",관성:"자리에 멈춘 발",
+  인성:"준비만 하다 멈춘 발",비겁:"혼자 서서 멈춘 발"},
+ 화:{식상:"말은 했는데 안 한 일",재성:"재다가 지나간 때",관성:"버티다 놓친 때",
+  인성:"준비하다 지나간 때",비겁:"혼자 미루다 지난 때"}};
+
+/* 찌르기 보조 한 줄 — 주도 십신에서 */
+const STAB2={
+ 정관:"그걸 남 탓한 적은 없을 게요.",
+ 편관:"그러면서 쉬지도 못했을 게요.",
+ 정재:"그러면서 손해는 다 기억할 게요.",
+ 편재:"그러면서 다음 판을 또 벌였을 게요.",
+ 식신:"그러면서 미안해했을 게요.",
+ 상관:"그러면서 말은 못 했을 게요.",
+ 비견:"그러면서 도와달란 말은 안 했을 게요.",
+ 겁재:"그러면서 되돌리지도 못했을 게요.",
+ 정인:"그러면서 준비가 부족했다고 여겼을 게요.",
+ 편인:"그러면서 아무한테도 말 안 했을 게요."};
+
+/* ══════════════════════════════════════════
+   순서 도식 — 4단계를 각각 다른 근거에서 도출
+     1 발동  주도 십신 × 고민   (10 × 6)
+     2 흐름  일간 오행 ↔ 최강 오행 관계 (5)
+     3 결핍  최약 오행           (5)
+     4 귀결  주도 십신 × 신강약   (10 × 2)
+   = 10×6×5×5×20 조합
+   ══════════════════════════════════════════ */
+
+/* ① 발동 — 십신이 정하는 동사 × 고민이 정하는 맥락 */
+const IGNITE={
+ 정관:{love:"먼저 약속한다",work:"먼저 책임진다",money:"먼저 떠안는다",
+  people:"먼저 지킨다",dir:"먼저 정해둔다",health:"먼저 참는다"},
+ 편관:{love:"먼저 부딪힌다",work:"먼저 떠맡는다",money:"먼저 밀어붙인다",
+  people:"먼저 맞선다",dir:"먼저 뛰어든다",health:"끝까지 버틴다"},
+ 정재:{love:"먼저 재본다",work:"먼저 따져본다",money:"먼저 아낀다",
+  people:"먼저 거리를 둔다",dir:"먼저 계획한다",health:"먼저 조절한다"},
+ 편재:{love:"크게 건다",work:"일부터 벌인다",money:"먼저 질러본다",
+  people:"사람부터 모은다",dir:"판을 키운다",health:"무리부터 한다"},
+ 식신:{love:"먼저 표현한다",work:"먼저 만든다",money:"먼저 베푼다",
+  people:"먼저 웃는다",dir:"일단 해본다",health:"몸으로 푼다"},
+ 상관:{love:"먼저 말해버린다",work:"판을 뒤엎는다",money:"새로 판다",
+  people:"먼저 솔직해진다",dir:"틀부터 깬다",health:"참다가 터진다"},
+ 비견:{love:"혼자 감당한다",work:"혼자 떠맡는다",money:"혼자 짊어진다",
+  people:"혼자 삭인다",dir:"혼자 정한다",health:"혼자 견딘다"},
+ 겁재:{love:"먼저 마음을 준다",work:"먼저 뛰어든다",money:"먼저 써버린다",
+  people:"먼저 다가간다",dir:"먼저 갈아탄다",health:"먼저 무리한다"},
+ 정인:{love:"오래 생각한다",work:"자료부터 모은다",money:"미뤄둔다",
+  people:"거리를 두고 본다",dir:"때를 기다린다",health:"원인부터 찾는다"},
+ 편인:{love:"속을 안 보인다",work:"다르게 해본다",money:"남과 다른 길로 간다",
+  people:"먼저 의심한다",dir:"역으로 간다",health:"스스로 진단한다"}};
+
+
+/* 도식용 짧은 키워드 — 문장에서 잘라내지 않고 따로 둔다 */
+const IGKEY={
+ 정관:{love:"약속",work:"책임",money:"부담",people:"의리",dir:"기준",health:"인내"},
+ 편관:{love:"충돌",work:"과부하",money:"밀어붙임",people:"대립",dir:"투신",health:"버팀"},
+ 정재:{love:"재기",work:"검토",money:"절약",people:"거리두기",dir:"계획",health:"조절"},
+ 편재:{love:"올인",work:"확장",money:"지출",people:"인맥",dir:"판키움",health:"무리"},
+ 식신:{love:"표현",work:"제작",money:"베풂",people:"친화",dir:"시도",health:"발산"},
+ 상관:{love:"직언",work:"전복",money:"개척",people:"솔직",dir:"파격",health:"폭발"},
+ 비견:{love:"홀로감당",work:"독박",money:"자부담",people:"삭임",dir:"독단",health:"독행"},
+ 겁재:{love:"선애정",work:"선점",money:"과소비",people:"선접근",dir:"전환",health:"과욕"},
+ 정인:{love:"숙고",work:"수집",money:"보류",people:"관망",dir:"대기",health:"원인추적"},
+ 편인:{love:"은폐",work:"역발상",money:"비주류",people:"의심",dir:"역행",health:"자가진단"}};
+
+/* ② 흐름 — 일간이 최강 오행과 맺는 관계에서 나온다 */
+const FLOW={
+ 비겁:{k:"혼자 짊어지기",t:"혼자 다 짊어지고"},
+ 식상:{k:"쏟아붓기",t:"가진 걸 다 쏟고"},
+ 재성:{k:"붙들기",t:"붙들고 놓지 못하고"},
+ 관성:{k:"버티기",t:"버티고 또 버티고"},
+ 인성:{k:"재기",t:"재고 또 재다가"}};
+function flowOf(F){const me=GE[F.dG];
+ /* 일간 자신의 오행은 뺀다 — 안 그러면 신강 사주가 전부 비겁으로 몰린다 */
+ const rest=Object.keys(F.el).filter(k=>k!==me);
+ const sg=rest.reduce((a,b)=>F.el[a]>=F.el[b]?a:b);
+ /* 일간 오행이 2위를 크게 앞서면 힘이 밖으로 안 나간다 = 비겁 */
+ if(F.el[me]-F.el[sg]>=1.5){F.flowEl=me;return"비겁"}
+ F.flowEl=sg;
+ if(SA[me]===sg)return"식상";
+ if(GK[me]===sg)return"재성";
+ if(GK[sg]===me)return"관성";
+ if(SA[sg]===me)return"인성";
+ return"비겁"}
+
+/* ③ 결핍 — 최약 오행이 무엇을 못 하게 만드는가 */
+const RESULT={
+ 토:{k:"담기지 않음",t:"담아둘 자리가 없다"},
+ 수:{k:"멈추지 못함",t:"식힐 틈이 없다"},
+ 금:{k:"끊지 못함",t:"끊어낼 칼이 없다"},
+ 목:{k:"다시 못 폄",t:"다시 뻗을 싹이 없다"},
+ 화:{k:"끝맺지 못함",t:"밀고 갈 불이 없다"}};
+
+/* ④ 귀결 — 십신 × 신강약. 자기비난의 형태가 다르다 */
+const BLAME={
+ 정관:{신강:"약속을 못 지킨 자기를 못 견딘다",신약:"감당 못 할 걸 떠안았다고 자책한다",
+  중화:"지키려던 선이 무너진 걸 오래 곱씹는다"},
+ 편관:{신강:"더 세게 밀지 못한 걸 탓한다",신약:"버티지 못한 자기를 탓한다",
+  중화:"무리한 자기와 못 버틴 자기를 번갈아 탓한다"},
+ 정재:{신강:"계산이 틀린 걸 인정 못 한다",신약:"애초에 욕심냈다고 자책한다",
+  중화:"재고도 틀렸다는 사실에 오래 머문다"},
+ 편재:{신강:"판을 더 키우지 못한 걸 아쉬워한다",신약:"괜히 벌였다고 후회한다",
+  중화:"벌인 것과 접은 것 사이에서 헤맨다"},
+ 식신:{신강:"더 잘 만들지 못한 걸 탓한다",신약:"괜히 나섰다고 움츠러든다",
+  중화:"내놓은 것이 부족했다고 여긴다"},
+ 상관:{신강:"알아주지 않은 쪽을 원망하다 자기에게 돌아온다",
+  신약:"말하지 말았어야 했다고 자책한다",중화:"말한 것과 참은 것 둘 다 후회한다"},
+ 비견:{신강:"도움을 청하지 않은 걸 당연히 여긴다",신약:"혼자 못 해낸 자기를 탓한다",
+  중화:"혼자 한 게 맞았는지 오래 묻는다"},
+ 겁재:{신강:"되돌릴 수 없다는 걸 알면서 밀어붙인 자기를 탓한다",
+  신약:"성급했다고 자책한다",중화:"빨랐던 건지 틀렸던 건지 구분이 안 된다"},
+ 정인:{신강:"준비가 부족했다고 결론짓는다",신약:"때를 놓친 자기를 탓한다",
+  중화:"기다린 시간이 아까워진다"},
+ 편인:{신강:"남들이 못 알아본 거라 여기다 결국 자기를 의심한다",
+  신약:"역시 나만 다르다고 물러선다",중화:"자기 판단을 믿지 못하게 된다"}};
+
+/* 문장 재료 */
+const ELW={목:"나무",화:"불",토:"흙",금:"쇠",수:"물"};
+const LACK={토:{w:"담아둘 그릇",v:"쏟아내고",r:"남는 게 없다"},
+ 수:{w:"식혀줄 물",v:"달아오르고",r:"꺼질 때까지 못 멈춘다"},
+ 금:{w:"끊어낼 칼",v:"붙들고",r:"제때 못 자른다"},
+ 목:{w:"새로 뻗을 싹",v:"버티고",r:"다음이 안 열린다"},
+ 화:{w:"밀고 갈 불",v:"재고",r:"시작을 못 한다"}};
+const PATT={정관:{a:"먼저 책임을 진다",b:"약속으로 들어간다",c:"어기면 자기를 못 견딘다"},
+ 편관:{a:"먼저 부딪힌다",b:"압박으로 자신을 민다",c:"쉬면 불안하다"},
+ 정재:{a:"먼저 계산한다",b:"손해를 오래 기억한다",c:"안 될 것 같으면 시작을 안 한다"},
+ 편재:{a:"먼저 벌인다",b:"크게 걸고 본다",c:"수습은 나중이다"},
+ 식신:{a:"먼저 만든다",b:"과정에서 즐거움을 얻는다",c:"끝맺음에 관심이 식는다"},
+ 상관:{a:"먼저 말한다",b:"틀을 못 견딘다",c:"인정 못 받으면 무너진다"},
+ 비견:{a:"먼저 혼자 한다",b:"기대는 걸 못 배웠다",c:"도움을 늦게 청한다"},
+ 겁재:{a:"먼저 결정한다",b:"판단이 빠른 만큼 손이 크다",c:"되돌리기를 못 한다"},
+ 정인:{a:"먼저 알아본다",b:"준비가 끝나야 움직인다",c:"준비가 안 끝난다"},
+ 편인:{a:"먼저 의심한다",b:"남과 다른 길을 본다",c:"설명하다 지친다"}};
+const NAMEW={토:"다 준 뒤의 빈손",수:"식힐 줄 모르는 열",금:"놓지 못하는 손",
+ 목:"자리에 멈춘 발",화:"재다가 지나간 때"};
+function scene(F){
+ const ig=IGNITE[F.topTG][ST.concern];
+ const fk=flowOf(F), fl=FLOW[fk], rs=RESULT[F.weak];
+ const bl=BLAME[F.topTG][F.strength];
+ return {
+  seq:[IGKEY[F.topTG][ST.concern], fl.k, rs.k],
+  lines:[
+   `${ig}. 누가 시킨 것도 아닌데.`,
+   `그러다 <b>${fl.t}</b>, ${rs.t}.`,
+   `그리고 ${bl}`],
+  why:`${F.topTG} ${F.g(F.topTG)} · ${GE[F.dG]}일간 → ${F.flowEl} ${F.el[F.flowEl]}(${fk}) · ${F.weak} ${F.el[F.weak]}`,
+  name:(NAME2[F.weak]||{})[fk]||NAMEW[F.weak],
+  post:`이건 성격이 아니오. ${GE[F.dG]}일간의 힘이 ${ELW[F.flowEl]}(${F.el[F.flowEl]})으로 `+
+       `<b>${fk}</b> 하는데, ${ELW[F.weak]}이 ${F.el[F.weak]}밖에 없어 멈출 자리가 없는 <b>구조</b>요.`}}
+
+/* ══════════════════════════════════════════
+   3. 상태 · 유틸
+   ══════════════════════════════════════════ */
+const TIER={one:{n:"이 자리 하나",p:"3,900원",d:"고른 영역 전부 · 시기 포함"},all:{n:"여덟 글자 전부",p:"19,900원",d:"평생운 18컷 · 25페이지"},sub:{n:"스무 사람 모두",p:"9,900원/월",d:"전 캐릭터 무제한 · 월간 세운"}};
+function buy(t){ST.tier=t;go("d2")}
+const CONCERN={money:"돈",work:"일",love:"사랑",people:"사람",dir:"방향",health:"몸"};
+const ST={name:"",gan:"丙",sex:"F",hour:null,concern:"love",tier:"all",mbti:null,snd:false,
+ read:["pungun"],skipped:[],paid:false,cur:null};
+let F=null, CUR="a1";
+const $=id=>document.getElementById(id);
+const TEA={목:{n:"솔잎차",d:"솔잎은 굳은 것을 풀어주오. 새로 뻗을 자리가 필요한 그대에게 맞소."},
+ 화:{n:"계피차",d:"계피는 속을 데우오. 밀고 나갈 불이 모자란 그대에게 맞소."},
+ 토:{n:"대추차",d:"대추는 담아두는 힘을 기르오. 쏟기만 하는 그대에게 맞소."},
+ 금:{n:"도라지차",d:"도라지는 맺고 끊게 하오. 놓지 못하는 그대에게 맞소."},
+ 수:{n:"국화차",d:"국화는 열을 내리오. 달아오르면 못 멈추는 그대에게 맞소."}};
+const nm=()=>ST.name||"그대";
+/* 오늘의 일진 — 실제 계산 */
+function today(){
+ const t=new Date(), J=jdn(t.getFullYear(),t.getMonth()+1,t.getDate()), B=jdn(1900,1,1);
+ const g=GAN[((J-B)%10+GAN.indexOf("甲")+10)%10], j=JI[(((J-B)%12)+JI.indexOf("戌")+12)%12];
+ return {md:`${t.getMonth()+1}월 ${t.getDate()}일`, gz:g+j, g, j,
+  el:GE[g], rel:relToMe(GE[g])};
+}
+function dayScore(){const t=today();
+ let v=58; if(t.el===F.yong)v+=26; if(t.el===F.strong)v-=14;
+ if(t.j===CHUNG[F.dJ])v-=20; if(t.j===F.dJ)v+=8;
+ return Math.max(12,Math.min(96,v))}
+function relToMe(e){ if(!F)return""; const me=GE[F.dG];
+ if(e===me)return"같은 기운이 겹치는"; if(SA[me]===e)return"기운이 빠져나가는";
+ if(GK[me]===e)return"눌리는"; if(GK[e]===me)return"내가 다스리는"; return"기운을 받는"}
+const ilgan=()=>ILGAN[F?F.dG:ST.gan];
+const chr=()=>CH[ST.cur]||CH.pungun;
+function tsnd(){ST.snd=!ST.snd;$("snd").classList.toggle("on",ST.snd);
+ $("snd").textContent=ST.snd?"♪ 켜짐":"♪ 소리"}
+function ripple(){const d=document.createElement("div");d.className="ripple";
+ document.body.appendChild(d);setTimeout(()=>d.remove(),1010)}
+function nr(L){let dl=0;return `<div class="nr">${L.map(l=>{
+ if(l==="")return '<span class="ps"></span>';
+ const s=`<span class="l" style="animation-delay:${dl}s">${l}</span>`;dl+=.72;return s}).join("")}</div>`}
+const say=(t,w)=>`<div class="say"><small>${w||chr().n}</small>${t}</div>`;
+const you=()=>lens().you;
+function agree(k){let h=0;for(const c of k)h=(h*31+c.charCodeAt(0))|0;
+ return{p:64+Math.abs(h)%30,n:1400+Math.abs(h>>3)%3800}}
+const agrHTML=k=>{const a=agree(k);
+ return `<div class="agr"><span>이 문장에</span><div class="bar"><i style="--w:${a.p}%"></i></div>
+  <b>${a.p}%</b><span>가 "그렇다" · ${a.n.toLocaleString()}명</span></div>`};
+
+/* ══════════════════════════════════════════
+   4. 캐릭터 SVG — 남/여 실루엣 구분
+   ══════════════════════════════════════════ */
+function figSVG(w,col,female,prop,fx){
+ const id="g"+Math.random().toString(36).slice(2,7);
+ return `<svg viewBox="0 0 150 200" style="width:${w}px;height:auto">
+  <defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1">
+   <stop offset="0" stop-color="${col}" stop-opacity=".68"/>
+   <stop offset="1" stop-color="${col}" stop-opacity=".13"/></linearGradient></defs>
+  ${fx==="rain"?Array.from({length:8},(_,i)=>
+   `<line class="mFx" style="animation-delay:${(i*.24).toFixed(2)}s" x1="${16+i*14}" y1="0"
+    x2="${13+i*14}" y2="16" stroke="${col}" stroke-width="1" opacity=".4"/>`).join(""):""}
+  <g class="mBody">
+   ${female
+    /* 여성 — 높은 포니테일/올백 · 각진 어깨 */
+    ?`<path d="M75 30c-12 0-19 8-19 19 0 3 .5 6 1.5 8l-4-2c-2 6 1 10 5 12" fill="url(#${id})"/>
+      <path d="M84 22c8-3 14 2 12 9-1.5 6-6 9-9 14l-3-8z" fill="url(#${id})"/>
+      <circle cx="75" cy="52" r="12" fill="url(#${id})"/>
+      <g fill="#08060D" opacity=".5"><ellipse cx="70.5" cy="51" rx="1.6" ry="2.1"/>
+       <ellipse cx="79.5" cy="51" rx="1.6" ry="2.1"/></g>
+      <g class="mEye" stroke="#08060D" stroke-width="1.5" stroke-linecap="round" opacity=".55">
+       <line x1="68.5" y1="51" x2="72.5" y2="51"/><line x1="77.5" y1="51" x2="81.5" y2="51"/></g>
+      <path d="M75 64c-16 0-27 5-31 14l-5 8 8 3-6 28c-1 5 2 9 7 9h54c5 0 8-4 7-9l-6-28 8-3-5-8c-4-9-15-14-31-14z"
+       fill="url(#${id})"/>`
+    /* 남성 — 갓/묶은 머리 · 넓은 어깨 */
+    :`<ellipse cx="75" cy="38" rx="26" ry="4.5" fill="url(#${id})"/>
+      <path d="M64 38c0-8 2-14 11-14s11 6 11 14z" fill="url(#${id})"/>
+      <circle cx="75" cy="52" r="12" fill="url(#${id})"/>
+      <g fill="#08060D" opacity=".5"><ellipse cx="70.5" cy="51" rx="1.6" ry="2"/>
+       <ellipse cx="79.5" cy="51" rx="1.6" ry="2"/></g>
+      <g class="mEye" stroke="#08060D" stroke-width="1.5" stroke-linecap="round" opacity=".55">
+       <line x1="68.5" y1="51" x2="72.5" y2="51"/><line x1="77.5" y1="51" x2="81.5" y2="51"/></g>
+      <path d="M75 64c-19 0-31 6-35 16l-4 7 9 3-6 27c-1 5 2 9 7 9h58c5 0 8-4 7-9l-6-27 9-3-4-7c-4-10-16-16-35-16z"
+       fill="url(#${id})"/>`}
+   <line x1="75" y1="76" x2="75" y2="126" stroke="${col}" stroke-opacity=".3" stroke-width="1"/>
+  </g>
+  ${prop==="brush"?`<g class="mProp"><rect x="97" y="52" width="3" height="30" rx="1.5"
+    fill="${col}" opacity=".8"/><path d="M97 82h3l-1.5 8z" fill="${col}" opacity=".6"/></g>`:""}
+  ${prop==="pipe"?`<g class="mProp"><rect x="86" y="56" width="26" height="2.4" rx="1.2"
+    fill="${col}" opacity=".8"/><circle cx="114" cy="57" r="4.2" fill="none" stroke="${col}"
+    stroke-width="2" opacity=".8"/></g>`:""}
+  ${prop==="thread"?`<path class="mProp" d="M52 74h46" stroke="${col}" stroke-width="1.8"
+    opacity=".85" stroke-linecap="round"/>`:""}
+  ${prop==="fan"?`<g class="mProp"><path d="M96 74l16-8v16z" fill="${col}" opacity=".75"/></g>`:""}
+  ${fx==="smoke"?[0,1.7,3.4].map(d=>
+   `<path class="mFx" style="animation-delay:${d}s" d="M114 52c-3-6 3-9 0-13"
+    fill="none" stroke="${col}" stroke-width="1.5" opacity=".45" stroke-linecap="round"/>`).join(""):""}
+  ${fx==="mote"?Array.from({length:5},(_,i)=>
+   `<circle class="mFx" style="animation-delay:${(i*.9).toFixed(1)}s" cx="${34+i*20}"
+    cy="${100+((i*17)%18)}" r="1.6" fill="${col}" opacity=".7"/>`).join(""):""}
+ </svg>`;
+}
+const CFIG={pungun:["brush","mote"],nopa:["pipe","smoke"],wolha:["thread",null],
+ hongmae:["fan",null],yeondam:[null,"rain"],dongja:[null,"mote"]};
+function chrFig(id,w){const c=CH[id],f=CFIG[id]||[null,null];
+ return figSVG(w,c.c,c.sex==="F",f[0],f[1])}
+function ilganFig(w){return figSVG(w,ilgan().c,ST.sex==="F",null,"mote")}
+
+/* ══════════════════════════════════════════
+   4-B. 장면 아트 — 배경·소품
+   ══════════════════════════════════════════ */
+const SCN={
+gate:{t:"대문 · 사계",spec:["9:16","진입","기본"],
+ art:()=>{const S=SEASON[SEA];
+  return `<svg viewBox="0 0 400 250">
+  <defs>
+   <radialGradient id="moonG"><stop offset="0" stop-color="#F2ECE4" stop-opacity=".85"/>
+    <stop offset="1" stop-color="#F2ECE4" stop-opacity="0"/></radialGradient>
+   <radialGradient id="lanG"><stop offset="0" stop-color="#E5B87A" stop-opacity=".7"/>
+    <stop offset="1" stop-color="#E5B87A" stop-opacity="0"/></radialGradient>
+   <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="${S.sky}"/><stop offset="1" stop-color="#0C0A12"/></linearGradient>
+   <linearGradient id="wetG" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#1D1829"/><stop offset="1" stop-color="#0A0810"/></linearGradient>
+  </defs>
+  <rect width="400" height="250" fill="url(#skyG)"/>
+  <circle cx="330" cy="42" r="48" fill="url(#moonG)" opacity=".5"/>
+  <circle cx="330" cy="42" r="17" fill="#F2ECE4" opacity=".8"/>
+  ${Array.from({length:18},(_,i)=>`<circle cx="${(i*67)%390+8}" cy="${(i*41)%76+6}"
+   r="${.7+(i%3)*.4}" fill="#F2ECE4" opacity="${.25+(i%4)*.12}"/>`).join("")}
+
+  <rect x="0" y="96" width="128" height="104" fill="#1A1424"/>
+  <rect x="272" y="96" width="128" height="104" fill="#1A1424"/>
+  <rect x="0" y="90" width="128" height="9" fill="#241B14"/>
+  <rect x="272" y="90" width="128" height="9" fill="#241B14"/>
+  <path d="M0 90q22-13 44 0t44 0 40 0" fill="none" stroke="#2E2740" stroke-width="1.5"/>
+  <path d="M272 90q22-13 44 0t44 0 40 0" fill="none" stroke="#2E2740" stroke-width="1.5"/>
+
+  <rect x="128" y="72" width="144" height="128" fill="#0F0C18"/>
+  <rect x="120" y="62" width="160" height="14" fill="#241B14" stroke="#E5B87A" stroke-opacity=".25"/>
+  <g class="sDoor" style="transform-origin:128px 136px">
+   <rect x="128" y="76" width="66" height="124" fill="#241B14" stroke="#E5B87A" stroke-opacity=".3"/>
+   <g stroke="#E5B87A" stroke-opacity=".16" stroke-width="1">${[0,1,2].map(i=>
+    `<line x1="${146+i*22}" y1="80" x2="${146+i*22}" y2="196"/>`).join("")}
+    ${[0,1,2,3].map(i=>`<line x1="132" y1="${94+i*28}" x2="190" y2="${94+i*28}"/>`).join("")}</g></g>
+  <g style="transform:scaleX(.2);transform-origin:272px 136px">
+   <rect x="206" y="76" width="66" height="124" fill="#241B14" stroke="#E5B87A" stroke-opacity=".3"/></g>
+  <path d="M160 200 L196 78 L232 78 L262 200z" fill="url(#lanG)" opacity=".55" class="sFlick"/>
+
+  <path d="M0 88q30 20 58 6t54 14 46-4" fill="none" stroke="${S.vine}" stroke-width="2.5" opacity=".8"/>
+  <path d="M400 88q-30 22-60 8t-52 16-40-6" fill="none" stroke="${S.vine}" stroke-width="2.5" opacity=".8"/>
+  ${[[26,100],[62,112],[96,98],[128,116],[300,110],[334,96],[366,114],[268,102],
+     [44,128],[80,140],[318,132],[352,146]].map(([x,y],i)=>
+   `<g transform="translate(${x} ${y})" opacity="${.55+(i%3)*.15}">
+     ${Array.from({length:S.pet},(_,k)=>`<ellipse rx="${S.pr}" ry="${S.pr*.56}"
+      transform="rotate(${k*(360/S.pet)}) translate(${S.pr*.95} 0)"
+      fill="${i%2?S.c1:S.c2}"/>`).join("")}
+     <circle r="1.8" fill="#E5B87A"/></g>`).join("")}
+
+  ${[[104,44],[200,34],[298,48]].map(([x,y],i)=>
+   `<g class="sFlick" style="animation-delay:${i*.8}s">
+     <circle cx="${x}" cy="${y+22}" r="34" fill="url(#lanG)" opacity=".55"/>
+     <line x1="${x}" y1="${y-14}" x2="${x}" y2="${y+2}" stroke="#E5B87A" stroke-opacity=".5"/>
+     <rect x="${x-11}" y="${y+2}" width="22" height="4" fill="#3A2E22" stroke="#E5B87A" stroke-opacity=".5"/>
+     <path d="M${x-10} ${y+6}h20v20a10 10 0 0 1-20 0z" fill="${i===1?"#C9707A":"#5C7FA8"}"
+      opacity=".55" stroke="#E5B87A" stroke-opacity=".55"/>
+     <ellipse cx="${x}" cy="${y+18}" rx="5.5" ry="8" fill="#E5B87A" opacity=".7"/>
+     <line x1="${x}" y1="${y+26}" x2="${x}" y2="${y+33}" stroke="#C9707A" stroke-opacity=".6"/></g>`).join("")}
+
+  ${cat(70,84,1.05)}
+  ${SEA==="summer"?firefly(7,150,120,120,60):""}
+  ${SEA==="spring"?butterfly(300,124,"#E58BA5",.4)+butterfly(120,140,"#F2ECE4",2.1):""}
+
+  <rect y="200" width="400" height="50" fill="url(#wetG)"/>
+  <line y1="200" x2="400" y2="200" stroke="#3A3150" stroke-opacity=".6"/>
+  <ellipse cx="200" cy="224" rx="86" ry="18" fill="#E5B87A" opacity=".14" class="sFlick"/>
+  ${[[104,206],[200,210],[298,206]].map(([x,y],i)=>
+   `<ellipse cx="${x}" cy="${y+16}" rx="9" ry="20" fill="#E5B87A" opacity=".13"
+     class="sFlick" style="animation-delay:${i*.8}s"/>`).join("")}
+  <ellipse cx="330" cy="232" rx="12" ry="5" fill="#F2ECE4" opacity=".12"/>
+  ${[0,1,2,3].map(i=>`<path d="M${40+i*96} 236q26-5 52 0" stroke="#3A3150" stroke-width="1"
+   fill="none" opacity=".3"/>`).join("")}
+  ${petals(7,S.c1)}
+ </svg>`},
+ prompt:()=>{const S=SEASON[SEA];return `Korean romance-fantasy webtoon style, night scene.
+A traditional Korean hanok gate standing half-open at the end of a quiet
+lane just after rain. Warm golden light spills out through the open gate.
+${S.pdesc} tumble over the tiled wall on both sides. Three ornate Korean
+paper lanterns (청사초롱) hang above at different heights, glowing amber
+and blue. A small black cat sits on the wall watching, eyes catching the
+lantern light. The wet stone ground mirrors the lantern light and the moon
+in soft broken reflections. ${S.pextra}
+Deep plum-violet night sky, full moon and faint stars.
+Beautiful, inviting, slightly magical — not eerie.
+No people, no text, no signboard. Aspect ratio 9:16.`},
+ hint:`<b>기본 진입 장면.</b> 계절이 바뀌면 꽃과 하늘색이 바뀝니다.<br>
+ 같은 사람이 봄·여름·가을·겨울에 오면 <b>매번 다른 화면</b>을 봅니다.<br>
+ 담장 위 <b>고양이</b>는 사계절 고정 — 이 집의 마스코트입니다.`},
+
+tea:{t:"다과상 · 차 한 잔",spec:["16:9","재방문 보상"],
+ art:()=>`<svg viewBox="0 0 400 150">
+  <rect width="400" height="150" fill="#0A0810"/>
+  ${shaft(200,60,0,110,.22)}
+  ${ring(200,58,44,"#D98BA5",.18)}
+  <rect y="96" width="400" height="54" fill="#151220"/>
+  <line y1="96" x2="400" y2="96" stroke="#3A3150"/>
+  <rect x="72" y="88" width="256" height="10" rx="2" fill="#3A2E22" stroke="#E5B87A" stroke-opacity=".35"/>
+  <g><ellipse cx="150" cy="86" rx="21" ry="8" fill="#E9E2D6" opacity=".14" stroke="#E5B87A" stroke-opacity=".45"/>
+   <path d="M129 86q0 14 21 14t21-14" fill="#E9E2D6" opacity=".1" stroke="#E5B87A" stroke-opacity=".4"/>
+   <ellipse cx="150" cy="86" rx="15" ry="5" fill="#C9A05C" opacity=".35"/>
+   ${[0,1,2].map(i=>`<path class="sMote" style="animation-delay:${i*1.7}s"
+    d="M${146+i*4} 80q-4-10 0-17" stroke="#E9E2D6" stroke-opacity=".45" fill="none"
+    stroke-width="1.3" stroke-linecap="round"/>`).join("")}</g>
+  <g><ellipse cx="252" cy="90" rx="30" ry="10" fill="#241B14" stroke="#E5B87A" stroke-opacity=".3"/>
+   ${[[240,86],[254,84],[266,88]].map(([x,y],i)=>
+    `<g transform="translate(${x} ${y})"><path d="M-8 0q0-7 8-7t8 7-8 6-8-6z" fill="#D9A05C"
+      opacity=".65"/><circle r="1.6" fill="#E58BA5" opacity=".8"/></g>`).join("")}</g>
+  <g><ellipse cx="330" cy="88" rx="14" ry="6" fill="#12101C" stroke="#7FC4BC" stroke-opacity=".4"/>
+   ${[0,1,2,3,4].map(k=>`<ellipse cx="330" cy="86" rx="7" ry="3.2"
+    transform="rotate(${k*72} 330 86)" fill="#E58BA5" opacity=".5"/>`).join("")}</g>
+  ${cat(60,84,.82)}
+  ${motes(8,100,50,220,50,"#E5B87A",.5)}
+ </svg>`,
+ prompt:`Korean romance-fantasy webtoon style. A low lacquered tea table set
+for one guest: a celadon teacup with pale tea and thin steam rising, a
+small plate of traditional Korean confections (약과, 한과) arranged
+neatly, and a single flower resting in a shallow dish. A small black
+cat sits at the edge of the table, watching. Warm lantern light from
+above, a faint rose-coloured luminous ring floating behind. Motes of
+gold drift through the air. Deep plum-violet shadows. Inviting,
+gentle, no people, no text. Aspect ratio 16:9.`,
+ hint:`<b>재방문 보상 화면입니다.</b> 두 번째 방문부터 도령이 차를 내어줍니다.<br>
+ "다음에 오면 차를 내어드리겠소" — 이 약속이 재방문 이유가 됩니다.`},
+
+sealbook:{t:"인장첩",spec:["3:4","수집"],
+ art:()=>`<svg viewBox="0 0 400 165">
+  <rect width="400" height="165" fill="#0A0810"/>
+  ${shaft(200,80,0,165,.14)}
+  <rect x="26" y="12" width="348" height="140" rx="3" fill="#E9E2D6" opacity=".07"
+   stroke="#E5B87A" stroke-opacity=".3"/>
+  <line x1="200" y1="12" x2="200" y2="152" stroke="#E5B87A" stroke-opacity=".18"/>
+  ${["風","白","靑","時","銀","赤","夢","西","牌","面","月","紅","戀","和","商","訓","藥","日","三","靑"]
+   .map((t,i)=>{const c=i%5,r=Math.floor(i/5),got=i<4,
+    col=["#E5B87A","#BFD3D6","#8FB582","#8FA5C4","#A896D4","#D9607F","#8FA0C4","#7FB5CC",
+         "#D4B25C","#B59A82","#D98BA5","#D96A72","#95A3C4","#C4AE8A","#D9B265","#9AAABC",
+         "#A8BC95","#C4C4BC","#C4857A","#8FC4BC"][i];
+    return seal(58+c*71,40+r*36,13,t,col,got)}).join("")}
+  ${motes(7,60,40,280,90,"#E5B87A",.45)}
+ </svg>`,
+ prompt:`Korean romance-fantasy webtoon style. An open collector's booklet
+(인장첩) of pale hanji paper lying flat, ruled into a grid of twenty
+small squares. Four squares bear glowing coloured seal-stamps in
+different hues; the rest are empty and faintly outlined, waiting.
+Warm lantern light from above, gold motes drifting. Deep plum-violet
+background. Precious, collectible, no people, no legible text.
+Aspect ratio 3:4.`,
+ hint:`<b>수집 장치.</b> 사람을 만날 때마다 인장을 하나씩 받습니다.<br>
+ 스무 개를 다 모으면 <b>한정 카드</b>를 줍니다.<br>
+ 여성 이용자층에서 수집 요소는 재결제 동인이 큽니다.`},
+
+door:{t:"열리는 문",spec:["9:16","전환"],
+ art:()=>`<svg viewBox="0 0 400 190">
+  <rect width="400" height="190" fill="#0A0810"/>
+  <rect x="60" y="0" width="280" height="190" fill="#12101C" stroke="#3A3150"/>
+  <rect x="196" y="0" width="8" height="190" fill="#0A0810"/>
+  <g class="sDoor"><rect x="60" y="0" width="136" height="190" fill="#1A1424" stroke="#3A3150"/>
+   <g stroke="#3A3150" stroke-width="1">${[0,1,2,3,4].map(i=>
+    `<line x1="${72+i*24}" y1="4" x2="${72+i*24}" y2="186"/>`).join("")}
+    ${[0,1,2,3,4,5].map(i=>`<line x1="64" y1="${16+i*30}" x2="192" y2="${16+i*30}"/>`).join("")}</g></g>
+  <rect x="204" y="0" width="136" height="190" fill="#1A1424" stroke="#3A3150"/>
+  <g stroke="#3A3150" stroke-width="1">${[0,1,2,3,4].map(i=>
+   `<line x1="${216+i*24}" y1="4" x2="${216+i*24}" y2="186"/>`).join("")}
+   ${[0,1,2,3,4,5].map(i=>`<line x1="208" y1="${16+i*30}" x2="336" y2="${16+i*30}"/>`).join("")}</g>
+  <rect x="60" y="0" width="140" height="190" fill="url(#lg)" opacity=".35"/>
+ </svg>`,
+ prompt:`Korean romance-fantasy webtoon style. A traditional Korean wooden
+lattice door (살문) swinging inward, warm amber light spilling out
+through the widening gap into a dark exterior. Paper panes glowing
+from within. Viewed straight on, symmetrical. No people, no text.
+Aspect ratio 9:16.`},
+
+desk:{t:"붓 · 벼루 · 빈 종이",spec:["16:9","소품"],
+ art:()=>`<svg viewBox="0 0 400 160">
+  <rect width="400" height="160" fill="#0A0810"/>
+  ${shaft(200,54,0,160,.24)}
+  <rect y="98" width="400" height="62" fill="#151220"/>
+  <line y1="98" x2="400" y2="98" stroke="#3A3150" stroke-opacity=".7"/>
+  ${ring(200,74,46,"#A896D4",.22)}
+  <rect x="96" y="70" width="208" height="58" fill="#E9E2D6" opacity=".08" stroke="#3A3150"/>
+  ${[0,1,2,3].map(i=>`<line x1="${128+i*48}" y1="76" x2="${128+i*48}" y2="122"
+   stroke="#3A3150" stroke-width=".7" opacity=".4"/>`).join("")}
+  <ellipse cx="330" cy="116" rx="32" ry="14" fill="#12101C" stroke="#E5B87A" stroke-opacity=".3"/>
+  <ellipse cx="330" cy="114" rx="22" ry="9" fill="#08060D"/>
+  <circle cx="326" cy="111" r="1.6" fill="#F2ECE4" opacity=".7"/>
+  <circle cx="335" cy="116" r="1.1" fill="#F2ECE4" opacity=".5"/>
+  <g class="sHover" transform="rotate(-20 118 82)">
+   <rect x="110" y="42" width="5" height="58" rx="2.5" fill="#3A2E22" stroke="#E5B87A" stroke-width=".7"/>
+   <path d="M110 100h5l-2.5 13z" fill="#E5B87A" opacity=".7"/>
+   <circle cx="112.5" cy="40" r="6" fill="#E5B87A" opacity=".25" class="sFlick"/></g>
+  <g class="sHover" style="animation-delay:1.4s">
+   <rect x="52" y="30" width="30" height="21" fill="#E9E2D6" opacity=".12"
+    stroke="#E5B87A" stroke-opacity=".3" transform="rotate(-9 67 40)"/></g>
+  <g class="sHover" style="animation-delay:2.6s">
+   <rect x="312" y="24" width="26" height="18" fill="#E9E2D6" opacity=".1"
+    stroke="#E5B87A" stroke-opacity=".25" transform="rotate(12 325 33)"/></g>
+  ${motes(9,60,60,290,80,"#E5B87A",.6)}
+ </svg>`,
+ prompt:`Korean romance-fantasy webtoon style. A low writing desk in a dim
+mystical study at night. A sheet of hanji paper lies flat, an inkstone
+holds ink so dark it mirrors starlight, and a calligraphy brush hovers
+just above the paper, floating unsupported with a faint golden aura at
+its tip. Two or three sheets of paper drift weightlessly in the air.
+A faint luminous constellation ring glows behind the desk. Golden
+motes of light rise slowly through a soft shaft of light from above.
+Deep plum-violet shadows. No hands, no people, no text.
+Aspect ratio 16:9.`},
+
+room:{t:"실내 · 좌식 · 병풍",spec:["16:9","배경"],
+ art:()=>`<svg viewBox="0 0 400 170">
+  <rect width="400" height="170" fill="#0A0810"/>
+  ${shaft(200,64,0,124,.26)}
+  ${[0,1,2,3].map(i=>`<rect x="${28+i*88}" y="14" width="80" height="96" fill="#0F0C18"
+   stroke="#2E2740"/>
+   <g opacity=".35">${Array.from({length:5},(_,k)=>
+    `<circle cx="${44+i*88+((k*23)%56)}" cy="${30+((k*31)%70)}" r="1.3" fill="#A896D4"/>`).join("")}
+    <path d="M${40+i*88} ${44+i*7}q22-16 44 4" stroke="#A896D4" stroke-opacity=".4"
+     stroke-width=".8" fill="none"/></g>`).join("")}
+  ${beads(24,10,4,9)}${beads(340,10,4,9)}
+  <rect y="124" width="400" height="46" fill="#151220"/>
+  <line y1="124" x2="400" y2="124" stroke="#3A3150"/>
+  ${ring(200,86,40,"#7FC4BC",.2)}
+  <ellipse cx="112" cy="148" rx="32" ry="12" fill="#12101C" stroke="#E5B87A" stroke-opacity=".35"/>
+  <ellipse cx="288" cy="148" rx="32" ry="12" fill="#12101C" stroke="#3A3150"/>
+  <g><rect x="184" y="130" width="32" height="7" rx="3" fill="#3A2E22" stroke="#E5B87A" stroke-opacity=".35"/>
+   ${[0,1,2].map(i=>`<path class="sMote" style="animation-delay:${i*1.8}s"
+    d="M${196+i*4} 128q-4-8 0-14" stroke="#E5B87A" stroke-opacity=".5" fill="none"
+    stroke-width="1.4" stroke-linecap="round"/>`).join("")}</g>
+  ${[[86,26],[200,16],[314,26]].map(([x,y],i)=>
+   `<g class="sFlick" style="animation-delay:${i*.7}s">
+     <circle cx="${x}" cy="${y+18}" r="30" fill="url(#lanG)" opacity=".5"/>
+     <line x1="${x}" y1="${y-14}" x2="${x}" y2="${y}" stroke="#E5B87A" stroke-opacity=".45"/>
+     <path d="M${x-9} ${y}h18v18a9 9 0 0 1-18 0z" fill="${["#C9707A","#E5B87A","#5C7FA8"][i]}"
+      opacity=".5" stroke="#E5B87A" stroke-opacity=".5"/></g>`).join("")}
+  ${motes(11,40,40,320,90,"#E5B87A",.55)}
+ </svg>`,
+ prompt:`Korean romance-fantasy webtoon style. The interior of a mystical
+fortune-teller's room at night. A folding screen along the back wall
+painted with faint luminous constellations. Beaded curtains hang at
+both edges of frame, catching amber, rose and violet light. Three
+ornate paper lanterns hang at different heights. Two floor cushions
+face each other; between them a small incense burner sends thin
+threads of smoke curling upward. A pale glowing ring of light floats
+in the air above. Golden motes drift through a soft shaft of light.
+Deep plum-violet shadows. Empty, no people, no text.
+Aspect ratio 16:9.`},
+
+shelf:{t:"진열대 · 걸린 목패",spec:["16:9","배경"],
+ art:()=>`<svg viewBox="0 0 400 165">
+  <rect width="400" height="165" fill="#0A0810"/>
+  ${shaft(200,80,0,165,.16)}
+  <rect y="10" width="400" height="10" fill="#3A2E22"/>
+  <line y1="10" x2="400" y2="10" stroke="#E5B87A" stroke-opacity=".35"/>
+  ${[0,1,2,3,4,5].map(i=>{const x=36+i*66,y=42+(i%3)*10;
+   return `<line x1="${x}" y1="20" x2="${x}" y2="${y}" stroke="#E5B87A" stroke-opacity=".3"/>
+    <g class="sHover" style="animation-delay:${(i*.42).toFixed(2)}s">
+     <rect x="${x-21}" y="${y}" width="42" height="66" rx="2" fill="#241B14"
+      stroke="#E5B87A" stroke-opacity=".35"/>
+     <rect x="${x-21}" y="${y}" width="42" height="66" rx="2" fill="url(#lanG)" opacity=".16"/>
+     <text x="${x}" y="${y+40}" text-anchor="middle" font-family="Gowun Batang" font-size="19"
+      fill="#E5B87A" opacity=".8">${"平歲財宮再心"[i]}</text>
+     <ellipse cx="${x}" cy="${y+74}" rx="15" ry="4" fill="#E5B87A" opacity=".14"/></g>`}).join("")}
+  ${motes(10,30,50,340,80,"#E5B87A",.5)}
+  <rect y="150" width="400" height="15" fill="#0F0C18"/>
+ </svg>`,
+ prompt:`Korean romance-fantasy webtoon style. A row of six narrow wooden
+plaques hanging from a beam by thin cords at different heights, each
+carved with a single Chinese character that glows warm amber from
+within, as if lit from inside the wood. Each plaque casts a soft pool
+of light beneath it. Golden motes of light drift slowly upward through
+the air. The background falls into deep plum-violet darkness.
+Mysterious, inviting, like an offering hall. No people. Aspect ratio 16:9.`},
+
+hall:{t:"안쪽 방 · 스무 자리",spec:["16:9","배경"],
+ art:()=>`<svg viewBox="0 0 400 165">
+  <rect width="400" height="165" fill="#0A0810"/>
+  <rect y="0" width="400" height="98" fill="#0D0A16"/>
+  <rect y="98" width="400" height="67" fill="#151220"/>
+  <line y1="98" x2="400" y2="98" stroke="#3A3150" stroke-opacity=".7"/>
+  ${[0,1,2,3,4].map(r=>[0,1,2,3].map(c=>{
+   const x=52+c*99-r*8,y=110+r*11,o=(.55-r*.09).toFixed(2),
+    col=["#E5B87A","#D98BA5","#A896D4","#7FC4BC"][(c+r)%4];
+   return `<ellipse cx="${x}" cy="${y}" rx="${21-r*2.2}" ry="${7.5-r*.8}" fill="#12101C"
+     stroke="${col}" stroke-opacity="${o}"/>
+    <ellipse cx="${x}" cy="${y-13}" rx="${5-r*.5}" ry="${7-r*.7}" fill="${col}"
+     opacity="${(.45-r*.07).toFixed(2)}" class="sFlick" style="animation-delay:${((c+r)*.5).toFixed(1)}s"/>`}).join("")).join("")}
+  ${[[74,26],[200,16],[326,26]].map(([x,y],i)=>
+   `<g class="sFlick" style="animation-delay:${i*.9}s">
+     <circle cx="${x}" cy="${y+18}" r="34" fill="url(#lanG)" opacity=".45"/>
+     <line x1="${x}" y1="${y-16}" x2="${x}" y2="${y}" stroke="#E5B87A" stroke-opacity=".4"/>
+     <path d="M${x-9} ${y}h18v18a9 9 0 0 1-18 0z" fill="${["#A896D4","#E5B87A","#D98BA5"][i]}"
+      opacity=".5" stroke="#E5B87A" stroke-opacity=".45"/></g>`).join("")}
+  ${motes(14,30,50,340,90,"#E5B87A",.45)}
+ </svg>`,
+ prompt:`Korean romance-fantasy webtoon style. A long dim hall receding into
+darkness, with twenty floor cushions arranged in rows. Above each
+cushion floats a small glowing flame-light in a different colour —
+amber, rose, violet, teal — like waiting spirits. Most cushions are
+empty. Three ornate paper lanterns hang overhead. Golden motes drift
+through the air. Deep plum-violet shadows, mist along the floor.
+Quiet, expectant, mysterious. No people, no text. Aspect ratio 16:9.`},
+
+scroll:{t:"펼쳐지는 두루마리",spec:["16:9","전환"],
+ art:()=>`<svg viewBox="0 0 400 150">
+  <rect width="400" height="150" fill="#0A0810"/>
+  ${shaft(200,74,0,150,.2)}
+  <rect x="30" y="42" height="66" fill="#E9E2D6" opacity=".11" stroke="#3A3150" class="sUnroll"
+   width="340"/>
+  ${[0,1,2,3,4,5].map(i=>`<line x1="${64+i*52}" y1="52" x2="${64+i*52}" y2="98"
+   stroke="#3A3150" stroke-width=".8" opacity=".45"/>`).join("")}
+  ${[0,1,2,3,4].map(i=>`<g class="sHover" style="animation-delay:${(i*.6).toFixed(1)}s">
+   <text x="${86+i*58}" y="${34-(i%2)*8}" text-anchor="middle" font-family="Gowun Batang"
+    font-size="15" fill="#E5B87A" opacity=".7">${"命式四柱堂"[i]}</text></g>`).join("")}
+  <rect x="20" y="32" width="14" height="88" rx="7" fill="#3A2E22" stroke="#E5B87A" stroke-opacity=".45"/>
+  <rect x="366" y="32" width="14" height="88" rx="7" fill="#3A2E22" stroke="#E5B87A" stroke-opacity=".45"/>
+  ${motes(9,50,44,300,70,"#E5B87A",.6)}
+ </svg>`,
+ prompt:`Korean romance-fantasy webtoon style. A long paper scroll unrolling
+between two dark wooden rods. Above the paper, glowing golden Chinese
+characters float free of the page, drifting slowly upward as if
+lifting off the surface. The hanji paper catches warm light. Motes of
+gold drift through a soft shaft of light from above. Deep plum-violet
+background. Magical, weightless. No hands, no people. Aspect ratio 16:9.`},
+
+fold:{t:"반쯤 접힌 두루마리",spec:["16:9","페이월"],
+ art:()=>`<svg viewBox="0 0 400 130">
+  <rect width="400" height="130" fill="#0A0810"/>
+  <rect x="26" y="34" width="348" height="34" fill="#E9E2D6" opacity=".11" stroke="#3A3150"/>
+  <rect x="26" y="68" width="348" height="28" fill="#E9E2D6" opacity=".03" stroke="#2E2740"/>
+  <line x1="26" y1="68" x2="374" y2="68" stroke="#E5B87A" stroke-opacity=".5"/>
+  ${[0,1,2,3,4,5].map(i=>`<line x1="${58+i*52}" y1="42" x2="${58+i*52}" y2="62"
+   stroke="#3A3150" stroke-width=".8" opacity=".55"/>
+   <line x1="${58+i*52}" y1="74" x2="${58+i*52}" y2="90" stroke="#2E2740" stroke-width=".8" opacity=".3"/>`).join("")}
+  <rect x="18" y="26" width="12" height="78" rx="6" fill="#3A2E22" stroke="#E5B87A" stroke-opacity=".4"/>
+ </svg>`,
+ prompt:`Korean romance-fantasy webtoon style. A paper scroll folded halfway
+closed, the upper half lit and readable-looking, the lower half creased
+over and falling into deep shadow. Warm amber light on the exposed
+portion only. No legible text, no hands. Aspect ratio 16:9.`},
+
+untie:{t:"붉은 끈 · 개봉",spec:["1:1","결제완료"],
+ art:()=>`<svg viewBox="0 0 400 155">
+  <rect width="400" height="155" fill="#0A0810"/>
+  ${ring(200,78,62,"#E5B87A",.2)}
+  <circle cx="200" cy="78" r="72" fill="url(#lanG)" class="sFlick"/>
+  <rect x="124" y="48" width="152" height="62" rx="7" fill="#3A2E22"
+   stroke="#E5B87A" stroke-opacity=".5"/>
+  <rect x="124" y="48" width="152" height="7" fill="#E5B87A" opacity=".28"/>
+  ${[0,1,2,3].map(i=>`<line x1="${146+i*36}" y1="55" x2="${146+i*36}" y2="110"
+   stroke="#E5B87A" stroke-opacity=".14"/>`).join("")}
+  <g class="sDoor" style="transform-origin:200px 78px">
+   <rect x="192" y="34" width="16" height="90" rx="4" fill="#C9707A" opacity=".85"/>
+   <circle cx="200" cy="34" r="7" fill="#C9707A" opacity=".7"/></g>
+  <ellipse cx="200" cy="78" rx="52" ry="16" fill="#E5B87A" opacity=".26"/>
+  ${[0,1,2,3,4,5,6,7].map(i=>{const a=(i*45)*Math.PI/180;
+   return `<g class="sMote" style="animation-delay:${(i*.4).toFixed(1)}s"
+    transform="translate(${200+Math.cos(a)*40} ${78+Math.sin(a)*26})">
+    ${[0,1,2,3,4].map(k=>`<ellipse rx="3.6" ry="2" transform="rotate(${k*72}) translate(3.4 0)"
+     fill="#E5B87A" opacity=".55"/>`).join("")}</g>`}).join("")}
+ </svg>`,
+ prompt:`Korean romance-fantasy webtoon style. A lacquered scroll case bound
+with a red silk cord, the cord untying itself as golden light bursts
+out from the opening seam. Small golden blossoms of light scatter
+outward from the opening. A luminous ring rotates slowly behind.
+Centered, high contrast, deep plum-violet background. Joyful,
+rewarding, ceremonial. No hands, no text. Aspect ratio 1:1.`},
+
+ink:{t:"먹이 번지는 종이",spec:["16:9","소품"],
+ art:()=>`<svg viewBox="0 0 400 120">
+  <rect width="400" height="120" fill="#0A0810"/>
+  <rect x="60" y="16" width="280" height="88" fill="#E9E2D6" opacity=".09" stroke="#3A3150"/>
+  ${[0,1,2,3,4].map(i=>`<line x1="${88+i*54}" y1="24" x2="${88+i*54}" y2="96"
+   stroke="#3A3150" stroke-width=".7" opacity=".45"/>`).join("")}
+  <circle cx="200" cy="60" r="7" fill="#0A0810" opacity=".85"/>
+  <circle cx="200" cy="60" r="0" fill="none" stroke="#E5B87A" stroke-opacity=".5" class="sInk"/>
+  <circle cx="200" cy="60" r="0" fill="none" stroke="#E5B87A" stroke-opacity=".3" class="sInk"
+   style="animation-delay:1.2s"/>
+ </svg>`,
+ prompt:`Korean romance-fantasy webtoon style. Close on a sheet of pale hanji
+paper with faint vertical column lines. A single drop of black ink has
+landed at the center and is blooming outward in soft irregular rings.
+Warm amber light from one side, deep plum shadow. No hands, no text.
+Aspect ratio 16:9.`},
+
+fork:{t:"갈림길",spec:["16:9","고민 선택"],
+ art:()=>`<svg viewBox="0 0 400 155">
+  <rect width="400" height="155" fill="#0A0810"/>
+  <circle cx="200" cy="20" r="42" fill="url(#moonG)" opacity=".35"/>
+  <path d="M0 155h400v-30q-100 10-200-24T0 130z" fill="#12101C"/>
+  <path d="M200 155 L142 62" stroke="#3A3150" stroke-width="2" fill="none"/>
+  <path d="M200 155 L258 62" stroke="#3A3150" stroke-width="2" fill="none"/>
+  <path d="M200 155 L200 54" stroke="#E5B87A" stroke-opacity=".5" stroke-width="2" fill="none"/>
+  ${[[142,62,"#A896D4"],[200,54,"#E5B87A"],[258,62,"#D98BA5"]].map(([x,y,col],i)=>
+   `<g class="sHover" style="animation-delay:${i*.6}s">
+     <circle cx="${x}" cy="${y-22}" r="26" fill="${col}" opacity=".14"/>
+     <ellipse cx="${x}" cy="${y-22}" rx="7" ry="10" fill="${col}" opacity=".55" class="sFlick"/>
+     <rect x="${x-3.5}" y="${y-10}" width="7" height="26" fill="#3A2E22"
+      stroke="${col}" stroke-opacity=".4"/>
+     <rect x="${x-15}" y="${y-20}" width="30" height="12" fill="#241B14"
+      stroke="${col}" stroke-opacity="${i===1?".7":".3"}"/></g>`).join("")}
+  ${firefly(6,90,80,220,50)}
+  ${motes(6,80,60,240,60,"#E5B87A",.4)}
+ </svg>`,
+ prompt:`Korean romance-fantasy webtoon style. A path splitting into three
+directions across a misty moonlit plain. Above each branch hovers a
+small floating lantern-flame in a different colour — violet, amber,
+rose — marking the way. Small wooden signposts stand blank beneath
+them. Fireflies drift low over the grass. A pale moon above. Deep
+plum-violet tones, dreamlike and inviting. No people, no legible text.
+Aspect ratio 16:9.`},
+
+altar:{t:"명식 받침 · 네 자리",spec:["16:9","명식"],
+ art:()=>`<svg viewBox="0 0 400 170">
+  <rect width="400" height="170" fill="#0A0810"/>
+  ${shaft(200,70,0,132,.32)}
+  <circle cx="200" cy="60" r="82" fill="url(#lanG)" opacity=".3" class="sFlick"/>
+  ${ring(200,62,58,"#E5B87A",.3)}
+  ${ring(200,62,34,"#A896D4",.28)}
+  ${[0,1,2,3].map(i=>{const x=124+i*51;
+   return `<g class="sHover" style="animation-delay:${i*.5}s">
+    <rect x="${x-16}" y="${30+(i%2)*8}" width="32" height="46" rx="2"
+     fill="#241B14" stroke="${i===2?"#E5B87A":"#3A3150"}"
+     stroke-opacity="${i===2?".8":".45"}"/>
+    <rect x="${x-16}" y="${30+(i%2)*8}" width="32" height="46" rx="2" fill="url(#lanG)"
+     opacity="${i===2?".3":".1"}"/></g>`}).join("")}
+  <rect y="132" width="400" height="38" fill="#151220"/>
+  <line y1="132" x2="400" y2="132" stroke="#3A3150"/>
+  <rect x="66" y="124" width="268" height="10" fill="#241B14" stroke="#E5B87A" stroke-opacity=".35"/>
+  ${[0,1,2,3].map(i=>`<rect x="${124+i*51-14}" y="118" width="28" height="6" rx="2"
+   fill="#0F0C18" stroke="#E5B87A" stroke-opacity=".3"/>`).join("")}
+  <ellipse cx="200" cy="150" rx="150" ry="14" fill="#E5B87A" opacity=".1"/>
+  ${motes(13,70,54,260,80,"#E5B87A",.65)}
+ </svg>`,
+ prompt:`Korean romance-fantasy webtoon style. A ceremonial altar in a dark
+mystical chamber. Four blank wooden plaques hover in the air above a
+low carved altar table, suspended and slowly floating, each faintly
+glowing. Two concentric luminous rings — one gold, one violet —
+rotate slowly behind them, marked with twelve radial ticks like a
+celestial dial. A shaft of warm light falls from above. Golden motes
+of light rise through the beam. The altar's surface has four empty
+carved slots waiting. Deep plum-violet shadows, mist along the floor.
+Awe-inspiring, sacred, no people, no text. Aspect ratio 16:9.`},
+
+facing:{t:"마주앉은 자리",spec:["16:9","훅"],
+ art:()=>`<svg viewBox="0 0 400 150">
+  <rect width="400" height="150" fill="#0A0810"/>
+  ${shaft(200,58,0,110,.24)}
+  ${[0,1,2].map(i=>`<rect x="${44+i*108}" y="8" width="98" height="66" fill="#0F0C18"
+   stroke="#2E2740"/>
+   <g opacity=".3">${Array.from({length:4},(_,k)=>
+    `<circle cx="${60+i*108+((k*29)%74)}" cy="${20+((k*23)%48)}" r="1.2" fill="#A896D4"/>`).join("")}</g>`).join("")}
+  ${beads(14,4,3,7)}${beads(354,4,3,7)}
+  <rect y="94" width="400" height="56" fill="#151220"/>
+  <line y1="94" x2="400" y2="94" stroke="#3A3150"/>
+  <ellipse cx="98" cy="122" rx="36" ry="13" fill="#12101C" stroke="#E5B87A" stroke-opacity=".45"/>
+  <ellipse cx="302" cy="122" rx="36" ry="13" fill="#12101C" stroke="#3A3150"/>
+  <circle cx="98" cy="120" r="42" fill="url(#lanG)" opacity=".28" class="sFlick"/>
+  <g class="sHover">
+   ${[0,1,2,3].map(i=>`<rect x="${164+i*20}" y="52" width="16" height="26" rx="1.5"
+    fill="#241B14" stroke="${i===2?"#E5B87A":"#3A3150"}" stroke-opacity="${i===2?".8":".4"}"/>`).join("")}
+   <ellipse cx="200" cy="86" rx="46" ry="7" fill="#E5B87A" opacity=".12"/></g>
+  ${ring(200,64,36,"#7FC4BC",.16)}
+  ${motes(9,60,40,280,70,"#E5B87A",.5)}
+ </svg>`,
+ prompt:`Korean romance-fantasy webtoon style. Two floor cushions facing each
+other across a dark wooden floor in a mystical room. Between them,
+four small glowing plaques float in mid-air at chest height, casting
+a soft pool of light on the floor beneath. Beaded curtains frame both
+edges of the composition. A constellation-painted folding screen
+behind. One cushion is lit warm amber as if just occupied; the other
+waits in shadow. Golden motes drift through the air. Deep plum-violet
+tones. No people, no text. Aspect ratio 16:9.`},
+
+seat:{t:"그 사람의 자리",spec:["3:4","캐릭터 배경"],
+ art:()=>`<svg viewBox="0 0 400 150">
+  <rect width="400" height="150" fill="#0A0810"/>
+  ${shaft(200,66,0,112,.3)}
+  ${beads(18,2,3,8)}${beads(348,2,3,8)}
+  ${ring(200,58,50,"var(--c)",.25)}
+  <circle cx="200" cy="58" r="70" fill="url(#lanG)" opacity=".32" class="sFlick"/>
+  <rect y="100" width="400" height="50" fill="#151220"/>
+  <line y1="100" x2="400" y2="100" stroke="#3A3150"/>
+  <ellipse cx="200" cy="120" rx="60" ry="16" fill="#12101C" stroke="var(--c)" stroke-opacity=".5"/>
+  <ellipse cx="200" cy="118" rx="44" ry="10" fill="var(--c)" opacity=".1"/>
+  <ellipse cx="200" cy="138" rx="96" ry="10" fill="var(--c)" opacity=".08"/>
+  ${motes(10,70,50,260,70,"var(--c)",.6)}
+ </svg>`,
+ prompt:`Korean romance-fantasy webtoon style. A single empty floor cushion
+lit by a shaft of warm light from above, in an otherwise dark
+mystical chamber. A faint luminous circular sigil hovers in the air
+behind it. Beaded curtains hang at both edges of frame. Motes of
+coloured light drift slowly upward around the cushion. The floor
+mirrors the glow faintly. Intimate, expectant, sacred. No people,
+no text. Aspect ratio 3:4.`},
+
+roadmap:{t:"대운 길 · 이정표",spec:["16:9","대운 맵"],
+ art:()=>`<svg viewBox="0 0 400 160">
+  <rect width="400" height="160" fill="#0A0810"/>
+  <circle cx="352" cy="24" r="40" fill="url(#moonG)" opacity=".38"/>
+  <circle cx="352" cy="24" r="13" fill="#F2ECE4" opacity=".75"/>
+  <path d="M0 142q60-20 96-42t92-36 96-24 116-16" stroke="#2E2740" stroke-width="2.5"
+   fill="none" stroke-linecap="round"/>
+  <path d="M0 142q60-20 96-42t92-36" stroke="var(--c)" stroke-width="2.5" fill="none"
+   stroke-linecap="round" opacity=".8"/>
+  ${[[14,138],[86,108],[156,80],[214,62],[286,46],[356,34]].map(([x,y],i)=>
+   `<ellipse cx="${x}" cy="${y+5}" rx="${11-i}" ry="3.5" fill="#08060D" opacity=".7"/>
+    <path d="M${x-7} ${y}q0-11 7-11t7 11z" fill="${i<=3?"#3A2E22":"#1D1829"}"
+     stroke="${i===3?"var(--c)":"#2E2740"}" stroke-width="1"/>
+    ${i>3?`<ellipse class="sFlick" style="animation-delay:${i*.5}s" cx="${x}" cy="${y-18}"
+      rx="4.5" ry="6.5" fill="#E5B87A" opacity=".5"/>`:""}`).join("")}
+  <circle cx="214" cy="50" r="15" fill="none" stroke="var(--c)" stroke-opacity=".45"/>
+  <circle cx="214" cy="50" r="4.5" fill="var(--c)"/>
+  ${[[60,120],[128,96],[300,44]].map(([x,y],i)=>
+   `<g opacity=".7">${[0,1,2,3,4].map(k=>`<ellipse cx="${x}" cy="${y}" rx="4" ry="2.3"
+     transform="rotate(${k*72} ${x} ${y})" fill="#E58BA5" opacity=".55"/>`).join("")}</g>`).join("")}
+  ${cat(258,52,.7)}
+  ${firefly(5,40,90,200,44)}
+  ${petals(5,"#E58BA5")}
+ </svg>`,
+ prompt:`Korean romance-fantasy webtoon style. A long winding path receding from
+lower-left into the upper-right distance, marked by six small stone
+markers. The near half glows warm amber; small floating lantern-flames
+hover above the far markers, waiting. Flowering shrubs bloom beside the
+path. A black cat sits on one of the distant markers. Fireflies and
+petals drift through the misty air. Full moon above. Contemplative,
+beautiful, no people, no text. Aspect ratio 16:9.`,
+ hint:`가로 패럴랙스로 길을 따라 이동하는 느낌을 냅니다.`},
+
+cardbg:{t:"공유 카드 문양",spec:["1:1","엔딩 카드"],
+ art:()=>`<svg viewBox="0 0 400 160">
+  <rect width="400" height="160" fill="#0A0810"/>
+  <rect x="8" y="6" width="384" height="148" fill="none" stroke="var(--c)" stroke-opacity=".45"/>
+  <rect x="15" y="13" width="370" height="134" fill="none" stroke="var(--c)" stroke-opacity=".2"/>
+  ${[[24,22],[376,22],[24,138],[376,138]].map(([x,y])=>
+   `<g opacity=".6">${[0,1,2,3,4].map(k=>`<ellipse cx="${x}" cy="${y}" rx="5" ry="2.8"
+     transform="rotate(${k*72} ${x} ${y})" fill="var(--c)" opacity=".4"/>`).join("")}
+    <circle cx="${x}" cy="${y}" r="1.8" fill="var(--c)"/></g>`).join("")}
+  ${ring(200,80,52,"var(--c)",.22)}
+  <circle cx="200" cy="80" r="72" fill="url(#lanG)" opacity=".3" class="sFlick"/>
+  ${[0,1,2,3,4,5,6,7].map(i=>{const a=(i*45-90)*Math.PI/180;
+   return `<g transform="translate(${200+Math.cos(a)*66} ${80+Math.sin(a)*66})" opacity=".45">
+    ${[0,1,2,3,4].map(k=>`<ellipse rx="3.4" ry="1.9" transform="rotate(${k*72}) translate(3.2 0)"
+     fill="var(--c)"/>`).join("")}</g>`}).join("")}
+  ${motes(8,110,40,180,80,"var(--c)",.5)}
+ </svg>`,
+ prompt:`Korean romance-fantasy webtoon style. An ornate decorative card frame in
+luminous line-work: a double border with five-petal flower motifs at the
+four corners, and a slowly rotating celestial ring at the center marked
+with twelve radial ticks. A halo of eight small blossoms encircles the
+ring. Soft radial glow behind. Rendered in thin gold and rose lines on a
+deep plum-black ground. Completely empty at the center for a character
+illustration. Elegant, precious, keepsake-like. No text. Aspect ratio 1:1.`,
+ hint:`중앙을 <b>반드시 비워두세요.</b> 캐릭터와 이름은 앱에서 얹습니다.<br>
+ 이 카드가 SNS에 퍼지는 <b>바이럴 자산</b>입니다.`},
+
+tray:{t:"목패를 늘어놓은 상",spec:["16:9","상품 선택"],
+ art:()=>`<svg viewBox="0 0 400 140">
+  <rect width="400" height="140" fill="#0A0810"/>
+  ${shaft(200,58,0,100,.2)}
+  <rect y="58" width="400" height="82" fill="#151220"/>
+  <line y1="58" x2="400" y2="58" stroke="#3A3150"/>
+  <rect x="30" y="66" width="340" height="56" rx="4" fill="#241B14" stroke="#E5B87A" stroke-opacity=".32"/>
+  ${[0,1,2,3].map(i=>{const x=62+i*86;
+   return `<g class="sHover" style="animation-delay:${i*.5}s">
+    <rect x="${x-25}" y="${70-(i===0?5:0)}" width="50" height="44" rx="2.5"
+     fill="#3A2E22" stroke="${i===0?"#E5B87A":"#3A3150"}" stroke-opacity="${i===0?".75":".35"}"/>
+    <rect x="${x-25}" y="${70-(i===0?5:0)}" width="50" height="44" rx="2.5" fill="url(#lanG)"
+     opacity="${i===0?".25":".08"}"/>
+    <line x1="${x-14}" y1="${84-(i===0?5:0)}" x2="${x+14}" y2="${84-(i===0?5:0)}"
+     stroke="#E5B87A" stroke-opacity=".22"/>
+    <line x1="${x-14}" y1="${96-(i===0?5:0)}" x2="${x+7}" y2="${96-(i===0?5:0)}"
+     stroke="#E5B87A" stroke-opacity=".16"/></g>`}).join("")}
+  <g transform="translate(348 50)" opacity=".65">${[0,1,2,3,4].map(k=>
+   `<ellipse rx="5.4" ry="3" transform="rotate(${k*72}) translate(5 0)" fill="#E58BA5"/>`).join("")}
+   <circle r="2" fill="#E5B87A"/></g>
+  ${motes(8,70,40,260,50,"#E5B87A",.45)}
+ </svg>`,
+ prompt:`Korean romance-fantasy webtoon style. Four small wooden plaques laid on
+a shallow lacquered tray on a low table, seen from a slight angle. The
+leftmost tilts forward and glows warmly from within. A single fresh
+blossom rests at the tray's corner. A soft shaft of light from above,
+gold motes drifting. Deep plum shadows. No legible text, no hands.
+Aspect ratio 16:9.`},
+
+banner:{t:"등불 배너",spec:["16:9","오늘의 운세"],
+ art:()=>`<svg viewBox="0 0 400 130">
+  <rect width="400" height="130" fill="#0A0810"/>
+  <circle cx="74" cy="48" r="76" fill="url(#lanG)" opacity=".45" class="sFlick"/>
+  <path d="M0 12q40 18 76 6t70 12" fill="none" stroke="#4A5C3A" stroke-width="2" opacity=".6"/>
+  ${[[22,20],[62,30],[104,18],[140,28]].map(([x,y],i)=>
+   `<g transform="translate(${x} ${y})" opacity=".55">${[0,1,2,3,4].map(k=>
+    `<ellipse rx="3.8" ry="2.2" transform="rotate(${k*72}) translate(3.6 0)"
+     fill="#E58BA5"/>`).join("")}</g>`).join("")}
+  <g class="sFlick"><line x1="74" y1="0" x2="74" y2="14" stroke="#E5B87A" stroke-opacity=".5"/>
+   <rect x="62" y="14" width="24" height="5" fill="#3A2E22" stroke="#E5B87A" stroke-opacity=".55"/>
+   <path d="M61 19h26v26a13 13 0 0 1-26 0z" fill="#C9707A" opacity=".5"
+    stroke="#E5B87A" stroke-opacity=".6"/>
+   <ellipse cx="74" cy="34" rx="7" ry="10" fill="#E5B87A" opacity=".7"/>
+   <line x1="74" y1="45" x2="74" y2="54" stroke="#C9707A" stroke-opacity=".6"/></g>
+  ${cat(146,104,.78)}
+  ${firefly(5,180,44,180,44)}
+  ${Array.from({length:8},(_,i)=>`<circle class="sDrift" style="animation-delay:${(i*.85).toFixed(1)}s"
+   cx="${170+i*28}" cy="${36+((i*23)%50)}" r="1.6" fill="#E5B87A" opacity=".4"/>`).join("")}
+ </svg>`,
+ prompt:`Korean romance-fantasy webtoon style. A single ornate Korean paper
+lantern hanging in the upper-left of a wide frame, glowing rose and
+amber, with a flowering vine trailing beside it. A black cat sits below
+it, tail curled. Warm light fades across empty dark plum space to the
+right. Fireflies and gold motes drift through the glow. Mostly empty
+composition with room for text on the right. No people, no text.
+Aspect ratio 16:9.`},
+
+oldpaper:{t:"오래된 종이 · 회고",spec:["16:9","회고 루프"],
+ art:()=>`<svg viewBox="0 0 400 135">
+  <rect width="400" height="135" fill="#0A0810"/>
+  ${shaft(200,60,0,135,.16)}
+  <g transform="rotate(-2 200 66)">
+   <rect x="66" y="20" width="268" height="92" fill="#E9E2D6" opacity=".08" stroke="#3A3150"/>
+   <rect x="66" y="20" width="268" height="92" fill="none" stroke="#E5B87A" stroke-opacity=".16"/>
+   ${[0,1,2,3].map(i=>`<line x1="${96+i*62}" y1="30" x2="${96+i*62}" y2="102"
+    stroke="#3A3150" stroke-width=".7" opacity=".4"/>`).join("")}
+   <path d="M66 20l18 13-18 5z" fill="#0A0810"/>
+   <path d="M334 112l-18-13 18-5z" fill="#0A0810"/>
+   <g transform="translate(302 36)" opacity=".7">${[0,1,2,3,4].map(k=>
+    `<ellipse rx="5" ry="2.8" transform="rotate(${k*72}) translate(4.6 0)"
+     fill="#E5B8CC"/>`).join("")}<circle r="1.8" fill="#D9A05C"/></g>
+   ${seal(96,92,11,"風","#E5B87A",1)}</g>
+  ${motes(6,110,40,180,60,"#E5B87A",.4)}
+ </svg>`,
+ prompt:`Korean romance-fantasy webtoon style. An aged sheet of hanji paper
+lying at a slight angle, corners softly curled. A small pressed flower
+rests in the upper right corner, and a red seal-stamp is impressed at
+the lower left. Faint vertical column lines, no legible writing. Warm
+light falls across it from above, gold motes drifting. Deep plum
+background. Nostalgic, treasured. No hands, no text. Aspect ratio 16:9.`},
+
+wall:{t:"후기 벽 · 붙은 종이쪽",spec:["16:9","후기"],
+ art:()=>`<svg viewBox="0 0 400 150">
+  <rect width="400" height="150" fill="#12101C"/>
+  ${[0,1,2,3,4,5].map(i=>`<line x1="${34+i*66}" y1="0" x2="${34+i*66}" y2="150"
+   stroke="#1A1424" stroke-width="1"/>`).join("")}
+  <path d="M0 14q40 16 78 4t74 10 82-8 88 12 78-6" fill="none" stroke="#4A5C3A"
+   stroke-width="2" opacity=".7"/>
+  ${[[34,22],[96,30],[168,18],[242,28],[312,20],[368,30]].map(([x,y],i)=>
+   `<g transform="translate(${x} ${y})" opacity=".6">${[0,1,2,3,4].map(k=>
+    `<ellipse rx="4.2" ry="2.4" transform="rotate(${k*72}) translate(4 0)"
+     fill="${i%2?"#E58BA5":"#F2B8CC"}"/>`).join("")}<circle r="1.6" fill="#E5B87A"/></g>`).join("")}
+  ${[[40,44,-4],[136,52,3],[236,40,-2],[318,56,5],[68,102,4],[186,110,-3],[292,98,2]].map(([x,y,r],i)=>
+   `<g transform="rotate(${r} ${x+26} ${y+18})" class="sHover" style="animation-delay:${i*.5}s">
+     <rect x="${x}" y="${y}" width="52" height="36" fill="#E9E2D6" opacity=".1" stroke="#3A3150"/>
+     <rect x="${x}" y="${y}" width="52" height="36" fill="none" stroke="#E5B87A" stroke-opacity=".18"/>
+     <line x1="${x+7}" y1="${y+11}" x2="${x+45}" y2="${y+11}" stroke="#3A3150" stroke-width=".8"/>
+     <line x1="${x+7}" y1="${y+19}" x2="${x+40}" y2="${y+19}" stroke="#3A3150" stroke-width=".8"/>
+     <line x1="${x+7}" y1="${y+27}" x2="${x+33}" y2="${y+27}" stroke="#3A3150" stroke-width=".8"/>
+     ${[0,1,2,3,4].map(k=>`<ellipse cx="${x+26}" cy="${y+2}" rx="3.2" ry="1.8"
+      transform="rotate(${k*72} ${x+26} ${y+2})" fill="#C9707A" opacity=".6"/>`).join("")}</g>`).join("")}
+  ${cat(348,128,.72)}
+  ${motes(7,50,50,300,70,"#E5B87A",.4)}
+ </svg>`,
+ prompt:`Korean romance-fantasy webtoon style. A wooden-panelled wall covered
+with small square notes of pale hanji paper, each pinned with a tiny
+pressed flower instead of a pin, hanging at slightly different angles
+and lifting faintly as if in a breeze. A flowering vine runs along the
+top of the wall. A black cat dozes at the base. Warm amber light from
+above, gold motes drifting. Lived-in, affectionate, accumulated over
+time. No people, no legible text. Aspect ratio 16:9.`},
+
+coin:{t:"엽전 · 값을 치르다",spec:["1:1","결제"],
+ art:()=>`<svg viewBox="0 0 400 120">
+  <rect width="400" height="120" fill="#0A0810"/>
+  <rect y="66" width="400" height="54" fill="#151220"/>
+  <line y1="66" x2="400" y2="66" stroke="#3A3150"/>
+  ${[[168,74],[200,68],[232,76],[186,58],[214,54]].map(([x,y],i)=>
+   `<circle cx="${x}" cy="${y}" r="16" fill="#3A2E22" stroke="#E5B87A" stroke-opacity=".45"/>
+    <rect x="${x-4}" y="${y-4}" width="8" height="8" fill="#0A0810"/>`).join("")}
+  <circle cx="200" cy="60" r="58" fill="url(#lg)" opacity=".4" class="sFlick"/>
+ </svg>`,
+ prompt:`Korean romance-fantasy webtoon style. A small pile of traditional
+Korean brass coins with square center holes, resting on a dark wooden
+surface, catching warm amber light from above. Shallow depth, deep plum
+background. No hands, no text. Aspect ratio 1:1.`},
+
+handle:{t:"문고리 · 안쪽 그림자",spec:["9:16","릴레이"],
+ art:()=>`<svg viewBox="0 0 400 150">
+  <rect width="400" height="150" fill="#0A0810"/>
+  <rect x="0" y="0" width="250" height="150" fill="#1A1424" stroke="#3A3150"/>
+  <g stroke="#3A3150" stroke-width="1">${[0,1,2,3,4].map(i=>
+   `<line x1="${28+i*44}" y1="6" x2="${28+i*44}" y2="144"/>`).join("")}
+   ${[0,1,2,3,4].map(i=>`<line x1="4" y1="${18+i*30}" x2="246" y2="${18+i*30}"/>`).join("")}</g>
+  <circle cx="228" cy="78" r="11" fill="none" stroke="#E5B87A" stroke-width="2" opacity=".8"/>
+  <circle cx="228" cy="66" r="3.5" fill="#E5B87A" opacity=".7"/>
+  <rect x="250" y="0" width="150" height="150" fill="#0F0C18"/>
+  <ellipse cx="330" cy="88" rx="34" ry="52" fill="#08060D" opacity=".9" class="sFlick"/>
+  <circle cx="318" cy="150" r="70" fill="url(#lg)" opacity=".4"/>
+ </svg>`,
+ prompt:`Korean romance-fantasy webtoon style. Close on a hand-less wooden
+lattice door with a brass ring handle, seen from inside. To the right,
+a dark doorway opens onto a deeper room where a shadowed figure stands
+half-lit by warm lantern light from below. The figure's face is not
+visible. Tense, quiet. No text. Aspect ratio 9:16.`,
+ hint:`<b>릴레이 등장</b> 장면의 기준 이미지입니다.<br>
+ 문(near)·인물(mid)·방(far) 3층으로 나누면 카메라가 들어가는 것처럼 보입니다.`}
+};
+
+
+
+const SEASON={
+ spring:{ko:"봄 · 벚꽃",sky:"#221A3A",vine:"#4A5C3A",c1:"#F2B8CC",c2:"#E58BA5",pet:5,pr:4.6,
+  pdesc:"Cherry blossom branches heavy with pale pink petals",
+  pextra:"Petals and a pale butterfly drift through the air."},
+ summer:{ko:"여름 · 능소화",sky:"#1A1230",vine:"#3E5C36",c1:"#E58BA5",c2:"#D96A5C",pet:5,pr:4.8,
+  pdesc:"Flowering trumpet-creeper vines heavy with coral-pink blossoms",
+  pextra:"Fireflies drift softly through the humid air."},
+ autumn:{ko:"가을 · 국화",sky:"#241A28",vine:"#5C5236",c1:"#E5C87A",c2:"#D9A05C",pet:9,pr:4.2,
+  pdesc:"Chrysanthemum blooms in gold and amber spilling over the wall",
+  pextra:"A few dry leaves turn slowly in the air."},
+ winter:{ko:"겨울 · 매화",sky:"#161632",vine:"#3A3348",c1:"#F2ECE4",c2:"#E5B8CC",pet:5,pr:3.8,
+  pdesc:"Bare plum branches dusted with snow and studded with small white blossoms",
+  pextra:"Fine snow drifts down through the lantern light."}};
+let SEA="summer";
+function setSea(k){SEA=k;
+ document.querySelectorAll("#seaSel button").forEach(b=>b.classList.toggle("on",b.dataset.k===k));
+ if(CUR==="a1")go("a1",true)}
+
+
+/* ══════════════════════════════════════════
+   장면별 애니메이션 — 플랫폼 · 레이어 · 명령
+   ══════════════════════════════════════════ */
+/* ══════════════════════════════════════════
+   애니메이션 — 힉스필드 단일 파이프라인
+   제미나이 스틸 → 힉스필드 영상 → webm/mp4
+   ══════════════════════════════════════════ */
+const ANIMBASE=`This is a 2D hand-drawn animation, not live action. Preserve the
+illustration style exactly: flat cel shading, uniform lineart, painted
+texture. Do not add photographic realism, skin pores, film grain or 3D
+lighting. Do not redraw or reshape any element. Animate only what is
+described above; everything else stays completely still.`;
+
+const PIPE=`① 제미나이로 시작 이미지 1장 생성
+② 힉스필드에 업로드 → 아래 프롬프트 + 프리셋
+③ webm(VP9) + mp4(H.264) 두 벌 + poster.jpg
+④ /scene/{id}/ 에 배치`;
+
+const TINT=`/* 색을 바꿔야 하는 장면은 무채색으로 뽑고 앱에서 입힌다 */
+.scene-video{filter:grayscale(1) brightness(1.15)}
+.scene-tint {position:absolute;inset:0;background:var(--c);
+             mix-blend-mode:color;opacity:.62;pointer-events:none}
+/* 클립 1개로 일간 10색 · 계절 4종을 전부 커버 */`;
+
+const MO={
+gate:{ps:"Dolly In",ar:"9:16",du:"5s",loop:0,tint:1,
+ hg:`Slow dolly in down the rain-wet lane toward the half-open hanok gate.
+The three paper lanterns flicker gently. Flower petals drift across the
+frame. The reflection on the wet stone ground ripples faintly. The black
+cat on the wall flicks its tail once and turns its head toward the
+viewer. The camera stops just before the gate. Warm golden light spills
+from the opening.
+
+${'${ANIMBASE}'}
+
+(Preset: Dolly In · 9:16 · 5s)`,
+ note:`<b>계절 4종이 필요합니다.</b> 꽃과 하늘색만 다른 시작 이미지 4장을 만들고<br>
+  같은 프롬프트로 4클립을 뽑으세요. 프롬프트는 동일합니다.<br>
+  첫 방문에만 재생하고 두 번째부터는 <b>poster 정지 이미지</b>로 두세요.`},
+
+door:{ps:"Static",ar:"9:16",du:"2s",loop:0,
+ hg:`Static camera. The left panel of the wooden lattice door swings
+inward. Warm amber light widens through the growing gap and spills
+across the threshold. Dust drifts through the light.
+
+${'${ANIMBASE}'}
+
+(Preset: Static · 9:16 · 2s)`},
+
+altar:{ps:"Static",ar:"16:9",du:"4s",loop:0,tint:1,
+ hg:`Static camera. Four blank wooden plaques rise slowly from the altar
+and settle hovering in the air, one after another from left to right.
+Two concentric luminous rings rotate slowly behind them. Golden motes
+drift upward through the shaft of light. At the end the third plaque
+glows brighter than the others.
+
+${'${ANIMBASE}'}
+
+(Preset: Static · 16:9 · 4s)`,
+ note:`<b>카메라를 반드시 고정하세요.</b> 프리셋에서 Static 선택.<br>
+  카메라가 움직이면 목패의 한자가 흔들려 계산 신뢰가 깎입니다.`},
+
+roadmap:{ps:"Dolly Right",ar:"16:9",du:"4s",loop:0,tint:1,
+ hg:`Slow dolly right along the winding path, travelling from the near
+stone markers toward the distant ones. Ink washes bloom outward as the
+camera passes. The floating lantern-flames above the far markers sway.
+Fireflies drift low. The cat sitting on a marker turns its head as the
+camera passes.
+
+${'${ANIMBASE}'}
+
+(Preset: Dolly Right · 16:9 · 4s)`},
+
+handle:{ps:"Dolly In",ar:"9:16",du:"3s",loop:0,
+ hg:`Slow dolly in past the brass door handle toward the dark inner room.
+The shadowed figure steps forward into the shaft of warm light. Their
+face becomes visible only at the very end. Dust drifts through the beam.
+Quiet, deliberate, slightly ominous.
+
+${'${ANIMBASE}'}
+
+(Preset: Dolly In · 9:16 · 3s)`,
+ note:`<b>두 번째 결제가 갈리는 3초입니다.</b> 1차 출시에 이거 하나는 반드시.`},
+
+untie:{ps:"Static",ar:"1:1",du:"2s",loop:0,
+ hg:`Static camera. The red silk cord unties itself and slips away from
+the scroll case. Golden light bursts out from the opening seam and small
+golden blossoms of light scatter outward, then settle. The ring behind
+pulses once.
+
+${'${ANIMBASE}'}
+
+(Preset: Static · 1:1 · 2s)`},
+
+cardbg:{ps:"Static",ar:"1:1",du:"3s",loop:1,tint:1,still:1,
+ hg:`Static camera, centered. The celestial ring rotates slowly. The halo
+behind pulses once, softly. Motes of light drift upward around the empty
+center. The decorative border stays perfectly still. Seamlessly loopable.
+
+${'${ANIMBASE}'}
+
+(Preset: Static · 1:1 · 3s · seamless loop)`,
+ note:`<b>정지 PNG 를 반드시 함께 만드세요.</b><br>
+  SNS 공유 시 캡처가 되어야 하는데 영상은 저장이 안 됩니다.<br>
+  · 화면에서는 webm 루프<br>
+  · "이미지로 저장" 누르면 <b>PNG 버전</b>으로 교체 후 html2canvas`},
+
+desk:{ps:"Static",ar:"16:9",du:"3s",loop:1,
+ hg:`Static camera. The floating brush bobs gently in the air, ink glinting
+at its tip. Two sheets of paper drift slowly. The constellation ring
+behind rotates. Golden motes rise through the light. Seamlessly loopable.
+
+${'${ANIMBASE}'}
+
+(Preset: Static · 16:9 · 3s · seamless loop)`},
+
+room:{ps:"Static",ar:"16:9",du:"4s",loop:1,
+ hg:`Static camera. The three hanging lanterns flicker at slightly
+different rhythms. The beaded curtains at both edges sway faintly. Thin
+threads of incense smoke curl upward from the burner. The constellation
+ring drifts. Seamlessly loopable.
+
+${'${ANIMBASE}'}
+
+(Preset: Static · 16:9 · 4s · seamless loop)`},
+
+hall:{ps:"Dolly In",ar:"16:9",du:"4s",loop:0,
+ hg:`Very slow dolly in down the hall between the rows of cushions. The
+coloured flame-lights above each cushion flicker at different rhythms.
+Motes drift. The lanterns overhead sway gently. The far end stays in
+darkness.
+
+${'${ANIMBASE}'}
+
+(Preset: Dolly In · 16:9 · 4s)`},
+
+shelf:{ps:"Static",ar:"16:9",du:"3s",loop:1,
+ hg:`Static camera. The six hanging wooden plaques sway very slightly on
+their cords at different rhythms, the carved characters glowing warm
+from within. The pools of light beneath them shift. Golden motes drift
+upward. Seamlessly loopable.
+
+${'${ANIMBASE}'}
+
+(Preset: Static · 16:9 · 3s · seamless loop)`},
+
+scroll:{ps:"Static",ar:"16:9",du:"3s",loop:0,
+ hg:`Static camera. The scroll unrolls smoothly to the right between the
+two rods. As the paper opens, glowing golden characters lift free of the
+surface and drift slowly upward. Motes rise through the light.
+
+${'${ANIMBASE}'}
+
+(Preset: Static · 16:9 · 3s)`},
+
+tea:{ps:"Static",ar:"16:9",du:"3s",loop:1,
+ hg:`Static camera. Thin steam curls upward from the teacup. The black cat
+at the table's edge blinks slowly and its tail sways. The rose-coloured
+ring behind drifts. Golden motes rise. Warm and still. Seamlessly
+loopable.
+
+${'${ANIMBASE}'}
+
+(Preset: Static · 16:9 · 3s · seamless loop)`},
+
+sealbook:{ps:"Static",ar:"3:4",du:"2s",loop:0,
+ hg:`Static camera, top-down on the open booklet. A red seal stamp presses
+down into one empty square with a small bounce and settles. A faint
+ring of light spreads from it. The other squares stay still.
+
+${'${ANIMBASE}'}
+
+(Preset: Static · 3:4 · 2s)`,
+ note:`인장을 <b>새로 받았을 때만</b> 재생하세요. 평소엔 정지 이미지.`},
+
+fork:{ps:"Static",ar:"16:9",du:"3s",loop:1,
+ hg:`Static camera. The three floating lantern-flames above the signposts
+bob gently at different rhythms — the center one brightest. Fireflies
+drift low across the misty plain. Seamlessly loopable.
+
+${'${ANIMBASE}'}
+
+(Preset: Static · 16:9 · 3s · seamless loop)`},
+
+ink:{ps:"Static",ar:"16:9",du:"2s",loop:0,
+ hg:`Static camera, macro. A single drop of black ink falls onto the hanji
+paper and blooms outward in two soft irregular rings, then settles.
+One motion only, then stillness.
+
+${'${ANIMBASE}'}
+
+(Preset: Static · 16:9 · 2s)`,
+ note:`투표 반응(먹 번짐)과 <b>같은 클립</b>을 씁니다. 한 번 만들면 두 곳에서 쓰입니다.`},
+
+facing:{ps:"Static",ar:"16:9",du:"3s",loop:1,
+ hg:`Static camera. The four glowing plaques hovering between the two
+cushions bob gently at different rhythms. The pool of light beneath them
+shifts. The beaded curtains sway. Motes drift. Seamlessly loopable.
+
+${'${ANIMBASE}'}
+
+(Preset: Static · 16:9 · 3s · seamless loop)`},
+
+seat:{ps:"Static",ar:"3:4",du:"3s",loop:1,tint:1,
+ hg:`Static camera. The luminous circular sigil behind the empty cushion
+rotates slowly. The shaft of light pulses gently. Coloured motes drift
+upward. The beaded curtains at the edges sway faintly. Seamlessly
+loopable.
+
+${'${ANIMBASE}'}
+
+(Preset: Static · 3:4 · 3s · seamless loop)`,
+ note:`<b>무채색으로 뽑으세요.</b> 캐릭터 20인의 색이 각각 다릅니다.<br>
+  클립 하나에 앱에서 색을 입히면 20개를 안 만들어도 됩니다.`},
+
+fold:{ps:"Static",ar:"16:9",du:"2s",loop:0,
+ hg:`Static camera. The scroll folds halfway closed in one smooth motion,
+the lower half creasing over and falling into shadow. The exposed upper
+half stays lit.
+
+${'${ANIMBASE}'}
+
+(Preset: Static · 16:9 · 2s)`},
+
+tray:{ps:"Static",ar:"16:9",du:"2s",loop:1,
+ hg:`Static camera. The four wooden plaques on the tray bob very gently at
+different rhythms, the leftmost glowing brightest. The blossom at the
+tray's corner trembles slightly. Seamlessly loopable.
+
+${'${ANIMBASE}'}
+
+(Preset: Static · 16:9 · 2s · seamless loop)`},
+
+coin:{ps:"Static",ar:"1:1",du:"2s",loop:0,
+ hg:`Static camera. One brass coin slides off the top of the small pile and
+settles beside it with a soft rock. The glow behind pulses once.
+
+${'${ANIMBASE}'}
+
+(Preset: Static · 1:1 · 2s)`},
+
+oldpaper:{ps:"Static",ar:"16:9",du:"3s",loop:1,
+ hg:`Static camera. The curled corners of the aged paper lift and settle
+very slightly, as if in a faint draught. The pressed flower trembles.
+Motes drift through the warm light. Seamlessly loopable.
+
+${'${ANIMBASE}'}
+
+(Preset: Static · 16:9 · 3s · seamless loop)`},
+
+wall:{ps:"Static",ar:"16:9",du:"3s",loop:1,
+ hg:`Static camera. The pinned paper notes lift and settle at different
+rhythms as if in a light breeze. The flowering vine above sways. The
+black cat at the base blinks slowly. Motes drift. Seamlessly loopable.
+
+${'${ANIMBASE}'}
+
+(Preset: Static · 16:9 · 3s · seamless loop)`},
+
+banner:{ps:"Static",ar:"16:9",du:"3s",loop:1,
+ hg:`Static camera. The hanging lantern sways gently and its light shifts
+slowly across the dark space. The flowering vine trembles. The cat's
+tail flicks once. Fireflies and motes drift through the glow. Very
+subtle. Seamlessly loopable.
+
+${'${ANIMBASE}'}
+
+(Preset: Static · 16:9 · 3s · seamless loop)`,
+ note:`<b>매일 보는 화면</b>입니다. 움직임을 가장 작게 잡으세요.<br>
+  크면 사흘이면 질립니다.`}
+};
+const CAM={"Dolly In":{n:"Dolly In",c:"#E5B87A"},
+ "Dolly Right":{n:"Dolly Right",c:"#E5B87A"},
+ "Static":{n:"Static",c:"#7FC4BC"}};
+
+/* 여성 취향 공통 파츠 */
+const cat=(x,y,sc,col)=>`<g transform="translate(${x} ${y}) scale(${sc||1})" opacity=".9">
+ <ellipse cx="0" cy="0" rx="17" ry="7.5" fill="${col||"#1A1424"}"/>
+ <circle cx="-13" cy="-7" r="6.4" fill="${col||"#1A1424"}"/>
+ <path d="M-18 -11l1.5-6 4.5 3.4z" fill="${col||"#1A1424"}"/>
+ <path d="M-10 -12l3.6-5.2 2 5.6z" fill="${col||"#1A1424"}"/>
+ <path d="M15 -1q10-3 8-13" stroke="${col||"#1A1424"}" stroke-width="3.4" fill="none"
+  stroke-linecap="round" class="sBead"/>
+ <circle cx="-15.5" cy="-7.5" r="1.5" fill="#E5B87A" opacity=".9" class="sFlick"/>
+ <circle cx="-10.5" cy="-7.5" r="1.5" fill="#E5B87A" opacity=".9" class="sFlick"/></g>`;
+const butterfly=(x,y,col,d)=>`<g class="sMote" style="animation-delay:${d||0}s"
+ transform="translate(${x} ${y})">
+ <ellipse cx="-3.4" cy="-1.6" rx="4.2" ry="3" fill="${col}" opacity=".7"
+  transform="rotate(-22)"/>
+ <ellipse cx="3.4" cy="-1.6" rx="4.2" ry="3" fill="${col}" opacity=".7"
+  transform="rotate(22)"/>
+ <ellipse cx="0" cy="1" rx="1" ry="3.4" fill="${col}" opacity=".85"/></g>`;
+const firefly=(n,x0,y0,w,h)=>Array.from({length:n},(_,i)=>
+ `<g class="sMote" style="animation-delay:${(i*.72).toFixed(2)}s">
+  <circle cx="${x0+((i*61)%w)}" cy="${y0+((i*43)%h)}" r="5.5" fill="#D9F27A" opacity=".16"/>
+  <circle cx="${x0+((i*61)%w)}" cy="${y0+((i*43)%h)}" r="1.6" fill="#EAFFA0" opacity=".85"/></g>`).join("");
+const seal=(x,y,r,txt,col,got)=>`<g transform="translate(${x} ${y})">
+ <rect x="${-r}" y="${-r}" width="${r*2}" height="${r*2}" rx="3"
+  fill="${got?col:"#12101C"}" opacity="${got?".22":".5"}"
+  stroke="${got?col:"#2E2740"}" stroke-opacity="${got?".85":".4"}"/>
+ <text y="${r*.36}" text-anchor="middle" font-family="Gowun Batang"
+  font-size="${r*1.1}" fill="${got?col:"#2E2740"}" opacity="${got?".95":".45"}">${txt}</text>
+ ${got?`<circle r="${r*1.5}" fill="${col}" opacity=".08"/>`:""}</g>`;
+const petals=(n,col)=>Array.from({length:n},(_,i)=>
+ `<ellipse class="sDrift" style="animation-delay:${(i*1.05).toFixed(1)}s;animation-duration:${(6+(i%3)*2)}s"
+  cx="${40+i*46}" cy="${100+((i*39)%80)}" rx="3.6" ry="2.1" fill="${col}" opacity=".6"
+  transform="rotate(${i*37} ${40+i*46} ${100+((i*39)%80)})"/>`).join("");
+
+/* 장면 공통 파츠 */
+const motes=(n,x0,y0,w,h,col,op)=>Array.from({length:n},(_,i)=>
+ `<circle class="sMote" style="animation-delay:${(i*(6/n)).toFixed(2)}s"
+  cx="${x0+((i*53)%w)}" cy="${y0+((i*37)%h)}" r="${1+(i%3)*.6}"
+  fill="${col||"#E5B87A"}" opacity="${op||.7}"/>`).join("");
+const beads=(x,y,cols,len)=>`<g class="sBead" style="transform-origin:${x}px ${y}px">
+ ${Array.from({length:cols},(_,c)=>Array.from({length:len},(_,r)=>
+  `<circle cx="${x+c*13}" cy="${y+8+r*11}" r="2.6"
+   fill="${["#E5B87A","#C9707A","#A896D4","#7FC4BC"][(c+r)%4]}" opacity=".45"/>`).join("")).join("")}
+ <rect x="${x-7}" y="${y}" width="${cols*13}" height="4" fill="#241B14"
+  stroke="#E5B87A" stroke-opacity=".3"/></g>`;
+const ring=(cx,cy,r,col,op)=>`<g class="sSpin" style="transform-origin:${cx}px ${cy}px">
+ <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${col}" stroke-opacity="${op}"/>
+ <circle cx="${cx}" cy="${cy}" r="${r*.72}" fill="none" stroke="${col}" stroke-opacity="${op*.6}"
+  stroke-dasharray="3 7"/>
+ ${Array.from({length:12},(_,i)=>{const a=i*30*Math.PI/180;
+  return `<line x1="${cx+Math.cos(a)*r*.72}" y1="${cy+Math.sin(a)*r*.72}"
+   x2="${cx+Math.cos(a)*r}" y2="${cy+Math.sin(a)*r}" stroke="${col}"
+   stroke-opacity="${op*.8}" stroke-width="1"/>`}).join("")}
+ ${Array.from({length:4},(_,i)=>{const a=i*90*Math.PI/180;
+  return `<circle cx="${cx+Math.cos(a)*r}" cy="${cy+Math.sin(a)*r}" r="2.4"
+   fill="${col}" opacity="${op}"/>`}).join("")}</g>`;
+const shaft=(x,w,y0,y1,op)=>`<path class="sShaft" d="M${x-w/2} ${y0} L${x+w/2} ${y0}
+ L${x+w*1.5} ${y1} L${x-w*1.5} ${y1}z" fill="url(#lanG)" opacity="${op||.28}"/>`;
+
+function sceneArt(id,cls){const s=SCN[id];if(!s)return"";
+ return `<div class="sceneart ${cls||""}" onclick="showScn('${id}')">
+  ${s.art()}<span class="slot">IMG · ${id}</span></div>`}
+function showScn(id){const s=SCN[id],mo=MO[id]||{ps:"Static",ar:"16:9",du:"3s",hg:""};
+ const cm=CAM[mo.ps]||CAM.Static, pr=typeof s.prompt==="function"?s.prompt():s.prompt;
+ $("pmodin").innerHTML=`<button class="x" onclick="closeP()">닫기 ✕</button>
+  <h3>${s.t}</h3>
+  <div class="m1">/scene/${id}/ · 힉스필드 단일 파이프라인</div>
+  <div class="sp">
+   <span style="color:${cm.c};border-color:${cm.c}88">${mo.ps}</span>
+   <span>${mo.ar}</span><span>${mo.du}</span>
+   ${mo.loop?`<span style="color:var(--teal)">seamless loop</span>`:""}
+   ${mo.tint?`<span style="color:var(--lav)">무채색 · 앱에서 착색</span>`:""}
+   ${mo.still?`<span style="color:var(--rose)">PNG 병행</span>`:""}</div>
+
+  <div class="hint" style="border-color:var(--teal);margin:0 0 4px">
+   <b>제작 순서</b><br>① 제미나이로 시작 이미지 1장<br>
+   ② 힉스필드 업로드 → 아래 프롬프트 + 프리셋 <b>${mo.ps}</b><br>
+   ③ webm(VP9) + mp4(H.264) + poster.jpg<br>
+   ④ /scene/${id}/ 에 배치</div>
+
+  <div class="pl">① 시작 이미지 · 제미나이
+   <button onclick="cpP(this,\`${pr.replace(/`/g,"")}\`)">복사</button></div>
+  <pre>${pr}</pre>
+
+  <div class="pl">② 모션 · 힉스필드
+   <button onclick="cpP(this,\`${(mo.hg||"").replace(/`/g,"")}\`)">복사</button></div>
+  <pre>${(mo.hg||"").replace(/</g,"&lt;")}</pre>
+
+  ${mo.tint?`<div class="pl">③ 착색 · CSS
+    <button onclick="cpP(this,\`${TINT.replace(/`/g,"")}\`)">복사</button></div>
+   <pre>${TINT.replace(/</g,"&lt;")}</pre>`:""}
+
+  ${mo.note?`<div class="hint">${mo.note}</div>`:""}
+  ${s.hint?`<div class="hint" style="border-color:var(--gold)">${s.hint}</div>`:""}`;
+ $("pmod").classList.add("on")}
+function closeP(){$("pmod").classList.remove("on")}
+function cpP(b,t){navigator.clipboard?.writeText(t);const o=b.textContent;
+ b.textContent="복사됨";setTimeout(()=>b.textContent=o,1200)}
+
+/* ══════════════════════════════════════════
+   5. 공통 조각
+   ══════════════════════════════════════════ */
+function msHTML(anim){
+ return `<div class="ms ${anim?"":"static"}" id="msb">${F.P.map((p,i)=>{
+  const lk=(i===3&&!F.hourKnown);
+  return `<div class="pil ${i===2?"self":""} ${lk?"lk":""}"><div class="p">${p[2]}</div>
+   <div class="g">${p[0]}</div><div class="j">${p[1]}</div>
+   ${lk?`<div class="key">시각 필요</div>`:""}</div>`}).join("")}</div>
+  ${F.hourKnown?"":`<button class="btn gh" style="margin-top:6px;padding:10px;font-size:12px"
+   onclick="go('a4')">태어난 때를 채우면 자식·말년 자리가 열립니다</button>`}`}
+const msNote=()=>`<p class="msnote">이 여덟 글자가 <b>사주팔자</b>다.<br>
+ 가운데 기둥 윗글자 <b>${F.dG}</b> — 그게 그대이고, 나머지 일곱은 그대가 놓인 자리다.</p>`;
+function calcPanel(){const c=F.corr;
+ return `<div class="calc"><div class="t"><span>■ 셈에 쓴 것</span><span style="color:var(--paper3)">검증 가능</span></div>
+  <div class="r"><span class="k">표준시</span><span class="v">${c.std.label}</span></div>
+  <div class="r"><span class="k">서머타임</span><span class="v">${c.dst?"<b>적용 · 1시간 되돌림</b>":"해당 없음"}</span></div>
+  <div class="r"><span class="k">진태양시</span><span class="v">서울 → <b>${c.lc>0?"+":""}${c.lc}분</b></span></div>
+  <div class="r"><span class="k">보정</span><span class="v"><s>${c.before}</s> → <b>${c.after}</b>${c.sh?` <b>(${c.sh>0?"익":"전"}일)</b>`:""}</span></div>
+  <div class="r"><span class="k">절기</span><span class="v">입춘·절입일 기준 월주 산출</span></div>
+  <div class="r"><span class="k">시주</span><span class="v">${F.hourKnown
+   ?"<b>산출됨</b>":"<b style=\"color:var(--gold)\">제외 — 세 기둥으로 계산</b>"}</span></div></div>`}
+const meCard=()=>`<div class="mec">${ilganFig(46)}<div>
+ <div class="gz">${F.dG}${ilgan().ko.slice(1)} · ${F.strength}</div>
+ <div class="nm">${ilgan().nm}</div><div class="tr">${ilgan().tr}</div></div></div>`;
+function elBar(){const mx=Math.max(...Object.values(F.el));
+ return `<div class="elbar">${Object.entries(F.el).map(([k,v],i)=>
+  `<div><i style="--h:${Math.max(3,v/mx*48)}px;animation-delay:${i*.11}s"></i>
+   <div class="lb">${k}</div><div class="vv">${v}</div></div>`).join("")}</div>`}
+
+/* ══════════════════════════════════════════
+   6. 화면
+   ══════════════════════════════════════════ */
+const OPEN={
+ gate:{scene:"gate",lines:[
+  ["비가 막 그친 밤이었다."],
+  ["담장 위로 꽃넝쿨이 늘어져 있고,","초롱이 줄지어 걸려 있다."],
+  ["물 고인 돌바닥에 불빛이 흔들린다.","","대문은 열려 있었다."],
+  ["REVEAL"]]},
+ pavilion:{scene:"pavilion",lines:[
+  ["연못 한가운데 정자에 불이 켜져 있다."],
+  ["징검다리가 그리로 이어진다.","연꽃등이 물 위를 떠다닌다."],
+  ["돌을 밟고 건너갔다.","","안에는 아무도 없다."],
+  ["REVEAL"]]},
+ snow:{scene:"snow",lines:[
+  ["눈이 소리 없이 내리고 있었다."],
+  ["처마 밑에 고드름이 달렸고,","창마다 불이 켜져 있다."],
+  ["댓돌 위에 신발이 없다.","","그런데 문은 열려 있었다."],
+  ["REVEAL"]]}};
+let OPENKEY="gate";
+let A1=OPEN[OPENKEY].lines;
+let A1I=0;
+
+
+const S={
+a1:{g:"A",t:"골목",r:()=>`<div class="scr" style="text-align:center;padding-top:14px" onclick="a1n()">
+  ${sceneArt("gate","hero")}
+  <svg viewBox="0 0 40 62" style="width:36px;margin:0 auto;animation:swayP 6s ease-in-out infinite;transform-origin:top center">
+   <g fill="none" stroke="var(--gold)" stroke-width="1.2"><line x1="20" y1="0" x2="20" y2="10"/>
+   <rect x="10" y="10" width="20" height="4"/><path d="M9 14h22v22a11 11 0 0 1-22 0z"/></g>
+   <ellipse cx="20" cy="28" rx="7" ry="9" fill="var(--gold)" opacity=".5"/></svg>
+  <div id="a1d" style="opacity:0;transition:opacity 1.4s;margin-top:6px">${chrFig("pungun",118)}</div>
+  <div id="a1n" style="margin-top:20px"></div>
+  <p class="sm" id="a1t" style="margin-top:22px;letter-spacing:.2em">화면을 누르시오</p></div>`,
+ i:()=>{A1I=0;a1p()}},
+
+a2:{g:"A",t:"이름을 적다",r:()=>`<div class="scr">
+  <div class="prog"><i class="d"></i><i></i><i></i><i></i></div>
+  ${sceneArt("desk")}
+  ${nr(["도령이 붓을 들었다.","종이는 아직 비어 있다."])}
+  ${say("그대를 뭐라 적으면 되겠소?","도령")}
+  <input class="fld ser" id="inm" placeholder="이름 또는 별명" maxlength="12">
+  ${nr(["","본명을 적을 이유는 없다.","셈에는 쓰이지 않는다."])}
+  <button class="btn" onclick="ST.name=$('inm').value.trim();go('a3')">적는다</button></div>`},
+
+a3:{g:"A",t:"날을 대다",r:()=>`<div class="scr">
+  <div class="prog"><i class="d"></i><i class="d"></i><i></i><i></i><i></i></div>
+  ${sceneArt("ink")}
+  ${nr(["붓끝이 종이에 닿았다.","먹이 한 방울 번졌다."])}
+  ${say(ST.name?`${ST.name}이 태어난 날은 언제요?`:"태어난 날을 대시오.","도령")}
+  <div class="f3"><div><label>년</label><input class="fld" id="y2" value="1993"></div>
+   <div><label>월</label><input class="fld" id="m2" value="5"></div>
+   <div><label>일</label><input class="fld" id="d2" value="15"></div></div>
+  ${say("남녀에 따라 운이 흐르는 방향이 반대요. 이건 반드시 있어야 하오.","도령")}
+  <div class="og c2">
+   <button class="op ${ST.sex==="F"?"on":""}" style="text-align:center;font-family:var(--serif);font-size:15px"
+    onclick="ST.sex='F';pull();go('a4')">여인</button>
+   <button class="op ${ST.sex==="M"?"on":""}" style="text-align:center;font-family:var(--serif);font-size:15px"
+    onclick="ST.sex='M';pull();go('a4')">사내</button></div></div>`},
+
+a4:{g:"A",t:"때를 묻다",r:()=>`<div class="scr">
+  <div class="prog"><i class="d"></i><i class="d"></i><i class="d"></i><i></i></div>
+  ${sceneArt("room")}
+  ${nr(["도령이 고개를 들었다."])}
+  ${say("때는 아시오?","도령")}
+  ${nr(["","대부분은 모른다.","모른다고 해도 그는 개의치 않았다."])}
+  <div class="og c2">${[["새벽","03–07",5],["아침","07–11",9],["한낮","11–15",13],
+   ["저녁","15–19",17],["밤","19–23",21],["모르오","세 기둥으로",null]].map(h=>
+   `<button class="op" onclick="ST.hour=${h[2]};recalc(1);go('a4b')"><b>${h[0]}</b><span>${h[1]}</span></button>`).join("")}</div></div>`},
+
+a4b:{g:"A",t:"성향 4글자",r:()=>`<div class="scr">
+  <div class="prog"><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i><i></i></div>
+  ${sceneArt("ink")}
+  ${nr(["그가 종이 한 장을 더 꺼냈다."])}
+  ${say(`혹시 <b>성향 검사</b>를 해본 적 있소?<br>네 글자로 나오는 그것 말이오.`,"도령")}
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin:14px 0">
+   ${["INTJ","INTP","ENTJ","ENTP","INFJ","INFP","ENFJ","ENFP",
+      "ISTJ","ISFJ","ESTJ","ESFJ","ISTP","ISFP","ESTP","ESFP"].map(t=>
+    `<button class="op ${ST.mbti===t?"on":""}" style="text-align:center;padding:11px 2px;
+      font-family:var(--mono);font-size:12px;letter-spacing:.06em"
+      onclick="ST.mbti='${t}';go('a5')">${t}</button>`).join("")}</div>
+  <button class="btn gh" onclick="ST.mbti=null;go('a5')">모르오 · 사주만으로 보겠소</button>
+  ${nr(["","네 글자는 셈에 넣지 않는다.","<em>사주와 어긋나는 자리</em>를 찾는 데만 쓴다."])}
+  <p class="sm mt">본 서비스의 성향 검사는 특정 상표의 검사가 아닙니다.</p></div>`},
+
+a5:{g:"A",t:"걸리는 것",r:()=>`<div class="scr">
+  <div class="prog"><i class="d"></i><i class="d"></i><i class="d"></i><i class="d"></i></div>
+  ${sceneArt("fork")}
+  ${nr(["붓을 내려놓고, 그가 물었다."])}
+  ${say("무엇이 걸려서 예까지 왔소?","도령")}
+  ${nr(["","한참 답이 나오지 않았다.","하나만 고르라면—"])}
+  <div class="og c2">${[["money","돈","버는 것, 모이는 것"],["work","일","직장, 사업, 방향"],
+   ["love","사랑","연애, 결혼, 이별"],["people","사람","관계, 배신, 외로움"],
+   ["dir","방향","이대로 맞나"],["health","몸","기운, 잠, 지침"]].map(x=>
+   `<button class="op ${ST.concern===x[0]?"on":""}" onclick="ST.concern='${x[0]}';go('a6')">
+    <b>${x[1]}</b><span>${x[2]}</span></button>`).join("")}</div></div>`},
+
+a6:{g:"A",t:"글자가 서다",r:()=>`<div class="scr">
+  ${sceneArt("altar")}
+  ${nr(["그가 종이를 펼치고 글자를 세우기 시작했다."])}
+  <div class="h1" id="a6h" style="min-height:34px;font-size:20px"></div>
+  ${msHTML(true)}${msNote()}${calcPanel()}
+  <button class="btn mt" id="a6b" style="opacity:0;transition:opacity .5s" onclick="go('a7')">계속</button></div>`,
+ i:()=>{const ps=$("msb").querySelectorAll(".pil"),h=$("a6h");
+  h.textContent="글자를 세우는 중이다…";
+  ps.forEach((p,i)=>setTimeout(()=>p.classList.add("flip"),320+i*330));
+  setTimeout(()=>{ps[2].classList.add("lit");
+   h.innerHTML='<span style="color:var(--c)">여덟 글자가 나왔다.</span>';
+   $("a6b").style.opacity="1"},1800)}},
+
+a7:{g:"A",t:"훅 — 4단",r:()=>`<div class="scr">
+  <div class="eb">${nm()} · ${ST.sex==="F"?"여인":"사내"} · ${F.age}세 · ${CONCERN[ST.concern]}</div>
+  ${ST.name?`<p class="sm" style="margin-bottom:14px">그가 이름을 한 번 부르고 다시 종이를 봤다.</p>`:""}
+  ${sceneArt("facing")}
+  ${meCard()}
+  ${nr(["그는 한참 종이를 들여다보다가,","고개를 들지 않은 채 말했다."])}
+  <div id="segs"></div></div>`,
+ i:()=>segInit()},
+
+/* ── B 로비 ── */
+b1:{g:"B",t:"진열대",r:()=>`<div class="scr">
+  <div class="sm" style="display:flex;justify-content:space-between;margin-bottom:14px">
+   <span>四柱堂</span><span style="color:var(--gold)">${today().md} · ${today().gz}日</span></div>
+  ${meCard()}
+  <div class="dorbar" onclick="go('g1')" style="cursor:pointer">${chrFig("pungun",30)}
+   <p>오늘은 ${today().gz}日. ${today().rel} 날이오.</p>
+   <span class="tagfree">무료</span></div>
+  ${sceneArt("shelf")}
+  ${["깊이 보는 것","사람 사이의 것","그냥 보는 것"].map((t,i)=>`
+   <div class="shh"><h3>${t}</h3><span>${["MAIN","RELATION","FREE"][i]}</span></div>
+   <div class="beam"></div><div class="shelf">${[
+    [["平生","평생운","29,900"],["歲運","올해의 운","12,900"],["財","재물운","12,900"]],
+    [["宮合","궁합","15,900"],["再會","재회운","6,900"],["心","속마음","4,900"]],
+    [["日辰","오늘의 운세","무료"],["夢","꿈해몽","무료"],["牌","타로","무료"]]
+   ][i].map(x=>`<div class="tag" onclick="go('${i===2?"g1":"d1"}')"><div class="plk">
+    <div class="han">${x[0]}</div><div class="ko">${x[1]}</div>
+    <div class="pr" style="${x[2]==="무료"?"color:var(--gold)":""}">${x[2]}</div></div></div>`).join("")}</div>`).join("")}
+  <button class="btn gh mt" onclick="go('b2')">스무 사람 보러 가기</button>
+  <div style="display:flex;gap:7px;margin-top:7px">
+   <button class="btn gh" style="margin:0" onclick="go('f2')">인장첩 ${ST.read.length}/20</button>
+   <button class="btn gh" style="margin:0" onclick="go('g3')">차 한 잔</button></div></div>`},
+
+b2:{g:"B",t:"스무 사람",r:()=>`<div class="scr">
+  ${sceneArt("hall","hero")}
+  ${nr(["문 하나가 더 있었다.","열고 들어서자, 스무 개의 자리가 놓여 있다."])}
+  <p class="tx mb">같은 여덟 글자를 놓고도 보는 자리가 다르다.</p>
+  <div class="cgrid" style="margin-top:14px">${Object.entries(CH).map(([k,c])=>{
+   const rd=ST.read.includes(k);
+   return `<div class="cnode ${rd?"":""}" style="--nc:${c.c}" onclick="openChr('${k}')">
+    <span class="gx">${c.sex==="F"?"女":"男"}</span>
+    ${chrFig(k,34)}<div class="n">${c.n}</div>
+    <div class="s">${rd?"印 받음":c.p?c.p/1000+"k":"무료"}</div></div>`}).join("")}</div>
+  <button class="btn gh mt" onclick="go('f2')">인장첩 · ${ST.read.length}/20</button>
+  <p class="sm mt" style="text-align:center">전체 <b style="color:var(--gold)">${Object.values(CH).reduce((a,c)=>a+(c.pg||16),0)}페이지</b> · 한 번에 드리지 않는다</p></div>`},
+
+b3:{g:"B",t:"그 사람",r:()=>{const c=chr();
+ return `<div class="scr" style="--c:${c.c}">
+  ${sceneArt("seat","hero")}
+  <div class="figwrap" style="margin-top:-58px"><div class="glow"></div>${chrFig(ST.cur,120)}
+   <span class="imgtag">IMG · ${ST.cur}</span></div>
+  <div style="text-align:center;margin-bottom:16px">
+   <div class="sm">${c.h}</div>
+   <div style="font-family:var(--serif);font-size:22px;font-weight:700;color:${c.c}">${c.n}</div>
+   <div class="sm" style="margin-top:3px">${c.g} · ${c.ark} · ${c.sex==="F"?"여":"남"}</div></div>
+  <div class="say" style="border-color:${c.c}"><small style="color:${c.c}">${c.n}</small>${c.qt}</div>
+  ${ST.read.includes(ST.cur)
+   ?`<div style="display:flex;gap:10px;align-items:center;border:1px solid ${c.c};
+      background:${c.c}14;padding:11px 13px;margin-bottom:14px">
+      <div style="width:32px;height:32px;border:1px solid ${c.c};display:flex;
+       align-items:center;justify-content:center;font-family:var(--serif);
+       font-size:15px;color:${c.c}">${c.h[0]}</div>
+      <p style="flex:1;font-size:12px;color:var(--paper2)">이미 인장을 받았습니다.
+       언제든 다시 읽을 수 있습니다.</p></div>`
+   :""}
+  ${msHTML(false)}
+  <p class="sm">계산 결과는 모든 사람이 같은 값을 씁니다. 보는 자리만 다릅니다.</p>
+  <button class="btn mt" onclick="go('d1')">${c.p?c.p.toLocaleString()+"원 · 듣는다":"값 없이 듣는다"}</button>
+  <button class="btn gh" onclick="go('b2')">다른 사람 보기</button></div>`}},
+
+b4:{g:"B",t:"내 명식",r:()=>`<div class="scr">
+  ${sceneArt("altar")}
+  <div class="eb">命式</div><h2 class="h1">${nm()}의 여덟 글자</h2>
+  ${msHTML(false)}${msNote()}${calcPanel()}
+  <div class="shh"><h3>오행</h3><span>五行</span></div><div class="beam"></div>
+  ${elBar()}
+  <p class="sm" style="text-align:center">가장 강함 <b style="color:var(--c)">${F.strong} ${F.el[F.strong]}</b>
+   · 가장 약함 <b style="color:var(--c)">${F.weak} ${F.el[F.weak]}</b></p>
+  <div class="shh"><h3>대운</h3><span>大運</span></div><div class="beam"></div>
+  <div style="display:flex;gap:4px;overflow-x:auto;padding-top:11px">${F.deun.map((d,i)=>
+   `<div style="flex:none;min-width:50px;text-align:center;border:1px solid ${i===F.nowI?"var(--c)":"var(--line)"};padding:7px 3px">
+    <div style="font-family:var(--serif);font-size:13px;color:${i===F.nowI?"var(--c)":"var(--paper2)"}">${d.gz}</div>
+    <div class="sm" style="font-size:8px">${d.age}</div></div>`).join("")}</div>
+  <button class="btn mt" onclick="go('c1')">전체 풀이 보기</button>
+  <button class="btn gh" onclick="go('b2')">스무 사람 보기</button></div>`},
+
+/* ── C 리포트 ── */
+c1:{g:"C",t:"두루마리",r:()=>`<div class="scr" style="text-align:center;padding-top:36px">
+  <div class="figwrap"><div class="glow"></div>${ilganFig(140)}
+   <span class="imgtag">IMG · ${F.dG}_${ST.sex}</span></div>
+  ${sceneArt("scroll")}
+  ${nr(["도령이 두루마리를 펼쳤다.","당신의 글자가 처음부터 끝까지 적혀 있다."])}
+  <div class="eb">${F.dG}${ilgan().ko.slice(1)} · ${chr().n}가 봅니다</div>
+  ${say(lens().open(),chr().n)}
+  <button class="btn mt" onclick="go('c2')">읽기 시작한다</button>
+  <button class="btn gh" onclick="go('b4')">먼저 내 명식부터</button></div>`},
+
+c2:{g:"C",t:"웹툰 뷰어",r:()=>{const S2=scene(F);
+ return `<div class="scr">
+  <div class="cut" data-n="01"><div class="figwrap"><div class="glow"></div>${ilganFig(110)}
+   <span class="imgtag">IMG</span></div>
+   ${nr(["종이 위에 당신이 서 있다."])}
+   <h2 class="h1">당신은 ${F.dG}${GE[F.dG]} —<br>${ilgan().tr.replace(/ 사람$/,"")} 사람이다.</h2></div>
+  <div class="cut" data-n="02">${msHTML(false)}${msNote()}</div>
+  <div class="cut" data-n="03">${nr([`${chr().n}가 첫 글자를 짚었다.`])}
+   ${say(`${ELW[F.strong]}이 ${F.el[F.strong]}. ${lens().strong(ELW[F.strong])}`,chr().n)}
+   <p class="tx">상황이 만든 게 아니라 처음부터 그렇게 되어 있는 것이다.</p></div>
+  <div class="cut" data-n="04"><div class="eb">五行</div>${elBar()}</div>
+  <div class="cut dk" data-n="07">${nr([`${chr().n}의 목소리가 낮아졌다.`])}
+   <h2 class="h2">${lens().weak(ELW[F.weak])}</h2>
+   <p class="tx">${ELW[F.strong]}이 ${F.el[F.strong]}인데 ${ELW[F.weak]}은 ${F.el[F.weak]}이다.
+    ${LACK[F.weak].v.replace(/고$/,"는")} 힘은 큰데 받을 자리가 없다.</p></div>
+  <div class="cut" data-n="08">${nr(["그가 종이 한쪽에 글자 하나를 크게 썼다."])}
+   <h2 class="h1" style="font-size:30px;text-align:center;color:var(--c)">${F.yong==="목"?"木":F.yong==="화"?"火":F.yong==="토"?"土":F.yong==="금"?"金":"水"}</h2>
+   ${say(lens().yong(ELW[F.yong]),chr().n)}</div>
+  <button class="btn mt" onclick="go('c3')">더 펼친다</button>
+  <button class="btn gh" onclick="go('c5')">카드만 받고 나선다</button></div>`}},
+
+c3:{g:"C",t:"대운 맵",r:()=>{const d=F.deun,ni=F.nowI;
+ return `<div class="scr">
+  ${sceneArt("roadmap","hero")}
+  <div class="eb">大運</div><h2 class="h1">${F.age}세, ${ni+1}번째 구간에<br>서 있다</h2>
+  <svg viewBox="0 0 340 96" style="width:100%;margin:14px 0">
+   <line x1="20" y1="52" x2="320" y2="52" stroke="var(--line)" stroke-width="1.5"/>
+   <line x1="20" y1="52" x2="${20+(300/7)*ni}" y2="52" stroke="var(--c)" stroke-width="1.5"/>
+   ${d.map((x,i)=>{const px=20+(300/7)*i,on=i===ni;
+    return `<circle cx="${px}" cy="52" r="${on?5.5:3}" fill="${on?"var(--c)":"var(--bg)"}"
+     stroke="${i<=ni?"var(--c)":"var(--line)"}" stroke-width="1.4"/>
+     ${on?`<circle cx="${px}" cy="52" r="12" fill="none" stroke="var(--c)" stroke-opacity=".35"/>`:""}
+     <text x="${px}" y="34" text-anchor="middle" font-family="Gowun Batang" font-size="13"
+      fill="${on?"var(--c)":i<ni?"var(--paper3)":"var(--paper2)"}">${x.gz}</text>
+     <text x="${px}" y="72" text-anchor="middle" font-family="IBM Plex Mono" font-size="8.5"
+      fill="var(--paper3)">${x.age}세</text>`}).join("")}</svg>
+  <p class="tx">지나온 구간은 되돌릴 수 없지만 다음 구간은 아직 비어 있다.
+   지금은 <b>${d[ni].gz}</b> — ${F.deunTG}이 앞에 선 시기다.</p>
+  <button class="btn mt" onclick="go('c4')">그 다음은</button>
+  <button class="btn gh" onclick="go('b4')">내 명식 다시 보기</button></div>`}},
+
+c4:{g:"C",t:"반쯤 접다",r:()=>`<div class="scr" style="padding-top:40px">
+  ${sceneArt("fold")}
+  ${nr([`${chr().n}가 두루마리를 반쯤 접었다.`,"접힌 쪽에도 글자가 있었다."])}
+  ${say("여기까지가 값 없이 볼 수 있는 데요.",chr().n)}
+  ${ST.paid==="one"?`
+  <div class="dz"><div class="k">왜</div><p>이 구조가 만들어진 자리는 <b style="color:var(--c)">월지 ${F.P[1][1]}</b>일세.</p></div>
+  <div class="dz"><div class="k">언제</div><p><span class="bl">가가가</span>년 — 전체를 보셔야 열립니다.</p></div>
+  <div class="dz"><div class="k">어떻게</div><p><span class="bl">가가</span> — 전체를 보셔야 열립니다.</p></div>
+  <button class="btn gh" onclick="ST.paid='all';sync();go('c4')">전체로 올리기 · +16,000원</button>`
+  :ST.paid?`
+  <div class="dz"><div class="k">왜</div><p>이 구조가 만들어진 자리는 <b style="color:var(--c)">월지 ${F.P[1][1]}</b>일세.</p></div>
+  <div class="dz"><div class="k">언제</div><p>${F.deun[F.nowI].gz} 대운이 끝나는 <b style="color:var(--c)">${2026-F.age+F.deun[F.nowI].age+10}</b>년.</p></div>
+  <div class="dz"><div class="k">어떻게</div><p>${ELW[F.weak]}이 없는 사람이 그릇을 만드는 길은 <b style="color:var(--c)">셋</b>이야.
+   그대에게 맞는 건 <b style="color:var(--c)">${["사람에게 맡기는 것","기한을 정하는 것","자리를 옮기는 것"][F.age%3]}</b>일세.</p></div>`
+  :`
+  <div class="dz"><div class="k">왜</div><p>이 구조가 만들어진 자리는 <span class="bl">가가가가</span>일세.</p></div>
+  <div class="dz"><div class="k">언제</div><p>${F.deun[F.nowI].gz} 대운이 끝나는 <span class="bl">가가가</span>년.</p></div>
+  <div class="dz"><div class="k">어떻게</div><p>${ELW[F.weak]}이 없는 사람이 그릇을 만드는 길은
+   <span class="bl">가가</span>가지야.</p></div>`}
+  ${ST.paid
+   ?`<p class="sm" style="text-align:center;margin-bottom:8px">
+      ${TIER[ST.paid].n} · ${ST.paid==="one"?`${CONCERN[ST.concern]} 영역만 열림`:"전체 열림"}</p>
+     <button class="btn mt" onclick="go('c5')">이미 치렀소 · 마저 읽는다</button>`
+   :`<button class="btn mt" onclick="go('d1')">마저 본다</button>
+     <button class="btn gh" onclick="go('c5')">여기서 그만둔다</button>`}</div>`},
+
+c5:{g:"C",t:"공유 카드",r:()=>`<div class="scr" style="text-align:center">
+  ${sceneArt("cardbg")}
+  ${nr(["나갈 채비를 하는데, 그가 종이 한 장을 내밀었다."])}
+  <div style="border:1px solid var(--c);padding:24px 18px;
+   background:linear-gradient(180deg,rgba(229,184,122,.1),transparent 60%)">
+   <div class="figwrap"><div class="glow"></div>${ilganFig(118)}<span class="imgtag">IMG</span></div>
+   <div class="eb" style="margin-bottom:5px">${F.dG}${ilgan().ko.slice(1)} · ${F.strength}</div>
+   <h3 style="font-family:var(--serif);font-size:19px;font-weight:700">${ilgan().nm}</h3>
+   <p class="tx" style="font-size:12.5px">${ilgan().tr}</p>
+   <p class="sm" style="margin-top:13px">— ${nm()} · 사주당</p></div>
+  <button class="btn mt" onclick="go('r1')">간직하고 한 줄 남긴다</button>
+  <button class="btn gh" onclick="go('h1')">나선다</button></div>`},
+
+/* ── D 결제 ── */
+d0:{g:"D",t:"한 겹 더 (값 없음)",r:()=>`<div class="scr">
+  <div class="eb">값 없이 여는 자리</div>
+  ${sceneArt("scroll")}
+  ${nr(["도령이 종이를 다시 펼쳤다.","이번엔 아래쪽이었다."])}
+  ${say("값은 아직 묻지 않겠소. 대신 묻는 대로 답해주시오.",chr().n)}
+  <div id="fsegs"></div></div>`,
+ i:()=>freeInit()},
+
+d1:{g:"D",t:"어디까지",r:()=>`<div class="scr">
+  ${sceneArt("tray")}
+  ${nr(["그가 목패 몇 개를 앞에 늘어놓았다."])}
+  ${ST.paid
+   ?say(`이미 치르셨소. 마저 보시오.`,chr().n)+
+     `<button class="btn" onclick="go('c1')">두루마리 열기</button>
+      <button class="btn gh" onclick="go('h1')">다른 사람 보기</button>`
+   :say("어디까지 보시겠소?",chr().n)}
+  ${ST.paid?"":`<div class="tier free" onclick="go('d0')"><span class="rec">권함</span>
+   <div class="tp"><span class="nm">한 겹 더</span><span class="pr">값 없음</span></div>
+   <div class="d">물으며 갑니다 · 6단</div></div>
+  <div class="tier" onclick="buy('one')"><div class="tp"><span class="nm">이 자리 하나</span>
+   <span class="pr">3,900원</span></div><div class="d">${CONCERN[ST.concern]} 영역 전부 · 시기 포함</div></div>
+  <div class="tier" onclick="buy('all')"><div class="tp"><span class="nm">여덟 글자 전부</span>
+   <span class="pr">19,900원</span></div><div class="d">18컷 · 대운 맵 · 분기점 3개</div></div>
+  <div class="tier" onclick="buy('sub')"><div class="tp"><span class="nm">스무 사람 모두</span>
+   <span class="pr">9,900원/월</span></div><div class="d">전 캐릭터 무제한 · 월간 세운</div></div>
+  `}
+  ${ST.paid?"":nr(["","값 없이 나가도 붙잡는 기색은 없었다."])}</div>`},
+
+d2:{g:"D",t:"값을 치르다",r:()=>`<div class="scr">
+  ${sceneArt("coin")}
+  ${nr(["패 하나를 집었다."])}
+  <h2 class="h1">${TIER[ST.tier].n}<br>${TIER[ST.tier].p}</h2>
+  <p class="tx">${TIER[ST.tier].d} · ${chr().n}</p>
+  <button class="btn mt" onclick="ST.paid=ST.tier;sync();go('d3')">치른다</button>
+  <button class="btn gh" onclick="go('d1')">다시 고른다</button>
+  <div class="legal">수집 항목 · 이름(별명 가능), 생년월일시, 성별<br>
+   이용 목적 · 사주 계산 및 리포트 제공 | 보유 기간 · 회원 탈퇴 시까지</div></div>`},
+
+d3:{g:"D",t:"끈이 풀리다",r:()=>`<div class="scr" style="text-align:center;padding-top:78px">
+  ${sceneArt("untie")}
+  ${nr(["붉은 끈이 풀렸다.","두루마리가 끝까지 펼쳐졌다."])}
+  <button class="btn mt" onclick="go('c1')">읽는다</button>
+  <button class="btn gh" onclick="go('b1')">나중에 읽는다</button></div>`},
+
+/* ── H 릴레이 ── */
+h1:{g:"H",t:"릴레이",r:()=>{
+ const R=RULES.filter(r=>!ST.read.includes(r.id)&&!ST.skipped.includes(r.id)&&r.test(F)).sort((a,b)=>b.p-a.p);
+ const forced=ST.read.map(k=>FORCED[k]).filter(k=>k&&!ST.read.includes(k));
+ const card=(id,why,qt,isF)=>{const c=CH[id];
+  return `<div class="rel" style="--rc:${c.c}">
+   ${c.p===0?'<span class="free">값 없음</span>':""}
+   <div class="why">왜 이 사람인가 · ${why}</div>
+   <div class="hd">${chrFig(id,40)}<div><div class="han">${c.h}</div>
+    <div class="nm">${c.n}</div></div></div>
+   <div class="qt">${qt}</div>
+   <div class="row"><button class="go" onclick="pick('${id}')">${
+    c.p?c.p.toLocaleString()+"원 · 듣는다":"값 없이 듣는다"}</button>
+    <button class="skip" onclick="skip('${id}')">나중에</button></div></div>`};
+ return `<div class="scr">
+  ${sceneArt("handle","hero")}
+  ${nr(["문고리를 잡았을 때,","안쪽에서 다른 목소리가 들렸다."])}
+  ${forced.length?`<div class="eb" style="color:var(--teal)">먼저 — 반드시 이어지는 곳</div>
+   ${forced.map(k=>card(k,"직전 이야기가 무거웠음",CH[k].qt,1)).join("")}`:""}
+  ${R.length?`<div class="eb">이 명식이 지목한 사람</div>
+   ${R.slice(0,3).map(r=>card(r.id,r.cond(F),r.qt(F))).join("")}`
+   :`<div class="eb">오늘은 여기까지</div>
+     ${say("오늘 만날 사람은 다 만났소. 내일 오시오.",chr().n)}
+     <button class="btn" onclick="go('g3')">차 한 잔 하고 간다</button>
+     <button class="btn gh" onclick="go('f2')">인장첩 보기</button>`}
+  ${R.length>=3&&!ST.paid?(()=>{const t3=R.slice(0,3),sum=t3.reduce((a,r)=>a+CH[r.id].p,0),bd=Math.round(sum*.7/100)*100;
+   return `<div style="border:1px solid var(--gold);padding:16px;margin-top:12px;
+    background:linear-gradient(180deg,rgba(229,184,122,.07),transparent)">
+    <div style="font-family:var(--serif);font-size:16px;font-weight:700;margin-bottom:9px">세 사람 묶음</div>
+    <div style="display:flex;gap:5px;margin-bottom:11px">${t3.map(r=>
+     `<div style="flex:1;border:1px solid var(--line);padding:7px 3px;text-align:center;
+      font-family:var(--serif);font-size:11px">${CH[r.id].n}</div>`).join("")}</div>
+    <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;margin-bottom:10px">
+     <s style="color:var(--paper3)">${sum.toLocaleString()}원</s>
+     <b style="color:var(--gold);font-size:16px">${bd.toLocaleString()}원</b></div>
+    <button class="btn" style="background:var(--gold);margin:0" onclick="go('d2')">묶어서 듣는다</button></div>`})():""}
+  <div style="border:1px solid var(--c);background:linear-gradient(180deg,rgba(229,184,122,.08),transparent);
+   padding:14px 16px;margin-top:14px">
+   <div class="sm" style="color:var(--c);margin-bottom:8px">印章 · 만난 사람의 인장</div>
+   <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px">
+    ${Object.keys(CH).slice(0,10).map(k=>{const c=CH[k],has=ST.read.includes(k);
+     return `<div style="width:26px;height:26px;border:1px solid ${has?c.c:"var(--line)"};
+      background:${has?c.c+"22":"transparent"};display:flex;align-items:center;
+      justify-content:center;font-family:var(--serif);font-size:12px;
+      color:${has?c.c:"var(--paper3)"};opacity:${has?1:.3}">${c.h[0]}</div>`}).join("")}</div>
+   <p style="font-size:11.5px;color:var(--paper2);line-height:1.7">
+    <b style="color:var(--c)">${ST.read.length}/20</b> · 다섯을 모으면 다과상이 차려집니다</p>
+   <button class="btn gh" style="margin-top:9px;padding:9px;font-size:12px"
+    onclick="go('f2')">인장첩 보기</button></div>
+  <div class="brake"><div class="t">멈추는 장치</div>
+   <p>· 한 번 앉을 때 두 사람까지만. 세 번째는 내일<br>
+   · 거절하신 분은 다시 권하지 않습니다<br>
+   · 무거운 이야기 뒤엔 값 없는 자리가 반드시 따라옵니다<br>
+   · 같은 상대의 재회는 이레에 한 번</p></div>
+  <div class="legal">본 서비스는 전통 명리학 해석에 기반한 <b>자기이해·오락 목적</b> 콘텐츠입니다.<br>
+   의학적·법률적·재무적 판단의 근거가 아니며, 특정 결과를 보장하지 않습니다.<br>
+   응답률 수치는 실제 사용자 응답 집계값이며 <b>예측 적중률이 아닙니다.</b></div></div>`}},
+
+/* ── G 무료 ── */
+g1:{g:"G",t:"오늘의 운세",r:()=>`<div class="scr">
+  ${sceneArt("banner","hero")}
+  <div class="sm" style="color:var(--gold)">${today().md} · ${today().gz}日</div>
+  <h2 class="h1 mt">오늘은 ${today().gz}日,<br>${today().rel} 날이다.</h2>
+  ${meCard()}
+  <div style="border:1px solid var(--line);background:var(--bg2);padding:14px;margin-bottom:8px">
+   <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+    <span style="font-family:var(--serif);font-size:15px;font-weight:700">기운</span>
+    <span style="font-family:var(--mono);font-size:11px;color:var(--c)">${dayScore()}</span></div>
+   <div style="height:2px;background:var(--line);margin-bottom:9px"><i style="display:block;height:100%;background:var(--c);width:${dayScore()}%"></i></div>
+   <p class="tx" style="font-size:12px">${today().j}가 일지 ${F.dJ}와 만난다.
+    ${today().j===CHUNG[F.dJ]?"<b>충(沖)</b>이오. 자리가 흔들리는 날.":
+      today().el===F.yong?"<b>용신</b>이 드는 날이오. 움직이기 좋소.":
+      today().el===F.strong?"이미 강한 기운이 또 겹치오. 과하기 쉬운 날.":
+      "크게 어긋나지 않소. 다지기 좋은 날."}</p></div>
+  <span class="tagfree">무료 · 매일 갱신</span>
+  <div class="brake" style="margin-top:16px"><div class="t">재방문 트리거</div>
+   <p>매일 일진 · 절입일 월운 · 입춘 세운 · 생일 · 대운 전환 · 분기점 · 반기 회고</p></div>
+  <button class="btn gh mt" onclick="go('g2')">반년 전 그 말</button>
+  <button class="btn gh" onclick="go('b1')">진열대로</button></div>`},
+
+g2:{g:"G",t:"회고 루프",r:()=>{const S2=scene(F);
+ return `<div class="scr">
+  ${sceneArt("oldpaper")}
+  <div class="eb" style="color:var(--teal)">■ 6개월 전 오늘</div>
+  <h2 class="h2">그때 이렇게 말했습니다.</h2>
+  <div style="border-left:2px solid var(--paper3);padding-left:14px;margin:14px 0;
+   font-family:var(--serif);font-size:15px;color:var(--paper2);line-height:1.8">
+   <span class="sm" style="display:block;margin-bottom:5px">2026년 2월 · ${chr().n}</span>
+   "${S2.lines[1].replace(/<\/?b>/g,"")}"</div>
+  <p class="tx">지금 돌아보면 어떻습니까?</p>
+  <div class="vt"><button onclick="look(1)">그랬습니다</button>
+   <button onclick="look(2)">반반</button><button onclick="look(0)">아니었습니다</button></div>
+  <div class="react" id="lres"></div>
+  <button class="btn gh mt" onclick="go('h1')">다른 사람에게 물어본다</button>
+  <button class="btn gh" onclick="go('b1')">진열대로</button></div>`}},
+
+f2:{g:"F",t:"인장첩",r:()=>{
+ const ids=Object.keys(CH), got=ST.read.length;
+ return `<div class="scr">
+  ${sceneArt("sealbook","hero")}
+  <div class="eb">印章帖</div>
+  <h2 class="h1">스무 개의 인장 중<br><span style="color:var(--c)">${got}개</span>를 모았다</h2>
+  <p class="tx mb">사람을 만날 때마다 인장을 하나씩 받습니다.
+   스무 개를 다 모으면 <b>한정 카드</b>를 드립니다.</p>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:16px 0">
+   ${ids.map((k,i)=>{const c=CH[k],has=ST.read.includes(k);
+    return `<div onclick="${has?`openChr('${k}')`:`go('b2')`}"
+     style="aspect-ratio:1;border:1px solid ${has?c.c:"var(--line)"};
+     background:${has?c.c+"1f":"transparent"};display:flex;align-items:center;
+     justify-content:center;font-family:var(--serif);font-size:17px;
+     color:${has?c.c:"var(--paper3)"};opacity:${has?1:.35};cursor:pointer">
+     ${c.h[0]}</div>`}).join("")}</div>
+  <div class="brake"><div class="t">모으면</div>
+   <p>· 5개 — <b style="color:var(--paper)">다과상</b>이 차려집니다<br>
+   · 10개 — 계절 한정 <b style="color:var(--paper)">공유 카드</b><br>
+   · 20개 — <b style="color:var(--paper)">스무 사람 합본</b> · 한정 표지</p></div>
+  <button class="btn mt" onclick="go('b2')">아직 못 만난 사람</button>
+  <button class="btn gh" onclick="go('g3')">차 한 잔 하고 가기</button></div>`}},
+
+g3:{g:"G",t:"차 한 잔",r:()=>`<div class="scr">
+  ${sceneArt("tea","hero")}
+  ${nr(["문을 나서려는데 그가 불렀다."])}
+  ${say(`오늘은 그냥 가지 마시오.<br>차 한 잔 놓고 갈 테니 앉았다 가시오.`,chr().n)}
+  <div style="border:1px solid var(--line);background:var(--bg2);padding:14px;margin:14px 0">
+   <div class="sm" style="color:var(--c);margin-bottom:8px">오늘의 차 · ${TEA[F.yong].n}</div>
+   <p class="tx" style="font-size:12.5px">${TEA[F.yong].d}</p>
+   <p class="sm" style="margin-top:8px">${ELW[F.yong]}이 그대의 용신이오.
+    ${ELW[F.strong]}이 ${F.el[F.strong]}인데 ${ELW[F.weak]}은 ${F.el[F.weak]}이니.</p></div>
+  ${nr(["","차는 값을 받지 않았다."])}
+  <button class="btn mt" onclick="go('f2')">인장첩 보기</button>
+  <button class="btn gh" onclick="go('b1')">잘 마셨소</button>
+  <p class="sm mt" style="text-align:center">내일도 새 차를 내어드립니다</p></div>`},
+
+r1:{g:"R",t:"다녀간 사람들",r:()=>`<div class="scr">
+  ${sceneArt("wall","hero")}
+  ${nr(["벽에 종이쪽이 여러 장 붙어 있다."])}
+  <div class="soc" style="margin-bottom:14px"><span class="dot"></span>
+   이번 달 <b>4,210</b>건 · 평균 <b>4.6</b></div>
+  ${[[5,"맞힌다기보다 근거를 대주니까 다르게 들렸어요. 제 글자를 짚어가며 설명해서 반박을 못 하겠더라고요.","김*연","풍운도령"],
+     [5,"만세력이 다른 앱이랑 한 글자도 안 틀려서 그때부터 믿고 봤습니다.","김*태","풍운도령"],
+     [5,"노파 언니 진짜 멋있어요. 아팠는데 청동자가 무료라 이어서 봤어요.","한*빈","삼거리 노파"],
+     [4,"재회는 될지 안 될지 안 알려줘요. 처음엔 답답했는데 읽고 나니 그게 맞는 것 같아요.","이*은","연담"]].map(r=>
+   `<div class="rvw"><div class="st">${"★".repeat(r[0])}${"☆".repeat(5-r[0])}</div>
+    <p>${r[1]}</p><div class="who">— ${r[2]} · ${r[3]}<span class="rvwtag">결제 확인됨</span></div></div>`).join("")}
+  <p class="sm mt">끝까지 읽은 분만 남길 수 있습니다. 대가를 주고받은 글은 없습니다.<br>
+   <b style="color:var(--ember)">※ 위 후기와 수치는 화면 확인용 예시입니다. 실서비스 전 실제 데이터로 교체하세요.</b></p>
+  <button class="btn gh mt" onclick="go('b1')">진열대로</button></div>`}
+};
+
+/* ══════════════════════════════════════════
+   7. 훅 세그먼트
+   ══════════════════════════════════════════ */
+function segs(){const S2=scene(F),P=PATT[F.topTG],
+ stab=STAB[ST.concern][F.weak], sub=STAB2[F.topTG],
+ m1=MYTH_TG[F.topTG][ST.concern], m2=MYTH_ST[F.strength][ST.concern];
+ return [
+ /* 0단 · 찌르기 — 고민×약오행 + 십신 보조 한 줄 */
+ {lab:"",src:`${F.dG}일간 · ${ELW[F.weak]} ${F.el[F.weak]} · ${F.topTG}`,noSrc:1,
+  html:`<div class="stab">${ST.name?`<p style="font-size:15px;color:var(--paper2);
+    margin-bottom:10px">${ST.name}.</p>`:""}<p>${stab}</p>
+   <p style="font-family:var(--serif);font-size:16px;color:var(--paper2);
+    margin-top:12px">${sub}</p></div>`,
+  q:"…맞소?",
+  yes:"그럴 줄 알았소. 어떻게 아느냐 하면—",
+  no:"그럼 다행이오. 헌데 이건 어떻소."},
+
+ /* 1단 · 부정확인 — 오해는 십신, 정도는 신강약 */
+ {lab:"1 · 먼저, 아닌 것부터",src:`${F.topTG} ${F.g(F.topTG)} · ${F.strength} ${F.score}`,
+  html:`<p class="neg">사람들이 ${you()}를 두고 <span class="strk">${m1}</span>고 하지. 아니오.<br>
+   <span class="strk" style="animation-delay:.7s">${m2}</span>는 말도 틀렸소.<br><br>
+   <b>${P.b}는 사람일 뿐이오.</b></p>`,
+  q:"이 말은 어떻소?",yes:"그럴 줄 알았소. 그럼 순서를 짚어드리리다.",
+  no:"괜찮소. 진짜는 다음이오."},
+
+ /* 2단 · 순서 — 4축 도출 */
+ {lab:"2 · 순서",src:S2.why,
+  html:`<div class="scene"><p>${you()}는 늘 이 순서요.</p>
+   <div class="seq">${S2.seq.map(x=>`<div><span>${x}</span></div>`).join("")}</div>
+   ${S2.lines.map((l,i)=>`<p class="${i===1?"hit":""}">${l}</p>`).join("")}</div>
+   <div class="soc"><span class="dot"></span>같은 자리에 앉은 사람 <b>1,847</b>명 중
+    <b>81%</b>가 "그렇다"를 눌렀소<span style="color:var(--ember)"> · 예시</span></div>`,
+  q:"…이 순서가 맞소?",yes:"그럴 줄 알았소. 그럼 이름을 붙여드리리다.",
+  no:"아직 이르오. 이름을 붙여보면 알 것이오."},
+
+ /* 2.5단 · 어긋남 — 성향 4글자를 넣은 사람만 */
+ ...(gapList(F).length?[{lab:"2.5 · 어긋난 자리",
+  src:`사주 ${Object.values(sajuAxis(F)).slice(0,4).join("")} ↔ 입력 ${ST.mbti}`,
+  html:`<div class="scene" style="border-color:rgba(168,150,212,.4);
+   background:linear-gradient(180deg,rgba(168,150,212,.08),transparent 72%)">
+   <p style="font-size:16px;color:var(--paper2)">여덟 글자와 그대가 적은 네 글자가
+    <b style="color:var(--lav)">${gapList(F).length}군데</b> 어긋나오.</p>
+   ${gapList(F).map(g=>`<p style="margin-top:13px"><b style="color:var(--lav)">${g.from} → ${g.to}</b><br>
+    ${g.t}<br><span style="color:var(--lav)">${g.w}</span></p>`).join("")}</div>`,
+  q:"…짚이는 데가 있소?",
+  yes:"그럴 게요. 그 사이가 그대를 가장 지치게 하오.",
+  no:"그럼 잘 맞춰 사신 것이오. 흔치 않소."}]:[]),
+
+ /* 3단 · 명명 — 약오행 × 흐름 */
+ {lab:"3 · 이름",src:`${ELW[F.weak]} ${F.el[F.weak]} × ${flowOf(F)}`,
+  html:`<div class="nameB"><p class="pre">오래 느꼈는데 말로는 못 했던 것.<br>그건 이름이 있소.</p>
+   <p class="word">${S2.name}</p><p class="post">${S2.post}</p></div>`,
+  q:"이제 알겠소?",yes:"그렇소. 여기까지가 값 없이 하는 얘기요.",no:"천천히 생각해보시오."},
+ {end:1}]}
+
+
+/* ── 훅 렌더 ── */
+function segInit(){
+ const G=segs();
+ $("segs").innerHTML=G.map((sg,i)=>{
+  if(sg.end)return `<div class="blk hide" data-i="${i}">
+   ${nr([`${chr().n}가 종이를 덮었다.`])}
+   <p style="font-family:var(--serif);font-size:18px;line-height:1.78;color:var(--c)">
+    여기까지가 <b>여덟 글자 중 셋</b>으로 본 것이다.</p>
+   <p class="tx mt">나머지 다섯에는 <b>왜</b>와 <b>언제</b>가 들어 있다.</p>
+   <button class="btn mt" onclick="go('d0')">값 없이 한 겹 더</button>
+   <button class="btn gh" onclick="go('d1')">어디까지 볼지 고른다</button>
+   <p class="sm mt" style="text-align:center">값은 아직 묻지 않았다</p></div>`;
+  return `<div class="blk hide" data-i="${i}">
+   ${sg.lab?`<div class="lab">${sg.lab}</div>`:""}
+   ${sg.noSrc?"":`<span class="src">근거 · ${sg.src}</span>`}
+   ${sg.html}
+   ${sg.noSrc?"":agrHTML(sg.lab+sg.src)}
+   <div class="vt" id="vt${i}"><button onclick="vote(${i},1)">그렇소</button>
+    <button onclick="vote(${i},0)">아니오</button></div>
+   <div class="react" id="rc${i}"></div></div>`}).join("");
+ openSeg(0)}
+function openSeg(i){const el=document.querySelector(`.blk[data-i="${i}"]`);if(!el)return;
+ el.classList.remove("hide");requestAnimationFrame(()=>el.classList.add("in"));
+ setTimeout(()=>el.scrollIntoView({behavior:"smooth",block:"center"}),140)}
+function vote(i,y){ripple();const sg=segs()[i];
+ $("rc"+i).innerHTML=say(y?sg.yes:sg.no,chr().n);$("rc"+i).classList.add("on");
+ $("vt"+i).style.cssText="transition:.35s;overflow:hidden;max-height:0;opacity:0;margin:0";
+ setTimeout(()=>openSeg(i+1),660)}
+
+/* ── 무료 6단 렌더 ── */
+function freeInit(){
+ $("fsegs").innerHTML=freeSegs().map((sg,i)=>{
+  if(sg.end)return `<div class="blk hide" data-f="${i}">
+   ${nr([`${chr().n}가 붓을 내려놓았다.`])}
+   ${say(`여기까지가 값 없이 하는 얘기요.<br>
+    <b>왜</b> 그런지와 <b>언제</b> 그런지는 아직 안 했소.`,chr().n)}
+   <div class="dz"><div class="k">왜</div><p>이 구조가 만들어진 자리는 <span class="bl">가가가가</span>일세.</p></div>
+   <div class="dz"><div class="k">언제</div><p>${F.deun[F.nowI].gz} 대운이 끝나는 <span class="bl">가가가</span>년.</p></div>
+   <div class="dz"><div class="k">어떻게</div><p>그릇을 만드는 길은 <span class="bl">가가</span>가지야.
+    그대에게 맞는 건 <span class="bl">가</span>번이오.</p></div>
+   <button class="btn mt" onclick="go('d1')">마저 본다</button>
+   <button class="btn gh" onclick="go('c5')">카드만 받고 나선다</button>
+   <button class="btn gh" onclick="go('h1')">다른 사람에게 물어본다</button>
+   <p class="sm mt" style="text-align:center">값 없이 나가도 붙잡지 않소</p></div>`;
+  return `<div class="blk hide" data-f="${i}"><div class="lab">${sg.lab}</div>
+   <span class="src">근거 · ${sg.src}</span>${sg.html}${agrHTML("f"+sg.lab+sg.src)}
+   <div class="vt" id="fvt${i}"><button onclick="fvote(${i},1)">그렇소</button>
+    <button onclick="fvote(${i},0)">아니오</button></div>
+   <div class="react" id="frc${i}"></div></div>`}).join("");
+ fopen(0)}
+function fopen(i){const el=document.querySelector(`.blk[data-f="${i}"]`);if(!el)return;
+ el.classList.remove("hide");requestAnimationFrame(()=>el.classList.add("in"));
+ setTimeout(()=>el.scrollIntoView({behavior:"smooth",block:"center"}),140)}
+function fvote(i,y){ripple();const sg=freeSegs()[i];
+ $("frc"+i).innerHTML=say(y?sg.yes:sg.no,chr().n);$("frc"+i).classList.add("on");
+ $("fvt"+i).style.cssText="transition:.35s;overflow:hidden;max-height:0;opacity:0;margin:0";
+ setTimeout(()=>fopen(i+1),660)}
+
+/* 회고 */
+function look(v){const r=$("lres");
+ r.innerHTML=v===1
+  ?say("그럼 그 다음을 봐야겠소. 이번엔 시기까지 짚어드리겠소.",chr().n)+
+   `<p class="sm mt" style="color:var(--teal)">→ statement_log 에 <b>hit</b> 기록 · 공감률 갱신</p>`
+  :v===2?say("반반이면 절반은 바뀐 것이오.",chr().n)+
+   `<p class="sm mt" style="color:var(--teal)">→ partial 기록</p>`
+  :say("그렇다면 내가 잘못 본 것이오. 태어난 때를 아신다면 다시 봐드리겠소.",chr().n)+
+   `<p class="sm mt" style="color:var(--teal)">→ miss 기록 · 공감률 60% 미만 문장은 뱅크에서 내려갑니다</p>`;
+ r.classList.add("on")}
+
+/* 무료 심화 6단 */
+function freeSegs(){const P=PATT[F.topTG],L=LACK[F.weak];
+ const dn=F.deun[F.nowI];
+ return [
+ {lab:"1 · 없는 것부터",src:`${ELW[F.weak]} ${F.el[F.weak]}`,
+  html:`<p class="tale">눈에 띄는 건 ${ELW[F.strong]}이 ${F.el[F.strong]}인 게 아니오.
+   <b>${ELW[F.weak]}이 ${F.el[F.weak]}밖에 없는 것</b>이지.</p>
+   <p class="tale">${ELW[F.weak]}은 <b>${L.w}</b>이오. 그게 없이 살아온 것이오.</p>`,
+  q:"짚이는 게 있소?",yes:"그럼 안쪽을 더 보겠소.",no:"한 겹만 더 보시오."},
+ {lab:"2 · 왜 반복되나",src:`${F.topTG} ${F.g(F.topTG)} · ${F.strength}`,
+  html:`<p class="tale">${IGNITE[F.topTG][ST.concern]}. 그리고 ${P.b}.</p>
+   <p class="tale">${F.strength==="신강"
+     ?"게다가 신강이오. 쏟을 힘은 넘치는데 받을 그릇이 없지."
+     :F.strength==="신약"?"게다가 신약이오. 채워야 하는데 채울 그릇도 없소."
+     :"중화라 크게 티는 안 났을 게요. 그래서 더 오래 몰랐지."}</p>
+   <p class="tale">그래서 끝에서 <b>${BLAME[F.topTG][F.strength]}</b>.</p>`,
+  q:"이건 어떻소?",yes:"좋소. 그럼 자리를 짚어드리리다.",no:"그럴 수도 있소."},
+ {lab:"3 · 어느 자리에서",src:`일지 ${F.dJ}${F.iljiChung?" 충":""}`,
+  html:`<p class="tale">${F.iljiChung
+    ?`일지 <b>${F.dJ}</b>가 부딪히고 있소. 사람 자리가 조용할 수 없는 배치요.`
+    :`일지 <b>${F.dJ}</b>는 조용한 편이오. 대신 밖에서 흔들리지.`}</p>
+   <p class="tale">${F.gwan>=2?"관이 둘이라 책임이 앞장서오."
+    :F.jae>=2?"재가 둘이라 손이 크오."
+    :F.sik>=2?"식상이 둘이라 만드는 데 힘이 쏠리오."
+    :"어느 한쪽으로 크게 기울지 않았소."}</p>`,
+  q:"…맞소?",yes:"그럼 시기를 봐야겠군.",no:"괜찮소. 시기만 보고 가시오."},
+ {lab:"4 · 지금 어디에",src:`대운 ${dn.gz} · ${F.deunTG}`,
+  html:`<p class="tale">지금은 <b>${dn.gz}</b> 대운이오. ${dn.age}세부터.</p>
+   <p class="tale">이 구간의 성격은 <b>${F.deunTG}</b>. ${
+    ["편관","상관","겁재"].includes(F.deunTG)
+     ?"조용히 지나가지 않는 구간이오."
+     :"크게 흔들리진 않소. 다지는 구간이지."}</p>`,
+  q:"요즘 그렇소?",yes:"그렇다면 다음 자리가 중요하오.",no:"아직 안 왔을 수도 있소."},
+ {lab:"5 · 필요한 것",src:`용신 ${F.yong}`,
+  html:`<p class="tale">그대에게 필요한 건 <b>${ELW[F.yong]}</b>이오.</p>
+   <p class="tale">${F.strength==="신강"?"남는 힘을 빼내 방향을 잡아줄 것."
+    :"모자란 힘을 채워줄 것."} 사람에게서 그걸 구하면 그 사람이 지치오.
+   <b>먼저 그대 안에 두시오.</b></p>`,
+  q:"알겠소?",yes:"좋소. 여기까지가 값 없이 하는 얘기요.",no:"천천히 생각해보시오."},
+ {end:1}]}
+
+/* 릴레이 이동 */
+function pick(id){if(!ST.read.includes(id))ST.read.push(id);ST.cur=id;sync();go("b3")}
+function skip(id){if(!ST.skipped.includes(id))ST.skipped.push(id);go("h1",true)}
+function openChr(id){ST.cur=id;go("b3")}
+
+/* A1 서사 */
+function a1p(){const box=$("a1n");
+ if(A1I===2){const sa=document.querySelector(".sceneart");
+  if(sa)sa.outerHTML=sceneArt("door","hero")}
+ if(A1[A1I][0]==="REVEAL"){$("a1d").style.opacity="1";
+  box.innerHTML=`<div class="say" style="text-align:left;margin-top:4px"><small>도령</small>
+   오셨소.<br><span style="font-size:15.5px;color:var(--paper2)">비를 맞으셨군. …거기 앉으시오. 손부터 보겠소 — 아니, 글자부터.</span></div>`;
+  $("a1t").textContent="앉는다";return}
+ box.innerHTML=nr(A1[A1I])}
+function a1n(){A1I++;if(A1I>=A1.length){go("a2");return}a1p()}
+
+/* ══════════════════════════════════════════
+   8. 라우터
+   ══════════════════════════════════════════ */
+const GN={A:"들어가다",B:"둘러보다",C:"읽다",D:"값을 치르다",H:"이어지다",F:"모으다",G:"다시 오다",R:"남기다"};
+const HIST=[];
+function go(id,noPush){
+ const s=S[id];if(!s)return;
+ if(!noPush&&CUR&&CUR!==id){HIST.push(CUR);if(HIST.length>40)HIST.shift()}
+ CUR=id;
+ $("view").innerHTML=s.r();
+ $("lab").textContent=id.toUpperCase();
+ $("snd").style.display=id==="a1"?"block":"none";
+ /* 진입 서사 구간(a1~a6)에서는 상단바를 숨겨 몰입 유지 */
+ const showBar=!["a1"].includes(id);
+ $("topbar").classList.toggle("hide",!showBar);
+ $("ttl").textContent=s.t;
+ $("btBack").disabled=HIST.length===0;
+ const sn=$("sealN"); if(sn)sn.textContent=ST.read.length;
+ $("btSkip").style.display=["a2","a3","a4","a5"].includes(id)?"block":"none";
+ document.querySelectorAll("#nav a").forEach(a=>a.classList.toggle("on",a.dataset.id===id));
+ window.scrollTo({top:0});
+ if(s.i)s.i()}
+function back(){if(!HIST.length)return;go(HIST.pop(),true)}
+function pull(){
+ const gv=(a,b)=>{const e=$(a);const v=e?parseInt(e.value,10):NaN;
+  return Number.isFinite(v)?v:+$(b).value};
+ $("iy").value=gv("y2","iy");$("im").value=gv("m2","im");$("id_").value=gv("d2","id_");
+ $("isx").value=ST.sex;
+ recalc(1)}
+function recalc(keep){
+ if(!$("iy"))return;
+ const known=ST.hour!=null, h=known?ST.hour:12;
+ F=calc(+$("iy").value,+$("im").value,+$("id_").value,h,+$("imi").value,
+  $("isx").value,126.98,known);
+ ST.sex=$("isx").value;ST.gan=F.dG;sync();
+ if(!keep&&CUR)go(CUR)}
+function sync(){
+ document.documentElement.style.setProperty("--c",ilgan().c);
+ $("fx").innerHTML=`일간 <b>${F.dG}</b> · <b>${F.strength}</b><br>
+  최강 <b>${F.strong} ${F.el[F.strong]}</b> · 최약 <b>${F.weak} ${F.el[F.weak]}</b><br>
+  주도 <b>${F.topTG}</b> · 용신 <b>${F.yong}</b><br>
+  대운 <b>${F.deun[F.nowI].gz}</b> · <b>${F.age}</b>세<br>
+  읽음 <b>${ST.read.length}</b>/20 · ${ST.paid?"<b>결제</b>":"미결제"}`;
+ document.querySelectorAll("#gg button").forEach(b=>
+  b.style.borderColor=b.dataset.g===F.dG?ILGAN[F.dG].c:"var(--line)")}
+
+/* 초기화 */
+F=calc(1993,5,15,10,20,"F");
+let h="",lg="";
+Object.entries(S).forEach(([id,s])=>{
+ if(s.g!==lg){h+=`<span class="gh">${s.g} · ${GN[s.g]}</span>`;lg=s.g}
+ h+=`<a href="javascript:void 0" data-id="${id}" onclick="go('${id}')"><b>${id.toUpperCase()}</b>${s.t}</a>`});
+$("nav").innerHTML=h;
+$("gg").innerHTML=Object.entries(ILGAN).map(([g,v])=>
+ `<button data-g="${g}" style="color:${v.c}" onclick="ST.gan='${g}';F.dG='${g}';sync();go(CUR)">${g}</button>`).join("");
+$("rtog").onclick=()=>$("rail").classList.toggle("open");
+$("pmod").onclick=e=>{if(e.target.id==="pmod")closeP()};
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeP()});
+sync();go("a1");
+</script>
+</body>
+</html>

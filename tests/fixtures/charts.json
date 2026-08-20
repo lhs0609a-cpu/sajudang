@@ -1,0 +1,1052 @@
+[
+ {
+  "id": "jieqi-01",
+  "note": "경칩 절입(03-05 17:46) -2일",
+  "input": {
+   "year": 1988,
+   "month": 3,
+   "day": 3,
+   "hour": 17,
+   "minute": 46,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "jieqi-02",
+  "note": "경칩 절입(03-05 17:46) +2일",
+  "input": {
+   "year": 1988,
+   "month": 3,
+   "day": 7,
+   "hour": 17,
+   "minute": 46,
+   "sex": "F",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "jieqi-03",
+  "note": "입하 절입(05-06 08:30) -2일",
+  "input": {
+   "year": 1995,
+   "month": 5,
+   "day": 4,
+   "hour": 8,
+   "minute": 30,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "jieqi-04",
+  "note": "입하 절입(05-06 08:30) +2일",
+  "input": {
+   "year": 1995,
+   "month": 5,
+   "day": 8,
+   "hour": 8,
+   "minute": 30,
+   "sex": "F",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "jieqi-05",
+  "note": "소서 절입(07-07 10:06) -2일",
+  "input": {
+   "year": 2001,
+   "month": 7,
+   "day": 5,
+   "hour": 10,
+   "minute": 6,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "jieqi-06",
+  "note": "소서 절입(07-07 10:06) +2일",
+  "input": {
+   "year": 2001,
+   "month": 7,
+   "day": 9,
+   "hour": 10,
+   "minute": 6,
+   "sex": "F",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "jieqi-07",
+  "note": "백로 절입(09-08 09:29) -2일",
+  "input": {
+   "year": 2007,
+   "month": 9,
+   "day": 6,
+   "hour": 9,
+   "minute": 29,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "jieqi-08",
+  "note": "백로 절입(09-08 09:29) +2일",
+  "input": {
+   "year": 2007,
+   "month": 9,
+   "day": 10,
+   "hour": 9,
+   "minute": 29,
+   "sex": "F",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "jieqi-09",
+  "note": "입동 절입(11-08 02:58) -2일",
+  "input": {
+   "year": 2015,
+   "month": 11,
+   "day": 6,
+   "hour": 2,
+   "minute": 58,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "jieqi-10",
+  "note": "입동 절입(11-08 02:58) +2일",
+  "input": {
+   "year": 2015,
+   "month": 11,
+   "day": 10,
+   "hour": 2,
+   "minute": 58,
+   "sex": "F",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "ipchun-01",
+  "note": "입춘(02-04 11:14 KST) -40분 — 년주가 1989년",
+  "input": {
+   "year": 1990,
+   "month": 2,
+   "day": 4,
+   "hour": 10,
+   "minute": 34,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "ipchun-02",
+  "note": "입춘(02-04 11:14 KST) +40분 — 년주가 1990년",
+  "input": {
+   "year": 1990,
+   "month": 2,
+   "day": 4,
+   "hour": 11,
+   "minute": 54,
+   "sex": "F",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "ipchun-03",
+  "note": "입춘(02-04 22:07 KST) -40분 — 년주가 1995년",
+  "input": {
+   "year": 1996,
+   "month": 2,
+   "day": 4,
+   "hour": 21,
+   "minute": 27,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "ipchun-04",
+  "note": "입춘(02-04 22:07 KST) +40분 — 년주가 1996년",
+  "input": {
+   "year": 1996,
+   "month": 2,
+   "day": 4,
+   "hour": 22,
+   "minute": 47,
+   "sex": "F",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "ipchun-05",
+  "note": "입춘(02-04 21:40 KST) -40분 — 년주가 1999년",
+  "input": {
+   "year": 2000,
+   "month": 2,
+   "day": 4,
+   "hour": 21,
+   "minute": 0,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "ipchun-06",
+  "note": "입춘(02-04 21:40 KST) +40분 — 년주가 2000년",
+  "input": {
+   "year": 2000,
+   "month": 2,
+   "day": 4,
+   "hour": 22,
+   "minute": 20,
+   "sex": "F",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "ipchun-07",
+  "note": "입춘(02-04 19:22 KST) -40분 — 년주가 2011년",
+  "input": {
+   "year": 2012,
+   "month": 2,
+   "day": 4,
+   "hour": 18,
+   "minute": 42,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "ipchun-08",
+  "note": "입춘(02-04 19:22 KST) +40분 — 년주가 2012년",
+  "input": {
+   "year": 2012,
+   "month": 2,
+   "day": 4,
+   "hour": 20,
+   "minute": 2,
+   "sex": "F",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "ipchun-09",
+  "note": "입춘(02-04 18:03 KST) -40분 — 년주가 2019년",
+  "input": {
+   "year": 2020,
+   "month": 2,
+   "day": 4,
+   "hour": 17,
+   "minute": 23,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "ipchun-10",
+  "note": "입춘(02-04 18:03 KST) +40분 — 년주가 2020년",
+  "input": {
+   "year": 2020,
+   "month": 2,
+   "day": 4,
+   "hour": 18,
+   "minute": 43,
+   "sex": "F",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "zi-01",
+  "note": "자시 경계 23:05",
+  "input": {
+   "year": 1985,
+   "month": 3,
+   "day": 12,
+   "hour": 23,
+   "minute": 5,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "zi-02",
+  "note": "자시 경계 23:40",
+  "input": {
+   "year": 1990,
+   "month": 7,
+   "day": 20,
+   "hour": 23,
+   "minute": 40,
+   "sex": "F",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "zi-03",
+  "note": "자시 경계 23:59",
+  "input": {
+   "year": 1995,
+   "month": 11,
+   "day": 3,
+   "hour": 23,
+   "minute": 59,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "zi-04",
+  "note": "자시 경계 00:10",
+  "input": {
+   "year": 2000,
+   "month": 6,
+   "day": 15,
+   "hour": 0,
+   "minute": 10,
+   "sex": "F",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "zi-05",
+  "note": "자시 경계 00:45",
+  "input": {
+   "year": 2003,
+   "month": 9,
+   "day": 9,
+   "hour": 0,
+   "minute": 45,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "zi-06",
+  "note": "자시 경계 23:20",
+  "input": {
+   "year": 2008,
+   "month": 1,
+   "day": 25,
+   "hour": 23,
+   "minute": 20,
+   "sex": "F",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "zi-07",
+  "note": "자시 경계 01:00",
+  "input": {
+   "year": 2011,
+   "month": 4,
+   "day": 18,
+   "hour": 1,
+   "minute": 0,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "zi-08",
+  "note": "자시 경계 23:50",
+  "input": {
+   "year": 2014,
+   "month": 8,
+   "day": 30,
+   "hour": 23,
+   "minute": 50,
+   "sex": "F",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "zi-09",
+  "note": "자시 경계 00:30",
+  "input": {
+   "year": 2018,
+   "month": 12,
+   "day": 7,
+   "hour": 0,
+   "minute": 30,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "zi-10",
+  "note": "자시 경계 23:15",
+  "input": {
+   "year": 2021,
+   "month": 5,
+   "day": 22,
+   "hour": 23,
+   "minute": 15,
+   "sex": "F",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "std1275-01",
+  "note": "표준시 127.5° 구간 · 서울",
+  "input": {
+   "year": 1954,
+   "month": 4,
+   "day": 10,
+   "hour": 9,
+   "minute": 0,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "std1275-02",
+  "note": "표준시 127.5° 구간 · 부산",
+  "input": {
+   "year": 1956,
+   "month": 11,
+   "day": 2,
+   "hour": 14,
+   "minute": 30,
+   "sex": "F",
+   "hour_known": true,
+   "city": "부산"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "std1275-03",
+  "note": "표준시 127.5° 구간 · 대구",
+  "input": {
+   "year": 1958,
+   "month": 3,
+   "day": 17,
+   "hour": 6,
+   "minute": 45,
+   "sex": "M",
+   "hour_known": true,
+   "city": "대구"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "std1275-04",
+  "note": "표준시 127.5° 구간 · 광주",
+  "input": {
+   "year": 1960,
+   "month": 12,
+   "day": 24,
+   "hour": 20,
+   "minute": 15,
+   "sex": "F",
+   "hour_known": true,
+   "city": "광주"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "std1275-05",
+  "note": "표준시 127.5° 구간 · 서울",
+  "input": {
+   "year": 1961,
+   "month": 7,
+   "day": 8,
+   "hour": 11,
+   "minute": 50,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "dst-01",
+  "note": "서머타임 1948년 구간 (1948.6.1~1948.9.12)",
+  "input": {
+   "year": 1948,
+   "month": 6,
+   "day": 2,
+   "hour": 12,
+   "minute": 0,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "dst-02",
+  "note": "서머타임 1949년 구간 (1949.4.3~1949.9.10)",
+  "input": {
+   "year": 1949,
+   "month": 4,
+   "day": 4,
+   "hour": 12,
+   "minute": 0,
+   "sex": "F",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "dst-03",
+  "note": "서머타임 1950년 구간 (1950.4.1~1950.9.9)",
+  "input": {
+   "year": 1950,
+   "month": 4,
+   "day": 2,
+   "hour": 12,
+   "minute": 0,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "dst-04",
+  "note": "서머타임 1951년 구간 (1951.5.6~1951.9.8)",
+  "input": {
+   "year": 1951,
+   "month": 5,
+   "day": 7,
+   "hour": 12,
+   "minute": 0,
+   "sex": "F",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "dst-05",
+  "note": "서머타임 1955년 구간 (1955.5.5~1955.9.8)",
+  "input": {
+   "year": 1955,
+   "month": 5,
+   "day": 6,
+   "hour": 12,
+   "minute": 0,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "dst-06",
+  "note": "서머타임 1956년 구간 (1956.5.20~1956.9.29)",
+  "input": {
+   "year": 1956,
+   "month": 5,
+   "day": 21,
+   "hour": 12,
+   "minute": 0,
+   "sex": "F",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "dst-07",
+  "note": "서머타임 1957년 구간 (1957.5.5~1957.9.21)",
+  "input": {
+   "year": 1957,
+   "month": 5,
+   "day": 6,
+   "hour": 12,
+   "minute": 0,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "dst-08",
+  "note": "서머타임 1958년 구간 (1958.5.4~1958.9.20)",
+  "input": {
+   "year": 1958,
+   "month": 5,
+   "day": 5,
+   "hour": 12,
+   "minute": 0,
+   "sex": "F",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "dst-09",
+  "note": "서머타임 1959년 구간 (1959.5.3~1959.9.19)",
+  "input": {
+   "year": 1959,
+   "month": 5,
+   "day": 4,
+   "hour": 12,
+   "minute": 0,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "dst-10",
+  "note": "서머타임 1960년 구간 (1960.5.1~1960.9.17)",
+  "input": {
+   "year": 1960,
+   "month": 5,
+   "day": 2,
+   "hour": 12,
+   "minute": 0,
+   "sex": "F",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "dst-11",
+  "note": "서머타임 1987년 구간 (1987.5.10~1987.10.11)",
+  "input": {
+   "year": 1987,
+   "month": 5,
+   "day": 11,
+   "hour": 12,
+   "minute": 0,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "dst-12",
+  "note": "서머타임 1988년 구간 (1988.5.8~1988.10.9)",
+  "input": {
+   "year": 1988,
+   "month": 5,
+   "day": 9,
+   "hour": 12,
+   "minute": 0,
+   "sex": "F",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "plain-01",
+  "note": "일반",
+  "input": {
+   "year": 1993,
+   "month": 5,
+   "day": 15,
+   "hour": 10,
+   "minute": 20,
+   "sex": "F",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "plain-02",
+  "note": "일반 · 남",
+  "input": {
+   "year": 1978,
+   "month": 10,
+   "day": 3,
+   "hour": 17,
+   "minute": 45,
+   "sex": "M",
+   "hour_known": true,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ },
+ {
+  "id": "plain-03",
+  "note": "시각 미상",
+  "input": {
+   "year": 1986,
+   "month": 6,
+   "day": 21,
+   "hour": null,
+   "minute": null,
+   "sex": "F",
+   "hour_known": false,
+   "city": "서울"
+  },
+  "expected": {
+   "year": "?",
+   "month": "?",
+   "day": "?",
+   "hour": "?",
+   "daeun_start_age": null
+  }
+ }
+]
