@@ -199,6 +199,9 @@ class StatementLog(Base):
     statement_id: Mapped[str] = mapped_column(Text, nullable=False)
     chart_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True), ForeignKey("charts.id"))
+    # 캐시 키(생년월일시 해시). charts 행이 아직 없어도 어떤 명식이었는지
+    # 잃지 않기 위해 원문 그대로 남긴다. 이게 없으면 hit율 분석이 불가능해진다.
+    chart_key: Mapped[str | None] = mapped_column(Text)
     user_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     lens_id: Mapped[str | None] = mapped_column(Text)
     concern: Mapped[str | None] = mapped_column(Text)
@@ -219,6 +222,7 @@ class StatementLog(Base):
     __table_args__ = (
         Index("ix_stmt_statement_answer", "statement_id", "answer"),
         Index("ix_stmt_chart", "chart_id"),
+        Index("ix_stmt_chart_key", "chart_key"),
         Index("ix_stmt_shown_at", "shown_at"),
         Index("ix_stmt_user_shown", "user_id", "shown_at"),
     )

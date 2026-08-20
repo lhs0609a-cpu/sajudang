@@ -69,15 +69,21 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str]) -> list:
         0))
 
     # ── 2 · 없는 것부터 ──────────────────────────────────
+    if len(f.weak_els) > 1:
+        also = ("<p class=\"tale\">%s 도 같이 바닥이오. 둘 다 없는 자리요.</p>"
+                % " · ".join(element_word(x) for x in f.weak_els if x != weak))
+    else:
+        also = ""
     cuts.append(_cut(
         "lack", "1 · 없는 것부터",
-        "%s %s" % (element_word(weak), f.elements[weak]),
+        "%s %s%s" % (element_word(weak), f.elements[weak],
+                     " (동률 %d)" % len(f.weak_els) if len(f.weak_els) > 1 else ""),
         ('<p class="tale">눈에 띄는 건 %s %s인 게 아니오. '
          '<b>%s %s밖에 없는 것</b>이지.</p>'
          '<p class="tale">%s <b>%s</b>이오. 그게 없이 살아온 것이오.</p>'
          % (josa(element_word(strong), "이", "가"), f.elements[strong],
             josa(element_word(weak), "이", "가"), f.elements[weak],
-            josa(element_word(weak), "은", "는"), lack["w"])),
+            josa(element_word(weak), "은", "는"), lack["w"]) + also),
         0, sid="lack:%s" % weak))
 
     # ── 3 · 왜 반복되나 ──────────────────────────────────
@@ -117,12 +123,20 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str]) -> list:
 
     # ── 5 · 지금 어디에 (대운) ───────────────────────────
     heavy = daeun["ten_god"] in ("편관", "상관", "겁재")
+    if f.daeun_started:
+        lead = ('<p class="tale">지금은 <b>%s</b> 대운이오. %d세부터.</p>'
+                % (daeun["gz"], daeun["start_age"]))
+    else:
+        # 아직 첫 대운에 들지 않았다. 들어갔다고 말하지 않는다.
+        lead = ('<p class="tale">아직 첫 대운에 들지 않았소. '
+                '<b>%s</b> 대운은 %d세부터요.</p>'
+                % (daeun["gz"], daeun["start_age"]))
     cuts.append(_cut(
         "daeun_now", "4 · 지금 어디에",
-        "대운 %s · %s" % (daeun["gz"], f.daeun_ten_god),
-        ('<p class="tale">지금은 <b>%s</b> 대운이오. %d세부터.</p>'
-         '<p class="tale">이 구간의 성격은 <b>%s</b>. %s</p>'
-         % (daeun["gz"], daeun["start_age"], f.daeun_ten_god,
+        "대운 %s · %s%s" % (daeun["gz"], f.daeun_ten_god,
+                          "" if f.daeun_started else " · 진입 전"),
+        (lead + '<p class="tale">이 구간의 성격은 <b>%s</b>. %s</p>'
+         % (f.daeun_ten_god,
             "조용히 지나가지 않는 구간이오." if heavy
             else "크게 흔들리진 않소. 다지는 구간이지.")),
         1, sid="daeun:%s" % f.daeun_ten_god))
@@ -145,7 +159,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str]) -> list:
     cuts.append(_cut(
         "daeun_map", "6 · 대운 맵",
         "대운수 %d · %s" % (f.daeun[0]["start_age"],
-                          "순행" if f.daeun[1]["start_age"] > f.daeun[0]["start_age"] else "역행"),
+                          "순행" if f.forward else "역행"),
         ('<div class="dmap">%s</div>'
          '<p class="note">대운수는 절입일까지의 실제 일수 ÷ 3 으로 셈했소.</p>'
          % "".join(

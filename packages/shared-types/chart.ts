@@ -67,6 +67,8 @@ export interface Features {
   yongsin: Element;
   ten_gods: Record<string, number>;
   top_ten_god: string;
+  /** 주도 십신이 동률이었는가. 43%가 동률 — 단정해서 쓰지 말 것. */
+  top_ten_god_tied: boolean;
   gwan: number;
   jae: number;
   sik: number;
@@ -74,12 +76,18 @@ export interface Features {
   inn: number;
   strong_el: Element;
   weak_el: Element;
+  /** 최약 오행이 동률이면 전부. 화면에서는 둘 다 말해야 정직하다. */
+  weak_els: Element[];
   gap: number;
   flow: Flow;
   flow_el: Element;
   age: number;
+  /** 대운 순행 여부. 화면에서 방향을 적을 때 이 값을 쓸 것. */
+  forward: boolean;
   daeun: Daeun[];
   daeun_now: number;
+  /** 첫 대운에 들어갔는가. false 면 '지금 그 대운' 이라고 말하면 안 된다. */
+  daeun_started: boolean;
   daeun_ten_god: string;
   daeun_start: number;
   ilji_chung: boolean;

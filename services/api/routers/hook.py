@@ -15,7 +15,8 @@ HOOK_TTL = 24 * 3600
 @router.post("/hook", response_model=HookResponse)
 def post_hook(req: HookRequest) -> HookResponse:
     raw = load_features(req.chart_id)
-    key = store.k_hook(req.chart_id, req.concern, req.axis4 or "", req.lens_id or "")
+    key = store.k_hook(req.chart_id, req.concern, req.axis4 or "",
+                       req.lens_id or "", req.name)
     cached = store.get_json(key)
     if cached is not None:
         return HookResponse(chart_id=req.chart_id, segments=cached, cached=True)

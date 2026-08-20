@@ -44,6 +44,7 @@ class Features:
     # ── 십신 ──
     ten_gods: dict                   # 10종 카운트 (0 포함)
     top_ten_god: str
+    top_ten_god_tied: bool           # 동률이었는가 (43% 가 동률 — 단정 금지)
     gwan: int
     jae: int
     sik: int
@@ -53,14 +54,17 @@ class Features:
     # ── 파생 ──
     strong_el: str
     weak_el: str
+    weak_els: list                   # 최약 오행이 동률이면 전부
     gap: float
     flow: str
     flow_el: str
 
     # ── 시간 ──
     age: int
+    forward: bool                    # 대운 순행 여부 ★ 리포트가 이걸 씁니다
     daeun: list                      # [{"gz","gan","ji","start_age","ten_god"}]
     daeun_now: int
+    daeun_started: bool              # 첫 대운에 들어갔는가
     daeun_ten_god: str
     daeun_start: float
 
@@ -122,9 +126,9 @@ def _ten_gods(pillars, day_gan: str):
     천간(일간 제외) + 지지 본기. docs/05 §6
     4주면 3+4=7개, 3주면 2+3=5개.
 
-    카운트와 함께 '등장 순서'도 돌려준다. 최다 십신이 동률일 때
-    년주 쪽을 먼저 잡기 위해서다. (10종 중 하나로 임의 고정하면
-    그 십신에 표본이 몰린다 — 분포 검증에서 드러났던 문제.)
+    카운트와 함께 '등장 순서'도 돌려준다. 동률 처리에 쓴다.
+    (10종 중 하나로 임의 고정하면 그 십신에 표본이 몰린다 —
+     분포 검증에서 실제로 드러났던 문제.)
     """
     counts = {k: 0 for k in TEN_GODS}
     order = []
@@ -140,6 +144,56 @@ def _ten_gods(pillars, day_gan: str):
             bump(p.gan)
         bump(HIDDEN[p.ji][0][0])
     return counts, order
+
+
+# 십신 묶음 → 오행 (일간 기준)
+def _group_element(group: str, me: str) -> str:
+    return {"비겁": me, "식상": GENERATES[me], "재성": CONTROLS[me],
+            "관성": CONTROLLED_BY[me], "인성": GENERATED_BY[me]}[group]
+
+
+def _pick_top_ten_god(counts, order, day_gan, month_ji, el):
+    """
+    주도 십신. 동률이 43% 나오므로 동률 처리가 결과를 좌우한다.
+
+    동률이면 명리에서 힘의 근거가 되는 순서로 가른다.
+      ① 월령(월지 본기)의 십신 — 월지가 가장 힘이 세다
+      ② 그 십신이 딛는 오행의 수치가 큰 쪽
+      ③ 그래도 같으면 명식에 먼저 나온 쪽 (년주 → 시주)
+
+    동률이었는지는 `top_ten_god_tied` 로 함께 돌려준다.
+    화면에서 단정적으로 쓰지 않기 위해서다.
+    """
+    mx = max(counts.values())
+    winners = [k for k in order if counts[k] == mx]
+    if len(winners) <= 1:
+        return (winners[0] if winners else order[0]), False
+
+    me = ELEMENT_OF_GAN[day_gan]
+
+    # ① 월령
+    wolryeong = ten_god(HIDDEN[month_ji][0][0], day_gan)
+    if wolryeong in winners:
+        return wolryeong, True
+
+    # ② 딛는 오행이 강한 쪽
+    def strength_of(name):
+        return el.get(_group_element(TEN_GOD_GROUP[name], me), 0.0)
+
+    best = max(strength_of(w) for w in winners)
+    strongest = [w for w in winners if strength_of(w) == best]
+    if len(strongest) == 1:
+        return strongest[0], True
+
+    # ③ 명식에 먼저 나온 쪽
+    return strongest[0], True
+
+
+def _weak_elements(el: dict):
+    """가장 약한 오행. 동률이면 전부 돌려준다 (8.8% 가 동률)."""
+    mn = min(el.values())
+    tied = [k for k in ELEMENTS if el[k] == mn]
+    return tied[0], tied
 
 
 def _flow(el: dict, day_gan: str):
@@ -177,11 +231,11 @@ def build_features(chart: Chart, as_of: Optional[date] = None) -> Features:
     tg, tg_order = _ten_gods(cp, day_gan)
 
     strong_el = max(el, key=lambda e: el[e])
-    weak_el = min(el, key=lambda e: el[e])
+    weak_el, weak_els = _weak_elements(el)
     flow, flow_el = _flow(el, day_gan)
 
-    # max 는 동률이면 먼저 나온 것을 남긴다 → 년주 쪽 우선
-    top_ten_god = max(tg_order, key=lambda k: tg[k])
+    top_ten_god, top_tied = _pick_top_ten_god(
+        tg, tg_order, day_gan, chart.month_pillar.ji, el)
 
     # 대운 — 현재 구간. 나이는 연 나이(올해 - 태어난 해), 대운수와 같은 기준.
     age = as_of.year - chart.solar_time.year
@@ -196,8 +250,8 @@ def build_features(chart: Chart, as_of: Optional[date] = None) -> Features:
     for i, d in enumerate(chart.daeun):
         if d.start_age <= age:
             now = i
-    if age < chart.daeun[0].start_age:
-        now = 0
+    # 첫 대운에 아직 들어가지 않은 사람 — '지금 그 대운' 이라고 말하면 거짓말
+    daeun_started = age >= chart.daeun[0].start_age
 
     # 일지 충·합 — 일주 자신은 제외
     others = [p.ji for p in cp if p.label != "일주"]
@@ -214,17 +268,17 @@ def build_features(chart: Chart, as_of: Optional[date] = None) -> Features:
         strength=strength, strength_score=score,
         deuk_ryeong=dr, deuk_ji=dj,
         yongsin=yongsin,
-        ten_gods=tg, top_ten_god=top_ten_god,
+        ten_gods=tg, top_ten_god=top_ten_god, top_ten_god_tied=top_tied,
         gwan=tg["정관"] + tg["편관"],
         jae=tg["정재"] + tg["편재"],
         sik=tg["식신"] + tg["상관"],
         bi=tg["비견"] + tg["겁재"],
         inn=tg["정인"] + tg["편인"],
-        strong_el=strong_el, weak_el=weak_el,
+        strong_el=strong_el, weak_el=weak_el, weak_els=weak_els,
         gap=round(el[strong_el] - el[weak_el], 1),
         flow=flow, flow_el=flow_el,
-        age=age,
-        daeun=daeun_list, daeun_now=now,
+        age=age, forward=chart.forward,
+        daeun=daeun_list, daeun_now=now, daeun_started=daeun_started,
         daeun_ten_god=daeun_list[now]["ten_god"],
         daeun_start=chart.daeun_start,
         ilji_chung=ilji_chung, ilji_hap=ilji_hap,

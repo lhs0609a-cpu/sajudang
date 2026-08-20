@@ -91,6 +91,7 @@ export function CalcPanel({ f }: { f: Features }) {
 }
 
 export function Summary({ f }: { f: Features }) {
+  const weakWords = (f.weak_els ?? [f.weak_el]).map((e) => EL_WORD[e] ?? e);
   return (
     <div className="sum">
       <p>
@@ -99,9 +100,29 @@ export function Summary({ f }: { f: Features }) {
       </p>
       <p className="sm">
         가장 강한 것 {EL_WORD[f.strong_el]} {f.elements[f.strong_el as keyof typeof f.elements]} ·
-        가장 약한 것 {EL_WORD[f.weak_el]} {f.elements[f.weak_el as keyof typeof f.elements]} ·
-        흐름 {f.flow}
+        가장 약한 것 {weakWords.join(" · ")}{" "}
+        {f.elements[f.weak_el as keyof typeof f.elements]} · 흐름 {f.flow}
       </p>
+      <p className="sm">
+        대운 {f.forward ? "순행" : "역행"} · 대운수 {f.daeun[0]?.start_age}
+        {f.daeun_started === false && " (아직 들지 않았소)"}
+      </p>
+
+      {/*
+        동률이면 그 사실을 숨기지 않는다.
+        주도 십신은 43%가 동률이다. 단정해서 말하면 그게 거짓말이 된다.
+      */}
+      {f.top_ten_god_tied && (
+        <p className="sm" style={{ color: "var(--gold)" }}>
+          ※ 주도 십신 <b>{f.top_ten_god}</b> 은 다른 십신과 개수가 같소.
+          월지에 뿌리를 둔 쪽으로 잡았소.
+        </p>
+      )}
+      {(f.weak_els?.length ?? 1) > 1 && (
+        <p className="sm" style={{ color: "var(--gold)" }}>
+          ※ {weakWords.join(" 과 ")} 이 똑같이 바닥이오. 둘 다 없는 자리요.
+        </p>
+      )}
     </div>
   );
 }

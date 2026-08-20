@@ -60,9 +60,14 @@ def record_answer(statement_id: str, chart_id: str, answer: int,
         import models
         import uuid as _uuid
         with db.session() as s:
+            # charts 행이 있으면 FK 로, 없으면 캐시 키로 남긴다.
+            # 어느 쪽이든 '어떤 사주였는지' 를 잃지 않는다.
+            row = s.query(models.Chart).filter(
+                models.Chart.cache_key == chart_id).one_or_none()
             s.add(models.StatementLog(
                 statement_id=statement_id,
-                chart_id=None,          # chart_id 는 UUID 여야 함 — 저장 시 매핑
+                chart_id=row.id if row else None,
+                chart_key=chart_id,
                 user_id=_uuid.UUID(user_id) if user_id else None,
                 lens_id=lens_id, concern=concern, stage=row["stage"],
                 day_gan=row["day_gan"], strength=row["strength"],

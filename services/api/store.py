@@ -10,6 +10,7 @@ Redis 가 있으면 Redis, 없으면 프로세스 메모리로 돕니다. 어느
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import os
@@ -113,8 +114,18 @@ def k_chart(chart_id: str) -> str:
     return "chart:%s" % chart_id
 
 
-def k_hook(chart_id: str, concern: str, axis4: str, lens_id: str) -> str:
-    return "hook:%s:%s:%s:%s" % (chart_id, concern, axis4 or "-", lens_id or "-")
+def k_hook(chart_id: str, concern: str, axis4: str, lens_id: str,
+           name: str = "") -> str:
+    """
+    ★ name 을 반드시 키에 넣습니다.
+
+    chart_id 는 생년월일시·성별·도시 해시입니다. 같은 날 같은 시에 태어난
+    다른 사람은 chart_id 가 같습니다. 이름을 키에서 빼면 뒤에 온 사람이
+    앞사람 이름이 박힌 훅을 받습니다.
+    """
+    tag = hashlib.sha256(name.strip().encode()).hexdigest()[:8] if name.strip() else "-"
+    return "hook:%s:%s:%s:%s:%s" % (chart_id, concern, axis4 or "-",
+                                    lens_id or "-", tag)
 
 
 def k_relay_session(session_id: str) -> str:
