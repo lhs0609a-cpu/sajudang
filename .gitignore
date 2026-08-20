@@ -13,3 +13,4 @@ dist/
 .DS_Store
 var/
 대조표.md
+.vercel/
