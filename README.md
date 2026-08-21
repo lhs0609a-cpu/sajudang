@@ -41,23 +41,24 @@
 |---|---|
 | 저장소 | https://github.com/lhs0609a-cpu/sajudang |
 | 프론트 | https://sajudang-three.vercel.app |
+| 계산 API | https://sajudang-api.fly.dev |
+
+상세 설계는 `docs/17_배포_운영_설계.md`.
 
 `main` 에 push 하면 Vercel 이 자동 배포합니다. (Root Directory `apps/web`, npm workspaces)
 
-### ⚠ 지금 배포본은 명식을 세우지 못합니다
+### 계산 API
 
-프론트만 올라가 있고 **계산 API 는 아직 어디에도 없습니다.**
-`NEXT_PUBLIC_API_BASE` 가 없으면 화면 상단에 그 사실을 알리는 띠가 뜹니다
-(조용히 실패하지 않게). 화면·서사·릴레이 UI 는 볼 수 있습니다.
-
-FastAPI 는 `sxtwl`(C++ 확장)이 필요해 Vercel 서버리스에 맞지 않습니다.
-컨테이너 호스팅(Render·Railway·Fly·AWS ECS)에 `services/api` 를 올린 뒤:
+Fly.io 도쿄(nrt) 컨테이너 한 대 + 볼륨 1GB.
 
 ```bash
-# Vercel 환경변수 등록 후 재배포
-vercel env add NEXT_PUBLIC_API_BASE production   # 예: https://api.sajudang.com
-vercel --prod
+fly deploy --remote-only --app sajudang-api      # 로컬 도커 불필요
+fly secrets set CORS_ORIGINS="https://sajudang-three.vercel.app" --app sajudang-api
 ```
+
+★ **`/health` 의 `store.durable` 이 true 인지 확인하세요.**
+false 면 상태가 메모리에 있다는 뜻이고, 그러면 공유 링크가 재시작마다
+사라지고 **하루 결제 2건·세션 릴레이 2명 브레이크가 풀립니다.**
 
 API 쪽에는 **CORS 허용 출처에 배포 도메인을 넣어야 합니다.**
 

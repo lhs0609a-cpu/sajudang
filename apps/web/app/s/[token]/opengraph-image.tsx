@@ -23,6 +23,16 @@ const BASE =
   process.env.NEXT_PUBLIC_API_BASE ??
   "http://localhost:8000";
 
+/**
+ * satori(next/og 렌더러)는 8자리 hex 투명도(#RRGGBBAA)를 못 읽습니다.
+ * 그대로 쓰면 그라디언트가 검은 박스로 나옵니다. rgba 로 넘깁니다.
+ */
+function rgba(hex: string, a: number): string {
+  const h = hex.replace("#", "");
+  const n = parseInt(h.length === 3 ? h.replace(/(.)/g, "$1$1") : h, 16);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
+}
+
 /** 일간 10색 — docs/09 §2 */
 const ILGAN_COLOR: Record<string, string> = {
   甲: "#7FB08A", 乙: "#A8C97F", 丙: "#E5B87A", 丁: "#D98BA5", 戊: "#C9A87F",
@@ -68,9 +78,14 @@ export default async function Image({ params }: { params: { token: string } }) {
       >
         {/* 위에서 내려오는 빛기둥 — 장면 공통 요소 (docs/09 §4) */}
         <div style={{
-          position: "absolute", top: 0, left: "34%", width: "32%", height: "100%",
-          background: `linear-gradient(180deg, ${c}22, transparent 72%)`,
+          position: "absolute", top: 0, right: 0, width: "46%", height: "100%",
+          background: `linear-gradient(200deg, ${rgba(c, 0.16)}, ${rgba(c, 0)} 68%)`,
           display: "flex",
+        }} />
+        {/* 성좌 원륜 — 오른쪽에 크게 */}
+        <div style={{
+          position: "absolute", right: -90, top: 150, width: 420, height: 420,
+          borderRadius: 420, border: `1px solid ${rgba(c, 0.28)}`, display: "flex",
         }} />
         {/* 왼쪽 강조선 */}
         <div style={{

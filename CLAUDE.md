@@ -58,6 +58,8 @@
 | `docs/11_법무_컴플라이언스.md` | **기능 추가 전 필수** |
 | `docs/14_신살_궁위_확정표.md` | 신살·귀인·조상 자리 손댈 때 **필수** |
 | `docs/15_공유_유입_설계.md` | 분석지·공유·유입 화면 손댈 때 |
+| `docs/16_신살인물_에셋발주서.md` | 신살 인물·에셋 |
+| `docs/17_배포_운영_설계.md` | **배포·환경변수·CORS·상태 저장** |
 | `reference/sajudang.html` | 애매할 때 정답. 동작하는 참조 구현체 |
 
 ---
@@ -173,6 +175,18 @@ Features:
 
 ### 새 기능을 붙이기 전
 `docs/11_법무_컴플라이언스.md` 의 금지 목록을 먼저 확인한다.
+
+---
+
+## 배포
+
+```
+프론트   https://sajudang-three.vercel.app   Vercel · main push 자동
+API     https://sajudang-api.fly.dev        Fly nrt · fly deploy --remote-only
+```
+
+배포 전 반드시 `/health` 의 `store.durable` 이 true 인지 보세요.
+false 면 브레이크가 풀린 채로 도는 것입니다. 상세는 docs/17.
 
 ---
 
