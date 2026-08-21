@@ -149,9 +149,18 @@ def test_gongmang_draws_no_person():
 # 접근성 · 에셋 폴백
 # ══════════════════════════════════════════════════════════
 def test_component_respects_reduced_motion():
+    """
+    스타일은 tokens.css(토큰) 와 overrides.css(수정분) 로 나뉘어 있습니다.
+    어느 쪽에 있든 신살 인물이 reduced-motion 을 지켜야 합니다.
+    """
     comp = COMP.read_text(encoding="utf-8")
     assert "prefers-reduced-motion" in comp
-    css = (ROOT / "apps" / "web" / "styles" / "tokens.css").read_text(encoding="utf-8")
+
+    styles = ROOT / "apps" / "web" / "styles"
+    css = "\n".join((styles / n).read_text(encoding="utf-8")
+                    for n in ("tokens.css", "overrides.css")
+                    if (styles / n).exists())
+    assert ".sfig {" in css, "신살 인물 스타일이 없습니다"
     block = css[css.index(".sfig {"):]
     assert "prefers-reduced-motion" in block
     assert "animation: none !important" in block

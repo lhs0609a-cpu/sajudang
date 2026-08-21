@@ -52,6 +52,53 @@ export interface Correction {
   boundary_note: string | null;
 }
 
+/** 명식에서 성립한 신살 하나 */
+export interface SinsalHit {
+  key: string;
+  name: string;
+  hanja: string;
+  kind: "길신" | "살" | "특수";
+  at: string[];      // 앉은 기둥
+  target: string;    // 어느 지지에서 성립했는가
+}
+
+/** 길신이 앉은 자리를 궁위로 읽은 것 — 누가 돕는가 */
+export interface Helper {
+  sinsal: string;
+  hanja: string;
+  pillar: string;
+  ji: string;
+  who: string;
+  age: string;
+  kind: string;
+  ten_god_group: string;
+}
+
+/** 년주 = 조상 자리 */
+export interface Ancestor {
+  pillar: string;
+  gan_ten_god: string;
+  ji_ten_god: string;
+  elements: string[];
+  yongsin: string;
+  supports_yongsin: boolean;
+  stance: "돕는 쪽" | "짐이 되는 쪽" | "크게 관여하지 않는 쪽";
+  good_sinsal: string[];
+  bad_sinsal: string[];
+  inherited: string;
+}
+
+/** 네 기둥의 궁위 */
+export interface Palace {
+  pillar: string;
+  gz: string | null;
+  who: string;
+  also: string;
+  age: string;
+  ten_god: string | null;
+  unknown?: boolean;
+}
+
 export interface Features {
   pillars: Pillar[];          // 시각 미상이면 3개
   day_gan: string;
@@ -92,6 +139,14 @@ export interface Features {
   daeun_start: number;
   ilji_chung: boolean;
   ilji_hap: string[];
+
+  /* ── 신살 · 궁위 (docs/14) ── */
+  sinsal: SinsalHit[];
+  gongmang: string;
+  helpers: Helper[];
+  ancestor: Ancestor;
+  palaces: Palace[];
+
   correction: Correction;
 }
 

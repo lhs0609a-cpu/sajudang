@@ -12,8 +12,8 @@
  *
  * ★ 계산은 서버(/v1/chart)가 합니다. 여기서 사주를 세지 않습니다.
  */
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
 import Scene from "@/components/scene/Scene";
 import { Narration, Progress, Say } from "@/components/Narration";
@@ -67,17 +67,27 @@ const AXIS4 = [
 const CITIES = ["서울", "인천", "수원", "춘천", "강릉", "대전", "청주", "전주",
   "광주", "목포", "대구", "안동", "포항", "부산", "울산", "창원", "제주"];
 
-export default function EntryPage() {
+const STEPS: Step[] = ["a1", "a2", "a3", "a4", "a4b", "a5", "a6", "a7"];
+
+function EntryInner() {
   const router = useRouter();
+  const params = useSearchParams();
   const s = useSession();
-  const [step, setStep] = useState<Step>("a1");
+  // 관리자 레일이 ?step=a5 로 바로 건너뛸 수 있게 한다
+  const asked = params.get("step") as Step | null;
+  const [step, setStep] = useState<Step>(
+    asked && STEPS.includes(asked) ? asked : "a1");
+
+  useEffect(() => {
+    if (asked && STEPS.includes(asked)) setStep(asked);
+  }, [asked]);
   const [beat, setBeat] = useState(0);          // a1 나레이션 진행
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [segments, setSegments] = useState<HookSegment[] | null>(null);
   const [hookDone, setHookDone] = useState(false);
 
-  const season = seasonOf();
+  const season = s.seasonOverride ?? seasonOf();
   const lens = LENS_BY_ID[s.cur] ?? LENS_BY_ID.pungun;
   const beats = OPENING[season];
 
@@ -353,5 +363,13 @@ export default function EntryPage() {
         </div>
       )}
     </Shell>
+  );
+}
+
+export default function EntryPage() {
+  return (
+    <Suspense fallback={<Shell bare><Narration lines={["대문을 여는 중이오."]} /></Shell>}>
+      <EntryInner />
+    </Suspense>
   );
 }

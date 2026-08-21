@@ -45,6 +45,13 @@ export interface SessionState {
   relayUsed: number;
   visits: number;
 
+  /* ── 관리자 (프로덕션 기본 꺼짐) ──
+     ?admin=1 로 켜고 ?admin=0 으로 끕니다. 전체 화면을 오가며
+     플로우를 확인하는 용도입니다. */
+  admin: boolean;
+  seasonOverride: Season | null;   // 진입 서사 4계절 확인
+  ilganOverride: string | null;    // 일간 10색 테마 확인
+
   set: (patch: Partial<SessionState>) => void;
   markRead: (id: string) => void;
   markSkipped: (id: string) => void;
@@ -81,6 +88,9 @@ const initial = {
   paid: false,
   relayUsed: 0,
   visits: 0,
+  admin: false,
+  seasonOverride: null as Season | null,
+  ilganOverride: null as string | null,
 };
 
 export const useSession = create<SessionState>()(
@@ -103,13 +113,15 @@ export const useSession = create<SessionState>()(
         sex: s.sex, city: s.city, axis4: s.axis4, concern: s.concern,
         chartId: s.chartId, cur: s.cur, read: s.read, skipped: s.skipped,
         seals: s.seals, tier: s.tier, paid: s.paid, visits: s.visits,
+        admin: s.admin, seasonOverride: s.seasonOverride,
+        ilganOverride: s.ilganOverride,
       }),
     },
   ),
 );
 
 /** 절기 기준으로 계절을 고른다. (docs/09 §5 — 같은 사람이 계절마다 다른 화면을 본다) */
-export function seasonOf(d: Date = today): Season {
+export function seasonOf(d: Date = new Date()): Season {
   const m = d.getMonth() + 1;
   if (m >= 2 && m <= 4) return "spring";
   if (m >= 5 && m <= 7) return "summer";
@@ -130,4 +142,70 @@ export const TIERS: { id: Tier; name: string; price: string; desc: string }[] = 
   { id: "one", name: "이 자리 하나", price: "3,900원", desc: "고른 영역 전부 · 시기 포함" },
   { id: "all", name: "여덟 글자 전부", price: "19,900원", desc: "평생운 18컷 · 25페이지" },
   { id: "sub", name: "스무 사람 모두", price: "9,900원/월", desc: "전 캐릭터 무제한 · 월간 세운" },
+];
+
+/** 화면 대장 — 관리자 레일이 이걸로 목록을 그립니다. docs/08 §1 */
+export interface ScreenLink {
+  id: string;
+  name: string;
+  href: string;
+}
+export const SCREEN_GROUPS: { group: string; label: string; items: ScreenLink[] }[] = [
+  {
+    group: "A", label: "들어가다",
+    items: [
+      { id: "a1", name: "골목", href: "/?step=a1" },
+      { id: "a2", name: "이름", href: "/?step=a2" },
+      { id: "a3", name: "날·고을", href: "/?step=a3" },
+      { id: "a4", name: "때", href: "/?step=a4" },
+      { id: "a4b", name: "성향 4글자", href: "/?step=a4b" },
+      { id: "a5", name: "고민", href: "/?step=a5" },
+      { id: "a6", name: "명식", href: "/?step=a6" },
+      { id: "a7", name: "훅 5단", href: "/?step=a7" },
+    ],
+  },
+  {
+    group: "B", label: "둘러보다",
+    items: [
+      { id: "b1", name: "진열대", href: "/lobby?tab=b1" },
+      { id: "b2", name: "스무 사람", href: "/lobby?tab=b2" },
+      { id: "b3", name: "그 사람", href: "/lobby?tab=b3" },
+      { id: "b4", name: "내 명식", href: "/lobby?tab=b4" },
+    ],
+  },
+  {
+    group: "C", label: "읽다",
+    items: [
+      { id: "c1", name: "표지", href: "/report/pungun?tab=c1" },
+      { id: "c2", name: "본문", href: "/report/pungun?tab=c2" },
+      { id: "c3", name: "대운 맵", href: "/report/pungun?tab=c3" },
+      { id: "c4", name: "페이월", href: "/report/pungun?tab=c4" },
+      { id: "c5", name: "공유 카드", href: "/report/pungun?tab=c5" },
+      { id: "c6", name: "피드백", href: "/report/pungun?tab=c6" },
+      { id: "c7", name: "분석지", href: "/summary" },
+      { id: "c8", name: "내보내기", href: "/summary#share" },
+    ],
+  },
+  {
+    group: "D", label: "값을 치르다",
+    items: [
+      { id: "d0", name: "무료 6단", href: "/pay?step=d0" },
+      { id: "d1", name: "어디까지", href: "/pay?step=d1" },
+      { id: "d2", name: "결제", href: "/pay?step=d2" },
+      { id: "d3", name: "완료", href: "/pay?step=d3" },
+    ],
+  },
+  {
+    group: "H·G·F·R", label: "이어지다 · 다시 오다 · 모으다",
+    items: [
+      { id: "h1", name: "릴레이", href: "/relay" },
+      { id: "g1", name: "오늘의 일진", href: "/daily" },
+      { id: "f2", name: "인장첩", href: "/me?tab=f2" },
+      { id: "r1", name: "후기", href: "/me?tab=r1" },
+    ],
+  },
+  {
+    group: "S", label: "건너오다 (공유 유입)",
+    items: [{ id: "s1", name: "받은 분석지", href: "/summary" }],
+  },
 ];

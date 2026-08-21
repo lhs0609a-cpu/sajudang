@@ -54,6 +54,10 @@ const post = <T>(path: string, body: unknown) =>
 export const api = {
   chart: (req: ChartRequest) => post<ChartResponse>("/v1/chart", req),
 
+  /** 새로고침 뒤 chart_id 만 남았을 때 명식을 되찾는다. */
+  getChart: (chartId: string) =>
+    call<ChartResponse>(`/v1/chart/${encodeURIComponent(chartId)}`),
+
   hook: (req: {
     chart_id: string; concern: string; axis4?: string | null;
     name?: string; lens_id?: string | null;

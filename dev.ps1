@@ -10,6 +10,7 @@
     fixtures       회귀 케이스 50건 생성
     sheet          대조표(대조표.md) 뽑기
     screens        화면 연결 그래프 — 고아·막다른·죽은 버튼
+    flow           전체 플로우 훑기 — 32화면을 실제 브라우저로 열어 확인
     api            API 서버 (http://localhost:8000/docs)
     infra          postgres + redis 컨테이너
     migrate        알렘빅 upgrade head
@@ -95,6 +96,11 @@ switch ($Task) {
   "dist"    { Need-Venv; Push-Location $Root; & $Py tools\distribution.py; Pop-Location }
   "dup"     { Need-Venv; Push-Location $Root; & $Py tools\dup_rate.py; Pop-Location }
   "screens" { Need-Venv; Push-Location $Root; & $Py tools\screen_graph.py; Pop-Location }
+  "flow" {
+    Need-Venv
+    $target = if ($Rest) { $Rest[0] } else { "http://localhost:3000" }
+    Push-Location $Root; & $Py toolslow_check.py $target; Pop-Location
+  }
   "fixtures"{ Need-Venv; Push-Location $Root; & $Py tools\make_fixtures.py @Rest; Pop-Location }
   "sheet"   { Need-Venv; Push-Location $Root; & $Py tools\fixture_sheet.py 대조표.md; Pop-Location }
 

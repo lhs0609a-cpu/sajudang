@@ -6,8 +6,8 @@
  *
  * 미출시 캐릭터는 실루엣으로 둡니다. 결제 버튼을 붙이지 않습니다.
  */
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
 import Scene from "@/components/scene/Scene";
 import { Narration, Say } from "@/components/Narration";
@@ -19,10 +19,15 @@ type Tab = "b1" | "b2" | "b3" | "b4";
 
 const GROUPS = ["정통", "검사", "술수", "관계", "맥락", "정서"];
 
-export default function LobbyPage() {
+const TABS: Tab[] = ["b1", "b2", "b3", "b4"];
+
+function LobbyInner() {
   const router = useRouter();
+  const params = useSearchParams();
   const s = useSession();
-  const [tab, setTab] = useState<Tab>("b1");
+  const asked = params.get("tab") as Tab | null;
+  const [tab, setTab] = useState<Tab>(asked && TABS.includes(asked) ? asked : "b1");
+  useEffect(() => { if (asked && TABS.includes(asked)) setTab(asked); }, [asked]);
   const lens = LENS_BY_ID[s.cur] ?? LENSES[0];
 
   const released = LENSES.filter((l) => l.released);
@@ -131,5 +136,13 @@ export default function LobbyPage() {
         </button>
       </div>
     </Shell>
+  );
+}
+
+export default function LobbyPage() {
+  return (
+    <Suspense fallback={<Shell title="진열대"><p className="sm">…</p></Shell>}>
+      <LobbyInner />
+    </Suspense>
   );
 }

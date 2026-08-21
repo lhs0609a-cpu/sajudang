@@ -7,8 +7,8 @@
  * ★ 잠긴 컷은 본문이 아예 내려오지 않습니다. 블러로 가린 게 아니라
  *   서버가 안 줍니다. (docs/02 §7)
  */
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
 import Scene from "@/components/scene/Scene";
 import { Narration, Say } from "@/components/Narration";
@@ -19,14 +19,19 @@ import type { ReportResponse } from "@shared/chart";
 
 type Tab = "c1" | "c2" | "c3" | "c4" | "c5" | "c6";
 
-export default function ReportPage() {
+const TABS: Tab[] = ["c1", "c2", "c3", "c4", "c5", "c6"];
+
+function ReportInner() {
   const params = useParams<{ id: string }>();
+  const query = useSearchParams();
   const router = useRouter();
   const s = useSession();
   const lensId = params.id;
   const lens = LENS_BY_ID[lensId];
 
-  const [tab, setTab] = useState<Tab>("c1");
+  const asked = query.get("tab") as Tab | null;
+  const [tab, setTab] = useState<Tab>(asked && TABS.includes(asked) ? asked : "c1");
+  useEffect(() => { if (asked && TABS.includes(asked)) setTab(asked); }, [asked]);
   const [rep, setRep] = useState<ReportResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [rating, setRating] = useState(0);
@@ -175,12 +180,9 @@ export default function ReportPage() {
         </p>
         <button className="btn mt" onClick={() => {
           if (!s.seals.includes(lensId)) s.set({ seals: [...s.seals, lensId] });
-          router.push("/summary");
+          router.push("/relay");
         }}>
-          인장을 받고 분석지를 받는다
-        </button>
-        <button className="btn gh" onClick={() => router.push("/relay")}>
-          바로 다음 사람에게
+          인장을 받고 나간다
         </button>
       </Shell>
     );
@@ -207,8 +209,15 @@ export default function ReportPage() {
         <button className="btn gh" onClick={() => setTab("c3")}>대운 맵</button>
       )}
       <button className="btn gh" onClick={() => setTab("c5")}>공유 카드</button>
-      <button className="btn gh" onClick={() => router.push("/summary")}>분석지 한 장</button>
       <button className="btn gh" onClick={() => setTab("c6")}>다 읽었소</button>
     </Shell>
+  );
+}
+
+export default function ReportPage() {
+  return (
+    <Suspense fallback={<Shell title="읽다"><p className="sm">…</p></Shell>}>
+      <ReportInner />
+    </Suspense>
   );
 }

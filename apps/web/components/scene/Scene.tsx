@@ -12,7 +12,7 @@
  */
 import { useEffect, useState } from "react";
 import { RATIO_BOX, SCENE_BY_ID, SEASON_PALETTE } from "./manifest";
-import { seasonOf, type Season } from "@/lib/store";
+import { seasonOf, useSession, type Season } from "@/lib/store";
 
 function useReducedMotion() {
   const [reduced, setReduced] = useState(false);
@@ -114,7 +114,8 @@ export default function Scene({ id, className }: { id: string; className?: strin
   const spec = SCENE_BY_ID[id];
   const reduced = useReducedMotion();
   const hasClip = useHasClip(id);
-  const season = seasonOf();
+  const override = useSession((st) => st.seasonOverride);
+  const season = override ?? seasonOf();
 
   if (!spec) return null;
 

@@ -29,6 +29,18 @@ def load_features(chart_id: str) -> dict:
     return f
 
 
+@router.get("/chart/{chart_id}", response_model=ChartResponse)
+def get_chart(chart_id: str) -> ChartResponse:
+    """
+    이미 세운 명식을 chart_id 로 다시 가져온다.
+
+    브라우저를 새로고침하면 화면 상태는 날아가지만 chart_id 는 남습니다.
+    이게 없으면 새로고침 한 번에 "아직 세우지 않았소" 로 돌아갑니다.
+    """
+    return ChartResponse(chart_id=chart_id,
+                         features=load_features(chart_id), cached=True)
+
+
 @router.post("/chart", response_model=ChartResponse)
 def post_chart(req: ChartRequest) -> ChartResponse:
     key = chart_key(req)

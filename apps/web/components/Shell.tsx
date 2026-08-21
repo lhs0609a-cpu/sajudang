@@ -7,10 +7,11 @@
  */
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSession } from "@/lib/store";
 import { LENS_BY_ID } from "@/lib/lenses";
-import { apiMisconfigured } from "@/lib/api";
+import { api, apiMisconfigured } from "@/lib/api";
+import DevRail from "@/components/DevRail";
 
 export const LEGAL = [
   "본 서비스는 전통 명리학 해석에 기반한 자기이해·오락 목적 콘텐츠입니다.",
@@ -52,17 +53,48 @@ export default function Shell({
 }) {
   const features = useSession((s) => s.features);
   const cur = useSession((s) => s.cur);
+  const admin = useSession((s) => s.admin);
+  const ilganOverride = useSession((s) => s.ilganOverride);
   const themeColor = LENS_BY_ID[cur]?.color;
+
+  /*
+   * 새로고침하면 features 는 사라지고 chartId 만 남습니다(용량 때문에
+   * 저장하지 않습니다). 그대로 두면 "아직 세우지 않았소" 로 돌아갑니다.
+   * chart_id 로 서버에서 되찾아 옵니다.
+   */
+  const chartId = useSession((s) => s.chartId);
+  const hasFeatures = useSession((s) => !!s.features);
+  const setSession = useSession((s) => s.set);
+  useEffect(() => {
+    if (!chartId || hasFeatures) return;
+    let alive = true;
+    api.getChart(chartId)
+      .then((r) => { if (alive) setSession({ features: r.features }); })
+      .catch(() => { /* 못 찾으면 각 화면이 알아서 안내한다 */ });
+    return () => { alive = false; };
+  }, [chartId, hasFeatures, setSession]);
+
+  // 레일이 켜지면 무대를 오른쪽으로 민다
+  useEffect(() => {
+    document.body.classList.toggle("has-rail", admin);
+    return () => document.body.classList.remove("has-rail");
+  }, [admin]);
 
   // 계산 서버가 안 붙은 배포본이면 조용히 실패하지 않고 알린다
   const [noApi, setNoApi] = useState(false);
   useEffect(() => setNoApi(apiMisconfigured()), []);
 
   return (
-    <div className="stage">
+    <>
+      {/* useSearchParams 를 쓰므로 Suspense 로 감싼다.
+          안 감싸면 모든 페이지의 정적 프리렌더가 깨진다. */}
+      <Suspense fallback={null}>
+        <DevRail />
+      </Suspense>
+      <div className="stage">
       <div
         className="phone"
-        data-ilgan={features?.day_gan ?? undefined}
+        data-ilgan={ilganOverride ?? features?.day_gan ?? undefined}
         style={themeColor ? ({ ["--c" as string]: themeColor }) : undefined}
       >
         {!bare && <TopBar title={title ?? ""} skipTo={skipTo} />}
@@ -80,6 +112,7 @@ export default function Shell({
           {legal && <Legal />}
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

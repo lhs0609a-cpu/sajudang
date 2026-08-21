@@ -4,18 +4,21 @@
  * @screen f2 r1
  * F · 모으다 — f2 인장첩 / R · 남기다 — r1 후기
  */
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
 import Scene from "@/components/scene/Scene";
 import { Narration, Say } from "@/components/Narration";
 import { LENSES } from "@/lib/lenses";
 import { useSession } from "@/lib/store";
 
-export default function MePage() {
+function MeInner() {
   const router = useRouter();
+  const params = useSearchParams();
   const s = useSession();
-  const [tab, setTab] = useState<"f2" | "r1">("f2");
+  const asked = params.get("tab");
+  const [tab, setTab] = useState<"f2" | "r1">(asked === "r1" ? "r1" : "f2");
+  useEffect(() => { if (asked === "r1" || asked === "f2") setTab(asked); }, [asked]);
 
   if (tab === "r1") {
     return (
@@ -64,5 +67,13 @@ export default function MePage() {
         지운 정보는 되돌릴 수 없습니다. 생년월일시는 사주 계산 목적으로만 씁니다.
       </p>
     </Shell>
+  );
+}
+
+export default function MePage() {
+  return (
+    <Suspense fallback={<Shell title="인장첩"><p className="sm">…</p></Shell>}>
+      <MeInner />
+    </Suspense>
   );
 }

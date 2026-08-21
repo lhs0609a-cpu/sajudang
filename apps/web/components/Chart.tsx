@@ -6,6 +6,7 @@
  * ★ hour_known=false 면 시주 칸을 **잠금 표시**합니다. 채우지 않습니다.
  *   (CLAUDE.md 절대 규칙 1)
  */
+import { useEffect, useState } from "react";
 import type { Features } from "@shared/chart";
 
 const EL_WORD: Record<string, string> = {
@@ -13,21 +14,36 @@ const EL_WORD: Record<string, string> = {
 };
 
 export function Pillars({ f }: { f: Features }) {
+  /*
+   * ★ .pil 은 opacity:0 · rotateY(90deg) 로 시작합니다.
+   *   .flip 을 붙여야 보입니다. 참조 구현체는 JS 로 붙였는데
+   *   그걸 옮기지 않아 **기둥이 아예 안 보이던** 버그가 있었습니다.
+   *   기둥 뒤집기는 로딩이 아니라 결과 발표 연출입니다. (docs/08 §7)
+   */
+  const [flip, setFlip] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setFlip(true), 40);
+    return () => clearTimeout(t);
+  }, []);
+
   const cells = [...f.pillars];
   return (
     <div className="ms">
       {cells.map((p, i) => (
-        <div className="pil" key={p.label} style={{ animationDelay: `${i * 0.33}s` }}>
-          <div className="lb">{p.label}</div>
-          <div className="gz">{p.gan}</div>
-          <div className="gz">{p.ji}</div>
+        <div className={"pil" + (flip ? " flip" : "")} key={p.label}
+             style={{ animationDelay: `${i * 0.33}s` }}>
+          <div className="p">{p.label}</div>
+          <div className="g">{p.gan}</div>
+          <div className="j">{p.ji}</div>
         </div>
       ))}
       {!f.hour_known && (
-        <div className="pil locked" title="시각을 모르므로 세우지 않았습니다">
-          <div className="lb">시주</div>
-          <div className="gz">◇</div>
-          <div className="gz">◇</div>
+        <div className={"pil lk" + (flip ? " flip" : "")}
+             style={{ animationDelay: `${cells.length * 0.33}s` }}
+             title="시각을 모르므로 세우지 않았습니다">
+          <div className="p">시주</div>
+          <div className="g">◇</div>
+          <div className="j">◇</div>
         </div>
       )}
     </div>
@@ -41,10 +57,15 @@ export function ElementBar({ f }: { f: Features }) {
     <div className="elbar">
       {entries.map(([k, v], i) => (
         <div key={k}>
-          <i style={{
-            ["--h" as string]: `${Math.max(3, (v / max) * 48)}px`,
-            animationDelay: `${i * 0.11}s`,
-          }} />
+          {/* 막대 자리를 고정 높이로 잡아야 라벨이 한 줄로 선다.
+              안 잡으면 막대 길이만큼 라벨이 위아래로 흩어지고
+              아래 글씨를 덮는다. */}
+          <span className="bar">
+            <i style={{
+              ["--h" as string]: `${Math.max(3, (v / max) * 48)}px`,
+              animationDelay: `${i * 0.11}s`,
+            }} />
+          </span>
           <div className="lb">{k}</div>
           <div className="vv">{v}</div>
         </div>
