@@ -64,7 +64,7 @@ def health() -> dict:
         "ok": True,
         "engine_ver": ENGINE_VER,
         "tz_source": tz.TZ_SOURCE,
-        "store": store.BACKEND,
+        "store": store.stats(),
         "db": db.HAS_DB,
         "payments": payments.ENABLED,
         "cors_origins": CORS_ORIGINS,

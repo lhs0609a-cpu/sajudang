@@ -1,12 +1,18 @@
 """
 캐시·카운터 — docs/02 §6
 
-Redis 가 있으면 Redis, 없으면 프로세스 메모리로 돕니다. 어느 쪽이든
-**브레이크 카운터는 반드시 동작**해야 하므로 인터페이스를 같게 두었습니다.
+세 가지 백엔드를 같은 인터페이스로 씁니다. 위에서부터 먼저 잡히는 것을 씁니다.
 
-    REDIS_URL=redis://localhost:6379/0
+    1. Redis     REDIS_URL 이 있으면. 여러 대로 늘릴 때.
+    2. SQLite    STORE_PATH 가 있으면. 한 대짜리 배포의 기본.
+    3. 메모리    아무것도 없으면. 개발·테스트용.
 
-메모리 폴백은 단일 프로세스에서만 맞습니다. 운영에서는 Redis 를 쓰세요.
+★ 왜 메모리로 배포하면 안 되는가
+    · 공유 링크(90일)가 재시작마다 사라집니다.
+    · **브레이크가 풀립니다.** 하루 결제 2건·세션 릴레이 2명 카운터가
+      초기화되면 제한이 없는 것과 같습니다. (CLAUDE.md 절대 규칙 4)
+  그래서 배포에서는 STORE_PATH 나 REDIS_URL 중 하나가 반드시 있어야 합니다.
+  `/health` 의 `store` 값으로 확인하세요.
 """
 from __future__ import annotations
 
@@ -14,12 +20,15 @@ import hashlib
 import json
 import logging
 import os
+import sqlite3
+import threading
 import time
 from typing import Any, Optional
 
 log = logging.getLogger("store")
 
 REDIS_URL = os.getenv("REDIS_URL", "").strip()
+STORE_PATH = os.getenv("STORE_PATH", "").strip()
 
 _redis = None
 if REDIS_URL:
@@ -27,35 +36,68 @@ if REDIS_URL:
         import redis as _redis_lib
         _redis = _redis_lib.from_url(REDIS_URL, decode_responses=True)
         _redis.ping()
-        log.info("store: redis %s", REDIS_URL)
+        log.info("store: redis")
     except Exception as e:                     # noqa: BLE001
-        log.warning("store: redis 연결 실패 (%s) — 메모리로 폴백", e)
+        log.warning("store: redis 연결 실패 (%s)", e)
         _redis = None
 
-BACKEND = "redis" if _redis else "memory"
+# ── SQLite ────────────────────────────────────────────────
+_db: Optional[sqlite3.Connection] = None
+_lock = threading.Lock()
+
+if _redis is None and STORE_PATH:
+    try:
+        os.makedirs(os.path.dirname(STORE_PATH) or ".", exist_ok=True)
+        _db = sqlite3.connect(STORE_PATH, check_same_thread=False)
+        _db.execute("PRAGMA journal_mode=WAL")
+        _db.execute("PRAGMA synchronous=NORMAL")
+        _db.execute(
+            "CREATE TABLE IF NOT EXISTS kv ("
+            " k TEXT PRIMARY KEY, v TEXT NOT NULL, exp REAL)")
+        _db.execute("CREATE INDEX IF NOT EXISTS kv_exp ON kv(exp)")
+        _db.commit()
+        log.info("store: sqlite %s", STORE_PATH)
+    except Exception as e:                     # noqa: BLE001
+        log.warning("store: sqlite 열기 실패 (%s)", e)
+        _db = None
+
+BACKEND = "redis" if _redis else ("sqlite" if _db else "memory")
 
 _mem: dict[str, tuple[Optional[float], Any]] = {}
 
 
-def _expired(entry) -> bool:
-    exp, _ = entry
-    return exp is not None and exp < time.time()
+def _now() -> float:
+    return time.time()
 
 
+# ── 메모리 ────────────────────────────────────────────────
 def _mem_get(key: str):
     e = _mem.get(key)
     if e is None:
         return None
-    if _expired(e):
+    exp, val = e
+    if exp is not None and exp < _now():
         _mem.pop(key, None)
         return None
-    return e[1]
+    return val
 
 
+# ── 공통 API ──────────────────────────────────────────────
 def get_json(key: str):
     if _redis:
         raw = _redis.get(key)
         return json.loads(raw) if raw else None
+    if _db:
+        with _lock:
+            row = _db.execute(
+                "SELECT v, exp FROM kv WHERE k=?", (key,)).fetchone()
+        if row is None:
+            return None
+        v, exp = row
+        if exp is not None and exp < _now():
+            delete(key)
+            return None
+        return json.loads(v)
     return _mem_get(key)
 
 
@@ -67,26 +109,75 @@ def set_json(key: str, value, ttl: Optional[int] = None) -> None:
         else:
             _redis.set(key, raw)
         return
-    _mem[key] = (time.time() + ttl if ttl else None, value)
+    if _db:
+        exp = _now() + ttl if ttl else None
+        with _lock:
+            _db.execute(
+                "INSERT INTO kv(k, v, exp) VALUES(?,?,?) "
+                "ON CONFLICT(k) DO UPDATE SET v=excluded.v, exp=excluded.exp",
+                (key, json.dumps(value, ensure_ascii=False), exp))
+            _db.commit()
+        return
+    _mem[key] = (_now() + ttl if ttl else None, value)
+
+
+def delete(key: str) -> None:
+    if _redis:
+        _redis.delete(key)
+        return
+    if _db:
+        with _lock:
+            _db.execute("DELETE FROM kv WHERE k=?", (key,))
+            _db.commit()
+        return
+    _mem.pop(key, None)
 
 
 def incr(key: str, ttl: Optional[int] = None) -> int:
+    """
+    ★ 브레이크 카운터가 이걸 씁니다. 원자적이어야 합니다.
+    """
     if _redis:
         n = _redis.incr(key)
         if ttl and n == 1:
             _redis.expire(key, ttl)
         return int(n)
+    if _db:
+        with _lock:
+            row = _db.execute(
+                "SELECT v, exp FROM kv WHERE k=?", (key,)).fetchone()
+            cur, exp = 0, None
+            if row is not None:
+                v, e = row
+                if e is None or e >= _now():
+                    try:
+                        cur = int(json.loads(v))
+                    except (ValueError, TypeError):
+                        cur = 0
+                    exp = e
+            cur += 1
+            if exp is None and ttl:
+                exp = _now() + ttl
+            _db.execute(
+                "INSERT INTO kv(k, v, exp) VALUES(?,?,?) "
+                "ON CONFLICT(k) DO UPDATE SET v=excluded.v, exp=excluded.exp",
+                (key, json.dumps(cur), exp))
+            _db.commit()
+            return cur
     cur = _mem_get(key) or 0
     cur += 1
     exp = _mem.get(key, (None, None))[0]
     if exp is None and ttl:
-        exp = time.time() + ttl
+        exp = _now() + ttl
     _mem[key] = (exp, cur)
     return cur
 
 
 def get_int(key: str) -> int:
-    v = get_json(key) if not _redis else _redis.get(key)
+    if _redis:
+        v = _redis.get(key)
+    else:
+        v = get_json(key)
     try:
         return int(v)
     except (TypeError, ValueError):
@@ -96,14 +187,48 @@ def get_int(key: str) -> int:
 def exists(key: str) -> bool:
     if _redis:
         return bool(_redis.exists(key))
-    return _mem_get(key) is not None
+    return get_json(key) is not None
+
+
+def sweep() -> int:
+    """지난 항목 청소. SQLite 만 해당. 스케줄러에서 가끔 부르면 됩니다."""
+    if not _db:
+        return 0
+    with _lock:
+        cur = _db.execute("DELETE FROM kv WHERE exp IS NOT NULL AND exp < ?",
+                          (_now(),))
+        _db.commit()
+        return cur.rowcount or 0
 
 
 def clear_all() -> None:
     """테스트용. 운영 코드에서 부르지 마세요."""
     if _redis:
         _redis.flushdb()
+        return
+    if _db:
+        with _lock:
+            _db.execute("DELETE FROM kv")
+            _db.commit()
+        return
     _mem.clear()
+
+
+def stats() -> dict:
+    """/health 에서 보여줄 값."""
+    out = {"backend": BACKEND, "durable": BACKEND in ("redis", "sqlite")}
+    if _db:
+        with _lock:
+            out["keys"] = _db.execute("SELECT count(*) FROM kv").fetchone()[0]
+        out["path"] = STORE_PATH
+    elif _redis:
+        try:
+            out["keys"] = _redis.dbsize()
+        except Exception:                      # noqa: BLE001
+            pass
+    else:
+        out["keys"] = len(_mem)
+    return out
 
 
 # ── 키 규약 ────────────────────────────────────────────────

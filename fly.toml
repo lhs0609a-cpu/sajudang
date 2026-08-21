@@ -1,0 +1,45 @@
+# 사주당 계산 API — Fly.io
+#
+#   fly deploy --remote-only         (로컬 도커 없이 원격 빌드)
+#   fly secrets set CORS_ORIGINS=...
+#   fly volumes create sajudang_data --size 1 --region nrt
+#
+# ★ 볼륨이 없으면 공유 링크와 브레이크 카운터가 재시작마다 날아갑니다.
+
+app = "sajudang-api"
+primary_region = "nrt"          # 도쿄 — 한국에서 가장 가깝습니다
+
+[build]
+
+[env]
+  PORT = "8080"
+  STORE_PATH = "/data/store.sqlite"
+  STATEMENT_LOG_PATH = "/data/statement_log.jsonl"
+
+[[mounts]]
+  source = "sajudang_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "suspend"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 40
+    hard_limit = 80
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/health"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
