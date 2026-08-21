@@ -208,6 +208,8 @@ export interface SummarySection {
 }
 
 export interface SinsalBrief {
+  /** 의인화 그림을 찾는 열쇠 (lib/sinsalFigures.ts) */
+  key: string;
   name: string;
   hanja: string;
   kind: "길신" | "살" | "특수";

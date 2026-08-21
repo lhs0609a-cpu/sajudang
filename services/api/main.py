@@ -9,6 +9,7 @@
 ★ GuardMiddleware 는 끄지 마세요. (CLAUDE.md 절대 규칙 3)
 """
 import logging
+import os
 import sys
 from pathlib import Path
 
@@ -30,11 +31,21 @@ logging.basicConfig(
 
 ENGINE_VER = "0.2.0"     # ★ 만세력을 고치면 올리세요. charts.engine_ver 에 남습니다.
 
+# 브라우저가 이 API 를 부를 수 있는 출처. 쉼표로 여러 개.
+#   CORS_ORIGINS=https://sajudang-three.vercel.app,http://localhost:3000
+# ★ 배포 도메인을 여기 넣지 않으면 브라우저가 요청을 막습니다.
+#   서버는 200 을 주는데 화면만 조용히 비는 형태라 찾기 어렵습니다.
+CORS_ORIGINS = [
+    o.strip() for o in
+    os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+    if o.strip()
+]
+
 app = FastAPI(title="사주당 API", version=ENGINE_VER)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -56,4 +67,5 @@ def health() -> dict:
         "store": store.BACKEND,
         "db": db.HAS_DB,
         "payments": payments.ENABLED,
+        "cors_origins": CORS_ORIGINS,
     }

@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation";
 import Shell from "@/components/Shell";
 import Scene from "@/components/scene/Scene";
 import { Narration, Say } from "@/components/Narration";
+import SinsalFigure from "@/components/scene/SinsalFigure";
 import { api, ApiError } from "@/lib/api";
 import type { Shared } from "@shared/chart";
 
@@ -143,14 +144,16 @@ export default function SharedView({ token }: { token: string }) {
         </p>
       </div>
 
+      {/* 친구 곁에 선 이들 — 길신부터 보여준다 */}
       {d.sinsal && d.sinsal.length > 0 && (
-        <div className="sslist">
-          {d.sinsal.map((x) => (
-            <span key={x.name + x.at.join()}
-                  className={"chip " + (x.kind === "길신" ? "good" : "warn")}>
-              {x.name} <i>{x.at.join("·")}</i>
-            </span>
-          ))}
+        <div className="blk in">
+          <div className="lab">{who ? who + "님 곁에 선 이들" : "곁에 선 이들"}</div>
+          {[...d.sinsal]
+            .sort((a, b) => (a.kind === "길신" ? -1 : 1) - (b.kind === "길신" ? -1 : 1))
+            .map((x) => (
+              <SinsalFigure key={x.key + x.at.join()} sinsalKey={x.key}
+                            at={x.at} size={120} />
+            ))}
         </div>
       )}
 

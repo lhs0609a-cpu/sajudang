@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import Shell from "@/components/Shell";
 import Scene from "@/components/scene/Scene";
 import { Narration, Say } from "@/components/Narration";
+import SinsalFigure from "@/components/scene/SinsalFigure";
 import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/store";
 import type { Summary } from "@shared/chart";
@@ -93,18 +94,17 @@ export default function SummaryPage() {
         </div>
       ))}
 
-      {/* 이름 붙은 자리 */}
+      {/* 이름 붙은 자리 — 표가 아니라 곁에 선 사람으로 */}
       {sm.sinsal.length > 0 && (
         <div className="blk in">
-          <div className="lab">이름 붙은 자리</div>
-          <div className="sslist">
-            {sm.sinsal.map((x) => (
-              <span key={x.name + x.at.join()}
-                    className={"chip " + (x.kind === "길신" ? "good" : "warn")}>
-                {x.name} <i>{x.at.join("·")}</i>
-              </span>
-            ))}
-          </div>
+          <div className="lab">곁에 선 이들</div>
+          <p className="sm">
+            옛사람들이 이 자리들을 어떤 모습으로 그렸는지 옮긴 것이오.
+            무엇이 일어난다는 뜻이 아니오.
+          </p>
+          {sm.sinsal.map((x) => (
+            <SinsalFigure key={x.key + x.at.join()} sinsalKey={x.key} at={x.at} />
+          ))}
         </div>
       )}
 

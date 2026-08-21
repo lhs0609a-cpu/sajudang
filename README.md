@@ -29,6 +29,7 @@
 | T5-2 리텐션 | ✅ 5층 트리거 · 하루 1건 · 우선순위 · 회고 루프 |
 | **신살·궁위** | ✅ 길신 5 · 살 3 · 특수 5 · 공망 · 궁위 4 — 누가 돕는가 · 조상 자리 (docs/14) |
 | **분석지·공유** | ✅ 7절 분석지 · 공유 링크(생일 미포함) · 유입 랜딩 · OG 미리보기 (docs/15) |
+| **신살 인물** | ✅ 13종 의인화 · 등장 연출 · 에셋 폴백 (docs/16) — 에셋 0/13 |
 
 **다음에 할 일**: 회귀 케이스 50건의 기대값 채우기. 아래 "2주차 관문" 참고.
 
@@ -58,8 +59,14 @@ vercel env add NEXT_PUBLIC_API_BASE production   # 예: https://api.sajudang.com
 vercel --prod
 ```
 
-API 쪽에는 CORS 허용 출처에 배포 도메인을 넣어야 합니다
-(`services/api/main.py` 의 `allow_origins`).
+API 쪽에는 **CORS 허용 출처에 배포 도메인을 넣어야 합니다.**
+
+```bash
+CORS_ORIGINS=https://sajudang-three.vercel.app,http://localhost:3000
+```
+
+빠뜨리면 서버는 200 을 주는데 브라우저가 막아서 **화면만 조용히 빕니다.**
+찾기 어려운 축에 듭니다. `/health` 응답의 `cors_origins` 로 확인하세요.
 
 ### 배포 보호
 
@@ -216,6 +223,7 @@ alembic.ini          마이그레이션
 docs/                설계 문서 00~13
                      14 신살·궁위 확정표 (유파 확정)
                      15 분석지·공유·유입 설계
+                     16 신살 인물 에셋 발주서
 seed/                bank · lenses · relay_rules · guard · ilgan · meta
 reference/
   sajudang.html      동작하는 참조 구현체 (문서와 어긋나면 이게 정답)

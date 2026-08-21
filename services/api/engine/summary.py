@@ -175,7 +175,7 @@ def build_summary(chart, f, concern: str = "love",
         "pillars": f.pillars,
         "hour_known": f.hour_known,
         "sections": secs,
-        "sinsal": [{"name": s["name"], "hanja": s["hanja"],
+        "sinsal": [{"key": s["key"], "name": s["name"], "hanja": s["hanja"],
                     "kind": s["kind"], "at": s["at"]} for s in f.sinsal],
         "caveats": _caveats(f),
     }
