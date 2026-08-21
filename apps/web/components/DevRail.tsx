@@ -5,9 +5,14 @@
  *
  * 전체 화면을 한 자리에서 오가며 플로우를 확인하고 고치는 용도입니다.
  *
- * ★ 기본은 꺼져 있습니다. 켜고 끄기
+ * ★ 켜고 끄기
  *      ?admin=1   켬 (브라우저에 기억됨)
- *      ?admin=0   끔
+ *      ?admin=0   끔 (레일 머리의 [숨기기] 와 같습니다)
+ *
+ *   기본값은 빌드가 정합니다 — NEXT_PUBLIC_ADMIN_DEFAULT.
+ *   출시 전에는 켜짐이라 새 브라우저·시크릿창에서도 바로 보입니다.
+ *   출시할 때 그 값을 0 으로 두면 기본 꺼짐이 되고, 그때부터는
+ *   ?admin=1 을 아는 사람만 봅니다.
  *   docs/08 §5 — 좌측 개발 레일은 프로덕션 화면이 아닙니다.
  *
  * ★ 여기서 하는 일은 전부 **화면 확인용**입니다.
@@ -36,6 +41,12 @@ const SEASONS: { k: Season; label: string }[] = [
   { k: "winter", label: "겨울 매화" },
 ];
 
+/*
+ * 출시 전 기본 켜짐. 출시할 때 Vercel 환경변수에 0 을 넣으면 꺼집니다.
+ * 값을 안 주면 켜짐입니다 — 아직 출시 전이기 때문입니다.
+ */
+const ADMIN_DEFAULT = process.env.NEXT_PUBLIC_ADMIN_DEFAULT !== "0";
+
 const EL = { 목: "나무", 화: "불", 토: "흙", 금: "쇠", 수: "물" } as Record<string, string>;
 
 export default function DevRail() {
@@ -47,13 +58,19 @@ export default function DevRail() {
   const [err, setErr] = useState<string | null>(null);
   const [open, setOpen] = useState(true);
 
-  /* ?admin=1 / ?admin=0 */
+  /*
+   * 켜고 끄는 규칙 — 사람이 정한 것이 빌드 기본값을 이깁니다.
+   *   ?admin=1 / ?admin=0  → 사람이 정했다고 기억(adminSet)
+   *   정한 적이 없으면      → 빌드 기본값(ADMIN_DEFAULT)
+   * 이 순서가 아니면 ?admin=0 으로 끈 레일이 다음 방문에 도로 켜집니다.
+   */
   useEffect(() => {
     const v = params.get("admin");
-    if (v === "1" && !s.admin) s.set({ admin: true });
-    if (v === "0" && s.admin) s.set({ admin: false });
+    if (v === "1") { s.set({ admin: true, adminSet: true }); return; }
+    if (v === "0") { s.set({ admin: false, adminSet: true }); return; }
+    if (!s.adminSet && ADMIN_DEFAULT && !s.admin) s.set({ admin: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params]);
+  }, [params, s.adminSet]);
 
   if (!s.admin) return null;
 
@@ -95,7 +112,15 @@ export default function DevRail() {
       {open && (
         <div className="railin">
           <h1>四柱堂</h1>
-          <div className="v">관리자 · 전체 플로우</div>
+          <div className="v">
+            관리자 · 전체 플로우
+            <button
+              className="railoff"
+              onClick={() => s.set({ admin: false, adminSet: true })}
+              title="레일을 끕니다. 다시 켜려면 주소 끝에 ?admin=1">
+              숨기기
+            </button>
+          </div>
 
           {/* ── 생년월일시 ── */}
           <span className="gh">생년월일시</span>

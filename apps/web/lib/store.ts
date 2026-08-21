@@ -45,10 +45,18 @@ export interface SessionState {
   relayUsed: number;
   visits: number;
 
-  /* ── 관리자 (프로덕션 기본 꺼짐) ──
+  /* ── 관리자 레일 ──
      ?admin=1 로 켜고 ?admin=0 으로 끕니다. 전체 화면을 오가며
-     플로우를 확인하는 용도입니다. */
+     플로우를 확인하는 용도입니다.
+
+     기본값은 빌드가 정합니다 — NEXT_PUBLIC_ADMIN_DEFAULT (docs/17 §4).
+     출시 전에는 켜짐이라 새 브라우저에서도 바로 보입니다.
+     출시할 때 그 값을 0 으로 두면 기본 꺼짐이 됩니다.
+
+     adminSet 은 **사람이 직접 정했는가**를 기억합니다. 이게 없으면
+     ?admin=0 으로 끈 것을 다음 방문에서 기본값이 도로 켜 버립니다. */
   admin: boolean;
+  adminSet: boolean;
   seasonOverride: Season | null;   // 진입 서사 4계절 확인
   ilganOverride: string | null;    // 일간 10색 테마 확인
 
@@ -88,7 +96,8 @@ const initial = {
   paid: false,
   relayUsed: 0,
   visits: 0,
-  admin: false,
+  admin: false,          // 첫 그림(SSR)에는 레일이 없다 — 켜는 것은 DevRail 이 한다
+  adminSet: false,
   seasonOverride: null as Season | null,
   ilganOverride: null as string | null,
 };
@@ -113,7 +122,7 @@ export const useSession = create<SessionState>()(
         sex: s.sex, city: s.city, axis4: s.axis4, concern: s.concern,
         chartId: s.chartId, cur: s.cur, read: s.read, skipped: s.skipped,
         seals: s.seals, tier: s.tier, paid: s.paid, visits: s.visits,
-        admin: s.admin, seasonOverride: s.seasonOverride,
+        admin: s.admin, adminSet: s.adminSet, seasonOverride: s.seasonOverride,
         ilganOverride: s.ilganOverride,
       }),
     },

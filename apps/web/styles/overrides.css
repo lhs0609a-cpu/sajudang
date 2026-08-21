@@ -215,15 +215,26 @@
   position: fixed; left: 0; top: 0; bottom: 0; width: 232px; z-index: 90;
   background: #06040a; border-right: 1px solid var(--line);
   font-family: var(--mono); font-size: 10px; color: var(--paper3);
-  overflow-y: auto;
+  overflow-y: auto; overflow-x: hidden;   /* 가로 스크롤바가 아래를 갉아먹었다 */
 }
 .rail.closed { width: 26px; overflow: visible; }
-.railin { padding: 16px 12px 40px; }
+.railin { padding: 16px 12px 40px; min-width: 0; }
+.railin * { min-width: 0; }
 .rail h1 {
   font-family: var(--serif); font-size: 15px; color: var(--gold);
   letter-spacing: .1em;
 }
-.rail .v { font-size: 9px; margin-bottom: 12px; opacity: .6; }
+.rail .v {
+  font-size: 9px; margin-bottom: 12px; opacity: .6;
+  display: flex; align-items: center; justify-content: space-between; gap: 6px;
+}
+/* 레일을 끄는 단추 — 끄면 다시 켤 방법은 ?admin=1 뿐이므로 title 에 적어 둡니다 */
+.railoff {
+  font-size: 9px; padding: 2px 6px; border-radius: 4px; cursor: pointer;
+  background: transparent; color: inherit; opacity: .8;
+  border: 1px solid var(--line);
+}
+.railoff:hover { opacity: 1; border-color: var(--gold); color: var(--gold); }
 .rail .gh {
   display: block; font-size: 8.5px; letter-spacing: .16em; color: var(--gold);
   margin: 14px 0 5px; padding-bottom: 4px; border-bottom: 1px solid var(--line);
