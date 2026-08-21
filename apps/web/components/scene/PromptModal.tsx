@@ -17,10 +17,19 @@
  *   모션 프롬프트에 이미 붙어 있으니 통째로 복사하세요.
  */
 import { useEffect, useState } from "react";
+import { seasonOf, useSession } from "@/lib/store";
+
+const SEASON_KO: Record<string, string> = {
+  spring: "봄 · 벚꽃", summer: "여름 · 능소화",
+  autumn: "가을 · 국화", winter: "겨울 · 매화",
+};
 
 export interface PromptEntry {
   title: string;
   who?: string | null;
+  /* 대문처럼 계절을 타는 장면 — 꽃이 계절마다 달라 그림이 넉 장 필요합니다 */
+  seasonal?: boolean;
+  seasons?: Record<string, string> | null;
   spec?: string[] | null;
   hint?: string | null;
   image: string | null;
@@ -88,6 +97,8 @@ export default function PromptModal({
 }) {
   const [data, setData] = useState<Bundle | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const override = useSession((st) => st.seasonOverride);
+  const season = override ?? seasonOf();
 
   useEffect(() => {
     let alive = true;
@@ -110,7 +121,16 @@ export default function PromptModal({
   const e = data
     ? (kind === "scene" ? data.scenes[id] : data.figures[id])
     : null;
-  const dir = kind === "scene" ? `/scene/${id}/` : `/sinsal/${id}/`;
+
+  /*
+   * 계절을 타는 장면은 지금 보고 있는 계절의 프롬프트와 폴더를 보여 줍니다.
+   * 한 벌만 보여 주면 넉 장을 만들어야 하는 줄 모르고 한 장만 만들게 됩니다.
+   */
+  const seasonal = kind === "scene" && !!e?.seasonal;
+  const image = seasonal ? (e?.seasons?.[season] ?? e?.image) : e?.image;
+  const dir = kind === "scene"
+    ? (seasonal ? `/scene/${id}/${season}/` : `/scene/${id}/`)
+    : `/sinsal/${id}/`;
 
   return (
     <div className="pmod on" onClick={onClose}>
@@ -148,8 +168,22 @@ export default function PromptModal({
               ④ <b>{dir}</b> 에 배치하면 코드 수정 없이 교체되오
             </div>
 
-            {e.image && (
-              <Block n="①" label="시작 이미지 · 제미나이" text={e.image} />
+            {seasonal && (
+              <div className="hint" style={{ borderColor: "var(--rose)" }}>
+                <b>계절 넉 장이 필요하오.</b><br />
+                꽃이 계절마다 다릅니다 — 벚꽃 · 능소화 · 국화 · 매화.
+                착색으로는 꽃 모양을 못 바꾸니 그림 자체가 넉 장이어야 합니다.<br />
+                지금 보이는 것은 <b>{SEASON_KO[season] ?? season}</b> 것이오.
+                레일에서 계절을 바꾸면 나머지가 나옵니다.
+              </div>
+            )}
+            {image && (
+              <Block
+                n="①"
+                label={seasonal
+                  ? `시작 이미지 · 제미나이 · ${SEASON_KO[season] ?? season}`
+                  : "시작 이미지 · 제미나이"}
+                text={image} />
             )}
             {e.motion && (
               <Block n="②" label="모션 · 힉스필드" text={e.motion}

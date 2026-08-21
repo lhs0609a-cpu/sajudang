@@ -27,16 +27,23 @@ function useReducedMotion() {
   return reduced;
 }
 
-/** 에셋이 실제로 있는지 확인. 없으면 SVG 자리표시로 간다. */
-function useHasClip(id: string) {
+/**
+ * 에셋이 실제로 있는지 확인. 없으면 SVG 자리표시로 간다.
+ *
+ * 계절을 타는 장면(대문)은 계절 폴더를 봅니다 — /scene/gate/spring/ ….
+ * 꽃이 계절마다 다릅니다(벚꽃·능소화·국화·매화). 착색으로는 꽃 모양을
+ * 못 바꾸므로 그림 자체가 넉 장이어야 합니다. 한 폴더만 보면 넉 장을
+ * 만들어 넣어도 한 장만 쓰이고 나머지 세 계절은 자리표시로 남습니다.
+ */
+function useHasClip(base: string) {
   const [has, setHas] = useState<boolean | null>(null);
   useEffect(() => {
     let alive = true;
-    fetch(`/scene/${id}/poster.jpg`, { method: "HEAD" })
+    fetch(`${base}poster.jpg`, { method: "HEAD" })
       .then((r) => alive && setHas(r.ok))
       .catch(() => alive && setHas(false));
     return () => { alive = false; };
-  }, [id]);
+  }, [base]);
   return has;
 }
 
@@ -114,9 +121,13 @@ function Placeholder({ id, season }: { id: string; season: Season }) {
 export default function Scene({ id, className }: { id: string; className?: string }) {
   const spec = SCENE_BY_ID[id];
   const reduced = useReducedMotion();
-  const hasClip = useHasClip(id);
   const override = useSession((st) => st.seasonOverride);
   const season = override ?? seasonOf();
+  // 훅은 조건 앞에 와야 합니다. spec 이 없어도 순서가 흔들리면 안 됩니다.
+  const base = spec?.seasonal
+    ? `/scene/${id}/${season}/`
+    : `/scene/${id}/`;
+  const hasClip = useHasClip(base);
   const [open, setOpen] = useState(false);
 
   if (!spec) return null;
@@ -124,15 +135,16 @@ export default function Scene({ id, className }: { id: string; className?: strin
   const body = hasClip ? (
     reduced ? (
       // eslint-disable-next-line @next/next/no-img-element
-      <img src={`/scene/${id}/poster.jpg`} alt={spec.name} />
+      <img src={`${base}poster.jpg`} alt={spec.name} />
     ) : (
       <video
         className={spec.tint ? "scene-video" : undefined}
-        poster={`/scene/${id}/poster.jpg`}
+        poster={`${base}poster.jpg`}
         autoPlay muted playsInline loop={spec.loop}
+        key={base}
       >
-        <source src={`/scene/${id}/clip.webm`} type="video/webm" />
-        <source src={`/scene/${id}/clip.mp4`} type="video/mp4" />
+        <source src={`${base}clip.webm`} type="video/webm" />
+        <source src={`${base}clip.mp4`} type="video/mp4" />
       </video>
     )
   ) : (

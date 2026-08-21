@@ -44,8 +44,55 @@ try {
   process.exit(1);
 }
 
+/*
+ * ★ 대문(gate)은 계절을 탑니다. 한 번만 평가하면 SEA 의 초기값(여름)
+ *   하나만 나오고 봄·가을·겨울이 통째로 빕니다. 화면에서 계절을 바꿔도
+ *   여름 프롬프트가 뜨고, 그걸 복사해 만든 그림은 나머지 세 계절에
+ *   쓰이지 않습니다. SEA 를 갈아 끼워 네 번 평가합니다.
+ */
+const SEASON_KEYS = ["spring", "summer", "autumn", "winter"];
+function promptsFor(sea) {
+  const sb = { cat: () => "", console };
+  vm.createContext(sb);
+  vm.runInContext(
+    parts.join(NL + ";" + NL) + NL + ";SEA=" + JSON.stringify(sea) + ";" +
+    NL + ";globalThis.__y = {SCN};", sb);
+  const out = {};
+  for (const id of Object.keys(sb.__y.SCN)) {
+    const p = sb.__y.SCN[id].prompt;
+    out[id] = (typeof p === "function" ? p() : p) || null;
+  }
+  return out;
+}
+const BY_SEASON = {};
+for (const k of SEASON_KEYS) BY_SEASON[k] = promptsFor(k);
+/** 표에 박아두면 계절 장면이 늘었을 때 조용히 빠집니다. 세어서 찾습니다. */
+const SEASONAL = new Set(
+  Object.keys(BY_SEASON.spring).filter(
+    (id) => new Set(SEASON_KEYS.map((k) => BY_SEASON[k][id])).size > 1));
+
 const { SCN, MO, CAM, ANIMBASE, TINT, PIPE } = sandbox.__x;
-const out = { ANIMBASE, TINT, PIPE, CAM, scenes: {} };
+
+/*
+ * 신살 인물 13종은 참조 구현체에 없습니다 (docs/16 에서 나왔습니다).
+ * 원본은 seed/figure_prompts.json 이고 여기서는 합치기만 합니다.
+ * 산출물에서 거꾸로 읽어 오면 추출기를 다시 돌릴 때마다 인물이
+ * 통째로 날아갑니다 — 한 번 그럴 뻔했습니다.
+ */
+const FIG_SRC = "seed/figure_prompts.json";
+const figSrc = JSON.parse(fs.readFileSync(FIG_SRC, "utf8"));
+const figures = {};
+for (const k of Object.keys(figSrc)) {
+  if (k === "_") continue;                       // 머리말
+  const f = figSrc[k];
+  if (!f.image || !f.motion) {
+    console.error("인물 프롬프트가 비었습니다: " + k);
+    process.exit(1);
+  }
+  figures[k] = { note: null, hint: null, ...f };
+}
+
+const out = { ANIMBASE, TINT, PIPE, CAM, scenes: {}, figures };
 for (const id of Object.keys(SCN)) {
   const s = SCN[id];
   const mo = MO[id] || {};
@@ -62,8 +109,15 @@ for (const id of Object.keys(SCN)) {
   const motion = (mo.hg || null) &&
     mo.hg.split("${ANIMBASE}").join(ANIMBASE);
 
+  const seasonal = SEASONAL.has(id);
+  const seasons = seasonal
+    ? Object.fromEntries(SEASON_KEYS.map((k) => [k, BY_SEASON[k][id]]))
+    : null;
+
   out.scenes[id] = {
     title: s.t,
+    seasonal,
+    seasons,
     spec: s.spec || null,
     hint: s.hint || null,
     image,
@@ -82,5 +136,9 @@ const v = Object.values(out.scenes);
 console.log(
   `장면 ${v.length}개 · 이미지 프롬프트 ${v.filter((x) => x.image).length}` +
   ` · 모션 프롬프트 ${v.filter((x) => x.motion).length}`);
+console.log("신살 인물:", Object.keys(figures).length, "종 (" + FIG_SRC + ")");
+console.log("계절을 타는 장면:",
+  [...SEASONAL].join(", ") || "없음",
+  "→ 계절별 프롬프트를 따로 실었습니다");
 console.log("없는 것:",
   v.filter((x) => !x.image || !x.motion).map((x) => x.title).join(", ") || "없음");
