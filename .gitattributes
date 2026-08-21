@@ -1,0 +1,17 @@
+# 줄 끝 처리.
+#
+# ★ 셸 스크립트는 반드시 LF 여야 합니다.
+#   Windows 에서 체크아웃하면 CRLF 가 되는데, 리눅스 컨테이너가
+#   "#!/bin/sh\r" 를 인터프리터 이름으로 읽어 통째로 못 뜹니다.
+#   entrypoint.sh 가 그 자리라서 API 가 죽습니다.
+
+*.sh            text eol=lf
+Dockerfile      text eol=lf
+*.yml           text eol=lf
+*.yaml          text eol=lf
+
+# 산출물 — 줄 끝을 건드리지 않습니다
+*.png           binary
+*.jpg           binary
+*.webm          binary
+*.mp4           binary
