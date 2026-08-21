@@ -3,8 +3,8 @@
   reference/sajudang.html 과 docs/16 에서 그대로 뽑은 것입니다
 ==========================================================================
 
-  이미지 40장  (장면 27 + 신살 인물 13)
-  영상 40편
+  이미지 37장  (장면 24 + 신살 인물 13)
+  영상 37편
 
   한 항목마다 이 순서입니다
 
@@ -23,7 +23,7 @@
      통째로 같이 넣으시오. 빼면 3초 안에 그림이 실사 사진처럼
      변합니다. 얼굴이 특히 심합니다. (docs/10 §2)
 
-  2. '앱이 흑백으로 바꾼다' 고 적힌 장면 — 8장입니다
+  2. '앱이 흑백으로 바꾼다' 고 적힌 장면 — 5장입니다
 
      앱이 grayscale(1) 을 걸고 그 위에 캐릭터 색을 덮습니다.
      그림에 넣은 색은 어차피 지워집니다. 색으로 분위기를 내려
@@ -31,72 +31,69 @@
      캐릭터 스무 명의 색을 전부 감당하는 구조입니다.
      쓰이는 CSS 는 붙임 1 에 있습니다.
 
-  3. 대문 넉 장 (01~04)
+  3. 대문 (01) — 한 장이면 됩니다
 
-     같은 장면의 봄·여름·가을·겨울입니다. 하나만 만들면 나머지
-     세 계절에 들어온 사람은 자리표시 그림을 봅니다.
-     같은 사람이 계절마다 다른 화면을 보는 것이 이 서비스의
-     첫인상입니다. (docs/09 §5)
+     참조 구현체 메모에는 계절 4종을 만들라고 적혀 있으나
+     그러지 않아도 됩니다. 한 장을 넣으면 사계절 내내 나옵니다.
+     나중에 계절판을 넣고 싶어지면 붙임 4 의 프롬프트로 만들어
+     계절 폴더에 넣기만 하면 그때부터 그게 우선합니다.
 
 --------------------------------------------------------------------------
   차례
 --------------------------------------------------------------------------
 
   1부 · 진입 — 첫 화면부터 명식 세우기까지
-    01  대문 · 사계 — 봄 · 벚꽃          public/scene/gate/spring/
-    02  대문 · 사계 — 여름 · 능소화        public/scene/gate/summer/
-    03  대문 · 사계 — 가을 · 국화         public/scene/gate/autumn/
-    04  대문 · 사계 — 겨울 · 매화         public/scene/gate/winter/
-    05  열리는 문                     public/scene/door/
-    06  붓 · 벼루 · 빈 종이             public/scene/desk/
-    07  먹이 번지는 종이                 public/scene/ink/
-    08  실내 · 좌식 · 병풍              public/scene/room/
-    09  갈림길                       public/scene/fork/
-    10  명식 받침 · 네 자리              public/scene/altar/
-    11  마주앉은 자리                   public/scene/facing/
+    01  대문 · 사계                   public/scene/gate/
+    02  열리는 문                     public/scene/door/
+    03  붓 · 벼루 · 빈 종이             public/scene/desk/
+    04  먹이 번지는 종이                 public/scene/ink/
+    05  실내 · 좌식 · 병풍              public/scene/room/
+    06  갈림길                       public/scene/fork/
+    07  명식 받침 · 네 자리              public/scene/altar/
+    08  마주앉은 자리                   public/scene/facing/
 
   2부 · 진열대 — 캐릭터 고르기
-    12  안쪽 방 · 스무 자리              public/scene/hall/
-    13  그 사람의 자리                  public/scene/seat/
-    14  진열대 · 걸린 목패               public/scene/shelf/
+    09  안쪽 방 · 스무 자리              public/scene/hall/
+    10  그 사람의 자리                  public/scene/seat/
+    11  진열대 · 걸린 목패               public/scene/shelf/
 
   3부 · 리포트
-    15  펼쳐지는 두루마리                 public/scene/scroll/
-    16  대운 길 · 이정표                public/scene/roadmap/
-    17  반쯤 접힌 두루마리                public/scene/fold/
-    18  공유 카드 문양                  public/scene/cardbg/
-    19  후기 벽 · 붙은 종이쪽             public/scene/wall/
-    20  오래된 종이 · 회고               public/scene/oldpaper/
+    12  펼쳐지는 두루마리                 public/scene/scroll/
+    13  대운 길 · 이정표                public/scene/roadmap/
+    14  반쯤 접힌 두루마리                public/scene/fold/
+    15  공유 카드 문양                  public/scene/cardbg/
+    16  후기 벽 · 붙은 종이쪽             public/scene/wall/
+    17  오래된 종이 · 회고               public/scene/oldpaper/
 
   4부 · 결제
-    21  엽전 · 값을 치르다               public/scene/coin/
-    22  붉은 끈 · 개봉                 public/scene/untie/
-    23  목패를 늘어놓은 상                public/scene/tray/
+    18  엽전 · 값을 치르다               public/scene/coin/
+    19  붉은 끈 · 개봉                 public/scene/untie/
+    20  목패를 늘어놓은 상                public/scene/tray/
 
   5부 · 릴레이
-    24  문고리 · 안쪽 그림자              public/scene/handle/
+    21  문고리 · 안쪽 그림자              public/scene/handle/
 
   6부 · 오늘의 일진
-    25  등불 배너                     public/scene/banner/
-    26  다과상 · 차 한 잔               public/scene/tea/
+    22  등불 배너                     public/scene/banner/
+    23  다과상 · 차 한 잔               public/scene/tea/
 
   7부 · 인장첩
-    27  인장첩                       public/scene/sealbook/
+    24  인장첩                       public/scene/sealbook/
 
   8부 · 신살 인물 — 분석지에 나오는 사람들
-    28  흰 소매의 귀인                  public/sinsal/cheoneul/
-    29  태극을 인 이                   public/sinsal/taegeuk/
-    30  붓을 든 서생                   public/sinsal/munchang/
-    31  가마를 끄는 이                  public/sinsal/geumyeo/
-    32  그림자 속의 손                  public/sinsal/amrok/
-    33  칼을 쥔 무인                   public/sinsal/yangin/
-    34  흰 범                       public/sinsal/baekho/
-    35  등을 돌린 그림자                 public/sinsal/wonjin/
-    36  꽃그늘의 사람                   public/sinsal/dohwa/
-    37  말 위의 나그네                  public/sinsal/yeokma/
-    38  일산 아래 홀로                  public/sinsal/hwagae/
-    39  북두를 인 장수                  public/sinsal/gwaegang/
-    40  빈 자리                      public/sinsal/gongmang/
+    25  흰 소매의 귀인                  public/sinsal/cheoneul/
+    26  태극을 인 이                   public/sinsal/taegeuk/
+    27  붓을 든 서생                   public/sinsal/munchang/
+    28  가마를 끄는 이                  public/sinsal/geumyeo/
+    29  그림자 속의 손                  public/sinsal/amrok/
+    30  칼을 쥔 무인                   public/sinsal/yangin/
+    31  흰 범                       public/sinsal/baekho/
+    32  등을 돌린 그림자                 public/sinsal/wonjin/
+    33  꽃그늘의 사람                   public/sinsal/dohwa/
+    34  말 위의 나그네                  public/sinsal/yeokma/
+    35  일산 아래 홀로                  public/sinsal/hwagae/
+    36  북두를 인 장수                  public/sinsal/gwaegang/
+    37  빈 자리                      public/sinsal/gongmang/
 
 
 
@@ -105,10 +102,10 @@
 ##########################################################################
 
 ==========================================================================
-  01 / 40   대문 · 사계 — 봄 · 벚꽃
+  01 / 37   대문 · 사계
 ==========================================================================
   화면   a1 골목 — 맨 처음 보는 화면 · 공유 링크로 들어와도 여기
-  폴더   public/scene/gate/spring/
+  폴더   public/scene/gate/
   규격   9:16 · 5s · 프리셋 Dolly In · 한 번만 · ★ 앱이 흑백으로 바꾼 뒤 캐릭터 색을 입힙니다
   메모   계절 4종이 필요합니다. 꽃과 하늘색만 다른 시작 이미지 4장을 만들고
          같은 프롬프트로 4클립을 뽑으세요. 프롬프트는 동일합니다.
@@ -116,65 +113,11 @@
   참고   기본 진입 장면. 계절이 바뀌면 꽃과 하늘색이 바뀝니다.
          같은 사람이 봄·여름·가을·겨울에 오면 매번 다른 화면을 봅니다.
          담장 위 고양이는 사계절 고정 — 이 집의 마스코트입니다.
-  참고   그림 넉 장 · 모션 프롬프트는 넷 다 같습니다.
-         ★ 위 '메모' 의 "프롬프트는 동일" 은 모션 이야기입니다.
-         ① 이미지 프롬프트는 계절마다 꽃이 다릅니다 — 벚꽃 /
-         능소화 / 국화 / 매화. 착색으로는 꽃 모양을 못 바꾸니
-         넉 장을 따로 뽑아야 합니다.
-
---------------------------------------------------------------------------
-  ① 이미지 · 제미나이
---------------------------------------------------------------------------
-
-Korean romance-fantasy webtoon style, night scene.
-A traditional Korean hanok gate standing half-open at the end of a quiet
-lane just after rain. Warm golden light spills out through the open gate.
-Cherry blossom branches heavy with pale pink petals tumble over the tiled wall on both sides. Three ornate Korean
-paper lanterns (청사초롱) hang above at different heights, glowing amber
-and blue. A small black cat sits on the wall watching, eyes catching the
-lantern light. The wet stone ground mirrors the lantern light and the moon
-in soft broken reflections. Petals and a pale butterfly drift through the air.
-Deep plum-violet night sky, full moon and faint stars.
-Beautiful, inviting, slightly magical — not eerie.
-No people, no text, no signboard. Aspect ratio 9:16.
-
---------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Dolly In · 9:16 · 5s)
---------------------------------------------------------------------------
-
-Slow dolly in down the rain-wet lane toward the half-open hanok gate.
-The three paper lanterns flicker gently. Flower petals drift across the
-frame. The reflection on the wet stone ground ripples faintly. The black
-cat on the wall flicks its tail once and turns its head toward the
-viewer. The camera stops just before the gate. Warm golden light spills
-from the opening.
-
-This is a 2D hand-drawn animation, not live action. Preserve the
-illustration style exactly: flat cel shading, uniform lineart, painted
-texture. Do not add photographic realism, skin pores, film grain or 3D
-lighting. Do not redraw or reshape any element. Animate only what is
-described above; everything else stays completely still.
-
-(Preset: Dolly In · 9:16 · 5s)
-
-
-==========================================================================
-  02 / 40   대문 · 사계 — 여름 · 능소화
-==========================================================================
-  화면   a1 골목 — 맨 처음 보는 화면 · 공유 링크로 들어와도 여기
-  폴더   public/scene/gate/summer/
-  규격   9:16 · 5s · 프리셋 Dolly In · 한 번만 · ★ 앱이 흑백으로 바꾼 뒤 캐릭터 색을 입힙니다
-  메모   계절 4종이 필요합니다. 꽃과 하늘색만 다른 시작 이미지 4장을 만들고
-         같은 프롬프트로 4클립을 뽑으세요. 프롬프트는 동일합니다.
-         첫 방문에만 재생하고 두 번째부터는 poster 정지 이미지로 두세요.
-  참고   기본 진입 장면. 계절이 바뀌면 꽃과 하늘색이 바뀝니다.
-         같은 사람이 봄·여름·가을·겨울에 오면 매번 다른 화면을 봅니다.
-         담장 위 고양이는 사계절 고정 — 이 집의 마스코트입니다.
-  참고   그림 넉 장 · 모션 프롬프트는 넷 다 같습니다.
-         ★ 위 '메모' 의 "프롬프트는 동일" 은 모션 이야기입니다.
-         ① 이미지 프롬프트는 계절마다 꽃이 다릅니다 — 벚꽃 /
-         능소화 / 국화 / 매화. 착색으로는 꽃 모양을 못 바꾸니
-         넉 장을 따로 뽑아야 합니다.
+  참고   한 장만 만드시오. 이 그림이 사계절 내내 나옵니다.
+         ★ 위 '메모' 는 계절 4종을 만들라고 하지만 그러지
+         않아도 됩니다. 계절판을 넣고 싶어지면 그때 붙임 4 를
+         보시오 — 넣기만 하면 코드 고칠 것 없이 우선합니다.
+         아래 프롬프트는 여름 · 능소화 입니다.
 
 --------------------------------------------------------------------------
   ① 이미지 · 제미나이
@@ -213,115 +156,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  03 / 40   대문 · 사계 — 가을 · 국화
-==========================================================================
-  화면   a1 골목 — 맨 처음 보는 화면 · 공유 링크로 들어와도 여기
-  폴더   public/scene/gate/autumn/
-  규격   9:16 · 5s · 프리셋 Dolly In · 한 번만 · ★ 앱이 흑백으로 바꾼 뒤 캐릭터 색을 입힙니다
-  메모   계절 4종이 필요합니다. 꽃과 하늘색만 다른 시작 이미지 4장을 만들고
-         같은 프롬프트로 4클립을 뽑으세요. 프롬프트는 동일합니다.
-         첫 방문에만 재생하고 두 번째부터는 poster 정지 이미지로 두세요.
-  참고   기본 진입 장면. 계절이 바뀌면 꽃과 하늘색이 바뀝니다.
-         같은 사람이 봄·여름·가을·겨울에 오면 매번 다른 화면을 봅니다.
-         담장 위 고양이는 사계절 고정 — 이 집의 마스코트입니다.
-  참고   그림 넉 장 · 모션 프롬프트는 넷 다 같습니다.
-         ★ 위 '메모' 의 "프롬프트는 동일" 은 모션 이야기입니다.
-         ① 이미지 프롬프트는 계절마다 꽃이 다릅니다 — 벚꽃 /
-         능소화 / 국화 / 매화. 착색으로는 꽃 모양을 못 바꾸니
-         넉 장을 따로 뽑아야 합니다.
-
---------------------------------------------------------------------------
-  ① 이미지 · 제미나이
---------------------------------------------------------------------------
-
-Korean romance-fantasy webtoon style, night scene.
-A traditional Korean hanok gate standing half-open at the end of a quiet
-lane just after rain. Warm golden light spills out through the open gate.
-Chrysanthemum blooms in gold and amber spilling over the wall tumble over the tiled wall on both sides. Three ornate Korean
-paper lanterns (청사초롱) hang above at different heights, glowing amber
-and blue. A small black cat sits on the wall watching, eyes catching the
-lantern light. The wet stone ground mirrors the lantern light and the moon
-in soft broken reflections. A few dry leaves turn slowly in the air.
-Deep plum-violet night sky, full moon and faint stars.
-Beautiful, inviting, slightly magical — not eerie.
-No people, no text, no signboard. Aspect ratio 9:16.
-
---------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Dolly In · 9:16 · 5s)
---------------------------------------------------------------------------
-
-Slow dolly in down the rain-wet lane toward the half-open hanok gate.
-The three paper lanterns flicker gently. Flower petals drift across the
-frame. The reflection on the wet stone ground ripples faintly. The black
-cat on the wall flicks its tail once and turns its head toward the
-viewer. The camera stops just before the gate. Warm golden light spills
-from the opening.
-
-This is a 2D hand-drawn animation, not live action. Preserve the
-illustration style exactly: flat cel shading, uniform lineart, painted
-texture. Do not add photographic realism, skin pores, film grain or 3D
-lighting. Do not redraw or reshape any element. Animate only what is
-described above; everything else stays completely still.
-
-(Preset: Dolly In · 9:16 · 5s)
-
-
-==========================================================================
-  04 / 40   대문 · 사계 — 겨울 · 매화
-==========================================================================
-  화면   a1 골목 — 맨 처음 보는 화면 · 공유 링크로 들어와도 여기
-  폴더   public/scene/gate/winter/
-  규격   9:16 · 5s · 프리셋 Dolly In · 한 번만 · ★ 앱이 흑백으로 바꾼 뒤 캐릭터 색을 입힙니다
-  메모   계절 4종이 필요합니다. 꽃과 하늘색만 다른 시작 이미지 4장을 만들고
-         같은 프롬프트로 4클립을 뽑으세요. 프롬프트는 동일합니다.
-         첫 방문에만 재생하고 두 번째부터는 poster 정지 이미지로 두세요.
-  참고   기본 진입 장면. 계절이 바뀌면 꽃과 하늘색이 바뀝니다.
-         같은 사람이 봄·여름·가을·겨울에 오면 매번 다른 화면을 봅니다.
-         담장 위 고양이는 사계절 고정 — 이 집의 마스코트입니다.
-  참고   그림 넉 장 · 모션 프롬프트는 넷 다 같습니다.
-         ★ 위 '메모' 의 "프롬프트는 동일" 은 모션 이야기입니다.
-         ① 이미지 프롬프트는 계절마다 꽃이 다릅니다 — 벚꽃 /
-         능소화 / 국화 / 매화. 착색으로는 꽃 모양을 못 바꾸니
-         넉 장을 따로 뽑아야 합니다.
-
---------------------------------------------------------------------------
-  ① 이미지 · 제미나이
---------------------------------------------------------------------------
-
-Korean romance-fantasy webtoon style, night scene.
-A traditional Korean hanok gate standing half-open at the end of a quiet
-lane just after rain. Warm golden light spills out through the open gate.
-Bare plum branches dusted with snow and studded with small white blossoms tumble over the tiled wall on both sides. Three ornate Korean
-paper lanterns (청사초롱) hang above at different heights, glowing amber
-and blue. A small black cat sits on the wall watching, eyes catching the
-lantern light. The wet stone ground mirrors the lantern light and the moon
-in soft broken reflections. Fine snow drifts down through the lantern light.
-Deep plum-violet night sky, full moon and faint stars.
-Beautiful, inviting, slightly magical — not eerie.
-No people, no text, no signboard. Aspect ratio 9:16.
-
---------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Dolly In · 9:16 · 5s)
---------------------------------------------------------------------------
-
-Slow dolly in down the rain-wet lane toward the half-open hanok gate.
-The three paper lanterns flicker gently. Flower petals drift across the
-frame. The reflection on the wet stone ground ripples faintly. The black
-cat on the wall flicks its tail once and turns its head toward the
-viewer. The camera stops just before the gate. Warm golden light spills
-from the opening.
-
-This is a 2D hand-drawn animation, not live action. Preserve the
-illustration style exactly: flat cel shading, uniform lineart, painted
-texture. Do not add photographic realism, skin pores, film grain or 3D
-lighting. Do not redraw or reshape any element. Animate only what is
-described above; everything else stays completely still.
-
-(Preset: Dolly In · 9:16 · 5s)
-
-
-==========================================================================
-  05 / 40   열리는 문
+  02 / 37   열리는 문
 ==========================================================================
   화면   a1 골목 — 문이 열리는 순간 (★ 붙임 3 참고)
   폴더   public/scene/door/
@@ -355,7 +190,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  06 / 40   붓 · 벼루 · 빈 종이
+  03 / 37   붓 · 벼루 · 빈 종이
 ==========================================================================
   화면   a2 이름을 적다
   폴더   public/scene/desk/
@@ -393,7 +228,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  07 / 40   먹이 번지는 종이
+  04 / 37   먹이 번지는 종이
 ==========================================================================
   화면   a3 생년월일시 · a5 고민 고르기
   폴더   public/scene/ink/
@@ -428,7 +263,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  08 / 40   실내 · 좌식 · 병풍
+  05 / 37   실내 · 좌식 · 병풍
 ==========================================================================
   화면   a4 방 안
   폴더   public/scene/room/
@@ -468,7 +303,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  09 / 40   갈림길
+  06 / 37   갈림길
 ==========================================================================
   화면   a6 갈림길
   폴더   public/scene/fork/
@@ -504,7 +339,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  10 / 40   명식 받침 · 네 자리
+  07 / 37   명식 받침 · 네 자리
 ==========================================================================
   화면   a7 상 위
   폴더   public/scene/altar/
@@ -546,7 +381,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  11 / 40   마주앉은 자리
+  08 / 37   마주앉은 자리
 ==========================================================================
   화면   a8 마주 앉다
   폴더   public/scene/facing/
@@ -588,7 +423,7 @@ described above; everything else stays completely still.
 ##########################################################################
 
 ==========================================================================
-  12 / 40   안쪽 방 · 스무 자리
+  09 / 37   안쪽 방 · 스무 자리
 ==========================================================================
   화면   b1 진열대 들머리
   폴더   public/scene/hall/
@@ -625,7 +460,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  13 / 40   그 사람의 자리
+  10 / 37   그 사람의 자리
 ==========================================================================
   화면   b2 자리
   폴더   public/scene/seat/
@@ -664,7 +499,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  14 / 40   진열대 · 걸린 목패
+  11 / 37   진열대 · 걸린 목패
 ==========================================================================
   화면   b3 걸린 목패
   폴더   public/scene/shelf/
@@ -706,7 +541,7 @@ described above; everything else stays completely still.
 ##########################################################################
 
 ==========================================================================
-  15 / 40   펼쳐지는 두루마리
+  12 / 37   펼쳐지는 두루마리
 ==========================================================================
   화면   c1 두루마리 · c7 분석지
   폴더   public/scene/scroll/
@@ -741,7 +576,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  16 / 40   대운 길 · 이정표
+  13 / 37   대운 길 · 이정표
 ==========================================================================
   화면   c2 길 그림
   폴더   public/scene/roadmap/
@@ -780,7 +615,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  17 / 40   반쯤 접힌 두루마리
+  14 / 37   반쯤 접힌 두루마리
 ==========================================================================
   화면   c3 접힌 데
   폴더   public/scene/fold/
@@ -813,7 +648,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  18 / 40   공유 카드 문양
+  15 / 37   공유 카드 문양
 ==========================================================================
   화면   c4 패 뒷면
   폴더   public/scene/cardbg/
@@ -855,7 +690,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  19 / 40   후기 벽 · 붙은 종이쪽
+  16 / 37   후기 벽 · 붙은 종이쪽
 ==========================================================================
   화면   c5 벽 · m1 인장첩
   폴더   public/scene/wall/
@@ -891,7 +726,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  20 / 40   오래된 종이 · 회고
+  17 / 37   오래된 종이 · 회고
 ==========================================================================
   화면   c6 낡은 종이 · p1 값
   폴더   public/scene/oldpaper/
@@ -931,7 +766,7 @@ described above; everything else stays completely still.
 ##########################################################################
 
 ==========================================================================
-  21 / 40   엽전 · 값을 치르다
+  18 / 37   엽전 · 값을 치르다
 ==========================================================================
   화면   p2 엽전
   폴더   public/scene/coin/
@@ -963,7 +798,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  22 / 40   붉은 끈 · 개봉
+  19 / 37   붉은 끈 · 개봉
 ==========================================================================
   화면   p3 매듭을 풀다
   폴더   public/scene/untie/
@@ -999,7 +834,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  23 / 40   목패를 늘어놓은 상
+  20 / 37   목패를 늘어놓은 상
 ==========================================================================
   화면   p4 소반
   폴더   public/scene/tray/
@@ -1039,7 +874,7 @@ described above; everything else stays completely still.
 ##########################################################################
 
 ==========================================================================
-  24 / 40   문고리 · 안쪽 그림자
+  21 / 37   문고리 · 안쪽 그림자
 ==========================================================================
   화면   r1 손잡이
   폴더   public/scene/handle/
@@ -1082,7 +917,7 @@ described above; everything else stays completely still.
 ##########################################################################
 
 ==========================================================================
-  25 / 40   등불 배너
+  22 / 37   등불 배너
 ==========================================================================
   화면   d1 현수막
   폴더   public/scene/banner/
@@ -1121,7 +956,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  26 / 40   다과상 · 차 한 잔
+  23 / 37   다과상 · 차 한 잔
 ==========================================================================
   화면   d2 차 한 잔
   폴더   public/scene/tea/
@@ -1166,7 +1001,7 @@ described above; everything else stays completely still.
 ##########################################################################
 
 ==========================================================================
-  27 / 40   인장첩
+  24 / 37   인장첩
 ==========================================================================
   화면   m2 인장첩
   폴더   public/scene/sealbook/
@@ -1211,7 +1046,7 @@ described above; everything else stays completely still.
 ##########################################################################
 
 ==========================================================================
-  28 / 40   흰 소매의 귀인
+  25 / 37   흰 소매의 귀인
 ==========================================================================
   화면   천을귀인 天乙貴人 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/cheoneul/
@@ -1256,7 +1091,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  29 / 40   태극을 인 이
+  26 / 37   태극을 인 이
 ==========================================================================
   화면   태극귀인 太極貴人 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/taegeuk/
@@ -1301,7 +1136,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  30 / 40   붓을 든 서생
+  27 / 37   붓을 든 서생
 ==========================================================================
   화면   문창귀인 文昌貴人 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/munchang/
@@ -1346,7 +1181,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  31 / 40   가마를 끄는 이
+  28 / 37   가마를 끄는 이
 ==========================================================================
   화면   금여 金輿 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/geumyeo/
@@ -1391,7 +1226,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  32 / 40   그림자 속의 손
+  29 / 37   그림자 속의 손
 ==========================================================================
   화면   암록 暗祿 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/amrok/
@@ -1436,7 +1271,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  33 / 40   칼을 쥔 무인
+  30 / 37   칼을 쥔 무인
 ==========================================================================
   화면   양인 羊刃 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/yangin/
@@ -1481,7 +1316,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  34 / 40   흰 범
+  31 / 37   흰 범
 ==========================================================================
   화면   백호대살 白虎大殺 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/baekho/
@@ -1526,7 +1361,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  35 / 40   등을 돌린 그림자
+  32 / 37   등을 돌린 그림자
 ==========================================================================
   화면   원진 怨嗔 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/wonjin/
@@ -1571,7 +1406,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  36 / 40   꽃그늘의 사람
+  33 / 37   꽃그늘의 사람
 ==========================================================================
   화면   도화 桃花 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/dohwa/
@@ -1616,7 +1451,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  37 / 40   말 위의 나그네
+  34 / 37   말 위의 나그네
 ==========================================================================
   화면   역마 驛馬 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/yeokma/
@@ -1661,7 +1496,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  38 / 40   일산 아래 홀로
+  35 / 37   일산 아래 홀로
 ==========================================================================
   화면   화개 華蓋 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/hwagae/
@@ -1706,7 +1541,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  39 / 40   북두를 인 장수
+  36 / 37   북두를 인 장수
 ==========================================================================
   화면   괴강 魁罡 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/gwaegang/
@@ -1751,7 +1586,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  40 / 40   빈 자리
+  37 / 37   빈 자리
 ==========================================================================
   화면   공망 空亡 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/gongmang/
@@ -1816,10 +1651,7 @@ described above; everything else stays completely still.
   폴더마다 세 개가 있어야 합니다 — clip.webm · clip.mp4 · poster.jpg
   하나라도 없으면 그 화면은 자리표시 그림으로 남습니다.
 
-  [ ]  public/scene/gate/spring/     대문 · 사계 — 봄 · 벚꽃
-  [ ]  public/scene/gate/summer/     대문 · 사계 — 여름 · 능소화
-  [ ]  public/scene/gate/autumn/     대문 · 사계 — 가을 · 국화
-  [ ]  public/scene/gate/winter/     대문 · 사계 — 겨울 · 매화
+  [ ]  public/scene/gate/            대문 · 사계
   [ ]  public/scene/door/            열리는 문
   [ ]  public/scene/desk/            붓 · 벼루 · 빈 종이
   [ ]  public/scene/ink/             먹이 번지는 종이
@@ -1866,4 +1698,94 @@ described above; everything else stays completely still.
     참조 구현체는 a1 서사 세 번째 칸에서 대문을 '열리는 문' 으로
     바꿔 끼웁니다. 옮기는 과정에서 그 교체가 빠졌습니다.
     그림은 만들어 두시오 — 코드는 따로 이어 붙이겠습니다.
+
+##########################################################################
+  붙임 4 · 나중에 계절판을 넣고 싶어지면 (안 만들어도 됩니다)
+##########################################################################
+
+  대문은 한 장이면 충분합니다. 이 붙임은 '봄에는 벚꽃, 겨울에는
+  매화' 를 하고 싶어질 때만 보시오.
+
+  넣는 자리
+
+    public/scene/gate/spring/     봄 · 벚꽃
+    public/scene/gate/summer/     여름 · 능소화
+    public/scene/gate/autumn/     가을 · 국화
+    public/scene/gate/winter/     겨울 · 매화
+
+  계절 폴더에 그림이 있으면 앱이 그걸 먼저 씁니다. 없으면
+  public/scene/gate/ 로 내려옵니다. 한 계절만 만들어 넣어도
+  나머지는 기본 그림으로 굴러갑니다.
+
+  ② 모션 프롬프트는 넷 다 같습니다 — 본문 01 번 것을 그대로 쓰시오.
+  달라지는 것은 ① 이미지뿐이고, 꽃과 하늘색만 바뀝니다.
+
+--------------------------------------------------------------------------
+  ① 이미지 · 제미나이 · 봄 · 벚꽃
+  public/scene/gate/spring/
+--------------------------------------------------------------------------
+
+Korean romance-fantasy webtoon style, night scene.
+A traditional Korean hanok gate standing half-open at the end of a quiet
+lane just after rain. Warm golden light spills out through the open gate.
+Cherry blossom branches heavy with pale pink petals tumble over the tiled wall on both sides. Three ornate Korean
+paper lanterns (청사초롱) hang above at different heights, glowing amber
+and blue. A small black cat sits on the wall watching, eyes catching the
+lantern light. The wet stone ground mirrors the lantern light and the moon
+in soft broken reflections. Petals and a pale butterfly drift through the air.
+Deep plum-violet night sky, full moon and faint stars.
+Beautiful, inviting, slightly magical — not eerie.
+No people, no text, no signboard. Aspect ratio 9:16.
+
+--------------------------------------------------------------------------
+  ① 이미지 · 제미나이 · 여름 · 능소화   (본문 01 번과 같은 것)
+  public/scene/gate/summer/
+--------------------------------------------------------------------------
+
+Korean romance-fantasy webtoon style, night scene.
+A traditional Korean hanok gate standing half-open at the end of a quiet
+lane just after rain. Warm golden light spills out through the open gate.
+Flowering trumpet-creeper vines heavy with coral-pink blossoms tumble over the tiled wall on both sides. Three ornate Korean
+paper lanterns (청사초롱) hang above at different heights, glowing amber
+and blue. A small black cat sits on the wall watching, eyes catching the
+lantern light. The wet stone ground mirrors the lantern light and the moon
+in soft broken reflections. Fireflies drift softly through the humid air.
+Deep plum-violet night sky, full moon and faint stars.
+Beautiful, inviting, slightly magical — not eerie.
+No people, no text, no signboard. Aspect ratio 9:16.
+
+--------------------------------------------------------------------------
+  ① 이미지 · 제미나이 · 가을 · 국화
+  public/scene/gate/autumn/
+--------------------------------------------------------------------------
+
+Korean romance-fantasy webtoon style, night scene.
+A traditional Korean hanok gate standing half-open at the end of a quiet
+lane just after rain. Warm golden light spills out through the open gate.
+Chrysanthemum blooms in gold and amber spilling over the wall tumble over the tiled wall on both sides. Three ornate Korean
+paper lanterns (청사초롱) hang above at different heights, glowing amber
+and blue. A small black cat sits on the wall watching, eyes catching the
+lantern light. The wet stone ground mirrors the lantern light and the moon
+in soft broken reflections. A few dry leaves turn slowly in the air.
+Deep plum-violet night sky, full moon and faint stars.
+Beautiful, inviting, slightly magical — not eerie.
+No people, no text, no signboard. Aspect ratio 9:16.
+
+--------------------------------------------------------------------------
+  ① 이미지 · 제미나이 · 겨울 · 매화
+  public/scene/gate/winter/
+--------------------------------------------------------------------------
+
+Korean romance-fantasy webtoon style, night scene.
+A traditional Korean hanok gate standing half-open at the end of a quiet
+lane just after rain. Warm golden light spills out through the open gate.
+Bare plum branches dusted with snow and studded with small white blossoms tumble over the tiled wall on both sides. Three ornate Korean
+paper lanterns (청사초롱) hang above at different heights, glowing amber
+and blue. A small black cat sits on the wall watching, eyes catching the
+lantern light. The wet stone ground mirrors the lantern light and the moon
+in soft broken reflections. Fine snow drifts down through the lantern light.
+Deep plum-violet night sky, full moon and faint stars.
+Beautiful, inviting, slightly magical — not eerie.
+No people, no text, no signboard. Aspect ratio 9:16.
+
 

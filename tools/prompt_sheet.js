@@ -8,8 +8,10 @@
  *   어긋납니다. 참조 구현체를 실제로 평가해서 뽑습니다.
  *
  * 두 가지를 특히 조심합니다
- *   ① 대문(gate)만 계절을 탑니다. SEA 를 네 번 갈아 끼워 4장을 뽑습니다.
- *      한 번만 돌리면 여름 것 하나만 나와 봄·가을·겨울이 통째로 빕니다.
+ *   ① 대문(gate)만 계절을 탑니다. 만드는 것은 **한 장이면 됩니다** —
+ *      앱이 계절 폴더가 비면 기본 폴더로 내려옵니다. 나머지 세 계절
+ *      프롬프트는 나중에 쓰고 싶어질 때를 위해 붙임 4 에 실어 둡니다.
+ *      SEA 를 네 번 갈아 끼워야 넷을 다 얻습니다.
  *   ② 참조 구현체는 hg 안에 달러-중괄호로 감싼 ANIMBASE 를 문자열로
  *      적어 두어, 화면에 그 글자가 그대로 남습니다. 그걸 복사해
  *      힉스필드에 넣으면 영상 앵커가 빠지고 docs/10 §2 대로 3초 안에
@@ -64,6 +66,12 @@ const SEASONS = [
   { k: "autumn", ko: "가을 · 국화" },
   { k: "winter", ko: "겨울 · 매화" },
 ];
+
+/*
+ * 한 장만 만들 때 쓸 그림. 참조 구현체의 SEA 기본값과 같게 둡니다.
+ * 다른 계절 그림이 더 마음에 들면 붙임 4 에서 골라 쓰면 됩니다.
+ */
+const DEFAULT_SEASON = { k: "summer", ko: "여름 · 능소화" };
 
 const base = evalWith("summer");
 const { SCN, MO, ANIMBASE, TINT } = base;
@@ -155,31 +163,21 @@ const items = [];
 for (const [group, rows] of ORDER) {
   for (const [id, where] of rows) {
     const mo = MO[id] || {};
-    if (SEASONAL.includes(id)) {
-      for (const s of SEASONS) {
-        items.push({
-          group, id, key: id + "-" + s.k,
-          title: SCN[id].t + " — " + s.ko,
-          where,
-          dir: "public/scene/" + id + "/" + s.k + "/",
-          image: rawPrompt(bySeason[s.k], id),
-          motion: motionOf(id),
-          mo, hint: SCN[id].hint || null,
-          extra: "그림 넉 장 · 모션 프롬프트는 넷 다 같습니다." + NL +
-                 "         ★ 위 '메모' 의 \"프롬프트는 동일\" 은 모션 이야기입니다." + NL +
-                 "         ① 이미지 프롬프트는 계절마다 꽃이 다릅니다 — 벚꽃 /" + NL +
-                 "         능소화 / 국화 / 매화. 착색으로는 꽃 모양을 못 바꾸니" + NL +
-                 "         넉 장을 따로 뽑아야 합니다.",
-        });
-      }
-    } else {
-      items.push({
-        group, id, key: id, title: SCN[id].t, where,
-        dir: "public/scene/" + id + "/",
-        image: rawPrompt(SCN, id), motion: motionOf(id),
-        mo, hint: SCN[id].hint || null, extra: null,
-      });
-    }
+    const seasonal = SEASONAL.includes(id);
+    items.push({
+      group, id, key: id, title: SCN[id].t, where,
+      dir: "public/scene/" + id + "/",
+      image: rawPrompt(bySeason[DEFAULT_SEASON.k], id),
+      motion: motionOf(id),
+      mo, hint: SCN[id].hint || null,
+      extra: seasonal
+        ? ("한 장만 만드시오. 이 그림이 사계절 내내 나옵니다." + NL +
+           "         ★ 위 '메모' 는 계절 4종을 만들라고 하지만 그러지" + NL +
+           "         않아도 됩니다. 계절판을 넣고 싶어지면 그때 붙임 4 를" + NL +
+           "         보시오 — 넣기만 하면 코드 고칠 것 없이 우선합니다." + NL +
+           "         아래 프롬프트는 " + DEFAULT_SEASON.ko + " 입니다.")
+        : null,
+    });
   }
 }
 for (const k of FIG_ORDER) {
@@ -256,12 +254,12 @@ P("     하지 말고 명암·형태·질감으로 승부하시오. 클립 한 �
 P("     캐릭터 스무 명의 색을 전부 감당하는 구조입니다.");
 P("     쓰이는 CSS 는 붙임 1 에 있습니다.");
 P();
-P("  3. 대문 넉 장 (01~04)");
+P("  3. 대문 (01) — 한 장이면 됩니다");
 P();
-P("     같은 장면의 봄·여름·가을·겨울입니다. 하나만 만들면 나머지");
-P("     세 계절에 들어온 사람은 자리표시 그림을 봅니다.");
-P("     같은 사람이 계절마다 다른 화면을 보는 것이 이 서비스의");
-P("     첫인상입니다. (docs/09 §5)");
+P("     참조 구현체 메모에는 계절 4종을 만들라고 적혀 있으나");
+P("     그러지 않아도 됩니다. 한 장을 넣으면 사계절 내내 나옵니다.");
+P("     나중에 계절판을 넣고 싶어지면 붙임 4 의 프롬프트로 만들어");
+P("     계절 폴더에 넣기만 하면 그때부터 그게 우선합니다.");
 P();
 P(bar("-"));
 P("  차례");
@@ -343,6 +341,37 @@ P("    바꿔 끼웁니다. 옮기는 과정에서 그 교체가 빠졌습니다
 P("    그림은 만들어 두시오 — 코드는 따로 이어 붙이겠습니다.");
 P();
 
+P(bar("#"));
+P("  붙임 4 · 나중에 계절판을 넣고 싶어지면 (안 만들어도 됩니다)");
+P(bar("#"));
+P();
+P("  대문은 한 장이면 충분합니다. 이 붙임은 '봄에는 벚꽃, 겨울에는");
+P("  매화' 를 하고 싶어질 때만 보시오.");
+P();
+P("  넣는 자리");
+P();
+for (const sN of SEASONS) {
+  P("    public/scene/gate/" + (sN.k + "/").padEnd(10) + "  " + sN.ko);
+}
+P();
+P("  계절 폴더에 그림이 있으면 앱이 그걸 먼저 씁니다. 없으면");
+P("  public/scene/gate/ 로 내려옵니다. 한 계절만 만들어 넣어도");
+P("  나머지는 기본 그림으로 굴러갑니다.");
+P();
+P("  ② 모션 프롬프트는 넷 다 같습니다 — 본문 01 번 것을 그대로 쓰시오.");
+P("  달라지는 것은 ① 이미지뿐이고, 꽃과 하늘색만 바뀝니다.");
+P();
+for (const sN of SEASONS) {
+  P(bar("-"));
+  P("  ① 이미지 · 제미나이 · " + sN.ko +
+    (sN.k === DEFAULT_SEASON.k ? "   (본문 01 번과 같은 것)" : ""));
+  P("  " + "public/scene/gate/" + sN.k + "/");
+  P(bar("-"));
+  P();
+  P(rawPrompt(bySeason[sN.k], "gate").replace(/\s+$/, ""));
+  P();
+}
+P();
 fs.writeFileSync(OUT, L.join(NL) + NL, "utf8");
 
 const text = L.join(NL);

@@ -123,14 +123,15 @@ export default function PromptModal({
     : null;
 
   /*
-   * 계절을 타는 장면은 지금 보고 있는 계절의 프롬프트와 폴더를 보여 줍니다.
-   * 한 벌만 보여 주면 넉 장을 만들어야 하는 줄 모르고 한 장만 만들게 됩니다.
+   * 계절을 타는 장면(대문)이라도 **만드는 것은 한 장**입니다.
+   * 그래서 폴더는 기본 폴더를 알려 줍니다. 계절 폴더는 나중에 계절판을
+   * 넣고 싶어졌을 때만 쓰는 자리이고, 넣으면 앱이 그걸 먼저 씁니다.
+   * 지금 보고 있는 계절의 그림을 보여 주니 레일에서 계절을 바꿔 가며
+   * 마음에 드는 한 장을 고르면 됩니다.
    */
   const seasonal = kind === "scene" && !!e?.seasonal;
   const image = seasonal ? (e?.seasons?.[season] ?? e?.image) : e?.image;
-  const dir = kind === "scene"
-    ? (seasonal ? `/scene/${id}/${season}/` : `/scene/${id}/`)
-    : `/sinsal/${id}/`;
+  const dir = kind === "scene" ? `/scene/${id}/` : `/sinsal/${id}/`;
 
   return (
     <div className="pmod on" onClick={onClose}>
@@ -169,12 +170,16 @@ export default function PromptModal({
             </div>
 
             {seasonal && (
-              <div className="hint" style={{ borderColor: "var(--rose)" }}>
-                <b>계절 넉 장이 필요하오.</b><br />
-                꽃이 계절마다 다릅니다 — 벚꽃 · 능소화 · 국화 · 매화.
-                착색으로는 꽃 모양을 못 바꾸니 그림 자체가 넉 장이어야 합니다.<br />
-                지금 보이는 것은 <b>{SEASON_KO[season] ?? season}</b> 것이오.
-                레일에서 계절을 바꾸면 나머지가 나옵니다.
+              <div className="hint" style={{ borderColor: "var(--teal)" }}>
+                <b>한 장이면 되오.</b> 이 그림이 사계절 내내 나옵니다.<br />
+                지금 보이는 것은 <b>{SEASON_KO[season] ?? season}</b> 이고,
+                레일에서 계절을 바꾸면 다른 꽃으로 갈아 보실 수 있소.
+                마음에 드는 걸로 한 장만 뽑으시오.<br />
+                <span style={{ opacity: 0.7 }}>
+                  나중에 계절마다 다르게 하고 싶어지면
+                  <code> /scene/{id}/{"{계절}"}/ </code>
+                  에 넣기만 하면 그때부터 그게 우선하오.
+                </span>
               </div>
             )}
             {image && (

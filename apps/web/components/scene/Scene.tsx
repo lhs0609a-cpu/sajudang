@@ -28,23 +28,34 @@ function useReducedMotion() {
 }
 
 /**
- * 에셋이 실제로 있는지 확인. 없으면 SVG 자리표시로 간다.
+ * 쓸 에셋이 어디 있는지 고른다. 없으면 SVG 자리표시로 간다.
  *
- * 계절을 타는 장면(대문)은 계절 폴더를 봅니다 — /scene/gate/spring/ ….
- * 꽃이 계절마다 다릅니다(벚꽃·능소화·국화·매화). 착색으로는 꽃 모양을
- * 못 바꾸므로 그림 자체가 넉 장이어야 합니다. 한 폴더만 보면 넉 장을
- * 만들어 넣어도 한 장만 쓰이고 나머지 세 계절은 자리표시로 남습니다.
+ * 대문은 계절 그림을 넣을 수 있게 열어 두되 **한 장이면 충분합니다.**
+ *   /scene/gate/{계절}/  있으면 이걸 씁니다
+ *   /scene/gate/         없으면 이걸로 내려옵니다  ← 기본
+ *
+ * 한 장만 넣어도 사계절 내내 나옵니다. 나중에 계절을 넣고 싶어지면
+ * 계절 폴더에 넣기만 하면 그때부터 그게 우선합니다. 코드는 그대로입니다.
+ *
+ * 계절 폴더를 먼저 보고 없을 때만 내려오는 순서라야 합니다. 반대로 하면
+ * 계절 그림을 넣어도 영영 안 쓰입니다.
  */
-function useHasClip(base: string) {
-  const [has, setHas] = useState<boolean | null>(null);
+function useClipBase(seasonal: string | null, fallback: string) {
+  const [base, setBase] = useState<string | null | undefined>(undefined);
   useEffect(() => {
     let alive = true;
-    fetch(`${base}poster.jpg`, { method: "HEAD" })
-      .then((r) => alive && setHas(r.ok))
-      .catch(() => alive && setHas(false));
+    const ok = (dir: string) =>
+      fetch(`${dir}poster.jpg`, { method: "HEAD" })
+        .then((r) => r.ok)
+        .catch(() => false);
+
+    (async () => {
+      if (seasonal && (await ok(seasonal))) { if (alive) setBase(seasonal); return; }
+      if (alive) setBase((await ok(fallback)) ? fallback : null);
+    })();
     return () => { alive = false; };
-  }, [base]);
-  return has;
+  }, [seasonal, fallback]);
+  return base;   // undefined = 아직 확인 중 · null = 에셋 없음
 }
 
 /**
@@ -124,10 +135,12 @@ export default function Scene({ id, className }: { id: string; className?: strin
   const override = useSession((st) => st.seasonOverride);
   const season = override ?? seasonOf();
   // 훅은 조건 앞에 와야 합니다. spec 이 없어도 순서가 흔들리면 안 됩니다.
-  const base = spec?.seasonal
-    ? `/scene/${id}/${season}/`
-    : `/scene/${id}/`;
-  const hasClip = useHasClip(base);
+  const chosen = useClipBase(
+    spec?.seasonal ? `/scene/${id}/${season}/` : null,
+    `/scene/${id}/`,
+  );
+  const base = chosen ?? `/scene/${id}/`;
+  const hasClip = chosen === undefined ? null : chosen !== null;
   const [open, setOpen] = useState(false);
 
   if (!spec) return null;

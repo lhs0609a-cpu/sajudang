@@ -102,24 +102,34 @@ def test_only_gate_is_seasonal():
 # ══════════════════════════════════════════════════════════
 # 만들어 넣으면 실제로 화면에 뜨는가
 # ══════════════════════════════════════════════════════════
-def test_component_reads_the_season_folder():
+def test_one_image_is_enough_for_the_gate():
     """
-    계절 장면은 /scene/gate/{계절}/ 을 봐야 합니다. 한 폴더만 보면
-    넉 장을 만들어 넣어도 한 장만 쓰이고 나머지는 자리표시로 남습니다.
+    대문은 한 장이면 됩니다. 계절 폴더가 비면 기본 폴더로 내려와야
+    합니다. 안 내려오면 한 장을 넣어도 계절 셋은 자리표시로 남습니다.
     """
     src = SCENE_TSX.read_text(encoding="utf-8")
-    assert "spec?.seasonal" in src
-    assert "/scene/${id}/${season}/" in src
+    assert "useClipBase(" in src
+    assert "/scene/${id}/${season}/" in src      # 있으면 우선
+    assert "`/scene/${id}/`," in src             # 없으면 이리로
     # poster·webm·mp4 가 전부 같은 base 를 써야 합니다
     for f in ("poster.jpg", "clip.webm", "clip.mp4"):
         assert "${base}" + f in src, f
 
 
-def test_modal_shows_the_season_you_are_on():
+def test_season_folder_is_checked_before_the_fallback():
+    """순서가 뒤집히면 계절판을 넣어도 영영 안 쓰입니다."""
+    src = SCENE_TSX.read_text(encoding="utf-8")
+    body = src[src.index("function useClipBase"):]
+    body = body[:body.index("return base;")]
+    assert body.index("seasonal &&") < body.index("(fallback)")
+
+
+def test_modal_says_one_image_is_enough():
     src = MODAL.read_text(encoding="utf-8")
     assert "seasons?.[season]" in src
-    assert "/scene/${id}/${season}/" in src
-    assert "계절 넉 장이 필요하오" in src
+    assert "한 장이면 되오" in src
+    # 폴더는 기본 폴더를 알려 줘야 합니다
+    assert "`/scene/${id}/` : `/sinsal/${id}/`" in src
 
 
 # ══════════════════════════════════════════════════════════
@@ -153,36 +163,54 @@ def sheet() -> str:
     return SHEET.read_text(encoding="utf-8")
 
 
+N = 37       # 장면 24 + 인물 13. 대문도 한 장이므로 늘지 않습니다.
+
+
 def test_sheet_exists_and_lists_every_item():
-    s = sheet()
-    n = len(entries()) + 3          # 대문이 계절만큼 늘어난다
-    assert n == 40
-    heads = re.findall(r"^\s{2}(\d{2}) / 40\s", s, re.M)
-    assert len(heads) == 40, "항목 %d개만 있습니다" % len(heads)
-    assert [int(x) for x in heads] == list(range(1, 41)), "번호가 건너뜁니다"
+    assert len(entries()) == N
+    heads = re.findall(r"^\s{2}(\d{2}) / %d\s" % N, sheet(), re.M)
+    assert len(heads) == N, "항목 %d개만 있습니다" % len(heads)
+    assert [int(x) for x in heads] == list(range(1, N + 1)), "번호가 건너뜁니다"
 
 
 def test_sheet_has_both_prompt_blocks_for_every_item():
     s = sheet()
-    assert s.count("① 이미지 · 제미나이") == 40
-    assert s.count("② 모션 · 힉스필드") == 40
+    # 붙임 4 에 계절판 넷이 더 실려 있습니다 — 안 만들어도 되는 것입니다
+    assert s.count("① 이미지 · 제미나이") == N + 4
+    assert s.count("② 모션 · 힉스필드") == N
 
 
 def test_sheet_never_drops_the_video_anchor():
     """항목마다 하나씩. 머리말에도 한 번 나오므로 통째로 세면 안 됩니다."""
-    blocks = re.split(r"^={70,}$\n^\s{2}\d{2} / 40\s", sheet(), flags=re.M)[1:]
-    assert len(blocks) == 40
+    blocks = re.split(r"^={70,}$\n^\s{2}\d{2} / %d\s" % N, sheet(), flags=re.M)[1:]
+    assert len(blocks) == N
     bad = [b.splitlines()[0].strip() for b in blocks if ANCHOR not in b]
     assert not bad, "영상 앵커가 빠진 항목: %s" % bad
 
 
+def test_sheet_asks_for_one_gate_image_not_four():
+    s = sheet()
+    assert "public/scene/gate/" in s
+    assert "한 장만 만드시오" in s
+    head = s[:s.index("차례")]
+    assert "한 장이면 됩니다" in head, "머리말이 아직 넉 장을 요구합니다"
+
+
+def test_sheet_keeps_the_seasonal_prompts_as_optional():
+    """안 만들어도 되지만, 나중에 쓰고 싶어질 때 찾을 수 있어야 합니다."""
+    s = sheet()
+    # 본문에도 "붙임 4 를 보시오" 라는 안내가 있으므로 절 머리를 찾습니다
+    i = s.index("  붙임 4 · ")
+    assert "안 만들어도 됩니다" in s[i:i + 200]
+    tail = s[i:]
+    for season in SEASONS:
+        assert "public/scene/gate/%s/" % season in tail
+    for season, flower in FLOWER.items():
+        assert flower.lower() in tail.lower(), season
+
+
 def test_sheet_carries_no_placeholder():
     assert "$" + "{ANIMBASE}" not in sheet()
-
-
-@pytest.mark.parametrize("season", SEASONS)
-def test_sheet_has_a_folder_line_for_each_gate_season(season):
-    assert "public/scene/gate/%s/" % season in sheet()
 
 
 def test_sheet_folders_match_the_component_paths():
@@ -190,9 +218,7 @@ def test_sheet_folders_match_the_component_paths():
     s = sheet()
     for key in bundle()["figures"]:
         assert "public/sinsal/%s/" % key in s
-    for key, v in bundle()["scenes"].items():
-        if v.get("seasonal"):
-            continue
+    for key in bundle()["scenes"]:
         assert "public/scene/%s/" % key in s
 
 
