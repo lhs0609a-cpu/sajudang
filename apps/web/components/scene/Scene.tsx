@@ -11,6 +11,7 @@
  * 무채색 클립 + 색 입히기는 docs/10 §4 대상 장면에만 적용합니다.
  */
 import { useEffect, useState } from "react";
+import PromptModal from "./PromptModal";
 import { RATIO_BOX, SCENE_BY_ID, SEASON_PALETTE } from "./manifest";
 import { seasonOf, useSession, type Season } from "@/lib/store";
 
@@ -116,6 +117,7 @@ export default function Scene({ id, className }: { id: string; className?: strin
   const hasClip = useHasClip(id);
   const override = useSession((st) => st.seasonOverride);
   const season = override ?? seasonOf();
+  const [open, setOpen] = useState(false);
 
   if (!spec) return null;
 
@@ -137,11 +139,29 @@ export default function Scene({ id, className }: { id: string; className?: strin
     <Placeholder id={id} season={season} />
   );
 
+  /*
+   * 장면을 클릭하면 제작 프롬프트가 뜹니다.
+   * 참조 구현체의 showScn() 을 옮긴 것입니다 — 에셋을 뽑을 때 씁니다.
+   */
   return (
-    <div className={`sceneart ${className ?? ""}`}>
-      {body}
-      {hasClip && spec.tint && <span className="scene-tint" />}
-      {!hasClip && <span className="slot">IMG · {id}</span>}
-    </div>
+    <>
+      <div
+        className={`sceneart ${className ?? ""}`}
+        role="button"
+        tabIndex={0}
+        title={`${spec.name} — 눌러서 제작 프롬프트 보기`}
+        onClick={() => setOpen(true)}
+        onKeyDown={(ev) => {
+          if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); setOpen(true); }
+        }}
+      >
+        {body}
+        {hasClip && spec.tint && <span className="scene-tint" />}
+        <span className="slot">{hasClip ? "프롬프트" : `IMG · ${id}`}</span>
+      </div>
+      {open && (
+        <PromptModal kind="scene" id={id} onClose={() => setOpen(false)} />
+      )}
+    </>
   );
 }

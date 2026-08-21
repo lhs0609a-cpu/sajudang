@@ -370,3 +370,62 @@ body.has-rail-closed .stage { margin-left: 26px; }
 /* 상단바는 줄어들 수 있어야 한다 */
 .top { min-width: 0; }
 .top .tb { flex: 0 1 auto; min-width: 0; overflow: hidden; }
+
+/* ── 에셋 프롬프트 모달 ──────────────────────────────────
+   장면·신살 인물을 클릭하면 뜹니다. 참조 구현체의 showScn() 자리.
+   ------------------------------------------------------ */
+.pmod {
+  position: fixed; inset: 0; z-index: 200; display: none;
+  background: rgba(6, 4, 10, .86); padding: 24px 14px; overflow-y: auto;
+  backdrop-filter: blur(3px);
+}
+.pmod.on { display: block; }
+.pmodin {
+  max-width: 660px; margin: 0 auto; background: var(--bg);
+  border: 1px solid var(--line2); padding: 22px 20px 34px; position: relative;
+}
+.pmodin .x {
+  position: sticky; top: 0; float: right; background: var(--bg2);
+  border: 1px solid var(--line2); color: var(--paper2);
+  font-family: var(--mono); font-size: 10px; padding: 6px 10px; cursor: pointer;
+}
+.pmodin h3 {
+  font-family: var(--serif); font-size: 20px; color: var(--c);
+  font-weight: 700; margin-bottom: 4px;
+}
+.pmodin .m1 {
+  font-family: var(--mono); font-size: 10px; color: var(--paper3);
+  margin-bottom: 12px; word-break: break-all;
+}
+.pmodin .sp { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 14px; }
+.pmodin .sp span {
+  font-family: var(--mono); font-size: 9.5px; padding: 3px 8px;
+  border: 1px solid var(--line2); color: var(--paper2);
+}
+.pmodin .hint {
+  border: 1px solid var(--line2); border-left-width: 2px;
+  padding: 10px 12px; margin: 12px 0; font-size: 12px; line-height: 1.85;
+  color: var(--paper2); background: rgba(114, 106, 128, .06);
+}
+.pmodin .pl {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; margin: 16px 0 5px; font-family: var(--mono);
+  font-size: 10px; color: var(--gold); letter-spacing: .08em;
+}
+.pmodin .pl button {
+  background: var(--gold); border: none; color: #08060d;
+  font-family: var(--mono); font-size: 9.5px; padding: 5px 11px; cursor: pointer;
+}
+.pmodin .pdir {
+  font-size: 11px; color: var(--ember); margin-bottom: 5px; line-height: 1.7;
+}
+.pmodin pre {
+  background: var(--bg2); border: 1px solid var(--line);
+  padding: 12px 13px; font-family: var(--mono); font-size: 11px;
+  line-height: 1.72; color: var(--paper2); white-space: pre-wrap;
+  word-break: break-word; max-height: 340px; overflow-y: auto;
+}
+
+/* 클릭 가능한 자리라는 표시 */
+.sceneart { cursor: pointer; }
+.sceneart:hover .slot, .sfig-art:hover .slot { opacity: 1; }

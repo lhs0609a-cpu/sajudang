@@ -13,6 +13,7 @@
  *   docs/09 §6 — 얼굴은 눈 깜빡임 정도만, 움직임은 화면의 20% 이내
  */
 import { useEffect, useRef, useState } from "react";
+import PromptModal from "./PromptModal";
 import { figureOf, type Fx, type Prop, type SinsalFigure } from "@/lib/sinsalFigures";
 
 function useReducedMotion() {
@@ -270,6 +271,7 @@ export default function SinsalFigure({
   const reduced = useReducedMotion();
   const hasClip = useHasClip(sinsalKey);
   const { ref, seen } = useAppear<HTMLDivElement>();
+  const [open, setOpen] = useState(false);
 
   if (!f) return null;
   const uid = "sf-" + sinsalKey;
@@ -286,7 +288,17 @@ export default function SinsalFigure({
       }
       style={{ ["--c" as string]: f.color }}
     >
-      <div className="sfig-art" style={{ width: size }}>
+      <div
+        className="sfig-art"
+        style={{ width: size, cursor: "pointer" }}
+        role="button"
+        tabIndex={0}
+        title={`${f.title} — 눌러서 제작 프롬프트 보기`}
+        onClick={() => setOpen(true)}
+        onKeyDown={(ev) => {
+          if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); setOpen(true); }
+        }}
+      >
         <span className="halo" />
         {hasClip && !still ? (
           <video autoPlay muted playsInline loop
@@ -309,8 +321,11 @@ export default function SinsalFigure({
             <Silhouette f={f} uid={uid} />
           </svg>
         )}
-        {!hasClip && <span className="slot">IMG · {sinsalKey}</span>}
+        <span className="slot">{hasClip ? "프롬프트" : `IMG · ${sinsalKey}`}</span>
       </div>
+      {open && (
+        <PromptModal kind="figure" id={sinsalKey} onClose={() => setOpen(false)} />
+      )}
 
       <figcaption>
         <b className="t">{f.title}</b>
