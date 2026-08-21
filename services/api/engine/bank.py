@@ -154,6 +154,21 @@ def _seg(stage, label, source, body, question, yes, no, sid, show_source=True):
     }
 
 
+# 월지 → 계절. 절기 기준입니다 — 寅卯辰 이 봄입니다.
+# (양력 달이 아닙니다. 입춘에 해가 바뀌는 것과 같은 이치입니다.)
+SEASON_OF_JI = {
+    "寅": "봄", "卯": "봄", "辰": "봄",
+    "巳": "여름", "午": "여름", "未": "여름",
+    "申": "가을", "酉": "가을", "戌": "가을",
+    "亥": "겨울", "子": "겨울", "丑": "겨울",
+}
+
+
+def born_season(f) -> str:
+    """태어난 달의 기운. 월지에서 봅니다."""
+    return SEASON_OF_JI[f.pillars[1]["ji"]]
+
+
 def build_hook(f, concern: str, axis4: Optional[str] = None,
                name: str = "", you: str = "그대") -> list:
     """
@@ -183,17 +198,22 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     # ── 0단 · 찌르기 ────────────────────────────────────
     stab = _pick("STAB", concern, weak)
     stab2 = _pick("STAB2", top)
+    # ★ 일간 한 줄. 여기가 그 사람의 '나' 자리입니다.
+    #   전에는 근거 줄에만 적히고 본문에서는 안 썼습니다 — 첫 화면에서
+    #   일간이 다른 사람이 같은 말을 듣고 있었습니다.
+    gan_line = _pick("STAB_GAN", f.day_gan)
     head = ('<p class="hi">%s.</p>' % esc_name) if esc_name else ""
     segs.append(_seg(
         stage="0", label="", show_source=False,
         source="%s일간 · %s %s · %s" % (f.day_gan, element_word(weak),
                                        f.elements[weak], top),
-        body='<div class="stab">%s<p>%s</p><p class="sub">%s</p></div>'
-             % (head, stab, stab2),
+        body='<div class="stab">%s<p>%s</p><p class="sub">%s</p>'
+             '<p class="gan">%s</p></div>'
+             % (head, stab, stab2, gan_line),
         question="…맞소?",
         yes="그럴 줄 알았소. 어떻게 아느냐 하면—",
         no="그럼 다행이오. 헌데 이건 어떻소.",
-        sid="stab:%s:%s" % (concern, weak)))
+        sid="stab:%s:%s:%s" % (concern, weak, f.day_gan)))
 
     # ── 1단 · 부정확인 ──────────────────────────────────
     m1 = _pick("MYTH_TG", top, concern)
@@ -224,21 +244,26 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
         "그러다 <b>%s</b>, %s." % (fl["t"], rs["t"]),
         "그리고 %s" % bl,
     ]
+    # ★ 태어난 달의 기운 한 줄. 월지에서 봅니다.
+    #   시기는 말하지 않습니다 — '언제' 는 유료 구간(대운)의 몫입니다.
+    sea = born_season(f)
+    sea_line = _pick("STAB_SEASON", sea)
     segs.append(_seg(
         stage="2", label="2 · 순서",
-        source="%s %d · %s일간 → %s %s(%s) · %s %s"
+        source="%s %d · %s일간 → %s %s(%s) · %s %s · %s생"
                % (top, f.ten_gods[top], ELEMENT_OF_GAN[f.day_gan],
                   f.flow_el, f.elements[f.flow_el], flow,
-                  weak, f.elements[weak]),
-        body=('<div class="scene"><p>%s는 늘 이 순서요.</p><div class="seq">%s</div>%s</div>'
-              % (esc_you,
+                  weak, f.elements[weak], sea),
+        body=('<div class="scene"><p class="sea">%s</p>'
+              '<p>%s는 늘 이 순서요.</p><div class="seq">%s</div>%s</div>'
+              % (sea_line, esc_you,
                  "".join('<div><span>%s</span></div>' % s for s in seq),
                  "".join('<p class="%s">%s</p>' % ("hit" if i == 1 else "", l)
                          for i, l in enumerate(lines)))),
         question="…이 순서가 맞소?",
         yes="그럴 줄 알았소. 그럼 이름을 붙여드리리다.",
         no="아직 이르오. 이름을 붙여보면 알 것이오.",
-        sid="seq:%s:%s:%s:%s:%s" % (top, concern, flow, weak, strength)))
+        sid="seq:%s:%s:%s:%s:%s:%s" % (top, concern, flow, weak, strength, sea)))
 
     # ── 2.5단 · 어긋남 (불일치가 있을 때만) ──────────────
     gaps = gap_list(f, axis4)

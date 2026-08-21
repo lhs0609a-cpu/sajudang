@@ -15,6 +15,13 @@ primary_region = "nrt"          # 도쿄 — 한국에서 가장 가깝습니다
   PORT = "8080"
   STORE_PATH = "/data/store.sqlite"
   STATEMENT_LOG_PATH = "/data/statement_log.jsonl"
+  EVENT_LOG_PATH = "/data/events.jsonl"
+  # ★ DB. 한 대짜리는 SQLite 로 돕니다 — 이게 있어야
+  #   statement_log · 회고 루프 · 계측이 DB 로 갑니다.
+  #   Postgres 로 갈아탈 때는 이 줄을 지우고 시크릿으로 넣으세요:
+  #     fly secrets set DATABASE_URL=postgresql+psycopg2://...
+  #   (시크릿이 [env] 를 덮습니다. 붙이는 순서는 docs/17 §8)
+  DATABASE_URL = "sqlite:////data/app.sqlite"
 
 [[mounts]]
   source = "sajudang_data"

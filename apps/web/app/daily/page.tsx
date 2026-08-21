@@ -14,11 +14,13 @@ import Scene from "@/components/scene/Scene";
 import { Narration, Say } from "@/components/Narration";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/store";
+import { useScreen } from "@/lib/track";
 import type { DailyResponse } from "@shared/chart";
 
 const VISIT_WARN_AT = 3;
 
 export default function DailyPage() {
+  useScreen("daily");
   const router = useRouter();
   const s = useSession();
   const [data, setData] = useState<DailyResponse | null>(null);

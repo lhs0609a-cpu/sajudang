@@ -21,11 +21,28 @@ branch_labels = None
 depends_on = None
 
 
+def _has_column(bind, table: str, col: str) -> bool:
+    return col in {c["name"] for c in sa.inspect(bind).get_columns(table)}
+
+
 def upgrade() -> None:
+    """
+    ★ 이미 있으면 건너뜁니다.
+
+    0001 은 Postgres 에서만 '그때의 고정 DDL' 을 씁니다. 그 밖의 방언에서는
+    models.py 에서 **지금** 스키마를 만들기 때문에 chart_key 가 이미 들어
+    있습니다. 그대로 add_column 하면 duplicate column 으로 막힙니다.
+    """
+    bind = op.get_bind()
+    if _has_column(bind, "statement_log", "chart_key"):
+        return
     op.add_column("statement_log", sa.Column("chart_key", sa.Text(), nullable=True))
     op.create_index("ix_stmt_chart_key", "statement_log", ["chart_key"])
 
 
 def downgrade() -> None:
+    bind = op.get_bind()
+    if not _has_column(bind, "statement_log", "chart_key"):
+        return
     op.drop_index("ix_stmt_chart_key", table_name="statement_log")
     op.drop_column("statement_log", "chart_key")

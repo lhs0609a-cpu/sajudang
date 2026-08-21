@@ -18,9 +18,11 @@ import { Narration, Say } from "@/components/Narration";
 import { api } from "@/lib/api";
 import { LENS_BY_ID } from "@/lib/lenses";
 import { useSession } from "@/lib/store";
+import { useScreen } from "@/lib/track";
 import type { RelayResponse } from "@shared/chart";
 
 export default function RelayPage() {
+  useScreen("relay");
   const router = useRouter();
   const s = useSession();
   const [data, setData] = useState<RelayResponse | null>(null);

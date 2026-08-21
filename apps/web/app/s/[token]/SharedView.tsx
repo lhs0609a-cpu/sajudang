@@ -19,6 +19,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Shell from "@/components/Shell";
+import { useScreen } from "@/lib/track";
 import Scene from "@/components/scene/Scene";
 import { Narration, Say } from "@/components/Narration";
 import SinsalFigure from "@/components/scene/SinsalFigure";
@@ -66,6 +67,7 @@ const DOUBTS: { q: string; a: string }[] = [
 ];
 
 export default function SharedView({ token }: { token: string }) {
+  useScreen("s1");
   const router = useRouter();
 
   const [d, setD] = useState<Shared | null>(null);

@@ -18,6 +18,7 @@ import { Narration, Say } from "@/components/Narration";
 import SinsalFigure from "@/components/scene/SinsalFigure";
 import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/store";
+import { useScreen } from "@/lib/track";
 import type { Summary } from "@shared/chart";
 
 const EL_WORD: Record<string, string> = {
@@ -25,6 +26,7 @@ const EL_WORD: Record<string, string> = {
 };
 
 export default function SummaryPage() {
+  useScreen("c7");
   const router = useRouter();
   const s = useSession();
   const [sm, setSm] = useState<Summary | null>(null);

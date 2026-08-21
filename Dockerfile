@@ -18,15 +18,23 @@ RUN pip install --no-cache-dir -r requirements.txt \
 # 런타임에 필요한 것만. 문서·프론트·참조구현체는 넣지 않습니다.
 COPY seed/          ./seed/
 COPY services/api/  ./services/api/
+# 마이그레이션을 컨테이너 안에서 돌립니다 (entrypoint.sh)
+COPY alembic.ini    ./alembic.ini
 
 # 상태 파일 자리 (fly 볼륨이 여기 붙습니다)
 RUN mkdir -p /data
 ENV STORE_PATH=/data/store.sqlite \
-    STATEMENT_LOG_PATH=/data/statement_log.jsonl
+    STATEMENT_LOG_PATH=/data/statement_log.jsonl \
+    EVENT_LOG_PATH=/data/events.jsonl
 
-WORKDIR /app/services/api
+RUN chmod +x /app/services/api/entrypoint.sh
+
+WORKDIR /app
 EXPOSE 8080
 
+# entrypoint 가 마이그레이션을 올린 뒤 uvicorn 을 띄웁니다.
+#
 # 단일 워커. 브레이크 카운터가 SQLite 로 원자적으로 도므로 여러 워커도
-# 되지만, 한 대에서 시작합니다. 늘릴 때는 REDIS_URL 을 붙이세요.
-CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "1"]
+# 되지만, DB 도 SQLite 인 동안은 쓰기가 직렬화되므로 한 대로 둡니다.
+# 늘릴 때는 REDIS_URL + Postgres 를 먼저 붙이세요 (docs/17 §8).
+CMD ["/app/services/api/entrypoint.sh"]

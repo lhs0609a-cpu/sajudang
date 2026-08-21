@@ -22,7 +22,7 @@ import db                                            # noqa: E402
 import store                                         # noqa: E402
 from guard_middleware import GuardMiddleware         # noqa: E402
 from routers import (                                # noqa: E402
-    chart, daily, feedback, hook, pay, relay, report, share,
+    chart, daily, events, feedback, hook, pay, relay, report, share,
 )
 
 logging.basicConfig(
@@ -52,7 +52,7 @@ app.add_middleware(
 )
 app.add_middleware(GuardMiddleware)
 
-for r in (chart, hook, report, relay, feedback, daily, pay, share):
+for r in (chart, hook, report, relay, feedback, daily, pay, share, events):
     app.include_router(r.router)
 
 
@@ -65,7 +65,7 @@ def health() -> dict:
         "engine_ver": ENGINE_VER,
         "tz_source": tz.TZ_SOURCE,
         "store": store.stats(),
-        "db": db.HAS_DB,
+        "db": db.info(),
         "payments": payments.ENABLED,
         "cors_origins": CORS_ORIGINS,
     }

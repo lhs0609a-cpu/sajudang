@@ -62,18 +62,25 @@ def record_answer(statement_id: str, chart_id: str, answer: int,
         with db.session() as s:
             # charts 행이 있으면 FK 로, 없으면 캐시 키로 남긴다.
             # 어느 쪽이든 '어떤 사주였는지' 를 잃지 않는다.
-            row = s.query(models.Chart).filter(
+            #
+            # ★ 이름을 chart 로 둡니다. 예전에는 여기서도 row 를 써서
+            #   위에서 만든 dict 를 덮어썼고, 바로 아래 row["stage"] 가
+            #   ORM 객체를 첨자로 읽어 터졌습니다. DB 를 붙이는 순간
+            #   응답 기록이 전부 실패하는 자리였습니다.
+            chart = s.query(models.Chart).filter(
                 models.Chart.cache_key == chart_id).one_or_none()
             s.add(models.StatementLog(
                 statement_id=statement_id,
-                chart_id=row.id if row else None,
+                chart_id=chart.id if chart else None,
                 chart_key=chart_id,
                 user_id=_uuid.UUID(user_id) if user_id else None,
                 lens_id=lens_id, concern=concern, stage=row["stage"],
                 day_gan=row["day_gan"], strength=row["strength"],
                 top_ten_god=row["top_ten_god"], weak_el=row["weak_el"],
                 strong_el=row["strong_el"], flow=row["flow"], axis4=axis4,
-                answer=int(answer), answered_at=datetime.now(timezone.utc)))
+                answer=int(answer),
+                shown_at=datetime.now(timezone.utc),
+                answered_at=datetime.now(timezone.utc)))
         return 1
 
     LOG_PATH.parent.mkdir(parents=True, exist_ok=True)

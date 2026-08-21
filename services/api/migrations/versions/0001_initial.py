@@ -276,9 +276,26 @@ TABLES = ['cooldowns', 'lenses', 'notifications', 'relay_log', 'users', 'charts'
 
 
 def upgrade() -> None:
-    op.execute(DDL)
+    """
+    Postgres 는 위에 **고정해 둔 DDL** 을 그대로 씁니다. 운영 스키마의
+    authority 는 그 문자열입니다.
+
+    그 밖의 방언(SQLite)은 models.py 에서 그때그때 만듭니다.
+    위 DDL 은 UUID·JSONB·BIGSERIAL 을 쓰는 Postgres 문법이라 SQLite 가
+    읽지 못합니다. models.py 가 방언 중립이라 같은 스키마가 나오고,
+    create_all 이 ddl_if 를 알아서 지켜 GIN 같은 PG 전용 인덱스는
+    건너뜁니다.
+    """
+    bind = op.get_bind()
+    if bind.dialect.name == "postgresql":
+        op.execute(DDL)
+        return
+
+    import models
+    models.Base.metadata.create_all(bind, checkfirst=False)
 
 
 def downgrade() -> None:
+    cascade = " CASCADE" if op.get_bind().dialect.name == "postgresql" else ""
     for t in reversed(TABLES):
-        op.execute("DROP TABLE IF EXISTS %s CASCADE" % t)
+        op.execute("DROP TABLE IF EXISTS %s%s" % (t, cascade))

@@ -444,3 +444,32 @@ body.has-rail-closed .stage { margin-left: 26px; }
 /* 모달 안은 왼쪽 정렬 — 프롬프트가 가운데로 몰리면 읽을 수가 없다 */
 .pmodin, .pmodin * { text-align: left; }
 .pmodin pre { text-align: left; }
+
+/* ══════════ 훅에 새로 붙은 두 줄 ══════════
+   .gan  0단 끝 — 그 사람의 일간(‘나’ 자리)
+   .sea  2단 머리 — 태어난 달의 기운
+
+   전에는 일간이 근거 줄에만 적히고 본문에는 안 쓰였습니다. 첫 화면에서
+   일간이 다른 사람이 같은 말을 듣고 있었습니다. 눈에 들어와야 뜻이 있습니다.
+   ------------------------------------------------------ */
+.stab p.gan {
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.8;
+  margin-top: 12px;
+  padding-top: 11px;
+  border-top: 1px solid rgba(229, 184, 122, .18);
+  color: var(--c);
+}
+@media (max-width: 480px) { .stab p.gan { font-size: 15.5px; } }
+
+.scene p.sea {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .02em;
+  line-height: 1.75;
+  color: var(--paper3);
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(229, 184, 122, .14);
+}

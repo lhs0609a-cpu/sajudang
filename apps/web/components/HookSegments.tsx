@@ -8,6 +8,7 @@
  */
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { track } from "@/lib/track";
 import type { HookSegment } from "@shared/chart";
 
 function Agreement({ statementId }: { statementId: string }) {
@@ -43,7 +44,18 @@ export default function HookSegments({
   const [open, setOpen] = useState(1);
   const [replies, setReplies] = useState<Record<number, string>>({});
 
+  /*
+   * 몇 단까지 열렸는지 남깁니다. 초반이 어디서 끊기는지 여기가 답합니다.
+   * 훅 첫 단이 안 꽂히면 두 번째를 안 누릅니다 — 그걸 숫자로 봐야
+   * 문장을 고칠지 순서를 고칠지 정할 수 있습니다.
+   */
+  useEffect(() => {
+    const i = Math.min(open, segments.length) - 1;
+    if (i >= 0) track("hook_shown", "a7", { stage: i });
+  }, [open, segments.length]);
+
   const vote = async (i: number, yes: boolean) => {
+    track("hook_answer", "a7", { stage: i, yes: yes ? 1 : 0 });
     const seg = segments[i];
     setReplies((r) => ({ ...r, [i]: yes ? seg.yes : seg.no }));
     try {

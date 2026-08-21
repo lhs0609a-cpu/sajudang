@@ -155,7 +155,9 @@ def test_report_mentions_every_tied_weak_element():
 # ══════════════════════════════════════════════════════════
 # 5. 배선 — 명식이 바뀌면 문장이 바뀌는가
 # ══════════════════════════════════════════════════════════
-HOOK_KEYS = ("weak_el", "top_ten_god", "strength", "flow")
+# 문장 선택에 실제로 쓰이는 값. 일간과 계절이 여기 들어오면서
+# 같은 문장을 받는 사람 수가 크게 줄었습니다 (아래 테스트 참고).
+HOOK_KEYS = ("weak_el", "top_ten_god", "strength", "flow", "day_gan")
 
 import re as _re
 _nums = _re.compile(r"[0-9.]+")
@@ -166,24 +168,73 @@ def _sentences(f, concern="love"):
     return tuple(_nums.sub("#", s["html"]) for s in bank.build_hook(f, concern))
 
 
-def test_bank_sentence_choice_uses_only_five_values():
-    """
-    뱅크에서 **어떤 문장이 뽑히는가** 는
-    (고민, 약오행, 주도십신, 신강약, 흐름) 다섯 값으로 완전히 결정된다.
-    statement_id 가 그 다섯 값으로만 만들어지므로 id 로 확인한다.
+def _hook_key(f):
+    return tuple(getattr(f, x) for x in HOOK_KEYS) + (bank.born_season(f),)
 
-    일간·일지·월지·대운·용신은 문장 '선택' 에 관여하지 않는다.
-    뱅크에 축을 추가해 개인화를 깊게 만들면 이 테스트가 깨진다 —
-    깨지는 게 진전이다.
+
+def test_bank_sentence_choice_is_fully_determined_by_seven_values():
+    """
+    **어떤 문장이 뽑히는가** 는 이 일곱 값으로 완전히 결정된다.
+        고민 · 약오행 · 주도십신 · 신강약 · 흐름 · 일간 · 태어난 계절
+
+    일지·대운·용신·신살은 아직 문장 '선택' 에 관여하지 않는다.
+    축을 더 넣어 개인화를 깊게 하면 이 테스트가 깨진다 — 깨지는 게 진전이다.
     """
     seen = {}
     for c, f in people(400):
-        k = tuple(getattr(f, x) for x in HOOK_KEYS)
+        k = _hook_key(f)
         ids = tuple(s["statement_id"] for s in bank.build_hook(f, "love"))
         if k in seen:
             assert seen[k] == ids, "같은 키인데 문장 id 가 다릅니다: %s" % (k,)
         else:
             seen[k] = ids
+
+
+def test_day_master_changes_the_first_thing_they_read():
+    """
+    ★ 0단은 사람이 맨 처음 읽는 문장입니다.
+
+    전에는 일간이 근거 줄에만 적히고 본문에는 안 쓰였습니다. 일간이
+    다른 사람이 첫 화면에서 같은 말을 듣고 있었습니다.
+    """
+    bodies = {}
+    for c, f in people(400):
+        seg0 = bank.build_hook(f, "love")[0]
+        bodies.setdefault(f.day_gan, set()).add(_nums.sub("#", seg0["html"]))
+    assert len(bodies) >= 8, "일간 표본이 모자랍니다: %s" % sorted(bodies)
+    # 일간이 다르면 0단 문장도 달라야 한다
+    one_per_gan = {g: sorted(v)[0] for g, v in bodies.items()}
+    assert len(set(one_per_gan.values())) == len(one_per_gan),         "일간이 다른데 0단이 같습니다"
+
+
+def test_season_changes_the_sequence_stage():
+    seasons = {}
+    for c, f in people(400):
+        seg = [s for s in bank.build_hook(f, "love") if s["stage"] == "2"][0]
+        seasons.setdefault(bank.born_season(f), set()).add(
+            _nums.sub("#", seg["html"]))
+    assert set(seasons) == {"봄", "여름", "가을", "겨울"}, sorted(seasons)
+    first = {k: sorted(v)[0] for k, v in seasons.items()}
+    assert len(set(first.values())) == 4, "계절이 다른데 2단이 같습니다"
+
+
+def test_adding_axes_actually_reduced_shared_hooks():
+    """
+    축을 늘린 것이 실제로 효과가 있었는가 — 숫자로 붙들어 둡니다.
+    이 값이 다시 나빠지면(같은 문장을 받는 사람이 늘면) 여기가 잡습니다.
+    """
+    import hashlib
+    from collections import Counter
+    seen = Counter()
+    n = 0
+    for c, f in people(600):
+        body = "|".join(_nums.sub("#", s["html"])
+                        for s in bank.build_hook(f, "love"))
+        seen[hashlib.sha256(body.encode()).hexdigest()] += 1
+        n += 1
+    alone = sum(1 for v in seen.values() if v == 1)
+    ratio = alone / len(seen)
+    assert ratio >= 0.75, "혼자만 받는 훅이 %.1f%% 로 떨어졌습니다" % (100 * ratio)
 
 
 def test_rendered_hook_still_carries_the_persons_own_numbers():

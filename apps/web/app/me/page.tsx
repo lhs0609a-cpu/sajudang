@@ -11,6 +11,7 @@ import Scene from "@/components/scene/Scene";
 import { Narration, Say } from "@/components/Narration";
 import { LENSES } from "@/lib/lenses";
 import { useSession } from "@/lib/store";
+import { useScreen } from "@/lib/track";
 
 function MeInner() {
   const router = useRouter();
@@ -71,6 +72,7 @@ function MeInner() {
 }
 
 export default function MePage() {
+  useScreen("me");
   return (
     <Suspense fallback={<Shell title="인장첩"><p className="sm">…</p></Shell>}>
       <MeInner />

@@ -15,6 +15,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
+import { useScreen } from "@/lib/track";
 import Scene from "@/components/scene/Scene";
 import { Narration, Progress, Say } from "@/components/Narration";
 import { CalcPanel, ElementBar, Pillars, Summary } from "@/components/Chart";
@@ -86,6 +87,9 @@ function EntryInner() {
   const [error, setError] = useState<string | null>(null);
   const [segments, setSegments] = useState<HookSegment[] | null>(null);
   const [hookDone, setHookDone] = useState(false);
+
+  // 화면 이름이 곧 step 입니다. 어디서 나가는지 이걸로 셉니다.
+  useScreen(step);
 
   const season = s.seasonOverride ?? seasonOf();
   const lens = LENS_BY_ID[s.cur] ?? LENS_BY_ID.pungun;

@@ -17,6 +17,8 @@ import { Narration, Say } from "@/components/Narration";
 import { api, ApiError } from "@/lib/api";
 import { LENS_BY_ID } from "@/lib/lenses";
 import { TIERS, useSession, type Tier } from "@/lib/store";
+import { track, useScreen } from "@/lib/track";
+import { openCheckout } from "@/lib/toss";
 import type { ReportResponse } from "@shared/chart";
 
 interface Order {
@@ -44,6 +46,8 @@ function PayInner() {
   const [order, setOrder] = useState<Order | null>(null);
   const [busy, setBusy] = useState(false);
 
+  useScreen(step);
+
   /* d0 · 무료 구간 */
   useEffect(() => {
     if (step !== "d0" || !s.chartId || free) return;
@@ -60,9 +64,56 @@ function PayInner() {
     return () => { alive = false; };
   }, [step, s.chartId, s.cur, s.concern, s.axis4, free]);
 
+  /*
+   * 결제창에서 돌아왔다 — 토스가 ?toss=ok&paymentKey=… 로 되돌려 보냅니다.
+   *
+   * 결제창은 페이지를 통째로 떠났다 옵니다. 그래서 승인은 여기서 합니다.
+   * 금액은 안 보냅니다 — 서버가 주문에 적어 둔 값을 씁니다.
+   */
+  const tossBack = params.get("toss");
+  const [settling, setSettling] = useState(tossBack === "ok");
+  useEffect(() => {
+    if (tossBack !== "ok") return;
+    const orderId = params.get("order") ?? params.get("orderId");
+    const paymentKey = params.get("paymentKey");
+    if (!orderId || !paymentKey) {
+      setErr("결제 정보가 모자라오. 값은 빠져나가지 않았소.");
+      setSettling(false);
+      return;
+    }
+    let alive = true;
+    api
+      .payConfirm({ session_id: s.sessionId, order_id: orderId,
+                    payment_key: paymentKey })
+      .then((r) => {
+        if (!alive) return;
+        s.set({
+          tier: r.tier as Tier, paid: true,
+          seals: s.seals.includes(r.seal) ? s.seals : [...s.seals, r.seal],
+        });
+        track("pay_done", "d2");
+        router.replace("/pay?step=d3");
+      })
+      .catch((e) => {
+        if (!alive) return;
+        track("pay_fail", "d2");
+        setErr(e instanceof ApiError ? e.message : "결제 승인에 실패했소.");
+        setSettling(false);
+      });
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tossBack]);
+
+  /* 결제창에서 물러섰다 */
+  useEffect(() => {
+    if (tossBack !== "fail") return;
+    track("pay_fail", "d2");
+    setErr(params.get("message") ?? "결제가 중단되었소. 값은 빠져나가지 않았소.");
+  }, [tossBack, params]);
+
   /* d2 · 주문 만들기 — 금액·상한은 서버가 판정한다 */
   useEffect(() => {
-    if (step !== "d2" || !s.chartId || order) return;
+    if (step !== "d2" || !s.chartId || order || tossBack) return;
     let alive = true;
     setErr(null);
     api
@@ -111,6 +162,20 @@ function PayInner() {
   /* d2 · 결제 */
   if (step === "d2") {
     const tier = TIERS.find((t) => t.id === pick);
+
+    /* 결제창에서 막 돌아왔다 — 승인이 끝날 때까지 아무것도 누르지 못하게 */
+    if (settling) {
+      return (
+        <Shell title="값을 치르다" legal>
+          <Scene id="coin" />
+          <Narration lines={["값이 건너가는 중이오.", "잠시만 기다리시오."]} />
+          <p className="sm mt" style={{ textAlign: "center" }}>
+            창을 닫지 마시오.
+          </p>
+        </Shell>
+      );
+    }
+
     return (
       <Shell title="값을 치르다" legal>
         <Scene id="coin" />
@@ -141,24 +206,29 @@ function PayInner() {
                 onClick={async () => {
                   setBusy(true);
                   setErr(null);
+                  track("pay_start", "d2");
                   try {
-                    // 실제 결제창은 토스 SDK 가 띄웁니다. SDK 가 돌려준
-                    // paymentKey 를 서버로 넘겨 승인합니다.
-                    const key = window.prompt("토스 결제창에서 받은 paymentKey");
-                    if (!key) return;
-                    const r = await api.payConfirm({
-                      session_id: s.sessionId,
-                      order_id: order.order_id,
-                      payment_key: key,
+                    /*
+                     * 토스 결제창을 띄웁니다. 여기서 페이지를 떠났다가
+                     * successUrl 로 돌아오고, 승인은 위의 effect 가 합니다.
+                     *
+                     * customerKey 에 sessionId 를 씁니다 — 익명 난수입니다.
+                     * 이름·생년월일을 넣으면 PG 로 넘어갑니다. 넣지 마세요.
+                     */
+                    if (!order.client_key) {
+                      throw new Error("결제 열쇠가 없소.");
+                    }
+                    await openCheckout({
+                      clientKey: order.client_key,
+                      orderId: order.order_id,
+                      amount: order.amount,
+                      orderName: tier?.name ?? "사주당",
+                      customerKey: s.sessionId,
                     });
-                    s.set({
-                      tier: r.tier as Tier, paid: true,
-                      seals: s.seals.includes(r.seal) ? s.seals : [...s.seals, r.seal],
-                    });
-                    router.push("/pay?step=d3");
+                    // 여기 아래는 보통 안 옵니다 — 결제창이 페이지를 넘깁니다.
                   } catch (e) {
-                    setErr(e instanceof ApiError ? e.message : "결제에 실패했소.");
-                  } finally {
+                    track("pay_fail", "d2");
+                    setErr(e instanceof Error ? e.message : "결제에 실패했소.");
                     setBusy(false);
                   }
                 }}
@@ -207,7 +277,7 @@ function PayInner() {
           <button
             key={t.id}
             className={"op " + (pick === t.id ? "on" : "")}
-            onClick={() => { setPick(t.id); setOrder(null); }}
+            onClick={() => { setPick(t.id); setOrder(null); track("tier_pick", "d1"); }}
           >
             <b>{t.name} · {t.price}</b>
             <span>{t.desc}</span>

@@ -14,6 +14,7 @@ import { Narration, Say } from "@/components/Narration";
 import { CalcPanel, ElementBar, Pillars, Summary } from "@/components/Chart";
 import { LENSES, LENS_BY_ID } from "@/lib/lenses";
 import { useSession } from "@/lib/store";
+import { useScreen } from "@/lib/track";
 
 type Tab = "b1" | "b2" | "b3" | "b4";
 
@@ -140,6 +141,7 @@ function LobbyInner() {
 }
 
 export default function LobbyPage() {
+  useScreen("b1");
   return (
     <Suspense fallback={<Shell title="진열대"><p className="sm">…</p></Shell>}>
       <LobbyInner />

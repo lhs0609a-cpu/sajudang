@@ -9,6 +9,10 @@
     dup            훅 중복률
     fixtures       회귀 케이스 50건 생성
     sheet          대조표(대조표.md) 뽑기
+    plan           ★ 회귀 50건 — 무엇부터 볼지
+    fill <파일>     받아적은 기대값을 대조 (--write 로 fixtures 에 써넣음)
+    funnel         ★ 퍼널 — 어디서 나가는가 (FUNNEL_KEY 필요)
+    migrate-sqlite 로컬 SQLite 로 마이그레이션 왕복 시험
     screens        화면 연결 그래프 — 고아·막다른·죽은 버튼
     flow           전체 플로우 훑기 — 32화면을 실제 브라우저로 열어 확인
     api            API 서버 (http://localhost:8000/docs)
@@ -139,6 +143,32 @@ switch ($Task) {
   }
 
   # ── 프론트 ────────────────────────────────────────────────
+  "plan" { Need-Venv; & $Py "$Root	oolsill_expected.py" --plan }
+  "fill" {
+    Need-Venv
+    if (-not $Rest) { Write-Host "받아적은 파일을 주세요:  .\dev.ps1 fill 받아적음.txt" -ForegroundColor Yellow; exit 1 }
+    & $Py "$Root	oolsill_expected.py" @Rest
+  }
+  "funnel" { Need-Venv; & $Py "$Root	oolsunnel.py" @Rest }
+  "migrate-sqlite" {
+    Need-Venv
+    # ★ 마이그레이션을 실제로 돌려 본다. 안 하면 영영 미검증으로 남는다.
+    $tmp = Join-Path $env:TEMP ("sajudang-mig-" + [guid]::NewGuid().ToString("N").Substring(0,8))
+    New-Item -ItemType Directory -Force $tmp | Out-Null
+    # 역슬래시를 슬래시로. 정규식이라 '\\' 두 자로 적어야 합니다.
+    $env:DATABASE_URL = "sqlite:///" + ($tmp -replace '\\', '/') + "/m.sqlite"
+    Write-Host "DATABASE_URL = $env:DATABASE_URL" -ForegroundColor Cyan
+    $ok = $true
+    foreach ($step in @("upgrade head", "downgrade base", "upgrade head")) {
+      Write-Host "  alembic $step" -ForegroundColor DarkGray
+      & $Py -m alembic $step.Split(" ")
+      if ($LASTEXITCODE -ne 0) { $ok = $false; break }
+    }
+    Remove-Item -Recurse -Force $tmp -EA SilentlyContinue
+    Remove-Item Env:DATABASE_URL -EA SilentlyContinue
+    if ($ok) { Write-Host "마이그레이션 왕복 OK" -ForegroundColor Green }
+    else { Write-Host "마이그레이션 실패" -ForegroundColor Red; exit 1 }
+  }
   "web-pull" { Web-Pull }
 
   "web" {
