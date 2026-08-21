@@ -56,6 +56,8 @@
 | `docs/03_기능명세서.md` | 화면 동작 |
 | `docs/06_콘텐츠_문장뱅크.md` | 문장 구조 |
 | `docs/11_법무_컴플라이언스.md` | **기능 추가 전 필수** |
+| `docs/14_신살_궁위_확정표.md` | 신살·귀인·조상 자리 손댈 때 **필수** |
+| `docs/15_공유_유입_설계.md` | 분석지·공유·유입 화면 손댈 때 |
 | `reference/sajudang.html` | 애매할 때 정답. 동작하는 참조 구현체 |
 
 ---
@@ -111,6 +113,8 @@ venv 는 `%USERPROFILE%\.venvs\sajudang` — 저장소가 구글 드라이브에
   report.py      리포트 컷 · tier 잠금
   daily.py       오늘의 일진
   retention.py   리텐션 5층 · 하루 1건
+  sinsal.py      ★ 신살·궁위 — 유파 확정값. 바꾸면 결과가 달라진다.
+  summary.py     분석지 한 장 · 공유 payload(생일 미포함)
   guard.py       ★ 금지어 필터
 /services/api/routers/
   chart.py  hook.py  report.py  relay.py  feedback.py  daily.py  pay.py
@@ -236,3 +240,6 @@ Features:
 - 시각 미상인데 시주를 채우기
 - 얼굴 사진을 DB에 저장 (생체인식정보)
 - 실데이터 없이 공감률 숫자 표시
+- 공유 payload 에 생년월일시·고을 넣기
+- 신살로 질병·사고·재물을 단정하기 (docs/14 §7)
+- 유입 화면에서 적중률·과학·통계 같은 말 쓰기

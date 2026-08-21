@@ -27,6 +27,8 @@ SCREEN_MAP = {
     "/lobby": ["b1", "b2", "b3", "b4"],
     "/report/[id]": ["c1", "c2", "c3", "c4", "c5", "c6"],
     "/pay": ["d0", "d1", "d2", "d3"],
+    "/summary": ["c7", "c8"],
+    "/s/[token]": ["s1", "s2"],
     "/relay": ["h1"],
     "/daily": ["g1", "g2", "g3"],
     "/me": ["f2", "r1"],
@@ -61,7 +63,10 @@ def scan() -> tuple[dict, list, list]:
     tabs: dict[str, set] = {}
 
     for route, path in routes.items():
-        src = path.read_text(encoding="utf-8")
+        # page.tsx 가 얇은 서버 껍데기이고 알맹이가 형제 파일에 있는 경우가 있다
+        # (예: /s/[token] 의 SharedView.tsx). 같은 폴더의 .tsx 를 함께 본다.
+        src = "\n".join(f.read_text(encoding="utf-8")
+                        for f in sorted(path.parent.glob("*.tsx")))
 
         # 라우트 이동
         for pat in (r'router\.push\(\s*"([^"]+)"', r'href="([^"]+)"'):
@@ -98,7 +103,9 @@ def main() -> int:
             if d in incoming and d != src:
                 incoming[d] += 1
 
-    orphans = [r for r, n in incoming.items() if n == 0 and r != "/"]
+    # 바깥에서 링크로 바로 들어오는 화면은 고아가 아니다
+    ENTRY_POINTS = {"/", "/s/[token]"}
+    orphans = [r for r, n in incoming.items() if n == 0 and r not in ENTRY_POINTS]
     dead_ends = [r for r, d in edges.items() if not (d - {r})]
 
     print("라우트 %d개" % len(routes))

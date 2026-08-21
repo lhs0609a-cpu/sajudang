@@ -6,7 +6,7 @@
  */
 import type {
   ChartRequest, ChartResponse, DailyResponse, Features,
-  HookResponse, RelayResponse, ReportResponse,
+  HookResponse, RelayResponse, ReportResponse, Shared, Summary,
 } from "@shared/chart";
 
 const BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
@@ -83,6 +83,28 @@ export const api = {
   agreement: (statementId: string) =>
     call<{ shown: boolean; rate?: number; total?: number; min_responses?: number }>(
       `/v1/agreement?statement_id=${encodeURIComponent(statementId)}`),
+
+  /* ── 분석지 · 공유 ── */
+  summary: (req: {
+    chart_id: string; concern: string; axis4?: string | null;
+    lens_id?: string; name?: string;
+  }) => post<Summary>("/v1/summary", req),
+
+  /** 공유 링크 발급. 생년월일시는 담기지 않는다. */
+  share: (req: {
+    chart_id: string; concern: string; axis4?: string | null;
+    lens_id?: string; name?: string; from_name?: string;
+    reveal?: "full" | "light";
+  }) => post<{
+    token: string; path: string; expires_days: number;
+    includes: string[]; excludes: string[];
+  }>("/v1/share", req),
+
+  openShare: (token: string) =>
+    call<Shared>(`/v1/share/${encodeURIComponent(token)}`),
+
+  countShareOpen: (token: string) =>
+    post<{ views: number }>(`/v1/share/${encodeURIComponent(token)}/open`, {}),
 
   /* ── 결제 ── */
   payConfig: () =>

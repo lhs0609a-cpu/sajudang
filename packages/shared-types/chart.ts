@@ -198,3 +198,65 @@ export interface DailyResponse {
   source: string;
   free: boolean;
 }
+
+/* ── 분석지 ─────────────────────────────────────────────── */
+export interface SummarySection {
+  id: string;
+  title: string;
+  source: string;
+  html: string;
+}
+
+export interface SinsalBrief {
+  name: string;
+  hanja: string;
+  kind: "길신" | "살" | "특수";
+  at: string[];
+}
+
+export interface Summary {
+  name: string | null;
+  lens: LensPublic;
+  concern: string;
+  day_gan: string;
+  ilgan_name: string;
+  element: Element;
+  headline: string;
+  /** 공유 카드에 박히는 핵심 3줄 */
+  three_lines: string[];
+  strength: Strength;
+  flow: Flow;
+  weak_el: Element;
+  yongsin: Element;
+  pillars: Pillar[];
+  hour_known: boolean;
+  sections: SummarySection[];
+  sinsal: SinsalBrief[];
+  /** 숨기면 "맞히는 집" 이 된다. 반드시 함께 보여줄 것. */
+  caveats: string[];
+}
+
+/* ── 공유받은 것 ────────────────────────────────────────── */
+export interface Shared {
+  reveal: "full" | "light";
+  from_name: string | null;
+  name: string | null;
+  created_at: string;
+  views: number;
+  day_gan: string;
+  ilgan_name: string;
+  element: Element;
+  headline: string;
+  three_lines: string[];
+  strength: Strength;
+  flow: Flow;
+  weak_el: Element;
+  yongsin: Element;
+  lens: LensPublic;
+  caveats: string[];
+  /** reveal="full" 일 때만 온다 */
+  pillars?: Pillar[];
+  hour_known?: boolean;
+  sinsal?: SinsalBrief[];
+  sections?: SummarySection[];
+}

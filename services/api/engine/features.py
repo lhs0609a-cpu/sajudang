@@ -13,6 +13,7 @@ from dataclasses import dataclass, field, asdict
 from datetime import date
 from typing import Optional
 
+from . import sinsal as sinsal_mod
 from .calendar import Chart, Daeun
 from .constants import (
     CHUNG, HAP, ELEMENTS, GENERATES, GENERATED_BY, CONTROLS, CONTROLLED_BY,
@@ -71,6 +72,13 @@ class Features:
     # ── 관계 ──
     ilji_chung: bool
     ilji_hap: list
+
+    # ── 신살 · 궁위 ──
+    sinsal: list                     # [{key,name,hanja,kind,at,target}]
+    gongmang: str                    # 일주 순중공망 두 지지
+    helpers: list                    # 길신이 앉은 자리 → 누가 돕는가
+    ancestor: dict                   # 년주 = 조상 자리
+    palaces: list                    # 네 기둥의 궁위
 
     # ── 투명성 ──
     correction: dict
@@ -258,7 +266,7 @@ def build_features(chart: Chart, as_of: Optional[date] = None) -> Features:
     ilji_chung = CHUNG[day_ji] in others
     ilji_hap = [j for j in others if HAP.get(day_ji) == j]
 
-    return Features(
+    feats = Features(
         pillars=[{"gan": p.gan, "ji": p.ji, "label": p.label, "gz": p.gz}
                  for p in cp],
         day_gan=day_gan, day_ji=day_ji,
@@ -282,8 +290,15 @@ def build_features(chart: Chart, as_of: Optional[date] = None) -> Features:
         daeun_ten_god=daeun_list[now]["ten_god"],
         daeun_start=chart.daeun_start,
         ilji_chung=ilji_chung, ilji_hap=ilji_hap,
+        sinsal=sinsal_mod.find(chart),
+        gongmang=sinsal_mod.gongmang(day_gan, day_ji),
+        helpers=[], ancestor={}, palaces=sinsal_mod.palaces(chart),
         correction=_correction_dict(chart),
     )
+    # 조상 해석은 용신을 쓰므로 Features 가 다 채워진 뒤에 붙인다
+    feats.helpers = sinsal_mod.helpers(chart, feats)
+    feats.ancestor = sinsal_mod.ancestor(chart, feats)
+    return feats
 
 
 def _birth_year(chart: Chart) -> int:

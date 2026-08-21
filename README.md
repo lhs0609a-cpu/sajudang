@@ -23,10 +23,12 @@
 | T3-2 엔드포인트 | ✅ chart · hook · report · relay · feedback · daily · pay |
 | T3-3 릴레이 엔진 | ✅ 규칙 평가 · forced · 브레이크 하드코딩 |
 | T4-1 디자인 토큰 | ✅ 로판 팔레트 · 일간 10색 · 참조 CSS 이식 |
-| T4-2~3 화면 | ✅ **28화면 · 고아 0 · 막다른 0 · 죽은 버튼 0** |
+| T4-2~3 화면 | ✅ **32화면 · 고아 0 · 막다른 0 · 죽은 버튼 0** |
 | T4-4 장면 | ✅ 24종 컴포넌트 + 폴백 (에셋 0/24, 자리표시 SVG) |
 | T5-1 결제 | ⚠️ 토스페이먼츠 연동 코드 완성 — **PG 키 없어 실거래 검증 안 됨** |
 | T5-2 리텐션 | ✅ 5층 트리거 · 하루 1건 · 우선순위 · 회고 루프 |
+| **신살·궁위** | ✅ 길신 5 · 살 3 · 특수 5 · 공망 · 궁위 4 — 누가 돕는가 · 조상 자리 (docs/14) |
+| **분석지·공유** | ✅ 7절 분석지 · 공유 링크(생일 미포함) · 유입 랜딩 · OG 미리보기 (docs/15) |
 
 **다음에 할 일**: 회귀 케이스 50건의 기대값 채우기. 아래 "2주차 관문" 참고.
 
@@ -212,6 +214,8 @@ TASKS.md             작업 지시서
 dev.ps1 / Makefile   개발 명령
 alembic.ini          마이그레이션
 docs/                설계 문서 00~13
+                     14 신살·궁위 확정표 (유파 확정)
+                     15 분석지·공유·유입 설계
 seed/                bank · lenses · relay_rules · guard · ilgan · meta
 reference/
   sajudang.html      동작하는 참조 구현체 (문서와 어긋나면 이게 정답)
@@ -222,7 +226,7 @@ services/api/
   repo.py            statement_log 기록·집계
   payments.py        토스페이먼츠
   guard_middleware.py 전 응답 금지어 검사 (안전망)
-  routers/           chart hook report relay feedback daily pay
+  routers/           chart hook report relay feedback daily pay share
   migrations/        알렘빅
   scripts/           seed.py  notify.py
   engine/
@@ -236,6 +240,8 @@ services/api/
     relay.py         릴레이 · 브레이크
     report.py        리포트 컷 · tier 잠금
     daily.py         오늘의 일진
+    sinsal.py        ★ 신살·궁위 — 유파 확정값 (docs/14)
+    summary.py       분석지 한 장 · 공유 payload
     retention.py     리텐션 5층
     guard.py         금지어 필터
 apps/web/            Next.js 14 App Router — 28화면

@@ -123,6 +123,9 @@ export default function LobbyPage() {
         <button className="op" onClick={() => router.push("/daily")}>
           <b>오늘의 일진</b><span>값 없이 매일</span>
         </button>
+        <button className="op" onClick={() => router.push("/summary")}>
+          <b>분석지</b><span>한 장으로 받아보고 내보내기</span>
+        </button>
         <button className="op" onClick={() => router.push("/me")}>
           <b>인장첩</b><span>모은 인장 {s.seals.length}</span>
         </button>

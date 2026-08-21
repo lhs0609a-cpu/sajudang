@@ -175,9 +175,12 @@ export default function ReportPage() {
         </p>
         <button className="btn mt" onClick={() => {
           if (!s.seals.includes(lensId)) s.set({ seals: [...s.seals, lensId] });
-          router.push("/relay");
+          router.push("/summary");
         }}>
-          인장을 받고 나간다
+          인장을 받고 분석지를 받는다
+        </button>
+        <button className="btn gh" onClick={() => router.push("/relay")}>
+          바로 다음 사람에게
         </button>
       </Shell>
     );
@@ -204,6 +207,7 @@ export default function ReportPage() {
         <button className="btn gh" onClick={() => setTab("c3")}>대운 맵</button>
       )}
       <button className="btn gh" onClick={() => setTab("c5")}>공유 카드</button>
+      <button className="btn gh" onClick={() => router.push("/summary")}>분석지 한 장</button>
       <button className="btn gh" onClick={() => setTab("c6")}>다 읽었소</button>
     </Shell>
   );

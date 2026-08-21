@@ -19,7 +19,18 @@ from typing import Optional
 from . import bank as bank_mod
 from . import guard
 from . import lens as lens_mod
+from . import sinsal as sinsal_mod
 from .bank import element_word, josa
+
+import json as _json
+from functools import lru_cache as _lru
+from pathlib import Path as _Path
+
+
+@_lru(maxsize=1)
+def _sinsal_text() -> dict:
+    p = _Path(__file__).resolve().parents[3] / "seed" / "sinsal.json"
+    return _json.loads(p.read_text("utf-8"))
 from .constants import ELEMENT_OF_GAN
 
 TIERS = ("free", "one", "all", "sub")
@@ -169,6 +180,76 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str]) -> list:
                 d["start_age"], d["gz"], d["ten_god"])
              for d in f.daeun)),
         2))
+
+    # ── 7b · 이름 붙은 자리 (신살) ─────────────────────────
+    T = _sinsal_text()
+    if f.sinsal:
+        rows = []
+        for sv in f.sinsal:
+            m = T["meaning"].get(sv["key"], {})
+            rows.append(
+                '<div class="ss %s"><div class="hd"><b>%s</b>'
+                '<span class="hj">%s</span><span class="tag">%s</span></div>'
+                '<div class="at">%s · %s</div><p>%s</p>%s</div>'
+                % ("good" if sv["kind"] == "길신" else "warn",
+                   sv["name"], sv["hanja"], sv["kind"],
+                   " · ".join(sv["at"]), sv["target"],
+                   m.get("text", ""),
+                   ('<p class="sm">%s</p>' % m["caution"]) if m.get("caution") else ""))
+        body = "".join(rows)
+    else:
+        body = '<p class="tale">%s</p>' % T["none"]["sinsal"]
+    cuts.append(_cut(
+        "sinsal", "이름 붙은 자리",
+        "신살 %d · 공망 %s" % (len(f.sinsal), f.gongmang),
+        body + '<p class="sm">신살 표는 유파마다 다르오. 우리가 쓰는 표를 '
+               '문서에 적어 두었소.</p>',
+        0, sid="sinsal:%s" % ",".join(x["key"] for x in f.sinsal)))
+
+    # ── 7c · 누가 돕는가 ──────────────────────────────────
+    if f.helpers:
+        seen_p = []
+        rows = []
+        for h in f.helpers:
+            if h["pillar"] in seen_p:
+                continue
+            seen_p.append(h["pillar"])
+            names = [x["sinsal"] for x in f.helpers if x["pillar"] == h["pillar"]]
+            rows.append(
+                '<div class="hp"><div class="hd"><b>%s</b>'
+                '<span class="tag">%s</span></div>'
+                '<p>%s</p><p class="sm">%s</p></div>'
+                % (" · ".join(names), h["pillar"],
+                   T["helper_lead"][h["pillar"]], h["kind"]))
+        body = ('<p class="tale">길신이 앉은 자리를 궁위로 읽은 것이오. '
+                '누가 도울 사람인지 그 방향만 짚소.</p>' + "".join(rows))
+    else:
+        body = '<p class="tale">%s</p>' % T["none"]["helper"]
+    cuts.append(_cut(
+        "helper", "누가 돕는가",
+        "길신 %d자리" % len({h["pillar"] for h in f.helpers}),
+        body, 1, sid="helper:%s" % ",".join(
+            sorted({h["sinsal"] + ":" + h["pillar"] for h in f.helpers}))))
+
+    # ── 7d · 뿌리 (조상 자리) ─────────────────────────────
+    a = f.ancestor
+    stance_text = T["ancestor_stance"][a["stance"]]
+    good = ("<p class=\"sm\">이 자리에 %s 이 함께 앉았소.</p>"
+            % " · ".join(a["good_sinsal"])) if a["good_sinsal"] else ""
+    bad = ("<p class=\"sm\">이 자리에 %s 도 함께 있소.</p>"
+           % " · ".join(a["bad_sinsal"])) if a["bad_sinsal"] else ""
+    cuts.append(_cut(
+        "ancestor", "뿌리 · 조상 자리",
+        "년주 %s · %s / %s" % (a["pillar"], a["gan_ten_god"], a["ji_ten_god"]),
+        ('<p class="tale">%s</p>'
+         '<p class="tale">그대 년주는 <b>%s</b>. 위는 %s, 아래는 %s요.</p>'
+         '<p class="tale">%s</p>%s%s'
+         '<p class="sm">물려받은 결이라 보던 것은 <b>%s</b> 쪽이오. '
+         '무엇을 준다고 정해 말하지는 않겠소.</p>'
+         % (T["palace_lead"]["년주"], a["pillar"],
+            a["gan_ten_god"], a["ji_ten_god"], stance_text, good, bad,
+            a["inherited"])),
+        1, sid="ancestor:%s:%s" % (a["gan_ten_god"], a["stance"])))
 
     # ── 8 · 성향 4글자 대조 (입력했을 때만) ───────────────
     gaps = bank_mod.gap_list(f, axis4)
