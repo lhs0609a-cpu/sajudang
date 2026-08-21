@@ -184,6 +184,22 @@ def _rows() -> list[dict]:
     return out
 
 
+def clear() -> int:
+    """
+    쌓인 사건을 지운다. 배포 직후 시험분을 치우는 용도입니다.
+    statement_log 는 건드리지 않습니다 — 그건 공감률의 원천 자산입니다.
+    """
+    n = len(_rows())
+    if db.HAS_DB:
+        import models
+        from sqlalchemy import delete
+        with db.session() as s:
+            s.execute(delete(models.Event))
+    elif EVENT_LOG_PATH.exists():
+        EVENT_LOG_PATH.unlink()
+    return n
+
+
 def funnel() -> dict:
     """
     화면별 도달 **사람 수**(세션 수). 방문 수가 아니라 사람 수라야

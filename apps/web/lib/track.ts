@@ -58,6 +58,25 @@ function sid(): string {
 let queue: Ev[] = [];
 let timer: ReturnType<typeof setTimeout> | null = null;
 
+/**
+ * ★ 관리자는 세지 않습니다.
+ *
+ * 레일은 ?step= 으로 화면을 건너뜁니다. 그대로 세면 a4 를 안 거친
+ * 사람이 a6 에 나타나 "직전대비 200%" 같은 숫자가 나옵니다. 실제로
+ * 배포 직후 퍼널에 그 값이 찍혔습니다.
+ *
+ * 고치는 쪽이 자기 손으로 숫자를 망가뜨리게 두면, 그 숫자를 못 믿게
+ * 되고 결국 안 보게 됩니다.
+ */
+function isAdmin(): boolean {
+  try {
+    const raw = localStorage.getItem("sajudang-session");
+    return !!raw && JSON.parse(raw)?.state?.admin === true;
+  } catch {
+    return false;
+  }
+}
+
 function send(batch: Ev[], beacon = false) {
   if (!batch.length || !API_BASE) return;
   const url = `${API_BASE}/v1/events`;
@@ -89,6 +108,7 @@ export function flush(beacon = false) {
 
 export function track(name: EventName, screen: string, extra?: Partial<Ev>) {
   if (typeof window === "undefined") return;
+  if (isAdmin()) return;               // 관리자 레일은 퍼널에 안 실린다
   const s = sid();
   if (!s) return;
   queue.push({ name, screen, sid: s, ...extra });

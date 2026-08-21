@@ -44,6 +44,22 @@ def post_events(batch: EventBatch) -> dict:
     return {"ok": True, "recorded": n, "sent": len(batch.events)}
 
 
+@router.delete("/events")
+def clear_events(x_funnel_key: str | None = Header(default=None)) -> dict:
+    """
+    계측을 비운다. **열쇠가 있어야 합니다.**
+
+    쓸 자리는 하나뿐입니다 — 배포 직후 시험하며 만든 사건을 치우고
+    진짜 숫자를 0 부터 세기. 실사용이 시작된 뒤에는 부르지 마세요.
+    지운 것은 돌아오지 않습니다.
+    """
+    if not FUNNEL_KEY:
+        raise HTTPException(503, "FUNNEL_KEY 가 설정되지 않았습니다.")
+    if not x_funnel_key or not hmac.compare_digest(x_funnel_key, FUNNEL_KEY):
+        raise HTTPException(401, "열쇠가 맞지 않습니다.")
+    return {"ok": True, "deleted": analytics.clear()}
+
+
 @router.get("/funnel")
 def get_funnel(x_funnel_key: str | None = Header(default=None)) -> dict:
     """
