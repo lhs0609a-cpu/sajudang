@@ -55,12 +55,19 @@ for (const id of Object.keys(SCN)) {
   } catch (e) {
     console.error("  prompt 평가 실패:", id, e.message);
   }
+  // ★ 참조 구현체는 hg 안에 ${'${ANIMBASE}'} 로 적어 두어 **문자 그대로**
+  //   "${ANIMBASE}" 가 남습니다. 그대로 복사하면 영상 앵커가 빠지고,
+  //   docs/10 §2 가 경고한 대로 3초 안에 얼굴이 사진처럼 변합니다.
+  //   여기서 실제 앵커 문구로 바꿔 넣습니다.
+  const motion = (mo.hg || null) &&
+    mo.hg.split("${ANIMBASE}").join(ANIMBASE);
+
   out.scenes[id] = {
     title: s.t,
     spec: s.spec || null,
     hint: s.hint || null,
     image,
-    motion: mo.hg || null,
+    motion,
     preset: mo.ps || "Static",
     ratio: mo.ar || "16:9",
     duration: mo.du || "3s",
