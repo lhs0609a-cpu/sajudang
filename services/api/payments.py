@@ -1,10 +1,12 @@
 """
 토스페이먼츠 연동 — docs/01 §5 · docs/11 환불 정책
 
-    TOSS_CLIENT_KEY=test_ck_...
-    TOSS_SECRET_KEY=test_sk_...
+    TOSS_CLIENT_KEY=test_ck_...   (라이브는 live_ck_…)
+    TOSS_SECRET_KEY=test_sk_...   (라이브는 live_sk_…)
 
-★ 키가 없으면 결제를 **거절**합니다. 성공한 척하지 않습니다.
+★ 시크릿 키를 저장소 안 어떤 파일에도 적지 마세요. 환경변수로만 넣습니다.
+  (운영은 `fly secrets set`. 적어 두면 구글 드라이브로 동기화됩니다.)
+★ 키가 없거나 **두 짝이 안 맞으면** 결제를 거절합니다. 성공한 척하지 않습니다.
 ★ 하루 결제 2건 상한은 이 모듈에서 강제합니다. 우회 경로를 만들지 마세요.
   (CLAUDE.md 절대 규칙 4)
 
@@ -29,7 +31,76 @@ TOSS_CLIENT_KEY = os.getenv("TOSS_CLIENT_KEY", "").strip()
 TOSS_SECRET_KEY = os.getenv("TOSS_SECRET_KEY", "").strip()
 TOSS_BASE = "https://api.tosspayments.com/v1/payments"
 
-ENABLED = bool(TOSS_SECRET_KEY)
+# ── 키 두 짝이 서로 맞는지 뜰 때 본다 ──────────────────────────
+#
+# 토스는 연동 방식마다 키가 따로입니다.
+#     live_ck_  / test_ck_    API 개별 연동 — 결제창 payment()   ← 우리 것
+#     live_gck_ / test_gck_   결제위젯 연동 — widgets()
+#
+# 프론트(apps/web/lib/toss.ts)가 v2 SDK 의 payment() 를 부르므로
+# **API 개별 연동 키(ck/sk)** 라야 합니다.
+#
+# ★ 왜 미리 보는가
+#   위젯 키를 넣어도 결제창은 멀쩡히 뜹니다. 막히는 곳은 승인입니다 —
+#   손님이 카드를 이미 긁은 뒤입니다. 돈은 물려 있고 리포트는 안 열립니다.
+#   짝이 안 맞으면 아예 결제를 열지 않는 편이 낫습니다.
+
+_KINDS = {"ck": ("client", "api"), "gck": ("client", "widget"),
+          "sk": ("secret", "api"), "gsk": ("secret", "widget")}
+
+
+def _read_key(key: str):
+    """('live'|'test', 'client'|'secret', 'api'|'widget') 또는 None."""
+    parts = key.split("_", 2)
+    if len(parts) < 3:
+        return None
+    mode, kind = parts[0], parts[1]
+    if mode not in ("live", "test") or kind not in _KINDS:
+        return None
+    role, family = _KINDS[kind]
+    return mode, role, family
+
+
+def check_keys(client: str, secret: str) -> Optional[str]:
+    """못 쓸 조합이면 까닭을 돌려줍니다. 쓸 수 있으면 None.
+
+    ★ 돌려주는 문장에 키를 절대 싣지 마세요. 로그와 /health 에 나갑니다.
+    """
+    if not secret:
+        return "TOSS_SECRET_KEY 가 없습니다. 결제를 진행할 수 없습니다."
+    if not client:
+        return "TOSS_CLIENT_KEY 가 없습니다. 결제창을 띄울 수 없습니다."
+
+    c, s = _read_key(client), _read_key(secret)
+    if c is None:
+        return "TOSS_CLIENT_KEY 의 형식을 모르겠습니다 (live_ck_… 라야 합니다)."
+    if s is None:
+        return "TOSS_SECRET_KEY 의 형식을 모르겠습니다 (live_sk_… 라야 합니다)."
+    if c[1] != "client":
+        return "TOSS_CLIENT_KEY 자리에 시크릿 키가 들어 있습니다. 두 값이 바뀌었습니다."
+    if s[1] != "secret":
+        return "TOSS_SECRET_KEY 자리에 클라이언트 키가 들어 있습니다. 두 값이 바뀌었습니다."
+    if c[0] != s[0]:
+        return ("키 두 짝의 모드가 다릅니다 — 클라이언트 %s · 시크릿 %s. "
+                "한쪽만 라이브로 바꿔 두면 승인에서 막힙니다." % (c[0], s[0]))
+    if c[2] != s[2]:
+        return "클라이언트 키와 시크릿 키가 서로 다른 연동의 것입니다."
+    if c[2] != "api":
+        return ("결제위젯 연동 키(gck/gsk)입니다. 지금 프론트는 v2 SDK 의 "
+                "payment() — 결제창을 씁니다. API 개별 연동 키(ck/sk)를 넣거나, "
+                "프론트를 widgets() 로 바꾸세요.")
+    return None
+
+
+DISABLED_REASON = check_keys(TOSS_CLIENT_KEY, TOSS_SECRET_KEY)
+ENABLED = DISABLED_REASON is None
+LIVE = ENABLED and TOSS_SECRET_KEY.startswith("live_")
+
+if DISABLED_REASON and (TOSS_CLIENT_KEY or TOSS_SECRET_KEY):
+    # 키를 넣었는데 안 켜졌다면 조용히 넘기면 안 됩니다.
+    log.error("결제를 켜지 않았습니다 — %s", DISABLED_REASON)
+elif LIVE:
+    log.warning("토스 라이브 키입니다. 이제부터 실제로 돈이 오갑니다.")
 
 # 티어별 정가. products 테이블이 정본이 되면 거기서 읽도록 바꾸세요.
 TIER_PRICE = {"one": 3900, "all": 19900, "sub": 9900}
@@ -68,7 +139,7 @@ class PaymentResult:
 def _auth_header() -> dict:
     if not ENABLED:
         raise PaymentsDisabled(
-            "TOSS_SECRET_KEY 가 없습니다. 결제를 진행할 수 없습니다.")
+            DISABLED_REASON or "결제를 진행할 수 없습니다.")
     token = base64.b64encode((TOSS_SECRET_KEY + ":").encode()).decode()
     return {"Authorization": "Basic " + token,
             "Content-Type": "application/json"}
@@ -77,6 +148,7 @@ def _auth_header() -> dict:
 def client_config() -> dict:
     """프론트가 결제창을 띄우는 데 필요한 것. 시크릿 키는 절대 내려보내지 않는다."""
     return {"enabled": ENABLED, "client_key": TOSS_CLIENT_KEY or None,
+            "live": LIVE, "reason": DISABLED_REASON,
             "refund_notice": REFUND_NOTICE}
 
 

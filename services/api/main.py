@@ -67,5 +67,8 @@ def health() -> dict:
         "store": store.stats(),
         "db": db.info(),
         "payments": payments.ENABLED,
+        # 켜지지 않았다면 왜인지. 키는 안 실립니다 — 까닭만 나갑니다.
+        "payments_live": payments.LIVE,
+        "payments_reason": payments.DISABLED_REASON,
         "cors_origins": CORS_ORIGINS,
     }

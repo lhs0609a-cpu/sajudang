@@ -269,3 +269,59 @@ def test_return_from_checkout_is_handled():
     assert 'params.get("toss")' in page
     assert 'params.get("paymentKey")' in page
     assert "payConfirm(" in page
+
+
+# ══════════════════════════════════════════════════════════
+# 키 두 짝이 맞는가 — 손님이 카드를 긁기 **전에** 걸러야 한다
+#
+# 위젯 키(gck/gsk)를 넣어도 결제창은 멀쩡히 뜹니다. 막히는 곳은 승인이고,
+# 그때는 이미 긁은 뒤입니다. 그래서 뜰 때 봅니다.
+# ══════════════════════════════════════════════════════════
+def test_matching_api_keys_pass():
+    import payments
+    assert payments.check_keys("live_ck_aaa", "live_sk_bbb") is None
+    assert payments.check_keys("test_ck_aaa", "test_sk_bbb") is None
+
+
+def test_widget_keys_are_refused_while_frontend_uses_payment_window():
+    """프론트가 payment() 를 쓰는 동안 gck/gsk 를 받으면 안 된다."""
+    import payments
+    why = payments.check_keys("live_gck_aaa", "live_gsk_bbb")
+    assert why and "결제위젯" in why
+
+
+def test_live_and_test_keys_cannot_be_mixed():
+    import payments
+    assert payments.check_keys("test_ck_aaa", "live_sk_bbb")
+    assert payments.check_keys("live_ck_aaa", "test_sk_bbb")
+
+
+def test_swapped_keys_are_caught():
+    """클라이언트 자리에 시크릿을 넣는 사고가 제일 흔하다."""
+    import payments
+    why = payments.check_keys("live_sk_bbb", "live_ck_aaa")
+    assert why and "바뀌었" in why
+
+
+def test_client_key_alone_is_not_enough():
+    import payments
+    assert payments.check_keys("live_ck_aaa", "")
+    assert payments.check_keys("", "live_sk_bbb")
+
+
+def test_reason_never_carries_the_key_itself():
+    """까닭은 로그와 /health 로 나갑니다. 키가 실리면 안 됩니다."""
+    import payments
+    for c, k in [("live_gck_SECRETISH", "live_gsk_SECRETISH"),
+                 ("live_sk_SECRETISH", "live_ck_SECRETISH"),
+                 ("무엇", "live_sk_SECRETISH"),
+                 ("live_ck_SECRETISH", "무엇")]:
+        why = payments.check_keys(c, k) or ""
+        assert "SECRETISH" not in why, why
+
+
+def test_health_says_why_payments_are_off(app):
+    h = app.get("/health").json()
+    assert h["payments"] is False
+    assert h["payments_live"] is False
+    assert "TOSS_SECRET_KEY" in h["payments_reason"]
