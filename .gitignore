@@ -14,3 +14,7 @@ dist/
 var/
 대조표.md
 .vercel/
+
+# 에셋 원본(마스터). 수십 MB 라 커밋하지 않습니다.
+# public/scene/ 에 들어가는 것은 여기서 뽑은 인코딩본입니다.
+assets/master/
