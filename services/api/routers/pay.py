@@ -131,6 +131,15 @@ def confirm(req: ConfirmRequest) -> dict:
 
     # 하루 결제 카운터 · 인장
     store.incr(store.k_purchase_day(_user_key(req.session_id), _today()), ttl=DAY)
+
+    # 이 세션이 치른 주문 목록. 스무 사람 종합이 이걸 보고 자격을 봅니다.
+    # 클라이언트가 보낸 tier 를 믿으면 요청 한 줄로 8만 자가 빠져나갑니다.
+    okey = "orders:" + req.session_id
+    orders = store.get_json(okey) or []
+    if req.order_id not in orders:
+        orders.append(req.order_id)
+        store.set_json(okey, orders, ttl=365 * DAY)
+
     seals_key = "seals:" + _user_key(req.session_id)
     seals = store.get_json(seals_key) or []
     if order["lens_id"] not in seals:

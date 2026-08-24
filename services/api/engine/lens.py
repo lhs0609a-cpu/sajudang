@@ -42,10 +42,57 @@ def you_word(lens_id: Optional[str]) -> str:
     """캐릭터별 호칭 — 그대 / 자네 / 아저씨"""
     if not lens_id:
         return DEFAULT_YOU
+    v = _views().get(lens_id)
+    if v and v.get("you"):
+        return v["you"]
     try:
         return get(lens_id).get("you_word") or DEFAULT_YOU
     except LensError:
         return DEFAULT_YOU
+
+
+# ══════════════════════════════════════════════════════════
+# 관점 — 같은 명식을 스무 명이 다르게 보게 하는 자리
+# ══════════════════════════════════════════════════════════
+#
+# ★ 이게 없으면 렌즈가 이름·색만 바꿉니다.
+#   실제로 그랬습니다 — 20명의 리포트가 바이트 단위로 같았습니다.
+#   "스무 명이 각자의 관점으로 해석" 이 이 서비스의 한 줄인데
+#   그 한 줄이 구현돼 있지 않았습니다.
+#
+# ★ 근거는 캐릭터가 바꾸지 않습니다.
+#   여덟 글자는 하나입니다. 말하는 **순서와 어조**만 다릅니다.
+
+DEFAULT_VIEW = {
+    "you": DEFAULT_YOU,
+    "lead": None,
+    "focus": [],
+    "mute": [],
+    "open": None,
+    "close": None,
+    "notes": {},
+}
+
+
+@lru_cache(maxsize=1)
+def _views() -> dict:
+    raw = json.loads((SEED / "lens_view.json").read_text("utf-8"))
+    return {k: v for k, v in raw.items() if k != "_"}
+
+
+def view(lens_id: Optional[str]) -> dict:
+    """캐릭터의 관점. 없는 캐릭터면 기본값 — 화면이 죽지 않게."""
+    v = _views().get(lens_id or "")
+    if not v:
+        return dict(DEFAULT_VIEW)
+    out = dict(DEFAULT_VIEW)
+    out.update(v)
+    return out
+
+
+def missing_views() -> list:
+    """관점이 안 적힌 캐릭터. 테스트가 이걸 봅니다."""
+    return [l["id"] for l in all_lenses() if l["id"] not in _views()]
 
 
 def released() -> list:

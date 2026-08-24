@@ -280,16 +280,60 @@ def report_id(chart_id: str, lens_id: str, tier: str, concern: str) -> str:
     return hashlib.sha256(raw.encode()).hexdigest()[:32]
 
 
+def apply_view(cuts: list, view: dict) -> list:
+    """
+    캐릭터의 관점을 얹는다 — **순서와 어조만**.
+
+    ★ 근거는 건드리지 않습니다. 여덟 글자는 하나입니다.
+      같은 사람을 다르게 읽는 것이지 다른 사주를 만드는 게 아닙니다.
+
+      lead  맨 앞으로 (그 사람이 '먼저 보는 것')
+      mute  뒤로 (덜 보는 것 — 지우지는 않습니다)
+      notes 그 컷에 그 사람의 한 마디를 덧붙임
+
+    명식(chart)은 셈의 근거라 늘 맨 앞입니다. 일관만 이걸 lead 로
+    삼는데, 그 사람은 셈 자체를 보는 사람이라 뜻이 맞습니다.
+    """
+    lead = view.get("lead")
+    mute = set(view.get("mute") or ())
+    notes = view.get("notes") or {}
+
+    out = []
+    for c in cuts:
+        c = dict(c)
+        note = notes.get(c["id"])
+        if note:
+            c["html"] = c["html"] + (
+                '<p class="lensnote">%s</p>' % guard.enforce(note, {"cut": c["id"]}))
+            c["lens_note"] = True
+        out.append(c)
+
+    def key(c):
+        if c["id"] == "chart":
+            return (0, 0)            # 셈의 근거는 늘 먼저
+        if c["id"] == lead:
+            return (1, 0)
+        if c["id"] in mute:
+            return (3, 0)
+        return (2, 0)
+
+    return sorted(out, key=key)
+
+
 def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
                  axis4: Optional[str] = None) -> dict:
     """
     tier 별 잠금 차등. 잠긴 컷은 **본문을 내려보내지 않습니다.**
     제목과 근거만 보여 무엇이 잠겼는지 알 수 있게 합니다.
+
+    ★ 캐릭터마다 순서와 어조가 다릅니다 (engine/lens.view).
+      전에는 렌즈가 이름·색만 바꾸고 본문은 20명이 똑같았습니다.
     """
     if tier not in TIERS:
         raise ValueError("모르는 tier: %r" % (tier,))
     level = TIER_LEVEL[tier]
-    you = lens_mod.you_word(lens_id)
+    view = lens_mod.view(lens_id)
+    you = view["you"]
 
     cuts, locked = [], []
     for c in _all_cuts(f, concern, you, axis4):
@@ -300,12 +344,16 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
                            "source": c["source"],
                            "need_tier": "one" if c["min_level"] == 1 else "all"})
 
+    cuts = apply_view(cuts, view)
+
     return {
         "report_id": report_id(chart_id, lens_id, tier, concern),
         "chart_id": chart_id,
         "lens": lens_mod.public(lens_id),
         "tier": tier,
         "concern": concern,
+        "opening": guard.enforce(view["open"], {"cut": "open"}) if view.get("open") else None,
+        "closing": guard.enforce(view["close"], {"cut": "close"}) if view.get("close") else None,
         "cuts": cuts,
         "locked": locked,
     }
