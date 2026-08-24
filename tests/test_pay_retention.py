@@ -55,9 +55,23 @@ def test_prepare_reports_the_refund_notice(client):
 
 
 def test_secret_key_never_leaves_the_server(client):
-    body = client.get("/v1/pay/config").text
-    assert "secret" not in body.lower()
-    assert "client_key" in body
+    """
+    ★ 나가면 안 되는 것은 시크릿 **값**입니다.
+
+    본문에 'secret' 이라는 글자가 있는지만 보면 안 됩니다. 키가 안 꽂힌
+    환경에서 까닭 문장이 "TOSS_SECRET_KEY 가 없습니다" 라고 **이름**을
+    부르는데(payments.check_keys), 그 이름에 걸려 붉게 뜹니다.
+    이름은 나가도 됩니다 — 무엇을 꽂아야 하는지 알려주는 말입니다.
+    """
+    res = client.get("/v1/pay/config")
+    data = res.json()
+
+    assert "client_key" in data
+    # 시크릿을 담는 자리 자체가 없어야 합니다.
+    assert [k for k in data if "secret" in k.lower()] == []
+    # 값이 꽂힌 환경이면 그 값이 본문에 없어야 합니다.
+    if payments.TOSS_SECRET_KEY:
+        assert payments.TOSS_SECRET_KEY not in res.text
 
 
 @pytest.mark.skipif(payments.ENABLED, reason="PG 키가 설정된 환경")

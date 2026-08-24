@@ -18,3 +18,13 @@ var/
 # 에셋 원본(마스터). 수십 MB 라 커밋하지 않습니다.
 # public/scene/ 에 들어가는 것은 여기서 뽑은 인코딩본입니다.
 assets/master/
+
+# Next.js 가 빌드 때 다시 만드는 것들.
+next-env.d.ts
+*.tsbuildinfo
+
+# ★ apps/web/package-lock.json 은 커밋하지 않습니다.
+#   dev.ps1 web-pull 이 apps/web 만 따로 떼어 npm install 하면서 만든
+#   잠금 파일이라, 워크스페이스(@sajudang/shared-types) 연결이 빠져
+#   있습니다. Vercel 이 이걸 보고 npm ci 를 돌리면 그 자리에서 깨집니다.
+package-lock.json
