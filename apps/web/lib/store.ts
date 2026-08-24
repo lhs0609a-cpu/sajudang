@@ -20,9 +20,12 @@ export interface SessionState {
 
   /* 입력 */
   name: string;
-  year: number;
-  month: number;
-  day: number;
+  /* ★ 빈칸으로 시작합니다. 채워 두면 그냥 넘기고 **남의 사주**를 봅니다.
+     "근거 대는 집" 에서 가장 나쁜 실패는 틀린 것을 근거까지 붙여 보여주는
+     것입니다. 0 이 아니라 null 이라야 화면이 빈칸을 그립니다. */
+  year: number | null;
+  month: number | null;
+  day: number | null;
   hour: number | null;      // null = 시각 미상
   minute: number;
   hourKnown: boolean;
@@ -76,9 +79,9 @@ function newSessionId() {
 const initial = {
   sessionId: newSessionId(),
   name: "",
-  year: 1993,
-  month: 5,
-  day: 15,
+  year: null as number | null,
+  month: null as number | null,
+  day: null as number | null,
   hour: null as number | null,
   minute: 0,
   hourKnown: false,

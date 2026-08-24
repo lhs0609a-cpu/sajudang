@@ -129,10 +129,50 @@ function Placeholder({ id, season }: { id: string; season: Season }) {
   );
 }
 
-export default function Scene({ id, className }: { id: string; className?: string }) {
+/**
+ * 장면 하나를 그리는 미디어 한 겹. 같은 에셋을 두 번 쓸 때(가운데 + 흘림)
+ * 이 함수를 두 번 부릅니다. 브라우저는 같은 URL 을 한 번만 받아 옵니다.
+ */
+function Media({ base, name, loop, tintClass, reduced, decorative }: {
+  base: string; name: string; loop: boolean;
+  tintClass?: string; reduced: boolean; decorative?: boolean;
+}) {
+  if (reduced) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img className={tintClass} src={`${base}poster.jpg`}
+                alt={decorative ? "" : name} />;
+  }
+  return (
+    <video
+      className={tintClass}
+      poster={`${base}poster.jpg`}
+      autoPlay muted playsInline loop={loop}
+      key={base}
+    >
+      <source src={`${base}clip.webm`} type="video/webm" />
+      <source src={`${base}clip.mp4`} type="video/mp4" />
+    </video>
+  );
+}
+
+/**
+ * bleed — 같은 장면을 크게 흐려 뒤에 한 겹 더 깝니다.
+ *
+ * 9:16 에셋을 넓은 창에 `cover` 로 늘리면 세로 구도가 가로 한 줄로 잘려
+ * 그림이 사라집니다. 그래서 가운데는 `contain`(세로를 창에 맞춤)으로
+ * 두고, 남는 좌우를 이 겹이 채웁니다.
+ *
+ * ★ 이 겹도 **영상**입니다. 가운데가 움직이는데 배경이 정지컷이면
+ *   어긋나 보입니다. 같은 파일이라 내려받기는 한 번입니다.
+ *   prefers-reduced-motion 이면 두 겹 다 poster.jpg 로 내려갑니다.
+ */
+export default function Scene({ id, className, bleed }: {
+  id: string; className?: string; bleed?: boolean;
+}) {
   const spec = SCENE_BY_ID[id];
   const reduced = useReducedMotion();
   const override = useSession((st) => st.seasonOverride);
+  const admin = useSession((st) => st.admin);
   const season = override ?? seasonOf();
   // 훅은 조건 앞에 와야 합니다. spec 이 없어도 순서가 흔들리면 안 됩니다.
   const chosen = useClipBase(
@@ -146,20 +186,8 @@ export default function Scene({ id, className }: { id: string; className?: strin
   if (!spec) return null;
 
   const body = hasClip ? (
-    reduced ? (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img src={`${base}poster.jpg`} alt={spec.name} />
-    ) : (
-      <video
-        className={spec.tint ? "scene-video" : undefined}
-        poster={`${base}poster.jpg`}
-        autoPlay muted playsInline loop={spec.loop}
-        key={base}
-      >
-        <source src={`${base}clip.webm`} type="video/webm" />
-        <source src={`${base}clip.mp4`} type="video/mp4" />
-      </video>
-    )
+    <Media base={base} name={spec.name} loop={spec.loop} reduced={reduced}
+           tintClass={spec.tint ? `scene-video ${spec.tint}` : undefined} />
   ) : (
     <Placeholder id={id} season={season} />
   );
@@ -167,22 +195,43 @@ export default function Scene({ id, className }: { id: string; className?: strin
   /*
    * 장면을 클릭하면 제작 프롬프트가 뜹니다.
    * 참조 구현체의 showScn() 을 옮긴 것입니다 — 에셋을 뽑을 때 씁니다.
+   *
+   * ★ 레일이 켜져 있을 때만 눌립니다. 두 가지 이유입니다.
+   *   1) 제작 프롬프트는 내부 문서입니다. 손님에게 보일 것이 아닙니다.
+   *   2) 대문(a1)은 그림이 화면을 다 덮습니다. 그림이 항상 눌리면
+   *      "다음으로" 를 누를 자리가 없어지고 매 클릭이 모달에 막힙니다.
+   * 레일이 켜졌을 때는 stopPropagation 으로 부모의 '다음으로' 를 막습니다.
    */
+  const pickable = admin;
+
   return (
     <>
+      {bleed && (
+        <span className="scene-bleed" aria-hidden>
+          {hasClip
+            ? <Media base={base} name={spec.name} loop={spec.loop}
+                     reduced={reduced} decorative />
+            : <Placeholder id={id} season={season} />}
+        </span>
+      )}
       <div
         className={`sceneart ${className ?? ""}`}
-        role="button"
-        tabIndex={0}
-        title={`${spec.name} — 눌러서 제작 프롬프트 보기`}
-        onClick={() => setOpen(true)}
-        onKeyDown={(ev) => {
-          if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); setOpen(true); }
-        }}
+        role={pickable ? "button" : undefined}
+        tabIndex={pickable ? 0 : undefined}
+        title={pickable ? `${spec.name} — 눌러서 제작 프롬프트 보기` : undefined}
+        style={pickable ? undefined : { cursor: "inherit" }}
+        onClick={pickable ? (ev) => { ev.stopPropagation(); setOpen(true); } : undefined}
+        onKeyDown={pickable ? (ev) => {
+          if (ev.key === "Enter" || ev.key === " ") {
+            ev.preventDefault(); ev.stopPropagation(); setOpen(true);
+          }
+        } : undefined}
       >
         {body}
-        {hasClip && spec.tint && <span className="scene-tint" />}
-        <span className="slot">{hasClip ? "프롬프트" : `IMG · ${id}`}</span>
+        {hasClip && spec.tint && <span className={`scene-tint ${spec.tint}`} />}
+        {pickable && (
+          <span className="slot">{hasClip ? "프롬프트" : `IMG · ${id}`}</span>
+        )}
       </div>
       {open && (
         <PromptModal kind="scene" id={id} onClose={() => setOpen(false)} />

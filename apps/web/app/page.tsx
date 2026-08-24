@@ -16,6 +16,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
 import { useScreen } from "@/lib/track";
+import { birthMessageFrom, birthProblem } from "@/lib/birth";
 import Scene from "@/components/scene/Scene";
 import { Narration, Progress, Say } from "@/components/Narration";
 import { CalcPanel, ElementBar, Pillars, Summary } from "@/components/Chart";
@@ -97,11 +98,21 @@ function EntryInner() {
 
   /* ── a6 · 명식 세우기 — 서버 호출 ─────────────────────── */
   const buildChart = async () => {
+    /*
+     * 날짜를 지역 변수로 빼서 타입을 좁힙니다. a3 과 아래 useEffect 가
+     * birthProblem 으로 이미 막지만, 컴파일러가 보는 것은 store 의
+     * number | null 뿐입니다. null 을 서버로 보내지 않는 자리가 여기입니다.
+     */
+    const { year, month, day } = s;
+    if (year === null || month === null || day === null) {
+      setError("날을 다 적어야 명식을 세우오.");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
       const res = await api.chart({
-        year: s.year, month: s.month, day: s.day,
+        year, month, day,
         hour: s.hourKnown ? s.hour : null,
         minute: s.hourKnown ? s.minute : null,
         hour_known: s.hourKnown,
@@ -109,14 +120,22 @@ function EntryInner() {
       });
       s.set({ chartId: res.chart_id, features: res.features });
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "명식을 세우지 못했소.");
+      // 서버가 거절한 이유를 이 집의 말로 옮깁니다. 영어 원문이 뜨면
+      // 그 순간 몰입이 깨지고, 무엇을 고쳐야 하는지도 모릅니다.
+      const raw = e instanceof ApiError ? e.message : "";
+      setError(birthMessageFrom(raw) ?? "명식을 세우지 못했소. 적은 것을 한 번 보시오.");
     } finally {
       setBusy(false);
     }
   };
 
   useEffect(() => {
-    if (step === "a6" && !s.features && !busy && !error) void buildChart();
+    if (step !== "a6" || s.features || busy || error) return;
+    // 잘못 적힌 채로 서버를 부르지 않습니다. a3 이 막지만, 관리자 레일이나
+    // 주소로 바로 들어오는 길이 있어 여기서도 한 번 봅니다.
+    const bad = birthProblem(s.year, s.month, s.day);
+    if (bad) { setError(bad); return; }
+    void buildChart();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
 
@@ -138,22 +157,30 @@ function EntryInner() {
     const line = beats[Math.min(beat, beats.length - 1)];
     const last = beat >= beats.length;
     const advance = () => (last ? setStep("a2") : setBeat((b) => b + 1));
+    /*
+     * 대문은 프레임을 다 덮습니다. 그림이 배경이고 글이 그 위에 얹힙니다.
+     * .gatehero 가 위치·키를 잡고 Scene 의 .fill 이 그 안을 채웁니다.
+     * (styles/overrides.css 의 .gatehero / .sceneart.fill 과 짝입니다)
+     */
     return (
       <Shell bare>
-        <div style={{ textAlign: "center", paddingTop: 14, cursor: "pointer" }}
-             onClick={advance}>
-          <Scene id="gate" className="hero" />
-          {last ? (
-            <Say who="도령" html={
-              "오셨소.<br><span style='font-size:15.5px;color:var(--paper2)'>" +
-              "비를 맞으셨군. …거기 앉으시오. 손부터 보겠소 — 아니, 글자부터.</span>"} />
-          ) : (
-            <Narration lines={line} />
-          )}
-          <button className="btn mt" onClick={advance}>{last ? "앉는다" : "…"}</button>
-          <p className="sm mt" style={{ color: "var(--paper3)" }}>
-            {SEASON_PALETTE[season].ko}
-          </p>
+        <div className="gatehero" onClick={advance}>
+          {/* bleed — 같은 영상을 크게 흐려 프레임 바깥까지 깝니다.
+              넓은 화면에서만 나옵니다. Scene 이 알아서 겹을 하나 더 냅니다. */}
+          <Scene id="gate" className="fill" bleed />
+          <div className="gatecopy">
+            {last ? (
+              <Say who="도령" html={
+                "오셨소.<br><span style='font-size:15.5px;color:var(--paper2)'>" +
+                "비를 맞으셨군. …거기 앉으시오. 손부터 보겠소 — 아니, 글자부터.</span>"} />
+            ) : (
+              <Narration lines={line} />
+            )}
+            <button className="btn mt" onClick={advance}>{last ? "앉는다" : "…"}</button>
+            <p className="sm mt" style={{ color: "var(--paper3)" }}>
+              {SEASON_PALETTE[season].ko}
+            </p>
+          </div>
         </div>
       </Shell>
     );
@@ -162,7 +189,7 @@ function EntryInner() {
   if (step === "a2") {
     return (
       <Shell title="이름을 적다" skipTo="/lobby">
-        <Progress step={1} total={5} />
+        <Progress step={1} total={7} />
         <Scene id="desk" />
         <Narration lines={["도령이 붓을 들었다.", "종이는 아직 비어 있다."]} />
         <Say who="도령">그대를 뭐라 적으면 되겠소?</Say>
@@ -175,9 +202,22 @@ function EntryInner() {
   }
 
   if (step === "a3") {
+    /*
+     * ★ 여기서 막습니다.
+     *
+     * 예전에는 a3 을 그냥 통과시키고 a6 에서 서버가 거절했습니다. 오타 하나
+     * 낸 사람이 세 화면을 더 지나서야 영어 오류를 보고, 되돌아갈 버튼도
+     * 없었습니다. 틀린 자리에서 바로 말해 줍니다.
+     */
+    const bad = birthProblem(s.year, s.month, s.day);
+    const filled = s.year !== null && s.month !== null && s.day !== null;
+    const num = (v: string): number | null => {
+      const t = v.replace(/[^0-9]/g, "");
+      return t === "" ? null : Number(t);
+    };
     return (
       <Shell title="날을 대다" skipTo="/lobby">
-        <Progress step={2} total={5} />
+        <Progress step={2} total={7} />
         <Scene id="ink" />
         <Narration lines={["붓끝이 종이에 닿았다.", "먹이 한 방울 번졌다."]} />
         <Say who="도령">
@@ -186,24 +226,30 @@ function EntryInner() {
         <div className="f3">
           <div>
             <label>년</label>
-            <input className="fld" inputMode="numeric" value={s.year}
-                   onChange={(e) => s.set({ year: Number(e.target.value) || 0 })} />
+            <input className="fld" inputMode="numeric" placeholder="1993" maxLength={4}
+                   value={s.year ?? ""}
+                   onChange={(e) => s.set({ year: num(e.target.value), features: null, chartId: null })} />
           </div>
           <div>
             <label>월</label>
-            <input className="fld" inputMode="numeric" value={s.month}
-                   onChange={(e) => s.set({ month: Number(e.target.value) || 0 })} />
+            <input className="fld" inputMode="numeric" placeholder="5" maxLength={2}
+                   value={s.month ?? ""}
+                   onChange={(e) => s.set({ month: num(e.target.value), features: null, chartId: null })} />
           </div>
           <div>
             <label>일</label>
-            <input className="fld" inputMode="numeric" value={s.day}
-                   onChange={(e) => s.set({ day: Number(e.target.value) || 0 })} />
+            <input className="fld" inputMode="numeric" placeholder="15" maxLength={2}
+                   value={s.day ?? ""}
+                   onChange={(e) => s.set({ day: num(e.target.value), features: null, chartId: null })} />
           </div>
         </div>
+        {filled && bad && (
+          <p className="sm" style={{ color: "var(--ember)", marginTop: 8 }}>{bad}</p>
+        )}
 
         <label className="sm" style={{ display: "block", marginTop: 12 }}>태어난 고을</label>
         <select className="fld" value={s.city}
-                onChange={(e) => s.set({ city: e.target.value })}>
+                onChange={(e) => s.set({ city: e.target.value, features: null, chartId: null })}>
           {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
         <p className="sm">고을에 따라 진태양시가 달라지오. 서울은 32분을 되돌리오.</p>
@@ -212,12 +258,18 @@ function EntryInner() {
         <div className="og c2">
           {([["F", "여인"], ["M", "사내"]] as const).map(([v, label]) => (
             <button key={v} className={`op ${s.sex === v ? "on" : ""}`}
+                    disabled={!!bad}
                     style={{ textAlign: "center", fontFamily: "var(--serif)", fontSize: 15 }}
                     onClick={() => { s.set({ sex: v, features: null, chartId: null }); setStep("a4"); }}>
               {label}
             </button>
           ))}
         </div>
+        {bad && !filled && (
+          <p className="sm mt" style={{ textAlign: "center" }}>
+            날을 다 적어야 다음으로 가오.
+          </p>
+        )}
       </Shell>
     );
   }
@@ -225,7 +277,7 @@ function EntryInner() {
   if (step === "a4") {
     return (
       <Shell title="때를 묻다" skipTo="/lobby">
-        <Progress step={3} total={5} />
+        <Progress step={3} total={7} />
         <Scene id="room" />
         <Narration lines={["도령이 고개를 들었다."]} />
         <Say who="도령">때는 아시오?</Say>
@@ -263,7 +315,7 @@ function EntryInner() {
   if (step === "a4b") {
     return (
       <Shell title="성향 4글자" skipTo="/lobby">
-        <Progress step={4} total={5} />
+        <Progress step={4} total={7} />
         <Scene id="ink" />
         <Narration lines={["그가 종이 한 장을 더 꺼냈다."]} />
         <Say who="도령" html="혹시 <b>성향 검사</b>를 해본 적 있소?<br>네 글자로 나오는 그것 말이오." />
@@ -290,7 +342,7 @@ function EntryInner() {
   if (step === "a5") {
     return (
       <Shell title="걸리는 것" skipTo="/lobby">
-        <Progress step={5} total={5} />
+        <Progress step={5} total={7} />
         <Scene id="fork" />
         <Narration lines={["붓을 내려놓고, 그가 물었다."]} />
         <Say who="도령">무엇이 걸려서 예까지 왔소?</Say>
@@ -310,12 +362,21 @@ function EntryInner() {
   if (step === "a6") {
     return (
       <Shell title="글자가 서다">
+        <Progress step={6} total={7} />
         <Scene id="altar" />
         {busy && <Narration lines={["도령이 종이를 폈다.", "붓이 움직인다."]} />}
         {error && (
           <>
             <Say who="도령">{error}</Say>
-            <button className="btn" onClick={() => void buildChart()}>다시 세운다</button>
+            {/* ★ 여기가 막다른 길이었습니다.
+                '다시 세운다' 는 같은 값으로 재시도만 해서, 잘못 적은
+                사람은 영영 빠져나올 수 없었습니다. 고치러 갈 길을 냅니다. */}
+            <button className="btn" onClick={() => setStep("a3")}>
+              날을 고쳐 적는다
+            </button>
+            <button className="btn gh" onClick={() => void buildChart()}>
+              다시 세워 본다
+            </button>
           </>
         )}
         {s.features && (
@@ -337,6 +398,7 @@ function EntryInner() {
   /* a7 · 훅 5단 — 값은 아직 묻지 않는다 */
   return (
     <Shell title="도령이 말하다">
+      <Progress step={7} total={7} />
       <Scene id="facing" />
       {!segments && !error && <Narration lines={["도령이 종이를 들여다본다."]} />}
       {error && <Say who="도령">{error}</Say>}

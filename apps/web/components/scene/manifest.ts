@@ -11,6 +11,20 @@
 export type Preset = "Static" | "Dolly In" | "Dolly Right";
 export type Ratio = "9:16" | "16:9" | "3:4" | "1:1";
 
+/**
+ * 일간 색을 입히는 방식. (docs/10 §4)
+ *
+ *   recolor  무채색으로 발주한 클립. 흑백으로 깔고 --c 를 통째로 덧칠한다.
+ *            색이 전부 앱에서 나오므로 발주가 안 된 장면의 기본값이다.
+ *   grade    **컬러로 온 클립.** 원래 색을 그대로 두고 --c 를 옅게만 얹는다.
+ *
+ * ★ 컬러 에셋에 recolor 를 걸면 안 됩니다. grayscale(1) 이 원본 색을
+ *   통째로 버립니다. 대문이 실제로 이 사고를 냈습니다 — 능소화 분홍,
+ *   등불 주황, 반딧불이 전부 사라지고 보라 단색으로 나왔습니다.
+ *   에셋이 들어오면 그 클립이 무채색인지 보고 이 값을 정하세요.
+ */
+export type TintMode = "recolor" | "grade";
+
 export interface SceneSpec {
   id: string;
   name: string;
@@ -18,30 +32,30 @@ export interface SceneSpec {
   ratio: Ratio;
   seconds: number;
   loop: boolean;
-  /** 무채색으로 뽑고 앱에서 색을 입히는 장면. (docs/10 §4) */
-  tint?: boolean;
+  /** 일간 색을 입히는 장면. 방식은 TintMode 주석 참고. (docs/10 §4) */
+  tint?: TintMode;
   /** 계절에 따라 하늘·꽃이 바뀌는 장면 */
   seasonal?: boolean;
 }
 
 export const SCENES: SceneSpec[] = [
-  { id: "gate", name: "대문 · 사계", preset: "Dolly In", ratio: "9:16", seconds: 5, loop: false, tint: true, seasonal: true },
+  { id: "gate", name: "대문 · 사계", preset: "Dolly In", ratio: "9:16", seconds: 5, loop: false, tint: "grade", seasonal: true },
   { id: "door", name: "열리는 문", preset: "Static", ratio: "9:16", seconds: 2, loop: false },
   { id: "desk", name: "붓·벼루·빈 종이", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
   { id: "ink", name: "먹이 번지는 종이", preset: "Static", ratio: "16:9", seconds: 2, loop: false },
   { id: "room", name: "실내·병풍·주렴", preset: "Static", ratio: "16:9", seconds: 4, loop: true },
   { id: "fork", name: "갈림길", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
-  { id: "altar", name: "명식 받침", preset: "Static", ratio: "16:9", seconds: 4, loop: false, tint: true },
+  { id: "altar", name: "명식 받침", preset: "Static", ratio: "16:9", seconds: 4, loop: false, tint: "recolor" },
   { id: "facing", name: "마주앉은 자리", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
   { id: "shelf", name: "진열대", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
   { id: "hall", name: "스무 자리", preset: "Dolly In", ratio: "16:9", seconds: 4, loop: false },
-  { id: "seat", name: "그 사람의 자리", preset: "Static", ratio: "3:4", seconds: 3, loop: true, tint: true },
+  { id: "seat", name: "그 사람의 자리", preset: "Static", ratio: "3:4", seconds: 3, loop: true, tint: "recolor" },
   { id: "scroll", name: "펼쳐지는 두루마리", preset: "Static", ratio: "16:9", seconds: 3, loop: false },
   { id: "fold", name: "반쯤 접힌 두루마리", preset: "Static", ratio: "16:9", seconds: 2, loop: false },
   { id: "untie", name: "붉은 끈·개봉", preset: "Static", ratio: "1:1", seconds: 2, loop: false },
   { id: "handle", name: "문고리·그림자", preset: "Dolly In", ratio: "9:16", seconds: 3, loop: false },
-  { id: "roadmap", name: "대운 길", preset: "Dolly Right", ratio: "16:9", seconds: 4, loop: false, tint: true },
-  { id: "cardbg", name: "공유 카드 문양", preset: "Static", ratio: "1:1", seconds: 3, loop: true, tint: true },
+  { id: "roadmap", name: "대운 길", preset: "Dolly Right", ratio: "16:9", seconds: 4, loop: false, tint: "recolor" },
+  { id: "cardbg", name: "공유 카드 문양", preset: "Static", ratio: "1:1", seconds: 3, loop: true, tint: "recolor" },
   { id: "tray", name: "목패 늘어놓은 상", preset: "Static", ratio: "16:9", seconds: 2, loop: true },
   { id: "coin", name: "엽전", preset: "Static", ratio: "1:1", seconds: 2, loop: false },
   { id: "tea", name: "다과상", preset: "Static", ratio: "16:9", seconds: 3, loop: true },

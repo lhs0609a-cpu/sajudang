@@ -83,11 +83,17 @@ export default function DevRail() {
   };
 
   const recalc = async () => {
+    // 날짜를 지역 변수로 빼서 타입을 좁힙니다 (store 는 number | null).
+    const { year, month, day } = s;
+    if (year === null || month === null || day === null) {
+      setErr("년·월·일을 다 적어야 계산하오.");
+      return;
+    }
     setBusy(true);
     setErr(null);
     try {
       const r = await api.chart({
-        year: s.year, month: s.month, day: s.day,
+        year, month, day,
         hour: s.hourKnown ? s.hour : null,
         minute: s.hourKnown ? s.minute : null,
         hour_known: s.hourKnown, sex: s.sex, birth_city: s.city,
@@ -125,9 +131,12 @@ export default function DevRail() {
           {/* ── 생년월일시 ── */}
           <span className="gh">생년월일시</span>
           <div className="inrow">
-            <input value={s.year} onChange={(e) => s.set({ year: +e.target.value || 0 })} />
-            <input value={s.month} onChange={(e) => s.set({ month: +e.target.value || 0 })} />
-            <input value={s.day} onChange={(e) => s.set({ day: +e.target.value || 0 })} />
+            <input value={s.year ?? ""} placeholder="년"
+                   onChange={(e) => s.set({ year: +e.target.value || null })} />
+            <input value={s.month ?? ""} placeholder="월"
+                   onChange={(e) => s.set({ month: +e.target.value || null })} />
+            <input value={s.day ?? ""} placeholder="일"
+                   onChange={(e) => s.set({ day: +e.target.value || null })} />
           </div>
           <div className="inrow">
             <input value={s.hour ?? ""} placeholder="시"
