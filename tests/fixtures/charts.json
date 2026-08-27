@@ -13,12 +13,14 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "戊辰",
+   "month": "甲寅",
+   "day": "丁巳",
+   "hour": "己酉",
+   "daeun_start_age": 1
+  },
+  "expected_source": "crosscheck",
+  "needs_external_check": "진태양시 보정 후 절입과 비교합니다(JIEQI_BASIS=corrected). 표준시로 비교하는 앱과는 서울 기준 절입 직후 32분 구간에서 갈립니다."
  },
  {
   "id": "jieqi-02",
@@ -34,12 +36,14 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "戊辰",
+   "month": "乙卯",
+   "day": "辛酉",
+   "hour": "丁酉",
+   "daeun_start_age": 1
+  },
+  "expected_source": "crosscheck",
+  "needs_external_check": "진태양시 보정 후 절입과 비교합니다(JIEQI_BASIS=corrected). 표준시로 비교하는 앱과는 서울 기준 절입 직후 32분 구간에서 갈립니다."
  },
  {
   "id": "jieqi-03",
@@ -55,12 +59,14 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "乙亥",
+   "month": "庚辰",
+   "day": "乙未",
+   "hour": "庚辰",
+   "daeun_start_age": 10
+  },
+  "expected_source": "crosscheck",
+  "needs_external_check": "진태양시 보정 후 절입과 비교합니다(JIEQI_BASIS=corrected). 표준시로 비교하는 앱과는 서울 기준 절입 직후 32분 구간에서 갈립니다."
  },
  {
   "id": "jieqi-04",
@@ -76,12 +82,14 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "乙亥",
+   "month": "辛巳",
+   "day": "己亥",
+   "hour": "戊辰",
+   "daeun_start_age": 10
+  },
+  "expected_source": "crosscheck",
+  "needs_external_check": "진태양시 보정 후 절입과 비교합니다(JIEQI_BASIS=corrected). 표준시로 비교하는 앱과는 서울 기준 절입 직후 32분 구간에서 갈립니다."
  },
  {
   "id": "jieqi-05",
@@ -97,12 +105,14 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "辛巳",
+   "month": "甲午",
+   "day": "己巳",
+   "hour": "己巳",
+   "daeun_start_age": 10
+  },
+  "expected_source": "crosscheck",
+  "needs_external_check": "진태양시 보정 후 절입과 비교합니다(JIEQI_BASIS=corrected). 표준시로 비교하는 앱과는 서울 기준 절입 직후 32분 구간에서 갈립니다."
  },
  {
   "id": "jieqi-06",
@@ -118,12 +128,14 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "辛巳",
+   "month": "乙未",
+   "day": "癸酉",
+   "hour": "丁巳",
+   "daeun_start_age": 10
+  },
+  "expected_source": "crosscheck",
+  "needs_external_check": "진태양시 보정 후 절입과 비교합니다(JIEQI_BASIS=corrected). 표준시로 비교하는 앱과는 서울 기준 절입 직후 32분 구간에서 갈립니다."
  },
  {
   "id": "jieqi-07",
@@ -139,12 +151,14 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "丁亥",
+   "month": "戊申",
+   "day": "癸卯",
+   "hour": "丙辰",
+   "daeun_start_age": 10
+  },
+  "expected_source": "crosscheck",
+  "needs_external_check": "진태양시 보정 후 절입과 비교합니다(JIEQI_BASIS=corrected). 표준시로 비교하는 앱과는 서울 기준 절입 직후 32분 구간에서 갈립니다."
  },
  {
   "id": "jieqi-08",
@@ -160,12 +174,14 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "丁亥",
+   "month": "己酉",
+   "day": "丁未",
+   "hour": "甲辰",
+   "daeun_start_age": 10
+  },
+  "expected_source": "crosscheck",
+  "needs_external_check": "진태양시 보정 후 절입과 비교합니다(JIEQI_BASIS=corrected). 표준시로 비교하는 앱과는 서울 기준 절입 직후 32분 구간에서 갈립니다."
  },
  {
   "id": "jieqi-09",
@@ -181,12 +197,14 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "乙未",
+   "month": "丙戌",
+   "day": "丙戌",
+   "hour": "己丑",
+   "daeun_start_age": 9
+  },
+  "expected_source": "crosscheck",
+  "needs_external_check": "진태양시 보정 후 절입과 비교합니다(JIEQI_BASIS=corrected). 표준시로 비교하는 앱과는 서울 기준 절입 직후 32분 구간에서 갈립니다."
  },
  {
   "id": "jieqi-10",
@@ -202,12 +220,14 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "乙未",
+   "month": "丁亥",
+   "day": "庚寅",
+   "hour": "丁丑",
+   "daeun_start_age": 9
+  },
+  "expected_source": "crosscheck",
+  "needs_external_check": "진태양시 보정 후 절입과 비교합니다(JIEQI_BASIS=corrected). 표준시로 비교하는 앱과는 서울 기준 절입 직후 32분 구간에서 갈립니다."
  },
  {
   "id": "ipchun-01",
@@ -223,12 +243,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "己巳",
+   "month": "丁丑",
+   "day": "庚子",
+   "hour": "辛巳",
+   "daeun_start_age": 10
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "ipchun-02",
@@ -244,12 +265,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "庚午",
+   "month": "戊寅",
+   "day": "庚子",
+   "hour": "壬午",
+   "daeun_start_age": 1
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "ipchun-03",
@@ -265,12 +287,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "乙亥",
+   "month": "己丑",
+   "day": "辛未",
+   "hour": "戊戌",
+   "daeun_start_age": 10
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "ipchun-04",
@@ -286,12 +309,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "丙子",
+   "month": "庚寅",
+   "day": "辛未",
+   "hour": "己亥",
+   "daeun_start_age": 1
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "ipchun-05",
@@ -307,12 +331,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "己卯",
+   "month": "丁丑",
+   "day": "壬辰",
+   "hour": "庚戌",
+   "daeun_start_age": 10
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "ipchun-06",
@@ -328,12 +353,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "庚辰",
+   "month": "戊寅",
+   "day": "壬辰",
+   "hour": "辛亥",
+   "daeun_start_age": 1
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "ipchun-07",
@@ -349,12 +375,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "辛卯",
+   "month": "辛丑",
+   "day": "乙未",
+   "hour": "乙酉",
+   "daeun_start_age": 10
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "ipchun-08",
@@ -370,12 +397,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "壬辰",
+   "month": "壬寅",
+   "day": "乙未",
+   "hour": "丙戌",
+   "daeun_start_age": 1
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "ipchun-09",
@@ -391,12 +419,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "己亥",
+   "month": "丁丑",
+   "day": "丁丑",
+   "hour": "戊申",
+   "daeun_start_age": 10
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "ipchun-10",
@@ -412,12 +441,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "庚子",
+   "month": "戊寅",
+   "day": "丁丑",
+   "hour": "己酉",
+   "daeun_start_age": 1
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "zi-01",
@@ -433,12 +463,14 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "乙丑",
+   "month": "己卯",
+   "day": "庚戌",
+   "hour": "丁亥",
+   "daeun_start_age": 2
+  },
+  "expected_source": "crosscheck",
+  "needs_external_check": "조자시/야자시 — 우리는 조자시(23시부터 다음 날). 앱이 다르면 일주가 하루 다릅니다."
  },
  {
   "id": "zi-02",
@@ -454,12 +486,14 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "庚午",
+   "month": "癸未",
+   "day": "丁亥",
+   "hour": "庚子",
+   "daeun_start_age": 4
+  },
+  "expected_source": "crosscheck",
+  "needs_external_check": "조자시/야자시 — 우리는 조자시(23시부터 다음 날). 앱이 다르면 일주가 하루 다릅니다."
  },
  {
   "id": "zi-03",
@@ -475,12 +509,14 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "乙亥",
+   "month": "丙戌",
+   "day": "己亥",
+   "hour": "甲子",
+   "daeun_start_age": 9
+  },
+  "expected_source": "crosscheck",
+  "needs_external_check": "조자시/야자시 — 우리는 조자시(23시부터 다음 날). 앱이 다르면 일주가 하루 다릅니다."
  },
  {
   "id": "zi-04",
@@ -496,12 +532,14 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "庚辰",
+   "month": "壬午",
+   "day": "甲辰",
+   "hour": "甲子",
+   "daeun_start_age": 3
+  },
+  "expected_source": "crosscheck",
+  "needs_external_check": "조자시/야자시 — 우리는 조자시(23시부터 다음 날). 앱이 다르면 일주가 하루 다릅니다."
  },
  {
   "id": "zi-05",
@@ -517,12 +555,14 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "癸未",
+   "month": "辛酉",
+   "day": "乙酉",
+   "hour": "丙子",
+   "daeun_start_age": 1
+  },
+  "expected_source": "crosscheck",
+  "needs_external_check": "조자시/야자시 — 우리는 조자시(23시부터 다음 날). 앱이 다르면 일주가 하루 다릅니다."
  },
  {
   "id": "zi-06",
@@ -538,12 +578,14 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "丁亥",
+   "month": "癸丑",
+   "day": "甲子",
+   "hour": "乙亥",
+   "daeun_start_age": 3
+  },
+  "expected_source": "crosscheck",
+  "needs_external_check": "조자시/야자시 — 우리는 조자시(23시부터 다음 날). 앱이 다르면 일주가 하루 다릅니다."
  },
  {
   "id": "zi-07",
@@ -559,12 +601,14 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "辛卯",
+   "month": "壬辰",
+   "day": "癸卯",
+   "hour": "壬子",
+   "daeun_start_age": 4
+  },
+  "expected_source": "crosscheck",
+  "needs_external_check": "조자시/야자시 — 우리는 조자시(23시부터 다음 날). 앱이 다르면 일주가 하루 다릅니다."
  },
  {
   "id": "zi-08",
@@ -580,12 +624,14 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "甲午",
+   "month": "壬申",
+   "day": "甲戌",
+   "hour": "甲子",
+   "daeun_start_age": 8
+  },
+  "expected_source": "crosscheck",
+  "needs_external_check": "조자시/야자시 — 우리는 조자시(23시부터 다음 날). 앱이 다르면 일주가 하루 다릅니다."
  },
  {
   "id": "zi-09",
@@ -601,12 +647,14 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "戊戌",
+   "month": "癸亥",
+   "day": "癸酉",
+   "hour": "壬子",
+   "daeun_start_age": 1
+  },
+  "expected_source": "crosscheck",
+  "needs_external_check": "조자시/야자시 — 우리는 조자시(23시부터 다음 날). 앱이 다르면 일주가 하루 다릅니다."
  },
  {
   "id": "zi-10",
@@ -622,12 +670,14 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "辛丑",
+   "month": "癸巳",
+   "day": "庚午",
+   "hour": "丁亥",
+   "daeun_start_age": 5
+  },
+  "expected_source": "crosscheck",
+  "needs_external_check": "조자시/야자시 — 우리는 조자시(23시부터 다음 날). 앱이 다르면 일주가 하루 다릅니다."
  },
  {
   "id": "std1275-01",
@@ -643,12 +693,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "甲午",
+   "month": "戊辰",
+   "day": "丙申",
+   "hour": "壬辰",
+   "daeun_start_age": 9
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "std1275-02",
@@ -664,12 +715,13 @@
    "city": "부산"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "丙申",
+   "month": "戊戌",
+   "day": "癸酉",
+   "hour": "己未",
+   "daeun_start_age": 8
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "std1275-03",
@@ -685,12 +737,13 @@
    "city": "대구"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "戊戌",
+   "month": "乙卯",
+   "day": "癸巳",
+   "hour": "乙卯",
+   "daeun_start_age": 6
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "std1275-04",
@@ -706,12 +759,13 @@
    "city": "광주"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "庚子",
+   "month": "戊子",
+   "day": "丙戌",
+   "hour": "戊戌",
+   "daeun_start_age": 6
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "std1275-05",
@@ -727,12 +781,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "辛丑",
+   "month": "乙未",
+   "day": "壬寅",
+   "hour": "丙午",
+   "daeun_start_age": 1
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "dst-01",
@@ -748,12 +803,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "戊子",
+   "month": "丁巳",
+   "day": "戊午",
+   "hour": "丁巳",
+   "daeun_start_age": 1
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "dst-02",
@@ -769,12 +825,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "己丑",
+   "month": "丁卯",
+   "day": "甲子",
+   "hour": "己巳",
+   "daeun_start_age": 1
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "dst-03",
@@ -790,12 +847,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "庚寅",
+   "month": "己卯",
+   "day": "丁卯",
+   "hour": "乙巳",
+   "daeun_start_age": 1
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "dst-04",
@@ -811,12 +869,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "辛卯",
+   "month": "癸巳",
+   "day": "丁未",
+   "hour": "乙巳",
+   "daeun_start_age": 10
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "dst-05",
@@ -832,12 +891,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "乙未",
+   "month": "庚辰",
+   "day": "丁卯",
+   "hour": "乙巳",
+   "daeun_start_age": 10
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "dst-06",
@@ -853,12 +913,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "丙申",
+   "month": "癸巳",
+   "day": "戊子",
+   "hour": "丁巳",
+   "daeun_start_age": 5
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "dst-07",
@@ -874,12 +935,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "丁酉",
+   "month": "乙巳",
+   "day": "戊寅",
+   "hour": "丁巳",
+   "daeun_start_age": 1
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "dst-08",
@@ -895,12 +957,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "戊戌",
+   "month": "丙辰",
+   "day": "壬午",
+   "hour": "乙巳",
+   "daeun_start_age": 10
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "dst-09",
@@ -916,12 +979,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "己亥",
+   "month": "戊辰",
+   "day": "丙戌",
+   "hour": "癸巳",
+   "daeun_start_age": 10
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "dst-10",
@@ -937,12 +1001,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "庚子",
+   "month": "庚辰",
+   "day": "庚寅",
+   "hour": "辛巳",
+   "daeun_start_age": 9
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "dst-11",
@@ -958,12 +1023,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "丁卯",
+   "month": "乙巳",
+   "day": "庚申",
+   "hour": "辛巳",
+   "daeun_start_age": 2
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "dst-12",
@@ -979,12 +1045,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "戊辰",
+   "month": "丁巳",
+   "day": "甲子",
+   "hour": "己巳",
+   "daeun_start_age": 1
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "plain-01",
@@ -1000,12 +1067,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "癸酉",
+   "month": "丁巳",
+   "day": "丙申",
+   "hour": "癸巳",
+   "daeun_start_age": 7
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "plain-02",
@@ -1021,12 +1089,13 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "戊午",
+   "month": "辛酉",
+   "day": "戊戌",
+   "hour": "辛酉",
+   "daeun_start_age": 2
+  },
+  "expected_source": "crosscheck"
  },
  {
   "id": "plain-03",
@@ -1042,11 +1111,12 @@
    "city": "서울"
   },
   "expected": {
-   "year": "?",
-   "month": "?",
-   "day": "?",
-   "hour": "?",
-   "daeun_start_age": null
-  }
+   "year": "丙寅",
+   "month": "甲午",
+   "day": "丙申",
+   "hour": null,
+   "daeun_start_age": 5
+  },
+  "expected_source": "crosscheck"
  }
 ]

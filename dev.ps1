@@ -7,6 +7,8 @@
     engine-check   ★ 2주차 관문 — 테스트 + 분포 + 중복률
     dist           분포 검증 (3,000명)
     dup            훅 중복률
+    reach          릴레이 규칙 도달률 재기 (--write 로 규칙 파일에 기록)
+    crosscheck     ★ sxtwl 없는 독립 계산과 절입·여덟 글자 대조
     fixtures       회귀 케이스 50건 생성
     sheet          대조표(대조표.md) 뽑기
     plan           ★ 회귀 50건 — 무엇부터 볼지
@@ -99,11 +101,13 @@ switch ($Task) {
   "test"    { Need-Venv; Push-Location $Root; & $Py -m pytest tests -q; Pop-Location }
   "dist"    { Need-Venv; Push-Location $Root; & $Py tools\distribution.py; Pop-Location }
   "dup"     { Need-Venv; Push-Location $Root; & $Py tools\dup_rate.py; Pop-Location }
+  "reach"   { Need-Venv; Push-Location $Root; & $Py tools\relay_reach.py @Rest; Pop-Location }
+  "crosscheck" { Need-Venv; Push-Location $Root; & $Py tools\crosscheck.py @Rest; Pop-Location }
   "screens" { Need-Venv; Push-Location $Root; & $Py tools\screen_graph.py; Pop-Location }
   "flow" {
     Need-Venv
     $target = if ($Rest) { $Rest[0] } else { "http://localhost:3000" }
-    Push-Location $Root; & $Py toolslow_check.py $target; Pop-Location
+    Push-Location $Root; & $Py tools\flow_check.py $target; Pop-Location
   }
   "fixtures"{ Need-Venv; Push-Location $Root; & $Py tools\make_fixtures.py @Rest; Pop-Location }
   "sheet"   { Need-Venv; Push-Location $Root; & $Py tools\fixture_sheet.py 대조표.md; Pop-Location }
@@ -111,11 +115,13 @@ switch ($Task) {
   "engine-check" {
     Need-Venv; Push-Location $Root
     & $Py -m pytest tests -q;          if ($LASTEXITCODE) { Pop-Location; exit 1 }
+    & $Py tools\crosscheck.py 300;     if ($LASTEXITCODE) { Pop-Location; exit 1 }
     & $Py tools\distribution.py;       if ($LASTEXITCODE) { Pop-Location; exit 1 }
     & $Py tools\dup_rate.py;           if ($LASTEXITCODE) { Pop-Location; exit 1 }
     Pop-Location
     Write-Host "engine-check 통과" -ForegroundColor Green
-    Write-Host "※ 회귀 50건이 skip 이면 아직 관문을 통과한 게 아닙니다. .\dev.ps1 sheet" -ForegroundColor Yellow
+    Write-Host "※ 회귀 50건은 독립 계산(crosscheck)으로 채워 잠갔습니다." -ForegroundColor Yellow
+    Write-Host "  유파가 갈리는 20건(zi·jieqi)은 만세력 앱 대조가 남아 있습니다: .\dev.ps1 plan" -ForegroundColor Yellow
   }
 
   "api" {
@@ -143,13 +149,13 @@ switch ($Task) {
   }
 
   # ── 프론트 ────────────────────────────────────────────────
-  "plan" { Need-Venv; & $Py "$Root	oolsill_expected.py" --plan }
+  "plan" { Need-Venv; & $Py "$Root\tools\fill_expected.py" --plan }
   "fill" {
     Need-Venv
     if (-not $Rest) { Write-Host "받아적은 파일을 주세요:  .\dev.ps1 fill 받아적음.txt" -ForegroundColor Yellow; exit 1 }
-    & $Py "$Root	oolsill_expected.py" @Rest
+    & $Py "$Root\tools\fill_expected.py" @Rest
   }
-  "funnel" { Need-Venv; & $Py "$Root	oolsunnel.py" @Rest }
+  "funnel" { Need-Venv; & $Py "$Root\tools\funnel.py" @Rest }
   "migrate-sqlite" {
     Need-Venv
     # ★ 마이그레이션을 실제로 돌려 본다. 안 하면 영영 미검증으로 남는다.

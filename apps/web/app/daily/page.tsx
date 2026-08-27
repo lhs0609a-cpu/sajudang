@@ -79,7 +79,13 @@ export default function DailyPage() {
             <i style={{ ["--w" as string]: `${data.score}%` }} />
           </div>
           <p className="sm">오늘 기운 {data.score} / 100 — 적중률이 아니라 배치 점수요.</p>
-          <Say who="도령">{data.text}</Say>
+          {/* ★ 줄 단위로 그립니다. 관계·일간·신강약·계절·용신을 곱해 만든
+              다섯 줄이라, 한 문단으로 뭉치면 읽히지 않습니다. */}
+          <Say who="도령">
+            {data.lines.map((l, i) => (
+              <p key={i} style={i ? { marginTop: 8 } : undefined}>{l}</p>
+            ))}
+          </Say>
           {data.notes.map((n) => <p className="sm" key={n}>· {n}</p>)}
         </>
       )}

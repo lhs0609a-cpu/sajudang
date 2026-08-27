@@ -355,3 +355,39 @@ def test_fixture_chart(case):
 def test_fixture_file_has_fifty_cases():
     assert len(FIXTURE_CASES) == 50, (
         "고정 케이스가 50건이어야 합니다 (현재 %d건)" % len(FIXTURE_CASES))
+
+
+def test_no_fixture_is_still_unfilled():
+    """
+    50건이 통째로 skip 되던 상태로 돌아가지 않게.
+
+    ★ 기대값은 tools/crosscheck.py 의 **독립 계산**으로 채웠습니다.
+      sxtwl 을 한 줄도 쓰지 않고 절입을 Meeus 로 직접 풀어 여덟 글자를
+      다시 짠 값입니다. 두 계산이 50건 전부 일치했습니다.
+      이걸로 회귀가 잠깁니다 — 엔진을 고치다 글자가 달라지면 잡힙니다.
+    """
+    pending = [c["id"] for c in FIXTURE_CASES
+               if "?" in json.dumps(c["expected"], ensure_ascii=False)]
+    assert not pending, (
+        "기대값이 안 채워진 건: %s — python tools/fill_expected.py --from-crosscheck"
+        % ", ".join(pending))
+
+
+def test_school_sensitive_cases_are_still_flagged():
+    """
+    유파가 갈리는 건은 '바깥 확인 남음' 표를 달고 있어야 한다.
+
+    ★ 독립 계산으로 채웠다고 다 끝난 게 아닙니다.
+      두 계산은 **같은 유파**를 씁니다 — 조자시 정책과 절입 비교 기준.
+      그건 계산이 아니라 선택이라 만세력 앱 두 곳 이상에서 봐야 압니다.
+      표를 지우려면 실제로 바깥에서 확인하고 fill_expected.py 에
+      받아적은 파일을 물리세요. 그러면 표가 지워집니다.
+    """
+    flagged = {c["id"] for c in FIXTURE_CASES if c.get("needs_external_check")}
+    by_app = {c["id"] for c in FIXTURE_CASES
+              if c.get("expected_source") == "만세력앱"}
+    for c in FIXTURE_CASES:
+        group = c["id"].rsplit("-", 1)[0]
+        if group in ("zi", "jieqi") and c["id"] not in by_app:
+            assert c["id"] in flagged, (
+                "%s 는 유파가 갈리는 자리인데 표가 없습니다" % c["id"])

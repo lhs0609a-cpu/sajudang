@@ -95,6 +95,89 @@ def missing_views() -> list:
     return [l["id"] for l in all_lenses() if l["id"] not in _views()]
 
 
+def complement(prev_id: Optional[str], cand_id: str) -> float:
+    """
+    앞 캐릭터가 **뒤로 민 자리**(mute)를 다음 캐릭터가 **앞세우는가**(focus).
+    0.0 ~ 1.0. 릴레이 재순위에서 가중치를 받습니다.
+
+    ★ 이걸로 두 번째 결제가 팔리지는 않습니다.
+      재봤습니다 — 순서는 100% 달라지는데 새 문장은 평균 +0.29개뿐이었습니다.
+      여덟 글자가 하나뿐이라 **입력이 같으면 리포트는 순서만 바뀝니다.**
+      진짜 병목은 추천이 아니라 추가 입력입니다. `missing_inputs()` 를 보세요.
+      그래도 순서를 바꾸는 것은 값이 있어 남겨 둡니다 — 다만 작은 가중치로.
+    """
+    if not prev_id or prev_id == cand_id:
+        return 0.0
+    muted = set(view(prev_id).get("mute") or ())
+    if not muted:
+        return 0.0
+    focus = set(view(cand_id).get("focus") or ())
+    if not focus:
+        return 0.0
+    return len(muted & focus) / float(len(muted))
+
+
+# ══════════════════════════════════════════════════════════
+# 결합 축 — 추가 입력
+# ══════════════════════════════════════════════════════════
+#
+# ★ 두 번째 결제가 안 팔리는 진짜 이유가 여기 있습니다.
+#
+#   캐릭터를 바꿔 또 사면 같은 컷을 순서만 바꿔 받습니다. 처음에는
+#   추천 문제라 보고 lens.complement 를 붙였는데, 재보니 새 문장이
+#   평균 3.27 → 3.56개, **+0.29개뿐**이었습니다.
+#
+#   병목은 추천이 아니었습니다. docs/07 §결합 축이 이미 적어 둔 대로
+#
+#       입력 데이터가 다를 때만 진짜 다른 상품입니다.
+#
+#   여덟 글자는 하나뿐입니다. 입력이 같으면 관점을 아무리 적어도
+#   리포트는 순서만 바뀝니다. 문장이 모자란 게 아니라 입력이 없는 것입니다.
+#
+#   문서에만 있으면 잊히므로 seed/lenses.json 에 `input` 을 적고
+#   여기서 셉니다. 테스트가 숫자를 봅니다.
+
+# 실제로 리포트에 반영되는 추가 입력. 새로 구현하면 여기 넣으세요.
+IMPLEMENTED_INPUTS = frozenset({
+    "axis4",       # 성향 4글자 — 훅 2.5단 · 리포트 7컷 (engine/bank.axis_compare)
+    "birthplace",  # 출생지 — 진태양시 보정 (engine/calendar)
+    "blood",       # 혈액형 — 적혈랑        (engine/extras.blood_cut)
+    "image",       # 이미지 선택 — 몽화      (engine/extras.image_cut)
+    "cards",       # 카드 석 장 — 패선생     (engine/extras.cards_cut)
+    "partner",     # 상대 사주 — 관계축 4명  (engine/extras.partner_cut)
+    "context",     # 현재 상황 — 맥락축 4명  (engine/extras.context_cut)
+})
+
+# 못 붙이는 것과 그 이유. 비워 두면 '아직 안 함' 과 구별되지 않습니다.
+BLOCKED_INPUTS = {
+    "photo": ("얼굴 사진은 생체인식정보라 저장이 금지돼 있습니다 "
+              "(CLAUDE.md · docs/11). 저장 없이 처리하는 설계를 먼저 "
+              "정해야 합니다. 면상선생은 출시 최후순위입니다."),
+}
+
+
+def required_input(lens_id: str) -> Optional[str]:
+    """이 캐릭터가 받아야 하는 추가 입력. 없으면 None."""
+    return get(lens_id).get("input")
+
+
+def missing_inputs() -> list:
+    """
+    설계에는 있는데 아직 리포트에 안 쓰이는 추가 입력.
+
+    돌려주는 것: [{"lens_id","name","input","reason"}]
+    테스트가 이 목록이 **늘면** 알려줍니다.
+    """
+    out = []
+    for l in all_lenses():
+        need = l.get("input")
+        if not need or need in IMPLEMENTED_INPUTS:
+            continue
+        out.append({"lens_id": l["id"], "name": l["name"], "input": need,
+                    "reason": BLOCKED_INPUTS.get(need, "미구현")})
+    return out
+
+
 def released() -> list:
     return [l for l in all_lenses() if l.get("released")]
 

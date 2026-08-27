@@ -59,17 +59,23 @@ def _plain(html: str) -> str:
 
 def build_omnibus(f, chart_id: str, concern: str = "love",
                   axis4: Optional[str] = None,
-                  display_name: str = "") -> dict:
+                  display_name: str = "",
+                  extras: Optional[dict] = None) -> dict:
     """
     스무 사람 종합. tier="all" 로 뽑습니다 — 이걸 받는 사람은 이미
     값을 치른 사람입니다.
+
+    extras 를 주면 그걸 받는 캐릭터의 장이 그만큼 두꺼워집니다.
+    안 줘도 됩니다 — 그 장은 추가 입력 없이 쓰이고, `needs_input` 이
+    무엇을 더 주면 되는지 알려 줍니다.
     """
     lenses = [l for l in lens_mod.all_lenses() if l.get("released")]
 
     chapters = []
     lead_count = Counter()
     for l in lenses:
-        r = report_mod.build_report(f, chart_id, l["id"], "all", concern, axis4)
+        r = report_mod.build_report(f, chart_id, l["id"], "all", concern,
+                                    axis4, extras)
         view = lens_mod.view(l["id"])
 
         # 명식 컷은 장마다 되풀이할 필요가 없습니다. 앞에 한 번 나옵니다.
@@ -87,6 +93,8 @@ def build_omnibus(f, chart_id: str, concern: str = "love",
             "you": view["you"],
             "opening": r["opening"],
             "closing": r["closing"],
+            # 이 장을 더 두껍게 만들려면 무엇을 더 주면 되는가
+            "needs_input": r.get("needs_input"),
             "leads_with": CUT_LABEL.get(cuts[0]["id"], cuts[0]["id"]) if cuts else None,
             "cuts": cuts,
         })

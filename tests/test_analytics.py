@@ -87,9 +87,21 @@ def test_batch_is_capped(an):
     assert an.record(many) == an.MAX_BATCH
 
 
-def test_recording_never_raises(an, monkeypatch):
-    """계측이 서비스를 멈추게 해서는 안 된다."""
-    monkeypatch.setattr(an, "EVENT_LOG_PATH", Path("/뚫린/경로/없음/x.jsonl"))
+def test_recording_never_raises(an, monkeypatch, tmp_path):
+    """
+    계측이 서비스를 멈추게 해서는 안 된다.
+
+    ★ '없는 경로' 로는 이걸 시험할 수 없습니다.
+      전에는 `/뚫린/경로/없음/x.jsonl` 을 썼는데, 윈도우에서는 그게
+      `D:\\뚫린\\경로\\없음\\` 으로 **만들어집니다.** 그래서 이 테스트가
+      리눅스에서만 통과하고 개발 기계에서는 늘 실패했습니다.
+
+      쓸 수 없는 자리를 확실히 만들려면 **부모가 파일**이어야 합니다.
+      그러면 mkdir 이 두 OS 모두에서 실패합니다.
+    """
+    blocker = tmp_path / "이건파일이오"
+    blocker.write_text("x", encoding="utf-8")
+    monkeypatch.setattr(an, "EVENT_LOG_PATH", blocker / "x.jsonl")
     assert an.record([{"name": "screen", "screen": "a1", "sid": "sess1234567890ab"}]) == 0
 
 

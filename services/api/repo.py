@@ -89,23 +89,61 @@ def record_answer(statement_id: str, chart_id: str, answer: int,
     return 1
 
 
-def agreement(statement_id: str) -> Optional[dict]:
-    """
-    공감률. 응답이 MIN_RESPONSES_TO_SHOW 미만이면 **None** 을 돌려준다.
-    화면은 None 이면 아무것도 그리지 않는다.
-    """
-    hit = total = 0
+# ══════════════════════════════════════════════════════════
+# 공감률 — 점추정 대신 하한
+# ══════════════════════════════════════════════════════════
+#
+# ★ 두 가지가 겹쳐 있습니다.
+#
+#   1. 작은 표본
+#      52/100 과 520/1000 은 둘 다 52% 지만 확신의 크기가 다릅니다.
+#      점추정을 그대로 띄우면 백 명에게 물어본 것과 천 명에게 물어본
+#      것이 화면에서 같아 보입니다.
+#
+#      Wilson score 하한을 씁니다. 표본이 작으면 알아서 내려가고,
+#      쌓이면 점추정에 붙습니다.
+#
+#          52/ 100  점추정 52.0%  →  하한 42.3%
+#         520/1000  점추정 52.0%  →  하한 48.9%
+#         100/ 100  점추정  100%  →  하한 96.3%   ← 100%라 단정하지 않습니다
+#
+#   2. 선택 편향
+#      100건을 **가장 먼저** 넘는 문장은 가장 많이 겹치는 문장입니다.
+#      그래서 노출 수(shown)와 노출 대비 응답률(answer_rate)을 함께
+#      내려보냅니다. 무엇을 보고 있는지 알 수 있어야 합니다.
+#
+# ★ 하한이 낮은 문장을 감추는 방법도 있지만 쓰지 않습니다.
+#   감추면 화면에 남는 숫자가 전부 높아 보입니다 — 그건 또 다른
+#   거짓말입니다. **감추지 않고 낮게 말합니다.**
+
+WILSON_Z = 1.96          # 95% 신뢰구간
+
+
+def wilson_lower(hit: int, total: int, z: float = WILSON_Z) -> float:
+    """Wilson score 하한 (0.0 ~ 1.0). total 이 0이면 0.0."""
+    if total <= 0:
+        return 0.0
+    p = hit / total
+    d = 1.0 + z * z / total
+    centre = p + z * z / (2 * total)
+    margin = z * ((p * (1 - p) / total + z * z / (4 * total * total)) ** 0.5)
+    return max(0.0, (centre - margin) / d)
+
+
+def _counts(statement_id: str) -> tuple[int, int, int]:
+    """(그렇다, 응답, 노출). 노출은 답을 안 한 것까지 셉니다."""
+    hit = total = shown = 0
 
     if db.HAS_DB:
         import models
         from sqlalchemy import func, select
         with db.session() as s:
-            total = s.scalar(select(func.count()).select_from(models.StatementLog)
-                             .where(models.StatementLog.statement_id == statement_id,
-                                    models.StatementLog.answer.isnot(None))) or 0
-            hit = s.scalar(select(func.count()).select_from(models.StatementLog)
-                           .where(models.StatementLog.statement_id == statement_id,
-                                  models.StatementLog.answer == 1)) or 0
+            base = select(func.count()).select_from(models.StatementLog).where(
+                models.StatementLog.statement_id == statement_id)
+            shown = s.scalar(base) or 0
+            total = s.scalar(base.where(
+                models.StatementLog.answer.isnot(None))) or 0
+            hit = s.scalar(base.where(models.StatementLog.answer == 1)) or 0
     elif LOG_PATH.exists():
         with LOG_PATH.open(encoding="utf-8") as fp:
             for line in fp:
@@ -115,12 +153,32 @@ def agreement(statement_id: str) -> Optional[dict]:
                     continue
                 if r.get("statement_id") != statement_id:
                     continue
+                shown += 1
                 if r.get("answer") is None:
                     continue
                 total += 1
                 hit += 1 if r["answer"] == 1 else 0
+    return hit, total, shown
+
+
+def agreement(statement_id: str) -> Optional[dict]:
+    """
+    공감률. 응답이 MIN_RESPONSES_TO_SHOW 미만이면 **None** 을 돌려준다.
+    화면은 None 이면 아무것도 그리지 않는다.
+
+    rate 는 **하한**입니다. point 는 참고용으로만 같이 내려보냅니다.
+    """
+    hit, total, shown = _counts(statement_id)
 
     if total < MIN_RESPONSES_TO_SHOW:
         return None
-    return {"statement_id": statement_id, "hit": hit, "total": total,
-            "rate": round(100.0 * hit / total, 1)}
+    return {
+        "statement_id": statement_id,
+        "hit": hit,
+        "total": total,
+        "shown": shown,
+        "rate": round(100.0 * wilson_lower(hit, total), 1),
+        "point": round(100.0 * hit / total, 1),
+        "answer_rate": round(100.0 * total / shown, 1) if shown else None,
+        "basis": "Wilson 하한 95%",
+    }

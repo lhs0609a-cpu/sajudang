@@ -11,7 +11,8 @@
   "call": "도령",
   "price": 19900,
   "opening_quote": "월지에 巳가 있고 일간이 丙이오. 통근했다는 뜻이지. 그래서 그대는—",
-  "released": true
+  "released": true,
+  "input": null
  },
  {
   "id": "baegun",
@@ -25,7 +26,8 @@
   "call": "선사",
   "price": 15900,
   "opening_quote": "나는 십신을 세지 않소. 계절과 온도만 보오.",
-  "released": true
+  "released": true,
+  "input": null
  },
  {
   "id": "cheongam",
@@ -39,7 +41,8 @@
   "call": "거사",
   "price": 15900,
   "opening_quote": "여덟 글자를 그림 한 폭으로 읽소. 그림이 보이오?",
-  "released": true
+  "released": true,
+  "input": null
  },
  {
   "id": "sigye",
@@ -53,7 +56,8 @@
   "call": "시계장이",
   "price": 15900,
   "opening_quote": "인사는 됐소. 몇 년도부터 보시겠소.",
-  "released": true
+  "released": true,
+  "input": null
  },
  {
   "id": "eunbyeol",
@@ -67,7 +71,8 @@
   "call": "무녀",
   "price": 19900,
   "opening_quote": "사주는 이렇게 나왔는데, 검사 결과랑 어긋나네요. 그게 제일 중요한 대목이에요.",
-  "released": true
+  "released": true,
+  "input": "axis4"
  },
  {
   "id": "jeokhyeol",
@@ -81,7 +86,8 @@
   "call": "적혈랑",
   "price": 4900,
   "opening_quote": "피는 무슨 형이오? …믿지는 마시고.",
-  "released": true
+  "released": true,
+  "input": "blood"
  },
  {
   "id": "monghwa",
@@ -95,7 +101,8 @@
   "call": "몽화",
   "price": 15900,
   "opening_quote": "고르시오. 생각하지 말고.",
-  "released": true
+  "released": true,
+  "input": "image"
  },
  {
   "id": "seoyeok",
@@ -109,7 +116,8 @@
   "call": "별지기",
   "price": 19900,
   "opening_quote": "동방의 셈은 땅에서 보고, 나는 하늘에서 보오.",
-  "released": true
+  "released": true,
+  "input": "birthplace"
  },
  {
   "id": "paeseon",
@@ -123,7 +131,8 @@
   "call": "패선생",
   "price": 4900,
   "opening_quote": "석 장 뽑으시오. 사주가 못 보는 걸 패가 보오.",
-  "released": true
+  "released": true,
+  "input": "cards"
  },
  {
   "id": "myeonsang",
@@ -137,7 +146,8 @@
   "call": "면상선생",
   "price": 9900,
   "opening_quote": "글자는 나중에. 얼굴부터 봅시다.",
-  "released": true
+  "released": true,
+  "input": "photo"
  },
  {
   "id": "wolha",
@@ -151,7 +161,8 @@
   "call": "선녀",
   "price": 15900,
   "opening_quote": "나는 기다리는 사람이 아니에요. 매는 사람이지.",
-  "released": true
+  "released": true,
+  "input": "partner"
  },
  {
   "id": "hongmae",
@@ -165,7 +176,8 @@
   "call": "매파",
   "price": 19900,
   "opening_quote": "됐고, 그 사람 생년월일이나 대봐.",
-  "released": true
+  "released": true,
+  "input": "partner"
  },
  {
   "id": "yeondam",
@@ -179,7 +191,8 @@
   "call": "연담",
   "price": 6900,
   "opening_quote": "지난 일을 보러 오셨군요. …먼저 그대 쪽을 보겠습니다.",
-  "released": true
+  "released": true,
+  "input": "partner"
  },
  {
   "id": "hwagyeong",
@@ -193,7 +206,8 @@
   "call": "화경",
   "price": 15900,
   "opening_quote": "둘이 아니라 하나의 구조로 봅니다.",
-  "released": true
+  "released": true,
+  "input": "partner"
  },
  {
   "id": "haengsu",
@@ -207,7 +221,8 @@
   "call": "행수",
   "price": 12900,
   "opening_quote": "돈 얘기만 하겠소. 그대는 모으는 사주가 아니오.",
-  "released": true
+  "released": true,
+  "input": "context"
  },
  {
   "id": "hunjang",
@@ -221,7 +236,8 @@
   "call": "훈장",
   "price": 12900,
   "opening_quote": "재주는 있다. 헌데 쓰는 자리를 잘못 골랐어.",
-  "released": true
+  "released": true,
+  "input": "context"
  },
  {
   "id": "yakcho",
@@ -235,7 +251,8 @@
   "call": "의원",
   "price": 9900,
   "opening_quote": "나는 병을 보지 않소. 기운의 치우침을 보오.",
-  "released": true
+  "released": true,
+  "input": "context"
  },
  {
   "id": "ilgwan",
@@ -249,7 +266,8 @@
   "call": "일관",
   "price": 9900,
   "opening_quote": "무슨 날을 잡으시오.",
-  "released": true
+  "released": true,
+  "input": "context"
  },
  {
   "id": "nopa",
@@ -263,7 +281,8 @@
   "call": "노파",
   "price": 9900,
   "opening_quote": "듣기 좋은 소린 딴 데 가서 듣게.",
-  "released": true
+  "released": true,
+  "input": null
  },
  {
   "id": "dongja",
@@ -277,6 +296,7 @@
   "call": "동자",
   "price": 0,
   "opening_quote": "괜찮아요. 진짜로요.",
-  "released": true
+  "released": true,
+  "input": null
  }
 ]

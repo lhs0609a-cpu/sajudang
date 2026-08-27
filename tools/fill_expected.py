@@ -142,7 +142,120 @@ def parse(path: Path) -> dict:
     return out
 
 
+# ══════════════════════════════════════════════════════════
+# 독립 계산으로 채우기
+# ══════════════════════════════════════════════════════════
+#
+# ★ 이건 만세력 앱 대조를 **대신하지 않습니다.**
+#
+#   tools/crosscheck.py 는 sxtwl 을 한 줄도 쓰지 않는 두 번째 계산으로
+#   여덟 글자를 다시 짭니다(절입은 Meeus 로 직접 품). 그게 엔진과
+#   전부 일치하면, 그 값을 기대값으로 박아 **회귀를 잠글** 수 있습니다.
+#   앞으로 엔진을 고치다 여덟 글자가 달라지면 테스트가 잡습니다.
+#   지금처럼 50건이 통째로 skip 되는 것보다는 확실히 낫습니다.
+#
+#   다만 두 계산은 **같은 유파를 공유합니다** — 조자시 정책과 절입
+#   비교 기준(진태양시 보정 후). 그건 계산이 아니라 **선택**이라
+#   바깥에서 봐야 압니다. 그래서 유파가 갈리는 건에는 표를 남기고,
+#   `--plan` 이 계속 그 건들을 1·2순위로 세웁니다.
+#
+#       python tools/fill_expected.py --from-crosscheck          # 보기만
+#       python tools/fill_expected.py --from-crosscheck --write  # 써넣음
+
+SOURCE_CROSSCHECK = "crosscheck"      # 독립 계산
+SOURCE_APP = "만세력앱"                # 사람이 바깥에서 읽어온 값
+
+
+def from_crosscheck() -> tuple[dict, list]:
+    """(id → 기대값, 어긋난 건). crosscheck 의 독립 계산을 씁니다."""
+    sys.path.insert(0, str(ROOT))
+    sys.path.insert(0, str(ROOT / "services" / "api"))
+    from engine.calendar import build_chart              # noqa: E402
+    from tools import crosscheck as CC                   # noqa: E402
+
+    out, bad = {}, []
+    for c in cases():
+        i = c["input"]
+        ch = build_chart(
+            i["year"], i["month"], i["day"],
+            i.get("hour") if i.get("hour_known", True) else None,
+            i.get("minute") if i.get("hour_known", True) else None,
+            i["sex"], hour_known=i.get("hour_known", True),
+            city=i.get("city", "서울"))
+        theirs = CC.rebuild(ch).split()
+        mine_gz = [p.gz for p in ch.pillars]
+        if theirs != mine_gz:
+            bad.append((c["id"], mine_gz, theirs))
+            continue
+        out[c["id"]] = {
+            "pillars": theirs + ([None] if len(theirs) == 3 else []),
+            "daeun_start_age": ch.daeun[0].start_age if ch.daeun else None,
+        }
+    return out, bad
+
+
+def write_expected(filled: dict, source: str) -> int:
+    data = cases()
+    n = 0
+    for c in data:
+        w = filled.get(c["id"])
+        if not w:
+            continue
+        p = w["pillars"]
+        c["expected"] = {
+            "year": p[0], "month": p[1], "day": p[2],
+            "hour": p[3] if len(p) > 3 else None,
+            "daeun_start_age": w["daeun_start_age"],
+        }
+        c["expected_source"] = source
+        group = c["id"].rsplit("-", 1)[0]
+        if group in SCHOOL:
+            # 유파가 갈리는 자리. 독립 계산으로 채워도 **바깥 확인은 남습니다.**
+            c["needs_external_check"] = SCHOOL[group]
+        n += 1
+    io.open(FIX, "w", encoding="utf-8", newline="\n").write(
+        json.dumps(data, ensure_ascii=False, indent=1) + "\n")
+    return n
+
+
+def run_crosscheck_fill() -> int:
+    filled, bad = from_crosscheck()
+    print("=" * 74)
+    print("  독립 계산으로 채우기 — tools/crosscheck.py 의 두 번째 계산")
+    print("=" * 74)
+    print()
+    print("  일치 %d건 · 어긋남 %d건" % (len(filled), len(bad)))
+    if bad:
+        print()
+        print("  ── 두 계산이 다른 건 — 채우지 않습니다 ──")
+        for cid, a, b in bad:
+            print("  %-11s 엔진 %s" % (cid, " ".join(a)))
+            print("  %-11s 독립 %s" % ("", " ".join(b)))
+        print()
+        print("  ★ 먼저 왜 다른지 보세요. 여기가 어긋나면 나머지가 무의미합니다.")
+        return 1
+
+    school = sorted({c["id"].rsplit("-", 1)[0] for c in cases()} & set(SCHOOL))
+    n_school = sum(1 for c in cases() if c["id"].rsplit("-", 1)[0] in SCHOOL)
+    print()
+    print("  ★ 이걸로 끝난 게 아닙니다.")
+    print("    두 계산은 같은 유파를 씁니다. 유파가 갈리는 %d건(%s)은"
+          % (n_school, ", ".join(school)))
+    print("    만세력 앱 두 곳 이상에서 확인해야 합니다. 표를 남겨 둡니다.")
+    print("    (.\\dev.ps1 plan · .\\dev.ps1 sheet)")
+    print()
+
+    if "--write" not in sys.argv:
+        print("  아직 아무것도 안 썼습니다. 넣으려면 --write 를 붙이세요.")
+        return 0
+    n = write_expected(filled, SOURCE_CROSSCHECK)
+    print("  %d건을 채웠습니다 → %s" % (n, FIX))
+    return 0
+
+
 def main() -> int:
+    if "--from-crosscheck" in sys.argv:
+        return run_crosscheck_fill()
     if "--plan" in sys.argv or len(sys.argv) < 2:
         return plan()
 
@@ -207,21 +320,15 @@ def main() -> int:
         print("    유파 차이라면 그 건을 받아적은 파일에서 빼고 다시 쓰세요.")
         return 1
 
+    # 사람이 바깥에서 읽어온 값입니다. 독립 계산으로 채운 것과 구별해
+    # 표시하고, 유파 표시는 지웁니다 — 이 건은 실제로 바깥에서 봤습니다.
+    n = write_expected(got, SOURCE_APP)
     data = cases()
-    n = 0
     for c in data:
-        w = got.get(c["id"])
-        if not w:
-            continue
-        p = w["pillars"]
-        c["expected"] = {
-            "year": p[0], "month": p[1], "day": p[2],
-            "hour": p[3] if p[3] else None,
-            "daeun_start_age": w["daeun_start_age"],
-        }
-        n += 1
-    FIX.write_text(json.dumps(data, ensure_ascii=False, indent=1) + "\n",
-                   encoding="utf-8")
+        if c["id"] in got:
+            c.pop("needs_external_check", None)
+    io.open(FIX, "w", encoding="utf-8", newline="\n").write(
+        json.dumps(data, ensure_ascii=False, indent=1) + "\n")
     print("  %s 에 %d건을 채웠습니다." % (FIX.relative_to(ROOT), n))
     print()
     print("  이제:  .\\dev.ps1 engine-check")
