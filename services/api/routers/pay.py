@@ -192,7 +192,7 @@ def confirm(req: ConfirmRequest) -> dict:
     except payments.PaymentError as e:
         raise HTTPException(status_code=402, detail=str(e))
 
-    unlocked = payments.TIER_UNLOCKS.get(order["tier"], [])
+    unlocked = payments.unlocks_for(order["tier"], order.get("lens_id"))
     order.update(status="paid", payment_key=result.pg_tid, unlocked=unlocked)
     store.set_json("order:" + req.order_id, order, ttl=30 * DAY)
 

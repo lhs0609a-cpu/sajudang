@@ -27,6 +27,10 @@ TAG = re.compile(r"<[^>]+>")
 
 # 값 등급 → 자기 몫 컷이 적어도 몇 개여야 하는가.
 # 자기 몫 = 추가 입력 컷 + 관점 컷.
+#
+# ★ 이건 '추가 입력까지 채웠을 때' 의 바닥입니다. 관점 컷 혼자 져야 하는
+#   몫은 engine.lens_cuts.OWN_FLOOR 가 따로 들고 있습니다 — 손님이 추가
+#   입력을 안 적어도 비싼 캐릭터는 더 줘야 하기 때문입니다.
 OWN_FLOOR = [(19900, 3), (15900, 2), (4900, 1), (0, 0)]
 
 # 추가 입력을 채워 넣는 값. extras 는 저장되지 않습니다.
@@ -164,6 +168,65 @@ def test_more_money_is_never_less_report():
     for lo, hi in zip(prices, prices[1:]):
         assert worst_by_price[hi] >= worst_by_price[lo], \
             (lo, worst_by_price[lo], hi, worst_by_price[hi], rows)
+
+
+@pytest.mark.parametrize("lens", [l for l in lens_mod.all_lenses()
+                                  if l.get("released")],
+                         ids=lambda l: l["id"])
+def test_perspective_cuts_alone_carry_the_price(lens):
+    """
+    ★ 값이 요구하는 몫은 **관점 컷이 혼자** 져야 합니다.
+
+      자기 몫에는 추가 입력 컷도 들어가지만, 그건 손님이 안 적으면 안
+      열립니다. 안 적은 사람에게 19,900원짜리가 4,900원짜리와 같은 것을
+      주면 그건 값이 아니라 이름표입니다. 그래서 관점 컷만 따로 셉니다.
+    """
+    price = int(lens["price"])
+    assert lens_cuts_mod.owned(lens["id"]) >= lens_cuts_mod.floor_for(price), \
+        (lens["id"], price, lens_cuts_mod.owned(lens["id"]))
+
+
+def test_price_ladder_never_steps_down():
+    """
+    값이 오르는데 관점 컷 바닥이 내려가면 사다리가 아닙니다.
+    표(engine.lens_cuts.OWN_FLOOR)와 목표(OWN_TARGET) 둘 다 봅니다.
+    """
+    for table in (lens_cuts_mod.OWN_FLOOR, lens_cuts_mod.OWN_TARGET):
+        rows = sorted(table)
+        for (lo_p, lo_n), (hi_p, hi_n) in zip(rows, rows[1:]):
+            assert hi_n >= lo_n, (table, lo_p, lo_n, hi_p, hi_n)
+
+
+def test_price_rungs_are_real_cuts():
+    """
+    값이 여는 층이 **있지도 않은 컷**을 가리키면 아무것도 안 열립니다.
+    조용히 안 열리는 것이 가장 나쁜 실패라, 여기서 셉니다.
+    """
+    from engine import report as report_mod
+    f = next(_people())
+    ids = {c["id"] for c in report_mod._all_cuts(f, "love", "그대", "INFP",
+                                                 "pungun", None)[0]}
+    for _threshold, cid in report_mod.PRICE_RUNGS:
+        assert cid in ids, cid
+
+
+def test_expensive_lens_opens_the_rungs():
+    """
+    19,900원 캐릭터의 「이 자리 하나」는 층까지 열립니다.
+    4,900원 캐릭터는 안 열립니다 — 그 차이가 값의 몫입니다.
+    """
+    from engine import report as report_mod
+    f = next(_people())
+    rich = build_report(f, "t", "pungun", "one", "love", "INFP", None)
+    poor = build_report(f, "t", "jeokhyeol", "one", "love", "INFP",
+                        FILL["blood"])
+    rich_ids = {c["id"] for c in rich["cuts"]}
+    poor_ids = {c["id"] for c in poor["cuts"]}
+    for _threshold, cid in report_mod.PRICE_RUNGS:
+        assert cid in rich_ids, cid
+        assert cid not in poor_ids, cid
+    # 그리고 싼 쪽이 잃은 것이 없어야 합니다 — 위로만 쌓았습니다.
+    assert {"daeun_now", "yongsin", "helper", "ancestor"} <= poor_ids
 
 
 def test_free_character_is_never_charged():

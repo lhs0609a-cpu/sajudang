@@ -128,6 +128,25 @@ TIER_UNLOCKS = {
     "sub": ["daeun_now", "yongsin", "daeun_map", "axis"],
 }
 
+
+def unlocks_for(tier: str, lens_id: Optional[str] = None) -> list:
+    """
+    이 결제가 실제로 연 컷.
+
+    ★ 「이 자리 하나」는 캐릭터 값으로 받으므로 **값이 층을 엽니다.**
+      표를 여기 또 적지 않고 engine/report.PRICE_RUNGS 를 그대로 봅니다 —
+      값이 두 벌이 되면 어긋납니다. 화면이 보는 것과 청구가 보는 것은
+      한 표라야 합니다.
+    """
+    base = list(TIER_UNLOCKS.get(tier, []))
+    if tier != "one" or not lens_id:
+        return base
+    from engine import report as report_mod
+    for cid in sorted(report_mod.rungs_at(price_of(tier, lens_id))):
+        if cid not in base:
+            base.append(cid)
+    return base
+
 REFUND_NOTICE = (
     "디지털 콘텐츠 특성상 열람한 리포트는 청약철회가 제한됩니다. "
     "열람 전에는 전액 환불되며, 계산 오류가 확인되면 전액 환불 후 재발행합니다."

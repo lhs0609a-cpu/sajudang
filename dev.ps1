@@ -7,6 +7,7 @@
     engine-check   ★ 2주차 관문 — 테스트 + 분포 + 중복률
     dist           분포 검증 (3,000명)
     dup            훅 중복률
+    ladder         ★ 값 사다리 — 값이 오르면 실제로 더 주는가
     reach          릴레이 규칙 도달률 재기 (--write 로 규칙 파일에 기록)
     crosscheck     ★ sxtwl 없는 독립 계산과 절입·여덟 글자 대조
     fixtures       회귀 케이스 50건 생성
@@ -101,6 +102,7 @@ switch ($Task) {
   "test"    { Need-Venv; Push-Location $Root; & $Py -m pytest tests -q; Pop-Location }
   "dist"    { Need-Venv; Push-Location $Root; & $Py tools\distribution.py; Pop-Location }
   "dup"     { Need-Venv; Push-Location $Root; & $Py tools\dup_rate.py; Pop-Location }
+  "ladder"  { Need-Venv; Push-Location $Root; & $Py tools\price_ladder.py; Pop-Location }
   "reach"   { Need-Venv; Push-Location $Root; & $Py tools\relay_reach.py @Rest; Pop-Location }
   "crosscheck" { Need-Venv; Push-Location $Root; & $Py tools\crosscheck.py @Rest; Pop-Location }
   "screens" { Need-Venv; Push-Location $Root; & $Py tools\screen_graph.py; Pop-Location }

@@ -38,6 +38,33 @@ from .constants import ELEMENT_OF_GAN
 TIERS = ("free", "one", "all", "sub")
 TIER_LEVEL = {"free": 0, "one": 1, "all": 2, "sub": 2}
 
+# ══════════════════════════════════════════════════════════
+# 값이 여는 층 — 「이 자리 하나」 안에서
+# ══════════════════════════════════════════════════════════
+#
+# ★ 왜 필요했나
+#   「이 자리 하나」의 값은 캐릭터마다 4,900~19,900원인데 **여는 것이
+#   전부 같았습니다.** 재보니 4,900원과 19,900원이 둘 다 10컷이었고,
+#   12,900 · 9,900 · 6,900 · 4,900 **네 등급이 전부 같은 상품**이었습니다.
+#   등급이 넷인데 상품이 하나면 그건 값이 아니라 이름표입니다.
+#
+# ★ 위로만 쌓습니다 — 아무도 잃지 않게
+#   싼 등급에서 무언가를 빼는 방법도 있지만 쓰지 않았습니다. 이미 그
+#   값을 치르고 받아 본 사람이 있습니다. 그래서 **지금 열리는 것은
+#   그대로 두고**, `all` 에서만 열리던 두 컷을 위쪽 등급에 얹었습니다.
+#   `all` · `sub` 은 여전히 전부 봅니다 — 잃는 쪽이 없습니다.
+#
+# ★ 값을 여기 적지 않습니다
+#   문턱만 적습니다. 캐릭터 값은 seed/lenses.json 한 곳에 있고
+#   payments.price_of 가 그걸 청구합니다. 값이 두 벌이 되면 또
+#   어긋납니다 — 그 사고가 실제로 있었습니다.
+PRICE_RUNGS = ((12900, "daeun_map"), (15900, "axis"))
+
+
+def rungs_at(price: int) -> set:
+    """이 값이 「이 자리 하나」에서 더 여는 컷."""
+    return {cid for threshold, cid in PRICE_RUNGS if price >= threshold}
+
 
 def _cut(cid, title, source, body, min_level, sid=None):
     return {
@@ -335,6 +362,16 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     return cuts, extra_error
 
 
+def _lens_price(lens_id: Optional[str]) -> int:
+    """캐릭터 값. 모르면 0 — 없는 값으로 층을 열지 않습니다."""
+    if not lens_id:
+        return 0
+    try:
+        return int(lens_mod.get(lens_id).get("price") or 0)
+    except lens_mod.LensError:
+        return 0
+
+
 def report_id(chart_id: str, lens_id: str, tier: str, concern: str) -> str:
     raw = "|".join([chart_id, lens_id, tier, concern])
     return hashlib.sha256(raw.encode()).hexdigest()[:32]
@@ -400,10 +437,14 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
     view = lens_mod.view(lens_id)
     you = view["you"]
 
+    # 「이 자리 하나」는 캐릭터 값으로 받으므로 값이 층을 엽니다.
+    # 다른 티어는 값이 하나뿐이라 층이 없습니다.
+    opened = rungs_at(_lens_price(lens_id)) if tier == "one" else set()
+
     cuts, locked = [], []
     all_cuts, extra_error = _all_cuts(f, concern, you, axis4, lens_id, extras)
     for c in all_cuts:
-        if c["min_level"] <= level:
+        if c["min_level"] <= level or c["id"] in opened:
             cuts.append({k: v for k, v in c.items() if k != "min_level"})
         else:
             locked.append({"id": c["id"], "title": c["title"],
