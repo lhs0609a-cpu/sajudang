@@ -8,6 +8,8 @@
 
 ★ GuardMiddleware 는 끄지 마세요. (CLAUDE.md 절대 규칙 3)
 """
+import asyncio
+import contextlib
 import logging
 import os
 import sys
@@ -41,7 +43,44 @@ CORS_ORIGINS = [
     if o.strip()
 ]
 
-app = FastAPI(title="사주당 API", version=ENGINE_VER)
+# ── 청소기 ────────────────────────────────────────────────
+#
+# ★ 저장소는 스스로 줄지 않습니다.
+#   store.sweep() 은 있었는데 **부르는 데가 한 곳도 없었습니다.**
+#   TTL 이 붙은 것도 그 키를 다시 읽을 때만 지워지므로, 다시 오지 않는
+#   사람의 훅 캐시·공유 링크가 영영 남습니다. 볼륨은 1GB 한 장이고
+#   app.sqlite·계측 로그가 같은 자리를 씁니다.
+SWEEP_EVERY_SEC = int(os.getenv("SWEEP_EVERY_SEC", "3600"))
+
+log = logging.getLogger("main")
+
+
+async def _sweeper() -> None:
+    while True:
+        try:
+            await asyncio.sleep(SWEEP_EVERY_SEC)
+            n = await asyncio.to_thread(store.sweep)
+            if n:
+                log.info("store 청소 — 지난 항목 %d개 지움", n)
+        except asyncio.CancelledError:
+            raise
+        except Exception:                              # noqa: BLE001
+            # 청소가 실패해도 서비스는 계속 돕니다. 조용히 넘기지는 않습니다.
+            log.exception("store 청소 실패")
+
+
+@contextlib.asynccontextmanager
+async def lifespan(_app: FastAPI):
+    task = asyncio.create_task(_sweeper())
+    try:
+        yield
+    finally:
+        task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await task
+
+
+app = FastAPI(title="사주당 API", version=ENGINE_VER, lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

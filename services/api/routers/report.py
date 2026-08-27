@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 from fastapi import APIRouter, HTTPException
 
 import store
+from engine import extras as extras_mod
 from engine import lens as lens_mod
 from engine.features import Features
 from engine.omnibus import build_omnibus
@@ -27,10 +28,20 @@ def post_report(req: ReportRequest) -> ReportResponse:
     f = Features(**raw)
     try:
         data = build_report(f, req.chart_id, req.lens_id, req.tier,
-                            req.concern, req.axis4)
+                            req.concern, req.axis4, req.extras)
     except (ValueError, KeyError) as e:
         raise HTTPException(status_code=422, detail=str(e))
     return ReportResponse(**data)
+
+
+@router.get("/report/choices")
+def get_choices() -> dict:
+    """
+    추가 입력에서 고를 수 있는 것들. 화면이 목록을 만들 때 씁니다.
+
+    ★ 문장 원문은 내려보내지 않습니다 — id 와 라벨만. (docs/02 §7)
+    """
+    return extras_mod.choices()
 
 
 # ══════════════════════════════════════════════════════════
@@ -42,6 +53,8 @@ class OmnibusRequest(BaseModel):
     concern: str = "love"
     axis4: str | None = None
     display_name: str = Field(default="", max_length=12)
+    # 결합 축의 추가 입력. 저장하지 않습니다. (engine/extras.py)
+    extras: dict | None = None
 
 
 # 이 티어를 치른 사람만 받습니다. "이 자리 하나" 는 한 사람 값이라
@@ -84,6 +97,8 @@ def post_omnibus(req: OmnibusRequest) -> dict:
     f = Features(**raw)
     try:
         return build_omnibus(f, req.chart_id, req.concern,
-                             req.axis4, req.display_name)
+                             req.axis4, req.display_name, req.extras)
+    except extras_mod.ExtraInputError as e:
+        raise HTTPException(status_code=422, detail=str(e))
     except (ValueError, KeyError) as e:
         raise HTTPException(status_code=422, detail=str(e))

@@ -11,6 +11,11 @@ from schemas.api import ChartRequest, ChartResponse
 
 router = APIRouter(prefix="/v1", tags=["chart"])
 
+# 명식 캐시가 사는 기간. 리포트·릴레이·일진이 전부 chart_id 로 이걸 꺼내
+# 쓰므로 한 사람의 여정보다는 넉넉히 길어야 합니다. 90일이면 회고 루프와
+# 공유 링크(90일)까지 덮습니다.
+CHART_TTL = 90 * 24 * 3600
+
 
 def chart_key(req: ChartRequest) -> str:
     raw = "|".join(str(x) for x in [
@@ -59,6 +64,9 @@ def post_chart(req: ChartRequest) -> ChartResponse:
         raise HTTPException(status_code=400, detail=str(e))
 
     features = build_features(chart).to_dict()
-    # 같은 입력이면 같은 결과 — TTL 무기한
-    store.set_json(store.k_chart(key), features)
+    # 같은 입력이면 같은 결과라 캐시합니다. 다만 **무기한은 아닙니다** —
+    # 다시 세우는 데 0.2ms 밖에 안 드는데 한 벌이 5KB 라, 만기를 안 주면
+    # 저장소가 줄어들 힘이 하나도 없습니다. 만료돼도 다음 요청에 다시
+    # 만들어지므로 사용자에게는 아무 차이가 없습니다.
+    store.set_json(store.k_chart(key), features, ttl=CHART_TTL)
     return ChartResponse(chart_id=key, features=features, cached=False)

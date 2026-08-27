@@ -6,10 +6,11 @@
    "priority": 95,
    "condition": {
     "field": "el[weak_el]",
-    "op": "<=",
-    "value": 1.0
+    "op": "==",
+    "value": 0.0
    },
-   "reason": "{weak_el} {v} ≤ 1.0 — 가장 약한 오행이 바닥"
+   "reason": "{weak_iga} 여덟 자리에 하나도 없소",
+   "reach": 0.213
   },
   {
    "id": "r_yakcho",
@@ -18,9 +19,10 @@
    "condition": {
     "field": "gap",
     "op": ">=",
-    "value": 3.5
+    "value": 4.0
    },
-   "reason": "오행 편차 {gap} ≥ 3.5"
+   "reason": "{strong_eneun} 그득한데 {weak_eneun} 바닥이오 — 한쪽으로 쏠렸소",
+   "reach": 0.155
   },
   {
    "id": "r_wolha",
@@ -31,7 +33,8 @@
     "op": "==",
     "value": true
    },
-   "reason": "일지 {day_ji} 충 — 배우자궁 흔들림"
+   "reason": "일지 {day_ji_iga} 부딪히오 — 사람이 앉는 자리요",
+   "reach": 0.206
   },
   {
    "id": "r_hunjang",
@@ -40,9 +43,10 @@
    "condition": {
     "field": "gwan",
     "op": ">=",
-    "value": 2
+    "value": 3
    },
-   "reason": "관성 {gwan}개"
+   "reason": "관성이 {gwan} 자리요",
+   "reach": 0.143
   },
   {
    "id": "r_haengsu",
@@ -51,9 +55,10 @@
    "condition": {
     "field": "jae",
     "op": ">=",
-    "value": 2
+    "value": 3
    },
-   "reason": "재성 {jae}개"
+   "reason": "재성이 {jae} 자리요",
+   "reach": 0.142
   },
   {
    "id": "r_sigye",
@@ -68,7 +73,32 @@
      "겁재"
     ]
    },
-   "reason": "현 대운 {daeun_gz} = {daeun_ten_god}"
+   "reason": "지금 대운이 {daeun_gz} — {daeun_ten_god} 구간이오",
+   "reach": 0.303
+  },
+  {
+   "id": "r_pungun",
+   "lens_id": "pungun",
+   "priority": 78,
+   "condition": {
+    "field": "deuk_both",
+    "op": "==",
+    "value": true
+   },
+   "reason": "월령과 일지를 둘 다 얻었소 — 뿌리가 있소",
+   "reach": 0.178
+  },
+  {
+   "id": "r_yeondam",
+   "lens_id": "yeondam",
+   "priority": 76,
+   "condition": {
+    "field": "ilji_hap",
+    "op": ">=",
+    "value": 1
+   },
+   "reason": "일지 {day_ji}에 합이 걸려 있소",
+   "reach": 0.225
   },
   {
    "id": "r_hongmae",
@@ -77,9 +107,10 @@
    "condition": {
     "field": "gwan_and_jae",
     "op": ">=",
-    "value": 1
+    "value": 2
    },
-   "reason": "관 {gwan} · 재 {jae}"
+   "reason": "관 {gwan} · 재 {jae} — 둘 다 서 있네",
+   "reach": 0.123
   },
   {
    "id": "r_eunbyeol",
@@ -87,32 +118,131 @@
    "priority": 72,
    "condition": {
     "field": "strength",
-    "op": "!=",
+    "op": "==",
+    "value": "신약"
+   },
+   "reason": "신약이오 — 채울 그릇이 모자라요",
+   "reach": 0.108
+  },
+  {
+   "id": "r_cheongam",
+   "lens_id": "cheongam",
+   "priority": 70,
+   "condition": {
+    "field": "helper_pillars",
+    "op": ">=",
+    "value": 3
+   },
+   "reason": "길신이 {helper_pillars} 자리에 앉았소 — 그림이 나오오",
+   "reach": 0.221
+  },
+  {
+   "id": "r_ilgwan",
+   "lens_id": "ilgwan",
+   "priority": 68,
+   "condition": {
+    "field": "daeun_years_left",
+    "op": "<=",
+    "value": 2
+   },
+   "reason": "{daeun_gz} 대운이 바뀔 때가 가까우오",
+   "reach": 0.212
+  },
+  {
+   "id": "r_myeonsang",
+   "lens_id": "myeonsang",
+   "priority": 66,
+   "condition": {
+    "field": "el[strong_el]",
+    "op": ">=",
+    "value": 4.0
+   },
+   "reason": "{strong_iga} 넘치오 — 겉으로 드러나오",
+   "reach": 0.282
+  },
+  {
+   "id": "r_jeokhyeol",
+   "lens_id": "jeokhyeol",
+   "priority": 65,
+   "condition": {
+    "field": "bi",
+    "op": ">=",
+    "value": 3
+   },
+   "reason": "비겁이 {bi} 자리 — 같은 피가 여럿이오",
+   "reach": 0.142
+  },
+  {
+   "id": "r_monghwa",
+   "lens_id": "monghwa",
+   "priority": 64,
+   "condition": {
+    "field": "inn",
+    "op": ">=",
+    "value": 3
+   },
+   "reason": "인성이 {inn} 자리 — 안으로 도는 힘이 두터우오",
+   "reach": 0.135
+  },
+  {
+   "id": "r_baegun",
+   "lens_id": "baegun",
+   "priority": 62,
+   "condition": {
+    "field": "temp_gap",
+    "op": ">=",
+    "value": 3
+   },
+   "reason": "{season}에 났는데 불과 물이 크게 갈렸소",
+   "reach": 0.099
+  },
+  {
+   "id": "r_seoyeok",
+   "lens_id": "seoyeok",
+   "priority": 60,
+   "condition": {
+    "field": "hour_known",
+    "op": "==",
+    "value": false
+   },
+   "reason": "태어난 시를 모르오 — 땅의 셈으로는 여덟 자가 안 차오",
+   "reach": 0.144
+  },
+  {
+   "id": "r_hwagyeong",
+   "lens_id": "hwagyeong",
+   "priority": 58,
+   "condition": {
+    "field": "strength",
+    "op": "==",
     "value": "중화"
    },
-   "reason": "{strength} {strength_score}"
+   "reason": "중화요 — 어느 쪽으로도 기울지 않았소",
+   "reach": 0.341
   },
   {
    "id": "r_paeseon",
    "lens_id": "paeseon",
    "priority": 55,
    "condition": {
-    "field": "always",
+    "field": "top_ten_god_tied",
     "op": "==",
     "value": true
    },
-   "reason": "조건 없음"
+   "reason": "주도하는 십신이 갈리오 — 여덟 자로는 못 가르오",
+   "reach": 0.433
   },
   {
-   "id": "r_jeokhyeol",
-   "lens_id": "jeokhyeol",
-   "priority": 50,
+   "id": "r_dongja",
+   "lens_id": "dongja",
+   "priority": 45,
    "condition": {
-    "field": "always",
+    "field": "sinsal_good",
     "op": "==",
-    "value": true
+    "value": 0
    },
-   "reason": "재미 자리"
+   "reason": "곁에 선 길신이 하나도 없어요",
+   "reach": 0.117
   }
  ],
  "forced": {
@@ -124,5 +254,29 @@
   "per_day_purchase": 2,
   "reunion_cooldown_days": 7,
   "visit_warn_at": 3
+ },
+ "_note": [
+  "릴레이 규칙 — 사주 조건이 다음 캐릭터를 추천한다.",
+  "",
+  "★ 조건은 좁게 쓰세요.",
+  "  넓은 문턱은 추천이 아니라 배경이 됩니다. `가장 약한 오행 <= 1.0` 은",
+  "  인구의 88%에 걸렸고, 그래서 한 캐릭터가 1순위의 86%를 가져갔습니다.",
+  "  `== 0.0`(21%)으로 좁히니 '여덟 자리에 하나도 없소' 라는 훨씬 강한",
+  "  근거가 되었습니다. 문턱은 tools/probe_conditions.py 로 재보고 고릅니다.",
+  "",
+  "★ reason 에 연산자와 문턱값을 쓰지 마세요.",
+  "  근거는 보이되 규칙은 감춥니다. 측정값({strong_n})은 그 사람의 명식이라",
+  "  보여도 되지만 `>= 4.0` 은 우리 분기표입니다.",
+  "",
+  "★ reach 는 손으로 적지 마세요.",
+  "  tools/relay_reach.py --write 가 실제로 재서 씁니다.",
+  "  재순위가 이 값을 빼서 쏠림을 없앱니다."
+ ],
+ "exposure_lambda": 0.5,
+ "complement_weight": 0.15,
+ "reach_measured_with": {
+  "sample": 6000,
+  "hour_unknown_share": 0.15,
+  "source": "가정값 (DB 없음)"
  }
 }

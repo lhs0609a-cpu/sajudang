@@ -223,7 +223,9 @@ def test_confirm_sends_the_server_amount_not_the_clients(app, monkeypatch):
     app.post("/v1/pay/confirm", json={
         "session_id": sid, "order_id": o["order_id"],
         "payment_key": "pk", "amount": 1})
-    assert seen["amount"] == payments.TIER_PRICE["one"]
+    # ★ '이 자리 하나' 는 캐릭터마다 값이 다릅니다. 릴레이 카드에 보인
+    #   값이 그대로 청구돼야 합니다 — _prepare 는 연담으로 삽니다.
+    assert seen["amount"] == payments.price_of("one", "yeondam")
 
 
 def test_unknown_order_is_refused(app):
@@ -325,3 +327,69 @@ def test_health_says_why_payments_are_off(app):
     assert h["payments"] is False
     assert h["payments_live"] is False
     assert "TOSS_SECRET_KEY" in h["payments_reason"]
+
+
+# ══════════════════════════════════════════════════════════
+# 목패 — 값과 분량을 서버가 센다
+# ══════════════════════════════════════════════════════════
+#
+# ★ 화면이 제 손으로 적고 있었습니다.
+#   apps/web/lib/store.ts 가 "여덟 글자 전부 · 평생운 18컷 · 25페이지"
+#   라고 적어 두었는데 실제로는 11~12컷 · 6탭이었습니다. 19,900원짜리
+#   디지털 콘텐츠이고 같은 화면에 청약철회 제한 고지가 붙습니다.
+def _tiers(app, lens_id="yeondam"):
+    r = app.post("/v1/pay/tiers", json={
+        "chart_id": _chart(app), "lens_id": lens_id,
+        "concern": "love", "axis4": "INFP",
+    })
+    assert r.status_code == 200, r.text
+    return r.json()["tiers"]
+
+
+def test_tiers_report_the_real_cut_count():
+    """세어 준 컷 수가 리포트가 실제로 내는 컷 수와 같아야 한다."""
+    from fastapi.testclient import TestClient
+    import main as main_mod
+    from engine.features import Features
+    from engine.report import build_report
+    from routers.chart import load_features
+
+    with TestClient(main_mod.app) as app:
+        cid = _chart(app)
+        r = app.post("/v1/pay/tiers", json={
+            "chart_id": cid, "lens_id": "yeondam",
+            "concern": "love", "axis4": "INFP"})
+        assert r.status_code == 200, r.text
+        f = Features(**load_features(cid))
+        for t in r.json()["tiers"]:
+            rep = build_report(f, cid, "yeondam", t["id"], "love", "INFP")
+            assert t["cuts"] == len(rep["cuts"]), t
+            assert t["locked"] == len(rep["locked"]), t
+
+
+def test_tiers_price_matches_what_prepare_charges(app):
+    """목패에 적힌 값이 곧 청구되는 값이어야 한다."""
+    import payments
+    for lens_id in ("yeondam", "pungun", "jeokhyeol"):
+        for t in _tiers(app, lens_id):
+            assert t["price"] == payments.price_of(t["id"], lens_id), \
+                (lens_id, t["id"])
+
+
+def test_free_character_has_no_one_tier(app):
+    """값 없는 캐릭터에게 '이 자리 하나' 를 팔지 않는다. 강매입니다."""
+    ids = {t["id"] for t in _tiers(app, "dongja")}
+    assert "one" not in ids, ids
+
+
+def test_tiers_never_promise_more_than_it_gives(app):
+    """
+    ★ 목패가 약속한 컷 수가 **0 보다 크고**, 화면이 따로 적어 둔 숫자가
+      아니라 서버가 센 것이어야 한다. 부풀린 문구가 다시 들어오면
+      여기가 붉어집니다.
+    """
+    for t in _tiers(app):
+        assert t["cuts"] > 0, t
+        # 화면이 팔던 "18컷" 은 실제로 나온 적이 없는 수입니다.
+        assert t["cuts"] < 18, t
+        assert isinstance(t["note"], str) and t["note"], t

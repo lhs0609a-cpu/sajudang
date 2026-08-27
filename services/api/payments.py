@@ -102,8 +102,24 @@ if DISABLED_REASON and (TOSS_CLIENT_KEY or TOSS_SECRET_KEY):
 elif LIVE:
     log.warning("토스 라이브 키입니다. 이제부터 실제로 돈이 오갑니다.")
 
-# 티어별 정가. products 테이블이 정본이 되면 거기서 읽도록 바꾸세요.
-TIER_PRICE = {"one": 3900, "all": 19900, "sub": 9900}
+# ── 값 ────────────────────────────────────────────────────
+#
+# ★ 값이 두 벌이었습니다.
+#   릴레이 카드는 seed/lenses.json 의 **캐릭터 값**(4,900~19,900원)을
+#   보여 주는데, 실제로 청구되는 것은 여기 티어 값이었습니다. 스무
+#   캐릭터의 값이 **한 번도 청구되지 않았습니다.** 4,900원으로 보고 누른
+#   사람에게 19,900원이 찍히는 경로가 열려 있었습니다.
+#
+#   이제 **보이는 값이 청구되는 값**입니다.
+#     one  '이 자리 하나' — 그 캐릭터를 듣는 값. 캐릭터마다 다릅니다.
+#     all  '여덟 글자 전부' — 전 영역을 여는 값. 하나로 둡니다.
+#     sub  '스무 사람 모두' — 달마다. 하나로 둡니다.
+#
+#   one 을 캐릭터 값으로 받으려면 **비싼 캐릭터가 실제로 더 줘야** 합니다.
+#   그 배분은 engine/lens_cuts.py 의 관점 컷이 맡고,
+#   tests/test_lens_cuts.py 가 값 순서를 지킵니다.
+TIER_PRICE = {"all": 19900, "sub": 9900}
+FLAT_TIERS = frozenset(TIER_PRICE)
 
 # 티어가 여는 컷 (engine/report.py 의 min_level 과 짝을 맞춘다)
 TIER_UNLOCKS = {
@@ -152,11 +168,29 @@ def client_config() -> dict:
             "refund_notice": REFUND_NOTICE}
 
 
-def price_of(tier: str) -> int:
-    try:
+def price_of(tier: str, lens_id: Optional[str] = None) -> int:
+    """
+    이 사람이 이 티어를 사면 얼마인가.
+
+    ★ `one` 은 **캐릭터 값**입니다. 릴레이 카드에 붙는 값과 같아야 합니다 —
+      화면이 보여 준 값과 청구되는 값이 다르면 그건 값이 아니라 미끼입니다.
+    """
+    if tier in FLAT_TIERS:
         return TIER_PRICE[tier]
-    except KeyError:
+    if tier != "one":
         raise PaymentError("값을 매기지 않은 티어입니다: %r" % (tier,))
+    if not lens_id:
+        raise PaymentError("'이 자리 하나' 는 캐릭터마다 값이 다릅니다. "
+                           "lens_id 가 있어야 합니다.")
+    from engine import lens as lens_mod
+    try:
+        price = int(lens_mod.get(lens_id)["price"])
+    except lens_mod.LensError:
+        raise PaymentError("모르는 캐릭터입니다: %r" % (lens_id,))
+    if price <= 0:
+        # 값 없는 캐릭터. 결제로 보내지 않습니다 — 강매가 됩니다.
+        raise PaymentError("이 캐릭터는 값 없이 듣는 자리요.")
+    return price
 
 
 def confirm(payment_key: str, order_id: str, amount: int) -> PaymentResult:

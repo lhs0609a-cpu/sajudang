@@ -17,8 +17,10 @@ import hashlib
 from typing import Optional
 
 from . import bank as bank_mod
+from . import extras as extras_mod
 from . import guard
 from . import lens as lens_mod
+from . import lens_cuts as lens_cuts_mod
 from . import sinsal as sinsal_mod
 from .bank import element_word, josa
 
@@ -48,7 +50,10 @@ def _cut(cid, title, source, body, min_level, sid=None):
     }
 
 
-def _all_cuts(f, concern: str, you: str, axis4: Optional[str]) -> list:
+def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
+              lens_id: Optional[str] = None,
+              extras: Optional[dict] = None) -> tuple[list, Optional[str]]:
+    """돌려주는 것: (컷 목록, 추가 입력이 틀렸으면 그 사유)"""
     B = bank_mod.bank()
     top, weak, strong = f.top_ten_god, f.weak_el, f.strong_el
     lack = B["LACK"][weak]
@@ -85,6 +90,8 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str]) -> list:
                 % " · ".join(element_word(x) for x in f.weak_els if x != weak))
     else:
         also = ""
+    # ★ 곱하는 축: 약오행(5) × 강오행(5) × 동률 × **주도십신(10)**
+    #   전에는 마지막 축이 없어 52가지였고, 한 문장이 8.6%를 가져갔습니다.
     cuts.append(_cut(
         "lack", "1 · 없는 것부터",
         "%s %s%s" % (element_word(weak), f.elements[weak],
@@ -92,10 +99,12 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str]) -> list:
         ('<p class="tale">눈에 띄는 건 %s %s인 게 아니오. '
          '<b>%s %s밖에 없는 것</b>이지.</p>'
          '<p class="tale">%s <b>%s</b>이오. 그게 없이 살아온 것이오.</p>'
+         '<p class="tale">%s</p>'
          % (josa(element_word(strong), "이", "가"), f.elements[strong],
             josa(element_word(weak), "이", "가"), f.elements[weak],
-            josa(element_word(weak), "은", "는"), lack["w"]) + also),
-        0, sid="lack:%s" % weak))
+            josa(element_word(weak), "은", "는"), lack["w"],
+            B["LACK_LIVED"][top]) + also),
+        0, sid="lack:%s:%s" % (weak, top)))
 
     # ── 3 · 왜 반복되나 ──────────────────────────────────
     st_line = {
@@ -103,14 +112,17 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str]) -> list:
         "신약": "게다가 신약이오. 채워야 하는데 채울 그릇도 없소.",
         "중화": "중화라 크게 티는 안 났을 게요. 그래서 더 오래 몰랐지.",
     }[f.strength]
+    # ★ 곱하는 축에 **흐름(5)** 을 더했습니다.
     cuts.append(_cut(
         "why", "2 · 왜 반복되나",
-        "%s %d · %s" % (top, f.ten_gods[top], f.strength),
+        "%s %d · %s · %s 흐름" % (top, f.ten_gods[top], f.strength, f.flow),
         ('<p class="tale">%s. 그리고 %s.</p><p class="tale">%s</p>'
          '<p class="tale">그래서 끝에서 <b>%s</b>.</p>'
+         '<p class="tale">%s</p>'
          % (bank_mod._pick("IGNITE", top, concern), patt["b"], st_line,
-            bank_mod._pick("BLAME", top, f.strength))),
-        0, sid="why:%s:%s:%s" % (top, concern, f.strength)))
+            bank_mod._pick("BLAME", top, f.strength),
+            B["WHY_TAIL"][f.flow])),
+        0, sid="why:%s:%s:%s:%s" % (top, concern, f.strength, f.flow)))
 
     # ── 4 · 어느 자리에서 ────────────────────────────────
     if f.ilji_chung:
@@ -126,11 +138,14 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str]) -> list:
         lean = "식상이 둘이라 만드는 데 힘이 쏠리오."
     else:
         lean = "어느 한쪽으로 크게 기울지 않았소."
+    # ★ 곱하는 축에 **일간(10)** 을 더했습니다.
     cuts.append(_cut(
         "place", "3 · 어느 자리에서",
-        "일지 %s%s" % (f.day_ji, " 충" if f.ilji_chung else ""),
-        '<p class="tale">%s</p><p class="tale">%s</p>' % (place, lean),
-        0, sid="place:%s:%s" % (f.day_ji, "chung" if f.ilji_chung else "-")))
+        "일지 %s%s · %s일간" % (f.day_ji, " 충" if f.ilji_chung else "", f.day_gan),
+        '<p class="tale">%s</p><p class="tale">%s</p><p class="tale">%s</p>'
+        % (place, lean, B["PLACE_NOTE"][f.day_gan]),
+        0, sid="place:%s:%s:%s" % (f.day_ji, "chung" if f.ilji_chung else "-",
+                                   f.day_gan)))
 
     # ── 5 · 지금 어디에 (대운) ───────────────────────────
     heavy = daeun["ten_god"] in ("편관", "상관", "겁재")
@@ -153,18 +168,29 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str]) -> list:
         1, sid="daeun:%s" % f.daeun_ten_god))
 
     # ── 6 · 필요한 것 (용신 + 다과상) ────────────────────
+    # ★ 여기가 가장 심하게 겹치던 자리입니다.
+    #   용신(5) × 신강여부(2) = **10가지가 상한**이라 문장을 더 써도
+    #   늘지 않았습니다. 3,000명 중 415명이 같은 문장을 받았습니다(11%).
+    #   유료 리포트가 무료 훅보다 더 겹치고 있었습니다.
+    #   그래서 **계절(4)** 과 **주도십신(10)** 을 곱합니다 → 상한 400가지.
     tea = bank_mod.tea(f)
+    season = bank_mod.born_season(f)
     cuts.append(_cut(
-        "yongsin", "5 · 필요한 것", "용신 %s" % f.yongsin,
+        "yongsin", "5 · 필요한 것",
+        "용신 %s · %s생 · %s" % (f.yongsin, season, top),
         ('<p class="tale">그대에게 필요한 건 <b>%s</b>이오.</p>'
+         '<p class="tale">%s</p>'
          '<p class="tale">%s 사람에게서 그걸 구하면 그 사람이 지치오. '
          '<b>먼저 그대 안에 두시오.</b></p>'
+         '<p class="tale">%s</p>'
          '<div class="tea"><b>%s</b><p>%s</p></div>'
          % (element_word(f.yongsin),
+            B["YONGSIN_SEASON"][season],
             "남는 힘을 빼내 방향을 잡아줄 것." if f.strength == "신강"
             else "모자란 힘을 채워줄 것.",
+            B["YONGSIN_WHERE"][top],
             tea["name"], tea["text"])),
-        1, sid="yongsin:%s:%s" % (f.yongsin, f.strength)))
+        1, sid="yongsin:%s:%s:%s:%s" % (f.yongsin, f.strength, season, top)))
 
     # ── 7 · 대운 맵 ─────────────────────────────────────
     cuts.append(_cut(
@@ -224,12 +250,19 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str]) -> list:
         body = ('<p class="tale">길신이 앉은 자리를 궁위로 읽은 것이오. '
                 '누가 도울 사람인지 그 방향만 짚소.</p>' + "".join(rows))
     else:
-        body = '<p class="tale">%s</p>' % T["none"]["helper"]
+        # ★ 여기가 '가짓수는 많은데 쏠린' 자리였습니다.
+        #   helper 컷 전체는 1,334가지였는데, 길신이 하나도 없는 사람
+        #   10.3%가 **전부 같은 한 문장**을 받고 있었습니다.
+        #   가짓수만 보면 안 보이고, 최다 점유를 봐야 보입니다.
+        body = ('<p class="tale">%s</p><p class="tale">%s</p>'
+                % (B["HELPER_NONE_LEAD"][f.strength],
+                   B["HELPER_NONE_WAY"][f.yongsin]))
     cuts.append(_cut(
         "helper", "누가 돕는가",
         "길신 %d자리" % len({h["pillar"] for h in f.helpers}),
-        body, 1, sid="helper:%s" % ",".join(
-            sorted({h["sinsal"] + ":" + h["pillar"] for h in f.helpers}))))
+        body, 1, sid=("helper:%s" % ",".join(
+            sorted({h["sinsal"] + ":" + h["pillar"] for h in f.helpers}))
+            if f.helpers else "helper:none:%s:%s" % (f.strength, f.yongsin))))
 
     # ── 7d · 뿌리 (조상 자리) ─────────────────────────────
     a = f.ancestor
@@ -252,27 +285,54 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str]) -> list:
         1, sid="ancestor:%s:%s" % (a["gan_ten_god"], a["stance"])))
 
     # ── 8 · 성향 4글자 대조 (입력했을 때만) ───────────────
-    gaps = bank_mod.gap_list(f, axis4)
-    if axis4:
-        if gaps:
-            body = ('<p class="tale">여덟 글자에서 나온 넉 자는 <b>%s</b>. '
-                    '그대가 적은 건 <b>%s</b>. %d군데 어긋나오.</p>%s'
-                    % (bank_mod.axis_string(f), axis4.upper(), len(gaps),
-                       "".join('<p class="gp"><b>%s → %s</b><br>%s<br>'
-                               '<span class="w">%s</span></p>'
-                               % (g["from"], g["to"], g["t"], g["w"])
-                               for g in gaps)))
-        else:
-            body = ('<p class="tale">여덟 글자에서 나온 넉 자와 그대가 적은 넉 자가 '
-                    '<b>%s</b> 로 같소. 흔치 않은 일이오.</p>'
-                    % bank_mod.axis_string(f))
+    #
+    # ★ 훅과 같은 규칙을 씁니다 — 겹친 자리를 먼저, 깊은 해석은
+    #   셋 이상 어긋난 사람에게만. (engine/bank.axis_compare)
+    cmp = bank_mod.axis_compare(f, axis4)
+    if cmp["usable"]:
+        note = ('<p class="sm">여덟 자는 바뀌지 않소. 그대가 적은 넉 자는 '
+                '다시 재면 달라지기도 하오 — 그건 그 검사의 성질이오.</p>')
         cuts.append(_cut(
-            "axis", "7 · 어긋난 자리",
+            "axis", "7 · 겹친 자리와 어긋난 자리",
             "사주 %s ↔ 입력 %s" % (bank_mod.axis_string(f), axis4.upper()),
-            body, 2,
-            sid="gap:%s" % ",".join(g["pair"] for g in gaps) if gaps else "gap:none"))
+            ('<p class="tale">여덟 글자에서 나온 넉 자는 <b>%s</b>. '
+             '그대가 적은 건 <b>%s</b>.</p>%s%s'
+             % (bank_mod.axis_string(f), axis4.upper(),
+                bank_mod.axis_block(cmp, f.strength), note)),
+            2, sid=bank_mod.axis_sid(cmp, f.strength)))
 
-    return cuts
+    # ── 9 · 이 캐릭터가 따로 받는 것 ──────────────────────
+    #
+    # ★ 여기가 두 번째 결제를 진짜 다른 상품으로 만드는 자리입니다.
+    #   여덟 글자는 하나뿐이라, 이 컷이 없으면 캐릭터를 바꿔도 순서만
+    #   바뀝니다. (engine/lens.py §결합 축)
+    #
+    # ★ 여기서 터져도 리포트 전체를 죽이지 않습니다.
+    #   추가 입력은 **컷 하나**를 여는 선택 입력입니다. 상대 생년월일 하나가
+    #   틀렸다고 값을 치른 사람의 명식·용신·대운까지 못 보게 할 이유가
+    #   없습니다. 그 컷만 접고 무엇이 틀렸는지 말해 줍니다.
+    #   (1만 명 시험에서 이 자리가 422 로 리포트를 통째로 막고 있었습니다)
+    # ── 9a · 이 캐릭터만 보는 자리 (관점 컷) ────────────────
+    #
+    # ★ 값이 캐릭터마다 다른데 받는 것이 값을 안 따라가고 있었습니다.
+    #   1만 명 시험에서 값 ↔ 컷수 상관 −0.419 — 4,900원짜리가
+    #   19,900원짜리보다 더 줬습니다. 자기 몫 컷을 여기서 채웁니다.
+    for lc in lens_cuts_mod.build(f, lens_id):
+        cuts.append(_cut(lc["id"], lc["title"], lc["source"], lc["html"],
+                         lc["min_level"], sid=lc["statement_id"]))
+
+    need = lens_mod.required_input(lens_id) if lens_id else None
+    extra_error = None
+    try:
+        extra = extras_mod.build(f, need, extras)
+    except extras_mod.ExtraInputError as e:
+        extra, extra_error = None, str(e)
+    if extra:
+        cuts.append(_cut(extra["id"], extra["title"], extra["source"],
+                         extra["html"], extra["min_level"],
+                         sid=extra["statement_id"]))
+
+    return cuts, extra_error
 
 
 def report_id(chart_id: str, lens_id: str, tier: str, concern: str) -> str:
@@ -313,6 +373,10 @@ def apply_view(cuts: list, view: dict) -> list:
             return (0, 0)            # 셈의 근거는 늘 먼저
         if c["id"] == lead:
             return (1, 0)
+        # ★ 그 캐릭터만 보는 자리는 앞쪽에 둡니다. 값을 치르고 이 사람을
+        #   고른 까닭이 이 컷이라, 뒤에 묻히면 고른 뜻이 없어집니다.
+        if c["id"].startswith("lc_"):
+            return (1, 1)
         if c["id"] in mute:
             return (3, 0)
         return (2, 0)
@@ -321,7 +385,8 @@ def apply_view(cuts: list, view: dict) -> list:
 
 
 def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
-                 axis4: Optional[str] = None) -> dict:
+                 axis4: Optional[str] = None,
+                 extras: Optional[dict] = None) -> dict:
     """
     tier 별 잠금 차등. 잠긴 컷은 **본문을 내려보내지 않습니다.**
     제목과 근거만 보여 무엇이 잠겼는지 알 수 있게 합니다.
@@ -336,7 +401,8 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
     you = view["you"]
 
     cuts, locked = [], []
-    for c in _all_cuts(f, concern, you, axis4):
+    all_cuts, extra_error = _all_cuts(f, concern, you, axis4, lens_id, extras)
+    for c in all_cuts:
         if c["min_level"] <= level:
             cuts.append({k: v for k, v in c.items() if k != "min_level"})
         else:
@@ -346,12 +412,22 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
 
     cuts = apply_view(cuts, view)
 
+    # 이 캐릭터가 더 받아야 하는 것. 안 받았으면 화면이 물어볼 수 있게
+    # 알려 줍니다. **무엇을 받는지만** 내려보내고 문장은 안 보냅니다.
+    need = lens_mod.required_input(lens_id)
+    needs_input = None
+    if need and need in extras_mod.BUILDERS and not (extras or {}).get(need):
+        needs_input = need
+
     return {
         "report_id": report_id(chart_id, lens_id, tier, concern),
         "chart_id": chart_id,
         "lens": lens_mod.public(lens_id),
         "tier": tier,
         "concern": concern,
+        "needs_input": needs_input,
+        # 추가 입력이 틀렸을 때. 그 컷만 접고 나머지는 그대로 내려갑니다.
+        "extra_error": extra_error,
         "opening": guard.enforce(view["open"], {"cut": "open"}) if view.get("open") else None,
         "closing": guard.enforce(view["close"], {"cut": "close"}) if view.get("close") else None,
         "cuts": cuts,

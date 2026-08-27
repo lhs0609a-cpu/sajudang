@@ -191,14 +191,31 @@ def exists(key: str) -> bool:
 
 
 def sweep() -> int:
-    """지난 항목 청소. SQLite 만 해당. 스케줄러에서 가끔 부르면 됩니다."""
-    if not _db:
-        return 0
-    with _lock:
-        cur = _db.execute("DELETE FROM kv WHERE exp IS NOT NULL AND exp < ?",
-                          (_now(),))
-        _db.commit()
-        return cur.rowcount or 0
+    """
+    지난 항목 청소. 돌려주는 것은 지운 개수.
+
+    ★ 이게 안 돌면 저장소가 **줄지 않습니다.**
+      TTL 이 붙어 있어도 지우는 건 그 키를 **다시 읽을 때**뿐이라,
+      다시 오지 않는 사람의 훅 캐시·공유 링크는 영영 남습니다.
+      1만 명 시험에서 이 함수의 호출처가 한 곳도 없었습니다.
+      지금은 main.py 의 청소기가 주기로 부릅니다.
+    """
+    if _redis:
+        return 0                      # 레디스는 스스로 만료시킵니다
+    if _db:
+        with _lock:
+            cur = _db.execute(
+                "DELETE FROM kv WHERE exp IS NOT NULL AND exp < ?", (_now(),))
+            _db.commit()
+            return cur.rowcount or 0
+    # 메모리 백엔드도 청소합니다. 여기가 특히 샜습니다 — 읽히지 않는 키는
+    # 만료돼도 파이썬 사전에 그대로 남아 프로세스가 살아 있는 동안 쌓입니다.
+    now = _now()
+    dead = [k for k, (exp, _v) in list(_mem.items())
+            if exp is not None and exp < now]
+    for k in dead:
+        _mem.pop(k, None)
+    return len(dead)
 
 
 def clear_all() -> None:

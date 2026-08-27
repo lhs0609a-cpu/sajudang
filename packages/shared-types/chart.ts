@@ -210,16 +210,29 @@ export interface ReportResponse {
   concern: string;
   cuts: ReportCut[];
   locked: LockedCut[];
+  /** 캐릭터의 여는 말·닫는 말. 렌더된 HTML 입니다. */
+  opening: string | null;
+  closing: string | null;
+  /** 이 캐릭터가 더 받아야 하는 추가 입력. 없으면 null.
+   *  partner / context / blood / image / cards */
+  needs_input: string | null;
+  /** 받은 추가 입력이 틀렸을 때 그 사유. 그 컷만 빠지고 리포트는 나옵니다. */
+  extra_error: string | null;
 }
 
 /* ── 릴레이 ─────────────────────────────────────────────── */
+/**
+ * ★ rule_id · priority · reach · score 는 **내려오지 않습니다.**
+ *   근거(reason)는 그 사람의 명식이라 보여야 하지만, 어떤 규칙이 몇 점으로
+ *   이겼는지는 우리 분기표입니다. 새면 규칙을 역산할 수 있습니다.
+ *   (services/api/engine/relay.py · PUBLIC_FIELDS)
+ */
 export interface RelayPick {
-  rule_id: string;
   lens_id: string;
   name: string;
-  priority: number;
   price: number | null;
   released: boolean;
+  /** 화면에 그대로 그려도 되는 근거 한 줄. 문턱값은 들어 있지 않습니다. */
   reason: string;
   quote: string | null;
 }
@@ -248,9 +261,14 @@ export interface DailyResponse {
   element: string;
   relation: string;
   score: number;
+  /** 본문. lines 를 이어 붙인 것. */
   text: string;
+  /** 본문을 줄 단위로. 관계 × 일간 × 신강약 × 계절 × 용신 을 곱한 결과라
+   *  같은 날 다른 사람이 받는 문장이 서로 다릅니다. */
+  lines: string[];
   notes: string[];
   source: string;
+  statement_id: string;
   free: boolean;
 }
 

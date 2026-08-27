@@ -69,6 +69,12 @@ class ReportRequest(BaseModel):
     tier: Tier = "free"
     concern: Concern = "love"
     axis4: Optional[str] = Field(default=None, min_length=4, max_length=4)
+    # 결합 축의 추가 입력. {"partner": {...}} / {"context": {...}} 등.
+    #
+    # ★ 여기 실려 온 것은 **저장하지 않습니다.**
+    #   특히 상대 사주는 제3자의 생년월일이라 본인 동의가 없습니다.
+    #   컷을 만들고 버립니다. (engine/extras.py · docs/11)
+    extras: Optional[dict] = None
 
 
 class ReportResponse(BaseModel):
@@ -79,6 +85,15 @@ class ReportResponse(BaseModel):
     concern: str
     cuts: list
     locked: list
+    # ★ 캐릭터의 여는 말·닫는 말. 여기 없으면 응답에서 조용히 버려집니다 —
+    #   실제로 그렇게 되고 있었고, 스무 명의 목소리 중 처음과 끝이 화면에
+    #   닿지 않았습니다. (engine/lens.view 의 open/close)
+    opening: Optional[str] = None
+    closing: Optional[str] = None
+    # 이 캐릭터가 더 받아야 하는 입력이 있으면 그 이름. 없으면 None.
+    needs_input: Optional[str] = None
+    # 받은 추가 입력이 틀렸으면 그 사유. 리포트는 그대로 나옵니다.
+    extra_error: Optional[str] = None
 
 
 class RelayRequest(BaseModel):
@@ -121,6 +136,10 @@ class DailyResponse(BaseModel):
     relation: str
     score: int
     text: str
+    # 본문을 줄 단위로. 관계 × 일간 × 신강약 × 계절 × 용신 을 곱한 것이라
+    # 같은 날 다른 사람이 받는 문장이 서로 다릅니다. (engine/daily.py)
+    lines: list
     notes: list
     source: str
+    statement_id: str
     free: bool

@@ -69,6 +69,19 @@ def josa(word: str, with_batchim: str, without: str) -> str:
     return word + (with_batchim if has_batchim(word) else without)
 
 
+def josa_hanja(hanja: str, with_batchim: str, without: str) -> str:
+    """
+    한자 뒤의 조사. **읽는 소리**로 고릅니다 — `申` 는 '신' 이라 `申이`,
+    `午` 는 '오' 라 `午가` 입니다. 글자로는 알 수 없습니다.
+    소리를 모르는 글자면 받침 없는 쪽으로 둡니다.
+    """
+    from .constants import GAN_SOUND, JI_SOUND
+    sound = JI_SOUND.get(hanja) or GAN_SOUND.get(hanja)
+    if not sound:
+        return hanja + without
+    return hanja + (with_batchim if has_batchim(sound) else without)
+
+
 class BankError(KeyError):
     """뱅크에 없는 조합. 지어내지 않고 터뜨린다."""
 
@@ -119,23 +132,100 @@ def axis_string(f) -> str:
 def gap_list(f, axis4: Optional[str]) -> list:
     """
     사주 4축과 입력 4글자가 어긋난 자리.
-    axis4 가 없거나 형식이 틀리면 빈 목록 — 2.5단을 아예 넣지 않는다.
+    axis4 가 없거나 형식이 틀리면 빈 목록.
     """
+    return axis_compare(f, axis4)["gaps"]
+
+
+# ══════════════════════════════════════════════════════════
+# 겹친 자리와 어긋난 자리
+# ══════════════════════════════════════════════════════════
+#
+# ★ 왜 겹친 자리를 먼저 말하는가
+#
+#   전에는 어긋난 자리만 말했고, 94%가 '어긋남' 을 깊게 파는 쪽으로
+#   갔습니다. 처음에는 축 설계가 틀렸다고 봤습니다 — `saju_axis` 가
+#   항 개수가 다른 합을 비교하니 한쪽이 구조적으로 이긴다고요.
+#
+#   바깥을 찾아보니 진단이 뒤집혔습니다. 한국에는 정반대인 두 분포가
+#   있습니다. 정식 MBTI 한국 대표표본(n=19,070)은 S·T·J 편중이고,
+#   무료 16Personalities(n=70,266)는 I·N·F·P 편중입니다. "MBTI 뭐야?"
+#   에 답하는 사람은 거의 전부 후자를 말합니다. 정식 기준으로는 우리
+#   축이 오히려 잘 맞습니다. **틀린 건 축이 아니라 기준이었습니다.**
+#
+#   그래서 백분위 보정을 실제로 구현해 돌려봤습니다. 2.5단을 깊게 파는
+#   비율이 94.4% → 92.5%. 거의 안 움직입니다. 이진 축 넷이면 넷이 다
+#   맞을 확률이 잘해야 6%라, **계산으로 될 일이 아니었습니다.**
+#
+#   말하는 방식의 문제였습니다. 겹친 자리를 먼저 말하고, 깊은 해석은
+#   셋 이상 어긋난 사람에게만 보냅니다.
+#
+# ★ 덤 — 입력값 자체가 흔들립니다.
+#   MBTI 는 5주 뒤 재검사에서 39~76%가 다른 유형이 나옵니다. 이건
+#   제품 서사에 오히려 맞습니다: "여덟 자는 안 바뀌오. 그대가 적은
+#   넉 자는 지난달과 다를 수 있소."
+
+GAP_DEEP_AT = 3      # 이만큼 어긋난 사람에게만 깊이 들어간다 (약 36%)
+
+
+def axis_compare(f, axis4: Optional[str]) -> dict:
+    """
+    사주 4축 ↔ 입력 4글자.
+
+        matches  겹친 자리 [{axis, letter, t}]
+        gaps     어긋난 자리 [{axis, from, to, pair, t, w}]
+        deep     깊은 해석(w)을 붙일 것인가
+        usable   비교할 수 있는 입력이었는가
+    """
+    empty = {"matches": [], "gaps": [], "deep": False, "usable": False}
     if not axis4 or len(axis4) != 4:
-        return []
+        return empty
     axis4 = axis4.upper()
     a = saju_axis(f)
-    out = []
+    B = bank()
+    matches, gaps = [], []
     for key, i in AXES:
-        if axis4[i] not in key:          # 형식이 이상하면 그 축은 건너뛴다
+        ch = axis4[i]
+        if ch not in key:                # 형식이 이상하면 그 축은 건너뛴다
             continue
-        if a[key] != axis4[i]:
-            pair = "%s→%s" % (a[key], axis4[i])
-            g = bank()["GAP"].get(pair)
+        if a[key] == ch:
+            matches.append({"axis": key, "letter": ch,
+                            "t": B["MATCH"][ch]})
+        else:
+            pair = "%s→%s" % (a[key], ch)
+            g = B["GAP"].get(pair)
             if g:
-                out.append({"axis": key, "from": a[key], "to": axis4[i],
-                            "pair": pair, "t": g["t"], "w": g["w"]})
-    return out
+                gaps.append({"axis": key, "from": a[key], "to": ch,
+                             "pair": pair, "t": g["t"], "w": g["w"]})
+    if not matches and not gaps:
+        return empty
+    return {"matches": matches, "gaps": gaps,
+            "deep": len(gaps) >= GAP_DEEP_AT, "usable": True}
+
+
+def axis_block(cmp: dict, strength: Optional[str] = None,
+               cls: str = "gap") -> str:
+    """겹친 자리 → 어긋난 자리 순서로 한 덩어리. 훅과 리포트가 같이 씁니다."""
+    n = len(cmp["matches"])
+    parts = ['<p class="lead">%s</p>' % bank()["MATCH_LEAD"][str(n)]]
+    for m in cmp["matches"]:
+        parts.append('<p class="mt"><b>%s</b> %s</p>' % (m["letter"], m["t"]))
+    for g in cmp["gaps"]:
+        deep = ('<br><span class="w">%s</span>' % g["w"]) if cmp["deep"] else ""
+        parts.append('<p class="gp"><b>%s → %s</b><br>%s%s</p>'
+                     % (g["from"], g["to"], g["t"], deep))
+    if strength:                      # 신강약(3) 을 곱해 쏠림을 줄인다
+        parts.append('<p class="tl">%s</p>' % bank()["MATCH_TAIL"][strength])
+    return '<div class="scene %s">%s</div>' % (cls, "".join(parts))
+
+
+def axis_sid(cmp: dict, strength: Optional[str] = None) -> str:
+    """이 단의 statement_id. 겹친 자리와 어긋난 자리를 둘 다 담습니다."""
+    return "axis:%d:%s:%s%s" % (
+        len(cmp["matches"]),
+        "".join(m["letter"] for m in cmp["matches"]) or "-",
+        ",".join(g["pair"] for g in cmp["gaps"]) or "-",
+        (":" + strength) if strength else "")
 
 
 # ══════════════════════════════════════════════════════════
@@ -265,30 +355,41 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
         no="아직 이르오. 이름을 붙여보면 알 것이오.",
         sid="seq:%s:%s:%s:%s:%s:%s" % (top, concern, flow, weak, strength, sea)))
 
-    # ── 2.5단 · 어긋남 (불일치가 있을 때만) ──────────────
-    gaps = gap_list(f, axis4)
-    if gaps:
-        body = ('<div class="scene gap"><p class="lead">여덟 글자와 그대가 적은 네 글자가 '
-                '<b>%d군데</b> 어긋나오.</p>%s</div>'
-                % (len(gaps),
-                   "".join('<p class="gp"><b>%s → %s</b><br>%s<br><span class="w">%s</span></p>'
-                           % (g["from"], g["to"], g["t"], g["w"]) for g in gaps)))
+    # ── 2.5단 · 겹친 자리와 어긋난 자리 ──────────────────
+    #
+    # ★ 넉 자를 적었으면 **어긋난 데가 없어도** 이 단을 넣습니다.
+    #   전에는 불일치가 있을 때만 넣었고, 그래서 넷이 다 맞는 6%에게
+    #   — 가장 드문 사람에게 — 아무 말도 하지 않았습니다.
+    cmp = axis_compare(f, axis4)
+    if cmp["usable"]:
+        gaps = cmp["gaps"]
+        if not gaps:
+            label, q = "2.5 · 겹친 자리", "…이게 맞소?"
+            yes = "그렇겠지요. 여덟 자와 넉 자가 다 겹치는 일은 흔치 않소."
+            no = "그럼 넉 자를 다시 재보시오. 다음 달에는 다른 유형이 나오기도 하오."
+        else:
+            label = "2.5 · 겹친 자리와 어긋난 자리"
+            q = "…짚이는 데가 있소?"
+            yes = ("그럴 게요. 그 사이가 그대를 가장 지치게 하오." if cmp["deep"]
+                   else "그 한두 자리가 늘 걸리는 자리요.")
+            no = "그럼 잘 맞춰 사신 것이오."
         segs.append(_seg(
-            stage="2.5", label="2.5 · 어긋난 자리",
+            stage="2.5", label=label,
             source="사주 %s ↔ 입력 %s" % (axis_string(f), _html.escape(axis4.upper())),
-            body=body,
-            question="…짚이는 데가 있소?",
-            yes="그럴 게요. 그 사이가 그대를 가장 지치게 하오.",
-            no="그럼 잘 맞춰 사신 것이오. 흔치 않소.",
-            sid="gap:%s" % ",".join(g["pair"] for g in gaps)))
+            body=axis_block(cmp, strength),
+            question=q, yes=yes, no=no,
+            sid=axis_sid(cmp, strength)))
 
     # ── 3단 · 이름 ──────────────────────────────────────
     word = bank()["NAME2"].get(weak, {}).get(flow) or bank()["NAMEW"][weak]
+    # ★ 이름은 이 사람이 가장 오래 기억하는 한 줄입니다. 캡처를 나란히
+    #   놓았을 때 제일 먼저 눈에 띄는 자리라 신강약(3) 을 곱해 둡니다.
     post = ("이건 성격이 아니오. %s일간의 힘이 %s(%s)으로 <b>%s</b> 하는데, "
-            "%s %s밖에 없어 멈출 자리가 없는 <b>구조</b>요."
+            "%s %s밖에 없어 멈출 자리가 없는 <b>구조</b>요. %s"
             % (ELEMENT_OF_GAN[f.day_gan], element_word(f.flow_el),
                f.elements[f.flow_el], flow,
-               josa(element_word(weak), "이", "가"), f.elements[weak]))
+               josa(element_word(weak), "이", "가"), f.elements[weak],
+               bank()["NAME_POST"][strength]))
     segs.append(_seg(
         stage="3", label="3 · 이름",
         source="%s %s × %s" % (element_word(weak), f.elements[weak], flow),
@@ -298,7 +399,7 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
         question="이제 알겠소?",
         yes="그렇소. 여기까지가 값 없이 하는 얘기요.",
         no="천천히 생각해보시오.",
-        sid="name:%s:%s" % (weak, flow)))
+        sid="name:%s:%s:%s" % (weak, flow, strength)))
 
     return segs
 

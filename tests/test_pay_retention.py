@@ -125,7 +125,8 @@ def test_tier_unlocks_match_report_cuts():
     """결제로 열리는 컷 이름이 리포트의 컷 id 와 맞아야 한다."""
     from engine.report import _all_cuts
     f = build_features(build_chart(1993, 5, 15, 10, 20, "F"))
-    ids = {c["id"] for c in _all_cuts(f, "love", "그대", "INFP")}
+    cuts, _err = _all_cuts(f, "love", "그대", "INFP")
+    ids = {c["id"] for c in cuts}
     for tier, unlocks in payments.TIER_UNLOCKS.items():
         assert set(unlocks) <= ids, (tier, set(unlocks) - ids)
 

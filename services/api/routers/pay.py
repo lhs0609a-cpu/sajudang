@@ -2,6 +2,7 @@
 결제 — docs/01 §5 · docs/11
 
     GET  /v1/pay/config    결제창에 필요한 공개 정보 (시크릿 키 제외)
+    POST /v1/pay/tiers     목패 셋 — 값과 **이 명식으로 실제 열리는 자리 수**
     POST /v1/pay/prepare   주문 생성. 금액은 서버가 정한다.
     POST /v1/pay/confirm   승인 → 인장 지급 · 잠금 해제
     POST /v1/pay/refund    환불 (열람 전 전액 / 계산 오류 전액)
@@ -78,6 +79,68 @@ def get_config() -> dict:
     return payments.client_config()
 
 
+# ══════════════════════════════════════════════════════════
+# 목패 셋 — 무엇을 얼마에 파는가
+# ══════════════════════════════════════════════════════════
+#
+# ★ 화면이 값과 분량을 제 손으로 적고 있었습니다.
+#   apps/web/lib/store.ts 의 TIERS 가 "평생운 18컷 · 25페이지" 라고
+#   적어 두었는데, 실제로 나오는 것은 11~12컷 · 6탭이었습니다.
+#   값도 마찬가지로 카드와 결제가 서로 달랐습니다.
+#
+#   이제 **서버가 세어서 내려보냅니다.** 화면은 받아 적기만 합니다.
+#   리포트를 만드는 그 함수로 세므로 어긋날 수가 없습니다.
+class TiersRequest(BaseModel):
+    chart_id: str
+    lens_id: str
+    concern: str = "love"
+    axis4: Optional[str] = None
+
+
+TIER_NAME = {"one": "이 자리 하나", "all": "여덟 글자 전부",
+             "sub": "스무 사람 모두"}
+TIER_NOTE = {
+    "one": "이 캐릭터가 보는 자리 전부 — 시기(대운)와 용신까지",
+    "all": "여덟 글자 전부 — 대운 맵과 성향 대조까지",
+    "sub": "달마다 · 스무 사람 무제한",
+}
+
+
+@router.post("/tiers")
+def get_tiers(req: TiersRequest) -> dict:
+    """
+    이 사람이 이 캐릭터에게서 티어마다 **실제로** 몇 컷을 받는가.
+
+    부풀리지도 줄이지도 않습니다 — build_report 로 세어서 그대로 냅니다.
+    """
+    from engine.features import Features
+    from engine.report import build_report
+    from routers.chart import load_features
+
+    f = Features(**load_features(req.chart_id))
+    out = []
+    for tier in ("one", "all", "sub"):
+        try:
+            price = payments.price_of(tier, req.lens_id)
+        except payments.PaymentError:
+            continue                      # 값 없는 캐릭터의 '이 자리 하나'
+        rep = build_report(f, req.chart_id, req.lens_id, tier, req.concern,
+                           req.axis4)
+        out.append({
+            "id": tier,
+            "name": TIER_NAME[tier],
+            "price": price,
+            "per_month": tier == "sub",
+            "note": TIER_NOTE[tier],
+            # ★ 센 것을 그대로. 사람마다 다릅니다.
+            "cuts": len(rep["cuts"]),
+            "locked": len(rep["locked"]),
+            "opens": [c["title"] for c in rep["locked"]] if tier == "one" else [],
+        })
+    return {"tiers": out, "lens_id": req.lens_id,
+            "refund_notice": payments.REFUND_NOTICE}
+
+
 @router.post("/prepare", response_model=PrepareResponse)
 def prepare(req: PrepareRequest) -> PrepareResponse:
     limit = BREAKS()["per_day_purchase"]
@@ -88,7 +151,11 @@ def prepare(req: PrepareRequest) -> PrepareResponse:
             status_code=429,
             detail="하루에 %d건까지만 받소. 내일 다시 오시오." % limit)
 
-    amount = payments.price_of(req.tier)
+    # ★ 값은 캐릭터마다 다릅니다 — 카드에 보인 값이 그대로 청구됩니다.
+    try:
+        amount = payments.price_of(req.tier, req.lens_id)
+    except payments.PaymentError as e:
+        raise HTTPException(status_code=422, detail=str(e))
     order_id = "sjd_" + uuid.uuid4().hex[:20]
     store.set_json("order:" + order_id, {
         "session_id": req.session_id, "chart_id": req.chart_id,

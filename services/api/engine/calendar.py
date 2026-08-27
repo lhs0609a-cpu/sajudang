@@ -40,6 +40,32 @@ DAEUN_COUNT = 8          # 대운 몇 구간까지 산출할지
 # 시각 미상일 때 절입·일주 경계 판정에 쓰는 기준 시각 (시주는 산출하지 않는다)
 HOUR_UNKNOWN_PROXY_MIN = 12 * 60
 
+
+# ── 날짜 검사 ──────────────────────────────────────────────
+#
+# ★ 화면과 **같은 규칙 · 같은 말투**여야 합니다.
+#   apps/web/lib/birth.ts 의 birthProblem() 과 짝입니다. 그쪽이 먼저
+#   막아 주지만 진짜 방어선은 이쪽이고, 이쪽이 영어로 말하면 주소로
+#   바로 들어온 사람에게 파이썬 원문이 뜹니다.
+_DAYS_IN = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+
+
+def days_in_month(year: int, month: int) -> int:
+    if month == 2 and ((year % 4 == 0 and year % 100 != 0) or year % 400 == 0):
+        return 29
+    return _DAYS_IN[month - 1]
+
+
+def check_birth_date(year: int, month: int, day: int) -> None:
+    """없는 날이면 우리말로 거절한다. 문제 없으면 조용히 돌아간다."""
+    if not 1 <= month <= 12:
+        raise ValueError("달은 1에서 12 사이요. (받은 것 %r)" % (month,))
+    last = days_in_month(year, month)
+    if not 1 <= day <= last:
+        raise ValueError("%d년 %d월은 %d일까지요. (받은 것 %r)"
+                         % (year, month, last, day))
+
+
 # ── 시각 보정 ──────────────────────────────────────────────
 CITY_LON = {
     "서울": 126.98, "인천": 126.71, "수원": 127.01, "춘천": 127.73,
@@ -154,6 +180,13 @@ def build_chart(year: int, month: int, day: int,
     """
     if sex not in ("M", "F"):
         raise ValueError("sex 는 'M' 또는 'F' 여야 합니다: %r" % (sex,))
+
+    # ★ 날짜가 있는 날인지 여기서 본다.
+    #   전에는 이 검사가 없어서 2월 30일이 tz.offsets() 안쪽까지 흘러갔고,
+    #   파이썬의 "day is out of range for month" 가 그대로 400 본문으로
+    #   나갔습니다. 화면(apps/web/lib/birth.ts)은 우리말로 막는데 서버만
+    #   영어로 말하고 있었습니다 — 방어선 둘의 말이 달랐습니다.
+    check_birth_date(year, month, day)
 
     lon = longitude if longitude is not None else CITY_LON.get(city, CITY_LON[DEFAULT_CITY])
 
