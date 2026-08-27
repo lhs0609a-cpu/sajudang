@@ -1,0 +1,302 @@
+/*
+ * 두루마리 — 결과지.
+ *
+ * ★ 무엇을 고쳤나
+ *   1. 근거가 안 보였습니다. `.src` 는 8.5px 짜리 작은 딱지라 본문에
+ *      묻혔습니다. 이 집의 포지션은 "맞히는 집" 이 아니라 **"근거 대는
+ *      집"** 인데, 정작 근거가 가장 작은 글씨였습니다.
+ *   2. 화면이 두루마리라면서 두루마리처럼 보이지 않았습니다.
+ *      배경이 그냥 검정이고 컷 사이가 실선이었습니다.
+ *   3. 내려받을 수가 없었습니다. 값을 치른 물건인데 손에 안 남았습니다.
+ *
+ * ★ 에셋을 쓰지 않습니다
+ *   한지 질감·낙관·이음매를 전부 CSS 로 냅니다. 장면 에셋이 0/24 인
+ *   상태에서도 오늘 바로 도는 것이 낫고, 인쇄에도 그대로 실립니다.
+ *
+ * 토큰은 styles/tokens.css 를 그대로 씁니다. 여기서 새 색을 만들지 않습니다.
+ */
+
+/* ══════════════════════════════════════════════════════════
+   두루마리 바탕
+   ══════════════════════════════════════════════════════════ */
+.scroll {
+  position: relative;
+  /* 한지 결 — 아주 옅은 세로 발簾 무늬와 얼룩. 이미지가 아닙니다. */
+  background:
+    repeating-linear-gradient(90deg,
+      rgba(229, 184, 122, .022) 0 1px,
+      transparent 1px 3px),
+    radial-gradient(120% 60% at 20% 0%, rgba(229, 184, 122, .055), transparent 60%),
+    radial-gradient(90% 50% at 85% 100%, rgba(168, 150, 212, .045), transparent 60%),
+    var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 30px 26px 26px;
+  box-shadow: inset 0 1px 0 rgba(242, 236, 228, .05),
+              0 18px 40px -28px #000;
+}
+@media (max-width: 520px) { .scroll { padding: 24px 17px 20px; } }
+
+/* 위아래 축(軸) — 두루마리를 감는 막대 */
+.scroll::before,
+.scroll::after {
+  content: "";
+  position: absolute;
+  left: -1px; right: -1px;
+  height: 7px;
+  background: linear-gradient(180deg, var(--line2), var(--bg3) 60%, #000);
+  border: 1px solid var(--line);
+}
+.scroll::before { top: -8px; border-radius: 4px 4px 1px 1px; }
+.scroll::after { bottom: -8px; border-radius: 1px 1px 4px 4px; }
+
+/* 표제 — 두루마리 머리 */
+.scrollhead {
+  text-align: center;
+  padding-bottom: 20px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+.scrollhead .who {
+  font-family: var(--serif);
+  font-size: 25px;
+  color: var(--c);
+  letter-spacing: .04em;
+}
+.scrollhead .hanja {
+  font-family: var(--serif);
+  font-size: 12px;
+  color: var(--paper3);
+  letter-spacing: .3em;
+  margin-top: 2px;
+}
+.scrollhead .eight {
+  display: flex; justify-content: center; gap: 7px;
+  margin: 16px 0 10px; flex-wrap: wrap;
+}
+.scrollhead .eight span {
+  font-family: var(--serif);
+  font-size: 17px;
+  color: var(--paper);
+  border: 1px solid var(--line2);
+  border-radius: 2px;
+  padding: 5px 9px;
+  background: rgba(12, 10, 18, .55);
+  min-width: 42px;
+}
+.scrollhead .cnt {
+  font-family: var(--mono); font-size: 10.5px; color: var(--paper3);
+  letter-spacing: .06em;
+}
+
+/* ══════════════════════════════════════════════════════════
+   컷 — 두루마리의 마디
+   ══════════════════════════════════════════════════════════ */
+.scroll .blk {
+  border-bottom: none;
+  padding: 26px 0 22px;
+  position: relative;
+}
+/* 마디 사이 이음매 — 실선 대신 가운데가 옅어지는 선 */
+.scroll .blk + .blk::before {
+  content: "";
+  position: absolute; top: 0; left: 8%; right: 8%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent,
+              var(--line2) 22%, var(--line2) 78%, transparent);
+}
+.scroll .blk .lab {
+  font-family: var(--serif);
+  font-size: 14px;
+  letter-spacing: .02em;
+  color: var(--c);
+  margin-bottom: 12px;
+}
+
+/* ── 근거 ────────────────────────────────────────────────
+   ★ 여기가 이 파일에서 가장 중요한 자리입니다.
+     전에는 8.5px 딱지 하나였습니다. 이제 **본문과 같은 급**으로
+     올리고, 무엇을 읽었는지 그 자리에서 보이게 합니다. */
+.scroll .src {
+  display: block;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.7;
+  letter-spacing: .02em;
+  color: var(--teal);
+  border: none;
+  border-left: 2px solid rgba(127, 196, 188, .5);
+  background: rgba(127, 196, 188, .06);
+  border-radius: 0 4px 4px 0;
+  padding: 7px 11px;
+  margin: 0 0 14px;
+}
+.scroll .src::before {
+  content: "근거";
+  font-size: 9.5px;
+  letter-spacing: .18em;
+  color: rgba(127, 196, 188, .75);
+  margin-right: 9px;
+}
+
+/* 관점 컷이 스스로 대는 '읽은 자리' — 낙관처럼 아래에 찍힙니다 */
+.ev {
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.75;
+  color: var(--paper3);
+  margin-top: 14px;
+  padding: 8px 11px;
+  border: 1px dashed var(--line2);
+  border-radius: 4px;
+  background: rgba(12, 10, 18, .4);
+}
+.ev .evk {
+  display: inline-block;
+  font-size: 9.5px;
+  letter-spacing: .18em;
+  color: var(--gold);
+  margin-right: 9px;
+}
+
+/* 캐릭터만 보는 자리 — 낙관 도장을 옆에 찍습니다 */
+.scroll .blk.own { padding-left: 15px; border-left: 2px solid var(--c); }
+.scroll .blk.own .lab::after {
+  content: "이 사람만 보는 자리";
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .12em;
+  color: var(--bg);
+  background: var(--c);
+  border-radius: 999px;
+  padding: 2px 8px;
+  margin-left: 10px;
+  vertical-align: 2px;
+}
+
+/* 여는 말 · 닫는 말 */
+.saying {
+  font-family: var(--serif);
+  font-size: 16px;
+  line-height: 1.95;
+  color: var(--paper2);
+  text-align: center;
+  padding: 20px 6px;
+  position: relative;
+}
+.saying::before, .saying::after {
+  content: "";
+  display: block; width: 34px; height: 1px;
+  background: var(--line2);
+  margin: 0 auto 15px;
+}
+.saying::after { margin: 15px auto 0; }
+.saying.close { color: var(--paper3); }
+
+/* ══════════════════════════════════════════════════════════
+   손잡이 — 내려받기 · 공유
+   ══════════════════════════════════════════════════════════ */
+.handles {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-top: 22px;
+}
+.handles button {
+  flex: 1 1 auto;
+  min-width: 128px;
+  background: rgba(12, 10, 18, .5);
+  border: 1px solid var(--line2);
+  color: var(--paper2);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .04em;
+  padding: 11px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: border-color .16s, color .16s;
+}
+.handles button:hover:not(:disabled) { border-color: var(--c); color: var(--paper); }
+.handles button:disabled { opacity: .45; cursor: default; }
+.handles button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+.handlenote { font-size: 11.5px; color: var(--paper3); margin-top: 9px; line-height: 1.7; }
+
+/* ══════════════════════════════════════════════════════════
+   인쇄 — 그대로 PDF 가 됩니다
+   ══════════════════════════════════════════════════════════
+   ★ 서버에 PDF 만드는 장치를 두지 않습니다.
+     헤드리스 브라우저를 얹으면 배포가 무거워지고, 무엇보다
+     **문장 뱅크가 이미 렌더된 HTML 로 화면에 있으므로** 그것을
+     그대로 인쇄하는 것이 가장 정확합니다. 서버가 다시 그리면
+     화면과 다른 물건이 나옵니다.
+   ★ 종이에서는 검정 바탕을 쓰지 않습니다. 잉크가 아깝고 읽기도
+     나쁩니다. 흰 종이에 검은 글씨로 뒤집습니다.
+*/
+@media print {
+  @page { size: A4; margin: 16mm 14mm; }
+
+  html, body {
+    background: #fff !important;
+    color: #14121a !important;
+  }
+  /* 화면에만 있는 것들 — 종이에 안 싣습니다 */
+  .topbar, .handles, .btn, .scene, .sceneart, .prog,
+  .noprint, nav, footer { display: none !important; }
+
+  .scroll {
+    background: #fff !important;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+  .scroll::before, .scroll::after { display: none; }
+
+  .scrollhead { border-bottom: 1px solid #cfc8bd; }
+  .scrollhead .who { color: #6b4d1f; }
+  .scrollhead .hanja, .scrollhead .cnt { color: #6f6a62; }
+  .scrollhead .eight span {
+    color: #14121a; border-color: #cfc8bd; background: #fff;
+  }
+
+  .scroll .blk {
+    /* 마디가 페이지 사이에서 잘리지 않게 */
+    break-inside: avoid;
+    page-break-inside: avoid;
+    padding: 14px 0;
+  }
+  .scroll .blk + .blk::before { background: #ded7cc; }
+  .scroll .blk .lab { color: #6b4d1f; font-size: 13px; }
+  .scroll .blk.own { border-left-color: #6b4d1f; }
+  .scroll .blk.own .lab::after { background: #6b4d1f; color: #fff; }
+
+  .tale, .neg { color: #24212b !important; font-size: 11.5pt; line-height: 1.75; }
+  .tale b { color: #000 !important; font-weight: 600; }
+
+  /* 근거는 종이에서도 눈에 띄어야 합니다 — 이게 이 물건의 값입니다 */
+  .scroll .src {
+    color: #1d5f57 !important;
+    background: #f2f8f7 !important;
+    border-left-color: #1d5f57 !important;
+    font-size: 9.5pt;
+  }
+  .scroll .src::before { color: #1d5f57; }
+  .ev {
+    color: #4a4550 !important;
+    background: #faf8f4 !important;
+    border-color: #ded7cc !important;
+    font-size: 9.5pt;
+  }
+  .ev .evk { color: #6b4d1f; }
+
+  .saying { color: #3b3742 !important; }
+  .saying::before, .saying::after { background: #ded7cc; }
+
+  /* 종이 아래에 출처를 남깁니다 — 어디서 나온 종이인지 */
+  .printfoot { display: block !important; }
+  .printfoot {
+    margin-top: 22px; padding-top: 10px;
+    border-top: 1px solid #ded7cc;
+    font-family: var(--mono); font-size: 8.5pt; color: #6f6a62;
+    line-height: 1.7;
+  }
+}
+.printfoot { display: none; }

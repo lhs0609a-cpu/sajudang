@@ -16,10 +16,22 @@ import Scene from "@/components/scene/Scene";
 import { Narration, Say } from "@/components/Narration";
 import { api, ApiError } from "@/lib/api";
 import { LENS_BY_ID } from "@/lib/lenses";
-import { TIERS, useSession, type Tier } from "@/lib/store";
+import { useSession, type Tier } from "@/lib/store";
 import { track, useScreen } from "@/lib/track";
 import { openCheckout } from "@/lib/toss";
 import type { ReportResponse } from "@shared/chart";
+
+interface TierCard {
+  id: string;
+  name: string;
+  price: number;
+  per_month: boolean;
+  note: string;
+  /** 이 명식으로 실제 열리는 자리 수. 부풀리지 않습니다. */
+  cuts: number;
+  locked: number;
+  opens: string[];
+}
 
 interface Order {
   order_id: string;
@@ -45,8 +57,23 @@ function PayInner() {
   const [pick, setPick] = useState<Tier>("all");
   const [order, setOrder] = useState<Order | null>(null);
   const [busy, setBusy] = useState(false);
+  /* 목패 — ★ 값도 분량도 서버가 셉니다. 화면은 받아 적기만 합니다. */
+  const [tiers, setTiers] = useState<TierCard[] | null>(null);
 
   useScreen(step);
+
+  /* 목패 셋 — 서버가 센 값과 분량 */
+  useEffect(() => {
+    if (!s.chartId || tiers) return;
+    if (step !== "d1" && step !== "d2") return;
+    let alive = true;
+    api
+      .payTiers({ chart_id: s.chartId, lens_id: s.cur,
+                  concern: s.concern, axis4: s.axis4 })
+      .then((r) => { if (alive) setTiers(r.tiers as TierCard[]); })
+      .catch((e) => { if (alive) setErr(e instanceof ApiError ? e.message : "목패를 펴지 못했소."); });
+    return () => { alive = false; };
+  }, [step, s.chartId, s.cur, s.concern, s.axis4, tiers]);
 
   /* d0 · 무료 구간 */
   useEffect(() => {
@@ -161,7 +188,7 @@ function PayInner() {
 
   /* d2 · 결제 */
   if (step === "d2") {
-    const tier = TIERS.find((t) => t.id === pick);
+    const tier = tiers?.find((t) => t.id === pick);
 
     /* 결제창에서 막 돌아왔다 — 승인이 끝날 때까지 아무것도 누르지 못하게 */
     if (settling) {
@@ -194,7 +221,13 @@ function PayInner() {
             <div className="dz">
               <div className="k">{tier?.name}</div>
               <p>{order.amount.toLocaleString()}원</p>
-              <p className="sm">{tier?.desc}</p>
+              <p className="sm">{tier?.note}</p>
+              {tier && (
+                <p className="sm">
+                  이 명식으로 열리는 자리 <b>{tier.cuts}컷</b>
+                  {tier.locked > 0 && ` · 남는 자리 ${tier.locked}컷`}
+                </p>
+              )}
             </div>
             <p className="sm">오늘 치른 값 {order.purchases_today} / {order.per_day_limit}건</p>
             <p className="sm">{order.refund_notice}</p>
@@ -272,18 +305,26 @@ function PayInner() {
     <Shell title="어디까지 볼지">
       <Scene id="tray" />
       <Narration lines={["목패 셋이 상 위에 놓였다."]} />
-      <div className="og">
-        {TIERS.map((t) => (
-          <button
-            key={t.id}
-            className={"op " + (pick === t.id ? "on" : "")}
-            onClick={() => { setPick(t.id); setOrder(null); track("tier_pick", "d1"); }}
-          >
-            <b>{t.name} · {t.price}</b>
-            <span>{t.desc}</span>
-          </button>
-        ))}
-      </div>
+      {!tiers ? (
+        <p className="sm">목패를 편다…</p>
+      ) : (
+        <div className="og">
+          {tiers.map((t) => (
+            <button
+              key={t.id}
+              className={"op " + (pick === t.id ? "on" : "")}
+              onClick={() => { setPick(t.id as Tier); setOrder(null); track("tier_pick", "d1"); }}
+            >
+              <b>
+                {t.name} · {t.price.toLocaleString()}원{t.per_month ? "/월" : ""}
+              </b>
+              <span>{t.note}</span>
+              {/* ★ 서버가 이 명식으로 세어 준 수. 부풀리지 않습니다. */}
+              <span>이 명식으로 <b>{t.cuts}컷</b></span>
+            </button>
+          ))}
+        </div>
+      )}
       <button className="btn mt" onClick={() => router.push("/pay?step=d2")}>
         이걸로 하겠소
       </button>

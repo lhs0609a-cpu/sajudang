@@ -116,6 +116,25 @@ export const api = {
       "/v1/pay/config"),
 
   /** 금액은 서버가 정합니다. 여기서 금액을 보내지 마세요. */
+  /**
+   * 목패 셋. ★ 값과 분량을 **서버가 세어서** 줍니다.
+   *   화면이 제 손으로 적으면 엔진이 달라져도 그 줄은 안 바뀌어
+   *   다시 어긋납니다. (전에 "18컷 · 25페이지" 라 적혀 있었고
+   *   실제로는 11~12컷 · 6탭이었습니다)
+   */
+  payTiers: (req: {
+    chart_id: string; lens_id: string;
+    concern?: string; axis4?: string | null;
+  }) =>
+    post<{
+      tiers: {
+        id: string; name: string; price: number; per_month: boolean;
+        note: string; cuts: number; locked: number; opens: string[];
+      }[];
+      lens_id: string;
+      refund_notice: string;
+    }>("/v1/pay/tiers", req),
+
   payPrepare: (req: {
     session_id: string; chart_id: string; lens_id: string;
     tier: string; concern?: string;

@@ -150,11 +150,16 @@ export const CONCERNS: { id: Concern; label: string; sub: string }[] = [
   { id: "health", label: "몸", sub: "기운, 잠, 지침" },
 ];
 
-export const TIERS: { id: Tier; name: string; price: string; desc: string }[] = [
-  { id: "one", name: "이 자리 하나", price: "3,900원", desc: "고른 영역 전부 · 시기 포함" },
-  { id: "all", name: "여덟 글자 전부", price: "19,900원", desc: "평생운 18컷 · 25페이지" },
-  { id: "sub", name: "스무 사람 모두", price: "9,900원/월", desc: "전 캐릭터 무제한 · 월간 세운" },
-];
+/**
+ * 목패의 이름만 여기 둡니다.
+ *
+ * ★ 값과 분량은 **서버가 셉니다** — `POST /v1/pay/tiers`.
+ *   여기 "평생운 18컷 · 25페이지" 라고 적혀 있었는데 실제로 나오는 것은
+ *   11~12컷 · 6탭이었습니다. 화면이 제 손으로 분량을 적으면 엔진이
+ *   달라져도 이 줄은 안 바뀌므로, 다시 어긋납니다.
+ *   값도 같습니다 — 캐릭터마다 다르고, 서버가 청구하는 값만이 참입니다.
+ */
+export const TIER_ORDER: Tier[] = ["one", "all", "sub"];
 
 /** 화면 대장 — 관리자 레일이 이걸로 목록을 그립니다. docs/08 §1 */
 export interface ScreenLink {

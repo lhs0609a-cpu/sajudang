@@ -36,6 +36,49 @@ function ReportInner() {
   const [err, setErr] = useState<string | null>(null);
   const [rating, setRating] = useState(0);
 
+  /* 고리 — 공유 링크. 생년월일시는 담기지 않습니다. (services/api/routers/share.py) */
+  const [sharing, setSharing] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [shareMsg, setShareMsg] = useState<string | null>(null);
+
+  /* 종이에 찍히는 날. 인쇄물에 언제 뽑았는지가 없으면 나중에 못 알아봅니다. */
+  const printedOn = new Date().toLocaleDateString("ko-KR", {
+    year: "numeric", month: "long", day: "numeric",
+  });
+
+  async function makeLink() {
+    if (!s.chartId) return;
+    if (shareUrl) {
+      await copy(shareUrl);
+      return;
+    }
+    setSharing(true);
+    setShareMsg(null);
+    try {
+      const r = await api.share({
+        chart_id: s.chartId, concern: s.concern, axis4: s.axis4,
+        lens_id: lensId, name: s.name, from_name: s.name,
+      });
+      const url = window.location.origin + r.path;
+      setShareUrl(url);
+      await copy(url);
+    } catch (e) {
+      setShareMsg(e instanceof ApiError ? e.message : "고리를 엮지 못했소.");
+    } finally {
+      setSharing(false);
+    }
+  }
+
+  async function copy(url: string) {
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareMsg("고리를 옮겨 담았소 — " + url);
+    } catch {
+      /* 클립보드를 막아 둔 브라우저가 있습니다. 그럴 땐 주소를 보여 줍니다. */
+      setShareMsg("이 고리를 쓰시오 — " + url);
+    }
+  }
+
   useEffect(() => {
     if (!s.chartId) return;
     let alive = true;
@@ -188,28 +231,91 @@ function ReportInner() {
     );
   }
 
-  /* c2 · 본문 (웹툰 뷰어) */
+  /* c2 · 본문 — 두루마리 */
+  const body = rep.cuts.filter((c) => c.id !== "daeun_map");
+  const pillars = s.features?.pillars ?? [];
+
   return (
     <Shell title={rep.lens.name}>
       <Scene id="oldpaper" />
-      {rep.cuts.filter((c) => c.id !== "daeun_map").map((c) => (
-        <div className="blk in" key={c.id}>
-          <div className="lab">{c.title}</div>
-          <span className="src">근거 · {c.source}</span>
-          <div dangerouslySetInnerHTML={{ __html: c.html }} />
-        </div>
-      ))}
 
-      {rep.locked.length > 0 && (
-        <button className="btn mt" onClick={() => setTab("c4")}>
-          잠긴 {rep.locked.length}컷 보기
+      {/* ★ 추가 입력이 틀렸을 때. 리포트를 통째로 막지 않습니다 —
+          그 컷만 빠지고 무엇이 틀렸는지 말해 줍니다. */}
+      {rep.extra_error && (
+        <div className="warn noprint">
+          <p>{rep.extra_error}</p>
+          <p className="sm">
+            그 자리 하나만 접었소. 나머지는 아래 그대로 있소.
+          </p>
+        </div>
+      )}
+
+      <div className="scroll" id="scroll">
+        <div className="scrollhead">
+          <p className="who">{rep.lens.name}</p>
+          <p className="hanja">{rep.lens.hanja}</p>
+          {pillars.length > 0 && (
+            <div className="eight">
+              {pillars.map((p) => <span key={p.label}>{p.gz}</span>)}
+            </div>
+          )}
+          <p className="cnt">
+            읽는 자리 {rep.cuts.length}컷
+            {rep.locked.length > 0 && ` · 잠긴 자리 ${rep.locked.length}컷`}
+          </p>
+        </div>
+
+        {rep.opening && (
+          <p className="saying" dangerouslySetInnerHTML={{ __html: rep.opening }} />
+        )}
+
+        {body.map((c) => (
+          <div
+            className={"blk in" + (c.id.startsWith("lc_") ? " own" : "")}
+            key={c.id}
+          >
+            <div className="lab">{c.title}</div>
+            {/* ★ 근거를 본문 위에, 본문과 같은 급으로 둡니다.
+                전에는 8.5px 딱지라 아무도 안 봤습니다. */}
+            <span className="src">{c.source}</span>
+            <div dangerouslySetInnerHTML={{ __html: c.html }} />
+          </div>
+        ))}
+
+        {rep.closing && (
+          <p className="saying close"
+             dangerouslySetInnerHTML={{ __html: rep.closing }} />
+        )}
+
+        {/* 종이에만 실립니다 — 어디서 나온 종이인지 */}
+        <div className="printfoot">
+          사주당 四柱堂 · {rep.lens.name}이 본 것 · {printedOn}
+          <br />
+          여덟 글자는 하나요. 읽는 눈이 스물이오.
+          맞힌다는 말은 하지 않소 — 무엇을 보고 한 말인지만 적어 두었소.
+        </div>
+      </div>
+
+      <div className="handles noprint">
+        <button onClick={() => window.print()}>
+          종이로 내려받기 (PDF)
         </button>
-      )}
-      {daeunCut && (
-        <button className="btn gh" onClick={() => setTab("c3")}>대운 맵</button>
-      )}
-      <button className="btn gh" onClick={() => setTab("c5")}>공유 카드</button>
-      <button className="btn gh" onClick={() => setTab("c6")}>다 읽었소</button>
+        <button onClick={() => void makeLink()} disabled={sharing}>
+          {sharing ? "고리를 엮는 중…" : shareUrl ? "고리 다시 복사" : "고리 만들어 나누기"}
+        </button>
+        {rep.locked.length > 0 && (
+          <button onClick={() => setTab("c4")}>잠긴 {rep.locked.length}컷</button>
+        )}
+        {daeunCut && <button onClick={() => setTab("c3")}>대운 맵</button>}
+        <button onClick={() => setTab("c6")}>다 읽었소</button>
+      </div>
+
+      {shareMsg && <p className="handlenote noprint">{shareMsg}</p>}
+      <p className="handlenote noprint">
+        내려받기는 인쇄창에서 <b>“PDF로 저장”</b>을 고르면 되오.
+        고리에는 <b>생년월일시와 고을이 담기지 않소</b> — 여덟 글자와 읽은
+        자리만 가오. 90일이 지나면 스스로 닫히오.
+      </p>
     </Shell>
   );
 }

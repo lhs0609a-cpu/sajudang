@@ -117,7 +117,15 @@ export default function RelayPage() {
                         onClick={() => void go(r.lens_id)}
                       >
                         <b>{r.released ? "듣는다" : "아직 자리에 없소"}</b>
-                        <span>{r.price ? r.price.toLocaleString() + "원" : "값 없이"}</span>
+                        {/* ★ 여기 보이는 값이 그대로 청구됩니다.
+                            전에는 카드가 캐릭터 값을 보여 주고 결제는
+                            티어 값을 물려, 스무 캐릭터의 값이 한 번도
+                            청구되지 않았습니다. (payments.price_of) */}
+                        <span>
+                          {r.price
+                            ? `${r.price.toLocaleString()}원 · 이 자리 하나`
+                            : "값 없이"}
+                        </span>
                       </button>
                       <button
                         className="op"
