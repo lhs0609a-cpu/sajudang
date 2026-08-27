@@ -67,6 +67,11 @@ class ReportRequest(BaseModel):
     chart_id: str
     lens_id: str
     tier: Tier = "free"
+    # ★ 자격은 이 열쇠로 봅니다. 없으면 무료 구간만 나갑니다.
+    #   tier 는 손님이 **보고 싶다고 말한 것**이고, 실제로 열리는 것은
+    #   치른 주문이 정합니다 (routers/report.entitled_tier).
+    #   계측에는 안 실립니다 — 화면 이름·사건 이름만 나갑니다.
+    session_id: Optional[str] = None
     concern: Concern = "love"
     axis4: Optional[str] = Field(default=None, min_length=4, max_length=4)
     # 결합 축의 추가 입력. {"partner": {...}} / {"context": {...}} 등.

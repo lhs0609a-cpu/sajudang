@@ -17,6 +17,54 @@ from schemas.api import ReportRequest, ReportResponse
 router = APIRouter(prefix="/v1", tags=["report"])
 
 
+# ══════════════════════════════════════════════════════════
+# 자격 — 이 사람이 실제로 무엇을 치렀는가
+# ══════════════════════════════════════════════════════════
+#
+# ★ 여기가 비어 있었습니다.
+#   `/v1/omnibus` 는 주문 기록을 보는데 **리포트 본체는 클라이언트가
+#   보낸 tier 를 그대로 믿었습니다.** 값을 한 푼도 안 치른 요청에
+#   `tier="one"` 을 실어 보내면 19컷 8,339자가 그대로 나갔습니다.
+#   화면은 그 값을 localStorage 에서 읽어 보냅니다 — 브라우저에서
+#   한 글자만 고치면 스무 캐릭터가 전부 열렸습니다.
+#
+# ★ 402 로 거절하지 않고 **치른 만큼으로 낮춰서** 내려보냅니다.
+#   무료 구간은 누구에게나 보여야 하고, 무엇이 잠겼는지는 `locked` 가
+#   제목과 근거로 말합니다. 빈 화면을 보이는 것이 가장 나쁩니다.
+#   응답의 `tier` 는 **실제로 내려간 티어**입니다 — 화면이 그걸 보고
+#   자기 기록을 고칠 수 있어야 합니다.
+#
+# ★ '이 자리 하나' 는 그 캐릭터에만 붙습니다.
+#   풍운도령을 치르고 홍매파를 열 수는 없습니다. 캐릭터 값이 곧
+#   「이 자리 하나」 값이기 때문입니다 (payments.price_of).
+TIER_RANK = {"free": 0, "one": 1, "all": 2, "sub": 2}
+
+
+def _paid_orders(session_id: str | None):
+    """이 세션이 치른 주문들. 클라이언트 말이 아니라 저장된 기록입니다."""
+    if not session_id:
+        return
+    for oid in store.get_json("orders:" + session_id) or []:
+        o = store.get_json("order:" + oid)
+        if o and o.get("status") == "paid":
+            yield o
+
+
+def entitled_tier(session_id: str | None, lens_id: str) -> str:
+    """이 사람이 이 캐릭터에게서 실제로 열 수 있는 티어."""
+    best = "free"
+    for o in _paid_orders(session_id):
+        t = o.get("tier")
+        if t not in TIER_RANK:
+            continue
+        # '이 자리 하나' 는 치른 그 캐릭터에서만 열립니다.
+        if t == "one" and o.get("lens_id") != lens_id:
+            continue
+        if TIER_RANK[t] > TIER_RANK[best]:
+            best = t
+    return best
+
+
 @router.post("/report", response_model=ReportResponse)
 def post_report(req: ReportRequest) -> ReportResponse:
     raw = load_features(req.chart_id)
@@ -25,9 +73,13 @@ def post_report(req: ReportRequest) -> ReportResponse:
     except lens_mod.LensError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
+    # 클라이언트가 부른 티어와 치른 티어 중 **낮은 쪽**으로 냅니다.
+    allowed = entitled_tier(req.session_id, req.lens_id)
+    tier = req.tier if TIER_RANK[req.tier] <= TIER_RANK[allowed] else allowed
+
     f = Features(**raw)
     try:
-        data = build_report(f, req.chart_id, req.lens_id, req.tier,
+        data = build_report(f, req.chart_id, req.lens_id, tier,
                             req.concern, req.axis4, req.extras)
     except (ValueError, KeyError) as e:
         raise HTTPException(status_code=422, detail=str(e))
@@ -67,15 +119,14 @@ def _paid_tier(session_id: str) -> str | None:
     이 사람이 무엇을 치렀는가. 주문 기록에서 봅니다.
 
     ★ 클라이언트가 보낸 tier 를 믿지 않습니다. 그러면 요청 한 줄로
-      8만 자가 빠져나갑니다.
+      8만 자가 빠져나갑니다. (리포트 본체도 이제 같은 기록을 봅니다 —
+      `entitled_tier`)
     """
     best = None
-    for oid in store.get_json("orders:" + session_id) or []:
-        o = store.get_json("order:" + oid)
-        if o and o.get("status") == "paid":
-            t = o.get("tier")
-            if t in OMNIBUS_TIERS:
-                best = "all" if t == "all" else (best or t)
+    for o in _paid_orders(session_id):
+        t = o.get("tier")
+        if t in OMNIBUS_TIERS:
+            best = "all" if t == "all" else (best or t)
     return best
 
 

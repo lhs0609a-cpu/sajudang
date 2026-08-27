@@ -98,15 +98,98 @@ def test_hook_response_carries_no_bank_internals(client, chart_id):
 
 
 # ── /v1/report ─────────────────────────────────────────────
+def _mark_paid(session_id, tier, lens_id="pungun"):
+    """이 세션이 값을 치른 것으로 기록한다. pay/confirm 이 쓰는 그 모양."""
+    oid = "test-order-%s-%s-%s" % (session_id, tier, lens_id)
+    store.set_json("order:" + oid, {
+        "session_id": session_id, "chart_id": "x", "lens_id": lens_id,
+        "tier": tier, "concern": "love", "amount": 1, "status": "paid",
+        "payment_key": "t"})
+    store.set_json("orders:" + session_id, [oid])
+
+
 def test_report_tier_gating(client, chart_id):
+    """티어가 오르면 더 열린다 — **값을 치렀을 때** 얘기다."""
+    _mark_paid("t-gate-paid", "all")
     free = client.post("/v1/report", json={
         "chart_id": chart_id, "lens_id": "pungun", "tier": "free",
         "concern": "love"}).json()
     all_ = client.post("/v1/report", json={
         "chart_id": chart_id, "lens_id": "pungun", "tier": "all",
-        "concern": "love"}).json()
+        "session_id": "t-gate-paid", "concern": "love"}).json()
     assert free["locked"] and not all_["locked"]
     assert len(all_["cuts"]) > len(free["cuts"])
+
+
+def test_report_without_paying_stays_free(client, chart_id):
+    """
+    ★ 여기가 비어 있었습니다.
+
+      리포트 본체가 클라이언트가 보낸 tier 를 그대로 믿어서, 값을 한 푼도
+      안 치른 요청에 tier="one" 을 실으면 19컷 8,339자가 그대로 나갔습니다.
+      화면은 그 값을 localStorage 에서 읽어 보냅니다 — 브라우저에서 한
+      글자만 고치면 스무 캐릭터가 전부 열렸습니다.
+    """
+    free = client.post("/v1/report", json={
+        "chart_id": chart_id, "lens_id": "pungun", "tier": "free",
+        "concern": "love"}).json()
+    for tier in ("one", "all", "sub"):
+        got = client.post("/v1/report", json={
+            "chart_id": chart_id, "lens_id": "pungun", "tier": tier,
+            "session_id": "t-never-paid", "concern": "love"}).json()
+        # 거절이 아니라 **낮춰서** 냅니다. 무료 구간은 보여야 합니다.
+        assert got["tier"] == "free", tier
+        assert len(got["cuts"]) == len(free["cuts"]), tier
+        assert got["locked"], tier
+        for c in got["locked"]:
+            assert not c.get("html"), (tier, c["id"])
+
+
+def test_report_without_session_stays_free(client, chart_id):
+    """열쇠를 아예 안 보내도 마찬가지."""
+    got = client.post("/v1/report", json={
+        "chart_id": chart_id, "lens_id": "pungun", "tier": "all",
+        "concern": "love"}).json()
+    assert got["tier"] == "free"
+
+
+def test_one_tier_opens_only_the_lens_that_was_paid(client, chart_id):
+    """
+    「이 자리 하나」는 그 캐릭터 값입니다. 4,900원짜리를 치르고
+    19,900원짜리를 열 수는 없습니다.
+    """
+    _mark_paid("t-one-lens", "one", lens_id="paeseon")
+    mine = client.post("/v1/report", json={
+        "chart_id": chart_id, "lens_id": "paeseon", "tier": "one",
+        "session_id": "t-one-lens", "concern": "love"}).json()
+    other = client.post("/v1/report", json={
+        "chart_id": chart_id, "lens_id": "pungun", "tier": "one",
+        "session_id": "t-one-lens", "concern": "love"}).json()
+    assert mine["tier"] == "one"
+    assert other["tier"] == "free"
+
+
+def test_all_tier_opens_every_lens(client, chart_id):
+    """'여덟 글자 전부' 는 캐릭터를 안 가립니다."""
+    _mark_paid("t-all-any", "all", lens_id="paeseon")
+    for lens in ("paeseon", "pungun", "nopa"):
+        got = client.post("/v1/report", json={
+            "chart_id": chart_id, "lens_id": lens, "tier": "all",
+            "session_id": "t-all-any", "concern": "love"}).json()
+        assert got["tier"] == "all", lens
+
+
+def test_unpaid_order_does_not_open_anything(client, chart_id):
+    """주문만 만들고 승인 안 한 건은 자격이 아니다."""
+    oid = "test-order-pending"
+    store.set_json("order:" + oid, {
+        "session_id": "t-pending", "lens_id": "pungun", "tier": "all",
+        "status": "pending"})
+    store.set_json("orders:t-pending", [oid])
+    got = client.post("/v1/report", json={
+        "chart_id": chart_id, "lens_id": "pungun", "tier": "all",
+        "session_id": "t-pending", "concern": "love"}).json()
+    assert got["tier"] == "free"
 
 
 def test_report_unknown_lens(client, chart_id):

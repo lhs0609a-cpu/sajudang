@@ -82,7 +82,7 @@ function PayInner() {
     api
       .report({
         chart_id: s.chartId, lens_id: s.cur, tier: "free",
-        concern: s.concern, axis4: s.axis4,
+        session_id: s.sessionId, concern: s.concern, axis4: s.axis4,
       })
       .then((r) => { if (alive) setFree(r); })
       .catch((e) => {

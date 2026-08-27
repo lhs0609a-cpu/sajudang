@@ -63,9 +63,15 @@ export const api = {
     name?: string; lens_id?: string | null;
   }) => post<HookResponse>("/v1/hook", req),
 
+  /**
+   * ★ session_id 를 반드시 실어 보냅니다.
+   *   tier 는 "보고 싶다" 는 말일 뿐이고, 실제로 열리는 것은 서버가
+   *   치른 주문을 보고 정합니다. 안 보내면 무료 구간만 옵니다.
+   *   응답의 tier 가 **실제로 내려온 티어**이니 그걸 믿으세요.
+   */
   report: (req: {
     chart_id: string; lens_id: string; tier: string;
-    concern: string; axis4?: string | null;
+    session_id: string; concern: string; axis4?: string | null;
   }) => post<ReportResponse>("/v1/report", req),
 
   relay: (req: {

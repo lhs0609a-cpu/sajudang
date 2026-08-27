@@ -84,12 +84,19 @@ function ReportInner() {
     let alive = true;
     api.report({
       chart_id: s.chartId, lens_id: lensId, tier: s.tier,
-      concern: s.concern, axis4: s.axis4,
+      session_id: s.sessionId, concern: s.concern, axis4: s.axis4,
     })
-      .then((r) => alive && setRep(r))
+      .then((r) => {
+        if (!alive) return;
+        setRep(r);
+        // ★ 서버가 낮춰서 보냈으면 우리 기록이 틀린 것입니다.
+        //   여기 적힌 tier 는 치른 것이 아니라 **보여 준 것**이라,
+        //   맞춰 두지 않으면 화면이 계속 없는 값을 부릅니다.
+        if (r.tier !== s.tier) s.set({ tier: r.tier as typeof s.tier });
+      })
       .catch((e) => alive && setErr(e instanceof ApiError ? e.message : "리포트를 펴지 못했소."));
     return () => { alive = false; };
-  }, [s.chartId, lensId, s.tier, s.concern, s.axis4]);
+  }, [s.chartId, lensId, s.tier, s.concern, s.axis4, s.sessionId]);
 
   if (!s.chartId) {
     return (
