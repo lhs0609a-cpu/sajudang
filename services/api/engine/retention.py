@@ -70,6 +70,40 @@ def daeun_turning_age(features: dict) -> Optional[int]:
     return None
 
 
+# 여섯 충 — 지지가 정면으로 부딪히는 짝.
+_CHUNG = {"子": "午", "丑": "未", "寅": "申", "卯": "酉", "辰": "戌", "巳": "亥"}
+_CHUNG.update({v: k for k, v in _CHUNG.items()})
+
+# 육합 — 지지가 묶이는 짝.
+_HAP = {"子": "丑", "寅": "亥", "卯": "戌", "辰": "酉", "巳": "申", "午": "未"}
+_HAP.update({v: k for k, v in _HAP.items()})
+
+
+def _daily_hits(features: dict, gan: str, ji: str) -> Optional[dict]:
+    """
+    오늘 일진이 **이 사람에게** 걸리는가. 안 걸리면 안 밀어냅니다.
+
+    걸리는 자리는 셋뿐입니다 — 일지를 부딪히거나, 일지와 묶이거나,
+    바닥난 기운을 채우거나. 셋 다 아니면 그냥 지나가는 날입니다.
+    """
+    day_ji = features.get("day_ji")
+    if not day_ji:
+        return None
+    if _CHUNG.get(day_ji) == ji:
+        return {"why": "chung",
+                "text": "그대 일지 %s 와 정면으로 부딪히는 날이오." % day_ji}
+    if _HAP.get(day_ji) == ji:
+        return {"why": "hap",
+                "text": "그대 일지 %s 와 묶이는 날이오." % day_ji}
+    weak = features.get("weak_el")
+    if weak and features.get("elements", {}).get(weak, 1) == 0:
+        from .constants import ELEMENT_OF_GAN
+        if ELEMENT_OF_GAN.get(gan) == weak:
+            return {"why": "fill",
+                    "text": "여덟 자리에 하나도 없던 기운이 오늘 드는 날이오."}
+    return None
+
+
 def plan_for(features: dict, birth: date, on: Optional[date] = None,
              lookback_statement: Optional[dict] = None,
              new_lens: Optional[str] = None) -> Optional[dict]:
@@ -132,11 +166,23 @@ def plan_for(features: dict, birth: date, on: Optional[date] = None,
         })
 
     # ── 일진 ──────────────────────────────────────────────
+    #
+    # ★ 매일 밀어내지 않습니다.
+    #   일진은 1년에 352건이 잡힙니다. 그걸 다 밀어내면 손님이 그날로
+    #   알림을 끕니다. 그리고 일진은 **같은 날 다수에게 같은 글자**가
+    #   가는 자리라, 캡처를 나란히 놓기 가장 쉬운 자리이기도 합니다
+    #   (docs/18 §4 · 반복이 위험한 진짜 이유는 반복이 들통나는 것).
+    #
+    # ★ 그래서 **그 사람 여덟 글자와 부딪히거나 맞물리는 날**만 냅니다.
+    #   앱을 열면 언제든 볼 수 있습니다 — 미는 것만 줄입니다.
     gan, ji = day_ganji(on)
-    candidates.append({
-        "kind": "daily",
-        "payload": {"gz": gan + ji, "text": "오늘은 %s일이오." % (gan + ji)},
-    })
+    hit = _daily_hits(features, gan, ji)
+    if hit:
+        candidates.append({
+            "kind": "daily",
+            "payload": {"gz": gan + ji, "why": hit["why"],
+                        "text": "오늘은 %s일이오. %s" % (gan + ji, hit["text"])},
+        })
 
     if not candidates:
         return None

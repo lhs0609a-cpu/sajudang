@@ -95,6 +95,18 @@ def day_ganji(d: date) -> tuple[str, str]:
     return GAN[(n + _BASE_GAN) % 10], JI[(n + _BASE_JI) % 12]
 
 
+def year_ganji(saju_year: int) -> tuple[str, str]:
+    """
+    그 해의 년주. **입춘으로 갈린 해**를 받습니다.
+
+    ★ build_chart 가 년주를 세는 그 식입니다. 두 벌로 두지 않습니다 —
+      한쪽만 고치면 세운과 명식의 년주가 어긋납니다.
+    ★ 넘겨주는 값은 양력 해가 아니라 `saju_year` 입니다. 1월생·2월 초생은
+      앞 해로 갈리므로, 부르는 쪽이 그 판단을 먼저 해야 합니다.
+    """
+    return GAN[(saju_year - 4) % 10], JI[(saju_year - 4) % 12]
+
+
 # ── 자료구조 ───────────────────────────────────────────────
 @dataclass(frozen=True)
 class Pillar:

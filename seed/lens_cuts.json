@@ -3358,7 +3358,7 @@
   "nopa": [
    {
     "id": "lc_nopa_floor",
-    "title": "바닥",
+    "title": "바닥이 만든 것",
     "min_level": 1,
     "source": "{weak} 바닥 · {b}",
     "lead": "듣기 좋은 소린 딴 데 가서 듣게. 나는 <b>바닥</b>만 보네. 없는 것이 그 사람을 만들거든.",

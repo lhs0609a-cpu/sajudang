@@ -142,10 +142,9 @@ def test_only_one_notification_per_day(features):
 
 
 def test_priority_wins_when_triggers_collide(features):
-    """생일과 일진이 겹치면 생일이 이긴다."""
+    """겹치면 우선순위가 높은 하나만 나간다."""
     plan = retention.plan_for(features, date(1993, 5, 15), date(2026, 5, 15))
     assert plan["kind"] == "birthday"
-    assert "daily" in plan["dropped"]
 
 
 def test_lookback_beats_everything(features):
@@ -158,7 +157,41 @@ def test_lookback_beats_everything(features):
 def test_no_lookback_without_data(features):
     """쌓인 응답이 없으면 회고를 만들지 않는다."""
     plan = retention.plan_for(features, date(1993, 1, 2), date(2026, 3, 3))
-    assert plan["kind"] != "lookback"
+    assert plan is None or plan["kind"] != "lookback"
+
+
+# ── 일진은 매일 밀어내지 않는다 ────────────────────────────
+#
+# ★ 전에는 일진이 **매일** 잡혔습니다. 1년에 352건입니다.
+#   그걸 다 밀어내면 손님이 그날로 알림을 끕니다. 그리고 일진은 같은 날
+#   다수에게 같은 글자가 가는 자리라 캡처를 나란히 놓기 가장 쉽습니다
+#   (docs/18 §4 — 반복이 위험한 진짜 이유는 반복이 들통나는 것).
+#   앱을 열면 언제든 볼 수 있습니다. **미는 것만** 줄였습니다.
+def test_daily_is_not_pushed_every_day(features):
+    """아무 날에나 일진 알림이 나가면 안 된다."""
+    from datetime import timedelta
+    days = [date(2026, 3, 1) + timedelta(days=i) for i in range(60)]
+    daily = [d for d in days
+             if (retention.plan_for(features, date(1993, 1, 2), d) or {})
+             .get("kind") == "daily"]
+    assert daily, "그 사람에게 걸리는 날은 있어야 한다"
+    assert len(daily) < len(days) / 2, (
+        "예순 날 중 %d일이나 밀어냅니다 — 그건 매일과 다르지 않습니다"
+        % len(daily))
+
+
+def test_daily_push_says_why_it_hit(features):
+    """미는 날이면 **왜 오늘인지**가 붙어야 한다."""
+    from datetime import timedelta
+    for i in range(60):
+        on = date(2026, 3, 1) + timedelta(days=i)
+        plan = retention.plan_for(features, date(1993, 1, 2), on)
+        if plan and plan["kind"] == "daily":
+            assert plan["payload"]["why"] in ("chung", "hap", "fill")
+            assert features["day_ji"] in plan["payload"]["text"] \
+                or plan["payload"]["why"] == "fill"
+            return
+    raise AssertionError("예순 날 안에 걸리는 날이 하나도 없습니다")
 
 
 def test_ipchun_triggers_year(features):

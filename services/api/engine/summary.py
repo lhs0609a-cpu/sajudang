@@ -15,6 +15,7 @@ from typing import Optional
 from . import bank as bank_mod
 from . import guard
 from . import lens as lens_mod
+from . import rarity as rarity_mod
 from .bank import element_word, josa
 from .constants import ELEMENT_OF_GAN
 
@@ -41,6 +42,32 @@ ILGAN_NAME = {
 def headline(f) -> str:
     """한 줄 정의 — 카드 맨 위에 박히는 문장."""
     return ILGAN_ONE[f.day_gan]
+
+
+def name_word(f) -> str:
+    """
+    훅 3단이 건네는 **이름** 한 마디. 카드의 주인공입니다.
+
+    ★ 사람이 가장 오래 기억하는 한 줄이고, 남에게 옮길 때도 이 말이
+      옮겨집니다. 훅과 카드가 **다른 이름**을 쓰면 안 되므로 여기서
+      새로 만들지 않고 같은 표를 봅니다.
+    """
+    B = bank_mod.bank()
+    return B["NAME2"].get(f.weak_el, {}).get(f.flow) or B["NAMEW"][f.weak_el]
+
+
+def rarity_bit(f, reveal: str = "full") -> dict:
+    """
+    카드에 박을 희소도. 세는 값이라 지어낸 것이 아닙니다.
+
+    ★ light 에는 일주 글자를 담지 않습니다. 여덟 글자를 감추기로 한
+      공유에서 일주만 흘리면 감춘 뜻이 반쯤 없어집니다.
+    """
+    r = rarity_mod.look(f)
+    out = {"words": r["words"], "band": r["band"], "sample": r["sample"]}
+    if reveal == "full":
+        out["ilju"] = {"gz": r["ilju"]["gz"], "words": r["ilju"]["words"]}
+    return out
 
 
 def three_lines(f, concern: str) -> list:
@@ -167,6 +194,10 @@ def build_summary(chart, f, concern: str = "love",
         "ilgan_name": ILGAN_NAME[f.day_gan],
         "element": ELEMENT_OF_GAN[f.day_gan],
         "headline": headline(f),
+        # ★ 카드가 들고 나가는 두 가지 — 이름과 셈한 수.
+        #   이름은 사람이 기억하는 한 줄이고, 수는 남에게 옮길 거리입니다.
+        "name_word": name_word(f),
+        "rarity": rarity_bit(f, "full"),
         "three_lines": lines,
         "strength": f.strength,
         "flow": f.flow,
@@ -212,6 +243,11 @@ def share_payload(summary: dict, reveal: str = "full") -> dict:
     """
     base = {
         "headline": summary["headline"],
+        # ★ 이름과 셈한 수는 light 에도 담습니다. 이 둘이 없으면 카드가
+        #   '내 이야기' 가 아니라 그냥 사주 소개가 됩니다.
+        "name_word": summary["name_word"],
+        "rarity": {k: v for k, v in summary["rarity"].items()
+                   if reveal == "full" or k != "ilju"},
         "three_lines": summary["three_lines"],
         "day_gan": summary["day_gan"],
         "ilgan_name": summary["ilgan_name"],

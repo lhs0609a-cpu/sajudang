@@ -311,8 +311,12 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     truth = _pick("PATT", top, "b")
     segs.append(_seg(
         stage="1", label="1 · 먼저, 아닌 것부터",
-        source="%s %d · %s %d" % (top, f.ten_gods[top], strength,
-                                  f.strength_score),
+        # ★ 근거는 보이되 **내부 척도는 감춥니다.**
+        #   여기 신강약 점수(strength_score)가 그대로 나가고 있었습니다 —
+        #   '중화 16' 은 사람이 읽을 수 있는 값이 아닙니다. 관점 컷에는
+        #   검사가 걸려 있었는데 훅 근거 줄에는 없었습니다.
+        #   글자와 개수는 근거고, 점수는 규칙입니다.
+        source="%s %d · %s" % (top, f.ten_gods[top], strength),
         body=('<p class="neg">사람들이 %s를 두고 <span class="strk">%s</span>고 하지. '
               '아니오.<br><span class="strk d2">%s</span>는 말도 틀렸소.<br><br>'
               '<b>%s는 사람일 뿐이오.</b></p>')
@@ -384,11 +388,16 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     word = bank()["NAME2"].get(weak, {}).get(flow) or bank()["NAMEW"][weak]
     # ★ 이름은 이 사람이 가장 오래 기억하는 한 줄입니다. 캡처를 나란히
     #   놓았을 때 제일 먼저 눈에 띄는 자리라 신강약(3) 을 곱해 둡니다.
-    post = ("이건 성격이 아니오. %s일간의 힘이 %s(%s)으로 <b>%s</b> 하는데, "
-            "%s %s밖에 없어 멈출 자리가 없는 <b>구조</b>요. %s"
+    # ★ 이 문장을 다시 썼습니다.
+    #   전에는 "…흙(3.2)으로 재성 하는데" 였습니다. 두 가지가 틀렸습니다 —
+    #   ① '재성 하는데' 는 비문입니다. 십신 이름에 '하다' 가 안 붙습니다.
+    #   ② 이름을 건네는 **가장 뜨거운 순간에 소수점**이 나옵니다.
+    #      근거는 이미 근거 줄이 대고 있으니 본문은 사람 말이라야 합니다.
+    post = ("이건 성격이 아니오. <b>%s</b>일간의 힘이 <b>%s</b> 쪽으로 %s, "
+            "정작 <b>%s</b> 바닥이라 <b>멈출 자리가 없는</b> 구조요. %s"
             % (ELEMENT_OF_GAN[f.day_gan], element_word(f.flow_el),
-               f.elements[f.flow_el], flow,
-               josa(element_word(weak), "이", "가"), f.elements[weak],
+               bank()["NAME_FLOW"][flow],
+               josa(element_word(weak), "이", "가"),
                bank()["NAME_POST"][strength]))
     segs.append(_seg(
         stage="3", label="3 · 이름",
