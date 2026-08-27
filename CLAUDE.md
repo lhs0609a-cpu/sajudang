@@ -110,6 +110,9 @@ venv 는 `%USERPROFILE%\.venvs\sajudang` — 저장소가 구글 드라이브에
   calendar.py    ★ 만세력. 05번 문서대로. (완료)
   features.py    Feature Store 산출 (완료)
   bank.py        훅 5단 조합 · 사주 4축(겹친 자리/어긋난 자리) · statement_id
+  rarity.py      ★ 희소도 — 이 배치가 인구에서 몇 명인가. **세는 값**이다
+                 골라 담지 않는다: 축 넷을 미리 정하고 그 칸을 그대로 말한다
+                 흔하면 흔하다고 한다. 표는 tools/make_rarity.py 가 만든다
   lens.py        캐릭터 렌즈 · 관점 · ★ 결합 축의 추가 입력 집계
   lens_cuts.py   ★ 관점 컷 — 그 캐릭터만 보는 자리. 축 셋을 곱한다
                  값이 오를수록 자기 몫 컷이 많다 (자기 몫 = 추가 입력 + 관점)
@@ -299,6 +302,9 @@ false 면 브레이크가 풀린 채로 도는 것입니다. 상세는 docs/17.
 .\dev.ps1 crosscheck       # sxtwl 없는 독립 계산과 대조
 .\dev.ps1 dup              # 중복률 — ★ 가짓수보다 '최다 점유' 를 보세요
 .\dev.ps1 ladder           # 값 사다리 — ★ 상관 말고 '옆 등급과 몇 컷 차' 를 보세요
+python tools/free_funnel.py        # ★ 처음 30초 — 값을 치르기 전까지 보는 전부
+python tools/free_funnel.py --show out.json   # 사람 여섯의 무료 구간 전문
+python tools/make_rarity.py        # 희소도 표 다시 세기 (축을 고쳤으면 필수)
 .\dev.ps1 reach --write    # 릴레이 도달률 재기 — 규칙을 고쳤으면 다시
 .\dev.ps1 screens          # 고아·막다른 화면·죽은 버튼
 .\dev.ps1 plan             # 회귀 50건 — 무엇부터 (유파 20건이 남음)
@@ -344,6 +350,16 @@ tools/population.py        도구들이 같은 인구를 보게 하는 자리
   청구됩니다 (`payments.price_of(tier, lens_id)`). 캐릭터 값이 곧
   「이 자리 하나」 값입니다. 카드는 4,900원인데 결제가 19,900원이던
   자리가 있었습니다
+- **틀릴 수 없는 말만 쓰기** — 바넘 문장은 아무 결과도 금지하지 않아
+  어떤 관찰에서도 살아남습니다. 그래서 '맞다' 는 나와도 '소름 돋는다' 는
+  안 나옵니다. **나이·연도·센 수**를 박으세요. 다만 그 해에 무슨 일이
+  생긴다고 말하지는 마세요 — 바뀌는 때만 셉니다
+- **희소도를 골라 담기** — 여러 자리를 재서 가장 드문 것만 말하면
+  누구나 드물어집니다. 축을 미리 정하고 그 칸을 그대로 냅니다
+- **미뤄 둔 컷으로 끝내기** — 기억은 마지막이 지배합니다. 끝은
+  `closing_cut` 으로 **자리가 고정**돼 있습니다 (`apply_view` 정렬 키)
+- **일진을 매일 밀어내기** — 1년에 352건입니다. 다 밀면 그날로 알림을
+  끕니다. 걸리는 날만 냅니다 (`retention._daily_hits`)
 - **클라이언트가 보낸 `tier` 를 믿기** — 자격은 **치른 주문**이 정합니다
   (`routers/report.entitled_tier`). 화면의 `tier` 는 localStorage 에서
   오는 값이라 브라우저에서 고칠 수 있습니다. 새 엔드포인트를 열 때마다
