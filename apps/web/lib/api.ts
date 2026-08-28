@@ -35,8 +35,16 @@ export interface TierCard {
   id: string;
   name: string;
   price: number;
-  /** 달마다 받는 값인가. `forever` 와 짝입니다. */
+  /**
+   * 달마다 자동으로 빠져나가는가.
+   *
+   * ★ 지금은 **항상 거짓**입니다. 빌링키도 자동결제도 없습니다.
+   *   「한 달 듣기」는 한 번 치르고 `days` 일입니다 — 저절로 다시
+   *   빠져나가지 않습니다. 자동결제를 붙이는 날 이 자리를 다시 보세요.
+   */
   per_month: boolean;
+  /** 며칠짜리인가. 영구면 null. */
+  days: number | null;
   /** 한 번 치르면 계속인가. all·one 이 참입니다. */
   forever: boolean;
   note: string;

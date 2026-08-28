@@ -461,7 +461,7 @@ function PayInner() {
               onClick={() => { setPick(t.id as Tier); setOrder(null); track("tier_pick", "d1"); }}
             >
               <b>
-                {t.name} · {t.price.toLocaleString()}원{t.per_month ? "/월" : ""}
+                {t.name} · {t.price.toLocaleString()}원
               </b>
               <span>{t.note}</span>
               {/*
@@ -479,7 +479,7 @@ function PayInner() {
               <span>
                 {t.lenses > 1 ? `${t.lenses}사람이 한꺼번에` : "이 사람 하나"}
                 {" · "}
-                {t.forever ? "한 번 치르면 계속" : "달마다"}
+                {t.forever ? "한 번 치르면 계속" : `${t.days ?? 30}일 동안`}
               </span>
               {/* ★ 열리는 자리의 **이름**. 서버가 이미 주고 있었는데
                   목패에서 안 쓰이고 있었습니다. 막연한 미끼는 오히려

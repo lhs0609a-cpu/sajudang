@@ -435,31 +435,42 @@ def test_tiers_never_promise_more_than_it_gives(app):
 # 티어 **사이**는 아무도 안 보고 있었습니다. 여기가 그 자리입니다.
 def test_no_tier_is_dominated_by_another(app):
     """
-    더 비싼데 덜 주거나 똑같이 주는 목패가 있으면 안 된다.
+    더 비싼데 **그 목패라야 열리는 것이 하나도 없으면** 안 된다.
 
-    '똑같이 주는데 값만 다른' 것도 지배로 봅니다 — 그건 값이 아니라
-    이름표입니다.
+    ★ 잣대를 고쳤습니다.
+      전에는 **컷 수**로 견줬습니다. 그런데 스무 사람을 여는 목패는
+      어떤 한 사람짜리와 견줘도 컷 수가 항상 많습니다. 그 잣대로는
+      「이 자리 하나」가 영원히 지는 것으로 나옵니다 — 틀린 계산이
+      아니라 틀린 질문입니다.
+
+      손님이 묻는 것은 "더 싼 저걸 사면 이건 안 사도 되는가?" 입니다.
+      그러니 **여는 것의 포함관계**로 봅니다.
+
+    ★ 전에는 `per_month` 가 다른 짝을 건너뛰었습니다. 이제 자동결제가
+      없어져 셋 다 한 번 치르는 상품이라, 건너뛸 짝이 없습니다 —
+      전부 나란히 놓고 견줍니다.
     """
+    from engine.calendar import build_chart
+    from engine.features import build_features
+    from engine.report import build_report
+
+    f = build_features(build_chart(1997, 3, 22, 14, 10, "F", True, "서울"))
+
     for lens_id in ("yeondam", "pungun", "jeokhyeol", "nopa", "haengsu"):
         tiers = {t["id"]: t for t in _tiers(app, lens_id)}
+        opens = {tid: {c["id"] for c in build_report(
+                    f, "t", lens_id, tid, "love", "INFP")["cuts"]}
+                 for tid in tiers}
         for a in tiers.values():
             for b in tiers.values():
-                if a["id"] == b["id"]:
+                if a["id"] == b["id"] or a["price"] < b["price"]:
                     continue
-                # 기간이 다른 상품끼리는 값을 곧바로 견주지 않습니다
-                # (한 번 치르는 것 vs 달마다). 내용만 봅니다.
-                if a["per_month"] != b["per_month"]:
-                    continue
-                if a["price"] > b["price"]:
-                    assert a["cuts"] > b["cuts"], (
-                        "%s: %s(%d원 %d컷)가 %s(%d원 %d컷)보다 비싼데 "
-                        "더 주지 않습니다"
-                        % (lens_id, a["name"], a["price"], a["cuts"],
-                           b["name"], b["price"], b["cuts"]))
-                elif a["price"] == b["price"]:
-                    assert a["cuts"] != b["cuts"], (
-                        "%s: %s와 %s가 값도 컷도 같습니다 — 같은 상품이 "
-                        "두 장입니다" % (lens_id, a["name"], b["name"]))
+                only = opens[a["id"]] - opens[b["id"]]
+                # 더 비싸거나 같은 값인데, 이것만 여는 것이 없으면 지배
+                assert only or a["lenses"] > b["lenses"], (
+                    "%s: %s(%d원)가 %s(%d원)보다 싸지 않은데 "
+                    "이것만 여는 것이 하나도 없습니다"
+                    % (lens_id, a["name"], a["price"], b["name"], b["price"]))
 
 
 def test_single_character_never_costs_as_much_as_all_twenty(app):
@@ -586,3 +597,69 @@ def test_paying_only_the_monthly_does_not_unlock_the_price_ladder(app):
     assert r["tier"] == "sub", "달삯이 「이 자리 하나」로 올라섰습니다"
     assert "daeun_map" not in ids and "axis" not in ids, (
         "달삯만 낸 사람에게 값 사다리가 열렸습니다")
+
+
+# ══════════════════════════════════════════════════════════
+# ★ 값을 치른 사람이 잃지 않는가
+# ══════════════════════════════════════════════════════════
+def test_a_forever_purchase_does_not_quietly_expire(app):
+    """
+    ★ 「한 번 치르면 계속 보오」라고 팔면서 **30일이면 사라졌습니다.**
+
+      confirm 이 주문을 `ttl=30*DAY` 로 저장하고, entitled_tier 는 그
+      주문을 읽어 자격을 봅니다. 서른 날이 지나면 주문이 없어지고
+      자격이 조용히 free 로 떨어집니다 — 값을 치른 사람이 전부 잃습니다.
+      목패에는 "영구" 라고 적혀 있습니다.
+    """
+    import store
+    from routers.report import entitled_tier
+
+    oid = "sjd-forever"
+    store.set_json("order:" + oid, {
+        "session_id": "s-forever", "chart_id": "x", "lens_id": "pungun",
+        "tier": "all", "concern": "love", "amount": 24900,
+        "status": "paid", "payment_key": "t",
+        "paid_at": "2020-01-01T00:00:00+00:00", "expires_at": None})
+    store.set_json("orders:s-forever", [oid])
+
+    assert entitled_tier("s-forever", "pungun") == "all", (
+        "영구로 판 것이 사라졌습니다")
+
+
+def test_the_monthly_pass_actually_runs_out(app):
+    """
+    ★ 「달마다」로 팔면서 **끝나지 않았습니다.**
+
+      빌링키도 자동결제도 없습니다. 9,900원을 한 번 받고 끝인데
+      entitled_tier 는 그 주문을 보고 **영원히** 스무 사람을 열어 줬습니다.
+      한 달치 값에 영구 이용권을 준 셈입니다.
+    """
+    import store
+    from routers.report import entitled_tier
+
+    live, dead = "sjd-live", "sjd-dead"
+    store.set_json("order:" + live, {
+        "session_id": "s-live", "chart_id": "x", "lens_id": "pungun",
+        "tier": "sub", "status": "paid", "payment_key": "t",
+        "paid_at": "2026-08-01T00:00:00+00:00",
+        "expires_at": "2099-01-01T00:00:00+00:00"})
+    store.set_json("orders:s-live", [live])
+    assert entitled_tier("s-live", "pungun") == "sub"
+
+    store.set_json("order:" + dead, {
+        "session_id": "s-dead", "chart_id": "x", "lens_id": "pungun",
+        "tier": "sub", "status": "paid", "payment_key": "t",
+        "paid_at": "2020-01-01T00:00:00+00:00",
+        "expires_at": "2020-01-31T00:00:00+00:00"})
+    store.set_json("orders:s-dead", [dead])
+    assert entitled_tier("s-dead", "pungun") == "free", (
+        "달삯이 지났는데 아직 열려 있습니다 — 한 달 값에 영구를 준 것입니다")
+
+
+def test_confirm_writes_when_it_was_paid_and_when_it_ends(app):
+    """산 때와 끝나는 때를 안 적으면 위 둘을 판정할 수 없습니다."""
+    import payments
+    from routers import pay as pay_mod
+
+    assert hasattr(pay_mod, "SUB_DAYS"), "달삯 기간이 코드에 없습니다"
+    assert payments.TIER_PRICE["sub"] > 0

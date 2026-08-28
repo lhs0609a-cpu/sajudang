@@ -5,6 +5,8 @@ POST /v1/omnibus   — 스무 사람 종합. **값을 치른 사람만.**
 from pydantic import BaseModel, Field
 from fastapi import APIRouter, HTTPException
 
+from datetime import datetime, timezone
+
 import payments
 import store
 from engine import extras as extras_mod
@@ -47,13 +49,36 @@ router = APIRouter(prefix="/v1", tags=["report"])
 TIER_RANK = {"free": 0, "one": 1, "sub": 1, "all": 2}
 
 
+def _expired(order: dict) -> bool:
+    """
+    끝난 자격인가.
+
+    ★ 「달마다」로 팔면서 **끝나지 않았습니다.** 빌링키도 자동결제도
+      없어 9,900원을 한 번 받고 끝인데, 자격은 영원히 열려 있었습니다 —
+      한 달치 값에 영구 이용권을 준 셈입니다.
+
+    ★ 끝나는 때는 **적힌 날**로 판정합니다. 전에는 주문 레코드가
+      30일 뒤 사라지면서 끝났는데, 그건 「영구」로 판 one·all 까지
+      같이 지웠습니다. 사라져서 끝나는 것이 아니라 적힌 날에 끝납니다.
+    """
+    ends = order.get("expires_at")
+    if not ends:
+        return False                      # 영구 — one · all
+    try:
+        return datetime.fromisoformat(ends) <= datetime.now(timezone.utc)
+    except ValueError:
+        # 못 읽는 날짜면 **끝난 것으로 보지 않습니다.** 값을 치른
+        # 사람에게서 우리 쪽 실수로 빼앗지 않습니다.
+        return False
+
+
 def _paid_orders(session_id: str | None):
     """이 세션이 치른 주문들. 클라이언트 말이 아니라 저장된 기록입니다."""
     if not session_id:
         return
     for oid in store.get_json("orders:" + session_id) or []:
         o = store.get_json("order:" + oid)
-        if o and o.get("status") == "paid":
+        if o and o.get("status") == "paid" and not _expired(o):
             yield o
 
 

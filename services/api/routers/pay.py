@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import hashlib
 import uuid
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException
@@ -28,6 +28,19 @@ from schemas.api import Tier
 router = APIRouter(prefix="/v1/pay", tags=["pay"])
 
 DAY = 86400
+
+# 「한 달 듣기」가 며칠인가.
+#
+# ★ 이 값을 「달마다」로 팔면서 **끝나지 않았습니다.**
+#   빌링키도 자동결제도 없습니다. 9,900원을 한 번 받고 끝인데
+#   entitled_tier 는 그 주문을 보고 **영원히** 스무 사람을 열어 줬습니다.
+#   한 달치 값에 영구 이용권을 준 셈입니다.
+#
+# ★ 자동결제를 붙이지 않았습니다.
+#   정기결제는 빌링키 발급·PG 심사·해지 화면이 따로 붙는 일입니다.
+#   그전까지는 **한 번 치르고 서른 날**로 정직하게 팝니다 —
+#   저절로 다시 빠져나가지 않습니다. 목패도 그렇게 적습니다.
+SUB_DAYS = 30
 
 
 def _user_key(session_id: str) -> str:
@@ -169,7 +182,10 @@ def get_tiers(req: TiersRequest) -> dict:
             "id": tier,
             "name": TIER_NAME[tier],
             "price": price,
-            "per_month": tier == "sub",
+            # ★ 「달마다」가 아닙니다 — 빌링키도 자동결제도 없습니다.
+            #   한 번 치르고 서른 날입니다. 저절로 다시 안 빠져나갑니다.
+            "per_month": False,
+            "days": SUB_DAYS if tier == "sub" else None,
             "forever": tier in ("one", "all"),
             "note": TIER_NOTE[tier],
             # ★ 센 것을 그대로. 사람마다 다릅니다.
@@ -238,8 +254,23 @@ def confirm(req: ConfirmRequest) -> dict:
         raise HTTPException(status_code=402, detail=str(e))
 
     unlocked = payments.unlocks_for(order["tier"], order.get("lens_id"))
-    order.update(status="paid", payment_key=result.pg_tid, unlocked=unlocked)
-    store.set_json("order:" + req.order_id, order, ttl=30 * DAY)
+
+    # ★ 산 때와 끝나는 때를 적습니다.
+    #
+    #   전에는 주문을 `ttl=30*DAY` 로 저장했습니다. entitled_tier 가 그
+    #   주문을 읽어 자격을 보는데, 서른 날이 지나면 주문이 사라지고
+    #   자격이 조용히 free 로 떨어졌습니다 — **영구라고 판 것을 값을
+    #   치른 사람이 잃었습니다.** 목패에는 "영구" 라 적혀 있었습니다.
+    #
+    #   이제 치른 주문은 **지우지 않습니다**(ttl 없음). 끝나는 때는
+    #   기록으로 판정합니다 — 사라져서 끝나는 것이 아니라, 적힌 날에
+    #   끝납니다. 그래야 무엇이 언제 끝나는지 손님에게 말할 수 있습니다.
+    now = datetime.now(timezone.utc)
+    ends = (now + timedelta(days=SUB_DAYS)) if order["tier"] == "sub" else None
+    order.update(status="paid", payment_key=result.pg_tid, unlocked=unlocked,
+                 paid_at=now.isoformat(),
+                 expires_at=ends.isoformat() if ends else None)
+    store.set_json("order:" + req.order_id, order)
 
     # 하루 결제 카운터 · 인장
     store.incr(store.k_purchase_day(_user_key(req.session_id), _today()), ttl=DAY)
@@ -332,7 +363,8 @@ def refund(req: RefundRequest) -> dict:
         raise HTTPException(status_code=402, detail=str(e))
 
     order.update(status="refunded", unlocked=[])
-    store.set_json("order:" + req.order_id, order, ttl=30 * DAY)
+    # 환불된 주문도 지우지 않습니다 — 무엇을 돌려줬는지 남아야 합니다.
+    store.set_json("order:" + req.order_id, order)
     return {"ok": True, "status": "refunded",
             "reissue": bool(req.calc_error)}
 
