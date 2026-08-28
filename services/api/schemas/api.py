@@ -83,6 +83,11 @@ class ReportRequest(BaseModel):
     session_id: Optional[str] = None
     concern: Concern = "love"
     axis4: Optional[str] = Field(default=None, min_length=4, max_length=4)
+    # 손님이 적은 이름. 어떤 캐릭터는 **이름으로 부릅니다**.
+    #
+    # ★ 셈에는 안 씁니다. 부르는 데만 씁니다. 안 적었으면 그 캐릭터의
+    #   대신 부르는 말로 물러섭니다 — 「이름」이라고 부르지 않습니다.
+    name: str = Field(default="", max_length=20)
     # 결합 축의 추가 입력. {"partner": {...}} / {"context": {...}} 등.
     #
     # ★ 여기 실려 온 것은 **저장하지 않습니다.**

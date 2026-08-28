@@ -8,7 +8,12 @@
   "  이 서비스의 한 줄이 구현돼 있지 않았습니다.",
   "",
   "무엇이 달라지는가",
-  "  you   호칭. 그대 / 자네 / 아저씨",
+  "  you   호칭. 그대 / 당신 / 자네 / 너 / 손님",
+  "        특수값 — 「이름」 손님 이름으로 부른다 (없으면 you_else)",
+  "                「성별」 사내면 you_m · 여인이면 you_f",
+  "        ★ 뱅크는 '그대'(받침 없음) 기준으로 쓰여 있습니다.",
+  "          받침 있는 호칭으로 바꾸면 조사가 깨집니다 —",
+  "          '당신가 · 손님는'. engine/voice.address 가 맞춥니다.",
   "  voice 말투. hao 하오체 / hapsyo 합쇼체 / hage 하게체",
   "        / banmal 반말 / haeyo 해요체 — engine/voice.py",
   "        ★ 설정집(docs/07)이 이미 정해 둔 것을 엔진이 무시하고",
@@ -46,7 +51,7 @@
   "voice": "hao"
  },
  "baegun": {
-  "you": "그대",
+  "you": "당신",
   "lead": "lack",
   "focus": [
    "lack",
@@ -64,7 +69,7 @@
   "voice": "hao"
  },
  "cheongam": {
-  "you": "그대",
+  "you": "자네",
   "lead": "why",
   "focus": [
    "why",
@@ -79,7 +84,7 @@
   "voice": "hao"
  },
  "sigye": {
-  "you": "그대",
+  "you": "이름",
   "lead": "daeun_now",
   "focus": [
    "daeun_now",
@@ -94,10 +99,11 @@
    "daeun_now": "지금 서 있는 자리요. 여기가 어디냐에 따라 같은 글자도 다르게 도오.",
    "daeun_map": "길게 놓고 보면 되풀이가 보이오. 한 자리만 보고 놀랄 것 없소."
   },
-  "voice": "hapsyo"
+  "voice": "hapsyo",
+  "you_else": "자네"
  },
  "eunbyeol": {
-  "you": "그대",
+  "you": "당신",
   "lead": "axis",
   "focus": [
    "axis",
@@ -112,7 +118,7 @@
   "voice": "haeyo"
  },
  "jeokhyeol": {
-  "you": "그대",
+  "you": "너",
   "lead": "why",
   "focus": [
    "why"
@@ -129,7 +135,7 @@
   "voice": "banmal"
  },
  "monghwa": {
-  "you": "그대",
+  "you": "이름",
   "lead": "sinsal",
   "focus": [
    "sinsal",
@@ -141,10 +147,11 @@
    "sinsal": "여기 이름이 붙어 있소. 이름이 붙었다는 건 옛사람들도 이 자리를 보았다는 뜻이오.",
    "place": "자리마다 드나드는 것이 다르오."
   },
-  "voice": "hao"
+  "voice": "hao",
+  "you_else": "너"
  },
  "seoyeok": {
-  "you": "그대",
+  "you": "손님",
   "lead": "sinsal",
   "focus": [
    "sinsal",
@@ -159,7 +166,7 @@
   "voice": "hao"
  },
  "paeseon": {
-  "you": "그대",
+  "you": "이름",
   "lead": "lack",
   "focus": [
    "lack"
@@ -172,10 +179,11 @@
   "notes": {
    "lack": "없는 패를 기다리는 사람이 제일 오래 앉아 있소."
   },
-  "voice": "banmal"
+  "voice": "banmal",
+  "you_else": "자네"
  },
  "myeonsang": {
-  "you": "그대",
+  "you": "그쪽",
   "lead": "place",
   "focus": [
    "place",
@@ -190,7 +198,7 @@
   "voice": "hapsyo"
  },
  "wolha": {
-  "you": "그대",
+  "you": "이름",
   "lead": "place",
   "focus": [
    "place",
@@ -202,10 +210,11 @@
    "place": "일지는 곁에 두는 자리요. 여기가 흔들리면 가까운 데부터 어긋나오.",
    "helper": "곁에 설 사람은 이미 자리에 적혀 있소."
   },
-  "voice": "haeyo"
+  "voice": "haeyo",
+  "you_else": "자네"
  },
  "hongmae": {
-  "you": "자네",
+  "you": "그쪽",
   "lead": "why",
   "focus": [
    "why",
@@ -220,7 +229,7 @@
   "voice": "banmal"
  },
  "yeondam": {
-  "you": "그대",
+  "you": "당신",
   "lead": "place",
   "focus": [
    "place",
@@ -253,7 +262,7 @@
   "voice": "hapsyo"
  },
  "haengsu": {
-  "you": "그대",
+  "you": "손님",
   "lead": "why",
   "focus": [
    "why",
@@ -271,7 +280,7 @@
   "voice": "hapsyo"
  },
  "hunjang": {
-  "you": "자네",
+  "you": "이름",
   "lead": "why",
   "focus": [
    "why",
@@ -283,7 +292,8 @@
    "why": "책임을 먼저 지는 사람은 제 몫을 늘 나중에 세지.",
    "axis": "스스로를 낮춰 적는 버릇이 여기 있어."
   },
-  "voice": "hage"
+  "voice": "hage",
+  "you_else": "너"
  },
  "yakcho": {
   "you": "그대",
@@ -301,7 +311,7 @@
   "voice": "haeyo"
  },
  "ilgwan": {
-  "you": "그대",
+  "you": "그쪽",
   "lead": "chart",
   "focus": [
    "chart",
@@ -337,7 +347,7 @@
   "voice": "hage"
  },
  "dongja": {
-  "you": "아저씨",
+  "you": "성별",
   "lead": "helper",
   "focus": [
    "helper"
@@ -352,6 +362,9 @@
   "notes": {
    "helper": "곁에 서 주는 사람이 있대요. 그거 하나만 알고 가셔도 돼요."
   },
-  "voice": "haeyo"
+  "voice": "haeyo",
+  "you_m": "아저씨",
+  "you_f": "아주머니",
+  "you_else": "그쪽"
  }
 }

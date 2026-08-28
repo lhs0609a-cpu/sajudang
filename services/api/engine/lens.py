@@ -38,17 +38,17 @@ def get(lens_id: str) -> dict:
         raise LensError("모르는 렌즈: %r" % (lens_id,))
 
 
-def you_word(lens_id: Optional[str]) -> str:
-    """캐릭터별 호칭 — 그대 / 자네 / 아저씨"""
+def you_word(lens_id: Optional[str], name: str = "",
+             sex: Optional[str] = None) -> str:
+    """
+    캐릭터별 호칭 — 그대 / 당신 / 자네 / 너 / 손님 / 이름 / 아저씨…
+
+    ★ 이름·성별을 안 넘기면 「이름」·「성별」 캐릭터는 대신 부르는 말로
+      물러섭니다. 지어내지 않습니다.
+    """
     if not lens_id:
         return DEFAULT_YOU
-    v = _views().get(lens_id)
-    if v and v.get("you"):
-        return v["you"]
-    try:
-        return get(lens_id).get("you_word") or DEFAULT_YOU
-    except LensError:
-        return DEFAULT_YOU
+    return you_of(lens_id, name, sex)
 
 
 # ══════════════════════════════════════════════════════════
@@ -91,6 +91,38 @@ def view(lens_id: Optional[str]) -> dict:
     out = dict(DEFAULT_VIEW)
     out.update(v)
     return out
+
+
+def you_of(lens_id: Optional[str], name: str = "",
+           sex: Optional[str] = None) -> str:
+    """
+    이 캐릭터가 손님을 뭐라 부르는가.
+
+    ★ 스무 명 중 열여섯이 똑같이 「그대」였습니다. 관점은 스무 개 다
+      다른데 부르는 말이 하나면, 읽는 사람에게는 같은 사람이 계속
+      말하는 것처럼 들립니다.
+
+      「이름」  손님이 적은 이름으로 부릅니다. 안 적었으면 you_else.
+      「성별」  사내면 you_m · 여인이면 you_f (청동자가 아저씨/아주머니).
+    """
+    v = view(lens_id)
+    you = v.get("you") or DEFAULT_YOU
+
+    if you == "이름":
+        clean = (name or "").strip()
+        # 이름을 안 적은 사람이 열에 넷이 넘습니다. 그때 「이름」이라고
+        # 부를 수는 없으니 그 캐릭터의 대신 부르는 말로 물러섭니다.
+        return clean or v.get("you_else") or DEFAULT_YOU
+
+    if you == "성별":
+        # ★ 모르면 지어내지 않습니다.
+        #   sex 가 없을 때 한쪽으로 정하면 그건 추측입니다 — 이 집이
+        #   시주를 열두 시로 채우지 않는 것과 같은 이유입니다.
+        if sex not in ("M", "F"):
+            return v.get("you_else") or DEFAULT_YOU
+        return (v.get("you_m") if sex == "M" else v.get("you_f")) or DEFAULT_YOU
+
+    return you
 
 
 def missing_views() -> list:

@@ -697,7 +697,8 @@ def apply_view(cuts: list, view: dict) -> list:
 
 def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
                  axis4: Optional[str] = None,
-                 extras: Optional[dict] = None) -> dict:
+                 extras: Optional[dict] = None,
+                 name: str = "") -> dict:
     """
     tier 별 잠금 차등. 잠긴 컷은 **본문을 내려보내지 않습니다.**
     제목과 근거만 보여 무엇이 잠겼는지 알 수 있게 합니다.
@@ -709,7 +710,10 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
         raise ValueError("모르는 tier: %r" % (tier,))
     level = TIER_LEVEL[tier]
     view = lens_mod.view(lens_id)
-    you = view["you"]
+    # ★ 부르는 말은 캐릭터마다 다르고, 어떤 캐릭터는 **손님 이름**으로
+    #   부릅니다. 이름을 안 적었으면 그 캐릭터의 대신 부르는 말로
+    #   물러섭니다 — 「이름」이라고 부르지 않습니다.
+    you = lens_mod.you_of(lens_id, name, getattr(f, "sex", None))
 
     # 「이 자리 하나」는 캐릭터 값으로 받으므로 값이 층을 엽니다.
     # 다른 티어는 값이 하나뿐이라 층이 없습니다.

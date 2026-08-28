@@ -121,6 +121,14 @@ export const api = {
     chart_id: string; lens_id: string; tier: string;
     session_id: string; concern: string; axis4?: string | null;
     /**
+     * 손님이 적은 이름.
+     *
+     * ★ 셈에는 안 씁니다 — **부르는 데만** 씁니다. 어떤 캐릭터는
+     *   이름으로 부릅니다(월하선녀·시계장이·패선생·약초의원).
+     *   안 적었으면 그 캐릭터의 대신 부르는 말로 물러섭니다.
+     */
+    name?: string;
+    /**
      * 이 캐릭터가 따로 받는 것. **저장되지 않습니다** —
      * 특히 상대 사주는 제3자의 생년월일이라 본인 동의가 없습니다.
      * 서버가 계산하고 버립니다. (engine/extras.py · docs/11)

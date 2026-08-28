@@ -112,7 +112,11 @@ def test_the_pronoun_matches_the_character(reports):
     """
     other = re.compile(r"그대(?!로)")
     for lid, rep in reports.items():
-        you = lens_mod.view(lid)["you"]
+        # ★ `view["you"]` 에는 「이름」·「성별」 같은 특수값이 들어 있습니다.
+        #   실제로 부르는 말은 you_of 가 정합니다 — 이름을 안 적었으면
+        #   대신 부르는 말(그대일 수 있음)로 물러섭니다.
+        #   reports 픽스처는 이름 없이 만들었으니 같은 조건으로 봅니다.
+        you = lens_mod.you_of(lid, "", "F")
         if you == "그대":
             continue
         for c in rep["cuts"]:
@@ -134,6 +138,9 @@ def test_two_characters_no_longer_read_as_the_same_text(reports):
         share.append(100 * same / sum(len(v) for v in ta.values()))
     assert statistics.median(share) < 20, (
         "두 사람이 중앙 %.1f%% 같은 글입니다" % statistics.median(share))
+    # ★ 가장 심한 짝도 봅니다. 중앙만 보면 한 짝이 통째로 겹쳐도 통과합니다 —
+    #   실제로 적혈랑↔홍매파가 86.5% 였습니다.
+    assert max(share) < 55, ("가장 겹치는 짝이 %.1f%% 입니다" % max(share))
 
 
 def test_the_voice_layer_never_slips_past_the_guard(reports):
@@ -154,3 +161,103 @@ def test_the_evidence_line_keeps_its_own_voice(reports):
         for c in rep["cuts"]:
             if c["id"] in base and not c["id"].startswith("lc_"):
                 assert c["source"] == base[c["id"]], (lid, c["id"])
+
+
+# ══════════════════════════════════════════════════════════
+# 호칭 — 스무 명이 다르게 부르는가
+# ══════════════════════════════════════════════════════════
+def test_every_character_is_addressed_differently():
+    """
+    ★ (말투 × 호칭) 짝이 스무 개 **전부 달라야** 합니다.
+
+      말투도 같고 부르는 말도 같으면 공통 컷이 글자 그대로 같아집니다.
+      실제로 적혈랑과 홍매파가 그래서 86.5% 같은 글이었습니다.
+
+      이름을 안 적은 사람이 열에 넷이 넘으니, **대체 호칭까지** 겹치면
+      안 됩니다.
+    """
+    import collections
+    for name in ("가은", ""):
+        pairs = collections.Counter(
+            (lens_mod.view(l["id"])["voice"], lens_mod.you_of(l["id"], name, "F"))
+            for l in lens_mod.released())
+        dup = {k: n for k, n in pairs.items() if n > 1}
+        assert not dup, ("이름=%r 일 때 겹치는 짝: %s" % (name, dup))
+
+
+def test_no_consonant_ending_address_breaks_the_josa(f):
+    """
+    ★ 받침 있는 호칭(당신·손님·그쪽·받침 있는 이름) 뒤에 「가·는·를·와」가
+      오면 비문입니다. 뱅크가 「그대」 기준으로 쓰여 있어서 그냥 바꾸면
+      바로 깨집니다.
+    """
+    from engine.report import build_report as br
+    bad = re.compile(r"(당신|손님|그쪽|박서준)(가|는|를|와)(?![가-힣])|너가")
+    for name in ("가은", "박서준", ""):
+        for l in lens_mod.released():
+            rep = br(f, "t", l["id"], "all", "love", "INFP", name=name)
+            for c in rep["cuts"]:
+                m = bad.search(_plain(c["html"]))
+                assert not m, (l["id"], name, m.group(0))
+
+
+def test_the_house_uses_more_than_one_way_to_address_you():
+    """
+    ★ 스무 명 중 **열여섯이 똑같이 「그대」** 였습니다. 관점은 스무 개 다
+      다른데 부르는 말이 하나면, 읽는 사람에게는 같은 사람이 계속
+      말하는 것처럼 들립니다.
+    """
+    words = {lens_mod.you_of(l["id"], "가은", "F")
+             for l in lens_mod.released()}
+    assert len(words) >= 5, ("호칭이 %d 가지뿐입니다: %s" % (len(words), words))
+
+
+def test_the_josa_follows_the_new_word():
+    """
+    ★ 뱅크는 「그대」(받침 없음) 기준으로 쓰여 있습니다.
+      받침 있는 호칭으로 바꾸면 **「당신가 · 손님는」** 이 됩니다.
+      바로 눈에 띄는 종류의 깨짐입니다.
+    """
+    t = "그대가 그렇고, 그대는 이렇소. 그대를 보오."
+    assert V.address(t, "당신") == "당신이 그렇고, 당신은 이렇소. 당신을 보오."
+    assert V.address(t, "손님") == "손님이 그렇고, 손님은 이렇소. 손님을 보오."
+    assert V.address(t, "자네") == "자네가 그렇고, 자네는 이렇소. 자네를 보오."
+    # 받침 있는 이름도 마찬가지입니다
+    assert V.address("그대가 그렇소.", "박서준") == "박서준이 그렇소."
+
+
+def test_neoga_is_not_a_word():
+    """★ 「너가」는 비문입니다. 주격에서만 '네' 로 바뀝니다."""
+    assert V.address("그대가 그렇소.", "너") == "네가 그렇소."
+    assert V.address("그대를 보오.", "너") == "너를 보오."
+    assert V.address("그대에게 주오.", "너") == "너에게 주오."
+
+
+def test_a_character_can_call_you_by_name(f):
+    """
+    이름으로 부르는 캐릭터가 실제로 이름을 씁니다.
+    """
+    from engine.report import build_report as br
+    rep = br(f, "t", "wolha", "one", "love", "INFP", name="가은")
+    body = " ".join(_plain(c["html"]) for c in rep["cuts"])
+    assert "가은" in body, "이름으로 부른다는 캐릭터가 이름을 안 씁니다"
+
+
+def test_no_one_is_ever_called_the_literal_word_name(f):
+    """
+    ★ 이름을 안 적은 사람이 열에 넷이 넘습니다. 그때 「이름」이라고
+      부를 수는 없습니다 — 그 캐릭터의 대신 부르는 말로 물러섭니다.
+    """
+    from engine.report import build_report as br
+    for lid in ("wolha", "sigye", "paeseon", "yakcho"):
+        you = lens_mod.you_of(lid, "", "F")
+        assert you not in ("이름", "성별"), (lid, you)
+        body = " ".join(_plain(c["html"])
+                        for c in br(f, "t", lid, "one", "love", "INFP")["cuts"])
+        assert "이름에게" not in body and "이름이 " not in body, lid
+
+
+def test_the_boy_calls_you_by_what_you_are(f):
+    """청동자는 소년이라 손님을 아저씨·아주머니라 부릅니다."""
+    assert lens_mod.you_of("dongja", "", "M") == "아저씨"
+    assert lens_mod.you_of("dongja", "", "F") == "아주머니"

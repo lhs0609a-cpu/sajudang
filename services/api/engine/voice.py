@@ -161,14 +161,38 @@ def _piece(text: str, voice: str) -> str:
 # ★ 「그대로」를 건드리면 안 됩니다.
 #   그건 호칭이 아니라 '있는 그대로' 의 그대로입니다. 한 글자 차이로
 #   "자네로 도오" 같은 말이 됩니다.
-_YOU = re.compile(r"그대(?!로)")
+#
+# ★ 조사를 같이 고쳐야 합니다.
+#   뱅크는 「그대」(받침 없음) 기준으로 쓰여 있어서 "그대가 · 그대는 ·
+#   그대를" 입니다. 받침 있는 호칭으로 바꾸면 **"당신가 · 손님는"** 이
+#   됩니다. 바로 눈에 띄는 종류의 깨짐이라, 뒤따르는 조사까지 봅니다.
+_JOSA = {"가": "이", "는": "은", "를": "을", "와": "과", "라": "이라"}
+_YOU = re.compile(r"그대(?!로)([가는를와라])?")
+
+
+def _batchim(word: str) -> bool:
+    """마지막 글자에 받침이 있는가. 한글이 아니면 없는 것으로 본다."""
+    b = _has_batchim(word[-1]) if word else None
+    return bool(b)
 
 
 def address(html: str, you: Optional[str]) -> str:
-    """박아 둔 호칭을 그 캐릭터의 것으로 바꾼다."""
+    """박아 둔 호칭을 그 캐릭터의 것으로 바꾼다. 조사도 같이 맞춘다."""
     if not html or not you or you == "그대":
         return html
-    return _YOU.sub(you, html)
+    hard = _batchim(you)
+
+    def sub(m):
+        josa = m.group(1) or ""
+        # ★ 「너가」는 비문입니다. 주격에서만 '네' 로 바뀝니다 —
+        #   너를 · 너에게 · 너는 은 그대로 두고 '너가' 만 잡습니다.
+        if you == "너" and josa == "가":
+            return "네가"
+        if hard and josa in _JOSA:
+            josa = _JOSA[josa]
+        return you + josa
+
+    return _YOU.sub(sub, html)
 
 
 def speak(html: str, voice: Optional[str]) -> str:

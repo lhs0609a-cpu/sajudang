@@ -28,7 +28,8 @@ def post_hook(req: HookRequest) -> HookResponse:
     try:
         segs = bank.build_hook(
             f, req.concern, req.axis4, name=req.name,
-            you=lens_mod.you_word(req.lens_id), misses=req.misses)
+            you=lens_mod.you_word(req.lens_id, req.name, raw.get("sex")),
+            misses=req.misses)
     except bank.BankError as e:
         # 뱅크에 없는 조합이면 지어내지 않고 알린다
         raise HTTPException(status_code=422, detail=str(e))

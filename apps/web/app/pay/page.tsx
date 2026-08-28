@@ -143,6 +143,7 @@ function PayInner() {
       .report({
         chart_id: s.chartId, lens_id: s.cur, tier: "free",
         session_id: s.sessionId, concern: s.concern, axis4: s.axis4,
+        name: s.name,
       })
       .then((r) => { if (alive) setFree(r); })
       .catch((e) => {

@@ -120,7 +120,7 @@ def post_report(req: ReportRequest) -> ReportResponse:
     f = Features(**raw)
     try:
         data = build_report(f, req.chart_id, req.lens_id, tier,
-                            req.concern, req.axis4, req.extras)
+                            req.concern, req.axis4, req.extras, req.name)
     except (ValueError, KeyError) as e:
         raise HTTPException(status_code=422, detail=str(e))
 

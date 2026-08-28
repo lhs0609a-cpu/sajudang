@@ -158,7 +158,7 @@ function ReportInner() {
     api.report({
       chart_id: s.chartId, lens_id: lensId, tier: s.tier,
       session_id: s.sessionId, concern: s.concern, axis4: s.axis4,
-      extras,
+      name: s.name, extras,
     })
       .then((r) => {
         if (!alive) return;

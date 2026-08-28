@@ -154,8 +154,19 @@ def test_hook_escapes_user_name(f):
 
 
 def test_you_word_follows_the_lens(f):
+    """
+    ★ 호칭이 일곱 갈래로 갈렸습니다 — 그대·당신·자네·너·손님·이름·성별.
+      「이름」과 「성별」은 특수값이라 손님 것을 넘겨야 풀립니다.
+      청동자는 소년이라 손님을 아저씨·아주머니로 부릅니다 — 성별을
+      안 넘기면 지어내지 않고 대신 부르는 말로 물러섭니다.
+    """
     assert "자네" in bank.build_hook(f, "love", you=lens_mod.you_word("nopa"))[1]["html"]
-    assert "아저씨" in bank.build_hook(f, "love", you=lens_mod.you_word("dongja"))[1]["html"]
+    assert "아주머니" in bank.build_hook(
+        f, "love", you=lens_mod.you_word("dongja", sex="F"))[1]["html"]
+    assert "아저씨" in bank.build_hook(
+        f, "love", you=lens_mod.you_word("dongja", sex="M"))[1]["html"]
+    # 성별을 모르면 지어내지 않습니다
+    assert lens_mod.you_word("dongja") not in ("성별", "아저씨", "아주머니")
 
 
 def test_hook_works_without_hour(f_no_hour):
