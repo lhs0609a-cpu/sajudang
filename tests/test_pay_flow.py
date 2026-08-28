@@ -476,3 +476,51 @@ def test_single_character_never_costs_as_much_as_all_twenty(app):
     assert top < payments.TIER_PRICE["all"], (
         "가장 비싼 캐릭터(%d원)가 '스무 사람 전부'(%d원) 이상입니다"
         % (top, payments.TIER_PRICE["all"]))
+
+
+# ══════════════════════════════════════════════════════════
+# ★ 기간이 다른 목패끼리도 견줘야 한다 — 첫 달은 나란히 놓입니다
+# ══════════════════════════════════════════════════════════
+#
+# 위의 지배 검사는 `per_month` 가 다른 짝을 **건너뜁니다.** 한 번 치르는
+# 것과 달마다를 곧바로 견주지 않으려고 그렇게 뒀는데, 그 틈으로
+# 「이 자리 하나」 ↔ 「달마다 듣기」가 아무 검사도 없이 빠져나갔습니다.
+#
+#   손님은 목패 셋을 **한 화면에 나란히** 놓고 고릅니다. 그 순간 머릿속에
+#   있는 것은 첫 달 값입니다. 풍운도령에서 이렇게 보였습니다:
+#
+#       이 자리 하나   19,900원 · 22컷 · 1사람
+#       달마다 듣기     9,900원 · 374컷 · 20사람
+#
+#   두 배 값에 17분의 1입니다. 스무 명 중 **열여섯 명**이 그랬습니다.
+@pytest.mark.xfail(strict=True, reason=(
+    "아직 안 고친 것입니다 — 값 정책 결정이 필요합니다. "
+    "지금 스무 명 중 열여섯 명에서 「이 자리 하나」가 「달마다 듣기」에 "
+    "완전히 밀립니다. 고치는 길은 둘: ㈎ one 값을 sub 월삯 아래로 내린다 "
+    "(매출 구조가 바뀝니다) ㈏ sub 이 여는 것을 줄인다 (스무 사람 전부가 "
+    "아니게 됩니다). 어느 쪽이든 손님이 치르는 값이 달라지므로 사람이 "
+    "정할 일입니다. strict=True 라, 고치면 이 표시를 떼라고 알려 줍니다."))
+def test_a_single_character_is_not_buried_by_the_monthly_tier(app):
+    """
+    첫 달 값으로 견줘서, 「이 자리 하나」가 「달마다 듣기」보다 비싸면서
+    여는 것이 더 적으면 안 된다.
+
+    ★ 고치는 길은 둘입니다 — one 값을 sub 아래로 내리거나, sub 이 여는
+      것을 줄이거나. 어느 쪽이든 **결정**이라 이 검사가 그때 깨집니다.
+      깨지면 값을 다시 정하라는 뜻이지, 검사를 지우라는 뜻이 아닙니다.
+    """
+    buried = []
+    for lens_id in ("pungun", "eunbyeol", "haengsu", "nopa", "yeondam",
+                    "jeokhyeol"):
+        tiers = {t["id"]: t for t in _tiers(app, lens_id)}
+        one, sub = tiers.get("one"), tiers.get("sub")
+        if not one or not sub:
+            continue
+        if one["price"] >= sub["price"] and sub["cuts"] >= one["cuts"]:
+            buried.append(
+                "%s: 이 자리 하나 %d원 %d컷  vs  달마다 %d원 %d컷"
+                % (lens_id, one["price"], one["cuts"],
+                   sub["price"], sub["cuts"]))
+    assert not buried, (
+        "첫 달로 견주면 「이 자리 하나」가 완전히 밀립니다:\n  "
+        + "\n  ".join(buried))
