@@ -24,6 +24,7 @@ from . import lens as lens_mod
 from . import lens_cuts as lens_cuts_mod
 from . import rarity as rarity_mod
 from . import sinsal as sinsal_mod
+from . import voice as voice_mod
 from .bank import element_word, josa
 
 import json as _json
@@ -748,6 +749,26 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
 
     cuts = apply_view(cuts, view)
 
+    # ★ 마지막에 말투를 입힙니다.
+    #
+    #   뱅크는 하오체 한 벌로 둡니다. 스무 벌로 쓰지 않습니다.
+    #   여기서 **문장 끝 어미만** 갈아 끼우면 공통 컷(리포트의 60~90%)까지
+    #   그 사람 목소리로 나갑니다.
+    #
+    #   전에는 스무 명이 전부 하오체였습니다. 관점은 스무 개 다 다른데
+    #   (여는 말 20/20) 목소리가 하나라, 두 사람을 이어 읽으면 중앙값
+    #   56%가 글자 그대로 같은 글로 읽혔습니다.
+    #
+    #   ★ 근거 줄(source)은 안 건드립니다. 근거는 캐릭터가 바꾸지
+    #     않습니다 — 여덟 글자는 하나입니다.
+    tone = view.get("voice")
+    for c in cuts:
+        c["html"] = voice_mod.speak(voice_mod.address(c["html"], you), tone)
+    for l in locked:
+        if l.get("teaser"):
+            l["teaser"] = voice_mod.speak(
+                voice_mod.address(l["teaser"], you), tone)
+
     # 이 캐릭터가 더 받아야 하는 것. 안 받았으면 화면이 물어볼 수 있게
     # 알려 줍니다. **무엇을 받는지만** 내려보내고 문장은 안 보냅니다.
     need = lens_mod.required_input(lens_id)
@@ -766,8 +787,10 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
         "sells": sells,
         # 추가 입력이 틀렸을 때. 그 컷만 접고 나머지는 그대로 내려갑니다.
         "extra_error": extra_error,
-        "opening": guard.enforce(view["open"], {"cut": "open"}) if view.get("open") else None,
-        "closing": guard.enforce(view["close"], {"cut": "close"}) if view.get("close") else None,
+        "opening": (guard.enforce(voice_mod.speak(view["open"], view.get("voice")),
+                                  {"cut": "open"}) if view.get("open") else None),
+        "closing": (guard.enforce(voice_mod.speak(view["close"], view.get("voice")),
+                                  {"cut": "close"}) if view.get("close") else None),
         "cuts": cuts,
         "locked": locked,
     }

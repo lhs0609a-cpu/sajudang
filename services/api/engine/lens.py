@@ -65,6 +65,9 @@ def you_word(lens_id: Optional[str]) -> str:
 
 DEFAULT_VIEW = {
     "you": DEFAULT_YOU,
+    # 말투. 안 적혀 있으면 하오체 — 뱅크 원문 그대로 나갑니다.
+    # (engine/voice.py · seed/lens_view.json)
+    "voice": "hao",
     "lead": None,
     "focus": [],
     "mute": [],

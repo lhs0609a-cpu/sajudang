@@ -180,11 +180,18 @@ def test_the_last_cut_is_always_the_closing(lens_id):
 
 
 def test_closing_makes_no_new_claim():
-    """덮는 말은 오늘 한 말을 되짚습니다. 새 점사를 하지 않습니다."""
+    """
+    덮는 말은 오늘 한 말을 되짚습니다. 새 점사를 하지 않습니다.
+
+    ★ 이 검사가 「글자에 없소」를 **문자 그대로** 보고 있었습니다.
+      말투 층(engine/voice.py)이 붙으면서 하게체 캐릭터에게는
+      「글자에 없네」로 나가 깨졌습니다. 지키려는 성질은 "못 본 것을
+      밝힌다" 이지 "하오체로 끝난다" 가 아닙니다. 어간으로 봅니다.
+    """
     for f in _people():
         cut = next(c for c in _report(f)["cuts"] if c["id"] == "closing_cut")
         body = TAG.sub("", cut["html"])
-        assert "글자에 없소" in body          # 못 본 것을 밝힌다
+        assert "글자에 없" in body            # 못 본 것을 밝힌다
         assert " ".join(p["gz"] for p in f.pillars) in body
 
 
