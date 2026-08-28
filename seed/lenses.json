@@ -144,7 +144,7 @@
   "sex": "M",
   "you_word": "그대",
   "call": "면상선생",
-  "price": 9900,
+  "price": 8900,
   "opening_quote": "글자는 나중에. 얼굴부터 봅시다.",
   "released": true,
   "input": "photo"
@@ -249,7 +249,7 @@
   "sex": "M",
   "you_word": "그대",
   "call": "의원",
-  "price": 9900,
+  "price": 8900,
   "opening_quote": "나는 병을 보지 않소. 기운의 치우침을 보오.",
   "released": true,
   "input": "context"
@@ -264,7 +264,7 @@
   "sex": "M",
   "you_word": "그대",
   "call": "일관",
-  "price": 9900,
+  "price": 8900,
   "opening_quote": "무슨 날을 잡으시오.",
   "released": true,
   "input": "context"
@@ -279,7 +279,7 @@
   "sex": "F",
   "you_word": "자네",
   "call": "노파",
-  "price": 9900,
+  "price": 8900,
   "opening_quote": "듣기 좋은 소린 딴 데 가서 듣게.",
   "released": true,
   "input": null

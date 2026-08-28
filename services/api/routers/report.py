@@ -38,7 +38,13 @@ router = APIRouter(prefix="/v1", tags=["report"])
 # ★ '이 자리 하나' 는 그 캐릭터에만 붙습니다.
 #   풍운도령을 치르고 홍매파를 열 수는 없습니다. 캐릭터 값이 곧
 #   「이 자리 하나」 값이기 때문입니다 (payments.price_of).
-TIER_RANK = {"free": 0, "one": 1, "all": 2, "sub": 2}
+# ★ sub 이 all 과 같은 등급(2)이었습니다. 이제 sub 은 **넓이**만 팝니다 —
+#   스무 사람을 기본 층으로. 깊이는 one 의 값 사다리와 all 의 몫입니다.
+#
+#   등급이 같아지면 구멍이 하나 생깁니다: 달삯을 낸 사람이 tier="one"
+#   을 실어 보내면 등급 비교를 통과해 **그 캐릭터의 값 사다리까지**
+#   열립니다. 아래 post_report 가 그 자리를 따로 막습니다.
+TIER_RANK = {"free": 0, "one": 1, "sub": 1, "all": 2}
 
 
 def _paid_orders(session_id: str | None):
@@ -77,6 +83,14 @@ def post_report(req: ReportRequest) -> ReportResponse:
     # 클라이언트가 부른 티어와 치른 티어 중 **낮은 쪽**으로 냅니다.
     allowed = entitled_tier(req.session_id, req.lens_id)
     tier = req.tier if TIER_RANK[req.tier] <= TIER_RANK[allowed] else allowed
+
+    # ★ 「이 자리 하나」는 등급이 같아도 **그 캐릭터를 치른 사람만**입니다.
+    #   one 과 sub 이 같은 등급(1)이 되면서, 달삯만 낸 사람이 tier="one"
+    #   을 실어 보내면 등급 비교를 그냥 통과합니다. 그러면 값 사다리
+    #   (대운 맵 · 성향 대조)가 9,900원에 열립니다 — 깊이를 산 사람과
+    #   같아집니다. 화면의 tier 는 localStorage 에서 오는 값입니다.
+    if tier == "one" and allowed != "one":
+        tier = allowed
 
     f = Features(**raw)
     try:

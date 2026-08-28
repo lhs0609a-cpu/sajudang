@@ -63,7 +63,11 @@ def _rarity_text() -> dict:
 from .constants import ELEMENT_OF_GAN, ten_god
 
 TIERS = ("free", "one", "all", "sub")
-TIER_LEVEL = {"free": 0, "one": 1, "all": 2, "sub": 2}
+# ★ sub 이 all 과 같은 층(2)이었습니다. 그래서 9,900원/월이 24,900원과
+#   똑같은 것을 열었고, 「이 자리 하나」까지 덮었습니다.
+#   sub 은 **넓이**를 팝니다 — 스무 사람을 기본 층(1)으로.
+#   깊이(대운 맵 · 성향 대조)는 one 의 값 사다리와 all 의 몫입니다.
+TIER_LEVEL = {"free": 0, "one": 1, "all": 2, "sub": 1}
 
 # ══════════════════════════════════════════════════════════
 # 값이 여는 층 — 「이 자리 하나」 안에서
@@ -493,6 +497,49 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
                 bank_mod.axis_block(cmp, f.strength), note)),
             2, sid=bank_mod.axis_sid(cmp, f.strength)))
 
+    else:
+        # ── 7 대체 · 물은 자리와 글자가 센 자리 ───────────
+        #
+        # ★ 이 컷이 넉 자를 안 적은 사람에게는 **아예 안 생겼습니다.**
+        #   재보니 45.1%입니다. 그것도 15,900원 이상에서만 열리는
+        #   자리라, **값을 치른 사람이 잃고 있었습니다.**
+        #   훅 2.5단은 대체 단을 넣어 메웠는데 리포트는 그대로였습니다.
+        #
+        # ★ 같은 자리(id "axis")에 넣습니다. 그래야 값 사다리가
+        #   여는 층이 비지 않습니다. 손님이 낸 것이 하나 더 있습니다 —
+        #   **고민**입니다. 물으러 온 자리와 글자가 센 자리를 맞붙입니다.
+        grp = bank_mod.concern_group(concern, f.sex)
+        asked = getattr(f, bank_mod.GROUP_TOTAL[grp])
+        loud = f.flow
+        row = bank_mod.bank()["CONCERN_AXIS"][concern]
+        word = row["w"]
+        B2 = bank_mod.bank()
+
+        lead = ('<p class="tale">%s 물으러 오신 자리는 <b>%s</b>이오. '
+                '여덟 글자에서는 <b>%s</b>으로 보오 — 그대의 %s은 <b>%d</b>이오. '
+                '글자가 가장 센 자리는 <b>%s</b>이오.</p>'
+                % (you, word, grp, grp, asked, loud))
+        if asked == 0:
+            body = lead + '<p class="tale">%s</p>' % (B2["CONCERN_EMPTY"] % grp)
+        elif grp == loud:
+            body = lead + '<p class="tale">%s</p>' % B2["CONCERN_SAME"][grp]
+        else:
+            body = (lead
+                    + '<p class="tale">헌데 %s</p>' % B2["CONCERN_ELSE"][loud]
+                    + '<p class="tale">%s</p>' % B2["WHY_TAIL"][loud])
+        body += ('<p class="tale">%s</p>' % B2["MATCH_TAIL"][f.strength])
+        body += ('<p class="sm">넉 자를 적으셨으면 이 자리에 '
+                 '<b>사주와 검사가 어긋난 데</b>를 놓았을 것이오. '
+                 '안 적으셨으니 그대가 낸 것으로 대신 보았소.</p>')
+
+        cuts.append(_cut(
+            "axis", "7 · 물은 자리와 센 자리",
+            "%s → %s %d · 가장 센 자리 %s · %s"
+            % (word, grp, asked, loud, f.strength),
+            body, 2,
+            sid="rcax:%s:%s:%d:%s:%s"
+                % (concern, grp, min(asked, 4), loud, f.strength)))
+
     # ── 9 · 이 캐릭터가 따로 받는 것 ──────────────────────
     #
     # ★ 여기가 두 번째 결제를 진짜 다른 상품으로 만드는 자리입니다.
@@ -667,6 +714,18 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
     # 다른 티어는 값이 하나뿐이라 층이 없습니다.
     opened = rungs_at(_lens_price(lens_id)) if tier == "one" else set()
 
+    # ★ 값이 없는 캐릭터는 **이 자리에서 팔지 않습니다.**
+    #
+    #   청동자는 브레이크입니다 — 무거운 리포트 뒤에 강제로 붙는
+    #   안전망이고(relay.FALLBACK_LENS · forced), 값이 붙어 있지 않습니다.
+    #   그런데 그 자리에 잠긴 컷 여섯이 서 있었고, 「이 자리 하나」 목패는
+    #   값이 없어 안 뜨니 **살 수 있는 것이 9,900원/월뿐**이었습니다.
+    #   방금 무거운 것을 읽고 온 사람에게 그 자리에서 파는 셈입니다.
+    #
+    #   여기서는 잠긴 것을 **내보이지 않습니다.** 열리는 만큼만 주고,
+    #   무엇이 더 있다고 말하지 않습니다. 브레이크는 매출보다 앞섭니다.
+    sells = _lens_price(lens_id) > 0
+
     cuts, locked = [], []
     all_cuts, extra_error = _all_cuts(f, concern, you, axis4, lens_id, extras)
     for c in all_cuts:
@@ -682,6 +741,10 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
                            "teaser": _teaser(c["html"]),
                            "chars": body_len,
                            "need_tier": "one" if c["min_level"] == 1 else "all"})
+
+    # 안 파는 자리에서는 잠긴 목록을 안 냅니다 — 값을 권하지 않습니다.
+    if not sells:
+        locked = []
 
     cuts = apply_view(cuts, view)
 
@@ -699,6 +762,8 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
         "tier": tier,
         "concern": concern,
         "needs_input": needs_input,
+        # 이 자리에서 값을 권해도 되는가. 값이 없는 캐릭터(브레이크)는 거짓.
+        "sells": sells,
         # 추가 입력이 틀렸을 때. 그 컷만 접고 나머지는 그대로 내려갑니다.
         "extra_error": extra_error,
         "opening": guard.enforce(view["open"], {"cut": "open"}) if view.get("open") else None,

@@ -106,6 +106,10 @@ class ReportResponse(BaseModel):
     closing: Optional[str] = None
     # 이 캐릭터가 더 받아야 하는 입력이 있으면 그 이름. 없으면 None.
     needs_input: Optional[str] = None
+    # ★ 이 자리에서 값을 권해도 되는가.
+    #   값이 없는 캐릭터(청동자 — 무거운 리포트 뒤 안전망)는 거짓입니다.
+    #   화면은 이게 거짓이면 페이월도 목패로 가는 버튼도 그리지 않습니다.
+    sells: bool = True
     # 받은 추가 입력이 틀렸으면 그 사유. 리포트는 그대로 나옵니다.
     extra_error: Optional[str] = None
 

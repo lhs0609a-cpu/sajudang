@@ -112,7 +112,21 @@ export const api = {
   report: (req: {
     chart_id: string; lens_id: string; tier: string;
     session_id: string; concern: string; axis4?: string | null;
+    /**
+     * 이 캐릭터가 따로 받는 것. **저장되지 않습니다** —
+     * 특히 상대 사주는 제3자의 생년월일이라 본인 동의가 없습니다.
+     * 서버가 계산하고 버립니다. (engine/extras.py · docs/11)
+     */
+    extras?: Record<string, unknown> | null;
   }) => post<ReportResponse>("/v1/report", req),
+
+  /**
+   * 추가 입력에서 고를 수 있는 것들.
+   *
+   * ★ 이 엔드포인트가 있는데 화면이 안 쓰고 있었습니다. 그래서
+   *   캐릭터가 입력을 요구하는 51.3%에게 그 컷이 조용히 사라졌습니다.
+   */
+  reportChoices: () => call<Record<string, unknown>>("/v1/report/choices"),
 
   relay: (req: {
     chart_id: string; session_id: string;

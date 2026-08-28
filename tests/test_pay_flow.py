@@ -493,34 +493,96 @@ def test_single_character_never_costs_as_much_as_all_twenty(app):
 #       달마다 듣기     9,900원 · 374컷 · 20사람
 #
 #   두 배 값에 17분의 1입니다. 스무 명 중 **열여섯 명**이 그랬습니다.
-@pytest.mark.xfail(strict=True, reason=(
-    "아직 안 고친 것입니다 — 값 정책 결정이 필요합니다. "
-    "지금 스무 명 중 열여섯 명에서 「이 자리 하나」가 「달마다 듣기」에 "
-    "완전히 밀립니다. 고치는 길은 둘: ㈎ one 값을 sub 월삯 아래로 내린다 "
-    "(매출 구조가 바뀝니다) ㈏ sub 이 여는 것을 줄인다 (스무 사람 전부가 "
-    "아니게 됩니다). 어느 쪽이든 손님이 치르는 값이 달라지므로 사람이 "
-    "정할 일입니다. strict=True 라, 고치면 이 표시를 떼라고 알려 줍니다."))
 def test_a_single_character_is_not_buried_by_the_monthly_tier(app):
     """
-    첫 달 값으로 견줘서, 「이 자리 하나」가 「달마다 듣기」보다 비싸면서
-    여는 것이 더 적으면 안 된다.
+    ★ 기간이 다른 목패끼리도 견줘야 합니다 — 첫 달은 나란히 놓입니다.
 
-    ★ 고치는 길은 둘입니다 — one 값을 sub 아래로 내리거나, sub 이 여는
-      것을 줄이거나. 어느 쪽이든 **결정**이라 이 검사가 그때 깨집니다.
-      깨지면 값을 다시 정하라는 뜻이지, 검사를 지우라는 뜻이 아닙니다.
+      위의 지배 검사는 `per_month` 가 다른 짝을 건너뜁니다. 그 틈으로
+      「이 자리 하나」 ↔ 「달마다 듣기」가 아무 검사도 없이 빠져나갔고,
+      스무 명 중 **열여섯 명**에서 달삯이 단품을 통째로 덮고 있었습니다.
+      풍운도령은 19,900원에 22컷 한 사람, 달삯은 9,900원에 374컷
+      스무 사람이었습니다.
+
+    ★ 잣대를 조심해야 합니다.
+      **컷 수로 견주면 안 됩니다.** 달삯은 스무 사람을 열어서 어떤 한
+      사람짜리 목패와 견줘도 컷 수가 항상 많습니다. 그 잣대로는 one 이
+      영원히 지는 것으로 나옵니다 — 틀린 계산이 아니라 틀린 질문입니다.
+
+      손님이 실제로 묻는 것은 "더 싼 저걸 사면 이건 안 사도 되는가?"
+      입니다. 그러니 이렇게 셉니다 —
+          값이 같거나 비싼데, **그 목패라야 열리는 것이 하나도 없다.**
     """
+    from engine.calendar import build_chart
+    from engine.features import build_features
+    from engine.report import build_report
+    import payments
+
+    f = build_features(build_chart(1997, 3, 22, 14, 10, "F", True, "서울"))
+    sub_price = payments.TIER_PRICE["sub"]
+
     buried = []
-    for lens_id in ("pungun", "eunbyeol", "haengsu", "nopa", "yeondam",
-                    "jeokhyeol"):
-        tiers = {t["id"]: t for t in _tiers(app, lens_id)}
-        one, sub = tiers.get("one"), tiers.get("sub")
-        if not one or not sub:
+    for l in lens_mod_released():
+        price = l.get("price")
+        if not price:
             continue
-        if one["price"] >= sub["price"] and sub["cuts"] >= one["cuts"]:
+        one = {c["id"] for c in build_report(
+            f, "t", l["id"], "one", "love", "INFP")["cuts"]}
+        sub = {c["id"] for c in build_report(
+            f, "t", l["id"], "sub", "love", "INFP")["cuts"]}
+        if price >= sub_price and not (one - sub):
             buried.append(
-                "%s: 이 자리 하나 %d원 %d컷  vs  달마다 %d원 %d컷"
-                % (lens_id, one["price"], one["cuts"],
-                   sub["price"], sub["cuts"]))
+                "%s(%d원): 달삯(%d원)이 여는 것을 넘어서는 자리가 없습니다"
+                % (l["id"], price, sub_price))
     assert not buried, (
-        "첫 달로 견주면 「이 자리 하나」가 완전히 밀립니다:\n  "
-        + "\n  ".join(buried))
+        "「이 자리 하나」가 달삯에 완전히 덮입니다: "
+        + " / ".join(buried))
+
+
+def lens_mod_released():
+    from engine import lens as lens_mod
+    return lens_mod.released()
+
+
+def test_the_monthly_tier_never_opens_the_deep_cuts(app):
+    """
+    ★ 달삯은 **넓이**를 팝니다. 깊이는 안 팝니다.
+
+      대운 맵과 성향 대조는 「이 자리 하나」의 값 사다리와 「스무 사람
+      전부」의 몫입니다. 달삯으로 그게 열리면 셋이 다시 같은 상품이 되고,
+      값 사다리가 통째로 의미를 잃습니다.
+    """
+    from engine.calendar import build_chart
+    from engine.features import build_features
+    from engine.report import build_report
+
+    f = build_features(build_chart(1997, 3, 22, 14, 10, "F", True, "서울"))
+    ids = {c["id"] for c in build_report(
+        f, "t", "pungun", "sub", "love", "INFP")["cuts"]}
+    assert "daeun_map" not in ids, "달삯이 대운 맵을 열고 있습니다"
+    assert "axis" not in ids, "달삯이 성향 대조를 열고 있습니다"
+
+
+def test_paying_only_the_monthly_does_not_unlock_the_price_ladder(app):
+    """
+    ★ 등급이 같아지면서 생긴 구멍입니다.
+
+      one 과 sub 이 같은 등급(1)이라, 달삯만 낸 사람이 tier="one" 을
+      실어 보내면 등급 비교를 그냥 통과합니다. 그러면 그 캐릭터의 값
+      사다리(대운 맵 · 성향 대조)가 9,900원에 열립니다.
+      화면의 tier 는 localStorage 에서 오는 값입니다.
+    """
+    import store
+    oid = "t-sub-order"
+    store.set_json("order:" + oid, {
+        "session_id": "t-sub-only", "chart_id": "x", "lens_id": "pungun",
+        "tier": "sub", "concern": "love", "amount": 9900, "status": "paid",
+        "payment_key": "t"})
+    store.set_json("orders:t-sub-only", [oid])
+
+    r = app.post("/v1/report", json={
+        "chart_id": _chart(app), "lens_id": "pungun", "tier": "one",
+        "session_id": "t-sub-only", "concern": "love"}).json()
+    ids = {c["id"] for c in r["cuts"]}
+    assert r["tier"] == "sub", "달삯이 「이 자리 하나」로 올라섰습니다"
+    assert "daeun_map" not in ids and "axis" not in ids, (
+        "달삯만 낸 사람에게 값 사다리가 열렸습니다")

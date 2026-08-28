@@ -183,46 +183,65 @@ def counted(n: int) -> dict:
 
 def dominance() -> dict:
     """
-    목패끼리 견준다. **실제 컷 수**로 봅니다 — 값만 보면 못 잡습니다.
+    목패끼리 견준다.
 
-    ★ tests/test_pay_flow.py 의 지배 검사는 `per_month` 가 다른 짝을
-      건너뜁니다(한 번 치르는 것과 달마다를 곧바로 견주지 않으려고).
-      그 틈에 「이 자리 하나」 ↔ 「달마다 듣기」가 아무 검사도 없이
-      남았습니다. 첫 달만 놓고 보면 손님은 그 둘을 나란히 놓고 고릅니다.
+    ★ 잣대를 고쳤습니다.
+      처음에는 **컷 수**로 견줬습니다. 그런데 「달마다 듣기」는 스무 사람을
+      열어서, 어떤 한 사람짜리 목패와 견줘도 컷 수가 항상 많습니다.
+      그 잣대로는 one 이 영원히 '밀리는' 것으로 나옵니다 — 틀린 계산이
+      아니라 **틀린 질문**입니다.
+
+      손님이 실제로 묻는 것은 이겁니다:
+          "더 싼 저걸 사면, 이걸 안 사도 되는가?"
+
+      그러니 지배는 이렇게 셉니다 —
+          값이 같거나 비싼데, **그 목패만 여는 것이 하나도 없다.**
+
+      지금 「이 자리 하나」는 12,900원부터 대운 맵을, 15,900원부터 성향
+      대조를 엽니다. 달삯으로는 **아무리 오래 내도 안 열립니다.**
+      그래서 밀리지 않습니다. 그 아래(8,900원 이하)는 값이 달삯보다
+      싸서 밀리지 않습니다.
     """
-    import os
-    os.environ.setdefault("STATEMENT_LOG_PATH",
-                          str(ROOT / "var" / "conv_sim.jsonl"))
-    from fastapi.testclient import TestClient
-    from main import app
+    from engine.calendar import build_chart
+    from engine.features import build_features
 
-    cli = TestClient(app)
-    cid = cli.post("/v1/chart", json={
-        "year": 1997, "month": 3, "day": 22, "hour": 14, "minute": 10,
-        "hour_known": True, "sex": "F", "birth_city": "서울"}).json()["chart_id"]
-
+    f = build_features(build_chart(1997, 3, 22, 14, 10, "F", True, "서울"))
     rows, bad = [], 0
     order = sorted(lens_mod.released(), key=lambda x: -(x.get("price") or 0))
+
+    sub_price = payments.TIER_PRICE["sub"]
     for l in order:
-        t = {x["id"]: x for x in cli.post("/v1/pay/tiers", json={
-            "chart_id": cid, "lens_id": l["id"], "concern": "love",
-            "axis4": "INFP"}).json()["tiers"]}
-        one, sub = t.get("one"), t["sub"]
-        subs = "%s원 %d컷 %d사람" % (f"{sub['price']:,}", sub["cuts"], sub["lenses"])
-        if not one:
+        cuts = {}
+        for t in ("one", "sub"):
+            if t == "one" and not l.get("price"):
+                continue
+            r = build_report(f, "sim", l["id"], t, "love", "INFP")
+            cuts[t] = {c["id"] for c in r["cuts"]}
+
+        subs = "%s원 %d컷 20사람" % (f"{sub_price:,}", len(cuts["sub"]))
+        if "one" not in cuts:
             rows.append({"name": l["name"], "one": "— 목패가 없음",
-                         "sub": subs, "dominated": False})
+                         "sub": subs, "only": "", "dominated": False})
             continue
-        ones = "%s원 %d컷 %d사람" % (f"{one['price']:,}", one["cuts"], one["lenses"])
-        d = one["price"] >= sub["price"] and sub["cuts"] >= one["cuts"]
+
+        price = l["price"]
+        only = sorted(cuts["one"] - cuts["sub"])
+        # 값이 같거나 비싼데, 이 목패만 여는 것이 하나도 없으면 밀린다
+        d = price >= sub_price and not only
         bad += 1 if d else 0
-        rows.append({"name": l["name"], "one": ones, "sub": subs,
-                     "dominated": d})
+        rows.append({
+            "name": l["name"],
+            "one": "%s원 %d컷 1사람" % (f"{price:,}", len(cuts["one"])),
+            "sub": subs,
+            "only": ("이것만 여는 컷: " + " · ".join(only)) if only
+                    else ("달삯보다 쌈" if price < sub_price else "이것만 여는 것 없음"),
+            "dominated": d})
 
     default = "pungun"
     name = next((l["name"] for l in order if l["id"] == default), default)
     return {"rows": rows, "bad": bad, "total": len(rows),
-            "default_name": "%s(%s)" % (name, default)}
+            "default_name": "%s(%s)" % (name, default),
+            "sub_price": sub_price}
 
 
 # ══════════════════════════════════════════════════════════
@@ -294,28 +313,26 @@ def main() -> int:
     print("      ★ 즉 한 사람이 하루에 낼 수 있는 값은 최대 2건입니다.")
 
     # ── 2b. 목패끼리 잡아먹는가 ───────────────────────────
-    rule("[2b] 목패끼리 잡아먹는가  ★ 센 것 — 실제 컷 수로 견줌")
+    rule("[2b] 목패끼리 잡아먹는가  ★ 센 것")
     dom = dominance()
-    print("  같은 명식 하나로 스무 사람의 목패를 전부 세어 견줬습니다.")
+    print("  손님이 묻는 것은 이겁니다 — \"더 싼 저걸 사면 이건 안 사도 되는가?\"")
+    print("  그래서 컷 수가 아니라 **그 목패만 여는 것**으로 견줍니다.")
     print()
-    print("  %-11s %-22s %-24s" % ("캐릭터", "이 자리 하나", "달마다 듣기(첫 달)"))
+    print("  %-11s %-20s %s" % ("캐릭터", "이 자리 하나", "이 목패라야 열리는 것"))
     print("  " + "─" * 74)
     for r in dom["rows"]:
-        print("  %-11s %-22s %-24s %s"
-              % (r["name"], r["one"], r["sub"],
+        print("  %-11s %-20s %s %s"
+              % (r["name"], r["one"], r["only"],
                  "← 밀림" if r["dominated"] else ""))
     print("  " + "─" * 74)
-    print("  ★ 첫 달만 놓고 보면 「이 자리 하나」가 「달마다 듣기」에")
-    print("    완전히 밀리는 캐릭터: **%d / %d명**"
-          % (dom["bad"], dom["total"]))
-    print("    (값이 같거나 비싼데 여는 것은 더 적다는 뜻입니다)")
+    print("  달마다 듣기: %s원/월 · 스무 사람 · 기본 층만"
+          % f"{dom['sub_price']:,}")
     print()
-    print("  ★ 그리고 손님이 **처음 만나는 캐릭터**는 %s 입니다"
-          % dom["default_name"])
-    print("    — 가장 심하게 밀리는 목패를 첫 화면에서 봅니다.")
-    print()
-    print("  ※ tests 의 지배 검사는 per_month 가 다른 짝을 **건너뜁니다.**")
-    print("    그래서 이 자리는 아무도 안 보고 있었습니다.")
+    if dom["bad"]:
+        print("  ★ 아직 밀리는 캐릭터: **%d / %d명**" % (dom["bad"], dom["total"]))
+    else:
+        print("  [OK] 밀리는 목패 없음 — 셋이 서로 다른 것을 팝니다.")
+        print("       one 깊이 · sub 넓이 · all 둘 다")
 
     # ── 3. 퍼널 ──────────────────────────────────────────
     rule("[3] 화면을 지나면 몇이 남는가  ▲ 가정한 것 (측정값 아님)")

@@ -991,3 +991,20 @@ body.has-rail-closed .stage { margin-left: 26px; }
 @media (prefers-reduced-motion: reduce) {
   .seal i { animation: none; opacity: 1; transform: rotate(-7deg); }
 }
+
+/* ══════════ 이 캐릭터가 따로 받는 것 ══════════
+   .ask  추가 입력을 묻는 자리.
+
+   ★ 서버는 needs_input 으로 무엇이 필요한지 말하고 choices 로 고를 것까지
+     내려보내는데, 화면이 그 둘을 하나도 안 썼습니다. 그래서 그 컷이
+     조용히 사라졌습니다 — 51.3%가 그렇습니다. 값을 치른 사람도 잃습니다.
+   ------------------------------------------------------ */
+.ask {
+  border: 1px solid var(--line2);
+  background: var(--bg2);
+  padding: 16px 17px;
+  margin: 18px 0;
+}
+.ask .lab { color: var(--c); margin-bottom: 6px; }
+.ask .og { margin-top: 10px; }
+.ask .fld { margin-top: 6px; }

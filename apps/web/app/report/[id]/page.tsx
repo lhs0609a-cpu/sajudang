@@ -11,6 +11,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
 import Scene from "@/components/scene/Scene";
+import ExtraAsk from "@/components/ExtraAsk";
 import { Narration, Say } from "@/components/Narration";
 import { api, ApiError } from "@/lib/api";
 import { LENS_BY_ID } from "@/lib/lenses";
@@ -60,6 +61,17 @@ function ReportInner() {
   const [rep, setRep] = useState<ReportResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [rating, setRating] = useState(0);
+
+  /*
+   * 이 캐릭터가 따로 받는 것.
+   *
+   * ★ 서버는 `needs_input` 으로 무엇이 필요한지 말하고 있었는데
+   *   **화면이 그걸 한 번도 안 읽었습니다.** 그래서 그 컷이 조용히
+   *   사라졌습니다 — 재보니 51.3%입니다. 값을 치른 사람도 잃습니다.
+   *   저장하지 않습니다: 요청에 실어 보내고 그걸로 끝입니다.
+   */
+  const [extras, setExtras] = useState<Record<string, unknown> | null>(null);
+  const [asking, setAsking] = useState(false);
 
   /*
    * 후기 — ★ 여기가 받는 척만 하고 버리던 자리입니다.
@@ -146,10 +158,12 @@ function ReportInner() {
     api.report({
       chart_id: s.chartId, lens_id: lensId, tier: s.tier,
       session_id: s.sessionId, concern: s.concern, axis4: s.axis4,
+      extras,
     })
       .then((r) => {
         if (!alive) return;
         setRep(r);
+        setAsking(false);
         // ★ 서버가 낮춰서 보냈으면 우리 기록이 틀린 것입니다.
         //   여기 적힌 tier 는 치른 것이 아니라 **보여 준 것**이라,
         //   맞춰 두지 않으면 화면이 계속 없는 값을 부릅니다.
@@ -157,7 +171,7 @@ function ReportInner() {
       })
       .catch((e) => alive && setErr(e instanceof ApiError ? e.message : "리포트를 펴지 못했소."));
     return () => { alive = false; };
-  }, [s.chartId, lensId, s.tier, s.concern, s.axis4, s.sessionId]);
+  }, [s.chartId, lensId, s.tier, s.concern, s.axis4, s.sessionId, extras]);
 
   if (!s.chartId) {
     return (
@@ -189,7 +203,10 @@ function ReportInner() {
           <p className="sm mt">
             {s.name ? `${s.name}의 ` : ""}여덟 글자를 {rep.lens.name}의 눈으로 본 것
           </p>
-          <p className="sm">읽는 자리 {rep.cuts.length}컷 · 잠긴 자리 {rep.locked.length}컷</p>
+          <p className="sm">
+            읽는 자리 {rep.cuts.length}컷
+            {rep.locked.length > 0 && ` · 잠긴 자리 ${rep.locked.length}컷`}
+          </p>
         </div>
         <button className="btn mt" onClick={() => setTab("c2")}>편다</button>
       </Shell>
@@ -209,7 +226,9 @@ function ReportInner() {
         ) : (
           <>
             <Narration lines={["대운 맵은 아직 잠겨 있소."]} />
-            <button className="btn mt" onClick={() => setTab("c4")}>어디까지 볼지 고른다</button>
+            {rep.sells && (
+              <button className="btn mt" onClick={() => setTab("c4")}>어디까지 볼지 고른다</button>
+            )}
           </>
         )}
         <button className="btn gh mt" onClick={() => setTab("c2")}>본문으로</button>
@@ -217,7 +236,18 @@ function ReportInner() {
     );
   }
 
-  /* c4 · 페이월 */
+  /* c4 · 페이월 — ★ 안 파는 자리에서는 아예 안 그립니다 */
+  if (tab === "c4" && !rep.sells) {
+    return (
+      <Shell title={rep.lens.name}>
+        <Scene id="oldpaper" />
+        {/* 청동자는 무거운 리포트 뒤에 붙는 안전망입니다.
+            여기서는 값을 권하지 않습니다. 브레이크는 매출보다 앞섭니다. */}
+        <Say who={rep.lens.name}>여기선 값을 받지 않소. 본 것이 전부요.</Say>
+        <button className="btn mt" onClick={() => setTab("c2")}>본문으로</button>
+      </Shell>
+    );
+  }
   if (tab === "c4") {
     return (
       <Shell title="여기서부터" legal>
@@ -364,6 +394,15 @@ function ReportInner() {
 
       {/* ★ 추가 입력이 틀렸을 때. 리포트를 통째로 막지 않습니다 —
           그 컷만 빠지고 무엇이 틀렸는지 말해 줍니다. */}
+      {/* ★ 이 캐릭터가 따로 받는 것. 안 물으면 그 컷이 조용히 사라집니다. */}
+      {rep.needs_input && !rep.extra_error && (
+        <ExtraAsk
+          need={rep.needs_input}
+          busy={asking}
+          onSubmit={(x) => { setAsking(true); setExtras(x); }}
+        />
+      )}
+
       {rep.extra_error && (
         <div className="warn noprint">
           <p>{rep.extra_error}</p>

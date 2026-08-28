@@ -578,3 +578,108 @@ def test_agreement_reports_exposure_even_below_the_threshold(client, chart_id,
     assert r["shown"] is False, "100건 전에는 공감률을 주지 않습니다"
     assert "rate" not in r
     assert r["seen"] == 3
+
+
+# ══════════════════════════════════════════════════════════
+# 값을 치르고도 조용히 잃던 자리들
+# ══════════════════════════════════════════════════════════
+def _cut_ids(client, chart_id, lens_id, tier, axis4=None, session=None):
+    body = {"chart_id": chart_id, "lens_id": lens_id, "tier": tier,
+            "concern": "love"}
+    if axis4:
+        body["axis4"] = axis4
+    if session:
+        body["session_id"] = session
+    r = client.post("/v1/report", json=body)
+    assert r.status_code == 200, r.text
+    return {c["id"] for c in r.json()["cuts"]}, r.json()
+
+
+def test_the_axis_slot_is_never_empty(client, chart_id):
+    """
+    ★ 이 컷이 넉 자를 안 적은 사람에게는 **아예 안 생겼습니다.**
+      재보니 45.1%입니다. 그것도 15,900원 이상에서만 열리는 자리라,
+      **값을 치른 사람이 잃고** 있었습니다. 훅 2.5단은 대체 단을 넣어
+      메웠는데 리포트는 그대로였습니다.
+    """
+    _mark_paid("t-axis", "all")
+    with_a4, _ = _cut_ids(client, chart_id, "pungun", "all", "INFP", "t-axis")
+    without, rep = _cut_ids(client, chart_id, "pungun", "all", None, "t-axis")
+
+    assert "axis" in with_a4, "넉 자를 적었는데 대조 컷이 없습니다"
+    assert "axis" in without, "넉 자가 없다고 그 자리가 통째로 비었습니다"
+
+    cut = next(c for c in rep["cuts"] if c["id"] == "axis")
+    assert cut["statement_id"].startswith("rcax:"), cut["statement_id"]
+    assert cut["source"], "대체 컷에도 근거가 붙어야 합니다"
+
+
+def test_the_free_character_never_sells(client, chart_id):
+    """
+    ★ 청동자는 **브레이크**입니다 — 무거운 리포트 뒤에 강제로 붙는
+      안전망이고(relay.FALLBACK_LENS · forced), 값이 붙어 있지 않습니다.
+      그런데 그 자리에 잠긴 컷 여섯이 서 있었고 「이 자리 하나」 목패는
+      값이 없어 안 떠서, **살 수 있는 것이 달삯뿐**이었습니다.
+      방금 무거운 것을 읽고 온 사람에게 그 자리에서 파는 셈이었습니다.
+    """
+    _, rep = _cut_ids(client, chart_id, "dongja", "free")
+    assert rep["sells"] is False
+    assert rep["locked"] == [], "안 파는 자리에서 잠긴 것을 내보이고 있습니다"
+
+    _, paid = _cut_ids(client, chart_id, "pungun", "free")
+    assert paid["sells"] is True
+    assert paid["locked"], "파는 자리에서는 무엇이 잠겼는지 말해야 합니다"
+
+
+def test_the_monthly_tier_is_breadth_not_depth(client, chart_id):
+    """
+    ★ sub 이 all 과 **글자 그대로 같은 목록**이었습니다. 9,900원/월이
+      24,900원을 덮었고 「이 자리 하나」까지 덮었습니다.
+      이제 sub 은 넓이만 팝니다 — 깊이는 값 사다리와 all 의 몫입니다.
+    """
+    _mark_paid("t-breadth", "sub", "pungun")
+    ids, rep = _cut_ids(client, chart_id, "pungun", "sub", "INFP", "t-breadth")
+    assert rep["tier"] == "sub"
+    assert "daeun_now" in ids and "yongsin" in ids, "기본 층은 열려야 합니다"
+    assert "daeun_map" not in ids, "달삯이 대운 맵을 열고 있습니다"
+    assert "axis" not in ids, "달삯이 성향 대조를 열고 있습니다"
+
+
+def test_the_monthly_tier_does_not_buy_the_price_ladder(client, chart_id):
+    """
+    ★ one 과 sub 이 같은 등급(1)이 되면서 생긴 구멍입니다.
+      달삯만 낸 사람이 tier="one" 을 실어 보내면 등급 비교를 그냥
+      통과합니다. 화면의 tier 는 localStorage 에서 오는 값입니다.
+    """
+    _mark_paid("t-ladder", "sub", "pungun")
+    ids, rep = _cut_ids(client, chart_id, "pungun", "one", "INFP", "t-ladder")
+    assert rep["tier"] == "sub", "달삯이 「이 자리 하나」로 올라섰습니다"
+    assert "daeun_map" not in ids and "axis" not in ids
+
+
+def test_the_extra_input_is_asked_for_not_silently_dropped(client, chart_id):
+    """
+    ★ 서버가 `needs_input` 으로 무엇이 필요한지 말하는데 **화면이 그걸
+      한 번도 안 읽었습니다.** 그래서 그 컷이 조용히 사라졌습니다 —
+      51.3%가 그렇습니다.
+
+      여기서는 서버 쪽 계약만 지킵니다: 요구가 있으면 이름을 대고,
+      채워 주면 컷이 실제로 늘어난다.
+    """
+    from pathlib import Path
+    web = Path(__file__).resolve().parents[1] / "apps" / "web"
+    page = (web / "app" / "report" / "[id]" / "page.tsx").read_text("utf-8")
+    assert "<ExtraAsk" in page, "화면이 추가 입력을 묻지 않습니다"
+    assert (web / "components" / "ExtraAsk.tsx").exists()
+
+    r = client.post("/v1/report", json={
+        "chart_id": chart_id, "lens_id": "jeokhyeol", "tier": "free",
+        "concern": "love"}).json()
+    if not r["needs_input"]:
+        return                      # 이 캐릭터가 안 물으면 여기서 끝
+    before = len(r["cuts"])
+    filled = client.post("/v1/report", json={
+        "chart_id": chart_id, "lens_id": "jeokhyeol", "tier": "free",
+        "concern": "love", "extras": {"blood": {"type": "A"}}}).json()
+    assert len(filled["cuts"]) > before, "채워 줬는데 컷이 안 늘었습니다"
+    assert filled["needs_input"] is None
