@@ -238,6 +238,17 @@ export const api = {
   }) => post<{ ok: boolean; verified: boolean; visible: boolean; say: string }>(
     "/v1/review", req),
 
+  /**
+   * 주문번호로 치른 것을 되찾습니다.
+   *
+   * ★ 로그인이 없습니다. 자격이 localStorage 난수(session_id)에 매여
+   *   있어서, 브라우저를 지우거나 기기를 바꾸면 치른 값을 통째로
+   *   잃었습니다. 서버가 토스에 되물어 실제로 치러진 주문인지 봅니다.
+   */
+  payRestore: (req: { session_id: string; order_id: string }) =>
+    post<{ ok: boolean; tier: string; lens_id: string | null;
+           expires_at: string | null; say: string }>("/v1/pay/restore", req),
+
   daily: (chartId: string) =>
     call<DailyResponse>(`/v1/daily?chart_id=${encodeURIComponent(chartId)}`),
 };

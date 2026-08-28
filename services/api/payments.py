@@ -314,6 +314,42 @@ def confirm(payment_key: str, order_id: str, amount: int) -> PaymentResult:
         raw=data)
 
 
+def lookup_by_order(order_id: str) -> dict:
+    """
+    이 주문이 토스 쪽에서 **실제로** 어떤 상태인가.
+
+        GET /v1/payments/orders/{orderId}
+
+    ★ 웹훅 본문을 믿지 않기 위한 자리입니다.
+      토스 웹훅에는 서명 헤더가 문서화돼 있지 않습니다. 그러면 본문만
+      보고는 그게 토스가 보낸 것인지 알 수 없습니다 — 주소만 알면
+      누구나 "이 주문 결제됐다" 고 POST 할 수 있습니다.
+
+      그래서 웹훅은 **알림으로만** 씁니다. 무엇이 참인지는 우리가
+      시크릿 키로 토스에 되물어 정합니다. 이 집에서 클라이언트가 보낸
+      tier 를 안 믿는 것과 같은 이유입니다.
+
+    돌려주는 것: 토스 응답 그대로(dict). 못 물으면 PaymentError.
+    """
+    if not ENABLED:
+        raise PaymentsDisabled(DISABLED_REASON or "결제가 꺼져 있습니다.")
+    res = httpx.get(
+        "%s/orders/%s" % (TOSS_BASE, order_id),
+        headers=_auth_header(), timeout=10.0)
+    data = res.json() if res.content else {}
+    if res.status_code >= 400:
+        log.warning("toss lookup 실패 %s %s", res.status_code, data)
+        raise PaymentError(data.get("message") or "결제를 확인하지 못했습니다.")
+    return data
+
+
+# 토스가 알려 주는 결제 상태 (docs.tosspayments.com/reference)
+#   READY · IN_PROGRESS · WAITING_FOR_DEPOSIT · DONE
+#   CANCELED · PARTIAL_CANCELED · ABORTED · EXPIRED
+PAID_STATES = {"DONE"}
+DEAD_STATES = {"CANCELED", "ABORTED", "EXPIRED"}
+
+
 def cancel(payment_key: str, reason: str,
            amount: Optional[int] = None) -> PaymentResult:
     """환불. amount 를 주면 부분 취소."""

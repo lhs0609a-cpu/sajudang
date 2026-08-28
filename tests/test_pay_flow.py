@@ -663,3 +663,83 @@ def test_confirm_writes_when_it_was_paid_and_when_it_ends(app):
 
     assert hasattr(pay_mod, "SUB_DAYS"), "달삯 기간이 코드에 없습니다"
     assert payments.TIER_PRICE["sub"] > 0
+
+
+# ══════════════════════════════════════════════════════════
+# 웹훅 — 본문을 믿지 않는가
+# ══════════════════════════════════════════════════════════
+#
+# ★ 토스 웹훅에는 서명 헤더가 문서화돼 있지 않습니다. 본문만 보고는
+#   그게 토스가 보낸 것인지 알 수 없습니다 — 주소만 알면 누구나
+#   "이 주문 결제됐다" 고 POST 할 수 있습니다. 무료로 스무 사람을
+#   여는 요청 한 줄이 됩니다.
+def _pending(order_id="sjd-hook", tier="all", sid="s-hook"):
+    import store
+    store.set_json("order:" + order_id, {
+        "session_id": sid, "chart_id": "x", "lens_id": "pungun",
+        "tier": tier, "concern": "love", "amount": 24900,
+        "status": "pending", "payment_key": None})
+    return order_id
+
+
+def test_webhook_does_not_trust_its_own_body(app):
+    """
+    누가 "결제됐다" 고 보내와도, 토스에 되물어 확인하기 전에는
+    자격을 열지 않는다.
+    """
+    import store
+    oid = _pending()
+    r = app.post("/v1/pay/webhook", json={
+        "eventType": "PAYMENT_STATUS_CHANGED",
+        "data": {"orderId": oid, "status": "DONE", "totalAmount": 24900}})
+    # 키가 없어 되물을 수 없으면 200 으로 넘기지 않고 다시 받겠다고 합니다.
+    assert r.status_code in (200, 503), r.text
+    assert store.get_json("order:" + oid)["status"] != "paid", (
+        "본문만 보고 자격을 열었습니다")
+
+
+def test_webhook_answers_fast_for_things_it_cannot_use(app):
+    """
+    ★ 10초 안에 200 을 안 주면 토스가 7번 다시 보냅니다
+      (1·4·16·64·256·1024·4096분). 재시도로 풀릴 문제가 아니면 200 입니다.
+    """
+    assert app.post("/v1/pay/webhook", json={}).json()["ok"] is True
+    assert app.post("/v1/pay/webhook",
+                    json={"data": {"orderId": "없는주문"}}).json()["ok"] is True
+
+
+# ══════════════════════════════════════════════════════════
+# 자격 복구 — 산 것을 잃지 않는가
+# ══════════════════════════════════════════════════════════
+def test_a_paid_order_can_be_restored_to_a_new_session(app):
+    """
+    ★ 로그인이 없습니다. 자격이 localStorage 난수에 매여 있어서 손님이
+      브라우저를 지우거나 기기를 바꾸면 치른 값을 통째로 잃었습니다.
+      되찾아 줄 길조차 없었습니다.
+    """
+    import store
+    from routers.report import entitled_tier
+
+    oid = "sjd-restore"
+    store.set_json("order:" + oid, {
+        "session_id": "옛-세션", "chart_id": "x", "lens_id": "pungun",
+        "tier": "all", "concern": "love", "amount": 24900,
+        "status": "paid", "payment_key": "t",
+        "paid_at": "2026-08-01T00:00:00+00:00", "expires_at": None})
+    store.set_json("orders:옛-세션", [oid])
+
+    assert entitled_tier("새-세션-0001", "pungun") == "free"
+    r = app.post("/v1/pay/restore", json={
+        "session_id": "새-세션-0001", "order_id": oid})
+    assert r.status_code == 200, r.text
+    assert entitled_tier("새-세션-0001", "pungun") == "all", "되돌리지 못했습니다"
+
+
+def test_restore_refuses_an_order_that_was_never_paid(app):
+    """주문번호를 아무렇게나 넣어 보는 길을 막는다."""
+    _pending("sjd-unpaid")
+    r = app.post("/v1/pay/restore", json={
+        "session_id": "새-세션-0002", "order_id": "sjd-unpaid"})
+    assert r.status_code == 409, r.text
+    assert app.post("/v1/pay/restore", json={
+        "session_id": "새-세션-0002", "order_id": "없는번호"}).status_code == 404

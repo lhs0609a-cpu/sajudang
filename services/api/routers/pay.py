@@ -17,13 +17,17 @@ import uuid
 from datetime import date, datetime, timedelta, timezone
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+import logging
+
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
 import payments
 import store
 from engine.relay import BREAKS
 from schemas.api import Tier
+
+log = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/v1/pay", tags=["pay"])
 
@@ -338,6 +342,132 @@ def _granted(order: dict) -> dict:
         "lenses": len(ids),
         "tier_name": TIER_NAME.get(tier, tier),
     }
+
+
+# ══════════════════════════════════════════════════════════
+# 웹훅 — 결제 상태가 바뀌었다는 **알림**
+# ══════════════════════════════════════════════════════════
+#
+# ★ 본문을 믿지 않습니다.
+#   토스 웹훅에는 서명 헤더가 문서화돼 있지 않습니다. 그러면 본문만
+#   보고는 그게 토스가 보낸 것인지 알 수 없습니다 — 주소만 알면 누구나
+#   "이 주문 결제됐다" 고 POST 할 수 있습니다. 무료로 스무 사람을 여는
+#   요청 한 줄이 됩니다.
+#
+#   그래서 웹훅은 **깨우는 종**으로만 씁니다. 무엇이 참인지는 우리가
+#   시크릿 키로 토스에 되물어 정합니다(payments.lookup_by_order).
+#   화면이 보낸 tier 를 안 믿는 것과 같은 이유입니다.
+#
+# ★ 무엇을 위해 붙였나
+#   가상계좌 입금(DEPOSIT_CALLBACK)과 **PG 쪽에서 일어난 취소**를
+#   우리가 알 길이 없었습니다. 토스 관리자 화면에서 취소해도 이쪽은
+#   계속 열려 있었습니다.
+#
+# ★ 10초 안에 200 을 줘야 합니다. 안 주면 토스가 7번 다시 보냅니다
+#   (1·4·16·64·256·1024·4096분). 그래서 못 알아들은 것도 200 입니다 —
+#   재시도로 풀릴 문제가 아니면 다시 받아도 같습니다.
+@router.post("/webhook")
+async def webhook(request: Request) -> dict:
+    try:
+        body = await request.json()
+    except Exception:
+        return {"ok": True, "ignored": "본문을 읽지 못했소"}
+
+    order_id = (body or {}).get("data", {}).get("orderId") or (body or {}).get("orderId")
+    if not order_id:
+        return {"ok": True, "ignored": "주문번호가 없소"}
+
+    order = store.get_json("order:" + str(order_id))
+    if not order:
+        return {"ok": True, "ignored": "모르는 주문이오"}
+
+    # ★ 여기가 요점입니다 — 본문이 아니라 토스에게 묻습니다.
+    try:
+        real = payments.lookup_by_order(str(order_id))
+    except payments.PaymentError as e:
+        log.warning("webhook lookup 실패 %s: %s", order_id, e)
+        # 우리 쪽 사정이면 다시 받아 볼 값이 있습니다.
+        raise HTTPException(status_code=503, detail="확인하지 못했소.")
+
+    status = real.get("status")
+    if status in payments.DEAD_STATES or (
+            status == "PARTIAL_CANCELED" and not real.get("balanceAmount")):
+        # 취소·만료 — 자격을 거둡니다. 기록은 남깁니다.
+        order.update(status="canceled", unlocked=[], pg_status=status)
+        store.set_json("order:" + str(order_id), order)
+        return {"ok": True, "applied": "canceled"}
+
+    if status in payments.PAID_STATES and order.get("status") != "paid":
+        # 가상계좌 입금처럼 나중에 완결되는 건. 금액도 토스 것을 씁니다.
+        now = datetime.now(timezone.utc)
+        ends = (now + timedelta(days=SUB_DAYS)) if order["tier"] == "sub" else None
+        order.update(
+            status="paid", pg_status=status,
+            payment_key=real.get("paymentKey") or order.get("payment_key"),
+            amount=int(real.get("totalAmount") or order.get("amount") or 0),
+            unlocked=payments.unlocks_for(order["tier"], order.get("lens_id")),
+            paid_at=now.isoformat(),
+            expires_at=ends.isoformat() if ends else None)
+        store.set_json("order:" + str(order_id), order)
+
+        okey = "orders:" + str(order.get("session_id") or "")
+        orders = store.get_json(okey) or []
+        if str(order_id) not in orders:
+            orders.append(str(order_id))
+            store.set_json(okey, orders, ttl=365 * DAY)
+        return {"ok": True, "applied": "paid"}
+
+    return {"ok": True, "applied": "none", "status": status}
+
+
+# ══════════════════════════════════════════════════════════
+# 자격 복구 — 산 것을 잃지 않게
+# ══════════════════════════════════════════════════════════
+#
+# ★ 로그인이 없습니다. 자격이 localStorage 난수(session_id)에 매여
+#   있어서, 손님이 브라우저 데이터를 지우거나 기기를 바꾸면 **치른 값을
+#   통째로 잃었습니다.** 24,900원짜리를요. 되찾아 줄 길조차 없었습니다.
+#
+# ★ 주문번호는 결제 영수증과 승인 문자에 남습니다. 그걸로 되찾습니다.
+#   그리고 여기서도 **토스에 되물어** 실제로 치러진 주문인지 봅니다 —
+#   주문번호를 아무렇게나 넣어 보는 길을 막습니다.
+class RestoreRequest(BaseModel):
+    session_id: str = Field(min_length=8, max_length=64)
+    order_id: str = Field(min_length=4, max_length=64)
+
+
+@router.post("/restore")
+def restore(req: RestoreRequest) -> dict:
+    order = store.get_json("order:" + req.order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="그런 주문번호가 없소.")
+
+    if order.get("status") != "paid":
+        # 치르지 않은 주문으로는 못 엽니다.
+        try:
+            real = payments.lookup_by_order(req.order_id)
+        except payments.PaymentError:
+            raise HTTPException(status_code=409, detail="아직 치러지지 않은 주문이오.")
+        if real.get("status") not in payments.PAID_STATES:
+            raise HTTPException(status_code=409, detail="아직 치러지지 않은 주문이오.")
+
+    okey = "orders:" + req.session_id
+    orders = store.get_json(okey) or []
+    if req.order_id not in orders:
+        orders.append(req.order_id)
+        store.set_json(okey, orders, ttl=365 * DAY)
+
+    # 인장도 같이 되돌려 줍니다.
+    if order.get("lens_id"):
+        skey = "seals:" + _user_key(req.session_id)
+        seals = store.get_json(skey) or []
+        if order["lens_id"] not in seals:
+            seals.append(order["lens_id"])
+            store.set_json(skey, seals, ttl=365 * DAY)
+
+    return {"ok": True, "tier": order["tier"], "lens_id": order.get("lens_id"),
+            "expires_at": order.get("expires_at"),
+            "say": "찾았소. 치르신 자리를 되돌려 놓았소."}
 
 
 @router.post("/refund")
