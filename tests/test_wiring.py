@@ -157,7 +157,11 @@ def test_report_mentions_every_tied_weak_element():
 # ══════════════════════════════════════════════════════════
 # 문장 선택에 실제로 쓰이는 값. 일간과 계절이 여기 들어오면서
 # 같은 문장을 받는 사람 수가 크게 줄었습니다 (아래 테스트 참고).
-HOOK_KEYS = ("weak_el", "top_ten_god", "strength", "flow", "day_gan")
+# ★ 축이 둘 늘었습니다.
+#   2.5단이 넉 자 없이도 나오게 되면서 **성별**(사랑을 어느 자리에서
+#   보는가)과 **물은 자리의 개수**가 문장 선택에 들어왔습니다.
+#   깨지는 게 진전이라던 자리가 실제로 깨져서, 키를 늘렸습니다.
+HOOK_KEYS = ("weak_el", "top_ten_god", "strength", "flow", "day_gan", "sex")
 
 import re as _re
 _nums = _re.compile(r"[0-9.]+")
@@ -168,14 +172,18 @@ def _sentences(f, concern="love"):
     return tuple(_nums.sub("#", s["html"]) for s in bank.build_hook(f, concern))
 
 
-def _hook_key(f):
-    return tuple(getattr(f, x) for x in HOOK_KEYS) + (bank.born_season(f),)
+def _hook_key(f, concern="love"):
+    grp = bank.concern_group(concern, f.sex)
+    asked = getattr(f, bank.GROUP_TOTAL[grp])
+    return (tuple(getattr(f, x) for x in HOOK_KEYS)
+            + (bank.born_season(f), grp, min(asked, 4)))
 
 
-def test_bank_sentence_choice_is_fully_determined_by_seven_values():
+def test_bank_sentence_choice_is_fully_determined_by_nine_values():
     """
-    **어떤 문장이 뽑히는가** 는 이 일곱 값으로 완전히 결정된다.
+    **어떤 문장이 뽑히는가** 는 이 아홉 값으로 완전히 결정된다.
         고민 · 약오행 · 주도십신 · 신강약 · 흐름 · 일간 · 태어난 계절
+        · 성별 · 물은 자리의 개수
 
     일지·대운·용신·신살은 아직 문장 '선택' 에 관여하지 않는다.
     축을 더 넣어 개인화를 깊게 하면 이 테스트가 깨진다 — 깨지는 게 진전이다.

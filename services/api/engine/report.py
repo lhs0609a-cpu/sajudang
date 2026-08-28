@@ -27,8 +27,26 @@ from . import sinsal as sinsal_mod
 from .bank import element_word, josa
 
 import json as _json
+import re as _re
 from functools import lru_cache as _lru
 from pathlib import Path as _Path
+
+# ── 태그를 걷어 사람이 읽는 글로 ──────────────────────────
+#
+# ★ 인라인과 블록을 갈라야 합니다.
+#   전부 공백으로 바꾸면 <b>쇠</b>이오 가 "쇠 이오" 가 되고,
+#   전부 빈칸으로 바꾸면 </p><p> 가 붙어 두 문장이 한 덩어리가 됩니다.
+_BLOCK_TAG = _re.compile(
+    r"</?(?:p|div|br|li|ul|ol|tr|td|th|table|h[1-6]|section)\b[^>]*>",
+    _re.I)
+_TAG = _re.compile(r"<[^>]+>")
+
+
+def _plain(html: str) -> str:
+    """컷 본문의 글자만. 분량을 세거나 맛보기를 뽑을 때 씁니다."""
+    text = _BLOCK_TAG.sub(" ", html or "")   # 블록은 띄운다
+    text = _TAG.sub("", text)                # 인라인은 붙인다
+    return _re.sub(r"\s+", " ", text).strip()
 
 
 @_lru(maxsize=1)
@@ -73,6 +91,59 @@ PRICE_RUNGS = ((12900, "daeun_map"), (15900, "axis"))
 def rungs_at(price: int) -> set:
     """이 값이 「이 자리 하나」에서 더 여는 컷."""
     return {cid for threshold, cid in PRICE_RUNGS if price >= threshold}
+
+
+# ══════════════════════════════════════════════════════════
+# 잠긴 컷의 첫 줄 — 궁금증은 구체적일 때만 생긴다
+# ══════════════════════════════════════════════════════════
+#
+# ★ 여기가 비어 있었습니다.
+#   페이월(c4)이 잠긴 컷마다 `가가가가 가가가가가 가가가` 를 그리고
+#   있었습니다. 자리표시 문자열이 그대로 배포된 것입니다.
+#
+#   정보 격차는 **구체적인 것에만** 생깁니다. 무엇을 놓치는지 모르면
+#   아쉽지도 않습니다. 제목만으로는 약합니다.
+#
+# ★ 본문을 주는 것이 아닙니다.
+#   첫 문장 하나를, 그것도 **끝까지 주지 않고** 자릅니다. 그 한 줄에
+#   이 명식에만 해당하는 것(나이·연도·글자·개수)이 들어 있으면
+#   손님은 무엇이 잠겼는지 압니다. 나머지는 여전히 안 내려갑니다.
+#
+# ★ 자르는 자리를 고릅니다.
+#   조사에서 자르면 ("그대의 대운이") 문장이 끊긴 게 아니라 망가진
+#   것처럼 보입니다. **명사 뒤**에서 자릅니다.
+TEASER_MAX = 44
+TEASER_MIN = 12
+# 본문의 이만큼을 넘겨주지 않습니다. 짧은 컷에서 맛보기가 본문이 되는
+# 것을 막습니다 — 100자짜리 대운 맵에 44자를 주면 그건 맛보기가 아닙니다.
+TEASER_SHARE = 0.4
+
+# 이 뒤에서 자르면 어색한 글자들 — 조사·어미의 첫 글자
+_BAD_TAIL = "은는이가을를의에서도만과와로으며고나지야한할하며되"
+
+
+def _teaser(html: str) -> Optional[str]:
+    """잠긴 컷의 첫 줄. 본문이 아니라 **맛보기**입니다."""
+    text = _plain(html)
+    if len(text) < TEASER_MIN:
+        return None
+
+    limit = min(TEASER_MAX, int(len(text) * TEASER_SHARE))
+    if limit < TEASER_MIN:
+        return None
+
+    # 첫 문장이 한도 안에 끝나면 문장째로 줍니다.
+    m = _re.search(r"[.!?…]", text[:limit + 6])
+    if m and m.end() >= TEASER_MIN and m.end() <= limit + 6:
+        return text[:m.end()].strip()
+
+    head = text[:limit].rstrip()
+    # 명사 뒤로 물러섭니다. 조사에서 끊긴 채로 내보내지 않습니다.
+    while len(head) > TEASER_MIN and head[-1] in _BAD_TAIL:
+        head = head[:-1].rstrip()
+    if len(head) < TEASER_MIN:
+        head = text[:limit].rstrip()
+    return head + " —"
 
 
 def _cut(cid, title, source, body, min_level, sid=None):
@@ -602,8 +673,14 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
         if c["min_level"] <= level or c["id"] in opened:
             cuts.append({k: v for k, v in c.items() if k != "min_level"})
         else:
+            # ★ 본문은 여전히 안 내려갑니다. 첫 줄만, 그것도 잘라서.
+            #   무엇이 잠겼는지 알 수 있어야 값을 치를지 정할 수 있습니다.
+            #   분량도 같이 냅니다 — '컷' 은 손님의 말이 아닙니다.
+            body_len = len(_plain(c["html"]))
             locked.append({"id": c["id"], "title": c["title"],
                            "source": c["source"],
+                           "teaser": _teaser(c["html"]),
+                           "chars": body_len,
                            "need_tier": "one" if c["min_level"] == 1 else "all"})
 
     cuts = apply_view(cuts, view)

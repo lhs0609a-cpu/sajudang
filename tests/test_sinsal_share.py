@@ -240,14 +240,45 @@ def test_share_rejects_bad_reveal(client):
 # 유입 화면 — 의심을 이기려고 거짓을 보태지 않는가
 # ══════════════════════════════════════════════════════════
 def test_referral_landing_makes_no_accuracy_claim():
+    """
+    ★ 이 검사가 문장의 **위치**를 보고 있었습니다.
+
+      여섯 문답이 `s/[token]` 안에 갇혀 있던 시절의 검사입니다. 그 문장은
+      이 서비스에서 가장 잘 쓰인 카피인데 **공유 링크로 온 사람만** 봤고,
+      검색·광고로 직접 들어온 사람은 한 번도 못 만났습니다. 그래서
+      components/Doubts.tsx 로 빼서 골목(a1)과 글자 서는 동안(a6)에도
+      씁니다.
+
+      검사는 자리를 따라갑니다 — 다만 **유입 화면이 그것을 실제로 그리는지**
+      도 같이 봅니다. 안 그러면 컴포넌트만 있고 화면에는 안 걸린 상태를
+      통과시킵니다.
+    """
     from pathlib import Path
-    d = (Path(__file__).resolve().parents[1]
-         / "apps" / "web" / "app" / "s" / "[token]")
-    src = "\n".join(f.read_text(encoding="utf-8")
-                    for f in sorted(d.glob("*.tsx")))
+    root = Path(__file__).resolve().parents[1] / "apps" / "web"
+    d = root / "app" / "s" / "[token]"
+    landing = chr(10).join(f.read_text(encoding="utf-8")
+                        for f in sorted(d.glob("*.tsx")))
+    doubts = (root / "components" / "Doubts.tsx").read_text(encoding="utf-8")
+    src = landing + chr(10) + doubts
+
     for banned in ("적중률", "과학적", "통계학", "입증", "보장"):
         assert banned not in src or "쓰지 않" in src, banned
     # 의심 항목이 실제로 들어 있는가
     assert "맞히는 집이 아니라" in src
     assert "127.5" in src
     assert "100건" in src
+    # 그리고 유입 화면이 그것을 **그리는가**
+    assert "<Doubts" in landing, "여섯 문답이 유입 화면에 안 걸려 있습니다"
+
+
+def test_the_doubts_reach_people_who_came_in_directly():
+    """
+    ★ 골목(a1)에서도 이 여섯 문답을 만나야 합니다.
+
+      전에는 검색·광고로 직접 들어온 사람이 의심을 안은 채 일곱 화면을
+      통과해야 했습니다. 가장 센 설득 자산이 그 사람들에게만 안 보였습니다.
+    """
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[1] / "apps" / "web"
+    entry = (root / "app" / "page.tsx").read_text(encoding="utf-8")
+    assert "<Doubts" in entry, "직접 들어온 사람은 여섯 문답을 못 봅니다"

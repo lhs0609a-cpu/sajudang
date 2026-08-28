@@ -127,11 +127,19 @@ export default function RelayPage() {
                             : "값 없이"}
                         </span>
                       </button>
+                      {/*
+                        ★ 레이블과 결과가 어긋나 있었습니다.
+                          손님은 "나중에" 를 **유예**로 읽는데 시스템은
+                          **영구 제외**로 처리했습니다. 작은 글씨로 적어
+                          뒀지만, 나중에 후회할 종류의 비가역 선택입니다.
+                          거절한 캐릭터를 재권유하지 않는 브레이크는 그대로
+                          두고, 레이블을 결과에 맞춥니다.
+                      */}
                       <button
                         className="op"
                         onClick={() => { s.markSkipped(r.lens_id); }}
                       >
-                        <b>나중에</b>
+                        <b>이 사람은 됐소</b>
                         <span>다시 권하지 않소</span>
                       </button>
                     </div>
@@ -142,6 +150,11 @@ export default function RelayPage() {
                 이번 자리에서 이을 수 있는 사람은 {data.breaks.per_session_relay}명까지요.
                 지금까지 {s.relayUsed}명.
               </p>
+              {/* ★ 유예하는 길을 따로 냅니다. 세션만 닫고 제외는 안 합니다 —
+                  브레이크는 그대로면서 손님이 무엇을 고르는지 알게 됩니다. */}
+              <button className="btn gh mt" onClick={() => router.push("/lobby")}>
+                오늘은 그만 듣겠소
+              </button>
             </>
           ) : (
             data && <Narration lines={["오늘 이을 자리는 없소."]} />

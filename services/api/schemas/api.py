@@ -44,12 +44,21 @@ class HookRequest(BaseModel):
     axis4: Optional[str] = Field(default=None, min_length=4, max_length=4)
     name: str = Field(default="", max_length=20)
     lens_id: Optional[str] = None
+    # 여기까지 「아니오」가 몇 번 나왔는가.
+    #
+    # ★ 손님의 응답이 다음 단을 하나도 안 바꾸고 있었습니다. 세 번
+    #   아니라 해도 도령이 방향을 안 틀었고, 그때 손님은 이게 녹음이라는
+    #   걸 압니다. 둘이 쌓이면 2단이 짚는 자리를 바꿉니다 (bank.TURN_AT).
+    misses: int = Field(default=0, ge=0, le=5)
 
 
 class HookSegment(BaseModel):
     stage: str
     label: str
     source: Optional[str]
+    # 근거를 본문 아래에 둘 것인가. 0단(찌르기)만 참입니다 —
+    # 위에 놓으면 첫 문장이 강의가 되고, 안 놓으면 여느 점집과 같아집니다.
+    source_below: bool = False
     html: str
     question: str
     yes: str
@@ -120,7 +129,16 @@ class RelayResponse(BaseModel):
 class FeedbackRequest(BaseModel):
     statement_id: str = Field(max_length=200)
     chart_id: str
-    answer: int = Field(ge=0, le=1)   # 1 그렇다 / 0 아니다
+    # 1 그렇다 / 0 아니다 / **null 글쎄올시다**
+    #
+    # ★ 이분법이 공감률을 오염시키고 있었습니다.
+    #   그렇소·아니오 둘뿐이라 애매한 사람이 **거짓 '그렇소'** 를 눌렀습니다.
+    #   그리고 답을 안 하면 다음 단이 안 열려서, 판단을 미루고 싶은 손님에게는
+    #   훅이 막다른 화면이었습니다. 첫 단이면 그대로 이탈입니다.
+    #
+    #   null 은 **노출로만** 셉니다 (repo._counts 의 shown). 공감률의
+    #   분모에는 안 들어갑니다.
+    answer: Optional[int] = Field(default=None, ge=0, le=1)
     stage: Optional[str] = None
     lens_id: Optional[str] = None
     concern: Optional[Concern] = None
@@ -140,6 +158,9 @@ class DailyResponse(BaseModel):
     element: str
     relation: str
     score: int
+    # 이 점수가 무엇을 센 것인가. 부정만 하지 않고 셈법을 펴 보입니다.
+    score_why: list
+    score_says: str
     text: str
     # 본문을 줄 단위로. 관계 × 일간 × 신강약 × 계절 × 용신 을 곱한 것이라
     # 같은 날 다른 사람이 받는 문장이 서로 다릅니다. (engine/daily.py)

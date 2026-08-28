@@ -232,8 +232,18 @@ def run_one(p, T: Tally, today: date):
     hook_html = "".join(s["html"] for s in segs)
     T.uniq["훅 전문"][hook_html] += 1
     T.uniq["훅 0단(찌르기)"][segs[0]["html"]] += 1
-    if not p["axis4"]:
-        T.notes["넉 자 미입력 — 훅 2.5단(어긋난 자리)이 빠짐"] += 1
+    # ★ 이 집계가 거짓말을 하고 있었습니다.
+    #   넉 자를 안 적으면 2.5단이 통째로 빠지던 시절의 셈입니다. 지금은
+    #   대체 단이 나옵니다 — 물은 자리와 글자가 센 자리를 맞붙입니다
+    #   (bank._concern_axis_seg). 고친 구멍을 계속 뚫린 것으로 세면
+    #   다음 사람이 없는 일을 고치러 갑니다.
+    #
+    #   그래서 axis4 의 유무가 아니라 **실제로 나온 단**을 셉니다.
+    stages = {s["stage"] for s in segs}
+    if "2.5" not in stages:
+        T.stop["훅 2.5단이 통째로 빠짐"] += 1
+    elif not p["axis4"]:
+        T.notes["넉 자 미입력 — 훅 2.5단이 대체 단(물은 자리)으로 나감"] += 1
 
     # 적합성 — 훅 0단이 이 사람의 약오행·일간·고민에서 나왔는가
     B = bank_mod.bank()

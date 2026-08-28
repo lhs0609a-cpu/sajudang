@@ -24,6 +24,44 @@ export function apiMisconfigured(): boolean {
   return localApi && !localSite;
 }
 
+/**
+ * 목패 한 장. ★ 값도 분량도 **서버가 세어서** 줍니다.
+ *
+ * 화면이 제 손으로 적으면 엔진이 달라져도 그 줄은 안 바뀌어 다시
+ * 어긋납니다 — "평생운 18컷 · 25페이지" 라 적혀 있었고 실제로는
+ * 11컷이었습니다.
+ */
+export interface TierCard {
+  id: string;
+  name: string;
+  price: number;
+  /** 달마다 받는 값인가. `forever` 와 짝입니다. */
+  per_month: boolean;
+  /** 한 번 치르면 계속인가. all·one 이 참입니다. */
+  forever: boolean;
+  note: string;
+  /** 이 명식으로 실제 열리는 자리 수. one 은 한 사람, all·sub 은 스무 사람 합계. */
+  cuts: number;
+  /** 그 분량이 몇 글자인가. '컷' 은 손님의 말이 아닙니다. */
+  chars: number;
+  /** 읽는 데 걸리는 어림 시간(분). 서버가 글자 수로 셉니다. */
+  minutes: number;
+  /** 몇 사람이 열리는가. one 은 1, all·sub 은 스무 사람. */
+  lenses: number;
+  locked: number;
+  opens: string[];
+}
+
+/** 값을 치른 직후 **실제로** 열린 것. 명식 캐시가 없으면 counted=false. */
+export interface Granted {
+  counted: boolean;
+  cuts?: number;
+  chars?: number;
+  minutes?: number;
+  lenses?: number;
+  tier_name?: string;
+}
+
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
     super(message);
@@ -61,6 +99,8 @@ export const api = {
   hook: (req: {
     chart_id: string; concern: string; axis4?: string | null;
     name?: string; lens_id?: string | null;
+    /** 「아니오」가 몇 번 나왔는가. 둘이면 도령이 짚는 자리를 바꿉니다. */
+    misses?: number;
   }) => post<HookResponse>("/v1/hook", req),
 
   /**
@@ -85,13 +125,22 @@ export const api = {
       `/v1/relay/consume?session_id=${encodeURIComponent(sessionId)}`, {}),
 
   feedback: (req: {
-    statement_id: string; chart_id: string; answer: 0 | 1;
+    statement_id: string; chart_id: string;
+    /** 1 그렇소 · 0 아니오 · **null 글쎄올시다**(노출로만 셉니다) */
+    answer?: 0 | 1 | null;
     stage?: string; lens_id?: string | null; concern?: string; axis4?: string | null;
   }) => post<{ ok: boolean; recorded: number }>("/v1/feedback", req),
 
-  /** 공감률. 응답 100건 미만이면 shown=false — 숫자를 지어내지 말 것. */
+  /**
+   * 공감률. 응답 100건 미만이면 shown=false — 숫자를 지어내지 말 것.
+   *
+   * ★ 그때도 `seen`(이 문장이 몇 번 나갔는가)은 옵니다. 공감률이 비어
+   *   있는 동안 그 자리를 비워 두면 사회적 증거가 0인 채로 결제
+   *   갈림길까지 갑니다. 노출 수는 정확도 주장이 아니라 사실입니다.
+   */
   agreement: (statementId: string) =>
-    call<{ shown: boolean; rate?: number; total?: number; min_responses?: number }>(
+    call<{ shown: boolean; rate?: number; total?: number; seen?: number;
+           min_responses?: number }>(
       `/v1/agreement?statement_id=${encodeURIComponent(statementId)}`),
 
   /* ── 분석지 · 공유 ── */
@@ -132,14 +181,8 @@ export const api = {
     chart_id: string; lens_id: string;
     concern?: string; axis4?: string | null;
   }) =>
-    post<{
-      tiers: {
-        id: string; name: string; price: number; per_month: boolean;
-        note: string; cuts: number; locked: number; opens: string[];
-      }[];
-      lens_id: string;
-      refund_notice: string;
-    }>("/v1/pay/tiers", req),
+    post<{ tiers: TierCard[]; lens_id: string;
+            refund_notice: string; refund_say: string }>("/v1/pay/tiers", req),
 
   payPrepare: (req: {
     session_id: string; chart_id: string; lens_id: string;
@@ -147,12 +190,31 @@ export const api = {
   }) => post<{
     order_id: string; amount: number; tier: string;
     client_key: string | null; enabled: boolean; refund_notice: string;
+    /** 같은 약속을 이 집의 말로. 결제 버튼 **바로 위**에 놓습니다. */
+    refund_say: string;
     purchases_today: number; per_day_limit: number;
   }>("/v1/pay/prepare", req),
 
   payConfirm: (req: { session_id: string; order_id: string; payment_key: string }) =>
-    post<{ ok: boolean; tier: string; unlocked: string[]; seal: string }>(
-      "/v1/pay/confirm", req),
+    post<{
+      ok: boolean; tier: string; unlocked: string[]; seal: string;
+      refund_notice: string;
+      /** 방금 무엇을 얻었는가. ★ 서버가 셉니다 — 화면이 적지 않습니다. */
+      granted: Granted;
+    }>("/v1/pay/confirm", req),
+
+  /**
+   * 별점·후기.
+   *
+   * ★ '결제 확인됨' 을 여기서 주장하지 마세요. 그건 **치른 주문**이
+   *   정합니다 (서버가 session_id 로 봅니다). 화면이 paid 를 실어
+   *   보내면 그건 광고 문구를 손님이 스스로 다는 것과 같습니다.
+   */
+  review: (req: {
+    lens_id: string; rating?: number | null; body?: string;
+    session_id?: string; chart_id?: string;
+  }) => post<{ ok: boolean; verified: boolean; visible: boolean; say: string }>(
+    "/v1/review", req),
 
   daily: (chartId: string) =>
     call<DailyResponse>(`/v1/daily?chart_id=${encodeURIComponent(chartId)}`),

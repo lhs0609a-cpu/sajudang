@@ -41,10 +41,23 @@ def test_hook_has_all_stages(f):
     assert [s["stage"] for s in segs] == ["0", "1", "2", "2.5", "3"]
 
 
-def test_hook_without_axis4_drops_the_gap_stage(f):
-    stages = [s["stage"] for s in bank.build_hook(f, "love")]
-    assert "2.5" not in stages
-    assert len(stages) == 4
+def test_hook_without_axis4_still_gets_a_25_stage(f):
+    """
+    ★ 규칙이 바뀐 자리입니다.
+      전에는 넉 자를 안 적으면 2.5단을 통째로 뺐습니다. 재보니 그게
+      **16.4%** 였고, 하필 훅에서 유일하게 손님이 낸 것과 여덟 글자를
+      맞붙이는 자리였습니다 — 가장 "나에 대한 말" 처럼 읽히는 대목이
+      조건부였던 것입니다.
+
+      넉 자가 없어도 손님이 낸 것이 하나 더 있습니다: **고민**.
+      물은 자리와 글자가 센 자리를 나란히 놓습니다.
+    """
+    segs = bank.build_hook(f, "love")
+    stages = [s["stage"] for s in segs]
+    assert stages == ["0", "1", "2", "2.5", "3"]
+    seg = next(s for s in segs if s["stage"] == "2.5")
+    assert seg["statement_id"].startswith("cax:")
+    assert seg["source"], "대체 단에도 근거가 붙어야 합니다"
 
 
 def test_hook_with_matching_axis4_still_speaks(f):
@@ -103,7 +116,7 @@ def test_gap_interpretation_never_asserts_the_past():
 def test_hook_works_for_every_concern(f):
     for c in CONCERNS:
         segs = bank.build_hook(f, c)
-        assert len(segs) == 4
+        assert len(segs) == 5
         assert all(s["html"] for s in segs)
 
 
@@ -147,7 +160,7 @@ def test_you_word_follows_the_lens(f):
 
 def test_hook_works_without_hour(f_no_hour):
     segs = bank.build_hook(f_no_hour, "work")
-    assert len(segs) == 4
+    assert len(segs) == 5
 
 
 def test_saju_axis_is_four_letters(f):

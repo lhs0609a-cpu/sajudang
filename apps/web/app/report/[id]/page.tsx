@@ -21,6 +21,31 @@ type Tab = "c1" | "c2" | "c3" | "c4" | "c5" | "c6";
 
 const TABS: Tab[] = ["c1", "c2", "c3", "c4", "c5", "c6"];
 
+/** 두루마리를 얼마나 내려왔는가. 얇은 막대 한 줄. */
+function ScrollProgress() {
+  const [pct, setPct] = useState(0);
+  useEffect(() => {
+    const on = () => {
+      const h = document.documentElement;
+      const max = h.scrollHeight - h.clientHeight;
+      setPct(max > 0 ? Math.min(100, Math.round((h.scrollTop / max) * 100)) : 0);
+    };
+    on();
+    window.addEventListener("scroll", on, { passive: true });
+    window.addEventListener("resize", on);
+    return () => {
+      window.removeEventListener("scroll", on);
+      window.removeEventListener("resize", on);
+    };
+  }, []);
+  return (
+    <div className="rprog noprint" aria-hidden>
+      <i style={{ width: `${pct}%` }} />
+    </div>
+  );
+}
+
+
 function ReportInner() {
   const params = useParams<{ id: string }>();
   const query = useSearchParams();
@@ -35,6 +60,42 @@ function ReportInner() {
   const [rep, setRep] = useState<ReportResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [rating, setRating] = useState(0);
+
+  /*
+   * 후기 — ★ 여기가 받는 척만 하고 버리던 자리입니다.
+   *
+   *   별점은 화면 상태만 바꿨고, 후기 칸에는 value 도 onChange 도
+   *   없었습니다. 손님이 친 글자는 **버튼을 누르는 순간 사라졌습니다.**
+   *   바로 아래에는 "결제하고 끝까지 읽은 분의 후기에만 '결제 확인됨'
+   *   표시가 붙습니다" 라고 적혀 있었는데, 붙일 후기가 한 건도 저장되지
+   *   않았습니다.
+   */
+  const [reviewBody, setReviewBody] = useState("");
+  const [reviewSay, setReviewSay] = useState<string | null>(null);
+  const [reviewBusy, setReviewBusy] = useState(false);
+  const [reviewSent, setReviewSent] = useState(false);
+
+  const hasReview = rating > 0 || reviewBody.trim().length > 0;
+
+  async function sendReview() {
+    if (!hasReview || reviewSent || reviewBusy) return;
+    setReviewBusy(true);
+    try {
+      /* '결제 확인됨' 은 서버가 치른 주문을 보고 정합니다.
+         여기서 paid 를 실어 보내지 않습니다 — 그건 광고 문구를
+         손님이 스스로 다는 것과 같습니다. */
+      const r = await api.review({
+        lens_id: lensId, rating: rating || null, body: reviewBody,
+        session_id: s.sessionId, chart_id: s.chartId ?? undefined,
+      });
+      setReviewSay(r.say);
+      setReviewSent(true);
+    } catch (e) {
+      setReviewSay(e instanceof ApiError ? e.message : "말을 받아 두지 못했소.");
+    } finally {
+      setReviewBusy(false);
+    }
+  }
 
   /* 고리 — 공유 링크. 생년월일시는 담기지 않습니다. (services/api/routers/share.py) */
   const [sharing, setSharing] = useState(false);
@@ -165,13 +226,33 @@ function ReportInner() {
         <Say who={rep.lens.name}>
           여기까지가 값 없이 하는 얘기요. 나머지에는 <b>왜</b>와 <b>언제</b>가 들어 있소.
         </Say>
+        {/*
+          ★ 여기가 `가가가가 가가가가가 가가가` 였습니다. 자리표시
+            문자열이 그대로 배포돼 있었습니다.
+
+            궁금증은 **구체적일 때만** 생깁니다 — 무엇을 놓치는지 모르면
+            아쉽지도 않습니다. 이제 서버가 그 컷의 첫 줄을 잘라서
+            내려보냅니다 (engine/report._teaser). 본문의 40%를 넘지
+            않고, 조사에서 끊기지 않습니다.
+
+            읽히는 것은 맛보기까지. 그 뒤에 흐려진 자락을 이어 붙여
+            **이 아래로 더 있다**는 것만 보입니다.
+        */}
         {rep.locked.map((l) => (
           <div className="dz" key={l.id}>
             <div className="k">{l.title}</div>
             <p className="sm">근거 · {l.source}</p>
-            <p className="bl">가가가가 가가가가가 가가가</p>
+            {l.teaser ? (
+              <p className="tz">
+                {l.teaser}
+                <span className="bl">그 다음은 값을 치른 뒤에 보이오</span>
+              </p>
+            ) : (
+              <p className="bl">가려 둔 자리요</p>
+            )}
+            {/* 분량은 서버가 셉니다. 화면이 적지 않습니다. */}
             <p className="sm">
-              {l.need_tier === "one" ? "이 자리 하나" : "여덟 글자 전부"}부터 열리오
+              {l.need_tier_name}부터 열리오 · {l.chars.toLocaleString()}자
             </p>
           </div>
         ))}
@@ -223,12 +304,40 @@ function ReportInner() {
             </button>
           ))}
         </div>
-        <textarea className="fld" rows={4} placeholder="남기고 싶은 말" />
+        <textarea
+          className="fld"
+          rows={4}
+          placeholder="남기고 싶은 말"
+          maxLength={1000}
+          value={reviewBody}
+          disabled={reviewSent}
+          onChange={(e) => setReviewBody(e.target.value)}
+        />
         <p className="sm">
           결제하고 끝까지 읽은 분의 후기에만 &quot;결제 확인됨&quot; 표시가 붙습니다.
           대가를 주고받은 글은 싣지 않습니다.
         </p>
-        <button className="btn mt" onClick={() => {
+        {/* 연락처를 적어 두고 가는 손님이 있습니다. 미리 말합니다. */}
+        <p className="sm">
+          연락처나 주민번호가 섞이면 저장하기 전에 지웁니다. 보관할 이유가 없소.
+        </p>
+
+        {reviewSay ? (
+          <Say who={rep.lens.name}>{reviewSay}</Say>
+        ) : (
+          <button
+            className="btn mt"
+            disabled={!hasReview || reviewBusy}
+            onClick={sendReview}
+          >
+            {reviewBusy ? "받아 적는 중이오" : "남긴다"}
+          </button>
+        )}
+
+        <button className="btn gh mt" onClick={async () => {
+          /* 아직 안 보낸 말이 있으면 나가기 전에 보냅니다.
+             손님이 친 글자를 버리지 않습니다. */
+          await sendReview();
           if (!s.seals.includes(lensId)) s.set({ seals: [...s.seals, lensId] });
           router.push("/relay");
         }}>
@@ -244,6 +353,13 @@ function ReportInner() {
 
   return (
     <Shell title={rep.lens.name}>
+      {/*
+        ★ 18~22컷이 진행 표시 없이 한 두루마리로 이어졌습니다.
+          어디쯤 읽고 있는지, 얼마나 남았는지가 없어서 중도 이탈이 그대로
+          미완독이 됩니다 — 미완독은 후기도 재구매도 없습니다.
+          훅에서 이미 단계 감각을 만들어 놨으니 결이 맞습니다.
+      */}
+      <ScrollProgress />
       <Scene id="oldpaper" />
 
       {/* ★ 추가 입력이 틀렸을 때. 리포트를 통째로 막지 않습니다 —
@@ -276,11 +392,17 @@ function ReportInner() {
           <p className="saying" dangerouslySetInnerHTML={{ __html: rep.opening }} />
         )}
 
-        {body.map((c) => (
+        {body.map((c, i) => (
           <div
             className={"blk in" + (c.id.startsWith("lc_") ? " own" : "")}
             key={c.id}
           >
+            {/* ★ 끝이 끝으로 읽히게 합니다.
+                closing_cut 의 자리 고정은 이미 돼 있는데, 손님은 그게
+                마지막인 줄 모른 채 지나갑니다. 기억은 마지막이 지배합니다. */}
+            {i === body.length - 1 && body.length > 1 && (
+              <p className="lastcut">이제 마지막 자리요.</p>
+            )}
             <div className="lab">{c.title}</div>
             {/* ★ 근거를 본문 위에, 본문과 같은 급으로 둡니다.
                 전에는 8.5px 딱지라 아무도 안 봤습니다. */}

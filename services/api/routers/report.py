@@ -5,6 +5,7 @@ POST /v1/omnibus   — 스무 사람 종합. **값을 치른 사람만.**
 from pydantic import BaseModel, Field
 from fastapi import APIRouter, HTTPException
 
+import payments
 import store
 from engine import extras as extras_mod
 from engine import lens as lens_mod
@@ -83,6 +84,15 @@ def post_report(req: ReportRequest) -> ReportResponse:
                             req.concern, req.axis4, req.extras)
     except (ValueError, KeyError) as e:
         raise HTTPException(status_code=422, detail=str(e))
+
+    # ★ 잠긴 컷이 **어느 목패에서 열리는지**를 그 목패의 이름으로 말합니다.
+    #   전에는 화면이 need_tier 를 보고 이름을 제 손으로 지어냈습니다.
+    #   `all` 이 "여덟 글자 전부" 에서 "스무 사람 전부" 로 바뀌었는데
+    #   페이월만 옛 이름을 부르고 있었습니다 — 목패에 적힌 이름과
+    #   페이월에 적힌 이름이 달랐다는 뜻입니다. 이름도 한 벌입니다.
+    for cut in data["locked"]:
+        cut["need_tier_name"] = payments.TIER_NAME[cut["need_tier"]]
+
     return ReportResponse(**data)
 
 

@@ -26,10 +26,22 @@ PRIORITY = {
     "turning": 85,      # 대운 전환
     "year": 80,         # 입춘 세운
     "birthday": 75,     # 생일
+    "week_check": 70,   # 「이번 주 한 가지」 회수 — 우리가 먼저 한 약속
     "month": 60,        # 절입일 월운
     "new_lens": 50,     # 새 캐릭터 출시
     "daily": 10,        # 일진
 }
+
+# 「이번 주 한 가지」를 며칠 뒤에 회수하는가.
+#
+# ★ 이 집이 **스스로 만든 복귀 고리를 안 쓰고 있었습니다.**
+#   무료 구간이 이미 "다음에 오시거든 **했는지만** 말해 주시오" 라고
+#   약속해 놓고, 다시 묻는 자리가 없었습니다. 손님이 값을 안 치르고
+#   나가도 이 약속 하나는 손에 들고 갑니다.
+#
+# ★ 일진을 미는 대신 이걸 밉니다. 일진은 1년에 352건이라 다 밀면
+#   그날로 알림이 꺼집니다. 이건 리포트 한 장에 **한 번**입니다.
+WEEK_CHECK_DAYS = 7
 
 KST_OFFSET = timedelta(hours=9)
 
@@ -106,14 +118,36 @@ def _daily_hits(features: dict, gan: str, ji: str) -> Optional[dict]:
 
 def plan_for(features: dict, birth: date, on: Optional[date] = None,
              lookback_statement: Optional[dict] = None,
-             new_lens: Optional[str] = None) -> Optional[dict]:
+             new_lens: Optional[str] = None,
+             week_task: Optional[dict] = None) -> Optional[dict]:
     """
     그날 보낼 알림 **하나**를 고른다. 없으면 None.
 
     lookback_statement : repo 에서 꺼낸 6개월 전 answer=1 문장. 없으면 회고는 건너뛴다.
+    week_task          : {"given_on": date, "statement_id": str} —
+                         「이번 주 한 가지」를 건넨 날. WEEK_CHECK_DAYS 뒤에
+                         한 번 회수합니다.
     """
     on = on or date.today()
     candidates: list[dict] = []
+
+    # ── 「이번 주 한 가지」 회수 ────────────────────────────
+    #
+    # ★ 우리가 먼저 한 약속입니다 — "다음에 오시거든 했는지만 말해
+    #   주시오". 약속해 놓고 안 물으면 그 문장은 그냥 덕담이 됩니다.
+    #   딱 한 번만 묻습니다. 했는지 안 했는지만 셉니다 — 안 했다고
+    #   나무라지 않습니다.
+    if week_task and week_task.get("given_on"):
+        given = week_task["given_on"]
+        if (on - given).days == WEEK_CHECK_DAYS:
+            candidates.append({
+                "kind": "week_check",
+                "payload": {
+                    "statement_id": week_task.get("statement_id"),
+                    "given_on": given.isoformat(),
+                    "text": "이레 전에 한 가지를 드렸소. 했는지만 말해 주시오.",
+                },
+            })
 
     # ── 반기 회고 ──────────────────────────────────────────
     if lookback_statement:

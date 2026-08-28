@@ -231,11 +231,26 @@ def axis_sid(cmp: dict, strength: Optional[str] = None) -> str:
 # ══════════════════════════════════════════════════════════
 # 훅 5단
 # ══════════════════════════════════════════════════════════
-def _seg(stage, label, source, body, question, yes, no, sid, show_source=True):
+def _seg(stage, label, source, body, question, yes, no, sid,
+         show_source=True, source_below=False):
+    """
+    source_below — 근거를 본문 **아래**에 두라는 표시.
+
+    ★ 0단이 근거 없이 나가고 있었습니다.
+      `show_source=False` 라 손님이 이 집에서 처음 읽는 문장이 하필
+      근거가 없는 문장이었습니다. "근거 대는 집" 이라는 자리가 가장 센
+      첫 문장에서 사라진 것입니다. 게다가 화면이 공감률을 `source` 가
+      있을 때만 그려서, **0단은 응답이 쌓여도 영영 공감률이 안 붙었습니다.**
+
+      그렇다고 근거를 첫 문장 **위**에 놓으면 찌르기가 무뎌집니다.
+      그래서 자리만 옮깁니다 — 찌르고, 그 아래에 무엇을 보고 한 말인지
+      적습니다.
+    """
     return {
         "stage": stage,
         "label": label,
         "source": source if show_source else None,
+        "source_below": bool(source_below),
         "html": guard.enforce(body, {"stage": stage, "statement_id": sid}),
         "question": question,
         "yes": yes,
@@ -259,16 +274,97 @@ def born_season(f) -> str:
     return SEASON_OF_JI[f.pillars[1]["ji"]]
 
 
+# ══════════════════════════════════════════════════════════
+# 물은 자리 ↔ 글자가 센 자리
+# ══════════════════════════════════════════════════════════
+#
+# ★ 이건 계산이 아니라 유파 선택입니다. 표는 seed/bank.json 의
+#   CONCERN_AXIS 한 곳에 있습니다. 사랑은 남녀가 갈립니다 —
+#   남자는 재성, 여자는 관성으로 보는 것이 통설입니다.
+GROUP_TOTAL = {"비겁": "bi", "식상": "sik", "재성": "jae",
+               "관성": "gwan", "인성": "inn"}
+
+
+def concern_group(concern: str, sex: str) -> str:
+    """이 고민을 여덟 글자의 어느 자리에서 보는가."""
+    row = bank()["CONCERN_AXIS"][concern]
+    if sex == "F" and row.get("gF"):
+        return row["gF"]
+    return row["g"]
+
+
+def _concern_axis_seg(f, concern: str, esc_you: str) -> dict:
+    """넉 자가 없을 때의 2.5단. 손님이 낸 것(고민)과 글자를 맞붙인다."""
+    B = bank()
+    row = B["CONCERN_AXIS"][concern]
+    grp = concern_group(concern, f.sex)
+    word = row["w"]
+    asked = getattr(f, GROUP_TOTAL[grp])      # 물은 자리의 개수
+    loud = f.flow                              # 글자가 가장 센 자리
+    same = grp == loud
+
+    lead = ('<p class="ask">%s <b>%s</b>이 걸려 오셨소. '
+            '%s 여덟 글자에서 <b>%s</b>으로 보오 — %s <b>%s</b>이오.</p>'
+            % (josa(esc_you, "은", "는"), word,
+               josa(word, "은", "는"), grp,
+               josa("%s %s" % (esc_you, grp), "은", "는"), asked))
+
+    if asked == 0:
+        body = lead + '<p class="hit">%s</p>' % (B["CONCERN_EMPTY"] % grp)
+        q, yes, no = ("…짚이오?",
+                      "그럴 게요. 없는 자리는 애써도 안 늘어나오 — 빌려 쓰는 법을 봐야 하오.",
+                      "그럼 다른 데서 메우고 계신 게요.")
+    elif same:
+        body = lead + '<p class="hit">%s</p>' % B["CONCERN_SAME"][grp]
+        q, yes, no = ("…그렇소?",
+                      "그럴 게요. 가장 센 자리가 가장 안 보이는 법이오.",
+                      "그럼 아직 안 터진 게요.")
+    else:
+        body = (lead
+                + '<p class="hit">헌데 %s</p>' % B["CONCERN_ELSE"][loud]
+                + '<p class="tale">%s</p>' % B["WHY_TAIL"][loud])
+        q, yes, no = ("…물으신 자리가 거기가 맞소?",
+                      "그럴 게요. 물음은 %s에서 났는데 걸린 데는 딴 자리요." % word,
+                      "그럼 물으신 자리가 맞소. 그건 그것대로 보겠소.")
+
+    return _seg(
+        stage="2.5", label="2.5 · 물은 자리와 센 자리",
+        source="%s → %s %s · 가장 센 자리 %s" % (word, grp, asked, loud),
+        body='<div class="cax">%s</div>' % body,
+        question=q, yes=yes, no=no,
+        sid="cax:%s:%s:%s:%s" % (concern, grp, min(asked, 4), loud))
+
+
+# 몇 번 「아니오」가 쌓이면 방향을 트는가.
+#
+# ★ 여기가 비어 있었습니다.
+#   손님의 응답이 **즉답 한 줄만** 바꾸고, 다음 단의 본문은 응답과
+#   무관하게 똑같이 나왔습니다. 세 번 아니라 해도 도령이 한 번도
+#   방향을 안 틀었습니다 — 그 순간 손님은 이게 녹음이라는 걸 압니다.
+#
+#   콜드리딩이 세다고 하는 대목은 문장이 아니라 **고쳐 나가는 행위**
+#   자체입니다. 그래서 두 번 어긋나면 짚는 자리를 바꿉니다.
+#
+# ★ 다만 없는 문장을 지어내지는 않습니다.
+#   2단의 불붙는 자리(IGNITE)는 **십신 × 고민** 축입니다. 그걸 접고
+#   이미 있는 **계절 · 일간** 축(STAB_SEASON · STAB_GAN)으로 갈아
+#   끼웁니다. 순서 세 줄은 흐름·약오행 축이라 그대로 둡니다 —
+#   손님이 아니라고 한 것은 십신 쪽이지 흐름 쪽이 아닙니다.
+TURN_AT = 2
+
+
 def build_hook(f, concern: str, axis4: Optional[str] = None,
-               name: str = "", you: str = "그대") -> list:
+               name: str = "", you: str = "그대", misses: int = 0) -> list:
     """
     훅 5단을 조합한다.
 
     f       : engine.features.Features
     concern : money / work / love / people / dir / health
-    axis4   : 성향 4글자 (선택). 없으면 2.5단을 넣지 않는다.
+    axis4   : 성향 4글자 (선택). 없으면 2.5단 자리에 대체 단이 들어간다.
     name    : 사용자가 적은 이름 (선택)
     you     : 캐릭터별 호칭 — 그대 / 자네 / 아저씨
+    misses  : 여기까지 「아니오」가 몇 번 나왔는가. TURN_AT 이상이면
+              2단이 십신 축을 접고 계절·일간 축으로 다시 짚는다.
 
     ★ 공감률(“몇 명 중 몇 %”)은 여기서 만들지 않습니다.
       실응답 100건 이상 쌓인 문장만 화면에 노출합니다. (CLAUDE.md 절대 규칙 2)
@@ -294,7 +390,10 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     gan_line = _pick("STAB_GAN", f.day_gan)
     head = ('<p class="hi">%s.</p>' % esc_name) if esc_name else ""
     segs.append(_seg(
-        stage="0", label="", show_source=False,
+        stage="0", label="",
+        # 근거를 답니다. 다만 찌르기 **아래**에 답니다 — 위에 놓으면
+        # 첫 문장이 강의가 되고, 안 놓으면 여느 점집과 같아집니다.
+        show_source=True, source_below=True,
         source="%s일간 · %s %s · %s" % (f.day_gan, element_word(weak),
                                        f.elements[weak], top),
         body='<div class="stab">%s<p>%s</p><p class="sub">%s</p>'
@@ -342,22 +441,47 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     #   시기는 말하지 않습니다 — '언제' 는 유료 구간(대운)의 몫입니다.
     sea = born_season(f)
     sea_line = _pick("STAB_SEASON", sea)
+
+    # ── 축을 트는 자리 ──────────────────────────────────
+    #
+    # 두 번 아니라 하셨으면 십신으로 짚던 것을 접습니다. 첫 줄
+    # (IGNITE = 십신 × 고민) 을 계절·일간 줄로 갈아 끼우고, 무엇을
+    # 접었는지 손님에게 말합니다. 감추면 그냥 다른 말이 나온 것이고,
+    # 말하면 **고쳐 짚는 것**이 됩니다.
+    turned = misses >= TURN_AT
+    if turned:
+        lines[0] = "%s 누가 시킨 것도 아닌데." % _pick("STAB_GAN", f.day_gan)
+        turn_line = ('<p class="turn">두 번 아니라 하셨소. '
+                     '십신으로 짚던 것을 접고 <b>태어난 달과 일간</b>으로 '
+                     '다시 보겠소.</p>')
+        seq = [sea, fl["k"], rs["k"]]
+    else:
+        turn_line = ""
+
     segs.append(_seg(
         stage="2", label="2 · 순서",
-        source="%s %d · %s일간 → %s %s(%s) · %s %s · %s생"
-               % (top, f.ten_gods[top], ELEMENT_OF_GAN[f.day_gan],
-                  f.flow_el, f.elements[f.flow_el], flow,
-                  weak, f.elements[weak], sea),
-        body=('<div class="scene"><p class="sea">%s</p>'
+        source=("%s생 · %s일간 → %s %s(%s) · %s %s"
+                % (sea, f.day_gan, f.flow_el, f.elements[f.flow_el], flow,
+                   weak, f.elements[weak])
+                if turned else
+                "%s %d · %s일간 → %s %s(%s) · %s %s · %s생"
+                % (top, f.ten_gods[top], ELEMENT_OF_GAN[f.day_gan],
+                   f.flow_el, f.elements[f.flow_el], flow,
+                   weak, f.elements[weak], sea)),
+        body=('<div class="scene">%s<p class="sea">%s</p>'
               '<p>%s는 늘 이 순서요.</p><div class="seq">%s</div>%s</div>'
-              % (sea_line, esc_you,
+              % (turn_line, sea_line, esc_you,
                  "".join('<div><span>%s</span></div>' % s for s in seq),
                  "".join('<p class="%s">%s</p>' % ("hit" if i == 1 else "", l)
                          for i, l in enumerate(lines)))),
         question="…이 순서가 맞소?",
         yes="그럴 줄 알았소. 그럼 이름을 붙여드리리다.",
         no="아직 이르오. 이름을 붙여보면 알 것이오.",
-        sid="seq:%s:%s:%s:%s:%s:%s" % (top, concern, flow, weak, strength, sea)))
+        # ★ 튼 단은 **다른 문장으로 집계**됩니다. 그래야 어긋난 축을
+        #   버리는 신호로 쓸 수 있습니다 (docs/18 · /v1/funnel).
+        sid="seq%s:%s:%s:%s:%s:%s:%s"
+            % ("@turn" if turned else "",
+               top, concern, flow, weak, strength, sea)))
 
     # ── 2.5단 · 겹친 자리와 어긋난 자리 ──────────────────
     #
@@ -383,6 +507,18 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
             body=axis_block(cmp, strength),
             question=q, yes=yes, no=no,
             sid=axis_sid(cmp, strength)))
+    else:
+        # ── 2.5단 대체 · 물은 자리와 글자가 센 자리 ──────────
+        #
+        # ★ 넉 자를 안 적은 사람에게는 이 단이 통째로 빠지고 있었습니다.
+        #   재보니 **16.4%** 입니다. 하필 훅에서 유일하게 **손님이 스스로
+        #   낸 것과 여덟 글자를 맞붙이는** 자리라, 가장 "나에 대한 말"
+        #   처럼 읽히는 대목이 조건부였습니다.
+        #
+        #   넉 자가 없어도 손님이 낸 것이 하나 더 있습니다 — **고민**입니다.
+        #   물으러 온 자리와 글자가 센 자리를 나란히 놓습니다. 구조는
+        #   위와 같습니다: 겹친 자리인가, 어긋난 자리인가.
+        segs.append(_concern_axis_seg(f, concern, esc_you))
 
     # ── 3단 · 이름 ──────────────────────────────────────
     word = bank()["NAME2"].get(weak, {}).get(flow) or bank()["NAMEW"][weak]

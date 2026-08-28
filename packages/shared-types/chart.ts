@@ -161,6 +161,15 @@ export interface HookSegment {
   stage: string;              // "0" | "1" | "2" | "2.5" | "3"
   label: string;
   source: string | null;
+  /**
+   * 근거를 본문 **아래**에 둘 것인가. 0단(찌르기)만 참이다.
+   *
+   * ★ 0단에 근거가 아예 없었습니다. 손님이 이 집에서 처음 읽는 문장이
+   *   하필 근거 없는 문장이라, "근거 대는 집" 이라는 자리가 가장 센
+   *   첫 문장에서 사라졌습니다. 그렇다고 근거를 찌르기 **위**에 놓으면
+   *   첫 문장이 강의가 됩니다. 그래서 자리만 아래로 옮깁니다.
+   */
+  source_below: boolean;
   html: string;               // 서버가 렌더한 HTML. 원문은 서버에만 있다.
   question: string;
   yes: string;
@@ -183,12 +192,32 @@ export interface ReportCut {
   statement_id: string | null;
 }
 
-/** 잠긴 컷은 본문(html)이 오지 않는다. 제목과 근거만 온다. */
+/**
+ * 잠긴 컷은 본문(html)이 오지 않는다. 제목·근거·**첫 줄**만 온다.
+ *
+ * ★ 전에는 화면이 `가가가가 가가가가가 가가가` 를 그렸습니다.
+ *   자리표시 문자열이 그대로 배포된 것입니다. 궁금증은 구체적일 때만
+ *   생깁니다 — 무엇을 놓치는지 모르면 아쉽지도 않습니다.
+ *   이제 서버가 첫 문장을 **잘라서** 내려보냅니다 (engine/report._teaser).
+ */
 export interface LockedCut {
   id: string;
   title: string;
   source: string;
+  /** 첫 줄. 본문의 40%를 넘지 않는다. 없을 수도 있다. */
+  teaser: string | null;
+  /** 이 컷의 실제 분량(글자). '컷' 은 손님의 말이 아니다. */
+  chars: number;
   need_tier: "one" | "all";
+  /**
+   * 그 목패의 **이름**. 서버가 실어 보낸다.
+   *
+   * ★ 화면이 need_tier 를 보고 이름을 제 손으로 지어냈습니다.
+   *   `all` 이 "여덟 글자 전부" 에서 "스무 사람 전부" 로 바뀌었는데
+   *   페이월만 옛 이름을 불러서, 같은 상품을 두 화면이 다른 이름으로
+   *   부르고 있었습니다. 이름도 한 벌입니다 (payments.TIER_NAME).
+   */
+  need_tier_name: string;
 }
 
 export interface LensPublic {
@@ -261,6 +290,15 @@ export interface DailyResponse {
   element: string;
   relation: string;
   score: number;
+  /**
+   * 이 점수가 무엇을 센 것인가.
+   *
+   * ★ 화면이 "적중률이 아니라 배치 점수요" 라고만 적고 있었습니다.
+   *   부정만 하고 정의를 안 주면 손님에게 76은 아무 뜻도 없는 수입니다.
+   *   여기는 근거 대는 집이니 방어가 아니라 셈법 공개로 처리합니다.
+   */
+  score_why: { k: string; v: number; t: string }[];
+  score_says: string;
   /** 본문. lines 를 이어 붙인 것. */
   text: string;
   /** 본문을 줄 단위로. 관계 × 일간 × 신강약 × 계절 × 용신 을 곱한 결과라

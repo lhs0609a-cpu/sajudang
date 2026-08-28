@@ -112,7 +112,10 @@ def test_client_cannot_set_the_amount(app):
         "amount": 10, "price": 10,
     })
     assert r.status_code == 200
-    assert r.json()["amount"] == 19900
+    import payments
+    # 값은 여기 적지 않습니다. 서버가 정한 것과 같은지만 봅니다 —
+    # 숫자를 두 벌 적어 두면 값을 고칠 때 여기가 조용히 거짓이 됩니다.
+    assert r.json()["amount"] == payments.TIER_PRICE["all"]
 
 
 def test_unknown_tier_is_refused(app):
@@ -347,9 +350,19 @@ def _tiers(app, lens_id="yeondam"):
 
 
 def test_tiers_report_the_real_cut_count():
-    """세어 준 컷 수가 리포트가 실제로 내는 컷 수와 같아야 한다."""
+    """
+    세어 준 컷 수가 리포트가 **실제로** 내는 컷 수와 같아야 한다.
+
+    ★ `all` · `sub` 은 한 사람 몫이 아닙니다.
+      그 둘을 치르면 스무 사람이 전부 열립니다
+      (routers/report.entitled_tier 가 모든 캐릭터에 rank 2 를 줍니다).
+      한 사람 몫만 적어 두면 9,900원짜리 달삯과 견줄 때 같은 것으로
+      보입니다 — 실제로 그렇게 보였고, 가운데 목패가 순수하게 열등한
+      선택지가 되어 있었습니다.
+    """
     from fastapi.testclient import TestClient
     import main as main_mod
+    from engine import lens as lens_mod
     from engine.features import Features
     from engine.report import build_report
     from routers.chart import load_features
@@ -361,10 +374,21 @@ def test_tiers_report_the_real_cut_count():
             "concern": "love", "axis4": "INFP"})
         assert r.status_code == 200, r.text
         f = Features(**load_features(cid))
+        released = [l["id"] for l in lens_mod.released()]
         for t in r.json()["tiers"]:
-            rep = build_report(f, cid, "yeondam", t["id"], "love", "INFP")
-            assert t["cuts"] == len(rep["cuts"]), t
-            assert t["locked"] == len(rep["locked"]), t
+            if t["id"] == "one":
+                rep = build_report(f, cid, "yeondam", "one", "love", "INFP")
+                assert t["cuts"] == len(rep["cuts"]), t
+                assert t["locked"] == len(rep["locked"]), t
+                assert t["lenses"] == 1, t
+            else:
+                want = sum(len(build_report(f, cid, lid, t["id"], "love",
+                                            "INFP")["cuts"])
+                           for lid in released)
+                assert t["cuts"] == want, t
+                assert t["lenses"] == len(released), t
+            # 분량도 서버가 셉니다. 화면이 적지 않습니다.
+            assert t["chars"] > 0 and t["minutes"] >= 1, t
 
 
 def test_tiers_price_matches_what_prepare_charges(app):
@@ -390,6 +414,65 @@ def test_tiers_never_promise_more_than_it_gives(app):
     """
     for t in _tiers(app):
         assert t["cuts"] > 0, t
-        # 화면이 팔던 "18컷" 은 실제로 나온 적이 없는 수입니다.
-        assert t["cuts"] < 18, t
+        assert t["chars"] > 0, t
         assert isinstance(t["note"], str) and t["note"], t
+        # 한 사람 몫과 스무 사람 몫이 뒤섞이지 않아야 합니다.
+        assert (t["lenses"] == 1) == (t["id"] == "one"), t
+
+
+# ══════════════════════════════════════════════════════════
+# ★ 목패끼리 잡아먹지 않는가 — 지배 검사
+# ══════════════════════════════════════════════════════════
+#
+# 이 검사가 없어서 값이 서로를 덮고 있었습니다.
+#
+#   · `sub`(9,900원/월)이 `all`(19,900원)과 여는 것이 **글자 그대로**
+#     같았습니다. 절반 값에 같은 것 — `all` 은 순수하게 열등했습니다.
+#   · 풍운도령에서는 「이 자리 하나」와 「여덟 글자 전부」가 값도 컷도
+#     똑같았습니다. **같은 상품이 두 장** 놓여 있었습니다.
+#
+# 값 사다리 검사(tests/test_lens_cuts.py)는 캐릭터 **사이**를 지켰지만
+# 티어 **사이**는 아무도 안 보고 있었습니다. 여기가 그 자리입니다.
+def test_no_tier_is_dominated_by_another(app):
+    """
+    더 비싼데 덜 주거나 똑같이 주는 목패가 있으면 안 된다.
+
+    '똑같이 주는데 값만 다른' 것도 지배로 봅니다 — 그건 값이 아니라
+    이름표입니다.
+    """
+    for lens_id in ("yeondam", "pungun", "jeokhyeol", "nopa", "haengsu"):
+        tiers = {t["id"]: t for t in _tiers(app, lens_id)}
+        for a in tiers.values():
+            for b in tiers.values():
+                if a["id"] == b["id"]:
+                    continue
+                # 기간이 다른 상품끼리는 값을 곧바로 견주지 않습니다
+                # (한 번 치르는 것 vs 달마다). 내용만 봅니다.
+                if a["per_month"] != b["per_month"]:
+                    continue
+                if a["price"] > b["price"]:
+                    assert a["cuts"] > b["cuts"], (
+                        "%s: %s(%d원 %d컷)가 %s(%d원 %d컷)보다 비싼데 "
+                        "더 주지 않습니다"
+                        % (lens_id, a["name"], a["price"], a["cuts"],
+                           b["name"], b["price"], b["cuts"]))
+                elif a["price"] == b["price"]:
+                    assert a["cuts"] != b["cuts"], (
+                        "%s: %s와 %s가 값도 컷도 같습니다 — 같은 상품이 "
+                        "두 장입니다" % (lens_id, a["name"], b["name"]))
+
+
+def test_single_character_never_costs_as_much_as_all_twenty(app):
+    """
+    ★ 「이 자리 하나」가 「스무 사람 전부」와 같거나 비싸면 안 된다.
+
+    가장 비싼 캐릭터가 19,900원인데 `all` 도 19,900원이었습니다.
+    한 사람 값으로 스무 사람을 살 수 있는데 아무도 그걸 모르는 상태였고,
+    풍운도령을 고른 사람에게는 두 목패가 완전히 같아 보였습니다.
+    """
+    import payments
+    from engine import lens as lens_mod
+    top = max(l["price"] for l in lens_mod.released() if l.get("price"))
+    assert top < payments.TIER_PRICE["all"], (
+        "가장 비싼 캐릭터(%d원)가 '스무 사람 전부'(%d원) 이상입니다"
+        % (top, payments.TIER_PRICE["all"]))

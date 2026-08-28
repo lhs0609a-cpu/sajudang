@@ -57,6 +57,8 @@ class PrepareResponse(BaseModel):
     client_key: Optional[str]
     enabled: bool
     refund_notice: str
+    # ★ 같은 약속을 이 집의 말로. 결제 버튼 바로 위에 놓입니다.
+    refund_say: str
     purchases_today: int
     per_day_limit: int
 
@@ -97,48 +99,90 @@ class TiersRequest(BaseModel):
     axis4: Optional[str] = None
 
 
-TIER_NAME = {"one": "이 자리 하나", "all": "여덟 글자 전부",
-             "sub": "스무 사람 모두"}
-TIER_NOTE = {
-    "one": "이 캐릭터가 보는 자리 전부 — 시기(대운)와 용신까지",
-    "all": "여덟 글자 전부 — 대운 맵과 성향 대조까지",
-    "sub": "달마다 · 스무 사람 무제한",
-}
+# 목패 이름·설명은 payments.py 에 한 벌만 둡니다. 값 바로 옆에 있어야
+# 이름만 고치고 값을 안 고치는 일이 안 생깁니다.
+TIER_NAME = payments.TIER_NAME
+TIER_NOTE = payments.TIER_NOTE
+
+# 한 컷을 읽는 데 걸리는 시간. 한글 산문 기준으로 잡았습니다.
+# 분량을 '컷' 이라는 우리 말로만 적으면 손님은 그게 얼마인지 모릅니다.
+CHARS_PER_MINUTE = 550
+
+
+def _plain_len(html: str) -> int:
+    import re
+    return len(re.sub(r"<[^>]+>", "", html or "").strip())
+
+
+def _measure(rep: dict) -> tuple:
+    """(컷 수, 글자 수). 서버가 셉니다 — 화면이 적지 않습니다."""
+    return len(rep["cuts"]), sum(_plain_len(c["html"]) for c in rep["cuts"])
 
 
 @router.post("/tiers")
 def get_tiers(req: TiersRequest) -> dict:
     """
-    이 사람이 이 캐릭터에게서 티어마다 **실제로** 몇 컷을 받는가.
+    이 사람이 티어마다 **실제로** 무엇을 받는가.
 
     부풀리지도 줄이지도 않습니다 — build_report 로 세어서 그대로 냅니다.
+
+    ★ `all` · `sub` 은 이 캐릭터 몫만 세면 안 됩니다.
+      그 둘은 **스무 사람을 전부** 엽니다. 한 사람 몫(18컷)만 적어 두면
+      9,900원짜리 달삯과 견줄 때 같은 것으로 보입니다. 실제로 여는 것을
+      세서 적습니다 — 스무 사람 합계입니다.
     """
+    from engine import lens as lens_mod
     from engine.features import Features
     from engine.report import build_report
     from routers.chart import load_features
 
     f = Features(**load_features(req.chart_id))
+    released = [l["id"] for l in lens_mod.released()]
+
     out = []
     for tier in ("one", "all", "sub"):
         try:
             price = payments.price_of(tier, req.lens_id)
         except payments.PaymentError:
             continue                      # 값 없는 캐릭터의 '이 자리 하나'
+
         rep = build_report(f, req.chart_id, req.lens_id, tier, req.concern,
                            req.axis4)
+        cuts, chars = _measure(rep)
+        lenses = 1
+        # 열리는 자리의 이름. 목패에 적으면 손님이 무엇을 사는지 압니다.
+        opens = [c["title"] for c in rep["locked"]]
+
+        if tier in ("all", "sub"):
+            # 스무 사람 전부를 실제로 세어 합칩니다.
+            cuts = chars = 0
+            for lid in released:
+                r = build_report(f, req.chart_id, lid, tier, req.concern,
+                                 req.axis4)
+                c, ch = _measure(r)
+                cuts += c
+                chars += ch
+            lenses = len(released)
+            opens = []
+
         out.append({
             "id": tier,
             "name": TIER_NAME[tier],
             "price": price,
             "per_month": tier == "sub",
+            "forever": tier in ("one", "all"),
             "note": TIER_NOTE[tier],
             # ★ 센 것을 그대로. 사람마다 다릅니다.
-            "cuts": len(rep["cuts"]),
-            "locked": len(rep["locked"]),
-            "opens": [c["title"] for c in rep["locked"]] if tier == "one" else [],
+            "cuts": cuts,
+            "chars": chars,
+            "minutes": max(1, round(chars / CHARS_PER_MINUTE)),
+            "lenses": lenses,
+            "locked": len(rep["locked"]) if tier == "one" else 0,
+            "opens": opens,
         })
     return {"tiers": out, "lens_id": req.lens_id,
-            "refund_notice": payments.REFUND_NOTICE}
+            "refund_notice": payments.REFUND_NOTICE,
+            "refund_say": payments.REFUND_SAY}
 
 
 @router.post("/prepare", response_model=PrepareResponse)
@@ -168,6 +212,7 @@ def prepare(req: PrepareRequest) -> PrepareResponse:
         order_id=order_id, amount=amount, tier=req.tier,
         client_key=cfg["client_key"], enabled=cfg["enabled"],
         refund_notice=cfg["refund_notice"],
+        refund_say=payments.REFUND_SAY,
         purchases_today=used, per_day_limit=limit)
 
 
@@ -213,8 +258,55 @@ def confirm(req: ConfirmRequest) -> dict:
         seals.append(order["lens_id"])
         store.set_json(seals_key, seals)
 
+    # ★ 값을 치른 직후에 **무엇을 얻었는지**를 세어 함께 보냅니다.
+    #
+    #   완료 화면이 "붉은 끈이 풀렸다 / 이제 나머지를 보시오" 한 줄이었습니다.
+    #   사람은 경험의 정점과 **끝**으로 전체를 기억합니다. 재구매·후기·추천이
+    #   갈리는 자리인데 방금 무엇을 얻었는지가 화면에 없었습니다.
+    #   화면이 제 손으로 세지 않게, 여기서 세어 내려보냅니다.
+    got = _granted(order)
+
     return {"ok": True, "tier": order["tier"], "unlocked": unlocked,
-            "seal": order["lens_id"], "refund_notice": payments.REFUND_NOTICE}
+            "seal": order["lens_id"], "refund_notice": payments.REFUND_NOTICE,
+            "granted": got}
+
+
+def _granted(order: dict) -> dict:
+    """이 결제로 실제로 열린 것. 세어서 냅니다 — 부풀리지 않습니다."""
+    from engine import lens as lens_mod
+    from engine.features import Features
+    from engine.report import build_report
+    from routers.chart import load_features
+
+    tier, lens_id = order["tier"], order.get("lens_id")
+    try:
+        f = Features(**load_features(order["chart_id"]))
+    except Exception:
+        # 명식 캐시가 지워졌으면 세지 않습니다. 지어내지 않습니다.
+        return {"counted": False}
+
+    ids = ([l["id"] for l in lens_mod.released()]
+           if tier in ("all", "sub") else [lens_id])
+    cuts = chars = 0
+    for lid in ids:
+        if not lid:
+            continue
+        try:
+            r = build_report(f, order["chart_id"], lid, tier,
+                             order.get("concern", "love"))
+        except Exception:
+            continue
+        c, ch = _measure(r)
+        cuts += c
+        chars += ch
+    return {
+        "counted": True,
+        "cuts": cuts,
+        "chars": chars,
+        "minutes": max(1, round(chars / CHARS_PER_MINUTE)),
+        "lenses": len(ids),
+        "tier_name": TIER_NAME.get(tier, tier),
+    }
 
 
 @router.post("/refund")

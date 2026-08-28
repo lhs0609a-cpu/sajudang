@@ -712,3 +712,282 @@ body.has-rail-closed .stage { margin-left: 26px; }
   padding-bottom: 10px;
   border-bottom: 1px solid rgba(229, 184, 122, .14);
 }
+
+/* ══════════ 2.5단 대체 — 물은 자리와 센 자리 ══════════
+   .cax  넉 자를 안 적은 사람(16.4%)이 2.5단 자리에서 받는 블록.
+
+   ★ 여기가 스타일 없이 나가고 있었습니다. 서버는 `.ask` `.hit` 을
+     그리는데 CSS 는 `.scene p.hit` 만 있어서, 이 블록에서는 아무것도
+     안 걸렸습니다. 훅에서 유일하게 손님이 낸 것과 여덟 글자를
+     맞붙이는 자리인데 맨 문단으로 떨어져 있었습니다.
+   ------------------------------------------------------ */
+.cax p {
+  font-family: var(--serif);
+  font-size: 16.5px;
+  line-height: 1.92;
+  color: var(--paper2);
+}
+.cax p + p { margin-top: 13px; }
+.cax p b { color: var(--paper); font-weight: 400; }
+.cax p.ask {
+  padding-bottom: 11px;
+  border-bottom: 1px solid rgba(229, 184, 122, .16);
+}
+.cax p.hit { color: var(--c); }
+.cax p.hit b { color: var(--c); }
+
+/* ══════════ 근거를 본문 아래에 ══════════
+   .src.below  0단(찌르기) 전용.
+
+   찌르고 나서 무엇을 보고 한 말인지 답니다. 위에 놓으면 첫 문장이
+   강의가 되고, 안 놓으면 여느 점집과 같아집니다.
+   ------------------------------------------------------ */
+.src.below { margin: 13px 0 0; }
+
+/* ══════════ 잠긴 컷의 맛보기 ══════════
+   .tz  읽히는 첫 줄.  .tz .bl  그 뒤로 흐려진 자락.
+
+   ★ 전에는 `가가가가 가가가가가 가가가` 를 통째로 흐리고 있었습니다.
+     가려 놓기만 하면 무엇을 놓치는지 모르고, 모르면 아쉽지도 않습니다.
+     첫 줄은 **읽히게** 두고, 그 뒤만 흐립니다.
+   ------------------------------------------------------ */
+.tz {
+  font-family: var(--serif);
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--paper2);
+  margin: 4px 0 6px;
+}
+.tz .bl { margin-left: 4px; }
+
+/* ══════════ 결제 버튼 위의 약속 ══════════
+   .vow  "셈이 틀렸다면 값을 돌려드리고 다시 세워 드리오."
+
+   법이 요구하는 고지는 아래 잔글씨로 갑니다. 그 안에 든 이 집의
+   약속만 여기로 올립니다 — 값을 치르기 직전에 읽히는 자리입니다.
+   ------------------------------------------------------ */
+.vow {
+  font-family: var(--serif);
+  font-size: 14.5px;
+  line-height: 1.85;
+  color: var(--paper2);
+  border-left: 2px solid var(--teal);
+  padding: 2px 0 2px 13px;
+  margin: 14px 0 10px;
+}
+
+/* ══════════ 일진 점수의 셈법 ══════════
+   .scw  무엇이 몇 점을 올리고 내렸는가.
+
+   ★ "적중률이 아니라 배치 점수요" 라고만 적혀 있었습니다. 아닌 것만
+     말하고 무엇인지는 안 말하면 76은 아무 뜻도 없는 수입니다.
+   ------------------------------------------------------ */
+.scw {
+  border: 1px solid var(--line);
+  background: var(--bg2);
+  padding: 11px 13px;
+  margin: 10px 0;
+}
+.scw p {
+  display: grid;
+  grid-template-columns: 62px 40px 1fr;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.scw p + p { margin-top: 6px; }
+.scw b {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: .1em;
+  color: var(--paper3);
+  font-weight: 400;
+}
+.scw i {
+  font-family: var(--mono);
+  font-style: normal;
+  font-size: 12px;
+  text-align: right;
+  color: var(--c);
+}
+.scw span { color: var(--paper2); }
+@media (max-width: 420px) {
+  .scw p { grid-template-columns: 54px 34px 1fr; font-size: 11.5px; }
+}
+
+/* ══════════ 골목 — 결과 약속 · 의심 풀기 ══════════
+   .promise    a1 에서 얻는 것을 약속하는 줄
+   .gatedoubt  대문 아래 접어 둔 여섯 문답
+
+   ★ 클릭 네 번이 지나도록 "여기서 무엇을 얻는가" 가 한 줄도 없었습니다.
+     분위기에 예산을 다 쓰면 약속할 자리가 안 남습니다.
+   ------------------------------------------------------ */
+.promise {
+  font-family: var(--serif);
+  font-size: 15.5px;
+  line-height: 1.85;
+  color: var(--paper2);
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(229, 184, 122, .2);
+}
+.promise b { color: var(--c); font-weight: 400; }
+.gatedoubt { padding: 0 4px 8px; }
+.gatedoubt .doubts { margin-top: 0; }
+
+/* ══════════ 링크처럼 보이는 버튼 ══════════
+   접힌 것을 펴는 자리에 씁니다. 버튼처럼 크면 CTA 와 다툽니다.
+   ------------------------------------------------------ */
+.lk {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--sans);
+  font-size: 12px;
+  color: var(--teal);
+  border-bottom: 1px solid rgba(127, 196, 188, .45);
+  cursor: pointer;
+  line-height: 1.6;
+}
+.lk:hover { color: var(--paper); }
+
+/* ══════════ 때 — 시·분을 아는 사람 ══════════
+   ★ 네 시간 칸이 시주를 바꿔 놓고 있었습니다. 07:50 생이 "아침" 을
+     고르면 09:00 으로 기록돼 진시가 사시가 됩니다.
+   ------------------------------------------------------ */
+.exact {
+  margin-top: 14px;
+  padding: 13px;
+  border: 1px solid var(--line);
+  background: var(--bg2);
+}
+.exact .sm { margin-bottom: 8px; }
+
+/* ══════════ 글자가 서는 장면 ══════════
+   .calcrun  표준시 → 고을 → 절기 를 한 줄씩 찍는다
+
+   ★ 절기·표준시·진태양시를 다 계산해 놓고 **계산하는 모습을 안 보여
+     주고** 있었습니다. 여기는 진짜로 계산하므로 착시가 아닙니다.
+   ------------------------------------------------------ */
+.calcrun {
+  border: 1px solid var(--line);
+  background: var(--bg2);
+  padding: 14px 15px;
+  margin: 12px 0;
+  min-height: 132px;
+}
+.calcrun p {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.9;
+  color: var(--paper3);
+  animation: calcIn .34s ease both;
+}
+.calcrun p.on { color: var(--c); }
+@keyframes calcIn { from { opacity: 0; transform: translateY(4px); } }
+
+/* ══════════ 글쎄올시다 ══════════
+   ★ 그렇소·아니오 둘뿐이라 애매한 사람이 거짓 '그렇소' 를 눌러
+     공감률을 오염시켰고, 아무것도 안 누르면 다음 단이 안 열렸습니다.
+   ------------------------------------------------------ */
+.vt3 {
+  display: block;
+  margin: 9px auto 0;
+  font-size: 11.5px;
+  color: var(--paper3);
+  border-bottom-color: rgba(114, 106, 128, .5);
+}
+.vt3:hover { color: var(--paper2); }
+
+/* 공감률이 아직 없는 동안의 자리 — 노출 수 */
+.agr.seen { color: var(--paper3); }
+.agr.seen b { color: var(--teal); font-weight: 400; }
+.agr.seen .dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--teal); box-shadow: 0 0 8px var(--teal);
+}
+
+/* ══════════ 무료 구간의 숨 고르는 자리 ══════════
+   ★ 8컷 1,592자가 한 번에 쏟아지고 상호작용이 0이었습니다.
+   ------------------------------------------------------ */
+.beat {
+  margin: 16px 0 20px;
+  padding: 13px 0;
+  border-top: 1px solid rgba(46, 39, 64, .8);
+  border-bottom: 1px solid rgba(46, 39, 64, .8);
+  text-align: center;
+}
+.beat .q {
+  display: block;
+  font-family: var(--serif);
+  font-size: 15px;
+  color: var(--paper2);
+  margin-bottom: 10px;
+}
+
+/* ══════════ 두루마리 진행 · 마지막 자리 ══════════
+   ★ 18~22컷이 진행 표시 없이 이어져, 중도 이탈이 그대로 미완독이
+     됐습니다. 미완독은 후기도 재구매도 없습니다.
+   ------------------------------------------------------ */
+.rprog {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  height: 2px;
+  background: rgba(46, 39, 64, .9);
+  margin: 0 0 10px;
+}
+.rprog i {
+  display: block;
+  height: 100%;
+  background: var(--c);
+  transition: width .12s linear;
+}
+.lastcut {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: .16em;
+  color: var(--gold);
+  margin-bottom: 9px;
+}
+@media print { .rprog { display: none; } }
+
+/* 목패에 적는 '열리는 자리' 이름 — 서버가 주는데 안 쓰이고 있었다 */
+.op .opens {
+  color: var(--gold);
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+/* ══════════ 인장을 찍는 자리 ══════════
+   ★ 인장이 c6 에서 조용히 배열에 들어갈 뿐이었습니다. 값을 치른 직후는
+     기억을 만드는 자리인데 얻은 표식이 화면에 없었습니다.
+   ------------------------------------------------------ */
+.seal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  margin: 18px 0 6px;
+}
+.seal i {
+  font-family: var(--serif);
+  font-style: normal;
+  font-size: 30px;
+  line-height: 1;
+  color: var(--ember);
+  border: 2px solid var(--ember);
+  border-radius: 3px;
+  padding: 11px 12px 13px;
+  transform: rotate(-7deg) scale(2.4);
+  opacity: 0;
+  animation: stamp .52s cubic-bezier(.2,.8,.3,1) .25s forwards;
+}
+.seal span { font-size: 12px; color: var(--paper3); }
+@keyframes stamp {
+  to { transform: rotate(-7deg) scale(1); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .seal i { animation: none; opacity: 1; transform: rotate(-7deg); }
+}

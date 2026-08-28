@@ -23,6 +23,7 @@ import { useScreen } from "@/lib/track";
 import Scene from "@/components/scene/Scene";
 import { Narration, Say } from "@/components/Narration";
 import SinsalFigure from "@/components/scene/SinsalFigure";
+import Doubts from "@/components/Doubts";
 import { api, ApiError } from "@/lib/api";
 import type { Shared } from "@shared/chart";
 
@@ -30,49 +31,12 @@ const EL_WORD: Record<string, string> = {
   목: "나무", 화: "불", 토: "흙", 금: "쇠", 수: "물",
 };
 
-/** ③ 의심 풀기 — 우리가 먼저 꺼낸다. 전부 코드로 확인 가능한 것만 적는다. */
-const DOUBTS: { q: string; a: string }[] = [
-  {
-    q: "사주 같은 걸 믿냐고 물으신다면",
-    a: "저희도 맞힌다고는 안 하오. 여기는 맞히는 집이 아니라 근거 대는 집이오. " +
-       "글자 여덟 개가 왜 그렇게 섰는지, 무엇을 보고 그렇게 읽었는지를 " +
-       "전부 화면에 적어 내놓소.",
-  },
-  {
-    q: "다들 하는 만세력 아니냐면",
-    a: "절기를 날짜가 아니라 **시각**까지 셈하오. 입춘이 오후 5시 27분이면 " +
-       "그날 오전에 태어난 사람은 아직 지난해요. 날짜만 보는 곳과 여기서 갈리오.",
-  },
-  {
-    q: "1954~1961년생이시라면",
-    a: "그 시절 한국 표준시는 동경 127.5도였소. 지금 기준으로 셈하면 30분이 " +
-       "어긋나오. 서머타임 열두 구간도 되돌려 셈하오.",
-  },
-  {
-    q: "태어난 시각을 모르신다면",
-    a: "시주를 세우지 않소. 열두 시로 채워 여덟 글자를 만들어 드리지 않소. " +
-       "모르는 건 모른다고 적고 세 기둥으로만 셈하오.",
-  },
-  {
-    q: "몇 %가 맞았다는 숫자가 없는 게 이상하다면",
-    a: "실제 응답이 100건 넘게 쌓인 문장만 공감률을 내보이오. 그전에는 " +
-       "아무 숫자도 안 띄우오. 적중률이라는 말은 아예 쓰지 않소.",
-  },
-  {
-    q: "결국 돈 내라는 거 아니냐면",
-    a: "여덟 글자 세우는 것과 훅, 무료 구간까지는 값을 묻지 않소. " +
-       "하루에 두 번 넘게는 팔지 않고, 한 자리에서 두 사람 넘게 " +
-       "이어 붙이지도 않소.",
-  },
-];
-
 export default function SharedView({ token }: { token: string }) {
   useScreen("s1");
   const router = useRouter();
 
   const [d, setD] = useState<Shared | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const [open, setOpen] = useState<number | null>(0);
 
   useEffect(() => {
     let alive = true;
@@ -164,25 +128,10 @@ export default function SharedView({ token }: { token: string }) {
         {who ? ` ${who}님이 무엇이 담기는지 보고 보내신 것이오.` : ""}
       </p>
 
-      {/* ③ ★ 의심 풀기 — 우리가 먼저 꺼낸다 */}
-      <div className="blk in doubts">
-        <div className="lab">믿기 어려우실 게요</div>
-        <Say who="도령">
-          그게 맞소. 저는 그대를 모르오. 먼저 몇 가지를 밝히고 시작하겠소.
-        </Say>
-        {DOUBTS.map((x, i) => (
-          <div className={"dq " + (open === i ? "on" : "")} key={x.q}>
-            <button className="qh" onClick={() => setOpen(open === i ? null : i)}>
-              <span>{x.q}</span><i>{open === i ? "−" : "+"}</i>
-            </button>
-            {open === i && (
-              <p dangerouslySetInnerHTML={{
-                __html: x.a.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>"),
-              }} />
-            )}
-          </div>
-        ))}
-      </div>
+      {/* ③ ★ 의심 풀기 — 우리가 먼저 꺼낸다.
+          문장은 components/Doubts.tsx 에 한 벌만 둡니다. 전에는 이 화면
+          안에 갇혀 있어서, 직접 들어온 사람은 한 번도 못 봤습니다. */}
+      <Doubts first={0} />
 
       {/* 친구가 받은 단서까지 같이 보여준다 */}
       {d.caveats?.length > 0 && (

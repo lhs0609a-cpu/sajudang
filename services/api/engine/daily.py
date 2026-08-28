@@ -49,16 +49,38 @@ def build_daily(f, on: date | None = None) -> dict:
     me = ELEMENT_OF_GAN[f.day_gan]
     rel = relation(el, me)
 
+    # ★ 점수는 **셈한 것을 그대로 말합니다.**
+    #
+    #   화면이 "오늘 기운 76/100 — 적중률이 아니라 배치 점수요" 라고만
+    #   적고 있었습니다. 적중률이 아니라는 건 맞는 말인데, **그럼 뭔지는
+    #   안 말했습니다.** 손님에게 76은 아무 뜻도 없는 수가 됩니다.
+    #   부정만 하고 정의를 안 주던 자리입니다.
+    #
+    #   여기는 근거 대는 집이니 방어가 아니라 **셈법 공개**로 처리합니다.
+    #   무엇이 몇 점을 올리고 내렸는지 그대로 내려보냅니다.
     score = BASE
+    why = [{"k": "기준", "v": BASE, "t": "누구나 여기서 시작하오"}]
     if el == f.yongsin:
         score += BONUS_YONGSIN
+        why.append({"k": "용신", "v": BONUS_YONGSIN,
+                    "t": "오늘 천간이 그대에게 드는 %s요" % element_word(f.yongsin)})
     if el == f.strong_el:
         score += PENALTY_STRONG
+        why.append({"k": "넘치는 기운", "v": PENALTY_STRONG,
+                    "t": "이미 많은 %s가 오늘 또 드오" % element_word(f.strong_el)})
     if ji == CHUNG[f.day_ji]:
         score += PENALTY_CHUNG
+        why.append({"k": "충", "v": PENALTY_CHUNG,
+                    "t": "일지 %s와 오늘 지지가 부딪히오" % f.day_ji})
     if ji == f.day_ji:
         score += BONUS_SAME_JI
+        why.append({"k": "겹침", "v": BONUS_SAME_JI,
+                    "t": "일지 %s와 오늘 지지가 같소" % f.day_ji})
+    raw = score
     score = max(FLOOR, min(CEIL, score))
+    if score != raw:
+        why.append({"k": "한도", "v": score - raw,
+                    "t": "%d~%d 밖으로는 안 나가오" % (FLOOR, CEIL)})
 
     # 한자 뒤 조사는 읽는 법에 따라 갈린다. 조사가 붙지 않는 형태로 쓴다.
     notes = []
@@ -95,6 +117,10 @@ def build_daily(f, on: date | None = None) -> dict:
         "element": el,
         "relation": rel,
         "score": score,
+        # 이 점수가 무엇을 센 것인가. 화면이 그대로 펼쳐 보입니다.
+        "score_why": why,
+        "score_says": ("오늘 일진과 그대 여덟 글자가 맞물린 자리를 센 것이오. "
+                       "좋고 나쁨이 아니라 부딪히는 수요."),
         "text": " ".join(body),
         "lines": body,
         "notes": notes,

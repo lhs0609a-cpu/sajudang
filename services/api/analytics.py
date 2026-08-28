@@ -59,6 +59,7 @@ EVENTS = {
     "hook_shown",      # 훅 한 단이 열렸다
     "hook_answer",     # 훅 한 단에 답했다
     "free_shown",      # 무료 구간을 봤다
+    "free_beat",       # 무료 구간 중간에 답했다 — 여기서 리듬이 끊깁니다
     "tier_view",       # 값 고르는 화면
     "tier_pick",       # 티어를 골랐다
     "pay_start",       # 결제창으로 갔다

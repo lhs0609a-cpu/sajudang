@@ -11,7 +11,7 @@ PHASE 5 — 결제 · 리텐션 테스트.
 """
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 from fastapi.testclient import TestClient
@@ -219,3 +219,52 @@ def test_every_kind_has_a_priority():
     for kind in ("daily", "month", "year", "birthday", "turning",
                  "lookback", "new_lens"):
         assert kind in retention.PRIORITY
+
+
+# ══════════════════════════════════════════════════════════
+# 「이번 주 한 가지」 회수 — 이 집이 스스로 만든 복귀 고리
+# ══════════════════════════════════════════════════════════
+#
+# ★ 무료 구간이 이미 "다음에 오시거든 **했는지만** 말해 주시오" 라고
+#   약속해 놓고, 다시 묻는 자리가 없었습니다. 약속해 놓고 안 물으면
+#   그 문장은 처방이 아니라 덕담이 됩니다.
+def _task(given):
+    return {"given_on": given, "statement_id": "week:금:여름:甲"}
+
+
+def test_the_weekly_task_is_collected_after_a_week(features):
+    given = date(2026, 3, 10)
+    plan = retention.plan_for(
+        features, date(1993, 5, 15),
+        given + timedelta(days=retention.WEEK_CHECK_DAYS),
+        week_task=_task(given))
+    assert plan is not None
+    assert plan["kind"] == "week_check"
+    assert plan["payload"]["given_on"] == given.isoformat()
+
+
+def test_the_weekly_task_is_asked_once_not_every_day(features):
+    """
+    ★ 매일 물으면 그건 회수가 아니라 잔소리입니다. 일진을 매일 밀지
+      않는 것과 같은 이유입니다 — 다 밀면 그날로 알림이 꺼집니다.
+    """
+    given = date(2026, 3, 10)
+    hits = [d for d in range(1, 21)
+            if (retention.plan_for(features, date(1993, 1, 2),
+                                   given + timedelta(days=d),
+                                   week_task=_task(given)) or {}
+                ).get("kind") == "week_check"]
+    assert hits == [retention.WEEK_CHECK_DAYS], hits
+
+
+def test_the_weekly_task_does_not_outrank_the_rarer_things(features):
+    """
+    드문 것이 먼저입니다. 대운은 십 년에 한 번이고, 이건 리포트마다
+    한 번입니다. 드물어야 열립니다.
+    """
+    P = retention.PRIORITY
+    assert P["week_check"] < P["lookback"]
+    assert P["week_check"] < P["turning"]
+    assert P["week_check"] < P["birthday"]
+    # 다만 일진보다는 위입니다 — 우리가 먼저 한 약속입니다.
+    assert P["week_check"] > P["daily"]

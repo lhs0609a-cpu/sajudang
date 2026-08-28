@@ -12,15 +12,31 @@ import { track } from "@/lib/track";
 import type { HookSegment } from "@shared/chart";
 
 function Agreement({ statementId }: { statementId: string }) {
-  const [data, setData] = useState<{ shown: boolean; rate?: number; total?: number } | null>(null);
+  const [data, setData] = useState<
+    { shown: boolean; rate?: number; total?: number; seen?: number } | null>(null);
   useEffect(() => {
     let alive = true;
     api.agreement(statementId).then((d) => alive && setData(d)).catch(() => {});
     return () => { alive = false; };
   }, [statementId]);
 
-  // 응답 100건 미만 → 아무것도 그리지 않는다 (숫자를 지어내지 않는다)
-  if (!data?.shown || data.rate == null) return null;
+  if (!data) return null;
+
+  // 응답 100건 미만 → 공감률은 안 그립니다 (숫자를 지어내지 않습니다).
+  //
+  // ★ 다만 그 자리를 **비워 두지도** 않습니다. 전에는 사회적 증거가
+  //   0인 채로 결제 갈림길까지 갔습니다. 몇 번 나갔는지는 지어내지
+  //   않고 낼 수 있습니다 — 정확도 주장이 아니라 사실 진술입니다.
+  //   0이면 아무것도 안 그립니다.
+  if (!data.shown || data.rate == null) {
+    if (!data.seen) return null;
+    return (
+      <div className="agr seen">
+        <span className="dot" />
+        <span>이 문장을 <b>{data.seen.toLocaleString()}명</b>이 받아 갔소</span>
+      </div>
+    );
+  }
   return (
     <div className="agr">
       <span>이 문장에</span>
@@ -32,17 +48,20 @@ function Agreement({ statementId }: { statementId: string }) {
 }
 
 export default function HookSegments({
-  segments, chartId, lensId, concern, charName, onDone,
+  segments, chartId, lensId, concern, charName, onMiss, onDone,
 }: {
   segments: HookSegment[];
   chartId: string;
   lensId: string;
   concern: string;
   charName: string;
+  /** 「아니오」가 몇 번 나왔는지 알린다. 부모가 훅을 다시 받아 온다. */
+  onMiss?: (misses: number) => void;
   onDone?: () => void;
 }) {
   const [open, setOpen] = useState(1);
   const [replies, setReplies] = useState<Record<number, string>>({});
+  const [misses, setMisses] = useState(0);
 
   /*
    * 몇 단까지 열렸는지 남깁니다. 초반이 어디서 끊기는지 여기가 답합니다.
@@ -54,14 +73,35 @@ export default function HookSegments({
     if (i >= 0) track("hook_shown", "a7", { stage: i });
   }, [open, segments.length]);
 
-  const vote = async (i: number, yes: boolean) => {
-    track("hook_answer", "a7", { stage: i, yes: yes ? 1 : 0 });
+  /*
+   * yes=true 그렇소 · yes=false 아니오 · yes=null **글쎄올시다**
+   *
+   * ★ 이분법이 두 가지를 망가뜨리고 있었습니다.
+   *   ① 애매한 사람이 **거짓 '그렇소'** 를 눌러 공감률을 오염시켰습니다.
+   *   ② 답을 안 하면 다음 단이 안 열려서, 판단을 미루고 싶은 손님이나
+   *      스크롤로 훑고 싶은 손님에게는 **막다른 화면**이었습니다.
+   *      그 자리가 훅의 첫 단이면 그대로 이탈입니다.
+   *
+   *   중립은 서버가 **노출로만** 셉니다 (answer 를 안 보냅니다).
+   */
+  const vote = async (i: number, yes: boolean | null) => {
+    track("hook_answer", "a7", { stage: i, yes: yes === null ? 2 : yes ? 1 : 0 });
     const seg = segments[i];
-    setReplies((r) => ({ ...r, [i]: yes ? seg.yes : seg.no }));
+    const say = yes === null
+      ? "그럴 수 있소. 판단은 미뤄 두고 계속 보시오."
+      : yes ? seg.yes : seg.no;
+    setReplies((r) => ({ ...r, [i]: say }));
+
+    if (yes === false) {
+      const n = misses + 1;
+      setMisses(n);
+      onMiss?.(n);
+    }
     try {
       await api.feedback({
         statement_id: seg.statement_id, chart_id: chartId,
-        answer: yes ? 1 : 0, stage: seg.stage, lens_id: lensId, concern,
+        answer: yes === null ? null : yes ? 1 : 0,
+        stage: seg.stage, lens_id: lensId, concern,
       });
     } catch {
       /* 기록 실패가 읽기를 막아서는 안 된다 */
@@ -77,15 +117,39 @@ export default function HookSegments({
       {segments.slice(0, open).map((seg, i) => (
         <div className="blk in" key={seg.statement_id}>
           {seg.label && <div className="lab">{seg.label}</div>}
-          {seg.source && <span className="src">근거 · {seg.source}</span>}
+          {/*
+            ★ 0단만 근거가 본문 **아래**로 갑니다 (seg.source_below).
+              전에는 0단에 근거가 아예 없었습니다 — 손님이 이 집에서
+              처음 읽는 문장이 하필 근거 없는 문장이라, "근거 대는 집"
+              이라는 자리가 가장 센 첫 문장에서 사라졌습니다.
+              그렇다고 찌르기 **위**에 놓으면 첫 문장이 강의가 됩니다.
+              그래서 자리만 옮깁니다: 찌르고, 그 아래에 무엇을 보고 한
+              말인지 적습니다.
+          */}
+          {seg.source && !seg.source_below && (
+            <span className="src">근거 · {seg.source}</span>
+          )}
           <div dangerouslySetInnerHTML={{ __html: seg.html }} />
-          {seg.source && <Agreement statementId={seg.statement_id} />}
+          {seg.source && seg.source_below && (
+            <span className="src below">근거 · {seg.source}</span>
+          )}
+          {/* ★ 조건을 source 가 아니라 statement_id 로 바꿉니다.
+              source 로 걸어 두면, 근거가 없는 단은 응답이 100건 쌓여도
+              공감률이 **영영** 안 붙습니다. 실제로 0단이 그랬습니다. */}
+          {seg.statement_id && <Agreement statementId={seg.statement_id} />}
 
           {replies[i] === undefined ? (
-            <div className="vt">
-              <button onClick={() => vote(i, true)}>그렇소</button>
-              <button onClick={() => vote(i, false)}>아니오</button>
-            </div>
+            <>
+              <div className="vt">
+                <button onClick={() => vote(i, true)}>그렇소</button>
+                <button onClick={() => vote(i, false)}>아니오</button>
+              </div>
+              {/* ★ 세 번째 길. 이게 없어서 애매한 사람이 거짓 '그렇소' 를
+                  눌렀고, 아무것도 안 누르면 다음 단이 안 열렸습니다. */}
+              <button className="lk vt3" onClick={() => vote(i, null)}>
+                글쎄올시다 · 그냥 계속 듣겠소
+              </button>
+            </>
           ) : (
             <div className="react on">
               <div className="say"><small>{charName}</small>{replies[i]}</div>

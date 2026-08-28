@@ -25,7 +25,7 @@ const FLUSH_MS = 4000;
 const MAX_QUEUE = 40;
 
 export type EventName =
-  | "screen" | "hook_shown" | "hook_answer" | "free_shown"
+  | "screen" | "hook_shown" | "hook_answer" | "free_shown" | "free_beat"
   | "tier_view" | "tier_pick" | "pay_start" | "pay_done" | "pay_fail"
   | "relay_take" | "relay_skip" | "share_click" | "share_land" | "drop_guess";
 

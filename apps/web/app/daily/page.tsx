@@ -78,7 +78,25 @@ export default function DailyPage() {
           <div className="bar" style={{ margin: "12px 0" }}>
             <i style={{ ["--w" as string]: `${data.score}%` }} />
           </div>
-          <p className="sm">오늘 기운 {data.score} / 100 — 적중률이 아니라 배치 점수요.</p>
+          <p className="sm">오늘 기운 {data.score} / 100</p>
+
+          {/*
+            ★ 전에는 "적중률이 아니라 배치 점수요" 한 줄이었습니다.
+              아닌 것만 말하고 무엇인지는 안 말하면, 손님에게 76은
+              아무 뜻도 없는 수입니다. 여기는 근거 대는 집이니 방어가
+              아니라 **셈법 공개**로 처리합니다. 무엇이 몇 점을 올리고
+              내렸는지 서버가 그대로 내려보냅니다.
+          */}
+          <div className="scw">
+            {data.score_why.map((w, i) => (
+              <p key={i}>
+                <b>{w.k}</b>
+                <i>{w.v > 0 ? `+${w.v}` : w.v}</i>
+                <span>{w.t}</span>
+              </p>
+            ))}
+          </div>
+          <p className="sm">{data.score_says}</p>
           {/* ★ 줄 단위로 그립니다. 관계·일간·신강약·계절·용신을 곱해 만든
               다섯 줄이라, 한 문단으로 뭉치면 읽히지 않습니다. */}
           <Say who="도령">
