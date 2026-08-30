@@ -261,3 +261,40 @@ def test_the_boy_calls_you_by_what_you_are(f):
     """청동자는 소년이라 손님을 아저씨·아주머니라 부릅니다."""
     assert lens_mod.you_of("dongja", "", "M") == "아저씨"
     assert lens_mod.you_of("dongja", "", "F") == "아주머니"
+
+
+def test_the_bank_is_written_in_one_speech_level():
+    """
+    ★ 뱅크에 합쇼체로 박힌 문장이 27개 있었습니다 —
+      MATCH · MATCH_LEAD · MATCH_TAIL (전부 2.5단 겉말).
+
+      말투 층(voice.py)은 하오체 어미만 갈아 끼웁니다. 합쇼체로 쓰인
+      문장은 **어느 캐릭터에게도 안 바뀝니다.** 반말 캐릭터가 갑자기
+      "…겹쳤습니다" 라고 말합니다.
+
+      뱅크는 하오체 **한 벌**이라야 스무 목소리를 탑니다.
+    """
+    import json
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    raw = json.loads((root / "seed" / "bank.json").read_text("utf-8"))
+    bad = []
+
+    def walk(o, path=""):
+        if isinstance(o, dict):
+            for k, v in o.items():
+                if str(k).startswith("_"):
+                    continue
+                walk(v, path + "/" + str(k))
+        elif isinstance(o, list):
+            for i, v in enumerate(o):
+                walk(v, "%s[%d]" % (path, i))
+        elif isinstance(o, str):
+            for w in ("습니다", "십니다", "합니다", "입니다", "겁니다", "립니다"):
+                if w in o:
+                    bad.append((path, o[:60]))
+                    return
+
+    walk(raw)
+    assert not bad, ("합쇼체로 갇힌 문장 %d개: %s" % (len(bad), bad[:3]))

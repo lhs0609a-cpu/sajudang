@@ -494,3 +494,80 @@ def test_missing_inputs_are_counted_not_forgotten():
     for m in photo:
         assert "생체인식" in m["reason"], m
     assert ids <= {l["id"] for l in lens_mod.all_lenses()}
+
+
+# ══════════════════════════════════════════════════════════
+# 물러서지 않는가 — 아첨을 사러 온 손님은 없다
+# ══════════════════════════════════════════════════════════
+#
+# ★ 「아니오」를 눌렀을 때 도령이 넷 다 물러서고 있었습니다.
+#     0단   "그럼 다행이오."
+#     1단   "괜찮소. 진짜는 다음이오."
+#     2.5단 "그럼 잘 맞춰 사신 것이오."
+#     3단   "천천히 생각해보시오."
+#   사과하거나 덕담으로 닫습니다. 값을 치를지 정하는 자리에서
+#   도령이 스스로 물러서면 살 이유가 없어집니다.
+#
+# ★ 다만 **단정하지도 않습니다.** 아니라고 한 것을 뒤집지 않고,
+#   그 '아니오' 자체를 자리로 씁니다. (CLAUDE.md 절대 규칙 2)
+RETREAT = ("다행이오", "괜찮소", "잘 맞춰", "천천히 생각",
+           "훌륭", "좋은 사주", "복이 많")
+
+
+def _all_replies(f):
+    out = []
+    for c in CONCERNS:
+        for axis4 in ("INFP", None):
+            for segs in (bank.build_hook(f, c, axis4),):
+                for s in segs:
+                    out.append((s["stage"], "yes", s["yes"]))
+                    out.append((s["stage"], "no", s["no"]))
+    return out
+
+
+def test_the_reader_never_retreats_when_you_say_no(f):
+    """아니라고 했다고 사과하거나 덕담으로 닫지 않는다."""
+    bad = [(st, lab, t) for st, lab, t in _all_replies(f)
+           if any(w in t for w in RETREAT)]
+    assert not bad, bad[:4]
+
+
+def test_a_no_is_answered_with_something_not_nothing(f):
+    """
+    「아니오」에 한 마디로 끝내지 않는다 — 물러서지 않는다는 건
+    말을 더 한다는 뜻입니다.
+    """
+    for st, lab, t in _all_replies(f):
+        if lab != "no":
+            continue
+        assert len(t) >= 14, (st, t)
+
+
+def test_the_gap_reading_stays_a_guess_but_lands_hard():
+    """
+    ★ 여기만은 완전 단정이 안 됩니다.
+      지난 일을 확인 없이 단정하지 않는다 — 절대 규칙 2이고,
+      "드러나는 기질을 오래 눌러온 것입니다" 가 그 위반이었습니다.
+
+      대신 **원인만 추정으로 두고 결과를 세게** 칩니다. 무엇 때문인지는
+      우리가 모르지만(수 있소), 그랬다면 지금 무엇이 벌어지는지는
+      물러설 이유가 없습니다.
+    """
+    for pair, g in bank.bank()["GAP"].items():
+        w = g["w"]
+        # 원인은 추정으로 남는다
+        assert "수 있소" in w or "수 있습니다" in w, (pair, w)
+        # 그러나 덕담으로 닫지 않는다
+        assert not any(x in w for x in RETREAT), (pair, w)
+        # 그리고 결과를 말한다 — 추정 한 줄로 끝내지 않는다
+        assert len(w) >= 40, (pair, w)
+
+
+def test_the_gap_reading_speaks_in_the_house_voice():
+    """
+    ★ 합쇼체로 박혀 있어 말투 층(engine/voice.py)이 못 건드렸습니다.
+      뱅크는 하오체 한 벌이라야 스무 목소리를 탑니다.
+    """
+    for pair, g in bank.bank()["GAP"].items():
+        for k in ("t", "w"):
+            assert "습니다" not in g[k] and "십니다" not in g[k], (pair, k, g[k])

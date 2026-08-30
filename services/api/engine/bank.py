@@ -313,12 +313,12 @@ def _concern_axis_seg(f, concern: str, esc_you: str) -> dict:
         body = lead + '<p class="hit">%s</p>' % (B["CONCERN_EMPTY"] % grp)
         q, yes, no = ("…짚이오?",
                       "그럴 게요. 없는 자리는 애써도 안 늘어나오 — 빌려 쓰는 법을 봐야 하오.",
-                      "그럼 다른 데서 메우고 계신 게요.")
+                      "그럼 다른 데서 메우고 계신 게요. 그것도 공짜는 아니오.")
     elif same:
         body = lead + '<p class="hit">%s</p>' % B["CONCERN_SAME"][grp]
         q, yes, no = ("…그렇소?",
                       "그럴 게요. 가장 센 자리가 가장 안 보이는 법이오.",
-                      "그럼 아직 안 터진 게요.")
+                      "그럼 아직 안 터진 게요. 센 자리는 늦게 터지오.")
     else:
         body = (lead
                 + '<p class="hit">헌데 %s</p>' % B["CONCERN_ELSE"][loud]
@@ -401,7 +401,7 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
              % (head, stab, stab2, gan_line),
         question="…맞소?",
         yes="그럴 줄 알았소. 어떻게 아느냐 하면—",
-        no="그럼 다행이오. 헌데 이건 어떻소.",
+        no="아니라 하시니 그건 접겠소. 헌데 이건 어떻소.",
         sid="stab:%s:%s:%s" % (concern, weak, f.day_gan)))
 
     # ── 1단 · 부정확인 ──────────────────────────────────
@@ -422,7 +422,7 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
              % (esc_you, m1, m2, truth),
         question="이 말은 어떻소?",
         yes="그럴 줄 알았소. 그럼 순서를 짚어드리리다.",
-        no="괜찮소. 진짜는 다음이오.",
+        no="그 말이 나올 자리라 넣어 둔 것이오. 다음을 보시오.",
         sid="myth:%s:%s:%s" % (top, concern, strength)))
 
     # ── 2단 · 순서 ──────────────────────────────────────
@@ -476,7 +476,7 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
                          for i, l in enumerate(lines)))),
         question="…이 순서가 맞소?",
         yes="그럴 줄 알았소. 그럼 이름을 붙여드리리다.",
-        no="아직 이르오. 이름을 붙여보면 알 것이오.",
+        no="순서가 틀렸다 하시니, 이름을 붙여 보고 다시 말하시오.",
         # ★ 튼 단은 **다른 문장으로 집계**됩니다. 그래야 어긋난 축을
         #   버리는 신호로 쓸 수 있습니다 (docs/18 · /v1/funnel).
         sid="seq%s:%s:%s:%s:%s:%s:%s"
@@ -500,7 +500,7 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
             q = "…짚이는 데가 있소?"
             yes = ("그럴 게요. 그 사이가 그대를 가장 지치게 하오." if cmp["deep"]
                    else "그 한두 자리가 늘 걸리는 자리요.")
-            no = "그럼 잘 맞춰 사신 것이오."
+            no = "그럼 아직 안 부딪힌 게요. 어긋난 자리는 늦게 값을 물리오."
         segs.append(_seg(
             stage="2.5", label=label,
             source="사주 %s ↔ 입력 %s" % (axis_string(f), _html.escape(axis4.upper())),
@@ -542,8 +542,8 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
               '그건 이름이 있소.</p><p class="word">%s</p><p class="post">%s</p></div>'
               % (word, post)),
         question="이제 알겠소?",
-        yes="그렇소. 여기까지가 값 없이 하는 얘기요.",
-        no="천천히 생각해보시오.",
+        yes="알면 됐소. 아는 것과 고치는 것은 또 다른 얘기지만.",
+        no="지금 아니라 하셔도 이름은 남소. 다음에 걸릴 때 떠오를 게요.",
         sid="name:%s:%s:%s" % (weak, flow, strength)))
 
     return segs
