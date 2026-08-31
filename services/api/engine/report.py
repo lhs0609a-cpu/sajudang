@@ -285,8 +285,11 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     cuts.append(_cut(
         "place", "3 · 어느 자리에서",
         "일지 %s%s · %s일간" % (f.day_ji, " 충" if f.ilji_chung else "", f.day_gan),
-        '<p class="tale">%s</p><p class="tale">%s</p><p class="tale">%s</p>'
-        % (place, lean, B["PLACE_NOTE"][f.day_gan]),
+        # ★ 셀 수 있는 줄. 이 컷은 일지·일간을 보면서 **개수를 안 냈습니다** —
+        #   그래서 틀릴 수가 없었습니다. 관·재·식상을 세어 박습니다.
+        ('<p class="cnt"><b>관성 %d · 재성 %d · 식상 %d.</b></p>'
+         '<p class="tale">%s</p><p class="tale">%s</p><p class="tale">%s</p>')
+        % (f.gwan, f.jae, f.sik, place, lean, B["PLACE_NOTE"][f.day_gan]),
         0, sid="place:%s:%s:%s" % (f.day_ji, "chung" if f.ilji_chung else "-",
                                    f.day_gan)))
 
@@ -471,12 +474,17 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     cuts.append(_cut(
         "ancestor", "뿌리 · 조상 자리",
         "년주 %s · %s / %s" % (a["pillar"], a["gan_ten_god"], a["ji_ten_god"]),
+        # ★ 조상 자리도 셀 수 있는 것이 하나도 없었습니다.
+        #   년주는 **몇 살까지 크게 작용하는 자리**인지 이 집이 이미
+        #   압니다(궁위). 나이를 박으면 틀릴 수 있는 말이 됩니다.
         ('<p class="tale">%s</p>'
+         '<p class="cnt"><b>년주는 대개 열다섯 안쪽을 비추는 자리요. '
+         '그대는 지금 %d살이니, 여기 적힌 건 이미 지나온 자리요.</b></p>'
          '<p class="tale">그대 년주는 <b>%s</b>. 위는 %s, 아래는 %s요.</p>'
          '<p class="tale">%s</p>%s%s'
          '<p class="sm">물려받은 결이라 보던 것은 <b>%s</b> 쪽이오. '
          '무엇을 준다고 정해 말하지는 않겠소.</p>'
-         % (T["palace_lead"]["년주"], a["pillar"],
+         % (T["palace_lead"]["년주"], int(f.age), a["pillar"],
             a["gan_ten_god"], a["ji_ten_god"], stance_text, good, bad,
             a["inherited"])),
         1, sid="ancestor:%s:%s" % (a["gan_ten_god"], a["stance"])))
@@ -619,6 +627,10 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         % (" ".join(p["gz"] for p in f.pillars),
            josa(element_word(weak), "을", "를"), josa(top, "을", "를")),
         '<p class="tale">%s</p>' % B_["CLOSE_KEEP"][f.strength],
+        # ★ 기억은 마지막이 지배하는데, 그 마지막이 셀 수 있는 것을
+        #   하나도 안 담고 있었습니다. 다음에 무엇이 바뀌는지 못 박습니다 —
+        #   나이는 틀릴 수 있는 말이고, 그래서 맞으면 남습니다.
+        _close_turn(f),
         '<p class="sm">여덟 자는 안 바뀌오. 바뀌는 것은 <b>쓰는 법</b>과 '
         '<b>때</b>요. 오늘 못 본 것도 적어 두겠소 — '
         '그대가 겪은 일, 곁의 사람, 그대가 고른 것. '
@@ -630,6 +642,31 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         sid="close:%s:%s" % (f.strength, weak)))
 
     return cuts, extra_error
+
+
+def _close_turn(f) -> str:
+    """
+    덮으며 — **다음에 바뀌는 때**를 못 박는다.
+
+    ★ 마지막 컷이 셀 수 있는 것을 하나도 안 담고 있었습니다.
+      기억은 마지막이 지배하는데, 거기가 틀릴 수 없는 말로 닫히면
+      아무것도 안 남습니다. 대운수는 절입까지의 실제 일수로 이미
+      정확히 세어 뒀습니다 — 안 쓰고 있었을 뿐입니다.
+
+    ★ 그 해에 무슨 일이 생긴다고는 말하지 않습니다. **바뀌는 때만** 셉니다.
+    """
+    nxt = f.daeun_now + 1
+    if nxt >= len(f.daeun):
+        return ('<p class="cnt"><b>지금 %d살, 마지막 대운이오.</b> '
+                '더 바뀔 칸은 없소.</p>' % int(f.age))
+    age = int(f.daeun[nxt]["start_age"])
+    left = max(0, age - int(f.age))
+    if left == 0:
+        return ('<p class="cnt"><b>올해 %d살, 대운이 바로 지금 바뀌오.</b></p>'
+                % int(f.age))
+    return ('<p class="cnt"><b>지금 %d살. 다음 대운은 %d살 — %d해 뒤요.</b> '
+            '그때 무슨 일이 생긴다는 말이 아니라, 읽는 자리가 바뀐다는 말이오.</p>'
+            % (int(f.age), age, left))
 
 
 def _lens_price(lens_id: Optional[str]) -> int:

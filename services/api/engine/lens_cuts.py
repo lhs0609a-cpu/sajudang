@@ -272,6 +272,124 @@ def axis_value(f, axis: str) -> str:
 # ══════════════════════════════════════════════════════════
 # 조립
 # ══════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════
+# 센 것 한 줄 — 틀릴 수 있는 말
+# ══════════════════════════════════════════════════════════
+#
+# ★ 관점 컷 아흔둘 중 **쉰 개가 아무것도 금지하지 않고** 있었습니다.
+#   (tools/falsifiable.py — 금지하는 문장 0%)
+#
+#   "당신은 때때로 외롭다" 는 어떤 결과에서도 살아남습니다. 틀릴 수가
+#   없으니 '맞다' 는 나와도 '소름' 은 안 나옵니다. 놀라움은 **틀릴 수도
+#   있었는데 맞았을 때**만 옵니다. 값을 치르는 순간은 그 순간입니다.
+#
+# ★ 지어내지 않습니다 — **셉니다.**
+#   이 집은 셀 수 있는 것을 이미 갖고 있습니다: 대운이 바뀌는 나이(절입
+#   까지의 실제 일수로 계산), 십신 개수, 오행 개수, 여덟 글자. 그걸
+#   문장에서 안 쓰고 있었을 뿐입니다.
+#
+# ★ 컷마다 **제 축에서 나온 수**를 씁니다.
+#   같은 줄을 아흔둘에 다 붙이면 중복률이 올라갑니다. 그 컷이 이미
+#   보고 있는 자리를 세어 붙입니다.
+#
+# ★ 내부 척도는 안 씁니다.
+#   신강약 점수·문턱값은 근거가 아니라 규칙입니다 (CLAUDE.md).
+#   글자와 개수만 냅니다.
+def _next_turn(f) -> Optional[tuple]:
+    """(다음 대운 나이, 몇 해 뒤). 마지막 칸이면 None."""
+    nxt = f.daeun_now + 1
+    if nxt >= len(f.daeun):
+        return None
+    age = int(f.daeun[nxt]["start_age"])
+    return age, max(0, age - int(f.age))
+
+
+def _counted(f, axes: list) -> str:
+    """
+    이 컷이 보는 자리를 세어 한 줄로.
+
+    ★ **반드시 수가 들어갑니다.** 「甲일간이오」 는 글자를 댄 것이지
+      센 것이 아닙니다 — 틀릴 수가 없습니다. 글자를 대는 축이면
+      그 글자의 오행이 여덟 자에 몇인지까지 붙입니다.
+    """
+    EL = {"甲": "목", "乙": "목", "丙": "화", "丁": "화", "戊": "토",
+          "己": "토", "庚": "금", "辛": "금", "壬": "수", "癸": "수"}
+    JI = {"寅": "목", "卯": "목", "巳": "화", "午": "화",
+          "辰": "토", "戌": "토", "丑": "토", "未": "토",
+          "申": "금", "酉": "금", "亥": "수", "子": "수"}
+
+    def turn():
+        t = _next_turn(f)
+        if t:
+            return "지금 %d살, 다음 대운은 %d살 — %d해 뒤" % (int(f.age), t[0], t[1])
+        return "지금 %d살, 마지막 대운이오" % int(f.age)
+
+    for ax in axes:
+        if ax == "gwan_jae":
+            return ("여덟 자에 관성이 %d, 재성이 %d요"
+                    % (f.ten_gods["정관"] + f.ten_gods["편관"],
+                       f.ten_gods["정재"] + f.ten_gods["편재"]))
+        if ax in ("age_band", "daeun_phase", "next_daeun_tg"):
+            return turn()
+        if ax in ("top_ten_god", "flow"):
+            return ("주도가 %s이고, 여덟 자에 %d 들었소"
+                    % (f.top_ten_god, f.ten_gods[f.top_ten_god]))
+        if ax == "daeun_ten_god":
+            return "지금 대운 %s %s, %d살까지" % (
+                f.daeun[f.daeun_now]["gz"], f.daeun_ten_god,
+                (_next_turn(f)[0] - 1) if _next_turn(f) else int(f.age))
+        if ax in ("zero_band", "weak_el", "yongsin"):
+            el = f.yongsin if ax == "yongsin" else f.weak_el
+            return "여덟 자에 %s가 %s요" % (element_word(el), _num(f.elements[el]))
+        if ax in ("strong_el", "gap_band", "score_band", "strength"):
+            return ("%s가 %s인데 %s는 %s요"
+                    % (element_word(f.strong_el), _num(f.elements[f.strong_el]),
+                       element_word(f.weak_el), _num(f.elements[f.weak_el])))
+        if ax in ("ilji_state", "day_ji", "palace"):
+            el = JI.get(f.day_ji)
+            if el:
+                return ("일지가 %s요 — 여덟 자에 %s가 %s"
+                        % (f.day_ji, element_word(el), _num(f.elements[el])))
+            return turn()
+        if ax in ("day_gan", "deuk"):
+            el = EL.get(f.day_gan)
+            if el:
+                return ("%s일간이오 — 여덟 자에 %s가 %s"
+                        % (f.day_gan, element_word(el), _num(f.elements[el])))
+            return turn()
+        if ax in ("month_ji", "season", "johu", "seupjo"):
+            mj = f.pillars[1]["gz"][1]
+            el = JI.get(mj)
+            if el:
+                return ("월지가 %s요 — 여덟 자에 %s가 %s"
+                        % (mj, element_word(el), _num(f.elements[el])))
+            return turn()
+        if ax == "year_ji":
+            yj = f.pillars[0]["gz"][1]
+            el = JI.get(yj)
+            if el:
+                return ("년지가 %s요 — 여덟 자에 %s가 %s"
+                        % (yj, element_word(el), _num(f.elements[el])))
+            return turn()
+        if ax == "hour_known":
+            return ("여덟 자를 다 셌소 — %d살까지 본 것이오" % int(f.age)
+                    if f.hour_known
+                    else "시주가 없어 여섯 자로 셌소 — %d살까지 본 것이오"
+                         % int(f.age))
+    # 못 세는 축뿐이면 나이로. 나이는 언제나 셀 수 있습니다.
+    return turn()
+
+
+def _num(v) -> str:
+    """개수를 사람 말로. 소수점은 안 냅니다 — 내부 척도로 보입니다."""
+    n = float(v)
+    if n == 0:
+        return "0"
+    if n < 1:
+        return "1도 안 되오"
+    return "%d" % round(n)
+
+
 def _pick(spec: dict, f, where: str) -> tuple[str, str]:
     """(열쇠, 문장). 표에 없으면 터뜨린다 — 빈칸을 두지 않는다."""
     key = axis_value(f, spec["axis"])
@@ -342,10 +460,23 @@ def build(f, lens_id: Optional[str]) -> list:
         tail = spec.get("tail")
         tail_html = ('<p class="ev"><span class="evk">읽은 자리</span>%s</p>'
                      % tail.format(**w)) if tail else ""
-        body = ('<p class="tale">%s</p><p class="tale">%s</p>'
+
+        # ★ 센 것 한 줄. 이 컷이 보는 자리를 세어 박습니다 —
+        #   틀릴 수 있는 말이라야 맞았을 때 뼈가 남습니다.
+        axes = [spec[k]["axis"] for k in ("a", "b", "c")
+                if spec.get(k) and spec[k].get("axis")]
+        cnt = _counted(f, axes)
+        # ★ 마지막 자물쇠 — **수가 없으면 센 것이 아닙니다.**
+        #   「甲일간이오」 는 글자를 댄 것이지 틀릴 수 있는 말이 아닙니다.
+        #   어떤 축을 새로 넣어도 이 줄만은 수를 답니다.
+        if cnt and not any(ch.isdigit() for ch in cnt):
+            cnt = _counted(f, ["age_band"])
+        cnt_html = ('<p class="cnt"><b>%s.</b></p>' % cnt) if cnt else ""
+        body = ('<p class="tale">%s</p>%s<p class="tale">%s</p>'
                 '<p class="tale">%s%s</p>%s'
-                % (spec["lead"].format(**w), ta.format(**w), tb.format(**w),
-                   (" " + tc.format(**w)) if tc else "", tail_html))
+                % (spec["lead"].format(**w), cnt_html, ta.format(**w),
+                   tb.format(**w), (" " + tc.format(**w)) if tc else "",
+                   tail_html))
         out.append({
             "id": spec["id"],
             "title": spec["title"],
