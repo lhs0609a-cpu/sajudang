@@ -683,3 +683,61 @@ def test_the_extra_input_is_asked_for_not_silently_dropped(client, chart_id):
         "concern": "love", "extras": {"blood": {"type": "A"}}}).json()
     assert len(filled["cuts"]) > before, "채워 줬는데 컷이 안 늘었습니다"
     assert filled["needs_input"] is None
+
+
+# ══════════════════════════════════════════════════════════
+# 거절할 때 — 우리 말로, 받은 것을 되돌려 주지 않고
+# ══════════════════════════════════════════════════════════
+def test_a_bad_request_never_echoes_the_birth_data(client):
+    """
+    ★ 오류 응답에 생년월일이 통째로 실려 나가고 있었습니다.
+
+        {"input":{"year":1997,"month":3,"day":22,"hour":14,
+                  "minute":10,"birth_city":"서울"}}
+
+      필드 하나만 빠뜨려도 pydantic 이 받은 본문을 그대로 되돌려 줍니다.
+      생년월일시와 고을은 준식별자입니다 — 계측에 안 싣기로 해 놓고
+      오류 응답으로 내보내고 있었습니다.
+
+      더 나쁜 자리: /v1/report 는 extras 로 **상대 사주**(제3자의
+      생년월일)를 받습니다. 본인 동의도 없는 남의 생년월일이 에코됐습니다.
+    """
+    r = client.post("/v1/chart", json={
+        "year": 1997, "month": 3, "day": 22, "hour": 14, "minute": 10,
+        "hour_known": True, "birth_city": "서울"})          # sex 없음
+    assert r.status_code == 422
+    body = r.text
+    for leak in ("1997", "서울", "input"):
+        assert leak not in body, ("오류 응답에 %r 이(가) 샜습니다" % leak)
+    assert "sex" in body, "무엇이 빠졌는지는 말해야 합니다"
+
+
+def test_the_third_party_birthday_never_echoes_either(client, chart_id):
+    """상대 사주는 본인 동의가 없는 제3자의 생년월일입니다."""
+    r = client.post("/v1/report", json={
+        "chart_id": chart_id, "lens_id": "yeondam", "tier": "free",
+        "concern": "love",
+        "extras": {"partner": {"year": 1988, "month": 7, "day": 3}}})
+    assert "1988" not in r.text, "상대 생년월일이 응답에 샜습니다"
+
+
+def test_the_server_refuses_in_the_house_voice(client):
+    """
+    ★ "Method Not Allowed" · "Not Found" 는 파이썬이 하는 말이지
+      이 집이 하는 말이 아닙니다. (CLAUDE.md — 서버가 파이썬 원문으로
+      대답하지 말 것)
+    """
+    assert client.get("/v1/pay/tiers").json()["detail"].endswith("받소.")
+    assert client.get("/v1/그런것없소").json()["detail"] == "그런 자리는 없소."
+
+
+def test_the_webhook_address_can_be_checked_in_a_browser(client):
+    """
+    ★ 토스에 주소를 넣기 전에 사람이 브라우저로 열어 봅니다. 그런데
+      POST 만 열려 있어 「Method Not Allowed」 만 떴습니다 — 맞게 넣은
+      건지 알 수가 없었습니다. 여기서 상태는 바꾸지 않습니다.
+    """
+    r = client.get("/v1/pay/webhook")
+    assert r.status_code == 200
+    assert r.json()["accepts"] == "POST"
+    assert r.json()["say"]

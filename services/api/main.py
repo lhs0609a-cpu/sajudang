@@ -17,8 +17,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from fastapi import FastAPI                          # noqa: E402
+from fastapi import FastAPI, Request                 # noqa: E402
+from fastapi.exceptions import RequestValidationError  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware   # noqa: E402
+from fastapi.responses import JSONResponse           # noqa: E402
+from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa: E402
 
 import db                                            # noqa: E402
 import store                                         # noqa: E402
@@ -90,6 +93,61 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(GuardMiddleware)
+
+
+# ══════════════════════════════════════════════════════════
+# 거절할 때 — 우리 말로, 그리고 **받은 것을 되돌려 주지 않고**
+# ══════════════════════════════════════════════════════════
+#
+# ★ 오류 응답에 생년월일이 통째로 실려 나가고 있었습니다.
+#
+#     {"detail":[{"type":"missing","loc":["body","sex"],
+#                 "msg":"Field required",
+#                 "input":{"year":1997,"month":3,"day":22,"hour":14,
+#                          "minute":10,"birth_city":"서울"}}]}
+#
+#   필드 하나만 빠뜨려도 pydantic 이 **받은 본문을 그대로 되돌려 줍니다.**
+#   생년월일시와 고을은 준식별자입니다. 계측에 안 싣기로 해 놓고
+#   오류 응답으로 내보내고 있었습니다 — 로그·프록시·모니터링에 그대로
+#   남습니다.
+#
+#   더 나쁜 자리가 하나 더 있습니다: `/v1/report` 는 extras 로 **상대
+#   사주**(제3자의 생년월일)를 받습니다. 그게 틀리면 본인 동의도 없는
+#   남의 생년월일이 오류 응답에 에코됐습니다.
+#
+#   그래서 `input` 과 `url` 을 뺍니다. **무엇이 빠졌는지만** 말합니다.
+#
+# ★ 그리고 우리 말로 거절합니다.
+#   "Method Not Allowed" · "Not Found" 는 파이썬이 하는 말이지 이 집이
+#   하는 말이 아닙니다. (CLAUDE.md — 서버가 파이썬 원문으로 대답하지 말 것)
+_WHERE = {"body": "본문", "query": "주소", "path": "주소", "header": "머리"}
+
+
+@app.exception_handler(RequestValidationError)
+async def _bad_request(request: Request, exc: RequestValidationError):
+    missing = []
+    for e in exc.errors():
+        loc = [str(x) for x in e.get("loc", []) if x not in ("body",)]
+        where = _WHERE.get(str(e.get("loc", ["body"])[0]), "본문")
+        missing.append("%s의 %s" % (where, ".".join(loc) or "값"))
+    said = ("%s 이(가) 잘못됐거나 빠졌소." % " · ".join(dict.fromkeys(missing))
+            if missing else "보내신 것을 읽지 못했소.")
+    # ★ 받은 값은 안 돌려줍니다. 무엇이 빠졌는지만.
+    return JSONResponse(status_code=422, content={"detail": said})
+
+
+@app.exception_handler(StarletteHTTPException)
+async def _http_error(request: Request, exc: StarletteHTTPException):
+    detail = exc.detail
+    if exc.status_code == 404 and detail in ("Not Found", None):
+        detail = "그런 자리는 없소."
+    elif exc.status_code == 405 and detail in ("Method Not Allowed", None):
+        detail = "그 방법으로는 안 받소. 이 자리는 POST 로만 받소."
+    elif exc.status_code == 500:
+        detail = "안에서 무언가 어긋났소. 값은 빠져나가지 않았소."
+    return JSONResponse(status_code=exc.status_code,
+                        content={"detail": detail},
+                        headers=getattr(exc, "headers", None))
 
 for r in (chart, hook, report, relay, feedback, daily, pay, share, events):
     app.include_router(r.router)
