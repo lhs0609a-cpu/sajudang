@@ -271,12 +271,12 @@ body:has(.gatehero) .stage { padding-bottom: 0; }
 .top {
   display: flex; align-items: center; gap: 8px;
   padding: 10px 14px; border-bottom: 1px solid var(--line);
-  background: #0a0810; font-family: var(--mono); font-size: 10.5px;
+  background: #0a0810; font-family: var(--mono); font-size: var(--fs-2);
 }
-.top .tt { flex: 1; color: var(--paper2); font-family: var(--sans); font-size: 12px; }
+.top .tt { flex: 1; color: var(--paper2); font-family: var(--sans); font-size: var(--fs-3); }
 .top .tb {
   background: none; border: 1px solid var(--line); color: var(--paper3);
-  padding: 4px 7px; cursor: pointer; text-decoration: none; font-size: 10px;
+  padding: 4px 7px; cursor: pointer; text-decoration: none; font-size: var(--fs-2);
 }
 .top .tb:hover { color: var(--paper); border-color: var(--line2); }
 .top .tb.sk { color: var(--gold); border-color: transparent; }
@@ -291,36 +291,36 @@ body:has(.gatehero) .stage { padding-bottom: 0; }
   background: linear-gradient(180deg, rgba(229,184,122,.07), transparent 70%);
 }
 .sumhead .gz {
-  font-family: var(--serif); font-size: 22px; color: var(--c); margin-top: 4px;
+  font-family: var(--serif); font-size: var(--fs-8); color: var(--c); margin-top: 4px;
 }
 .sumhead .hl {
-  font-family: var(--serif); font-size: 17px; color: var(--paper);
+  font-family: var(--serif); font-size: var(--fs-7); color: var(--paper);
   margin: 8px 0 14px; line-height: 1.6;
 }
 .sumhead .three p {
-  font-size: 14px; line-height: 1.8; margin: 7px 0;
+  font-size: var(--fs-5); line-height: 1.8; margin: 7px 0;
   padding-left: 26px; position: relative; color: var(--paper2);
 }
 .sumhead .three .n {
   position: absolute; left: 0; top: 1px; width: 17px; height: 17px;
   border: 1px solid var(--c); color: var(--c); font-family: var(--mono);
-  font-size: 9.5px; display: flex; align-items: center; justify-content: center;
+  font-size: var(--fs-2); display: flex; align-items: center; justify-content: center;
 }
 
 .scale div { display: flex; align-items: center; gap: 8px; margin: 5px 0; }
-.scale .k { width: 34px; font-size: 11.5px; color: var(--paper2); }
+.scale .k { width: 34px; font-size: var(--fs-3); color: var(--paper2); }
 .scale i {
   height: 7px; width: var(--w); background: var(--c); opacity: .72;
   display: block; min-width: 3px;
 }
-.scale .v { font-family: var(--mono); font-size: 10px; color: var(--paper3); }
+.scale .v { font-family: var(--mono); font-size: var(--fs-2); color: var(--paper3); }
 
 .sslist { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
 .sslist .chip {
-  font-size: 11.5px; padding: 4px 9px; border: 1px solid var(--line2);
+  font-size: var(--fs-3); padding: 4px 9px; border: 1px solid var(--line2);
   color: var(--paper2);
 }
-.sslist .chip i { font-style: normal; color: var(--paper3); font-size: 10px; }
+.sslist .chip i { font-style: normal; color: var(--paper3); font-size: var(--fs-2); }
 .sslist .chip.good { border-color: var(--c); color: var(--c); }
 .sslist .chip.warn { border-color: var(--ember); color: var(--ember); }
 
@@ -328,12 +328,12 @@ body:has(.gatehero) .stage { padding-bottom: 0; }
 .ss.good, .hp { border-left-color: var(--c); }
 .ss.warn { border-left-color: var(--ember); }
 .ss .hd, .hp .hd { display: flex; align-items: baseline; gap: 7px; }
-.ss .hj { font-family: var(--serif); font-size: 11px; color: var(--paper3); }
+.ss .hj { font-family: var(--serif); font-size: var(--fs-3); color: var(--paper3); }
 .ss .tag, .hp .tag {
-  font-family: var(--mono); font-size: 9px; border: 1px solid var(--line2);
+  font-family: var(--mono); font-size: var(--fs-2); border: 1px solid var(--line2);
   padding: 1px 5px; color: var(--paper3);
 }
-.ss .at { font-family: var(--mono); font-size: 10px; color: var(--paper3); margin: 3px 0 5px; }
+.ss .at { font-family: var(--mono); font-size: var(--fs-2); color: var(--paper3); margin: 3px 0 5px; }
 
 .caveat {
   border: 1px dashed var(--line2); padding: 13px 14px; margin: 18px 0;
@@ -344,16 +344,16 @@ body:has(.gatehero) .stage { padding-bottom: 0; }
 .doubts .dq { border-bottom: 1px solid var(--line); }
 .doubts .qh {
   width: 100%; background: none; border: none; color: var(--paper2);
-  text-align: left; padding: 12px 0; cursor: pointer; font-size: 13.5px;
+  text-align: left; padding: 12px 0; cursor: pointer; font-size: var(--fs-4);
   display: flex; justify-content: space-between; align-items: center; gap: 10px;
 }
 .doubts .dq.on .qh { color: var(--c); }
-.doubts .qh i { font-style: normal; color: var(--paper3); font-size: 15px; flex: none; }
+.doubts .qh i { font-style: normal; color: var(--paper3); font-size: var(--fs-5); flex: none; }
 .doubts .dq p {
-  font-size: 13px; line-height: 1.85; color: var(--paper2);
+  font-size: var(--fs-4); line-height: 1.85; color: var(--paper2);
   padding: 0 0 13px; margin: 0;
 }
-.mono { font-family: var(--mono); font-size: 11.5px; }
+.mono { font-family: var(--mono); font-size: var(--fs-3); }
 
 /* ── 신살 인물 ────────────────────────────────────────────
    등장 연출. 아래에서 떠오르며 뒤에서 빛이 번진다.
@@ -393,26 +393,26 @@ body:has(.gatehero) .stage { padding-bottom: 0; }
 
 .sfig-art .slot {
   position: absolute; left: 2px; bottom: 2px; z-index: 2;
-  font-family: var(--mono); font-size: 7px; color: var(--c);
+  font-family: var(--mono); font-size: var(--fs-1); color: var(--c);
   border: 1px dashed var(--c); padding: 1px 4px; opacity: .45;
   background: rgba(12, 10, 18, .72);
 }
 
 .sfig figcaption { flex: 1; min-width: 0; }
 .sfig figcaption .t {
-  display: block; font-family: var(--serif); font-size: 16.5px;
+  display: block; font-family: var(--serif); font-size: var(--fs-6);
   color: var(--c); font-weight: 700;
 }
 .sfig figcaption .w {
-  display: block; font-family: var(--mono); font-size: 9.5px;
+  display: block; font-family: var(--mono); font-size: var(--fs-2);
   color: var(--paper3); margin-top: 2px; letter-spacing: .04em;
 }
 .sfig figcaption .at {
-  display: inline-block; margin-top: 6px; font-size: 10.5px;
+  display: inline-block; margin-top: 6px; font-size: var(--fs-2);
   border: 1px solid var(--line2); padding: 2px 7px; color: var(--paper2);
 }
 .sfig figcaption .b {
-  margin-top: 8px; font-size: 13px; line-height: 1.82; color: var(--paper2);
+  margin-top: 8px; font-size: var(--fs-4); line-height: 1.82; color: var(--paper2);
 }
 
 /* 짐승·사람 공용 눈 깜빡임 — 참조 구현체 blinkk 과 같은 리듬 */
@@ -442,7 +442,7 @@ body:has(.gatehero) .stage { padding-bottom: 0; }
 .phone .lab {
   position: static; display: block; background: none;
   color: var(--paper3); padding: 0; z-index: auto;
-  font-family: var(--mono); font-size: 8.5px; letter-spacing: .16em;
+  font-family: var(--mono); font-size: var(--fs-1); letter-spacing: .16em;
   margin-bottom: 10px;
 }
 
@@ -453,34 +453,34 @@ body:has(.gatehero) .stage { padding-bottom: 0; }
 .rail {
   position: fixed; left: 0; top: 0; bottom: 0; width: 232px; z-index: 90;
   background: #06040a; border-right: 1px solid var(--line);
-  font-family: var(--mono); font-size: 10px; color: var(--paper3);
+  font-family: var(--mono); font-size: var(--fs-2); color: var(--paper3);
   overflow-y: auto; overflow-x: hidden;   /* 가로 스크롤바가 아래를 갉아먹었다 */
 }
 .rail.closed { width: 26px; overflow: visible; }
 .railin { padding: 16px 12px 40px; min-width: 0; }
 .railin * { min-width: 0; }
 .rail h1 {
-  font-family: var(--serif); font-size: 15px; color: var(--gold);
+  font-family: var(--serif); font-size: var(--fs-5); color: var(--gold);
   letter-spacing: .1em;
 }
 .rail .v {
-  font-size: 9px; margin-bottom: 12px; opacity: .6;
+  font-size: var(--fs-2); margin-bottom: 12px; opacity: .6;
   display: flex; align-items: center; justify-content: space-between; gap: 6px;
 }
 /* 레일을 끄는 단추 — 끄면 다시 켤 방법은 ?admin=1 뿐이므로 title 에 적어 둡니다 */
 .railoff {
-  font-size: 9px; padding: 2px 6px; border-radius: 4px; cursor: pointer;
+  font-size: var(--fs-2); padding: 2px 6px; border-radius: 4px; cursor: pointer;
   background: transparent; color: inherit; opacity: .8;
   border: 1px solid var(--line);
 }
 .railoff:hover { opacity: 1; border-color: var(--gold); color: var(--gold); }
 .rail .gh {
-  display: block; font-size: 8.5px; letter-spacing: .16em; color: var(--gold);
+  display: block; font-size: var(--fs-1); letter-spacing: .16em; color: var(--gold);
   margin: 14px 0 5px; padding-bottom: 4px; border-bottom: 1px solid var(--line);
 }
 .rail a {
   display: flex; gap: 6px; color: var(--paper3); text-decoration: none;
-  padding: 3px 4px; font-size: 10px;
+  padding: 3px 4px; font-size: var(--fs-2);
 }
 .rail a:hover { color: var(--paper2); background: rgba(229,184,122,.06); }
 .rail a.on { color: var(--gold); }
@@ -489,7 +489,7 @@ body:has(.gatehero) .stage { padding-bottom: 0; }
 .railtog {
   position: absolute; right: -1px; top: 8px; z-index: 2;
   background: #06040a; border: 1px solid var(--line); border-right: none;
-  color: var(--gold); font-size: 10px; padding: 6px 4px; cursor: pointer;
+  color: var(--gold); font-size: var(--fs-2); padding: 6px 4px; cursor: pointer;
 }
 .rail.closed .railtog { right: -22px; border-right: 1px solid var(--line); }
 
@@ -497,17 +497,17 @@ body:has(.gatehero) .stage { padding-bottom: 0; }
 .rail .inrow input, .rail .inrow select, .rail .sel {
   flex: 1; min-width: 0; background: var(--bg2); border: 1px solid var(--line);
   color: var(--paper); padding: 6px 2px; font-family: var(--mono);
-  font-size: 10px; text-align: center; outline: none;
+  font-size: var(--fs-2); text-align: center; outline: none;
 }
 .rail .sel { width: 100%; text-align: left; padding: 6px; }
 .rail .tg {
   flex: 1; background: var(--bg2); border: 1px solid var(--line);
-  color: var(--paper2); font-family: var(--mono); font-size: 9px; cursor: pointer;
+  color: var(--paper2); font-family: var(--mono); font-size: var(--fs-2); cursor: pointer;
 }
 .rail .tg.on { border-color: var(--ember); color: var(--ember); }
 .rail .mini {
   width: 100%; background: var(--gold); border: none; color: #08060d;
-  padding: 7px; font-family: var(--mono); font-size: 9.5px; cursor: pointer;
+  padding: 7px; font-family: var(--mono); font-size: var(--fs-2); cursor: pointer;
   margin-top: 2px;
 }
 .rail .mini:disabled { opacity: .5; cursor: default; }
@@ -522,7 +522,7 @@ body:has(.gatehero) .stage { padding-bottom: 0; }
 .rail .gg.c5 { grid-template-columns: repeat(5, 1fr); }
 .rail .gg button {
   background: none; border: 1px solid var(--line); color: var(--paper3);
-  font-size: 10px; padding: 5px 0; cursor: pointer;
+  font-size: var(--fs-2); padding: 5px 0; cursor: pointer;
 }
 .rail .gg button.on { border-color: var(--gold); color: var(--gold); }
 .rail .fx {
@@ -589,8 +589,8 @@ body.has-rail-closed .stage { margin-left: 26px; }
 
 @media (max-width: 480px) {
   .top { gap: 5px; padding: 9px 10px; }
-  .top .tb { padding: 4px 5px; font-size: 9.5px; }
-  .top .tt { font-size: 11px; }
+  .top .tb { padding: 4px 5px; font-size: var(--fs-2); }
+  .top .tt { font-size: var(--fs-3); }
 }
 @media (max-width: 360px) {
   /* 아주 좁으면 화면 이름을 접는다 — 버튼이 먼저다 */
@@ -637,41 +637,41 @@ body.has-rail-closed .stage { margin-left: 26px; }
 .pmodin .x {
   position: sticky; top: 0; float: right; background: var(--bg2);
   border: 1px solid var(--line2); color: var(--paper2);
-  font-family: var(--mono); font-size: 10px; padding: 6px 10px; cursor: pointer;
+  font-family: var(--mono); font-size: var(--fs-2); padding: 6px 10px; cursor: pointer;
 }
 .pmodin h3 {
-  font-family: var(--serif); font-size: 20px; color: var(--c);
+  font-family: var(--serif); font-size: var(--fs-8); color: var(--c);
   font-weight: 700; margin-bottom: 4px;
 }
 .pmodin .m1 {
-  font-family: var(--mono); font-size: 10px; color: var(--paper3);
+  font-family: var(--mono); font-size: var(--fs-2); color: var(--paper3);
   margin-bottom: 12px; word-break: break-all;
 }
 .pmodin .sp { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 14px; }
 .pmodin .sp span {
-  font-family: var(--mono); font-size: 9.5px; padding: 3px 8px;
+  font-family: var(--mono); font-size: var(--fs-2); padding: 3px 8px;
   border: 1px solid var(--line2); color: var(--paper2);
 }
 .pmodin .hint {
   border: 1px solid var(--line2); border-left-width: 2px;
-  padding: 10px 12px; margin: 12px 0; font-size: 12px; line-height: 1.85;
+  padding: 10px 12px; margin: 12px 0; font-size: var(--fs-3); line-height: 1.85;
   color: var(--paper2); background: rgba(114, 106, 128, .06);
 }
 .pmodin .pl {
   display: flex; align-items: center; justify-content: space-between;
   gap: 10px; margin: 16px 0 5px; font-family: var(--mono);
-  font-size: 10px; color: var(--gold); letter-spacing: .08em;
+  font-size: var(--fs-2); color: var(--gold); letter-spacing: .08em;
 }
 .pmodin .pl button {
   background: var(--gold); border: none; color: #08060d;
-  font-family: var(--mono); font-size: 9.5px; padding: 5px 11px; cursor: pointer;
+  font-family: var(--mono); font-size: var(--fs-2); padding: 5px 11px; cursor: pointer;
 }
 .pmodin .pdir {
-  font-size: 11px; color: var(--ember); margin-bottom: 5px; line-height: 1.7;
+  font-size: var(--fs-3); color: var(--ember); margin-bottom: 5px; line-height: 1.7;
 }
 .pmodin pre {
   background: var(--bg2); border: 1px solid var(--line);
-  padding: 12px 13px; font-family: var(--mono); font-size: 11px;
+  padding: 12px 13px; font-family: var(--mono); font-size: var(--fs-3);
   line-height: 1.72; color: var(--paper2); white-space: pre-wrap;
   word-break: break-word; max-height: 340px; overflow-y: auto;
 }
@@ -693,18 +693,18 @@ body.has-rail-closed .stage { margin-left: 26px; }
    ------------------------------------------------------ */
 .stab p.gan {
   font-family: var(--serif);
-  font-size: 17px;
+  font-size: var(--fs-7);
   line-height: 1.8;
   margin-top: 12px;
   padding-top: 11px;
   border-top: 1px solid rgba(229, 184, 122, .18);
   color: var(--c);
 }
-@media (max-width: 480px) { .stab p.gan { font-size: 15.5px; } }
+@media (max-width: 480px) { .stab p.gan { font-size: var(--fs-5); } }
 
 .scene p.sea {
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: var(--fs-3);
   letter-spacing: .02em;
   line-height: 1.75;
   color: var(--paper3);
@@ -723,7 +723,7 @@ body.has-rail-closed .stage { margin-left: 26px; }
    ------------------------------------------------------ */
 .cax p {
   font-family: var(--serif);
-  font-size: 16.5px;
+  font-size: var(--fs-6);
   line-height: 1.92;
   color: var(--paper2);
 }
@@ -753,7 +753,7 @@ body.has-rail-closed .stage { margin-left: 26px; }
    ------------------------------------------------------ */
 .tz {
   font-family: var(--serif);
-  font-size: 16px;
+  font-size: var(--fs-6);
   line-height: 1.8;
   color: var(--paper2);
   margin: 4px 0 6px;
@@ -768,7 +768,7 @@ body.has-rail-closed .stage { margin-left: 26px; }
    ------------------------------------------------------ */
 .vow {
   font-family: var(--serif);
-  font-size: 14.5px;
+  font-size: var(--fs-5);
   line-height: 1.85;
   color: var(--paper2);
   border-left: 2px solid var(--teal);
@@ -793,13 +793,13 @@ body.has-rail-closed .stage { margin-left: 26px; }
   grid-template-columns: 62px 40px 1fr;
   align-items: baseline;
   gap: 8px;
-  font-size: 12px;
+  font-size: var(--fs-3);
   line-height: 1.7;
 }
 .scw p + p { margin-top: 6px; }
 .scw b {
   font-family: var(--mono);
-  font-size: 9.5px;
+  font-size: var(--fs-2);
   letter-spacing: .1em;
   color: var(--paper3);
   font-weight: 400;
@@ -807,13 +807,13 @@ body.has-rail-closed .stage { margin-left: 26px; }
 .scw i {
   font-family: var(--mono);
   font-style: normal;
-  font-size: 12px;
+  font-size: var(--fs-3);
   text-align: right;
   color: var(--c);
 }
 .scw span { color: var(--paper2); }
 @media (max-width: 420px) {
-  .scw p { grid-template-columns: 54px 34px 1fr; font-size: 11.5px; }
+  .scw p { grid-template-columns: 54px 34px 1fr; font-size: var(--fs-3); }
 }
 
 /* ══════════ 골목 — 결과 약속 · 의심 풀기 ══════════
@@ -825,7 +825,7 @@ body.has-rail-closed .stage { margin-left: 26px; }
    ------------------------------------------------------ */
 .promise {
   font-family: var(--serif);
-  font-size: 15.5px;
+  font-size: var(--fs-5);
   line-height: 1.85;
   color: var(--paper2);
   margin-top: 16px;
@@ -844,7 +844,7 @@ body.has-rail-closed .stage { margin-left: 26px; }
   border: none;
   padding: 0;
   font-family: var(--sans);
-  font-size: 12px;
+  font-size: var(--fs-3);
   color: var(--teal);
   border-bottom: 1px solid rgba(127, 196, 188, .45);
   cursor: pointer;
@@ -879,7 +879,7 @@ body.has-rail-closed .stage { margin-left: 26px; }
 }
 .calcrun p {
   font-family: var(--mono);
-  font-size: 11.5px;
+  font-size: var(--fs-3);
   line-height: 1.9;
   color: var(--paper3);
   animation: calcIn .34s ease both;
@@ -894,7 +894,7 @@ body.has-rail-closed .stage { margin-left: 26px; }
 .vt3 {
   display: block;
   margin: 9px auto 0;
-  font-size: 11.5px;
+  font-size: var(--fs-3);
   color: var(--paper3);
   border-bottom-color: rgba(114, 106, 128, .5);
 }
@@ -921,7 +921,7 @@ body.has-rail-closed .stage { margin-left: 26px; }
 .beat .q {
   display: block;
   font-family: var(--serif);
-  font-size: 15px;
+  font-size: var(--fs-5);
   color: var(--paper2);
   margin-bottom: 10px;
 }
@@ -946,7 +946,7 @@ body.has-rail-closed .stage { margin-left: 26px; }
 }
 .lastcut {
   font-family: var(--mono);
-  font-size: 9.5px;
+  font-size: var(--fs-2);
   letter-spacing: .16em;
   color: var(--gold);
   margin-bottom: 9px;
@@ -956,7 +956,7 @@ body.has-rail-closed .stage { margin-left: 26px; }
 /* 목패에 적는 '열리는 자리' 이름 — 서버가 주는데 안 쓰이고 있었다 */
 .op .opens {
   color: var(--gold);
-  font-size: 11px;
+  font-size: var(--fs-3);
   line-height: 1.65;
 }
 
@@ -984,7 +984,7 @@ body.has-rail-closed .stage { margin-left: 26px; }
   opacity: 0;
   animation: stamp .52s cubic-bezier(.2,.8,.3,1) .25s forwards;
 }
-.seal span { font-size: 12px; color: var(--paper3); }
+.seal span { font-size: var(--fs-3); color: var(--paper3); }
 @keyframes stamp {
   to { transform: rotate(-7deg) scale(1); opacity: 1; }
 }
@@ -1033,7 +1033,7 @@ body.has-rail-closed .stage { margin-left: 26px; }
   font-family: var(--serif); font-style: normal; color: var(--cc);
   opacity: .82; line-height: 1;
 }
-.charart.chip .ph i { font-size: 22px; }
+.charart.chip .ph i { font-size: var(--fs-8); }
 .charart.card .ph i { font-size: 52px; }
 .charart.full .ph i { font-size: 108px; }
 .charart.off { filter: grayscale(1); opacity: .38; }
@@ -1043,8 +1043,8 @@ body.has-rail-closed .stage { margin-left: 26px; }
   display: flex; align-items: center; gap: 11px; text-align: left;
 }
 .op.face .who { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.op.face .who b { font-family: var(--serif); font-size: 14.5px; }
-.op.face .who span { font-size: 11.5px; color: var(--paper3); }
+.op.face .who b { font-family: var(--serif); font-size: var(--fs-5); }
+.op.face .who span { font-size: var(--fs-3); color: var(--paper3); }
 
 /* 그 사람의 자리 — 초상이 서는 곳 */
 .facebox { display: flex; justify-content: center; margin: 14px 0 4px; }
