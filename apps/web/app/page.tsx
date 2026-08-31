@@ -657,6 +657,14 @@ function EntryInner() {
         {s.features && done && (
           <>
             <Narration lines={["여덟 글자가 섰다."]} />
+            {/* ★ "여덟 글자가 섰다" 만 있었습니다. 그게 무슨 뜻인지
+                아무 데도 안 적혀 있었습니다. 첫 화면에서 한 번은
+                말해 줘야 뒤가 읽힙니다. */}
+            <p className="lede8">
+              태어난 <b>해 · 달 · 날 · 시</b>를 각각 두 글자로 옮긴 것이오.
+              넷씩 두 줄, 그래서 <b>여덟 글자</b>요. 이 여덟이 이 집이 읽는
+              전부요 — 더도 덜도 없소.
+            </p>
             <Pillars f={s.features} />
             <Summary f={s.features} />
             <ElementBar f={s.features} />

@@ -1048,3 +1048,78 @@ body.has-rail-closed .stage { margin-left: 26px; }
 
 /* 그 사람의 자리 — 초상이 서는 곳 */
 .facebox { display: flex; justify-content: center; margin: 14px 0 4px; }
+
+/* ══════════ 모르는 말을 그 자리에서 풀기 ══════════
+   ★ 명식 화면이 손님이 모르는 말로만 되어 있었습니다 —
+     "庚 일간 · 신강(26) · 용신 불 · 흐름 식상 · 주도 십신 상관".
+     이 집은 근거 대는 집인데, 근거를 모르는 말로 대면 그건 근거가
+     아니라 주문입니다.
+
+   ★ 용어를 지우지 않습니다. 옆에 뜻을 답니다. 명리 용어는 이 집의
+     근거이자 신뢰의 재료라, 없애면 여느 점집과 같아집니다.
+   ------------------------------------------------------ */
+.lede8 {
+  font-family: var(--serif);
+  font-size: var(--fs-4);
+  line-height: 1.9;
+  color: var(--paper2);
+  margin: 12px 0 16px;
+  padding-left: 14px;
+  border-left: 2px solid rgba(229, 184, 122, .3);
+}
+.lede8 b { color: var(--paper); font-weight: 400; }
+
+/* 기둥 밑에 다는 한 줄 — 이 자리가 무엇을 보는가 */
+.pil .what {
+  font-family: var(--sans);
+  font-size: var(--fs-1);
+  line-height: 1.5;
+  color: var(--paper3);
+  margin-top: 6px;
+  padding: 0 2px;
+  word-break: keep-all;
+}
+
+/* 용어 한 줄 — 이름과 뜻을 나란히 */
+.term {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(46, 39, 64, .8);
+  align-items: baseline;
+}
+.term:last-of-type { border-bottom: none; }
+.term .k {
+  font-family: var(--serif);
+  font-size: var(--fs-4);
+  color: var(--c);
+  word-break: keep-all;
+}
+.term .v {
+  font-size: var(--fs-3);
+  line-height: 1.8;
+  color: var(--paper2);
+  word-break: keep-all;
+}
+.term .v b { color: var(--paper); font-weight: 500; }
+.sum .note { color: var(--gold); margin-top: 10px; line-height: 1.75; }
+
+/* 오행 막대 머리말 */
+.barhead {
+  font-size: var(--fs-3);
+  line-height: 1.8;
+  color: var(--paper3);
+  margin: 16px 0 8px;
+  word-break: keep-all;
+}
+.barhead b { color: var(--paper2); font-weight: 500; }
+.elbar .ko {
+  font-size: var(--fs-1);
+  color: var(--paper3);
+  margin-top: 2px;
+}
+
+@media (max-width: 400px) {
+  .term { grid-template-columns: 1fr; gap: 3px; }
+}
