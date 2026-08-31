@@ -24,6 +24,7 @@ from . import lens as lens_mod
 from . import lens_cuts as lens_cuts_mod
 from . import rarity as rarity_mod
 from . import sinsal as sinsal_mod
+from . import terms as terms_mod
 from . import voice as voice_mod
 from .bank import element_word, josa
 
@@ -802,13 +803,26 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
     #
     #   ★ 근거 줄(source)은 안 건드립니다. 근거는 캐릭터가 바꾸지
     #     않습니다 — 여덟 글자는 하나입니다.
+    # ★ 어려운 말을 **리포트 한 장에 한 번씩** 풉니다.
+    #
+    #   재보니 어려운 말 41가지 중 40가지가 풀이 없이 나오고 있었습니다.
+    #   「상관」이 무엇인지 아는 손님은 거의 없습니다. 이 집은 근거 대는
+    #   집인데, 근거를 모르는 말로 대면 그건 근거가 아니라 주문입니다.
+    #
+    #   `seen` 을 컷들이 나눠 씁니다 — 한 장 안에서 같은 말을 열 번
+    #   풀면 읽기를 방해합니다. 처음 만나는 자리에서만 답니다.
+    seen: set = set()
     tone = view.get("voice")
     for c in cuts:
-        c["html"] = voice_mod.speak(voice_mod.address(c["html"], you), tone)
+        c["html"] = terms_mod.gloss(
+            voice_mod.speak(voice_mod.address(c["html"], you), tone), seen)
     for l in locked:
         if l.get("teaser"):
-            l["teaser"] = voice_mod.speak(
-                voice_mod.address(l["teaser"], you), tone)
+            # 맛보기도 손님이 읽는 글입니다. 같은 층을 태웁니다.
+            # ★ seen 을 나눠 쓰지 않습니다 — 페이월은 본문과 따로
+            #   읽히는 자리라, 거기서 처음 만나는 말이면 풀어 줘야 합니다.
+            l["teaser"] = terms_mod.gloss(voice_mod.speak(
+                voice_mod.address(l["teaser"], you), tone))
 
     # 이 캐릭터가 더 받아야 하는 것. 안 받았으면 화면이 물어볼 수 있게
     # 알려 줍니다. **무엇을 받는지만** 내려보내고 문장은 안 보냅니다.

@@ -609,13 +609,13 @@ function EntryInner() {
      */
     const c = s.features?.correction;
     const beats: string[] = c ? [
-      `표준시를 되돌린다… ${c.std_label}`,
+      `표준시(그 시절 쓰던 시계 기준)를 되돌린다… ${c.std_label}`,
       c.dst ? "서머타임 구간이오. 한 시간 되돌린다…"
             : "서머타임은 해당 없소.",
       `고을을 본다… ${c.city} ${c.lon_min > 0 ? "+" : ""}${c.lon_min}분`,
       c.hour_used ? `때를 고친다… ${c.before} → ${c.after}`
                   : "때를 모르신다 했으니, 시주는 세우지 않소.",
-      `절기를 찾는다… ${c.jieqi_name} 절입 ${c.jieqi_at_kst}`,
+      `절기(계절이 바뀌는 마디)를 찾는다… ${c.jieqi_name} 절입 ${c.jieqi_at_kst}`,
       "여덟 글자가 섰다.",
     ] : [];
     const done = calcAt >= beats.length;

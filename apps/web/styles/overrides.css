@@ -1123,3 +1123,32 @@ body.has-rail-closed .stage { margin-left: 26px; }
 @media (max-width: 400px) {
   .term { grid-template-columns: 1fr; gap: 3px; }
 }
+
+/* ══════════ 어려운 말 풀이 ══════════
+   ★ 어려운 말 41가지 중 40가지가 풀이 없이 2,860번 나오고 있었습니다.
+     「상관」이 무엇인지 아는 손님은 거의 없습니다. 이 집은 근거 대는
+     집인데, 근거를 모르는 말로 대면 그건 근거가 아니라 주문입니다.
+
+   ★ 용어는 지우지 않습니다. 옆에 뜻을 답니다 — 리포트 한 장에 한 번씩,
+     처음 만나는 자리에서만. (engine/terms.py)
+
+   ★ 본문 흐름을 끊지 않게 작고 옅게 답니다. 읽는 사람이 이미 아는
+     말이면 눈이 그냥 지나가야 합니다.
+   ------------------------------------------------------ */
+.gl {
+  font-style: normal;
+  font-family: var(--sans);
+  font-size: var(--fs-1);
+  font-weight: 300;
+  color: var(--teal);
+  white-space: nowrap;
+  margin-left: 3px;
+  opacity: .92;
+}
+/* 괄호는 글에 직접 들어 있습니다(engine/terms.py) — 여기서 만들지
+   않습니다. CSS 로만 두면 태그를 걷어낸 자리에서 말이 붙어 버립니다. */
+
+/* 줄이 좁은 자리에서는 줄바꿈을 허용한다 */
+@media (max-width: 420px) {
+  .gl { white-space: normal; }
+}

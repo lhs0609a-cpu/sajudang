@@ -131,15 +131,15 @@ export function ElementBar({ f }: { f: Features }) {
 export function CalcPanel({ f }: { f: Features }) {
   const c = f.correction;
   const rows: [string, React.ReactNode][] = [
-    ["표준시", c.std_label],
+    ["표준시", <>{c.std_label} <i className="gl">(그 시절 우리나라가 쓰던 시계 기준)</i></>],
     ["서머타임", c.dst ? <b>적용 · 1시간 되돌림</b> : "해당 없음"],
-    ["진태양시", <>{c.city} → <b>{c.lon_min > 0 ? "+" : ""}{c.lon_min}분</b></>],
+    ["진태양시", <>{c.city} → <b>{c.lon_min > 0 ? "+" : ""}{c.lon_min}분</b> <i className="gl">(해가 남중하는 때로 고친 시각)</i></>],
     ["보정", c.hour_used
       ? <><s>{c.before}</s> → <b>{c.after}</b>{c.day_shift
           ? <b> ({c.day_shift > 0 ? "익" : "전"}일)</b> : null}</>
       : "시각 미상 — 보정 없음"],
-    ["절기", `${c.jieqi_name} 절입 ${c.jieqi_at_kst} 기준`],
-    ["자시", c.zi_policy],
+    ["절기", <>{c.jieqi_name} 절입 {c.jieqi_at_kst} 기준 <i className="gl">(계절이 바뀌는 마디 스물넷 · 넘어가는 시각까지 셉니다)</i></>],
+    ["자시", <>{c.zi_policy} <i className="gl">(밤 11시부터 다음 날로 보는가)</i></>],
     ["시주", c.hour_used
       ? <b>산출됨</b>
       : <b style={{ color: "var(--gold)" }}>제외 — 세 기둥으로 계산</b>],

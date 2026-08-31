@@ -52,6 +52,11 @@ export default function DailyPage() {
   return (
     <Shell title="오늘의 일진">
       <Scene id="banner" />
+      {/* ★ 「일진」이 무엇인지 아무 데도 안 적혀 있었습니다. */}
+      <p className="lede8">
+        <b>일진</b>은 <b>그날의 기운</b>이오. 날마다 두 글자가 서는데,
+        그것이 그대 여덟 글자와 어디서 맞물리는지를 보오.
+      </p>
       {err && <Say who="도령">{err}</Say>}
 
       {/* 하루 3회 접속 시 만류 — 늘리지 마세요 */}

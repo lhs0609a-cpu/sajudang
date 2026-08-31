@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Optional
 
 from . import guard
+from . import terms
 from .constants import ELEMENT_OF_GAN
 
 SEED = Path(__file__).resolve().parents[3] / "seed"
@@ -546,6 +547,12 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
         no="지금 아니라 하셔도 이름은 남소. 다음에 걸릴 때 떠오를 게요.",
         sid="name:%s:%s:%s" % (weak, flow, strength)))
 
+    # ★ 훅에서도 어려운 말을 **한 벌에 한 번** 풉니다.
+    #   0단이 손님이 이 집에서 처음 읽는 글입니다. 거기서 「편관」이
+    #   풀이 없이 나오면 그 순간 손님은 압도당합니다.
+    seen: set = set()
+    for s in segs:
+        s["html"] = terms.gloss(s["html"], seen)
     return segs
 
 

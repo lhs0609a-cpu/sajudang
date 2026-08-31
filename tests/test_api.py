@@ -312,14 +312,14 @@ def test_teaser_is_a_real_prefix_of_the_cut(client, chart_id):
 
     f = Features(**load_features(chart_id))
     full = build_report(f, chart_id, "pungun", "all", "love")
-    body = {c["id"]: _plain(c["html"]) for c in full["cuts"]}
+    body = {c["id"]: _plain(_bare(c["html"])) for c in full["cuts"]}
 
     seen = 0
     for l in _locked(client, chart_id):
         if not l.get("teaser"):
             continue
         seen += 1
-        head = l["teaser"].rstrip(" —")
+        head = _plain(_bare(l["teaser"])).rstrip(" —")
         assert body[l["id"]].startswith(head), l["id"]
     assert seen, "맛보기가 한 줄도 안 나왔습니다"
 
@@ -332,14 +332,17 @@ def test_teaser_never_gives_away_the_cut(client, chart_id):
       아니라 본문의 절반입니다. 한도가 두 개인 이유입니다 —
       글자 수(TEASER_MAX)와 **비율**(TEASER_SHARE).
     """
-    from engine.report import TEASER_MAX, TEASER_SHARE
+    from engine.report import TEASER_MAX, TEASER_SHARE, _plain
 
     for l in _locked(client, chart_id):
         if not l.get("teaser"):
             continue
+        # ★ 길이는 **풀이를 뺀** 글로 잽니다. 풀이는 그 컷의 내용이
+        #   아니라 어려운 말을 도운 것이라, 넘겨준 분량에 안 셉니다.
+        bare = _plain(_bare(l["teaser"]))
         assert l["chars"] > 0, l
-        assert len(l["teaser"]) <= TEASER_MAX + 8, l
-        assert len(l["teaser"]) <= l["chars"] * TEASER_SHARE + 8, l
+        assert len(bare) <= TEASER_MAX + 8, (bare, l)
+        assert len(bare) <= l["chars"] * TEASER_SHARE + 8, (bare, l)
 
 
 def test_teaser_does_not_break_mid_particle(client, chart_id):
@@ -502,7 +505,7 @@ def test_hook_turns_the_axis_after_two_misses(client, chart_id):
     after = _hook(client, chart_id, bank.TURN_AT)["2"]
 
     assert before["html"] != after["html"], "방향을 안 틀었습니다"
-    assert "십신으로 짚던 것을 접고" in after["html"]
+    assert "십신으로 짚던 것을 접고" in _bare(after["html"])
     # 튼 단은 다른 문장으로 집계돼야 합니다 — 어긋난 축을 버리는 신호입니다
     assert after["statement_id"] != before["statement_id"]
     assert "@turn" in after["statement_id"]
@@ -583,6 +586,19 @@ def test_agreement_reports_exposure_even_below_the_threshold(client, chart_id,
 # ══════════════════════════════════════════════════════════
 # 값을 치르고도 조용히 잃던 자리들
 # ══════════════════════════════════════════════════════════
+def _bare(text: str) -> str:
+    """
+    풀이 괄호를 걷어낸 글.
+
+    ★ 어려운 말 풀이 층(engine/terms.py)이 붙으면서 「십신으로」가
+      「십신(여덟 글자 사이의…)으로」가 됩니다. 글자를 그대로 견주는
+      검사는 그때 깨집니다 — 검사가 보려는 성질은 풀이가 아니라
+      그 아래 문장이므로, 걷어내고 봅니다.
+    """
+    import re as _re
+    return _re.sub(r'<i class="gl">\([^)]*\)</i>', "", text)
+
+
 def _cut_ids(client, chart_id, lens_id, tier, axis4=None, session=None):
     body = {"chart_id": chart_id, "lens_id": lens_id, "tier": tier,
             "concern": "love"}
