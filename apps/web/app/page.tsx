@@ -137,6 +137,17 @@ function EntryInner() {
   const [cityOpen, setCityOpen] = useState(false);
   /* 시·분을 직접 적는 겹을 열었는가. 네 시간 칸이 시주를 바꿔 놓습니다. */
   const [exact, setExact] = useState(false);
+  /*
+   * 어느 칸을 골랐는가. **s.hour 로 되찾으면 안 됩니다** — 시를 고치는
+   * 순간 어느 칸에도 안 맞아 정밀 입력이 사라집니다.
+   */
+  const [pickedHour, setPickedHour] = useState<number | null>(
+    // 되돌아온 손님이면 전에 고른 칸을 되살립니다. 처음 한 번만 봅니다 —
+    // 그 뒤로는 손님이 시를 고쳐도 칸이 안 바뀝니다.
+    () => {
+      const i = HOURS.findIndex(([, , h]) => h === useSession.getState().hour);
+      return i >= 0 && useSession.getState().hourKnown ? i : null;
+    });
   /* a6 계산 장면이 몇 줄까지 찍혔는가. 0 이면 아직 아무것도 안 찍혔다. */
   const [calcAt, setCalcAt] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -420,7 +431,18 @@ function EntryInner() {
   }
 
   if (step === "a4") {
-    const bucket = HOURS.find(([, , h]) => h === s.hour);
+    /*
+     * ★ 여기가 고쳐지지 않던 자리입니다.
+     *
+     *   고른 칸(bucket)을 `s.hour` 로 되찾고 있었습니다. 그런데 손님이
+     *   시를 고치는 순간 그 값이 어느 칸에도 안 맞습니다 — 13에서 한
+     *   글자만 지워도 1이 되고, 1은 칸이 아닙니다. 그러면 `bucket` 이
+     *   undefined 가 되고 **정밀 입력 칸이 통째로 사라집니다.**
+     *   그래서 한 글자도 못 고쳤습니다.
+     *
+     *   고른 칸은 따로 기억합니다. 시를 아무리 고쳐도 칸은 안 없어집니다.
+     */
+    const bucket = pickedHour !== null ? HOURS[pickedHour] : undefined;
     return (
       <Shell title="때를 묻다">
         <Progress step={progressAt("a4")!} total={PROGRESS_TOTAL} />
@@ -439,12 +461,13 @@ function EntryInner() {
         </button>
 
         <div className="og c2">
-          {HOURS.map(([label, range, h]) => (
+          {HOURS.map(([label, range, h], idx) => (
             <button key={label}
-                    className={`op ${s.hourKnown && s.hour === h ? "on" : ""}`}
+                    className={`op ${pickedHour === idx ? "on" : ""}`}
                     onClick={() => {
                       s.set({ hourKnown: true, hour: h, minute: 0,
                               features: null, chartId: null });
+                      setPickedHour(HOURS.findIndex(([n]) => n === label));
                       setExact(false);
                     }}>
               <b>{label}</b><span>{range}</span>
@@ -483,18 +506,24 @@ function EntryInner() {
                            placeholder={String(bucket[2])}
                            value={s.hour ?? ""}
                            onChange={(e) => {
-                             const t = e.target.value.replace(/[^0-9]/g, "");
-                             const v = t === "" ? null : Math.min(23, Number(t));
-                             s.set({ hour: v, features: null, chartId: null });
+                             const t = e.target.value.replace(/[^0-9]/g, "").slice(0, 2);
+                             if (t === "") {
+                               s.set({ hour: null, features: null, chartId: null });
+                               return;
+                             }
+                             // 24 를 치면 23 으로 잡아 둡니다. 지우고 다시
+                             // 칠 수 있어야 하므로 값 자체는 막지 않습니다.
+                             s.set({ hour: Math.min(23, Number(t)),
+                                     features: null, chartId: null });
                            }} />
                   </div>
                   <div>
                     <label>분</label>
                     <input className="fld" inputMode="numeric" maxLength={2}
                            placeholder="0"
-                           value={s.minute || ""}
+                           value={s.minute ? String(s.minute) : ""}
                            onChange={(e) => {
-                             const t = e.target.value.replace(/[^0-9]/g, "");
+                             const t = e.target.value.replace(/[^0-9]/g, "").slice(0, 2);
                              s.set({ minute: t === "" ? 0 : Math.min(59, Number(t)),
                                      features: null, chartId: null });
                            }} />
@@ -685,6 +714,28 @@ function EntryInner() {
           보상이 아니라 **남은 노동**을 강조합니다. */}
       <Scene id="facing" />
       {!segments && !error && <Narration lines={["도령이 종이를 들여다본다."]} />}
+
+      {/*
+        ★ 훅이 아무 설명 없이 대뜸 시작하고 있었습니다.
+          손님은 "이현석. 모으기는 하는데 그걸로 뭘 할지가 없다." 를
+          갑자기 만납니다. 이게 무슨 화면인지, 왜 이런 말을 하는지,
+          「그렇소/아니오」가 무엇을 하는지 아무 데도 없었습니다.
+
+          찌르기의 세기를 죽이지 않으면서 **무엇이 벌어질지만** 먼저
+          한 줄로 말합니다. 값은 여기서 안 묻습니다.
+      */}
+      {segments && (
+        <div className="hookintro">
+          <p>
+            여기서부터 <b>다섯 마디</b>요. 그대의 여덟 글자만 보고 하는 말이오 —
+            이름도 사연도 안 들었소.
+          </p>
+          <p>
+            한 마디가 끝날 때마다 <b>맞는지 물어보겠소.</b> 아니라 하시면
+            짚는 자리를 바꾸오. 값은 아직 안 묻소.
+          </p>
+        </div>
+      )}
       {error && <Say who="도령">{error}</Say>}
       {segments && s.chartId && (
         <HookSegments

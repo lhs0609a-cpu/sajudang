@@ -116,6 +116,9 @@ export default function HookSegments({
     <>
       {segments.slice(0, open).map((seg, i) => (
         <div className="blk in" key={seg.statement_id}>
+          {/* ★ 몇 번째 마디인지. 0단은 label 이 비어 있어서 손님이
+              어디쯤 왔는지 알 길이 없었습니다. */}
+          <div className="stepno">{i + 1} / {segments.length}</div>
           {seg.label && <div className="lab">{seg.label}</div>}
           {/*
             ★ 0단만 근거가 본문 **아래**로 갑니다 (seg.source_below).
