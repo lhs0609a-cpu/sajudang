@@ -36,12 +36,22 @@ export function Legal() {
   );
 }
 
-export function TopBar({ title, skipTo }: { title: string; skipTo?: string }) {
+export function TopBar({ title, skipTo, onBack }: {
+  title: string; skipTo?: string; onBack?: () => void;
+}) {
   const router = useRouter();
   const seals = useSession((s) => s.seals);
   return (
     <div className="top">
-      <button className="tb" onClick={() => router.back()} aria-label="뒤로">←</button>
+      {/*
+        ★ 진입 흐름은 주소 하나 위의 일곱 단계입니다. 그런데 이 화살표는
+          `router.back()` 이라 **한 단계 뒤가 아니라 밖으로** 나갔습니다.
+          성향 넉 자 열여섯 칸에서 잘못 누르면 곧바로 셈 화면으로 넘어가고,
+          고칠 길이 이 화살표뿐인데 그걸 누르면 나가집니다.
+          단계를 아는 화면은 `onBack` 을 줍니다.
+      */}
+      <button className="tb" onClick={() => (onBack ? onBack() : router.back())}
+              aria-label="뒤로">←</button>
       <span className="tt">{title}</span>
       <Link className="tb" href="/daily" aria-label="오늘의 일진">日</Link>
       <Link className="tb" href="/me" aria-label="인장첩">印 {seals.length}</Link>
@@ -52,10 +62,11 @@ export function TopBar({ title, skipTo }: { title: string; skipTo?: string }) {
 }
 
 export default function Shell({
-  title, skipTo, bare, legal, children,
+  title, skipTo, bare, legal, onBack, children,
 }: {
   title?: string;
   skipTo?: string;
+  onBack?: () => void;     // 한 주소 위 여러 단계인 화면 (진입 흐름)
   bare?: boolean;          // a1 — 진입 서사 중에는 상단바를 숨긴다
   legal?: boolean;         // h1 · d2 · r1
   children: React.ReactNode;
@@ -106,7 +117,7 @@ export default function Shell({
         data-ilgan={ilganOverride ?? features?.day_gan ?? undefined}
         style={themeColor ? ({ ["--c" as string]: themeColor }) : undefined}
       >
-        {!bare && <TopBar title={title ?? ""} skipTo={skipTo} />}
+        {!bare && <TopBar title={title ?? ""} skipTo={skipTo} onBack={onBack} />}
         {noApi && (
           <div className="warn" style={{ margin: "12px 16px 0" }}>
             <p>계산 서버가 아직 붙지 않았소.</p>

@@ -74,6 +74,29 @@ function ReportInner() {
   const [asking, setAsking] = useState(false);
 
   /*
+   * ★ 캐릭터를 옮겨도 앞사람 것이 그대로 남아 있었습니다.
+   *
+   *   `/report/[id]` 는 같은 화면이라 이름표만 바뀝니다. 리액트는
+   *   그걸 같은 자리로 보고 **상태를 물려줍니다.** 그래서
+   *
+   *     · 갑에게 적은 추가 입력(extras)이 을에게 그대로 실려 갔습니다.
+   *       을은 그림을 묻는데 갑에게 적은 혈액형이 갑니다.
+   *     · 갑에서 한 번 깨지면(err) 을로 옮겨도 그 오류 화면이 계속
+   *       떴습니다. 새 글이 도착해도 err 가 안 지워져 안 보입니다.
+   *
+   *   그리는 중에 바로 지웁니다(리액트가 권하는 자리). 효과로 지우면
+   *   앞사람 것으로 한 번 부르고 다시 부릅니다.
+   */
+  const [seenLens, setSeenLens] = useState(lensId);
+  if (seenLens !== lensId) {
+    setSeenLens(lensId);
+    setExtras(null);
+    setAsking(false);
+    setErr(null);
+    setRep(null);
+  }
+
+  /*
    * 후기 — ★ 여기가 받는 척만 하고 버리던 자리입니다.
    *
    *   별점은 화면 상태만 바꿨고, 후기 칸에는 value 도 onChange 도
@@ -169,7 +192,13 @@ function ReportInner() {
         //   맞춰 두지 않으면 화면이 계속 없는 값을 부릅니다.
         if (r.tier !== s.tier) s.set({ tier: r.tier as typeof s.tier });
       })
-      .catch((e) => alive && setErr(e instanceof ApiError ? e.message : "리포트를 펴지 못했소."));
+      .catch((e) => {
+        if (!alive) return;
+        // ★ 실패했을 때 `asking` 을 안 껐습니다. 추가 입력을 넣고 요청이
+        //   깨지면 그 버튼이 「다시 펴는 중이오」 에서 영영 안 풀렸습니다.
+        setAsking(false);
+        setErr(e instanceof ApiError ? e.message : "리포트를 펴지 못했소.");
+      });
     return () => { alive = false; };
   }, [s.chartId, lensId, s.tier, s.concern, s.axis4, s.sessionId, extras]);
 
@@ -182,7 +211,27 @@ function ReportInner() {
     );
   }
   if (err) {
-    return <Shell title="읽다"><Say who="도령">{err}</Say></Shell>;
+    /*
+     * ★ 여기가 막다른 화면이었습니다.
+     *   오류 문구만 있고 버튼이 하나도 없어서, 한 번 깨지면 뒤로 버튼
+     *   말고는 나갈 길이 없었습니다. 값을 치른 사람일 수도 있습니다.
+     */
+    return (
+      <Shell title="읽다">
+        <Say who="도령">{err}</Say>
+        <button className="btn mt" onClick={() => {
+          setErr(null); setExtras(null); setRep(null);
+        }}>
+          다시 펴 본다
+        </button>
+        <button className="btn gh" onClick={() => router.push("/lobby")}>
+          진열대로
+        </button>
+        <button className="btn gh" onClick={() => router.push("/me")}>
+          치른 것을 못 찾겠소
+        </button>
+      </Shell>
+    );
   }
   if (!rep) {
     return <Shell title="읽다"><Narration lines={["두루마리를 편다."]} /></Shell>;
@@ -397,6 +446,10 @@ function ReportInner() {
       {/* ★ 이 캐릭터가 따로 받는 것. 안 물으면 그 컷이 조용히 사라집니다. */}
       {rep.needs_input && !rep.extra_error && (
         <ExtraAsk
+          /* ★ 고른 것이 다음 캐릭터로 넘어갔습니다. 갑에게 고른 「A형」이
+             남아 있어 을의 그림 물음에서 곧바로 「이걸로 보시오」가 켜지고,
+             누르면 그림 자리에 혈액형이 실려 갔습니다. */
+          key={lensId + ":" + rep.needs_input}
           need={rep.needs_input}
           busy={asking}
           onSubmit={(x) => { setAsking(true); setExtras(x); }}

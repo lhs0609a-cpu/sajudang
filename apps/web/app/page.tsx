@@ -132,6 +132,27 @@ function EntryInner() {
   useEffect(() => {
     if (asked && STEPS.includes(asked)) setStep(asked);
   }, [asked]);
+  /*
+   * ★ 지나온 단계를 쌓아 둔다.
+   *
+   *   진입 흐름은 주소가 `/` 하나입니다. 상단 화살표는 `router.back()`
+   *   이라 **한 단계 뒤가 아니라 사이트 밖으로** 나갔습니다. 그래서
+   *   성향 넉 자에서 잘못 누르면 — 열여섯 칸이 한 줄에 넷씩 붙어 있어
+   *   손가락이 흔히 미끄러집니다 — 되돌릴 길이 없었습니다.
+   *   걸리는 것 화면은 「뒤에 바꿔도 되오」 라고 적어 두기까지 했는데,
+   *   바꿀 자리가 개발용 레일 말고는 없었습니다.
+   */
+  const [trail, setTrail] = useState<Step[]>([]);
+  const go = (next: Step) => {
+    setTrail((t) => [...t, step]);
+    setStep(next);
+  };
+  const back = trail.length
+    ? () => {
+        setTrail((t) => t.slice(0, -1));
+        setStep(trail[trail.length - 1]);
+      }
+    : undefined;
   const [busy, setBusy] = useState(false);
   /* 고을을 펼쳤는가. 접어 두면 a3 의 필드가 다섯에서 넷이 됩니다. */
   const [cityOpen, setCityOpen] = useState(false);
@@ -266,12 +287,12 @@ function EntryInner() {
      */
     return (
       <Shell bare>
-        <div className="gatehero" onClick={() => setStep("a2")}>
+        <div className="gatehero" onClick={() => go("a2")}>
           <Scene id="gate" className="fill" bleed />
           <div className="gatecopy">
             <Narration lines={beats} />
             <p className="promise" dangerouslySetInnerHTML={{ __html: PROMISE }} />
-            <button className="btn mt" onClick={() => setStep("a2")}>
+            <button className="btn mt" onClick={() => go("a2")}>
               글자를 세우러 들어간다
             </button>
             <p className="sm mt" style={{ color: "var(--paper3)" }}>
@@ -294,7 +315,7 @@ function EntryInner() {
   if (step === "a2") {
     const named = s.name.trim().length > 0;
     return (
-      <Shell title="이름을 적다">
+      <Shell title="이름을 적다" onBack={back}>
         <Progress step={progressAt("a2")!} total={PROGRESS_TOTAL} />
         <Scene id="desk" />
         <Narration lines={["도령이 붓을 들었다.", "종이는 아직 비어 있다."]} />
@@ -311,7 +332,7 @@ function EntryInner() {
         <Narration lines={["", "본명을 적을 이유는 없다.", "셈에는 쓰이지 않는다."]} />
         <Say who="도령">셈에는 안 쓰이오. 다만 <b>내가 그대를 부를 때</b> 쓰오.</Say>
 
-        <button className="btn" onClick={() => setStep("a5")}>
+        <button className="btn" onClick={() => go("a5")}>
           {named ? "적는다" : "그냥 넘어간다"}
         </button>
         {/* 빈 채로 넘어가는 것도 **고른 것**이 되게 합니다. */}
@@ -349,7 +370,7 @@ function EntryInner() {
     };
     const askWord = CONCERNS.find((c) => c.id === s.concern)?.label ?? "";
     return (
-      <Shell title="날을 대다">
+      <Shell title="날을 대다" onBack={back}>
         <Progress step={progressAt("a3")!} total={PROGRESS_TOTAL} />
         <Scene id="ink" />
         <Narration lines={["붓끝이 종이에 닿았다.", "먹이 한 방울 번졌다."]} />
@@ -418,7 +439,7 @@ function EntryInner() {
 
         {/* ★ 자동 진행을 없앴습니다. 되돌릴 여지를 줍니다. */}
         <button className="btn mt" disabled={!filled || !!bad}
-                onClick={() => setStep("a4")}>
+                onClick={() => go("a4")}>
           다 적었소
         </button>
         {(!filled || bad) && (
@@ -444,7 +465,7 @@ function EntryInner() {
      */
     const bucket = pickedHour !== null ? HOURS[pickedHour] : undefined;
     return (
-      <Shell title="때를 묻다">
+      <Shell title="때를 묻다" onBack={back}>
         <Progress step={progressAt("a4")!} total={PROGRESS_TOTAL} />
         <Scene id="room" />
         <Narration lines={["도령이 고개를 들었다."]} />
@@ -455,7 +476,7 @@ function EntryInner() {
         <button className="btn" style={{ marginBottom: 12 }}
                 onClick={() => {
                   s.set({ hourKnown: false, hour: null, features: null, chartId: null });
-                  setStep("a4b");
+                  go("a4b");
                 }}>
           모르오 · 세 기둥으로 보겠소
         </button>
@@ -533,7 +554,7 @@ function EntryInner() {
               </>
             )}
             <button className="btn mt" disabled={s.hour === null}
-                    onClick={() => setStep("a4b")}>
+                    onClick={() => go("a4b")}>
               이 때로 하겠소
             </button>
           </div>
@@ -549,7 +570,7 @@ function EntryInner() {
 
   if (step === "a4b") {
     return (
-      <Shell title="성향 4글자">
+      <Shell title="성향 4글자" onBack={back}>
         <Progress step={progressAt("a4b")!} total={PROGRESS_TOTAL} />
         <Scene id="ink" />
         <Narration lines={["그가 종이 한 장을 더 꺼냈다."]} />
@@ -569,7 +590,7 @@ function EntryInner() {
         {/* ★ "모르오" 를 그리드 **위**로. a4 에서 이미 내린 판단을
             여기에도 적용합니다 — 훑는 순서상 아래에 두면 가장 늦게 보입니다. */}
         <button className="btn gh" style={{ marginBottom: 12 }}
-                onClick={() => { s.set({ axis4: null }); setStep("a6"); }}>
+                onClick={() => { s.set({ axis4: null }); go("a6"); }}>
           모르오 · 사주만으로 보겠소
         </button>
 
@@ -578,7 +599,7 @@ function EntryInner() {
             <button key={t} className={`op ${s.axis4 === t ? "on" : ""}`}
                     style={{ textAlign: "center", padding: "11px 2px",
                              fontFamily: "var(--mono)", fontSize: 12, letterSpacing: ".06em" }}
-                    onClick={() => { s.set({ axis4: t }); setStep("a6"); }}>
+                    onClick={() => { s.set({ axis4: t }); go("a6"); }}>
               {t}
             </button>
           ))}
@@ -599,7 +620,7 @@ function EntryInner() {
      *   이름 바로 뒤로 올렸습니다.
      */
     return (
-      <Shell title="걸리는 것">
+      <Shell title="걸리는 것" onBack={back}>
         <Progress step={progressAt("a5")!} total={PROGRESS_TOTAL} />
         <Scene id="fork" />
         <Narration lines={["붓을 내려놓고, 그가 물었다."]} />
@@ -610,13 +631,14 @@ function EntryInner() {
         <div className="og c2">
           {CONCERNS.map((c) => (
             <button key={c.id} className={`op ${s.concern === c.id ? "on" : ""}`}
-                    onClick={() => { s.set({ concern: c.id as Concern }); setStep("a3"); }}>
+                    onClick={() => { s.set({ concern: c.id as Concern }); go("a3"); }}>
               <b>{c.label}</b><span>{c.sub}</span>
             </button>
           ))}
         </div>
         <p className="sm mt">
-          고른 것이 여덟 글자의 어느 자리를 볼지 정하오. 뒤에 바꿔도 되오.
+          고른 것이 여덟 글자의 어느 자리를 볼지 정하오.
+          바꾸시려면 왼쪽 위 <b>←</b> 로 돌아오면 되오.
         </p>
       </Shell>
     );
@@ -650,7 +672,7 @@ function EntryInner() {
     const done = calcAt >= beats.length;
 
     return (
-      <Shell title="글자가 서다">
+      <Shell title="글자가 서다" onBack={back}>
         <Scene id="altar" />
         {busy && <Narration lines={["도령이 종이를 폈다.", "붓이 움직인다."]} />}
         {error && (
@@ -659,7 +681,7 @@ function EntryInner() {
             {/* ★ 여기가 막다른 길이었습니다.
                 '다시 세운다' 는 같은 값으로 재시도만 해서, 잘못 적은
                 사람은 영영 빠져나올 수 없었습니다. 고치러 갈 길을 냅니다. */}
-            <button className="btn" onClick={() => setStep("a3")}>
+            <button className="btn" onClick={() => go("a3")}>
               날을 고쳐 적는다
             </button>
             <button className="btn gh" onClick={() => void buildChart()}>
@@ -698,7 +720,7 @@ function EntryInner() {
             <Summary f={s.features} />
             <ElementBar f={s.features} />
             <CalcPanel f={s.features} />
-            <button className="btn mt" onClick={() => setStep("a7")}>
+            <button className="btn mt" onClick={() => go("a7")}>
               이 글자가 무슨 말인지 듣는다
             </button>
           </>
@@ -709,7 +731,7 @@ function EntryInner() {
 
   /* a7 · 훅 5단 — 값은 아직 묻지 않는다 */
   return (
-    <Shell title="도령이 말하다">
+    <Shell title="도령이 말하다" onBack={back}>
       {/* ★ 진행 막대를 뗐습니다. 결과가 보상인 구간에서 막대는 남은
           보상이 아니라 **남은 노동**을 강조합니다. */}
       <Scene id="facing" />

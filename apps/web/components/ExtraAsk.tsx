@@ -58,12 +58,34 @@ export default function ExtraAsk({
   const [months, setMonths] = useState("");
   const [p, setP] = useState({ year: "", month: "", day: "", sex: "F" });
 
+  const [chErr, setChErr] = useState(false);
+  const [tryAt, setTryAt] = useState(0);
+
   useEffect(() => {
     let alive = true;
-    api.reportChoices().then((c) => alive && setCh(c as Choices)).catch(() => {});
+    setChErr(false);
+    api.reportChoices()
+      .then((c) => alive && setCh(c as Choices))
+      /*
+       * ★ 여기서 실패를 통째로 삼키고 있었습니다 — `.catch(() => {})`.
+       *   고를 것을 못 받으면 `ch` 가 영영 null 이라 손님은
+       *   「고를 것을 펴는 중이오…」 를 **끝없이** 봅니다. 오류도
+       *   없고 다시 할 길도 없습니다. 값을 치른 사람일 수 있습니다.
+       */
+      .catch(() => alive && setChErr(true));
     return () => { alive = false; };
-  }, []);
+  }, [tryAt]);
 
+  if (chErr && !ch) {
+    return (
+      <div className="ask blk">
+        <p className="sm">고를 것을 못 펴겠소. 이 자리 하나만 접히오.</p>
+        <button className="btn gh mt" onClick={() => setTryAt((n) => n + 1)}>
+          다시 펴 본다
+        </button>
+      </div>
+    );
+  }
   if (!ch) return <p className="sm">고를 것을 펴는 중이오…</p>;
 
   const togglePick = (id: string) =>
