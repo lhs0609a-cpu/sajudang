@@ -1008,3 +1008,43 @@ body.has-rail-closed .stage { margin-left: 26px; }
 .ask .lab { color: var(--c); margin-bottom: 6px; }
 .ask .og { margin-top: 10px; }
 .ask .fld { margin-top: 6px; }
+
+/* ══════════ 캐릭터 초상 ══════════
+   ★ 발주서 §7 은 /char/{id}/bust.png 768×1024 를 요구하는데, 그걸
+     그리는 코드가 하나도 없었습니다. 스무 장을 만들어도 갈 데가
+     없었습니다. (tools/asset_audit.py 가 잡았습니다)
+
+   자리표시는 얼굴을 흉내내지 않습니다 — 반쯤 그린 얼굴은 없는 것보다
+   나쁩니다. 그 사람의 색과 한자 한 글자로 자리만 잡습니다.
+   ------------------------------------------------------ */
+.charart {
+  position: relative;
+  flex: 0 0 auto;
+  overflow: hidden;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--cc) 16%, transparent), transparent 70%);
+  border: 1px solid color-mix(in srgb, var(--cc) 34%, transparent);
+}
+.charart img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.charart .ph {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.charart .ph i {
+  font-family: var(--serif); font-style: normal; color: var(--cc);
+  opacity: .82; line-height: 1;
+}
+.charart.chip .ph i { font-size: 22px; }
+.charart.card .ph i { font-size: 52px; }
+.charart.full .ph i { font-size: 108px; }
+.charart.off { filter: grayscale(1); opacity: .38; }
+
+/* 진열대 목록 — 초상 + 이름 */
+.op.face {
+  display: flex; align-items: center; gap: 11px; text-align: left;
+}
+.op.face .who { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.op.face .who b { font-family: var(--serif); font-size: 14.5px; }
+.op.face .who span { font-size: 11.5px; color: var(--paper3); }
+
+/* 그 사람의 자리 — 초상이 서는 곳 */
+.facebox { display: flex; justify-content: center; margin: 14px 0 4px; }

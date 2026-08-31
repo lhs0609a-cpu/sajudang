@@ -10,6 +10,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
 import Scene from "@/components/scene/Scene";
+import CharArt from "@/components/CharArt";
 import { Narration, Say } from "@/components/Narration";
 import { CalcPanel, ElementBar, Pillars, Summary } from "@/components/Chart";
 import { LENSES, LENS_BY_ID } from "@/lib/lenses";
@@ -43,13 +44,19 @@ function LobbyInner() {
             <div className="lab">{g}</div>
             <div className="og c2">
               {LENSES.filter((l) => l.group === g).map((l) => (
-                <button key={l.id} className={`op ${l.released ? "" : "off"}`}
+                <button key={l.id} className={`op face ${l.released ? "" : "off"}`}
                         disabled={!l.released}
                         onClick={() => { s.set({ cur: l.id }); setTab("b3"); }}>
-                  <b style={{ color: l.released ? l.color : "var(--paper3)" }}>
-                    {l.released ? l.name : "● ● ●"}
-                  </b>
-                  <span>{l.released ? l.archetype : "아직 자리에 없소"}</span>
+                  {/* ★ 초상이 들어올 자리. 파일이 없으면 색과 한자로 버팁니다.
+                      전에는 이 자리가 아예 없어서, 스무 장을 만들어도
+                      갈 데가 없었습니다. (tools/asset_audit.py) */}
+                  <CharArt lens={l} size="chip" />
+                  <span className="who">
+                    <b style={{ color: l.released ? l.color : "var(--paper3)" }}>
+                      {l.released ? l.name : "● ● ●"}
+                    </b>
+                    <span>{l.released ? l.archetype : "아직 자리에 없소"}</span>
+                  </span>
                 </button>
               ))}
             </div>
@@ -64,6 +71,8 @@ function LobbyInner() {
     return (
       <Shell title={lens.name}>
         <Scene id="seat" />
+        {/* 그 사람의 자리 — 초상이 서는 곳 */}
+        <div className="facebox"><CharArt lens={lens} size="full" /></div>
         <div className="mec">
           <div>
             <div className="gz" style={{ color: lens.color }}>{lens.name} · {lens.hanja}</div>

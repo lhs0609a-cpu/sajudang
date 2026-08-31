@@ -40,7 +40,12 @@ export interface SceneSpec {
 
 export const SCENES: SceneSpec[] = [
   { id: "gate", name: "대문 · 사계", preset: "Dolly In", ratio: "9:16", seconds: 5, loop: false, tint: "grade", seasonal: true },
-  { id: "door", name: "열리는 문", preset: "Static", ratio: "9:16", seconds: 2, loop: false },
+  // ★ 아무 화면도 이걸 안 부릅니다 (tools/asset_audit.py).
+  //   만들어도 안 나옵니다. 대문(gate)이 이미 "열려 있는 문" 을
+  //   보여주고, 문고리(handle)가 릴레이에서 그 몫을 합니다.
+  //   발주 목록에서 뺍니다 — 안 쓸 것을 만들지 않습니다.
+  //   쓸 자리가 생기면 이 줄을 되살리고 화면에 <Scene id="door"/> 를 넣으세요.
+  // { id: "door", name: "열리는 문", preset: "Static", ratio: "9:16", seconds: 2, loop: false },
   { id: "desk", name: "붓·벼루·빈 종이", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
   { id: "ink", name: "먹이 번지는 종이", preset: "Static", ratio: "16:9", seconds: 2, loop: false },
   { id: "room", name: "실내·병풍·주렴", preset: "Static", ratio: "16:9", seconds: 4, loop: true },
@@ -50,7 +55,11 @@ export const SCENES: SceneSpec[] = [
   { id: "shelf", name: "진열대", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
   { id: "hall", name: "스무 자리", preset: "Dolly In", ratio: "16:9", seconds: 4, loop: false },
   { id: "seat", name: "그 사람의 자리", preset: "Static", ratio: "3:4", seconds: 3, loop: true, tint: "recolor" },
-  { id: "scroll", name: "펼쳐지는 두루마리", preset: "Static", ratio: "16:9", seconds: 3, loop: false },
+  // ★ 16:9 였습니다. 그런데 쓰는 자리 둘(리포트 표지 c1 · 분석지)이
+  //   `.sceneart.hero` — aspect-ratio 9/16 + object-fit:cover 라
+  //   **가로의 약 68%가 잘려 나갑니다.** 두루마리는 세로로 펼쳐지는
+  //   물건이니 9:16 이 맞습니다. 아직 안 만든 에셋이라 지금이 고칠 때입니다.
+  { id: "scroll", name: "펼쳐지는 두루마리", preset: "Static", ratio: "9:16", seconds: 3, loop: false },
   { id: "fold", name: "반쯤 접힌 두루마리", preset: "Static", ratio: "16:9", seconds: 2, loop: false },
   { id: "untie", name: "붉은 끈·개봉", preset: "Static", ratio: "1:1", seconds: 2, loop: false },
   { id: "handle", name: "문고리·그림자", preset: "Dolly In", ratio: "9:16", seconds: 3, loop: false },
