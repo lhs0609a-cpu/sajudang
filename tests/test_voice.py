@@ -298,3 +298,25 @@ def test_the_bank_is_written_in_one_speech_level():
 
     walk(raw)
     assert not bad, ("합쇼체로 갇힌 문장 %d개: %s" % (len(bad), bad[:3]))
+
+
+def test_no_hao_ending_survives_in_another_voice(reports):
+    """
+    ★ 줄표(—) 앞을 놓치고 있었습니다.
+
+      "여덟 자리를 넷으로 추렸소 — 빈 기운 · 힘 …" 에서 `추렸소` 가 안
+      바뀌어, 하게체 캐릭터가 갑자기 하오체로 말했습니다. 재보니 스무
+      명에서 **마흔네 번** 그랬습니다. 줄표는 이 집이 자주 쓰는
+      문장부호라 그만큼 많이 샜습니다.
+
+    ★ 「…십시오」는 합쇼체의 **변환 결과**입니다. 세면 안 됩니다.
+    """
+    hao = re.compile(r"[가-힣]{2,}(?<!십시)[오소](?=[\s.,!?…—·)\"'<]|$)")
+    left = []
+    for lid, rep in reports.items():
+        if lens_mod.view(lid)["voice"] == V.HAO:
+            continue
+        for c in rep["cuts"]:
+            for m in hao.finditer(_plain(c["html"])):
+                left.append((lid, c["id"], m.group(0)))
+    assert not left, ("안 바뀐 하오체 어미 %d개: %s" % (len(left), left[:5]))
