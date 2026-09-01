@@ -64,7 +64,7 @@ function LobbyInner() {
                     <span className="spec">
                       {l.released ? l.specialty : "아직 자리에 없소"}
                     </span>
-                    {l.released && <span className="arch">{l.archetype}</span>}
+                    {l.released && <span className="arch">{l.epithet}</span>}
                   </span>
                 </button>
               ))}
@@ -86,7 +86,7 @@ function LobbyInner() {
           <div>
             <div className="gz" style={{ color: lens.color }}>{lens.name} · {lens.hanja}</div>
             <div className="nm">
-              <b className="spec">{lens.specialty}</b> · {lens.archetype}
+              <b className="spec">{lens.specialty}</b> · {lens.epithet}
             </div>
             <div className="tr">{lens.group}</div>
           </div>
