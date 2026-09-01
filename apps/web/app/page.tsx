@@ -144,6 +144,17 @@ function EntryInner() {
    *   걸리는 것 화면은 「뒤에 바꿔도 되오」 라고 적어 두기까지 했는데,
    *   바꿀 자리가 개발용 레일 말고는 없었습니다.
    */
+  /*
+   * 다음 대운이 바뀌는 나이. 지금 대운의 **다음** 칸이 시작하는 해입니다.
+   * 마지막 칸이면 없습니다 — 없으면 그 줄을 안 냅니다.
+   */
+  const nextTurn = (() => {
+    const f = s.features;
+    if (!f?.daeun || typeof f.daeun_now !== "number") return null;
+    const nx = f.daeun[f.daeun_now + 1];
+    return nx && typeof nx.start_age === "number" ? nx.start_age : null;
+  })();
+
   const [trail, setTrail] = useState<Step[]>([]);
   const go = (next: Step) => {
     setTrail((t) => [...t, step]);
@@ -883,6 +894,27 @@ function EntryInner() {
           <p className="tx mt">
             남은 자리에는 <b>왜 하필 지금</b>과 <b>언제 바뀌는가</b>가 있소.
           </p>
+
+          {/*
+            ★ 여기까지 「안 하면 무엇을 잃는가」 가 한 줄도 없었습니다.
+              여덟 화면 전부에서 0 이었습니다 (tools/persuasion_audit.py).
+
+              사람은 얻는 것보다 잃는 것에 두 배쯤 민감합니다. 「남은
+              자리에는 …가 있소」 는 얻는 말이라 안 눌러도 그만입니다.
+
+              ★ 다만 **앞을 깎지 않습니다.** 「셋으로만 본 것」 같은 말은
+                방금 좋았다고 느낀 손님에게 8분의 3짜리였다고 말하는
+                셈입니다. 대신 **그 사람의 실제 수**를 하나 박습니다 —
+                다음 대운이 바뀌는 나이. 지어낸 말이 아니라 셈에서 나온
+                값이고, 그 해에 무슨 일이 난다고는 말하지 않습니다.
+                바뀌는 때만 셉니다.
+          */}
+          {nextTurn && (
+            <p className="tx losing">
+              그대의 다음 고비는 <b>{nextTurn}살</b>이오.
+              지금 나가면 그게 <b>왜 그때인지</b> 모른 채로 지나가오.
+            </p>
+          )}
           <button className="btn mt" onClick={() => router.push("/pay?step=d0")}>
             값 없이 내 것을 한 겹 더
           </button>

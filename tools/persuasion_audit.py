@@ -33,6 +33,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PAGE = ROOT / "apps" / "web" / "app" / "page.tsx"
 
+# ★ 화면이 부르는 부품도 함께 봅니다.
+#
+#   a7 은 훅을 HookSegments 가 그립니다. 공감률·노출 수·「그렇소/아니오」
+#   가 전부 거기 있는데, page.tsx 만 보면 그 화면이 텅 빈 것으로 나옵니다.
+#   실제로 「증거 0」 이라고 잘못 찍었습니다.
+PARTS = {
+    "a7": [ROOT / "apps" / "web" / "components" / "HookSegments.tsx"],
+    "a6": [ROOT / "apps" / "web" / "components" / "Chart.tsx"],
+}
+
 # 진입 흐름 일곱 화면
 STEPS = ["a1", "a2", "a3", "a4", "a4b", "a5", "a6", "a7"]
 KO = {"a1": "골목", "a2": "이름", "a3": "날·고을", "a4": "때",
@@ -114,9 +124,23 @@ def screens() -> dict:
         out.setdefault(sid, "")
         out[sid] += code[a:b]
 
-    # a1 은 step 비교가 아니라 기본값으로 그려질 수 있습니다
-    if "a1" not in out:
-        out["a1"] = code[:marks[0][1]] if marks else code
+    # ★ 모든 화면이 `step === "xx"` 로 갈리지는 않습니다.
+    #
+    #   a1 은 맨 위 기본값으로, a7 은 **맨 끝 기본 반환**으로 그려집니다.
+    #   처음 판은 그걸 몰라서 둘 다 「장치 0개」 라고 찍었습니다 —
+    #   실제로는 훅 머리말·마감이 다 거기 있는데도요.
+    #
+    #   나누는 표(step === ...)의 앞과 뒤를 각각 a1 · a7 로 봅니다.
+    if marks:
+        head = code[:marks[0][1]]
+        tail_at = marks[-2][1] if len(marks) >= 2 else 0
+        last_close = code.rfind("if (step ===")
+        tail = code[last_close:] if last_close > 0 else ""
+        # 마지막 `if (step === ...)` 블록 **뒤**가 기본 반환입니다
+        end = code.find("return (", last_close)
+        out["a1"] = out.get("a1", "") + head
+        if end > 0:
+            out["a7"] = out.get("a7", "") + code[end:]
     return out
 
 
@@ -141,6 +165,9 @@ def main() -> int:
     miss = {}
     for sid in STEPS:
         raw = sc.get(sid, "")
+        for extra in PARTS.get(sid, []):
+            if extra.exists():
+                raw += " " + extra.read_text(encoding="utf-8")
         # 코드도 함께 봅니다 — Progress 같은 장치는 글이 아니라 부품입니다
         txt = visible(raw) + " " + raw
         row, gone = [], []

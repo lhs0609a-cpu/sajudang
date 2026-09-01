@@ -1843,3 +1843,19 @@ body.has-rail-closed .stage { margin-left: 26px; }
   padding: 2px 7px;
 }
 .rarenote { color: var(--paper3); margin-top: 7px; }
+
+/*
+ * 훅 마감의 「잃는 것」 한 줄.
+ *
+ * ★ 얻는 말만 하면 안 눌러도 그만입니다. 사람은 잃는 쪽에 두 배쯤
+ *   민감합니다. 다만 앞을 깎지 않고, 그 사람의 **실제 수**를 박습니다.
+ *
+ * 세게 보이되 소리치지는 않습니다 — 겁을 주면 그 자리에서 닫습니다.
+ */
+.tx.losing {
+  margin-top: 10px;
+  padding-left: 11px;
+  border-left: 2px solid var(--c);
+  color: var(--paper);
+}
+.tx.losing b { color: var(--c); font-variant-numeric: tabular-nums; }
