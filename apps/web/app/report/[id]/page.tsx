@@ -351,7 +351,7 @@ function ReportInner() {
         <div className="card">
           <Scene id="cardbg" />
           <div className="cardin">
-            <p className="sm">사주당 四柱堂</p>
+            <p className="sm">성신당 星辰堂</p>
             <p style={{ fontFamily: "var(--serif)", fontSize: 20, color: "var(--c)" }}>
               {s.features?.day_gan} 일간 · {s.features?.strength}
             </p>
@@ -510,7 +510,7 @@ function ReportInner() {
 
         {/* 종이에만 실립니다 — 어디서 나온 종이인지 */}
         <div className="printfoot">
-          사주당 四柱堂 · {rep.lens.name}이 본 것 · {printedOn}
+          성신당 星辰堂 · {rep.lens.name}이 본 것 · {printedOn}
           <br />
           여덟 글자는 하나요. 읽는 눈이 스물이오.
           맞힌다는 말은 하지 않소 — 무엇을 보고 한 말인지만 적어 두었소.

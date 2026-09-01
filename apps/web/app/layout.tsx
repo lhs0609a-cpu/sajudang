@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "사주당 四柱堂",
+  title: "성신당 星辰堂",
   description: "맞히는 집이 아니라, 근거 대는 집.",
 };
 

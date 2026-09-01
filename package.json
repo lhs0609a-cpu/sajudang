@@ -2,7 +2,7 @@
   "name": "sajudang",
   "private": true,
   "version": "0.1.0",
-  "description": "사주당 四柱堂 — 웹 사주 서비스 모노레포",
+  "description": "성신당 星辰堂 — 웹 사주 서비스 모노레포",
   "workspaces": [
     "apps/*",
     "packages/*"

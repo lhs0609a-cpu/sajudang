@@ -222,7 +222,7 @@ const nScene = items.filter((x) => x.dir.indexOf("/scene/") >= 0).length;
 const nTint = items.filter((x) => x.mo.tint).length;
 
 P(bar("="));
-P("  사주당 · 에셋 제작 프롬프트 전량");
+P("  성신당 · 에셋 제작 프롬프트 전량");
 P("  reference/sajudang.html 과 docs/16 에서 그대로 뽑은 것입니다");
 P(bar("="));
 P();

@@ -75,14 +75,43 @@
   width: 100%; height: 100%; object-fit: cover;
 }
 
-/* 아래쪽을 어둡게 깔아 문구가 그림 위에 얹혀도 읽힌다 */
+/*
+ * 아래쪽을 어둡게 깔아 문구가 그림 위에 얹혀도 읽힌다.
+ *
+ * ★ 그림이 밝게 와도 글씨가 읽혀야 합니다.
+ *
+ *   예전 계단은 46%에서야 .55 로 들어갔습니다. 밤 장면처럼 아래가
+ *   어두운 그림에서는 됐지만, 들어오는 그림은 매번 다릅니다 —
+ *   갈림길은 아래쪽이 밝은 흙길이고 반딧불이 떠 있습니다. 그런
+ *   그림에서는 글이 묻힙니다.
+ *
+ *   더 일찍, 더 세게 들어갑니다. 그림이 무엇이든 글 놓이는 자리는
+ *   바탕색에 가깝게 만듭니다. 위쪽은 그대로 두어 그림을 안 죽입니다.
+ */
 .sceneart.hero::after,
 .sceneart.fill::after {
-  content: ""; position: absolute; inset: auto 0 0 0; height: 58%;
-  background: linear-gradient(to bottom, transparent 0%,
-              rgba(12, 10, 18, .55) 46%, var(--bg) 100%);
+  content: ""; position: absolute; inset: auto 0 0 0; height: 66%;
+  background: linear-gradient(to bottom,
+              transparent 0%,
+              rgba(12, 10, 18, .34) 26%,
+              rgba(12, 10, 18, .72) 54%,
+              rgba(12, 10, 18, .93) 78%,
+              var(--bg) 100%);
   pointer-events: none;
 }
+
+/*
+ * 그리고 글 자체에 그림자를 답니다.
+ *
+ * 깔개만으로는 못 지킵니다 — 깔개는 상자 아래쪽에 걸리는데 글이
+ * 늘 거기에만 있지는 않고, 그림이 흰빛으로 번지면(등불·달) 그
+ * 위에서 흰 글씨가 사라집니다. 그림자는 어떤 그림에서도 글자
+ * 테두리를 세워 줍니다.
+ */
+.gatecopy, .sceneart.fill ~ *, .sceneart.hero ~ * {
+  text-shadow: 0 1px 3px rgba(6, 4, 12, .78), 0 0 14px rgba(6, 4, 12, .5);
+}
+.gatecopy .btn { text-shadow: none; }
 
 /*
  * a1 골목 — 대문 한 장이 프레임을 다 덮는 화면.
@@ -1187,30 +1216,44 @@ body.has-rail-closed .stage { margin-left: 26px; }
 }
 
 /*
- * 장면을 화면 폭에 꽉 채운다.
+ * 장면 — 화면 폭에 꽉 채우고, 세로 영상을 상자에 맞춘다.
  *
- * ★ `.scr` 의 좌우 패딩(22px)이 그림 양옆에 어두운 띠로 남아 있었습니다.
- *   그림은 배경이지 본문 한 칸이 아닙니다 — 띠가 있으면 「끼워 넣은
- *   삽화」로 보이고, 없으면 그 화면 자체가 됩니다.
+ * ★ 두 가지를 한자리에서 잡습니다.
  *
- *   음수 마진으로 패딩을 되돌립니다. 이 22px 은 reference.css 의
- *   `.scr{padding:26px 22px 44px}` 과 짝입니다 — 한쪽만 고치면 틈이
- *   생기거나 가로 스크롤이 납니다.
+ *   (1) `.scr` 의 좌우 패딩(22px)이 그림 양옆에 어두운 띠로 남아
+ *       있었습니다. 그림은 배경이지 본문 한 칸이 아닙니다 — 띠가
+ *       있으면 「끼워 넣은 삽화」로 보이고, 없으면 그 화면이 됩니다.
+ *       음수 마진으로 되돌립니다. 이 22px 은 reference.css 의
+ *       `.scr{padding:26px 22px 44px}` 과 짝입니다.
  *
- *   `.scr >` 로 묶은 이유: 같은 클래스를 리포트·분석지·공유본에서도
- *   쓰는데 거기는 패딩이 다릅니다. 바로 아래 자식일 때만 흘립니다.
- *   `.hero` · `.fill` 은 제 규칙이 따로 있어 건드리지 않습니다.
+ *   (2) 들어오는 영상이 **전부 9:16 세로**가 됩니다(2026-09-01 부터).
+ *       예전 규칙은 `width:100%; height:auto` 라 세로 영상이 폭의
+ *       **178% 높이**로 흘렀습니다. 440px 짜리 화면에서 782px 입니다.
+ *       a5 의 고민 여섯 칸이 그 아래로 통째로 밀립니다 — 퍼널에서
+ *       가장 값진 질문인데 버튼이 안 보입니다.
+ *
+ *       상자를 장면이 정한 비율(--sr)로 잡고 object-fit:cover 로
+ *       채웁니다. 남는 데는 잘리고, 어디를 볼지는 --sf 가 정합니다.
+ *
+ *   `.hero` · `.fill` 은 제 규칙이 따로 있어 뺍니다. `.scr >` 로 묶은
+ *   것은 마진뿐입니다 — 상자는 어디에 놓이든 잡아야 합니다.
  */
+.sceneart:not(.hero):not(.fill) {
+  aspect-ratio: var(--sr, 16 / 9);
+  overflow: hidden;
+}
+
+.sceneart:not(.hero):not(.fill) > video,
+.sceneart:not(.hero):not(.fill) > img,
+.sceneart:not(.hero):not(.fill) > svg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--sf, 50% 50%);
+}
+
 .scr > .sceneart:not(.hero):not(.fill) {
   width: auto;
   margin-left: -22px;
   margin-right: -22px;
-}
-
-/* 좁은 화면은 `.stage` 패딩이 6px 이라 `.scr` 이 그대로 22px 입니다 */
-@media (max-width: 900px) {
-  .scr > .sceneart:not(.hero):not(.fill) {
-    margin-left: -22px;
-    margin-right: -22px;
-  }
 }

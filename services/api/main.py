@@ -1,5 +1,5 @@
 """
-사주당 API — FastAPI.
+성신당 API — FastAPI.
 
     uvicorn main:app --reload --port 8000
 
@@ -83,7 +83,7 @@ async def lifespan(_app: FastAPI):
             await task
 
 
-app = FastAPI(title="사주당 API", version=ENGINE_VER, lifespan=lifespan)
+app = FastAPI(title="성신당 API", version=ENGINE_VER, lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

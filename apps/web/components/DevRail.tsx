@@ -117,7 +117,7 @@ export default function DevRail() {
 
       {open && (
         <div className="railin">
-          <h1>四柱堂</h1>
+          <h1>星辰堂</h1>
           <div className="v">
             관리자 · 전체 플로우
             <button

@@ -1,4 +1,4 @@
-# 사주당 계산 API — Fly.io
+# 성신당 계산 API — Fly.io
 #
 #   fly deploy --remote-only         (로컬 도커 없이 원격 빌드)
 #   fly secrets set CORS_ORIGINS=...

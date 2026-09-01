@@ -47,7 +47,7 @@ export async function generateMetadata(
   const d = await fetchShared(params.token);
   if (!d) {
     return {
-      title: "사주당 四柱堂",
+      title: "성신당 星辰堂",
       description: "맞히는 집이 아니라, 근거 대는 집.",
     };
   }
@@ -60,7 +60,7 @@ export async function generateMetadata(
     openGraph: {
       title,
       description,
-      siteName: "사주당 四柱堂",
+      siteName: "성신당 星辰堂",
       type: "article",
       locale: "ko_KR",
     },

@@ -363,7 +363,7 @@ function PayInner() {
                       clientKey: order.client_key,
                       orderId: order.order_id,
                       amount: order.amount,
-                      orderName: tier?.name ?? "사주당",
+                      orderName: tier?.name ?? "성신당",
                       customerKey: s.sessionId,
                     });
                     // 여기 아래는 보통 안 옵니다 — 결제창이 페이지를 넘깁니다.

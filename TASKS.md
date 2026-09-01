@@ -13,9 +13,9 @@ git init
 
 # 문서·시드·참조 구현체를 배치
 mkdir -p docs seed reference tools
-cp ~/Downloads/사주당_개발문서/*.md         docs/
-cp ~/Downloads/사주당_개발문서/CLAUDE.md    ./
-cp ~/Downloads/사주당_개발문서/seed/*.json  seed/
+cp ~/Downloads/성신당_개발문서/*.md         docs/
+cp ~/Downloads/성신당_개발문서/CLAUDE.md    ./
+cp ~/Downloads/성신당_개발문서/seed/*.json  seed/
 cp ~/Downloads/sajudang.html                reference/
 
 claude

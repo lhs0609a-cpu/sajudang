@@ -73,7 +73,7 @@ export default function SummaryPage() {
 
       {/* 표지 — 카드로 잘라 나가는 부분 */}
       <div className="card sumhead">
-        <p className="sm">사주당 四柱堂</p>
+        <p className="sm">성신당 星辰堂</p>
         <p className="gz">{sm.day_gan} · {sm.ilgan_name}</p>
         <p className="hl">{sm.headline}</p>
         <div className="three">

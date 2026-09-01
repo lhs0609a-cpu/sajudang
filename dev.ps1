@@ -1,5 +1,5 @@
 <#
-  사주당 개발 명령 모음 (Windows).  사용:  .\dev.ps1 <명령>
+  성신당 개발 명령 모음 (Windows).  사용:  .\dev.ps1 <명령>
 
   == 파이썬 ==
     setup          Python 3.11 venv 생성 + 의존성 설치

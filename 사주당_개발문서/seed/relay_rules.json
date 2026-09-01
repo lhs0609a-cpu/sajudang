@@ -1,0 +1,128 @@
+{
+ "rules": [
+  {
+   "id": "r_nopa",
+   "lens_id": "nopa",
+   "priority": 95,
+   "condition": {
+    "field": "el[weak_el]",
+    "op": "<=",
+    "value": 1.0
+   },
+   "reason": "{weak_el} {v} ≤ 1.0 — 가장 약한 오행이 바닥"
+  },
+  {
+   "id": "r_yakcho",
+   "lens_id": "yakcho",
+   "priority": 88,
+   "condition": {
+    "field": "gap",
+    "op": ">=",
+    "value": 3.5
+   },
+   "reason": "오행 편차 {gap} ≥ 3.5"
+  },
+  {
+   "id": "r_wolha",
+   "lens_id": "wolha",
+   "priority": 86,
+   "condition": {
+    "field": "ilji_chung",
+    "op": "==",
+    "value": true
+   },
+   "reason": "일지 {day_ji} 충 — 배우자궁 흔들림"
+  },
+  {
+   "id": "r_hunjang",
+   "lens_id": "hunjang",
+   "priority": 84,
+   "condition": {
+    "field": "gwan",
+    "op": ">=",
+    "value": 2
+   },
+   "reason": "관성 {gwan}개"
+  },
+  {
+   "id": "r_haengsu",
+   "lens_id": "haengsu",
+   "priority": 82,
+   "condition": {
+    "field": "jae",
+    "op": ">=",
+    "value": 2
+   },
+   "reason": "재성 {jae}개"
+  },
+  {
+   "id": "r_sigye",
+   "lens_id": "sigye",
+   "priority": 80,
+   "condition": {
+    "field": "daeun_ten_god",
+    "op": "in",
+    "value": [
+     "편관",
+     "상관",
+     "겁재"
+    ]
+   },
+   "reason": "현 대운 {daeun_gz} = {daeun_ten_god}"
+  },
+  {
+   "id": "r_hongmae",
+   "lens_id": "hongmae",
+   "priority": 74,
+   "condition": {
+    "field": "gwan_and_jae",
+    "op": ">=",
+    "value": 1
+   },
+   "reason": "관 {gwan} · 재 {jae}"
+  },
+  {
+   "id": "r_eunbyeol",
+   "lens_id": "eunbyeol",
+   "priority": 72,
+   "condition": {
+    "field": "strength",
+    "op": "!=",
+    "value": "중화"
+   },
+   "reason": "{strength} {strength_score}"
+  },
+  {
+   "id": "r_paeseon",
+   "lens_id": "paeseon",
+   "priority": 55,
+   "condition": {
+    "field": "always",
+    "op": "==",
+    "value": true
+   },
+   "reason": "조건 없음"
+  },
+  {
+   "id": "r_jeokhyeol",
+   "lens_id": "jeokhyeol",
+   "priority": 50,
+   "condition": {
+    "field": "always",
+    "op": "==",
+    "value": true
+   },
+   "reason": "재미 자리"
+  }
+ ],
+ "forced": {
+  "nopa": "dongja",
+  "yeondam": "dongja"
+ },
+ "breaks": {
+  "per_session_relay": 2,
+  "per_day_purchase": 2,
+  "reunion_cooldown_days": 7,
+  "visit_warn_at": 3
+ }
+}

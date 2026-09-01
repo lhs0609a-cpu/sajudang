@@ -59,7 +59,7 @@ def main() -> int:
     steps = f["steps"]
     top = steps[0]["sessions"] if steps else 0
     print("=" * 72)
-    print("  사주당 퍼널   %s" % BASE)
+    print("  성신당 퍼널   %s" % BASE)
     print("  사건 %s건 · 사람 %s명" % (
         format(f["total_events"], ","), format(f["sessions"], ",")))
     print("=" * 72)

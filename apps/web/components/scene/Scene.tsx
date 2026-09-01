@@ -219,7 +219,20 @@ export default function Scene({ id, className, bleed }: {
         role={pickable ? "button" : undefined}
         tabIndex={pickable ? 0 : undefined}
         title={pickable ? `${spec.name} — 눌러서 제작 프롬프트 보기` : undefined}
-        style={pickable ? undefined : { cursor: "inherit" }}
+        /*
+         * ★ 상자 비율(--sr)과 초점(--sf).
+         *   들어오는 영상은 전부 9:16 인데 글 위 장면은 16:9 띠로
+         *   보여 줍니다. 상자를 잡고 object-fit:cover 로 채웁니다 —
+         *   안 그러면 세로 영상이 폭의 178% 높이로 흘러 아래 버튼이
+         *   화면 밖으로 밀립니다.
+         */
+        style={{
+          ["--sr" as string]:
+            (spec.box ?? (spec.ratio === "1:1" ? "1:1" : "4:3"))
+              .replace(":", " / "),
+          ...(spec.focus ? { ["--sf" as string]: spec.focus } : {}),
+          ...(pickable ? {} : { cursor: "inherit" }),
+        } as React.CSSProperties}
         onClick={pickable ? (ev) => { ev.stopPropagation(); setOpen(true); } : undefined}
         onKeyDown={pickable ? (ev) => {
           if (ev.key === "Enter" || ev.key === " ") {

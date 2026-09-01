@@ -35,17 +35,38 @@ WEB = ROOT / "apps" / "web"
 MANIFEST = WEB / "components" / "scene" / "manifest.ts"
 PUBLIC = WEB / "public"
 
-# ★ 비율은 **강제되는 자리에서만** 문제가 됩니다.
+# ★ 원본은 전부 9:16 세로입니다 (2026-09-01 부터).
 #
-#   인라인(기본)   .sceneart video{width:100%;height:auto} — 제 비율대로
-#                 눕습니다. 1:1 이든 3:4 든 그대로 나옵니다. 문제 없습니다.
-#   hero · fill   .sceneart.hero{aspect-ratio:9/16} + object-fit:cover
-#                 → **가로가 잘려 나갑니다.** 9:16 이 아니면 손해입니다.
+#   그래서 비율 문제가 뒤집혔습니다. 예전에는 「가로 원본을 세로 자리에
+#   넣으면 가로가 잘린다」 였는데, 이제는 **세로 원본을 가로 띠에 넣어
+#   위아래가 잘립니다.**
 #
-#   16:9 클립을 9:16 에 cover 하면 가로의 약 68%가 사라집니다.
-#   에셋을 만들기 **전에** 정해야 하는 자리입니다.
-FORCED = {"hero": "9:16", "fill": "9:16"}
-CROP_LOSS = {("16:9", "9:16"): 68, ("1:1", "9:16"): 44, ("3:4", "9:16"): 25}
+#   왜 띠로 보여 주는가 — 세로를 그대로 흘리면 폭의 178% 높이가 됩니다.
+#   440px 화면에서 782px 입니다. a5 의 고민 여섯 칸이 그 아래로 통째로
+#   밀립니다. 그래서 상자를 장면이 정한 비율로 잡고 cover 로 채웁니다.
+#
+#   여기서 찍는 것은 **원본의 몇 %가 실제로 보이는가** 입니다. 그림을
+#   맡기기 전에 알아야 하는 값입니다 — 16:9 자리에 세로 그림을 그리면
+#   가운데 32%만 나갑니다. 중요한 것을 위나 아래 끝에 두면 안 보입니다.
+SOURCE_RATIO = "9:16"
+
+
+def shown_pct(box: str) -> int:
+    """9:16 원본을 box 에 cover 로 넣으면 세로 몇 %가 보이는가."""
+    try:
+        bw, bh = (float(x) for x in box.split(":"))
+    except ValueError:
+        return 100
+    sw, sh = 9.0, 16.0
+    if bw <= 0 or bh <= 0:
+        return 100
+    # 폭을 맞춘 뒤 보이는 높이
+    vis = (bh / bw) * sw
+    return max(1, min(100, round(vis / sh * 100)))
+
+
+# 세로가 통째로 쓰이는 자리 — 잘리는 것이 없습니다
+FULL_HEIGHT = {"hero", "fill"}
 
 
 def read_manifest() -> dict:
@@ -58,11 +79,14 @@ def read_manifest() -> dict:
     for m in re.finditer(
             r'\{\s*id:\s*"([^"]+)",\s*name:\s*"([^"]+)",\s*preset:\s*"([^"]+)",'
             r'\s*ratio:\s*"([^"]+)",\s*seconds:\s*(\d+),\s*loop:\s*(true|false)'
-            r'(?:,\s*tint:\s*"([^"]+)")?(?:,\s*seasonal:\s*(true|false))?', src):
+            r'(?:,\s*tint:\s*"([^"]+)")?(?:,\s*seasonal:\s*(true|false))?'
+            r'(?:,\s*focus:\s*"([^"]+)")?(?:,\s*box:\s*"([^"]+)")?', src):
         out[m.group(1)] = {
             "name": m.group(2), "preset": m.group(3), "ratio": m.group(4),
             "seconds": int(m.group(5)), "loop": m.group(6) == "true",
             "tint": m.group(7), "seasonal": m.group(8) == "true",
+            "focus": m.group(9),
+            "box": m.group(10),
         }
     return out
 
@@ -125,13 +149,16 @@ def main() -> int:
         note = []
         if not u:
             orphan.append(sid); note.append("아무도 안 부름")
-        for who, w in u:
-            want = FORCED.get(w)
-            if want and spec["ratio"] != want:
-                loss = CROP_LOSS.get((spec["ratio"], want), 0)
-                if (sid, w) not in {(a, b) for a, b, _, _, _ in ratio_bad}:
-                    ratio_bad.append((sid, w, spec["ratio"], want, loss))
-                note.append("%s 자리 — 가로 %d%% 잘림" % (w, loss))
+        seen_slots = {w for _, w in u}
+        if seen_slots and not (seen_slots & FULL_HEIGHT):
+            box = spec.get("box") or ("1:1" if spec["ratio"] == "1:1" else "4:3")
+            pct = shown_pct(box)
+            if pct < 60:
+                key = (sid, box)
+                if key not in {(a, b) for a, b, _, _, _ in ratio_bad}:
+                    ratio_bad.append((sid, box, SOURCE_RATIO,
+                                      pct, 100 - pct))
+                note.append("세로 %d%%만 보임" % pct)
         if not has_clip:
             no_file.append(sid)
         print("  %-10s %-6s %-11s %-5s %-7s %s"
@@ -225,13 +252,16 @@ def main() -> int:
         bad = True
         print("  ★ 화면이 부르는데 **선언에 없는** 장면: %s" % ", ".join(missing))
     if ratio_bad:
-        bad = True
-        print("  ★ 강제 비율 자리에 다른 비율이 들어갑니다 — **잘려 나갑니다**:")
-        for sid, w, got, want, loss in ratio_bad:
-            print("     %-10s %s(%s)  →  %s 자리   가로 약 %d%% 사라짐"
-                  % (sid, got, "루프" if man[sid]["loop"] else "1회", want, loss))
-        print("     에셋을 만들기 **전에** 정해야 합니다 — 그 비율로 발주하든지,")
-        print("     그 자리를 그 비율에 맞추든지.")
+        # ★ 이건 버그가 아니라 **발주 정보**입니다. 원본은 전부 9:16 인데
+        #   글 위 장면은 띠로 보여 주므로 세로가 잘립니다. 그림을 그리기
+        #   전에 「어디가 보이는가」를 알아야 합니다.
+        print("  ※ 9:16 원본 중 실제로 보이는 세로 (상자에 cover):")
+        for sid, box, src, pct, cut in sorted(ratio_bad, key=lambda r: r[3]):
+            focus = man[sid].get("focus") or "가운데"
+            print("     %-10s %-5s 상자  →  세로 %2d%% 보임 (%d%% 잘림) · 초점 %s"
+                  % (sid, box, pct, cut, focus))
+        print("     중요한 것을 위아래 끝에 두지 마세요 — 안 보입니다.")
+        print("     가운데가 답이 아니면 manifest 의 focus 로 옮깁니다.")
     if not draws or not users:
         bad = True
         print("  ★ 캐릭터 초상이 갈 자리가 없습니다.")
