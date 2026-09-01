@@ -62,8 +62,9 @@ const OPENING: Record<string, string[]> = {
  * "결국 돈 내라는 거 아니냐" 가 첫 화면에서 가장 큰 의심입니다.
  */
 const PROMISE =
-  "여덟 글자를 세우고, <b>무엇을 보고 한 말인지</b>까지 적어 드리오.<br>" +
-  "맞힌다고는 안 하오. 값은 나중에 묻소.";
+  "그대가 태어난 <b>날과 시</b> 하나면 되오.<br>" +
+  "왜 그리 말했는지까지 적어 드리오. 맞힌다고는 안 하오.<br>" +
+  "값은 나중에 묻소.";
 
 /*
  * 때 — 네 시간짜리 여섯 칸.
@@ -293,7 +294,7 @@ function EntryInner() {
             <Narration lines={beats} />
             <p className="promise" dangerouslySetInnerHTML={{ __html: PROMISE }} />
             <button className="btn mt" onClick={() => go("a2")}>
-              글자를 세우러 들어간다
+              내 운명을 확인하러 간다
             </button>
             <p className="sm mt" style={{ color: "var(--paper3)" }}>
               {SEASON_PALETTE[season].ko}
@@ -440,7 +441,7 @@ function EntryInner() {
         {/* ★ 자동 진행을 없앴습니다. 되돌릴 여지를 줍니다. */}
         <button className="btn mt" disabled={!filled || !!bad}
                 onClick={() => go("a4")}>
-          다 적었소
+          내 날을 다 적었소
         </button>
         {(!filled || bad) && (
           <p className="sm mt" style={{ textAlign: "center" }}>
@@ -555,7 +556,7 @@ function EntryInner() {
             )}
             <button className="btn mt" disabled={s.hour === null}
                     onClick={() => go("a4b")}>
-              이 때로 하겠소
+              이 때로 내 것을 세우겠소
             </button>
           </div>
         )}
@@ -682,7 +683,7 @@ function EntryInner() {
                 '다시 세운다' 는 같은 값으로 재시도만 해서, 잘못 적은
                 사람은 영영 빠져나올 수 없었습니다. 고치러 갈 길을 냅니다. */}
             <button className="btn" onClick={() => go("a3")}>
-              날을 고쳐 적는다
+              내 날을 고쳐 적는다
             </button>
             <button className="btn gh" onClick={() => void buildChart()}>
               다시 세워 본다
@@ -721,7 +722,7 @@ function EntryInner() {
             <ElementBar f={s.features} />
             <CalcPanel f={s.features} />
             <button className="btn mt" onClick={() => go("a7")}>
-              이 글자가 무슨 말인지 듣는다
+              내 팔자가 무슨 말인지 듣는다
             </button>
           </>
         )}
@@ -787,7 +788,7 @@ function EntryInner() {
             남은 자리에는 <b>왜 하필 지금</b>과 <b>언제 바뀌는가</b>가 있소.
           </p>
           <button className="btn mt" onClick={() => router.push("/pay?step=d0")}>
-            값 없이 한 겹 더
+            값 없이 내 것을 한 겹 더
           </button>
           <button className="btn gh" onClick={() => router.push("/pay?step=d1")}>
             어디까지 볼지 고른다

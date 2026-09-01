@@ -496,7 +496,7 @@ function PayInner() {
         </div>
       )}
       <button className="btn mt" onClick={() => router.push("/pay?step=d2")}>
-        이걸로 하겠소
+        이걸로 내 것을 연다
       </button>
       <button className="btn gh" onClick={() => router.push("/pay?step=d0")}>
         값 없이 볼 수 있는 것부터

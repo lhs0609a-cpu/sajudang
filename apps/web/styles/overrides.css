@@ -1239,8 +1239,66 @@ body.has-rail-closed .stage { margin-left: 26px; }
  *   것은 마진뿐입니다 — 상자는 어디에 놓이든 잡아야 합니다.
  */
 .sceneart:not(.hero):not(.fill) {
-  aspect-ratio: var(--sr, 16 / 9);
+  /*
+   * ★ 장면은 화면의 **3분의 2**를 차지합니다.
+   *
+   *   비율(aspect-ratio)로 잡으면 기기마다 달라집니다 — 폭이 좁은
+   *   기기에서는 작아지고 넓은 기기에서는 커집니다. 「화면의 3분의 2」
+   *   는 **높이**로 잡아야 어디서나 3분의 2입니다.
+   *
+   *   9:16 원본 중 약 63%가 보입니다 (예전 4:3 상자에서는 42%).
+   *
+   *   clamp 의 아래 위 —
+   *     220px  가로로 눕힌 기기에서 띠가 되지 않게
+   *     680px  아주 큰 화면에서 그림만 남지 않게
+   *
+   *   비율은 그림이 없을 때(자리표시 SVG) 쓸 자리로 남겨 둡니다.
+   */
+  height: clamp(220px, 66vh, 680px);
   overflow: hidden;
+  position: relative;
+}
+
+/*
+ * 가로로 그려진 원본은 높이 대신 비율로 잡습니다.
+ * (manifest 에 box 가 적힌 장면 — 세로로 다시 받으면 그 줄을 지웁니다)
+ */
+.sceneart.boxed:not(.hero):not(.fill) {
+  height: auto;
+  aspect-ratio: var(--sr, 16 / 9);
+}
+
+/*
+ * ★ 그림 끝을 페이드아웃 — 모든 화면.
+ *
+ *   장면이 화면의 3분의 2를 먹으면 아래 글은 접힌 아래에서 시작합니다.
+ *   그림이 칼로 자른 듯 끝나면 거기서 화면이 끝난 줄 알고 안 내립니다.
+ *
+ *   덮개(::after)로 어둡게 까는 것과 **지워서 사라지게** 하는 것은
+ *   다릅니다. 덮개는 바탕색을 하나로 정해 놓아야 맞고, 리포트처럼
+ *   바탕이 다른 화면에서는 띠가 떠 보입니다. 마스크는 그림 자체를
+ *   투명하게 만들어 **어떤 바탕 위에서도** 자연스럽게 녹습니다.
+ *
+ *   위쪽도 살짝 물립니다 — 위가 딱 끊기면 상단바와 그림이 부딪힙니다.
+ */
+.sceneart:not(.fill) > video,
+.sceneart:not(.fill) > img,
+.sceneart:not(.fill) > svg {
+  -webkit-mask-image: linear-gradient(to bottom,
+      transparent 0%, #000 5%, #000 74%, transparent 100%);
+          mask-image: linear-gradient(to bottom,
+      transparent 0%, #000 5%, #000 74%, transparent 100%);
+}
+
+/* 대문은 글이 그림 위에 얹혀서 아래를 지우면 글 받침이 사라집니다.
+   거기는 깔개(::after)가 이미 그 일을 합니다 — 위만 물립니다. */
+.sceneart.fill > video,
+.sceneart.fill > img,
+.sceneart.fill > svg {
+  -webkit-mask-image: linear-gradient(to bottom,
+      transparent 0%, #000 4%, #000 100%);
+          mask-image: linear-gradient(to bottom,
+      transparent 0%, #000 4%, #000 100%);
 }
 
 .sceneart:not(.hero):not(.fill) > video,
@@ -1256,4 +1314,72 @@ body.has-rail-closed .stage { margin-left: 26px; }
   width: auto;
   margin-left: -22px;
   margin-right: -22px;
+}
+
+/* ══════════════════════════════════════════════════════════
+ * 글자 정렬 · 읽힘
+ * ══════════════════════════════════════════════════════════ */
+
+/*
+ * ★ 한글은 `keep-all` 로 끊습니다.
+ *
+ *   reference.css 가 `word-break: break-word` 였습니다. 그건 단어
+ *   **가운데**서 자릅니다. 그래서 대문에서
+ *
+ *       여덟 글자를 세우고, 무엇을 보고 한 말인지까지 적어 드리
+ *       오.
+ *
+ *   처럼 「오.」 한 글자가 혼자 떨어졌습니다. 영어는 하이픈이 붙어
+ *   덜 티나지만 한글은 그냥 말이 부러진 것으로 보입니다.
+ *
+ *   keep-all 은 띄어쓰기에서만 끊습니다. 긴 주소·토큰이 상자를 뚫는
+ *   것만 overflow-wrap 으로 막습니다.
+ */
+.scr p, .scr li, .nar, .say, .promise, .sm, .lab, .op, .btn, .term {
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+/*
+ * 그리고 줄을 고르게 나눕니다. 가운데 정렬한 글에서 마지막 줄만
+ * 짧게 남으면 정렬이 안 맞아 보입니다.
+ */
+.nar, .promise, .say, .gatecopy .sm {
+  text-wrap: pretty;
+}
+.gatecopy .promise, .gatecopy .nar {
+  text-wrap: balance;
+  max-width: 20em;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/*
+ * ★ 대문 글에 받침을 깝니다.
+ *
+ *   깔개(::after)는 상자 **아래쪽**에 걸립니다. 그런데 서사 세 줄은
+ *   그림 가운데쯤에 얹혀서, 열린 문틈의 밝은 빛 위에 흰 글씨가
+ *   놓입니다 — 「국화가 세 번 났다」가 거기서 지워졌습니다.
+ *
+ *   글자 그림자만으로는 못 지킵니다. 글 뒤에만 살짝 어둡게 깔고
+ *   가장자리를 흐려 네모가 안 보이게 합니다.
+ */
+.gatecopy .nar,
+.gatecopy .promise {
+  position: relative;
+  isolation: isolate;
+}
+.gatecopy .nar::before,
+.gatecopy .promise::before {
+  content: "";
+  position: absolute;
+  inset: -10px -18px;
+  z-index: -1;
+  border-radius: 22px;
+  background: rgba(10, 7, 16, .46);
+  -webkit-backdrop-filter: blur(7px);
+          backdrop-filter: blur(7px);
+  -webkit-mask-image: radial-gradient(120% 100% at 50% 50%, #000 52%, transparent 100%);
+          mask-image: radial-gradient(120% 100% at 50% 50%, #000 52%, transparent 100%);
+  pointer-events: none;
 }

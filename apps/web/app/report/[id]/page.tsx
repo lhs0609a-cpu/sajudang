@@ -206,7 +206,7 @@ function ReportInner() {
     return (
       <Shell title="읽다">
         <Narration lines={["먼저 글자를 세워야 하오."]} />
-        <button className="btn mt" onClick={() => router.push("/")}>글자를 세운다</button>
+        <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 본다</button>
       </Shell>
     );
   }
@@ -257,7 +257,7 @@ function ReportInner() {
             {rep.locked.length > 0 && ` · 잠긴 자리 ${rep.locked.length}컷`}
           </p>
         </div>
-        <button className="btn mt" onClick={() => setTab("c2")}>편다</button>
+        <button className="btn mt" onClick={() => setTab("c2")}>내 것을 편다</button>
       </Shell>
     );
   }
@@ -519,7 +519,7 @@ function ReportInner() {
 
       <div className="handles noprint">
         <button onClick={() => window.print()}>
-          종이로 내려받기 (PDF)
+          내 것을 종이로 받는다 (PDF)
         </button>
         <button onClick={() => void makeLink()} disabled={sharing}>
           {sharing ? "고리를 엮는 중…" : shareUrl ? "고리 다시 복사" : "고리 만들어 나누기"}

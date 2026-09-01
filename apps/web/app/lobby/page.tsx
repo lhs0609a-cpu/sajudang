@@ -114,7 +114,7 @@ function LobbyInner() {
         ) : (
           <>
             <Narration lines={["아직 글자를 세우지 않았소."]} />
-            <button className="btn mt" onClick={() => router.push("/")}>글자를 세운다</button>
+            <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 본다</button>
           </>
         )}
         <button className="btn gh mt" onClick={() => setTab("b1")}>진열대로</button>

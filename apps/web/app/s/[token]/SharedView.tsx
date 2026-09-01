@@ -59,7 +59,7 @@ export default function SharedView({ token }: { token: string }) {
         <Scene id="gate" className="hero" />
         <Say who="도령">{err}</Say>
         <button className="btn mt" onClick={() => router.push("/")}>
-          그래도 들어와 보시겠소
+          나도 내 운명을 확인해 본다
         </button>
       </Shell>
     );

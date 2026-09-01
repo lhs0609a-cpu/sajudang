@@ -215,7 +215,8 @@ export default function Scene({ id, className, bleed }: {
         </span>
       )}
       <div
-        className={`sceneart ${className ?? ""}`}
+        /* box 가 있으면 가로 원본이라 높이 대신 비율로 잡습니다 */
+        className={`sceneart ${spec.box ? "boxed" : ""} ${className ?? ""}`}
         role={pickable ? "button" : undefined}
         tabIndex={pickable ? 0 : undefined}
         title={pickable ? `${spec.name} — 눌러서 제작 프롬프트 보기` : undefined}

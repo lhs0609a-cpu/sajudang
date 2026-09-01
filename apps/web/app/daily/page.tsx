@@ -44,7 +44,7 @@ export default function DailyPage() {
     return (
       <Shell title="오늘의 일진">
         <Narration lines={["먼저 글자를 세워야 하오."]} />
-        <button className="btn mt" onClick={() => router.push("/")}>글자를 세운다</button>
+        <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 본다</button>
       </Shell>
     );
   }

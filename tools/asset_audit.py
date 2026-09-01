@@ -151,7 +151,8 @@ def main() -> int:
             orphan.append(sid); note.append("아무도 안 부름")
         seen_slots = {w for _, w in u}
         if seen_slots and not (seen_slots & FULL_HEIGHT):
-            box = spec.get("box") or ("1:1" if spec["ratio"] == "1:1" else "4:3")
+            # 장면은 화면 높이의 66% — 폭 440 기준으로 대략 8:9 상자
+            box = spec.get("box") or "8:9"
             pct = shown_pct(box)
             if pct < 60:
                 key = (sid, box)
