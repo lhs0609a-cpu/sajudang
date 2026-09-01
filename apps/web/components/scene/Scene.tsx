@@ -215,12 +215,32 @@ export default function Scene({ id, className, bleed, figure }: {
   const reduced = useReducedMotion();
   const override = useSession((st) => st.seasonOverride);
   const admin = useSession((st) => st.admin);
+  const cur = useSession((st) => st.cur);
   const season = override ?? seasonOf();
   // 훅은 조건 앞에 와야 합니다. spec 이 없어도 순서가 흔들리면 안 됩니다.
+  /*
+   * ★ 사람이 **구워진** 장면이 있으면 그걸 먼저 씁니다.
+   *
+   *   사람을 장면 위에 얹으려면 그 영상에 투명이 살아 있어야 합니다.
+   *   그런데 웹엠의 알파는 컨테이너 쪽 기능이라 ffmpeg 이 안 씁니다
+   *   (넷을 시험해 확인). 투명이 사는 형식(움직이는 WebP)은 같은 길이에
+   *   428~580KB 라 값이 안 맞습니다 — 눈 한 번 깜빡이는 데 그만큼은
+   *   못 씁니다.
+   *
+   *   그래서 만들 때 아예 **한 영상으로 굽습니다.** 투명 문제가
+   *   사라지고, 파일도 둘이 아니라 하나입니다 (451KB).
+   *
+   *     /scene/{장면}/{사람}/clip.webm   ← 있으면 이것
+   *     /scene/{장면}/clip.webm          ← 없으면 이것 + PNG 를 얹음
+   */
+  const figLens = figure === true ? cur : figure;
   const chosen = useClipBase(
-    spec?.seasonal ? `/scene/${id}/${season}/` : null,
+    figure && figLens ? `/scene/${id}/${figLens}/`
+      : spec?.seasonal ? `/scene/${id}/${season}/` : null,
     `/scene/${id}/`,
   );
+  /* 구워진 것을 쓰면 PNG 를 또 얹지 않습니다 — 사람이 둘이 됩니다 */
+  const baked = !!(figure && figLens && chosen === `/scene/${id}/${figLens}/`);
   const base = chosen ?? `/scene/${id}/`;
   const hasClip = chosen === undefined ? null : chosen !== null;
   const [open, setOpen] = useState(false);
@@ -284,7 +304,7 @@ export default function Scene({ id, className, bleed, figure }: {
         } : undefined}
       >
         {body}
-        {figure && <SceneFigure lens={figure === true ? undefined : figure} />}
+        {figure && !baked && <SceneFigure lens={figLens} />}
         {hasClip && spec.tint && <span className={`scene-tint ${spec.tint}`} />}
         {pickable && (
           <span className="slot">{hasClip ? "프롬프트" : `IMG · ${id}`}</span>
