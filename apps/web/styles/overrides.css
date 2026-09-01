@@ -1185,3 +1185,32 @@ body.has-rail-closed .stage { margin-left: 26px; }
   color: var(--paper3);
   margin-bottom: 6px;
 }
+
+/*
+ * 장면을 화면 폭에 꽉 채운다.
+ *
+ * ★ `.scr` 의 좌우 패딩(22px)이 그림 양옆에 어두운 띠로 남아 있었습니다.
+ *   그림은 배경이지 본문 한 칸이 아닙니다 — 띠가 있으면 「끼워 넣은
+ *   삽화」로 보이고, 없으면 그 화면 자체가 됩니다.
+ *
+ *   음수 마진으로 패딩을 되돌립니다. 이 22px 은 reference.css 의
+ *   `.scr{padding:26px 22px 44px}` 과 짝입니다 — 한쪽만 고치면 틈이
+ *   생기거나 가로 스크롤이 납니다.
+ *
+ *   `.scr >` 로 묶은 이유: 같은 클래스를 리포트·분석지·공유본에서도
+ *   쓰는데 거기는 패딩이 다릅니다. 바로 아래 자식일 때만 흘립니다.
+ *   `.hero` · `.fill` 은 제 규칙이 따로 있어 건드리지 않습니다.
+ */
+.scr > .sceneart:not(.hero):not(.fill) {
+  width: auto;
+  margin-left: -22px;
+  margin-right: -22px;
+}
+
+/* 좁은 화면은 `.stage` 패딩이 6px 이라 `.scr` 이 그대로 22px 입니다 */
+@media (max-width: 900px) {
+  .scr > .sceneart:not(.hero):not(.fill) {
+    margin-left: -22px;
+    margin-right: -22px;
+  }
+}
