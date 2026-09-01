@@ -173,6 +173,19 @@ export const api = {
            min_responses?: number }>(
       `/v1/agreement?statement_id=${encodeURIComponent(statementId)}`),
 
+  /*
+   * 소리 — 한 마디를 읽어 달라고 청한다.
+   *
+   * ★ 글을 아무거나 보내지 않습니다. 훅은 뱅크에서 나온 문장이라
+   *   statement_id 가 함께 가고, 캐릭터 첫마디는 이름으로 부릅니다.
+   *   서버에 열쇠가 없으면 `ready:false` 가 옵니다 — 오류가 아니라
+   *   **없음**이라, 화면은 조용히 넘어갑니다.
+   */
+  voice: (ask: { kind: "hook"; statement_id: string; html: string }
+               | { kind: "lens"; lens_id: string }) =>
+    post<{ key: string | null; url: string | null; ready: boolean }>(
+      "/v1/voice", ask),
+
   /* ── 분석지 · 공유 ── */
   summary: (req: {
     chart_id: string; concern: string; axis4?: string | null;

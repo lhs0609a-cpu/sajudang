@@ -8,6 +8,7 @@
  */
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { speakRemote } from "@/lib/sound";
 import { track } from "@/lib/track";
 import type { HookSegment } from "@shared/chart";
 
@@ -84,6 +85,24 @@ export default function HookSegments({
    *
    *   중립은 서버가 **노출로만** 셉니다 (answer 를 안 보냅니다).
    */
+  /*
+   * 새로 열린 마디를 읽어 준다.
+   *
+   * 훅은 사람마다 문장이 달라 미리 만들어 둘 수 없습니다. 서버가 그때
+   * 만들어 곳간에 두므로, 같은 말은 두 번 안 만듭니다.
+   */
+  const [said, setSaid] = useState(0);
+  useEffect(() => {
+    if (open <= said) return;
+    const seg = segments[open - 1];
+    setSaid(open);
+    if (seg?.statement_id && seg.html) {
+      void speakRemote(() => api.voice({
+        kind: "hook", statement_id: seg.statement_id!, html: seg.html,
+      }));
+    }
+  }, [open, said, segments]);
+
   const vote = async (i: number, yes: boolean | null) => {
     track("hook_answer", "a7", { stage: i, yes: yes === null ? 2 : yes ? 1 : 0 });
     const seg = segments[i];
@@ -114,6 +133,12 @@ export default function HookSegments({
 
   return (
     <>
+      {/*
+        ★ 새로 열린 마디만 읽어 줍니다.
+          이미 읽은 마디를 다시 읽으면 손님이 아래로 내릴 때마다
+          도령이 처음부터 다시 말합니다. 그리고 소리가 꺼져 있으면
+          **청하지도** 않습니다 — 만드는 데 값이 나가는 자리입니다.
+      */}
       {segments.slice(0, open).map((seg, i) => (
         <div className="blk in" key={seg.statement_id}>
           {/* ★ 몇 번째 마디인지. 0단은 label 이 비어 있어서 손님이

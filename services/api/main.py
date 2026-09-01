@@ -28,6 +28,7 @@ import store                                         # noqa: E402
 from guard_middleware import GuardMiddleware         # noqa: E402
 from routers import (                                # noqa: E402
     chart, daily, events, feedback, hook, pay, relay, report, share,
+    voice as voice_router,
 )
 
 logging.basicConfig(
@@ -149,8 +150,25 @@ async def _http_error(request: Request, exc: StarletteHTTPException):
                         content={"detail": detail},
                         headers=getattr(exc, "headers", None))
 
-for r in (chart, hook, report, relay, feedback, daily, pay, share, events):
+for r in (chart, hook, report, relay, feedback, daily, pay, share, events,
+          voice_router):
     app.include_router(r.router)
+
+
+def _voice_stats() -> dict:
+    """
+    소리가 켜졌는가, 곳간에 몇 마디가 쌓였는가.
+
+    ★ 곳간 수를 보는 이유 — 값이 트래픽이 아니라 **서로 다른 말의 수**에
+      묶이는 구조라, 이 숫자가 곧 지금까지 든 값입니다.
+    """
+    import voice
+    try:
+        n = len(list(voice.CACHE.glob("*.mp3"))) if voice.CACHE.is_dir() else 0
+    except Exception:                                # noqa: BLE001
+        n = 0
+    return {"enabled": voice.enabled(), "cached": n,
+            "dir": str(voice.CACHE)}
 
 
 @app.get("/health")
@@ -167,5 +185,7 @@ def health() -> dict:
         # 켜지지 않았다면 왜인지. 키는 안 실립니다 — 까닭만 나갑니다.
         "payments_live": payments.LIVE,
         "payments_reason": payments.DISABLED_REASON,
+        # 소리 — 열쇠가 있어야 납니다. 없으면 화면이 조용히 넘어갑니다.
+        "voice": _voice_stats(),
         "cors_origins": CORS_ORIGINS,
     }

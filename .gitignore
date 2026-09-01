@@ -28,3 +28,4 @@ next-env.d.ts
 #   잠금 파일이라, 워크스페이스(@sajudang/shared-types) 연결이 빠져
 #   있습니다. Vercel 이 이걸 보고 npm ci 를 돌리면 그 자리에서 깨집니다.
 package-lock.json
+voice_lines.json

@@ -28,6 +28,8 @@
  *   docs/10 에 발주 내용을 적어 둡니다.
  */
 
+// api.ts 와 **같은** 기본값이어야 합니다. 다르면 소리만 딴 데를 봅니다.
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 const KEY = "sd.sound";       // 켬/끔 — 이 기기에만 남습니다
 const VOL_BGM = 0.22;         // 배경음은 말보다 훨씬 아래로
 const VOL_VOICE = 0.9;
@@ -127,6 +129,36 @@ export function speak(name: string) {
   el.onerror = () => missing.add("voice:" + name);
   voice = el;
   void el.play().catch(() => {});
+}
+
+/**
+ * 서버가 만들어 준 소리를 낸다.
+ *
+ * ★ 훅은 사람마다 문장이 달라 미리 만들어 둘 수 없습니다. 서버가 그때
+ *   만들어 곳간에 두고 주소를 줍니다 (services/api/voice.py). 같은 말은
+ *   두 번 안 만들므로 값이 트래픽이 아니라 **서로 다른 말의 수**에
+ *   묶입니다.
+ *
+ * ★ 소리가 꺼져 있으면 **청하지도** 않습니다. 값이 나가는 자리라
+ *   안 들을 소리를 만들면 안 됩니다.
+ */
+export async function speakRemote(
+  ask: () => Promise<{ url: string | null; ready: boolean }>,
+) {
+  if (typeof window === "undefined") return;
+  if (soundState() !== "on") return;
+  try {
+    const r = await ask();
+    if (!r.ready || !r.url) return;
+    if (soundState() !== "on") return;   // 기다리는 새 껐을 수 있습니다
+    voice?.pause();
+    const el = new Audio(API_BASE + r.url);
+    el.volume = VOL_VOICE;
+    voice = el;
+    void el.play().catch(() => {});
+  } catch {
+    /* 소리는 곁가지입니다. 실패가 글을 막아서는 안 됩니다. */
+  }
 }
 
 /** 소리가 실제로 준비된 파일인지 (발주 상태를 화면에서 보려고) */
