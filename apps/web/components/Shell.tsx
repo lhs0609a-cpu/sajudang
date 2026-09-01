@@ -16,10 +16,29 @@
  */
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Suspense, useEffect, useRef, useState } from "react";
+import {
+  Suspense, useEffect, useLayoutEffect, useRef, useState,
+} from "react";
+
+/*
+ * 그리기 **전에** 도는 효과.
+ *
+ * ★ 이게 이번 버그의 자리입니다. useEffect 는 화면이 그려진 **뒤**에
+ *   돕니다. 그때는 CSS 가 지연 0 으로 시작한 애니메이션이 이미 끝난
+ *   뒤라, 뒤늦게 animation-delay 를 적어도 다시 돌지 않습니다.
+ *   그래서 전부 처음부터 떠 있었습니다.
+ *
+ *   useLayoutEffect 는 DOM 을 고친 직후·그리기 직전에 돕니다. 지연을
+ *   먼저 박고 그린 뒤에 애니메이션이 시작하므로 순서대로 뜹니다.
+ *   서버에서는 없는 물건이라 useEffect 로 내려갑니다(거기선 안 그립니다).
+ */
+const useBeforePaint =
+  typeof window === "undefined" ? useEffect : useLayoutEffect;
 import { useSession } from "@/lib/store";
 import { LENS_BY_ID } from "@/lib/lenses";
 import { api, apiMisconfigured } from "@/lib/api";
+import { playBgm } from "@/lib/sound";
+import SoundToggle from "@/components/SoundToggle";
 import DevRail from "@/components/DevRail";
 
 export const LEGAL = [
@@ -52,6 +71,7 @@ export function TopBar({ title, skipTo, onBack }: {
       */}
       <button className="tb" onClick={() => (onBack ? onBack() : router.back())}
               aria-label="뒤로">←</button>
+      <SoundToggle />
       <span className="tt">{title}</span>
       <Link className="tb" href="/daily" aria-label="오늘의 일진">日</Link>
       <Link className="tb" href="/me" aria-label="인장첩">印 {seals.length}</Link>
@@ -117,7 +137,7 @@ export default function Shell({
    *   장면과 진행 막대는 뺍니다 — 배경이라 처음부터 있어야 합니다.
    */
   const scrRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
+  useBeforePaint(() => {
     const root = scrRef.current;
     if (!root) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -152,12 +172,24 @@ export default function Shell({
       // 이미 떠 있는 것은 건드리지 않습니다 — 훅처럼 한 마디씩 늘어나는
       // 화면에서 앞말이 다시 떠오르면 읽던 자리를 잃습니다.
       if (el.dataset.beat === undefined) {
-        el.dataset.beat = "";
         el.style.animationDelay = t.toFixed(2) + "s";
+        // 표를 다는 순간 CSS 가 움직이기 시작합니다. 지연을 **먼저**
+        // 적어야 합니다 — 순서가 바뀌면 지연 없이 튀어 오릅니다.
+        el.dataset.beat = "";
       }
       t = Math.min(t + 0.16, 1.5);
     });
   });
+
+  /*
+   * 배경음.
+   *
+   * ★ 화면마다 새로 걸지 않습니다. 옮길 때마다 처음부터 다시 나면
+   *   그게 더 거슬립니다. 같은 이름이면 lib/sound 가 손을 안 댑니다.
+   *
+   * ★ 소리가 꺼져 있으면 아무 일도 안 합니다. 켜는 순간 이어집니다.
+   */
+  useEffect(() => { playBgm("hall"); }, []);
 
   // 계산 서버가 안 붙은 배포본이면 조용히 실패하지 않고 알린다
   const [noApi, setNoApi] = useState(false);

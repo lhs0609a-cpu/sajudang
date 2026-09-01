@@ -28,8 +28,18 @@ import widow  # noqa: E402
 
 
 def _bad():
+    """
+    ★ 화면에 박힌 글만 셉니다.
+
+      리포트 본문(seed/*)은 조각을 **조합해** 만들고, 말투 층과 풀이
+      층이 맨 끝에 얹혀 길이가 또 바뀝니다. 조각 하나의 길이를 재도
+      조합된 결과가 어디서 끊길지 모릅니다. 거기는 브라우저가 실제로
+      그린 줄을 보고 고치게 둡니다 (`text-wrap: pretty`).
+    """
     out = []
     for rel, line, kind, text in widow.harvest():
+        if rel.startswith("seed/"):
+            continue
         px = widow.SIZE.get(kind, 16.0)
         box = widow.GATE_WIDTH if kind == "promise" else widow.WIDTH
         lines = widow.wrap(text, px, box)
@@ -51,6 +61,7 @@ def test_css_asks_the_browser_to_avoid_them():
     css = (ROOT / "apps" / "web" / "styles" / "overrides.css").read_text(
         encoding="utf-8")
     assert "text-wrap: pretty" in css, "pretty 가 없다"
+    assert ".cutbody" in css, "리포트 본문이 브라우저에 안 맡겨져 있다"
     for cls in (".sm", ".say", ".nar"):
         assert cls in css.split("text-wrap: pretty")[0].rsplit("{", 1)[0][-400:], \
             "%s 에 안 걸려 있다" % cls

@@ -270,7 +270,7 @@ function ReportInner() {
         {daeunCut ? (
           <>
             <span className="src">근거 · {daeunCut.source}</span>
-            <div dangerouslySetInnerHTML={{ __html: daeunCut.html }} />
+            <div className="cutbody" dangerouslySetInnerHTML={{ __html: daeunCut.html }} />
           </>
         ) : (
           <>
@@ -499,7 +499,7 @@ function ReportInner() {
             {/* ★ 근거를 본문 위에, 본문과 같은 급으로 둡니다.
                 전에는 8.5px 딱지라 아무도 안 봤습니다. */}
             <span className="src">{c.source}</span>
-            <div dangerouslySetInnerHTML={{ __html: c.html }} />
+            <div className="cutbody" dangerouslySetInnerHTML={{ __html: c.html }} />
           </div>
         ))}
 
@@ -535,7 +535,7 @@ function ReportInner() {
       <p className="handlenote noprint">
         내려받기는 인쇄창에서 <b>“PDF로 저장”</b>을 고르면 되오.
         고리에는 <b>생년월일시와 고을이 담기지 않소</b> — 여덟 글자와 읽은
-        자리만 가오. 90일이 지나면 스스로 닫히오.
+        자리만 가오. 90일이 지나면 스스로 닫히오.
       </p>
     </Shell>
   );

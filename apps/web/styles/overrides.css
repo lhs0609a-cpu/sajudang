@@ -1407,8 +1407,21 @@ body.has-rail-closed .stage { margin-left: 26px; }
  *   장면(.sceneart)과 진행 막대(.prog)는 뺍니다. 배경이라 처음부터
  *   있어야 합니다 — 배경이 뒤늦게 뜨면 화면이 덜컹거립니다.
  */
-.scr > *:not(.prog):not(.sceneart):not(.nr),
-.scr .say {
+/*
+ * ★ 차례를 **받은 것만** 움직입니다.
+ *
+ *   전에는 CSS 가 지연 0 으로 먼저 시작하고, 그 뒤에 스크립트가 지연을
+ *   적었습니다. 그때는 이미 끝난 애니메이션이라 다시 안 돌아서
+ *   **전부 처음부터 떠 있었습니다.**
+ *
+ *   이제 Shell 이 그리기 직전에 차례를 적으면서 data-beat 를 답니다.
+ *   표가 붙은 것만 움직입니다.
+ *
+ *   왜 「안 움직이는 것을 숨기는」 방식이 아닌가 — 효과가 못 짚은
+ *   요소가 하나라도 생기면 그 글이 **영영 안 보입니다.** 못 짚으면
+ *   그냥 평소대로 보이는 쪽이 안전합니다. 연출은 덜 되어도 글은 남습니다.
+ */
+.scr [data-beat] {
   animation: beatIn .34s cubic-bezier(.2, .7, .3, 1) both;
 }
 
@@ -1431,4 +1444,56 @@ body.has-rail-closed .stage { margin-left: 26px; }
     opacity: 1 !important;
     transform: none !important;
   }
+}
+
+/* ══════════════════════════════════════════════════════════
+ * 소리 켜고 끄기
+ * ══════════════════════════════════════════════════════════ */
+
+.tb.snd { position: relative; min-width: 30px; }
+.tb.snd.on { color: var(--gold); border-color: var(--gold); }
+
+/*
+ * 처음 온 사람에게만 「소리」 라고 한 번 붙입니다.
+ * 꺼져 있는 줄 모르면 소리가 있다는 것도 모릅니다.
+ * 한 번 누르면 다시 안 붙습니다.
+ */
+.sndhint {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 5px;
+  font-family: var(--mono);
+  font-size: var(--fs-1);
+  letter-spacing: .08em;
+  color: var(--paper3);
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  padding: 2px 7px;
+  white-space: nowrap;
+  font-style: normal;
+  animation: sndPulse 2.6s ease-in-out 3;
+  pointer-events: none;
+}
+@keyframes sndPulse {
+  0%, 100% { opacity: .55; }
+  50%      { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sndhint { animation: none; opacity: .8; }
+}
+
+/*
+ * ★ 리포트 본문의 과부 줄은 손으로 못 고칩니다.
+ *
+ *   본문은 조각을 **조합해서** 만듭니다 (훅 5단 · 관점 컷). 게다가
+ *   말투 층과 풀이 층이 맨 끝에 얹혀 길이가 또 바뀝니다. 그러니 seed 의
+ *   조각 하나를 손봐도 조합된 결과가 어디서 끊길지 모릅니다.
+ *   재 보니 조각 2,109개 중 238곳이 걸리는데 **236곳이 여기**입니다.
+ *
+ *   이런 자리는 브라우저가 **실제로 그린 줄**을 보고 고치는 게 맞습니다.
+ *   손으로 잡는 것은 화면에 박힌 글 — 내가 길이를 아는 글까지입니다.
+ */
+.cutbody, .cutbody p, .saying, .lastcut {
+  text-wrap: pretty;
 }

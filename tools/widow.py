@@ -41,6 +41,7 @@
 """
 from __future__ import annotations
 
+import json
 import re
 import sys
 from pathlib import Path
@@ -59,7 +60,9 @@ SIZE = {
     "promise": 16.0,   # --fs-5
     "sm": 14.0,        # --fs-3  부가 설명
     "btn": 15.0,       # --fs-4  버튼
-    "lab": 13.0,       # --fs-2
+    "lab": 13.0,
+    "cut": 16.0,       # --fs-5  리포트 본문
+    "btn": 15.0,       # --fs-2
 }
 
 # 과부로 보는 길이 — 마지막 줄이 이보다 짧으면 짚습니다
@@ -146,6 +149,19 @@ def harvest():
                         if len(t) >= 8 and re.search(r"[가-힣]", t):
                             out.append((rel, line, kind, t))
 
+        # 버튼에 적힌 말 — 폭이 좁아 두 줄이 되면 티가 크게 납니다
+        for m in re.finditer(r"<button[^>]*>(.{6,200}?)</button>", code, re.S):
+            t = strip_tags(m.group(1))
+            if len(t) >= 8 and re.search("[가-힣]", t):
+                out.append((rel, code.count(chr(10), 0, m.start()) + 1, "btn", t))
+
+        # 그 밖의 문단 — 안내·경고·풀이
+        for m in re.finditer(r"<p(?![^>]*className=\"sm)[^>]*>(.{8,400}?)</p>",
+                             code, re.S):
+            t = strip_tags(m.group(1))
+            if len(t) >= 8 and re.search("[가-힣]", t):
+                out.append((rel, code.count(chr(10), 0, m.start()) + 1, "nr", t))
+
         # <Say> 와 <p className="sm"> 안의 글
         for rx, kind in ((r"<Say[^>]*>\s*([^<{][^<]{7,})<", "say"),
                          (r'className="sm[^"]*"[^>]*>\s*([^<{][^<]{7,})<', "sm")):
@@ -153,6 +169,31 @@ def harvest():
                 t = strip_tags(m.group(1))
                 if re.search(r"[가-힣]", t):
                     out.append((rel, code.count("\n", 0, m.start()) + 1, kind, t))
+    # ── 리포트 본문 — 문장 뱅크 ──────────────────────────
+    #
+    # ★ 여기가 통째로 빠져 있었습니다. 화면 글 122줄만 보고 「다 고쳤다」고
+    #   했는데, 손님이 **값을 치르고 읽는 글**은 한 줄도 안 봤습니다.
+    #   컷 하나가 한 문단이라 마지막 줄이 조각으로 남기 딱 좋습니다.
+    for name in ("bank.json", "lens_cuts.json", "extras.json", "sinsal.json"):
+        f = ROOT / "seed" / name
+        if not f.exists():
+            continue
+        data = json.loads(f.read_text(encoding="utf-8"))
+
+        def walk(o, path=""):
+            if isinstance(o, str):
+                t = strip_tags(o)
+                if len(t) >= 24 and re.search("[가-힣]", t):
+                    out.append(("seed/" + name, 0, "cut", t))
+            elif isinstance(o, dict):
+                for k, v in o.items():
+                    walk(v, path + "/" + str(k))
+            elif isinstance(o, list):
+                for v in o:
+                    walk(v, path)
+
+        walk(data)
+
     return out
 
 
@@ -179,8 +220,24 @@ def main() -> int:
         print("\n  [OK] 걸리는 자리 없음  (글줄 %d개를 봤습니다)" % len(rows))
         return 0
 
+    hand = [b for b in bad if not b[0].startswith("seed/")]
+    auto = [b for b in bad if b[0].startswith("seed/")]
+
     print()
-    for rel, line, kind, lines, tail in bad:
+    if auto:
+        print("  ※ 리포트 본문 %d곳 — 여기는 손으로 안 고칩니다." % len(auto))
+        print("     본문은 조각을 **조합해** 만들고(훅 5단·관점 컷), 말투 층과")
+        print("     풀이 층이 맨 끝에 얹혀 길이가 또 바뀝니다. 조각 하나를")
+        print("     손봐도 조합된 결과가 어디서 끊길지 모릅니다.")
+        print("     브라우저가 실제로 그린 줄을 보고 고치게 둡니다")
+        print("     (`text-wrap: pretty` — .cutbody · .saying).")
+        print()
+
+    if not hand:
+        print("  [OK] 화면에 박힌 글에는 걸리는 자리 없음")
+        print()
+
+    for rel, line, kind, lines, tail in hand:
         print("  %s:%d  (%s)" % (rel, line, kind))
         for i, l in enumerate(lines):
             mark = "  ← 여기가 홀로 남습니다" if i == len(lines) - 1 else ""
@@ -188,7 +245,8 @@ def main() -> int:
         print()
 
     print("-" * 76)
-    print("  글줄 %d개 중 %d곳" % (len(rows), len(bad)))
+    print("  글줄 %d개 중 %d곳 — 화면 글 %d · 리포트 본문 %d"
+          % (len(rows), len(bad), len(hand), len(auto)))
     print("  고치는 법 — <br> 로 뜻이 끊기는 자리에서 직접 끊거나,")
     print("  마지막 두 마디를 &nbsp; 로 묶어 같이 내려보냅니다.")
     print("-" * 76)

@@ -785,7 +785,7 @@ function EntryInner() {
             여기까지는 <b>그대가 어떤 사람인가</b>였소.
           </p>
           <p className="tx mt">
-            남은 자리에는 <b>왜 하필 지금</b>과 <b>언제 바뀌는가</b>가 있소.
+            남은 자리에는 <b>왜 하필 지금</b>과 <b>언제 바뀌는가</b>가 있소.
           </p>
           <button className="btn mt" onClick={() => router.push("/pay?step=d0")}>
             값 없이 내 것을 한 겹 더
