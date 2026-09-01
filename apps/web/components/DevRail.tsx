@@ -299,9 +299,18 @@ export default function DevRail() {
           <button className="mini gh2" onClick={() => { s.reset(); router.push("/"); }}>
             세션 초기화
           </button>
-          <button className="mini gh2" onClick={() => s.set({ admin: false })}>
-            레일 끄기 (?admin=1 로 다시)
-          </button>
+          {/*
+            ★ 유저 모드 — 레일을 끄면 손님이 보는 그대로가 됩니다.
+              전에는 "?admin=1 로 다시" 라고만 적혀 있었는데, 그건 주소를
+              손으로 고치라는 말입니다. 돌아오는 길을 **버튼으로** 둡니다.
+          */}
+          <div className="nav">
+            <button onClick={() => { s.set({ admin: false }); router.push("/"); }}>
+              유저 모드로
+            </button>
+            <b>관리자</b>
+            <button onClick={() => router.push("/admin")}>주인 자리 ↗</button>
+          </div>
         </div>
       )}
     </aside>

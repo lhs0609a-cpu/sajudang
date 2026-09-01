@@ -65,6 +65,41 @@ def has_batchim(word: str) -> bool:
     return False
 
 
+def amount_word(v: float) -> str:
+    """
+    오행의 세기를 사람 말로.
+
+    ★ `f.elements` 는 **안에서 쓰는 점수**입니다 (0.3 · 1.2 · 4.0).
+      가중치를 매겨 더한 값이라 사람이 읽을 수 있는 수가 아닙니다.
+      그런데 근거 줄에 「불 0.2」 처럼 그대로 나가고 있었습니다.
+
+      근거는 보이되 규칙은 감춥니다 (CLAUDE.md). 손님이 알아야 할 것은
+      「불이 옅다」이지 0.2 가 아닙니다. 0.2 를 보면 1.0 은 뭔지, 몇부터
+      많은 건지 묻게 되는데 그건 우리 분기표입니다.
+    """
+    if v < 0.5:
+        return "거의 없음"
+    if v < 1.2:
+        return "옅음"
+    if v < 2.2:
+        return "보통"
+    if v < 3.2:
+        return "짙음"
+    return "아주 짙음"
+
+
+def count_word(n: int) -> str:
+    """
+    개수는 **셀 수 있는 사실**이라 냅니다. 다만 표가 아니라 말로.
+
+    「상관 2」는 분기표처럼 보이고 「상관이 둘」은 근거로 읽힙니다.
+    같은 것을 말하는데 하나는 기계가 하는 말이고 하나는 사람이 하는
+    말입니다.
+    """
+    words = ("없음", "하나", "둘", "셋", "넷", "다섯")
+    return words[n] if 0 <= n < len(words) else "여섯 넘게"
+
+
 def josa(word: str, with_batchim: str, without: str) -> str:
     """`josa("나무", "이", "가")` → "나무가"."""
     return word + (with_batchim if has_batchim(word) else without)
@@ -330,7 +365,8 @@ def _concern_axis_seg(f, concern: str, esc_you: str) -> dict:
 
     return _seg(
         stage="2.5", label="2.5 · 물은 자리와 센 자리",
-        source="%s → %s %s · 가장 센 자리 %s" % (word, grp, asked, loud),
+        source="%s → %s %s · 가장 센 자리 %s"
+               % (word, josa(grp, "이", "가"), count_word(asked), loud),
         body='<div class="cax">%s</div>' % body,
         question=q, yes=yes, no=no,
         sid="cax:%s:%s:%s:%s" % (concern, grp, min(asked, 4), loud))
@@ -395,8 +431,9 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
         # 근거를 답니다. 다만 찌르기 **아래**에 답니다 — 위에 놓으면
         # 첫 문장이 강의가 되고, 안 놓으면 여느 점집과 같아집니다.
         show_source=True, source_below=True,
-        source="%s일간 · %s %s · %s" % (f.day_gan, element_word(weak),
-                                       f.elements[weak], top),
+        source="%s일간 · %s %s · %s"
+               % (f.day_gan, josa(element_word(weak), "이", "가"),
+                  amount_word(f.elements[weak]), top),
         body='<div class="stab">%s<p>%s</p><p class="sub">%s</p>'
              '<p class="gan">%s</p></div>'
              % (head, stab, stab2, gan_line),
@@ -416,7 +453,8 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
         #   '중화 16' 은 사람이 읽을 수 있는 값이 아닙니다. 관점 컷에는
         #   검사가 걸려 있었는데 훅 근거 줄에는 없었습니다.
         #   글자와 개수는 근거고, 점수는 규칙입니다.
-        source="%s %d · %s" % (top, f.ten_gods[top], strength),
+        source="%s %s · %s"
+               % (josa(top, "이", "가"), count_word(f.ten_gods[top]), strength),
         body=('<p class="neg">사람들이 %s를 두고 <span class="strk">%s</span>고 하지. '
               '아니오.<br><span class="strk d2">%s</span>는 말도 틀렸소.<br><br>'
               '<b>%s는 사람일 뿐이오.</b></p>')
@@ -462,13 +500,17 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     segs.append(_seg(
         stage="2", label="2 · 순서",
         source=("%s생 · %s일간 → %s %s(%s) · %s %s"
-                % (sea, f.day_gan, f.flow_el, f.elements[f.flow_el], flow,
-                   weak, f.elements[weak])
+                % (sea, f.day_gan, josa(f.flow_el, "이", "가"),
+                   amount_word(f.elements[f.flow_el]), flow,
+                   josa(weak, "이", "가"), amount_word(f.elements[weak]))
                 if turned else
-                "%s %d · %s일간 → %s %s(%s) · %s %s · %s생"
-                % (top, f.ten_gods[top], ELEMENT_OF_GAN[f.day_gan],
-                   f.flow_el, f.elements[f.flow_el], flow,
-                   weak, f.elements[weak], sea)),
+                "%s %s · %s일간 → %s %s(%s) · %s %s · %s생"
+                % (josa(top, "이", "가"), count_word(f.ten_gods[top]),
+                   ELEMENT_OF_GAN[f.day_gan],
+                   josa(f.flow_el, "이", "가"),
+                   amount_word(f.elements[f.flow_el]), flow,
+                   josa(weak, "이", "가"),
+                   amount_word(f.elements[weak]), sea)),
         body=('<div class="scene">%s<p class="sea">%s</p>'
               '<p>%s는 늘 이 순서요.</p><div class="seq">%s</div>%s</div>'
               % (turn_line, sea_line, esc_you,
@@ -538,7 +580,9 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
                bank()["NAME_POST"][strength]))
     segs.append(_seg(
         stage="3", label="3 · 이름",
-        source="%s %s × %s" % (element_word(weak), f.elements[weak], flow),
+        source="%s %s × %s"
+               % (josa(element_word(weak), "이", "가"),
+                  amount_word(f.elements[weak]), flow),
         body=('<div class="nameB"><p class="pre">오래 느꼈는데 말로는 못 했던 것.<br>'
               '그건 이름이 있소.</p><p class="word">%s</p><p class="post">%s</p></div>'
               % (word, post)),

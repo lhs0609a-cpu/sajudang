@@ -231,6 +231,41 @@ def clear_all() -> None:
     _mem.clear()
 
 
+def scan(prefix: str, limit: int = 5000) -> list:
+    """
+    앞글자가 같은 열쇠를 훑는다. **관리자 집계 전용**입니다.
+
+    ★ 손님 화면에서는 절대 부르지 마세요. 이건 곳간을 통째로 훑는
+      일이라 값이 비싸고, 남의 주문을 세는 자리라 열쇠가 걸린 문
+      뒤에만 두어야 합니다 (routers/admin.py).
+
+    ★ 만료된 것은 건너뜁니다. get_json 이 이미 그 판단을 하므로
+      여기서도 그걸 씁니다 — 두 군데서 따로 판단하면 언젠가 갈립니다.
+    """
+    out = []
+    if _db:
+        with _lock:
+            rows = _db.execute(
+                "SELECT k FROM kv WHERE k LIKE ? LIMIT ?",
+                (prefix + "%", limit)).fetchall()
+        keys = [r[0] for r in rows]
+    elif _redis:
+        try:
+            keys = [k.decode() if isinstance(k, bytes) else k
+                    for k in _redis.scan_iter(match=prefix + "*", count=1000)]
+            keys = keys[:limit]
+        except Exception:                      # noqa: BLE001
+            keys = []
+    else:
+        keys = [k for k in list(_mem)[:limit] if k.startswith(prefix)]
+
+    for k in keys:
+        v = get_json(k)
+        if v is not None:
+            out.append((k, v))
+    return out
+
+
 def stats() -> dict:
     """/health 에서 보여줄 값."""
     out = {"backend": BACKEND, "durable": BACKEND in ("redis", "sqlite")}

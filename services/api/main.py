@@ -28,7 +28,7 @@ import store                                         # noqa: E402
 from guard_middleware import GuardMiddleware         # noqa: E402
 from routers import (                                # noqa: E402
     chart, daily, events, feedback, hook, pay, relay, report, share,
-    voice as voice_router,
+    voice as voice_router, admin as admin_router,
 )
 
 logging.basicConfig(
@@ -151,7 +151,7 @@ async def _http_error(request: Request, exc: StarletteHTTPException):
                         headers=getattr(exc, "headers", None))
 
 for r in (chart, hook, report, relay, feedback, daily, pay, share, events,
-          voice_router):
+          voice_router, admin_router):
     app.include_router(r.router)
 
 

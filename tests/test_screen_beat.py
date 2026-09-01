@@ -55,6 +55,11 @@ def test_every_screen_goes_through_shell():
     """한 화면이라도 Shell 을 안 거치면 그 화면만 대화가 아니다."""
     bad = []
     for p in (WEB / "app").rglob("page.tsx"):
+        # ★ 주인 자리(/admin)는 손님 화면이 아닙니다. 틀도 장면도 없고
+        #   대화로 뜨지도 않습니다 — 읽고 판단하는 자리라 한눈에
+        #   보이는 것이 먼저입니다. 여기만 예외로 둡니다.
+        if "admin" in p.parts:
+            continue
         src = p.read_text(encoding="utf-8")
         if "<Shell" in src:
             continue

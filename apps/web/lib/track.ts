@@ -107,6 +107,16 @@ export function flush(beacon = false) {
 }
 
 export function track(name: EventName, screen: string, extra?: Partial<Ev>) {
+  /*
+   * ★ 주인 화면은 안 셉니다.
+   *
+   *   주인이 화면을 훑는 것이 손님 퍼널에 섞이면, 어디서 나가는지를
+   *   보려고 만든 숫자가 **주인의 발자국으로 오염**됩니다. 32개 화면을
+   *   한 번 훑으면 도달률이 통째로 흔들립니다.
+   */
+  if (typeof window !== "undefined"
+      && window.location.pathname.startsWith("/admin")) return;
+
   if (typeof window === "undefined") return;
   if (isAdmin()) return;               // 관리자 레일은 퍼널에 안 실린다
   const s = sid();

@@ -1542,3 +1542,75 @@ body.has-rail-closed .stage { margin-left: 26px; }
   cursor: pointer;
 }
 .rail .nav button:disabled { opacity: .35; cursor: default; }
+
+/* ══════════════════════════════════════════════════════════
+ * /admin — 주인 자리
+ *
+ * ★ 손님 화면과 **다른 화면**입니다. 틀(.phone)도 장면도 없습니다.
+ *   여기는 읽고 판단하는 자리라, 분위기보다 **한눈에 보이는 것**이
+ *   먼저입니다. 숫자는 자릿수를 맞춰 세로로 읽히게 둡니다.
+ * ══════════════════════════════════════════════════════════ */
+
+.adm {
+  max-width: 940px;
+  margin: 0 auto;
+  padding: 26px 20px 80px;
+  color: var(--paper);
+}
+.adm h1 {
+  font-family: var(--serif);
+  font-size: var(--fs-8);
+  margin-bottom: 4px;
+}
+.adm h2 {
+  font-family: var(--mono);
+  font-size: var(--fs-2);
+  letter-spacing: .16em;
+  color: var(--gold);
+  margin: 26px 0 8px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--line);
+}
+.adm .fld { max-width: 340px; }
+.adm .btn { max-width: 340px; }
+
+.admtop { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.admmode { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: var(--fs-2); }
+.admmode .on { color: var(--gold); border: 1px solid var(--gold); padding: 3px 9px; }
+.admmode button, .adm .lnk {
+  font-family: var(--mono); font-size: var(--fs-2);
+  background: none; border: 1px solid var(--line);
+  color: var(--paper2); padding: 3px 9px; cursor: pointer;
+}
+.adm .lnk { border: none; text-decoration: underline; padding: 0; }
+.admerr { color: #E08585; font-size: var(--fs-3); margin: 6px 0; }
+.admlink { display: inline-block; margin-top: 14px; color: var(--paper3); font-size: var(--fs-3); }
+
+/* 숫자 판 */
+.kpi { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: 8px; }
+.kpi > div {
+  border: 1px solid var(--line); padding: 11px 12px; background: var(--bg2);
+}
+.kpi b {
+  display: block; font-family: var(--mono); font-size: var(--fs-7);
+  font-weight: 400; color: var(--paper);
+  font-variant-numeric: tabular-nums;
+}
+.kpi span { display: block; margin-top: 3px; font-size: var(--fs-1); color: var(--paper3); }
+
+.admt { width: 100%; border-collapse: collapse; font-size: var(--fs-3); }
+.admt td { padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.admt td.n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.admt tr.bad td { color: #E8A87C; }
+.admbad { font-size: var(--fs-4); color: #E8A87C; margin: 6px 0 10px; }
+
+.admgrp { margin-bottom: 10px; }
+.admgh { font-family: var(--mono); font-size: var(--fs-1); color: var(--paper3); letter-spacing: .12em; margin-bottom: 4px; }
+.admscr { display: flex; flex-wrap: wrap; gap: 5px; }
+.admscr a {
+  font-family: var(--mono); font-size: var(--fs-2);
+  border: 1px solid var(--line); padding: 4px 9px;
+  color: var(--paper2); text-decoration: none;
+}
+.admscr a b { color: var(--gold); font-weight: 400; }
+.admscr a:hover { border-color: var(--gold); }
