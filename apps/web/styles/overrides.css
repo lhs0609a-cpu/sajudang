@@ -1394,8 +1394,14 @@ body.has-rail-closed .stage { margin-left: 26px; }
  *   장면(.sceneart)과 진행 막대(.prog)는 뺍니다. 배경이라 처음부터
  *   있어야 합니다 — 배경이 뒤늦게 뜨면 화면이 덜컹거립니다.
  */
-.scr > *:not(.prog):not(.sceneart):not(.nr) {
+.scr > *:not(.prog):not(.sceneart):not(.nr),
+.scr .say {
   animation: beatIn .34s cubic-bezier(.2, .7, .3, 1) both;
+}
+
+/* 알갱이를 품은 상자는 제 몫으로 안 뜹니다 — 안엣것이 뜹니다 */
+.scr > *:has(> .say), .scr > *:has(.nr .l) {
+  animation: none;
 }
 
 @keyframes beatIn {

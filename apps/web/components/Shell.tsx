@@ -121,11 +121,40 @@ export default function Shell({
     const root = scrRef.current;
     if (!root) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const els = root.querySelectorAll<HTMLElement>(
-      ":scope > *:not(.prog):not(.sceneart):not(.nr), .nr > .l");
+    /*
+     * 대화 알갱이 — 나레이션 한 줄, 대사 한 마디. 어디에 있든 줍니다.
+     *
+     * ★ 처음에는 `:scope >` 로 **바로 밑**만 봤습니다. 그런데 재 보니
+     *   56개 중 12개가 한 겹 안에 들어 있었습니다(상자로 묶은 자리).
+     *   그것들은 통째로 떠서, 그 화면만 대화가 아니었습니다.
+     */
+    const atoms = Array.from(
+      root.querySelectorAll<HTMLElement>(".nr > .l, .say"));
+
+    /*
+     * 나머지는 바로 밑 한 겹만 봅니다 — 버튼 여섯 칸을 하나씩 띄우면
+     * 고르는 화면이 느려집니다. 무리는 무리째 뜨는 게 맞습니다.
+     * 다만 알갱이를 **품고 있는 상자**는 뺍니다. 안엣것이 따로 뜨는데
+     * 상자까지 늦으면 두 번 늦습니다.
+     */
+    const tops = Array.from(root.children).filter((el) =>
+      el instanceof HTMLElement
+      && !el.classList.contains("prog")
+      && !el.classList.contains("sceneart")
+      && !el.classList.contains("nr")
+      && !atoms.some((a) => el.contains(a))) as HTMLElement[];
+
+    const seq = [...tops, ...atoms].sort((a, b) =>
+      a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1);
+
     let t = 0;
-    els.forEach((el) => {
-      el.style.animationDelay = t.toFixed(2) + "s";
+    seq.forEach((el) => {
+      // 이미 떠 있는 것은 건드리지 않습니다 — 훅처럼 한 마디씩 늘어나는
+      // 화면에서 앞말이 다시 떠오르면 읽던 자리를 잃습니다.
+      if (el.dataset.beat === undefined) {
+        el.dataset.beat = "";
+        el.style.animationDelay = t.toFixed(2) + "s";
+      }
       t = Math.min(t + 0.16, 1.5);
     });
   });
