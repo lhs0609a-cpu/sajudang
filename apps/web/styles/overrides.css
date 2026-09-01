@@ -1614,3 +1614,101 @@ body.has-rail-closed .stage { margin-left: 26px; }
 }
 .admscr a b { color: var(--gold); font-weight: 400; }
 .admscr a:hover { border-color: var(--gold); }
+
+/* ══════════════════════════════════════════════════════════
+ * 대사 옆의 얼굴
+ *
+ * ★ 도령이 내내 말을 하는데 화면에는 배경과 글자뿐이었습니다.
+ *   초상은 진열대에서만 그렸습니다. 이 집이 파는 것은 해석이 아니라
+ *   **그 사람**인데, 그 사람이 안 보이면 손님에게는 그냥 글입니다.
+ *
+ * ★ 얼굴이 글을 이기면 안 됩니다. 왼쪽에 작게 두고, 말은 그대로
+ *   읽히게 둡니다. 좁은 화면에서는 더 작게 내립니다.
+ * ══════════════════════════════════════════════════════════ */
+
+.say {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+}
+.sayface {
+  flex: 0 0 auto;
+  line-height: 0;
+  /* 세로 획(.say 의 왼쪽 선)과 겹치지 않게 살짝 띄웁니다 */
+  margin-top: 2px;
+}
+.saybody { flex: 1 1 auto; min-width: 0; }
+
+@media (max-width: 420px) {
+  .sayface { transform: scale(.82); transform-origin: top left; }
+  .say { gap: 7px; }
+}
+
+/* 인쇄에는 얼굴을 안 싣습니다 — 잉크만 먹고 글이 밀립니다 */
+@media print { .sayface { display: none; } }
+
+/* ══════════════════════════════════════════════════════════
+ * 첫 대면 (a4) — 도령의 얼굴이 처음 크게 나오는 자리
+ * ══════════════════════════════════════════════════════════ */
+
+.meet {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 4px 0 18px;
+  text-align: center;
+}
+
+.meetart {
+  position: relative;
+  line-height: 0;
+}
+/* 아래를 바탕색으로 녹입니다 — 초상이 네모로 잘려 보이면 스티커가 됩니다 */
+.meetart::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 26%;
+  background: linear-gradient(to bottom, transparent 0%, var(--bg) 100%);
+  pointer-events: none;
+}
+/* 그 사람의 색으로 뒤를 옅게 밝힙니다 */
+.meetart::before {
+  content: "";
+  position: absolute;
+  inset: 6% 4% 12%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--c) 0%, transparent 100%);
+  opacity: .17;
+  filter: blur(16px);
+  pointer-events: none;
+}
+
+.meetname {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin-top: -6px;
+}
+.meetname b {
+  font-family: var(--serif);
+  font-size: var(--fs-7);
+  font-weight: 400;
+  color: var(--c);
+}
+.meetname i {
+  font-family: var(--serif);
+  font-style: normal;
+  font-size: var(--fs-3);
+  color: var(--paper3);
+  letter-spacing: .1em;
+}
+.meetnote {
+  margin-top: 3px;
+  font-family: var(--mono);
+  font-size: var(--fs-1);
+  letter-spacing: .1em;
+  color: var(--paper3);
+}
+
+@media print { .meet { display: none; } }

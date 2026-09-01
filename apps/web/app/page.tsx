@@ -31,6 +31,7 @@ import { Narration, Progress, Say } from "@/components/Narration";
 import { CalcPanel, ElementBar, Pillars, Summary } from "@/components/Chart";
 import HookSegments from "@/components/HookSegments";
 import Doubts from "@/components/Doubts";
+import Meet from "@/components/Meet";
 import { api, ApiError } from "@/lib/api";
 import { LENS_BY_ID } from "@/lib/lenses";
 import { CONCERNS, seasonOf, useSession, type Concern } from "@/lib/store";
@@ -470,6 +471,18 @@ function EntryInner() {
         <Progress step={progressAt("a4")!} total={PROGRESS_TOTAL} />
         <Scene id="room" />
         <Narration lines={["도령이 고개를 들었다."]} />
+        {/*
+          ★ 첫 대면. 여기가 손님이 그 사람의 얼굴을 처음 보는 자리입니다.
+
+            전에는 일곱 화면을 지나도록 얼굴이 한 번도 안 나왔고, 초상은
+            진열대(b2)에서야 나왔습니다 — 결제 갈림길 **뒤**입니다.
+            얼굴을 보고 값을 치를지 정하는 것이지, 치를 마음을 먹은 뒤에
+            얼굴을 보는 게 아닙니다.
+
+            하필 여기인 까닭은 바로 윗줄에 있습니다 — 「도령이 고개를
+            들었다」. 고개를 드는데 얼굴이 없으면 그 문장이 거짓말입니다.
+        */}
+        <Meet />
         <Say who="도령">때는 아시오?</Say>
         <Narration lines={["", "대부분은 모른다.", "모른다고 해도 그는 개의치 않았다."]} />
 

@@ -224,8 +224,12 @@ def main() -> int:
     print("  초상을 그리는 코드   %s"
           % (", ".join(drawers) if draws else "**없음**"))
     # 어느 화면이 실제로 그 컴포넌트를 붙였는가
+    # ★ `<CharArt` 만 세면 안 됩니다. 대사(<Say>)에도 얼굴이 붙고
+    #   첫 대면(<Meet>)도 초상입니다. 세는 자리가 좁으면 「안 붙였다」고
+    #   찍혀서, 실제로는 붙어 있는데 또 붙이러 갑니다.
     users = [str(f.relative_to(WEB)) for f in (WEB / "app").rglob("*.tsx")
-             if "<CharArt" in f.read_text(encoding="utf-8")]
+             if re.search(r"<CharArt|<Meet|<Say",
+                          f.read_text(encoding="utf-8"))]
     print("  초상이 나오는 화면   %s"
           % (", ".join(users) if users else "**없음 — 컴포넌트만 있고 안 붙였습니다**"))
 

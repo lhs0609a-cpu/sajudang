@@ -25,10 +25,15 @@
 import { useEffect, useState } from "react";
 import type { LensInfo } from "@/lib/lenses";
 
-type Size = "chip" | "card" | "full";
+type Size = "chip" | "talk" | "card" | "full";
 
 const BOX: Record<Size, { w: number; h: number }> = {
   chip: { w: 48, h: 64 },     // 진열대 목록
+  /*
+   * 대사 옆. 얼굴이 글을 이기면 안 되고, 안 보이면 놓은 뜻이 없습니다.
+   * 한 줄 높이(약 3.5줄)에 맞춥니다.
+   */
+  talk: { w: 66, h: 88 },
   card: { w: 132, h: 176 },   // 릴레이 카드 · 인장첩
   full: { w: 288, h: 384 },   // 그 사람의 자리 (b3)
 };
