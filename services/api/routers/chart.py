@@ -42,8 +42,36 @@ def get_chart(chart_id: str) -> ChartResponse:
     브라우저를 새로고침하면 화면 상태는 날아가지만 chart_id 는 남습니다.
     이게 없으면 새로고침 한 번에 "아직 세우지 않았소" 로 돌아갑니다.
     """
-    return ChartResponse(chart_id=chart_id,
-                         features=load_features(chart_id), cached=True)
+    f = load_features(chart_id)
+    return ChartResponse(chart_id=chart_id, features=f, cached=True,
+                         rarity=_rarity(f))
+
+
+def _rarity(feat: dict) -> dict | None:
+    """
+    이 배치가 인구에서 몇 명인가.
+
+    ★ 표가 없거나 낡았으면 **아무것도 안 냅니다.** 지어낸 숫자를
+      진짜처럼 내면 이 집이 하지 않기로 한 일을 하는 것입니다.
+    """
+    from engine import rarity as rr
+    from engine.features import Features
+    try:
+        if rr.is_stale():
+            return None
+        f = Features(**feat)
+        look = rr.look(f)
+        return {
+            "words": look.get("words"),          # 1만 명에 1,050명
+            "band": look.get("band"),            # 흔함 / 드묾 …
+            "per10k": look.get("per10k"),
+            "ilju": (look.get("ilju") or {}).get("words"),
+            "ilju_gz": (look.get("ilju") or {}).get("gz"),
+            "ilju_per10k": (look.get("ilju") or {}).get("per10k"),
+        }
+    except Exception:                            # noqa: BLE001
+        # 희소도는 곁가지입니다. 못 세면 명식은 그대로 나갑니다.
+        return None
 
 
 @router.post("/chart", response_model=ChartResponse)
@@ -51,7 +79,8 @@ def post_chart(req: ChartRequest) -> ChartResponse:
     key = chart_key(req)
     cached = store.get_json(store.k_chart(key))
     if cached is not None:
-        return ChartResponse(chart_id=key, features=cached, cached=True)
+        return ChartResponse(chart_id=key, features=cached, cached=True,
+                             rarity=_rarity(cached))
 
     try:
         chart = build_chart(
@@ -69,4 +98,5 @@ def post_chart(req: ChartRequest) -> ChartResponse:
     # 저장소가 줄어들 힘이 하나도 없습니다. 만료돼도 다음 요청에 다시
     # 만들어지므로 사용자에게는 아무 차이가 없습니다.
     store.set_json(store.k_chart(key), features, ttl=CHART_TTL)
-    return ChartResponse(chart_id=key, features=features, cached=False)
+    return ChartResponse(chart_id=key, features=features, cached=False,
+                         rarity=_rarity(features))

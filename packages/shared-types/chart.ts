@@ -150,10 +150,29 @@ export interface Features {
   correction: Correction;
 }
 
+/**
+ * 희소도 — 이 배치가 인구에서 몇 명인가.
+ *
+ * ★ **센 값**입니다. 표는 4만 명을 세어 만듭니다(tools/make_rarity.py).
+ *   지어낸 숫자가 아니라 그래서 낼 수 있습니다.
+ *
+ * ★ 표가 없거나 낡았으면 서버가 아무것도 안 보냅니다(null). 화면은
+ *   그 자리를 조용히 접습니다 — 없는 숫자를 지어내지 않습니다.
+ */
+export interface Rarity {
+  words: string;          // "1만 명에 165명"
+  band: string;           // 흔함 · 드묾 …
+  per10k: number;
+  ilju: string | null;    // 일주만 따로
+  ilju_gz: string | null; // 庚戌
+  ilju_per10k: number | null;
+}
+
 export interface ChartResponse {
   chart_id: string;
   features: Features;
   cached: boolean;
+  rarity?: Rarity | null;
 }
 
 /* ── 훅 ─────────────────────────────────────────────────── */

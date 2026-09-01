@@ -36,6 +36,16 @@ class ChartResponse(BaseModel):
     chart_id: str
     features: dict
     cached: bool
+    # ★ 희소도 — 이 배치가 인구에서 몇 명인가.
+    #
+    #   엔진에는 있었는데 **유료 리포트에서만** 쓰고 있었습니다. 무료
+    #   구간에서 손님이 처음 받는 것은 자기 여덟 글자뿐이고, 그건
+    #   숫자가 아니라 글자라 「그래서 뭐」 로 끝납니다.
+    #
+    #   「1만 명에 165명」 은 지어낸 말이 아니라 **센 값**입니다
+    #   (tools/make_rarity.py 가 4만 명을 세어 표를 만듭니다).
+    #   값 없이 줄 수 있는 것 중 가장 센 한 줄입니다.
+    rarity: Optional[dict] = None
 
 
 class HookRequest(BaseModel):

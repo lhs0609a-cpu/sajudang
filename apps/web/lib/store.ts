@@ -36,6 +36,8 @@ export interface SessionState {
 
   /* 서버 결과 */
   chartId: string | null;
+  /** 희소도 — 센 값. 없으면 화면이 그 자리를 접는다 */
+  rarity: import("@shared/chart").Rarity | null;
   features: Features | null;
 
   /* 진행 */
@@ -90,6 +92,7 @@ const initial = {
   axis4: null as string | null,
   concern: "love" as Concern,
   chartId: null,
+  rarity: null,
   features: null,
   cur: DEFAULT_LENS,
   read: [] as string[],

@@ -1803,3 +1803,43 @@ body.has-rail-closed .stage { margin-left: 26px; }
   color: var(--c);
   letter-spacing: .08em;
 }
+
+/* ══════════════════════════════════════════════════════════
+ * 희소도 — 값 없이 주는 가장 센 한 줄
+ *
+ * ★ 여기까지 손님이 받은 것은 자기 여덟 글자뿐입니다. 글자는 숫자가
+ *   아니라 「그래서 뭐」 로 끝납니다. 「1만 명에 165명」 은 자기 자리를
+ *   단번에 알려 주고 그 다음이 궁금해집니다.
+ * ══════════════════════════════════════════════════════════ */
+
+.rare {
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--c);
+  background: var(--bg2);
+  padding: 13px 15px 12px;
+  margin: 16px 0;
+}
+.rarebig {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  margin: 3px 0 6px;
+}
+.rarebig b {
+  font-family: var(--mono);
+  font-size: var(--fs-7);
+  font-weight: 400;
+  color: var(--c);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .02em;
+}
+.rarebig em {
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: var(--fs-1);
+  letter-spacing: .12em;
+  color: var(--paper3);
+  border: 1px solid var(--line);
+  padding: 2px 7px;
+}
+.rarenote { color: var(--paper3); margin-top: 7px; }

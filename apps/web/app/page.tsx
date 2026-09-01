@@ -222,7 +222,8 @@ function EntryInner() {
         hour_known: s.hourKnown,
         sex: s.sex, birth_city: s.city,
       });
-      s.set({ chartId: res.chart_id, features: res.features });
+      s.set({ chartId: res.chart_id, features: res.features,
+              rarity: res.rarity ?? null });
     } catch (e) {
       // 서버가 거절한 이유를 이 집의 말로 옮깁니다. 영어 원문이 뜨면
       // 그 순간 몰입이 깨지고, 무엇을 고쳐야 하는지도 모릅니다.
@@ -765,6 +766,42 @@ function EntryInner() {
               전부요 — 더도 덜도 없소.
             </p>
             <Pillars f={s.features} />
+
+            {/*
+              ★ 값 없이 줄 수 있는 것 중 가장 센 한 줄.
+
+                여기까지 손님이 받은 것은 **자기 여덟 글자**뿐입니다.
+                그건 숫자가 아니라 글자라 「그래서 뭐」 로 끝납니다.
+                희소도는 다릅니다 — 「1만 명에 165명」 은 자기 자리를
+                단번에 알려 주고, 그 다음이 궁금해집니다.
+
+                ★ 지어낸 숫자가 아닙니다. 표는 4만 명을 세어 만듭니다
+                  (tools/make_rarity.py). 표가 없거나 낡았으면 서버가
+                  아무것도 안 보내고, 여기는 조용히 접힙니다.
+
+                ★ 「드물다」 고만 말하지 않습니다. 흔하면 흔하다고
+                  합니다 — 골라 담으면 누구나 드물어집니다.
+            */}
+            {s.rarity && (
+              <div className="rare">
+                <div className="lab">이 배치를 가진 사람</div>
+                <p className="rarebig">
+                  <b>{s.rarity.words}</b>
+                  <em>{s.rarity.band}</em>
+                </p>
+                {s.rarity.ilju && (
+                  <p className="sm">
+                    그중 <b>{s.rarity.ilju_gz}</b> 일주(그대를 가리키는
+                    두 글자)는 {s.rarity.ilju}요.
+                  </p>
+                )}
+                <p className="sm rarenote">
+                  사람 4만을 세어 만든 표요. 맞힌다는 말이 아니라
+                  <b> 몇 명인지</b> 센 것이오.
+                </p>
+              </div>
+            )}
+
             <Summary f={s.features} />
             <ElementBar f={s.features} />
             <CalcPanel f={s.features} />
