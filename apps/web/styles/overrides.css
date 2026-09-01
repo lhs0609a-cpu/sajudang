@@ -1796,3 +1796,10 @@ body.has-rail-closed .stage { margin-left: 26px; }
 }
 
 @media (max-width: 420px) { .scenefig { height: 70%; } }
+
+/* 훅 마디 머리 — 몇 번째인지 · 무엇에 대한 말인지 */
+.stepno em {
+  font-style: normal;
+  color: var(--c);
+  letter-spacing: .08em;
+}

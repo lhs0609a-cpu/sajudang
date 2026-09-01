@@ -11,6 +11,7 @@ import { api } from "@/lib/api";
 import { Say } from "@/components/Narration";
 import CharArt from "@/components/CharArt";
 import { LENS_BY_ID } from "@/lib/lenses";
+import { CONCERNS } from "@/lib/store";
 import { speakRemote } from "@/lib/sound";
 import { track } from "@/lib/track";
 import type { HookSegment } from "@shared/chart";
@@ -135,6 +136,7 @@ export default function HookSegments({
   };
 
   const lens = LENS_BY_ID[lensId];
+  const concernWord = CONCERNS.find((c) => c.id === concern)?.label ?? "";
 
   return (
     <>
@@ -160,7 +162,17 @@ export default function HookSegments({
                      mood={i === 0 ? "cut"
                            : i >= segments.length - 1 ? "soft" : "base"} />
           </span>}
-          <div className="stepno">{i + 1} / {segments.length}</div>
+          {/*
+            ★ 몇 번째인지 옆에 **무엇에 대한 말인지**를 답니다.
+
+              머리말에 한 번 적어 두어도, 아래로 내려가면 그 말은 화면
+              밖으로 나갑니다. 그때부터 손님은 다시 「이게 뭐에 대한
+              거지」 가 됩니다. 마디마다 짧게 남깁니다.
+          */}
+          <div className="stepno">
+            {i + 1} / {segments.length}
+            {concernWord && <em> · {concernWord}</em>}
+          </div>
           {seg.label && <div className="lab">{seg.label}</div>}
           {/*
             ★ 0단만 근거가 본문 **아래**로 갑니다 (seg.source_below).
