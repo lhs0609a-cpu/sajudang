@@ -1,732 +1,744 @@
 {
- "ANIMBASE": "This is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
- "TINT": "/* 색을 바꿔야 하는 장면은 무채색으로 뽑고 앱에서 입힌다 */\n.scene-video{filter:grayscale(1) brightness(1.15)}\n.scene-tint {position:absolute;inset:0;background:var(--c);\n             mix-blend-mode:color;opacity:.62;pointer-events:none}\n/* 클립 1개로 일간 10색 · 계절 4종을 전부 커버 */",
- "PIPE": "① 제미나이로 시작 이미지 1장 생성\n② 힉스필드에 업로드 → 아래 프롬프트 + 프리셋\n③ webm(VP9) + mp4(H.264) 두 벌 + poster.jpg\n④ /scene/{id}/ 에 배치",
- "CAM": {
-  "Dolly In": {
-   "n": "Dolly In",
-   "c": "#E5B87A"
+  "ANIMBASE": "This is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+  "TINT": "/* 색을 바꿔야 하는 장면은 무채색으로 뽑고 앱에서 입힌다 */\n.scene-video{filter:grayscale(1) brightness(1.15)}\n.scene-tint {position:absolute;inset:0;background:var(--c);\n             mix-blend-mode:color;opacity:.62;pointer-events:none}\n/* 클립 1개로 일간 10색 · 계절 4종을 전부 커버 */",
+  "PIPE": "① 제미나이로 시작 이미지 1장 생성\n② 힉스필드에 업로드 → 아래 프롬프트 + 프리셋\n③ webm(VP9) + mp4(H.264) 두 벌 + poster.jpg\n④ /scene/{id}/ 에 배치",
+  "CAM": {
+    "Dolly In": {
+      "n": "Dolly In",
+      "c": "#E5B87A"
+    },
+    "Dolly Right": {
+      "n": "Dolly Right",
+      "c": "#E5B87A"
+    },
+    "Static": {
+      "n": "Static",
+      "c": "#7FC4BC"
+    }
   },
-  "Dolly Right": {
-   "n": "Dolly Right",
-   "c": "#E5B87A"
+  "scenes": {
+    "gate": {
+      "title": "대문 · 사계",
+      "seasonal": true,
+      "seasons": {
+        "spring": "Korean romance-fantasy webtoon style, night scene.\nA traditional Korean hanok gate standing half-open at the end of a quiet\nlane just after rain. Warm golden light spills out through the open gate.\nCherry blossom branches heavy with pale pink petals tumble over the tiled wall on both sides. Three ornate Korean\npaper lanterns (청사초롱) hang above at different heights, glowing amber\nand blue. A small black cat sits on the wall watching, eyes catching the\nlantern light. The wet stone ground mirrors the lantern light and the moon\nin soft broken reflections. Petals and a pale butterfly drift through the air.\nDeep plum-violet night sky, full moon and faint stars.\nBeautiful, inviting, slightly magical — not eerie.\nNo people, no text, no signboard. Aspect ratio 9:16.",
+        "summer": "Korean romance-fantasy webtoon style, night scene.\nA traditional Korean hanok gate standing half-open at the end of a quiet\nlane just after rain. Warm golden light spills out through the open gate.\nFlowering trumpet-creeper vines heavy with coral-pink blossoms tumble over the tiled wall on both sides. Three ornate Korean\npaper lanterns (청사초롱) hang above at different heights, glowing amber\nand blue. A small black cat sits on the wall watching, eyes catching the\nlantern light. The wet stone ground mirrors the lantern light and the moon\nin soft broken reflections. Fireflies drift softly through the humid air.\nDeep plum-violet night sky, full moon and faint stars.\nBeautiful, inviting, slightly magical — not eerie.\nNo people, no text, no signboard. Aspect ratio 9:16.",
+        "autumn": "Korean romance-fantasy webtoon style, night scene.\nA traditional Korean hanok gate standing half-open at the end of a quiet\nlane just after rain. Warm golden light spills out through the open gate.\nChrysanthemum blooms in gold and amber spilling over the wall tumble over the tiled wall on both sides. Three ornate Korean\npaper lanterns (청사초롱) hang above at different heights, glowing amber\nand blue. A small black cat sits on the wall watching, eyes catching the\nlantern light. The wet stone ground mirrors the lantern light and the moon\nin soft broken reflections. A few dry leaves turn slowly in the air.\nDeep plum-violet night sky, full moon and faint stars.\nBeautiful, inviting, slightly magical — not eerie.\nNo people, no text, no signboard. Aspect ratio 9:16.",
+        "winter": "Korean romance-fantasy webtoon style, night scene.\nA traditional Korean hanok gate standing half-open at the end of a quiet\nlane just after rain. Warm golden light spills out through the open gate.\nBare plum branches dusted with snow and studded with small white blossoms tumble over the tiled wall on both sides. Three ornate Korean\npaper lanterns (청사초롱) hang above at different heights, glowing amber\nand blue. A small black cat sits on the wall watching, eyes catching the\nlantern light. The wet stone ground mirrors the lantern light and the moon\nin soft broken reflections. Fine snow drifts down through the lantern light.\nDeep plum-violet night sky, full moon and faint stars.\nBeautiful, inviting, slightly magical — not eerie.\nNo people, no text, no signboard. Aspect ratio 9:16."
+      },
+      "spec": [
+        "9:16",
+        "진입",
+        "기본"
+      ],
+      "hint": "<b>기본 진입 장면.</b> 계절이 바뀌면 꽃과 하늘색이 바뀝니다.<br>\n 같은 사람이 봄·여름·가을·겨울에 오면 <b>매번 다른 화면</b>을 봅니다.<br>\n 담장 위 <b>고양이</b>는 사계절 고정 — 이 집의 마스코트입니다.",
+      "image": "Korean romance-fantasy webtoon style, night scene.\nA traditional Korean hanok gate standing half-open at the end of a quiet\nlane just after rain. Warm golden light spills out through the open gate.\nFlowering trumpet-creeper vines heavy with coral-pink blossoms tumble over the tiled wall on both sides. Three ornate Korean\npaper lanterns (청사초롱) hang above at different heights, glowing amber\nand blue. A small black cat sits on the wall watching, eyes catching the\nlantern light. The wet stone ground mirrors the lantern light and the moon\nin soft broken reflections. Fireflies drift softly through the humid air.\nDeep plum-violet night sky, full moon and faint stars.\nBeautiful, inviting, slightly magical — not eerie.\nNo people, no text, no signboard. Aspect ratio 9:16.",
+      "motion": "Slow dolly in down the rain-wet lane toward the half-open hanok gate.\nThe three paper lanterns flicker gently. Flower petals drift across the\nframe. The reflection on the wet stone ground ripples faintly. The black\ncat on the wall flicks its tail once and turns its head toward the\nviewer. The camera stops just before the gate. Warm golden light spills\nfrom the opening.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Dolly In · 9:16 · 5s)",
+      "preset": "Dolly In",
+      "ratio": "9:16",
+      "duration": "5s",
+      "loop": false,
+      "tint": true,
+      "still": false,
+      "note": "<b>계절 4종이 필요합니다.</b> 꽃과 하늘색만 다른 시작 이미지 4장을 만들고<br>\n  같은 프롬프트로 4클립을 뽑으세요. 프롬프트는 동일합니다.<br>\n  첫 방문에만 재생하고 두 번째부터는 <b>poster 정지 이미지</b>로 두세요."
+    },
+    "tea": {
+      "title": "다과상 · 차 한 잔",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "16:9",
+        "재방문 보상"
+      ],
+      "hint": "<b>재방문 보상 화면입니다.</b> 두 번째 방문부터 도령이 차를 내어줍니다.<br>\n \"다음에 오면 차를 내어드리겠소\" — 이 약속이 재방문 이유가 됩니다.",
+      "image": "Korean romance-fantasy webtoon style. A low lacquered tea table set\nfor one guest: a celadon teacup with pale tea and thin steam rising, a\nsmall plate of traditional Korean confections (약과, 한과) arranged\nneatly, and a single flower resting in a shallow dish. A small black\ncat sits at the edge of the table, watching. Warm lantern light from\nabove, a faint rose-coloured luminous ring floating behind. Motes of\ngold drift through the air. Deep plum-violet shadows. Inviting,\ngentle, no people, no text. Aspect ratio 16:9.",
+      "motion": "Static camera. Thin steam curls upward from the teacup. The black cat\nat the table's edge blinks slowly and its tail sways. The rose-coloured\nring behind drifts. Golden motes rise. Warm and still. Seamlessly\nloopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
+      "preset": "Static",
+      "ratio": "16:9",
+      "duration": "3s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "note": null
+    },
+    "sealbook": {
+      "title": "인장첩",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "3:4",
+        "수집"
+      ],
+      "hint": "<b>수집 장치.</b> 사람을 만날 때마다 인장을 하나씩 받습니다.<br>\n 스무 개를 다 모으면 <b>한정 카드</b>를 줍니다.<br>\n 여성 이용자층에서 수집 요소는 재결제 동인이 큽니다.",
+      "image": "Korean romance-fantasy webtoon style. An open collector's booklet\n(인장첩) of pale hanji paper lying flat, ruled into a grid of twenty\nsmall squares. Four squares bear glowing coloured seal-stamps in\ndifferent hues; the rest are empty and faintly outlined, waiting.\nWarm lantern light from above, gold motes drifting. Deep plum-violet\nbackground. Precious, collectible, no people, no legible text.\nAspect ratio 3:4.",
+      "motion": "Static camera, top-down on the open booklet. A red seal stamp presses\ndown into one empty square with a small bounce and settles. A faint\nring of light spreads from it. The other squares stay still.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 2s)",
+      "preset": "Static",
+      "ratio": "3:4",
+      "duration": "2s",
+      "loop": false,
+      "tint": false,
+      "still": false,
+      "note": "인장을 <b>새로 받았을 때만</b> 재생하세요. 평소엔 정지 이미지."
+    },
+    "door": {
+      "title": "열리는 문",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "9:16",
+        "전환"
+      ],
+      "hint": null,
+      "image": "Korean romance-fantasy webtoon style. A traditional Korean wooden\nlattice door (살문) swinging inward, warm amber light spilling out\nthrough the widening gap into a dark exterior. Paper panes glowing\nfrom within. Viewed straight on, symmetrical. No people, no text.\nAspect ratio 9:16.",
+      "motion": "Static camera. The left panel of the wooden lattice door swings\ninward. Warm amber light widens through the growing gap and spills\nacross the threshold. Dust drifts through the light.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 2s)",
+      "preset": "Static",
+      "ratio": "9:16",
+      "duration": "2s",
+      "loop": false,
+      "tint": false,
+      "still": false,
+      "note": null
+    },
+    "desk": {
+      "title": "붓 · 벼루 · 빈 종이",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "16:9",
+        "소품"
+      ],
+      "hint": null,
+      "image": "Korean romance-fantasy webtoon style. A low writing desk in a dim\nmystical study at night. A sheet of hanji paper lies flat, an inkstone\nholds ink so dark it mirrors starlight, and a calligraphy brush hovers\njust above the paper, floating unsupported with a faint golden aura at\nits tip. Two or three sheets of paper drift weightlessly in the air.\nA faint luminous constellation ring glows behind the desk. Golden\nmotes of light rise slowly through a soft shaft of light from above.\nDeep plum-violet shadows. No hands, no people, no text.\nAspect ratio 16:9.",
+      "motion": "Static camera. The floating brush bobs gently in the air, ink glinting\nat its tip. Two sheets of paper drift slowly. The constellation ring\nbehind rotates. Golden motes rise through the light. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
+      "preset": "Static",
+      "ratio": "16:9",
+      "duration": "3s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "note": null
+    },
+    "room": {
+      "title": "실내 · 좌식 · 병풍",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "16:9",
+        "배경"
+      ],
+      "hint": null,
+      "image": "Korean romance-fantasy webtoon style. The interior of a mystical\nfortune-teller's room at night. A folding screen along the back wall\npainted with faint luminous constellations. Beaded curtains hang at\nboth edges of frame, catching amber, rose and violet light. Three\nornate paper lanterns hang at different heights. Two floor cushions\nface each other; between them a small incense burner sends thin\nthreads of smoke curling upward. A pale glowing ring of light floats\nin the air above. Golden motes drift through a soft shaft of light.\nDeep plum-violet shadows. Empty, no people, no text.\nAspect ratio 16:9.",
+      "motion": "Static camera. The three hanging lanterns flicker at slightly\ndifferent rhythms. The beaded curtains at both edges sway faintly. Thin\nthreads of incense smoke curl upward from the burner. The constellation\nring drifts. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 4s · seamless loop)",
+      "preset": "Static",
+      "ratio": "16:9",
+      "duration": "4s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "note": null
+    },
+    "shelf": {
+      "title": "진열대 · 걸린 목패",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "16:9",
+        "배경"
+      ],
+      "hint": null,
+      "image": "Korean romance-fantasy webtoon style. A row of six narrow wooden\nplaques hanging from a beam by thin cords at different heights, each\ncarved with a single Chinese character that glows warm amber from\nwithin, as if lit from inside the wood. Each plaque casts a soft pool\nof light beneath it. Golden motes of light drift slowly upward through\nthe air. The background falls into deep plum-violet darkness.\nMysterious, inviting, like an offering hall. No people. Aspect ratio 16:9.",
+      "motion": "Static camera. The six hanging wooden plaques sway very slightly on\ntheir cords at different rhythms, the carved characters glowing warm\nfrom within. The pools of light beneath them shift. Golden motes drift\nupward. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
+      "preset": "Static",
+      "ratio": "16:9",
+      "duration": "3s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "note": null
+    },
+    "hall": {
+      "title": "안쪽 방 · 스무 자리",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "16:9",
+        "배경"
+      ],
+      "hint": null,
+      "image": "Korean romance-fantasy webtoon style. A long dim hall receding into\ndarkness, with twenty floor cushions arranged in rows. Above each\ncushion floats a small glowing flame-light in a different colour —\namber, rose, violet, teal — like waiting spirits. Most cushions are\nempty. Three ornate paper lanterns hang overhead. Golden motes drift\nthrough the air. Deep plum-violet shadows, mist along the floor.\nQuiet, expectant, mysterious. No people, no text. Aspect ratio 16:9.",
+      "motion": "Very slow dolly in down the hall between the rows of cushions. The\ncoloured flame-lights above each cushion flicker at different rhythms.\nMotes drift. The lanterns overhead sway gently. The far end stays in\ndarkness.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Dolly In · 16:9 · 4s)",
+      "preset": "Dolly In",
+      "ratio": "16:9",
+      "duration": "4s",
+      "loop": false,
+      "tint": false,
+      "still": false,
+      "note": null
+    },
+    "scroll": {
+      "title": "펼쳐지는 두루마리",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "16:9",
+        "전환"
+      ],
+      "hint": null,
+      "image": "Korean romance-fantasy webtoon style. A long paper scroll unrolling\nbetween two dark wooden rods. Above the paper, glowing golden Chinese\ncharacters float free of the page, drifting slowly upward as if\nlifting off the surface. The hanji paper catches warm light. Motes of\ngold drift through a soft shaft of light from above. Deep plum-violet\nbackground. Magical, weightless. No hands, no people. Aspect ratio 16:9.",
+      "motion": "Static camera. The scroll unrolls smoothly to the right between the\ntwo rods. As the paper opens, glowing golden characters lift free of the\nsurface and drift slowly upward. Motes rise through the light.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s)",
+      "preset": "Static",
+      "ratio": "16:9",
+      "duration": "3s",
+      "loop": false,
+      "tint": false,
+      "still": false,
+      "note": null
+    },
+    "fold": {
+      "title": "반쯤 접힌 두루마리",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "16:9",
+        "페이월"
+      ],
+      "hint": null,
+      "image": "Korean romance-fantasy webtoon style. A paper scroll folded halfway\nclosed, the upper half lit and readable-looking, the lower half creased\nover and falling into deep shadow. Warm amber light on the exposed\nportion only. No legible text, no hands. Aspect ratio 16:9.",
+      "motion": "Static camera. The scroll folds halfway closed in one smooth motion,\nthe lower half creasing over and falling into shadow. The exposed upper\nhalf stays lit.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 2s)",
+      "preset": "Static",
+      "ratio": "16:9",
+      "duration": "2s",
+      "loop": false,
+      "tint": false,
+      "still": false,
+      "note": null
+    },
+    "untie": {
+      "title": "붉은 끈 · 개봉",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "1:1",
+        "결제완료"
+      ],
+      "hint": null,
+      "image": "Korean romance-fantasy webtoon style. A lacquered scroll case bound\nwith a red silk cord, the cord untying itself as golden light bursts\nout from the opening seam. Small golden blossoms of light scatter\noutward from the opening. A luminous ring rotates slowly behind.\nCentered, high contrast, deep plum-violet background. Joyful,\nrewarding, ceremonial. No hands, no text. Aspect ratio 1:1.",
+      "motion": "Static camera. The red silk cord unties itself and slips away from\nthe scroll case. Golden light bursts out from the opening seam and small\ngolden blossoms of light scatter outward, then settle. The ring behind\npulses once.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 1:1 · 2s)",
+      "preset": "Static",
+      "ratio": "1:1",
+      "duration": "2s",
+      "loop": false,
+      "tint": false,
+      "still": false,
+      "note": null
+    },
+    "ink": {
+      "title": "먹이 번지는 종이",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "16:9",
+        "소품"
+      ],
+      "hint": null,
+      "image": "Korean romance-fantasy webtoon style. Close on a sheet of pale hanji\npaper with faint vertical column lines. A single drop of black ink has\nlanded at the center and is blooming outward in soft irregular rings.\nWarm amber light from one side, deep plum shadow. No hands, no text.\nAspect ratio 16:9.",
+      "motion": "Static camera, macro. A single drop of black ink falls onto the hanji\npaper and blooms outward in two soft irregular rings, then settles.\nOne motion only, then stillness.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 2s)",
+      "preset": "Static",
+      "ratio": "16:9",
+      "duration": "2s",
+      "loop": false,
+      "tint": false,
+      "still": false,
+      "note": "투표 반응(먹 번짐)과 <b>같은 클립</b>을 씁니다. 한 번 만들면 두 곳에서 쓰입니다."
+    },
+    "fork": {
+      "title": "갈림길",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "16:9",
+        "고민 선택"
+      ],
+      "hint": null,
+      "image": "Korean romance-fantasy webtoon style. A path splitting into three\ndirections across a misty moonlit plain. Above each branch hovers a\nsmall floating lantern-flame in a different colour — violet, amber,\nrose — marking the way. Small wooden signposts stand blank beneath\nthem. Fireflies drift low over the grass. A pale moon above. Deep\nplum-violet tones, dreamlike and inviting. No people, no legible text.\nAspect ratio 16:9.",
+      "motion": "Static camera. The three floating lantern-flames above the signposts\nbob gently at different rhythms — the center one brightest. Fireflies\ndrift low across the misty plain. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
+      "preset": "Static",
+      "ratio": "16:9",
+      "duration": "3s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "note": null
+    },
+    "altar": {
+      "title": "명식 받침 · 네 자리",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "16:9",
+        "명식"
+      ],
+      "hint": null,
+      "image": "Korean romance-fantasy webtoon style. A ceremonial altar in a dark\nmystical chamber. Four blank wooden plaques hover in the air above a\nlow carved altar table, suspended and slowly floating, each faintly\nglowing. Two concentric luminous rings — one gold, one violet —\nrotate slowly behind them, marked with twelve radial ticks like a\ncelestial dial. A shaft of warm light falls from above. Golden motes\nof light rise through the beam. The altar's surface has four empty\ncarved slots waiting. Deep plum-violet shadows, mist along the floor.\nAwe-inspiring, sacred, no people, no text. Aspect ratio 16:9.",
+      "motion": "Static camera. Four blank wooden plaques rise slowly from the altar\nand settle hovering in the air, one after another from left to right.\nTwo concentric luminous rings rotate slowly behind them. Golden motes\ndrift upward through the shaft of light. At the end the third plaque\nglows brighter than the others.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 4s)",
+      "preset": "Static",
+      "ratio": "16:9",
+      "duration": "4s",
+      "loop": false,
+      "tint": true,
+      "still": false,
+      "note": "<b>카메라를 반드시 고정하세요.</b> 프리셋에서 Static 선택.<br>\n  카메라가 움직이면 목패의 한자가 흔들려 계산 신뢰가 깎입니다."
+    },
+    "facing": {
+      "title": "마주앉은 자리",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "16:9",
+        "훅"
+      ],
+      "hint": null,
+      "image": "Korean romance-fantasy webtoon style. Two floor cushions facing each\nother across a dark wooden floor in a mystical room. Between them,\nfour small glowing plaques float in mid-air at chest height, casting\na soft pool of light on the floor beneath. Beaded curtains frame both\nedges of the composition. A constellation-painted folding screen\nbehind. One cushion is lit warm amber as if just occupied; the other\nwaits in shadow. Golden motes drift through the air. Deep plum-violet\ntones. No people, no text. Aspect ratio 16:9.",
+      "motion": "Static camera. The four glowing plaques hovering between the two\ncushions bob gently at different rhythms. The pool of light beneath them\nshifts. The beaded curtains sway. Motes drift. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
+      "preset": "Static",
+      "ratio": "16:9",
+      "duration": "3s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "note": null
+    },
+    "seat": {
+      "title": "그 사람의 자리",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "3:4",
+        "캐릭터 배경"
+      ],
+      "hint": null,
+      "image": "Korean romance-fantasy webtoon style. A single empty floor cushion\nlit by a shaft of warm light from above, in an otherwise dark\nmystical chamber. A faint luminous circular sigil hovers in the air\nbehind it. Beaded curtains hang at both edges of frame. Motes of\ncoloured light drift slowly upward around the cushion. The floor\nmirrors the glow faintly. Intimate, expectant, sacred. No people,\nno text. Aspect ratio 3:4.",
+      "motion": "Static camera. The luminous circular sigil behind the empty cushion\nrotates slowly. The shaft of light pulses gently. Coloured motes drift\nupward. The beaded curtains at the edges sway faintly. Seamlessly\nloopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s · seamless loop)",
+      "preset": "Static",
+      "ratio": "3:4",
+      "duration": "3s",
+      "loop": true,
+      "tint": true,
+      "still": false,
+      "note": "<b>무채색으로 뽑으세요.</b> 캐릭터 20인의 색이 각각 다릅니다.<br>\n  클립 하나에 앱에서 색을 입히면 20개를 안 만들어도 됩니다."
+    },
+    "roadmap": {
+      "title": "대운 길 · 이정표",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "16:9",
+        "대운 맵"
+      ],
+      "hint": "가로 패럴랙스로 길을 따라 이동하는 느낌을 냅니다.",
+      "image": "Korean romance-fantasy webtoon style. A long winding path receding from\nlower-left into the upper-right distance, marked by six small stone\nmarkers. The near half glows warm amber; small floating lantern-flames\nhover above the far markers, waiting. Flowering shrubs bloom beside the\npath. A black cat sits on one of the distant markers. Fireflies and\npetals drift through the misty air. Full moon above. Contemplative,\nbeautiful, no people, no text. Aspect ratio 16:9.",
+      "motion": "Slow dolly right along the winding path, travelling from the near\nstone markers toward the distant ones. Ink washes bloom outward as the\ncamera passes. The floating lantern-flames above the far markers sway.\nFireflies drift low. The cat sitting on a marker turns its head as the\ncamera passes.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Dolly Right · 16:9 · 4s)",
+      "preset": "Dolly Right",
+      "ratio": "16:9",
+      "duration": "4s",
+      "loop": false,
+      "tint": true,
+      "still": false,
+      "note": null
+    },
+    "cardbg": {
+      "title": "공유 카드 문양",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "1:1",
+        "엔딩 카드"
+      ],
+      "hint": "중앙을 <b>반드시 비워두세요.</b> 캐릭터와 이름은 앱에서 얹습니다.<br>\n 이 카드가 SNS에 퍼지는 <b>바이럴 자산</b>입니다.",
+      "image": "Korean romance-fantasy webtoon style. An ornate decorative card frame in\nluminous line-work: a double border with five-petal flower motifs at the\nfour corners, and a slowly rotating celestial ring at the center marked\nwith twelve radial ticks. A halo of eight small blossoms encircles the\nring. Soft radial glow behind. Rendered in thin gold and rose lines on a\ndeep plum-black ground. Completely empty at the center for a character\nillustration. Elegant, precious, keepsake-like. No text. Aspect ratio 1:1.",
+      "motion": "Static camera, centered. The celestial ring rotates slowly. The halo\nbehind pulses once, softly. Motes of light drift upward around the empty\ncenter. The decorative border stays perfectly still. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 1:1 · 3s · seamless loop)",
+      "preset": "Static",
+      "ratio": "1:1",
+      "duration": "3s",
+      "loop": true,
+      "tint": true,
+      "still": true,
+      "note": "<b>정지 PNG 를 반드시 함께 만드세요.</b><br>\n  SNS 공유 시 캡처가 되어야 하는데 영상은 저장이 안 됩니다.<br>\n  · 화면에서는 webm 루프<br>\n  · \"이미지로 저장\" 누르면 <b>PNG 버전</b>으로 교체 후 html2canvas"
+    },
+    "tray": {
+      "title": "목패를 늘어놓은 상",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "16:9",
+        "상품 선택"
+      ],
+      "hint": null,
+      "image": "Korean romance-fantasy webtoon style. Four small wooden plaques laid on\na shallow lacquered tray on a low table, seen from a slight angle. The\nleftmost tilts forward and glows warmly from within. A single fresh\nblossom rests at the tray's corner. A soft shaft of light from above,\ngold motes drifting. Deep plum shadows. No legible text, no hands.\nAspect ratio 16:9.",
+      "motion": "Static camera. The four wooden plaques on the tray bob very gently at\ndifferent rhythms, the leftmost glowing brightest. The blossom at the\ntray's corner trembles slightly. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 2s · seamless loop)",
+      "preset": "Static",
+      "ratio": "16:9",
+      "duration": "2s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "note": null
+    },
+    "banner": {
+      "title": "등불 배너",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "16:9",
+        "오늘의 운세"
+      ],
+      "hint": null,
+      "image": "Korean romance-fantasy webtoon style. A single ornate Korean paper\nlantern hanging in the upper-left of a wide frame, glowing rose and\namber, with a flowering vine trailing beside it. A black cat sits below\nit, tail curled. Warm light fades across empty dark plum space to the\nright. Fireflies and gold motes drift through the glow. Mostly empty\ncomposition with room for text on the right. No people, no text.\nAspect ratio 16:9.",
+      "motion": "Static camera. The hanging lantern sways gently and its light shifts\nslowly across the dark space. The flowering vine trembles. The cat's\ntail flicks once. Fireflies and motes drift through the glow. Very\nsubtle. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
+      "preset": "Static",
+      "ratio": "16:9",
+      "duration": "3s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "note": "<b>매일 보는 화면</b>입니다. 움직임을 가장 작게 잡으세요.<br>\n  크면 사흘이면 질립니다."
+    },
+    "oldpaper": {
+      "title": "오래된 종이 · 회고",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "16:9",
+        "회고 루프"
+      ],
+      "hint": null,
+      "image": "Korean romance-fantasy webtoon style. An aged sheet of hanji paper\nlying at a slight angle, corners softly curled. A small pressed flower\nrests in the upper right corner, and a red seal-stamp is impressed at\nthe lower left. Faint vertical column lines, no legible writing. Warm\nlight falls across it from above, gold motes drifting. Deep plum\nbackground. Nostalgic, treasured. No hands, no text. Aspect ratio 16:9.",
+      "motion": "Static camera. The curled corners of the aged paper lift and settle\nvery slightly, as if in a faint draught. The pressed flower trembles.\nMotes drift through the warm light. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
+      "preset": "Static",
+      "ratio": "16:9",
+      "duration": "3s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "note": null
+    },
+    "wall": {
+      "title": "후기 벽 · 붙은 종이쪽",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "16:9",
+        "후기"
+      ],
+      "hint": null,
+      "image": "Korean romance-fantasy webtoon style. A wooden-panelled wall covered\nwith small square notes of pale hanji paper, each pinned with a tiny\npressed flower instead of a pin, hanging at slightly different angles\nand lifting faintly as if in a breeze. A flowering vine runs along the\ntop of the wall. A black cat dozes at the base. Warm amber light from\nabove, gold motes drifting. Lived-in, affectionate, accumulated over\ntime. No people, no legible text. Aspect ratio 16:9.",
+      "motion": "Static camera. The pinned paper notes lift and settle at different\nrhythms as if in a light breeze. The flowering vine above sways. The\nblack cat at the base blinks slowly. Motes drift. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
+      "preset": "Static",
+      "ratio": "16:9",
+      "duration": "3s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "note": null
+    },
+    "coin": {
+      "title": "엽전 · 값을 치르다",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "1:1",
+        "결제"
+      ],
+      "hint": null,
+      "image": "Korean romance-fantasy webtoon style. A small pile of traditional\nKorean brass coins with square center holes, resting on a dark wooden\nsurface, catching warm amber light from above. Shallow depth, deep plum\nbackground. No hands, no text. Aspect ratio 1:1.",
+      "motion": "Static camera. One brass coin slides off the top of the small pile and\nsettles beside it with a soft rock. The glow behind pulses once.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 1:1 · 2s)",
+      "preset": "Static",
+      "ratio": "1:1",
+      "duration": "2s",
+      "loop": false,
+      "tint": false,
+      "still": false,
+      "note": null
+    },
+    "handle": {
+      "title": "문고리 · 안쪽 그림자",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "9:16",
+        "릴레이"
+      ],
+      "hint": "<b>릴레이 등장</b> 장면의 기준 이미지입니다.<br>\n 문(near)·인물(mid)·방(far) 3층으로 나누면 카메라가 들어가는 것처럼 보입니다.",
+      "image": "Korean romance-fantasy webtoon style. Close on a hand-less wooden\nlattice door with a brass ring handle, seen from inside. To the right,\na dark doorway opens onto a deeper room where a shadowed figure stands\nhalf-lit by warm lantern light from below. The figure's face is not\nvisible. Tense, quiet. No text. Aspect ratio 9:16.",
+      "motion": "Slow dolly in past the brass door handle toward the dark inner room.\nThe shadowed figure steps forward into the shaft of warm light. Their\nface becomes visible only at the very end. Dust drifts through the beam.\nQuiet, deliberate, slightly ominous.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Dolly In · 9:16 · 3s)",
+      "preset": "Dolly In",
+      "ratio": "9:16",
+      "duration": "3s",
+      "loop": false,
+      "tint": false,
+      "still": false,
+      "note": "<b>두 번째 결제가 갈리는 3초입니다.</b> 1차 출시에 이거 하나는 반드시."
+    },
+    "mirror": {
+      "title": "맞대어 보는 자리",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "9:16",
+        "소품"
+      ],
+      "hint": "a4b 성향 4글자. 넉 자와 여덟 글자를 **맞대어** 보는 자리라, 두 벌이 나란히 놓이고 어긋난 데가 드러나는 그림이라야 합니다. 글자를 그리지 마세요 — 어느 나라 글자를 넣어도 틀립니다.",
+      "image": "Korean romance-fantasy webtoon style, vertical composition.\nA low lacquered table seen from slightly above. On the left, four\nsmall blank wooden tablets stand in a row, warm amber glow. On the\nright, four pale paper slips lie flat in a matching row, cool blue\nglow. Between the two rows a faint vertical seam of light runs down\nthe table, where the two glows meet and do not quite align.\nDark plum interior, drifting dust motes, a single hanging lantern\nout of focus above. No hands, no faces, no text, no letters of any\nscript. Aspect ratio 9:16.",
+      "motion": "Static camera. The two rows breathe very slightly out of phase —\nthe amber row brightens as the blue row dims, then reverses, over\nabout four seconds. The seam of light between them flickers once,\nsoftly, where they misalign. Dust motes drift upward. Nothing\nmoves position; only light shifts.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still."
+    }
   },
-  "Static": {
-   "n": "Static",
-   "c": "#7FC4BC"
+  "figures": {
+    "cheoneul": {
+      "note": null,
+      "hint": null,
+      "title": "흰 소매의 귀인",
+      "who": "천을귀인 天乙貴人",
+      "preset": "Dolly In",
+      "ratio": "3:4",
+      "duration": "3s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "spec": [
+        "3:4",
+        "신살 인물",
+        "Dolly In"
+      ],
+      "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA serene guardian woman in flowing white hanbok, wide sleeves spread\nforward as if shielding someone unseen. Warm gold rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+      "motion": "sleeves drift slowly forward, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Dolly In · 3:4 · 3s)"
+    },
+    "taegeuk": {
+      "note": null,
+      "hint": null,
+      "title": "태극을 인 이",
+      "who": "태극귀인 太極貴人",
+      "preset": "Static",
+      "ratio": "3:4",
+      "duration": "3s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "spec": [
+        "3:4",
+        "신살 인물",
+        "Static"
+      ],
+      "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA calm immortal holding a luminous circular emblem, half light half\nshadow. Teal rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+      "motion": "the circular emblem rotates once very slowly, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
+    },
+    "munchang": {
+      "note": null,
+      "hint": null,
+      "title": "붓을 든 서생",
+      "who": "문창귀인 文昌貴人",
+      "preset": "Static",
+      "ratio": "3:4",
+      "duration": "3s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "spec": [
+        "3:4",
+        "신살 인물",
+        "Static"
+      ],
+      "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA refined young scholar holding a writing brush upright, scrolls at his\nside. Lavender rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+      "motion": "brush tip sways, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
+    },
+    "geumyeo": {
+      "note": null,
+      "hint": null,
+      "title": "가마를 끄는 이",
+      "who": "금여 金輿",
+      "preset": "Static",
+      "ratio": "3:4",
+      "duration": "3s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "spec": [
+        "3:4",
+        "신살 인물",
+        "Static"
+      ],
+      "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nAn elegant attendant beside an ornate palanquin, one hand resting on its\npole. Rose rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+      "motion": "palanquin wheel turns a quarter, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
+    },
+    "amrok": {
+      "note": null,
+      "hint": null,
+      "title": "그림자 속의 손",
+      "who": "암록 暗祿",
+      "preset": "Static",
+      "ratio": "3:4",
+      "duration": "3s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "spec": [
+        "3:4",
+        "신살 인물",
+        "Static"
+      ],
+      "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA half-hidden figure in shadow, one hand extended forward from behind.\nFace obscured. Slate rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+      "motion": "the extended hand tilts slightly, shadow breathes\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
+    },
+    "yangin": {
+      "note": null,
+      "hint": null,
+      "title": "칼을 쥔 무인",
+      "who": "양인 羊刃",
+      "preset": "Static",
+      "ratio": "3:4",
+      "duration": "3s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "spec": [
+        "3:4",
+        "신살 인물",
+        "Static"
+      ],
+      "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA poised warrior resting a slender blade point-down, not raised.\nCrimson rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+      "motion": "blade catches a slow glint, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
+    },
+    "baekho": {
+      "note": null,
+      "hint": null,
+      "title": "흰 범",
+      "who": "백호대살 白虎大殺",
+      "preset": "Dolly In",
+      "ratio": "3:4",
+      "duration": "3s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "spec": [
+        "3:4",
+        "신살 인물",
+        "Dolly In"
+      ],
+      "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA white tiger seated in profile, calm and watchful, NOT snarling.\nNo blood, no wounds. Pale silver rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+      "motion": "tail sweeps once, ears twitch, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Dolly In · 3:4 · 3s)"
+    },
+    "wonjin": {
+      "note": null,
+      "hint": null,
+      "title": "등을 돌린 그림자",
+      "who": "원진 怨嗔",
+      "preset": "Static",
+      "ratio": "3:4",
+      "duration": "3s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "spec": [
+        "3:4",
+        "신살 인물",
+        "Static"
+      ],
+      "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nTwo figures back to back, slightly misaligned, neither facing the\nviewer. Muted violet-grey.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+      "motion": "both figures sway apart a few pixels, no faces\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
+    },
+    "dohwa": {
+      "note": null,
+      "hint": null,
+      "title": "꽃그늘의 사람",
+      "who": "도화 桃花",
+      "preset": "Static",
+      "ratio": "3:4",
+      "duration": "3s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "spec": [
+        "3:4",
+        "신살 인물",
+        "Static"
+      ],
+      "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA striking person standing under falling blossoms, gaze drawing the eye.\nFully clothed in layered hanbok, dignified posture.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+      "motion": "blossoms fall past, hair lifts once, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
+    },
+    "yeokma": {
+      "note": null,
+      "hint": null,
+      "title": "말 위의 나그네",
+      "who": "역마 驛馬",
+      "preset": "Static",
+      "ratio": "3:4",
+      "duration": "3s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "spec": [
+        "3:4",
+        "신살 인물",
+        "Static"
+      ],
+      "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA traveler on horseback in mid-stride, dust trailing behind.\nWarm sand rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+      "motion": "dust drifts backward, horse mane lifts\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
+    },
+    "hwagae": {
+      "note": null,
+      "hint": null,
+      "title": "일산 아래 홀로",
+      "who": "화개 華蓋",
+      "preset": "Static",
+      "ratio": "3:4",
+      "duration": "3s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "spec": [
+        "3:4",
+        "신살 인물",
+        "Static"
+      ],
+      "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA solitary figure beneath a floral canopy, turned slightly away.\nLavender rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+      "motion": "canopy fringe sways, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
+    },
+    "gwaegang": {
+      "note": null,
+      "hint": null,
+      "title": "북두를 인 장수",
+      "who": "괴강 魁罡",
+      "preset": "Static",
+      "ratio": "3:4",
+      "duration": "3s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "spec": [
+        "3:4",
+        "신살 인물",
+        "Static"
+      ],
+      "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA commander with the Big Dipper glowing above the head, steel-grey\narmor. Cool rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+      "motion": "the seven stars pulse once in sequence\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
+    },
+    "gongmang": {
+      "note": null,
+      "hint": null,
+      "title": "빈 자리",
+      "who": "공망 空亡",
+      "preset": "Static",
+      "ratio": "3:4",
+      "duration": "3s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "spec": [
+        "3:4",
+        "신살 인물",
+        "Static"
+      ],
+      "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nAn empty seat. No person. A dashed outline where someone would be.\nNearly monochrome, deep indigo.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+      "motion": "the dashed outline fades in and out once. nothing else moves.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
+    }
   }
- },
- "scenes": {
-  "gate": {
-   "title": "대문 · 사계",
-   "seasonal": true,
-   "seasons": {
-    "spring": "Korean romance-fantasy webtoon style, night scene.\nA traditional Korean hanok gate standing half-open at the end of a quiet\nlane just after rain. Warm golden light spills out through the open gate.\nCherry blossom branches heavy with pale pink petals tumble over the tiled wall on both sides. Three ornate Korean\npaper lanterns (청사초롱) hang above at different heights, glowing amber\nand blue. A small black cat sits on the wall watching, eyes catching the\nlantern light. The wet stone ground mirrors the lantern light and the moon\nin soft broken reflections. Petals and a pale butterfly drift through the air.\nDeep plum-violet night sky, full moon and faint stars.\nBeautiful, inviting, slightly magical — not eerie.\nNo people, no text, no signboard. Aspect ratio 9:16.",
-    "summer": "Korean romance-fantasy webtoon style, night scene.\nA traditional Korean hanok gate standing half-open at the end of a quiet\nlane just after rain. Warm golden light spills out through the open gate.\nFlowering trumpet-creeper vines heavy with coral-pink blossoms tumble over the tiled wall on both sides. Three ornate Korean\npaper lanterns (청사초롱) hang above at different heights, glowing amber\nand blue. A small black cat sits on the wall watching, eyes catching the\nlantern light. The wet stone ground mirrors the lantern light and the moon\nin soft broken reflections. Fireflies drift softly through the humid air.\nDeep plum-violet night sky, full moon and faint stars.\nBeautiful, inviting, slightly magical — not eerie.\nNo people, no text, no signboard. Aspect ratio 9:16.",
-    "autumn": "Korean romance-fantasy webtoon style, night scene.\nA traditional Korean hanok gate standing half-open at the end of a quiet\nlane just after rain. Warm golden light spills out through the open gate.\nChrysanthemum blooms in gold and amber spilling over the wall tumble over the tiled wall on both sides. Three ornate Korean\npaper lanterns (청사초롱) hang above at different heights, glowing amber\nand blue. A small black cat sits on the wall watching, eyes catching the\nlantern light. The wet stone ground mirrors the lantern light and the moon\nin soft broken reflections. A few dry leaves turn slowly in the air.\nDeep plum-violet night sky, full moon and faint stars.\nBeautiful, inviting, slightly magical — not eerie.\nNo people, no text, no signboard. Aspect ratio 9:16.",
-    "winter": "Korean romance-fantasy webtoon style, night scene.\nA traditional Korean hanok gate standing half-open at the end of a quiet\nlane just after rain. Warm golden light spills out through the open gate.\nBare plum branches dusted with snow and studded with small white blossoms tumble over the tiled wall on both sides. Three ornate Korean\npaper lanterns (청사초롱) hang above at different heights, glowing amber\nand blue. A small black cat sits on the wall watching, eyes catching the\nlantern light. The wet stone ground mirrors the lantern light and the moon\nin soft broken reflections. Fine snow drifts down through the lantern light.\nDeep plum-violet night sky, full moon and faint stars.\nBeautiful, inviting, slightly magical — not eerie.\nNo people, no text, no signboard. Aspect ratio 9:16."
-   },
-   "spec": [
-    "9:16",
-    "진입",
-    "기본"
-   ],
-   "hint": "<b>기본 진입 장면.</b> 계절이 바뀌면 꽃과 하늘색이 바뀝니다.<br>\n 같은 사람이 봄·여름·가을·겨울에 오면 <b>매번 다른 화면</b>을 봅니다.<br>\n 담장 위 <b>고양이</b>는 사계절 고정 — 이 집의 마스코트입니다.",
-   "image": "Korean romance-fantasy webtoon style, night scene.\nA traditional Korean hanok gate standing half-open at the end of a quiet\nlane just after rain. Warm golden light spills out through the open gate.\nFlowering trumpet-creeper vines heavy with coral-pink blossoms tumble over the tiled wall on both sides. Three ornate Korean\npaper lanterns (청사초롱) hang above at different heights, glowing amber\nand blue. A small black cat sits on the wall watching, eyes catching the\nlantern light. The wet stone ground mirrors the lantern light and the moon\nin soft broken reflections. Fireflies drift softly through the humid air.\nDeep plum-violet night sky, full moon and faint stars.\nBeautiful, inviting, slightly magical — not eerie.\nNo people, no text, no signboard. Aspect ratio 9:16.",
-   "motion": "Slow dolly in down the rain-wet lane toward the half-open hanok gate.\nThe three paper lanterns flicker gently. Flower petals drift across the\nframe. The reflection on the wet stone ground ripples faintly. The black\ncat on the wall flicks its tail once and turns its head toward the\nviewer. The camera stops just before the gate. Warm golden light spills\nfrom the opening.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Dolly In · 9:16 · 5s)",
-   "preset": "Dolly In",
-   "ratio": "9:16",
-   "duration": "5s",
-   "loop": false,
-   "tint": true,
-   "still": false,
-   "note": "<b>계절 4종이 필요합니다.</b> 꽃과 하늘색만 다른 시작 이미지 4장을 만들고<br>\n  같은 프롬프트로 4클립을 뽑으세요. 프롬프트는 동일합니다.<br>\n  첫 방문에만 재생하고 두 번째부터는 <b>poster 정지 이미지</b>로 두세요."
-  },
-  "tea": {
-   "title": "다과상 · 차 한 잔",
-   "seasonal": false,
-   "seasons": null,
-   "spec": [
-    "16:9",
-    "재방문 보상"
-   ],
-   "hint": "<b>재방문 보상 화면입니다.</b> 두 번째 방문부터 도령이 차를 내어줍니다.<br>\n \"다음에 오면 차를 내어드리겠소\" — 이 약속이 재방문 이유가 됩니다.",
-   "image": "Korean romance-fantasy webtoon style. A low lacquered tea table set\nfor one guest: a celadon teacup with pale tea and thin steam rising, a\nsmall plate of traditional Korean confections (약과, 한과) arranged\nneatly, and a single flower resting in a shallow dish. A small black\ncat sits at the edge of the table, watching. Warm lantern light from\nabove, a faint rose-coloured luminous ring floating behind. Motes of\ngold drift through the air. Deep plum-violet shadows. Inviting,\ngentle, no people, no text. Aspect ratio 16:9.",
-   "motion": "Static camera. Thin steam curls upward from the teacup. The black cat\nat the table's edge blinks slowly and its tail sways. The rose-coloured\nring behind drifts. Golden motes rise. Warm and still. Seamlessly\nloopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
-   "preset": "Static",
-   "ratio": "16:9",
-   "duration": "3s",
-   "loop": true,
-   "tint": false,
-   "still": false,
-   "note": null
-  },
-  "sealbook": {
-   "title": "인장첩",
-   "seasonal": false,
-   "seasons": null,
-   "spec": [
-    "3:4",
-    "수집"
-   ],
-   "hint": "<b>수집 장치.</b> 사람을 만날 때마다 인장을 하나씩 받습니다.<br>\n 스무 개를 다 모으면 <b>한정 카드</b>를 줍니다.<br>\n 여성 이용자층에서 수집 요소는 재결제 동인이 큽니다.",
-   "image": "Korean romance-fantasy webtoon style. An open collector's booklet\n(인장첩) of pale hanji paper lying flat, ruled into a grid of twenty\nsmall squares. Four squares bear glowing coloured seal-stamps in\ndifferent hues; the rest are empty and faintly outlined, waiting.\nWarm lantern light from above, gold motes drifting. Deep plum-violet\nbackground. Precious, collectible, no people, no legible text.\nAspect ratio 3:4.",
-   "motion": "Static camera, top-down on the open booklet. A red seal stamp presses\ndown into one empty square with a small bounce and settles. A faint\nring of light spreads from it. The other squares stay still.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 2s)",
-   "preset": "Static",
-   "ratio": "3:4",
-   "duration": "2s",
-   "loop": false,
-   "tint": false,
-   "still": false,
-   "note": "인장을 <b>새로 받았을 때만</b> 재생하세요. 평소엔 정지 이미지."
-  },
-  "door": {
-   "title": "열리는 문",
-   "seasonal": false,
-   "seasons": null,
-   "spec": [
-    "9:16",
-    "전환"
-   ],
-   "hint": null,
-   "image": "Korean romance-fantasy webtoon style. A traditional Korean wooden\nlattice door (살문) swinging inward, warm amber light spilling out\nthrough the widening gap into a dark exterior. Paper panes glowing\nfrom within. Viewed straight on, symmetrical. No people, no text.\nAspect ratio 9:16.",
-   "motion": "Static camera. The left panel of the wooden lattice door swings\ninward. Warm amber light widens through the growing gap and spills\nacross the threshold. Dust drifts through the light.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 2s)",
-   "preset": "Static",
-   "ratio": "9:16",
-   "duration": "2s",
-   "loop": false,
-   "tint": false,
-   "still": false,
-   "note": null
-  },
-  "desk": {
-   "title": "붓 · 벼루 · 빈 종이",
-   "seasonal": false,
-   "seasons": null,
-   "spec": [
-    "16:9",
-    "소품"
-   ],
-   "hint": null,
-   "image": "Korean romance-fantasy webtoon style. A low writing desk in a dim\nmystical study at night. A sheet of hanji paper lies flat, an inkstone\nholds ink so dark it mirrors starlight, and a calligraphy brush hovers\njust above the paper, floating unsupported with a faint golden aura at\nits tip. Two or three sheets of paper drift weightlessly in the air.\nA faint luminous constellation ring glows behind the desk. Golden\nmotes of light rise slowly through a soft shaft of light from above.\nDeep plum-violet shadows. No hands, no people, no text.\nAspect ratio 16:9.",
-   "motion": "Static camera. The floating brush bobs gently in the air, ink glinting\nat its tip. Two sheets of paper drift slowly. The constellation ring\nbehind rotates. Golden motes rise through the light. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
-   "preset": "Static",
-   "ratio": "16:9",
-   "duration": "3s",
-   "loop": true,
-   "tint": false,
-   "still": false,
-   "note": null
-  },
-  "room": {
-   "title": "실내 · 좌식 · 병풍",
-   "seasonal": false,
-   "seasons": null,
-   "spec": [
-    "16:9",
-    "배경"
-   ],
-   "hint": null,
-   "image": "Korean romance-fantasy webtoon style. The interior of a mystical\nfortune-teller's room at night. A folding screen along the back wall\npainted with faint luminous constellations. Beaded curtains hang at\nboth edges of frame, catching amber, rose and violet light. Three\nornate paper lanterns hang at different heights. Two floor cushions\nface each other; between them a small incense burner sends thin\nthreads of smoke curling upward. A pale glowing ring of light floats\nin the air above. Golden motes drift through a soft shaft of light.\nDeep plum-violet shadows. Empty, no people, no text.\nAspect ratio 16:9.",
-   "motion": "Static camera. The three hanging lanterns flicker at slightly\ndifferent rhythms. The beaded curtains at both edges sway faintly. Thin\nthreads of incense smoke curl upward from the burner. The constellation\nring drifts. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 4s · seamless loop)",
-   "preset": "Static",
-   "ratio": "16:9",
-   "duration": "4s",
-   "loop": true,
-   "tint": false,
-   "still": false,
-   "note": null
-  },
-  "shelf": {
-   "title": "진열대 · 걸린 목패",
-   "seasonal": false,
-   "seasons": null,
-   "spec": [
-    "16:9",
-    "배경"
-   ],
-   "hint": null,
-   "image": "Korean romance-fantasy webtoon style. A row of six narrow wooden\nplaques hanging from a beam by thin cords at different heights, each\ncarved with a single Chinese character that glows warm amber from\nwithin, as if lit from inside the wood. Each plaque casts a soft pool\nof light beneath it. Golden motes of light drift slowly upward through\nthe air. The background falls into deep plum-violet darkness.\nMysterious, inviting, like an offering hall. No people. Aspect ratio 16:9.",
-   "motion": "Static camera. The six hanging wooden plaques sway very slightly on\ntheir cords at different rhythms, the carved characters glowing warm\nfrom within. The pools of light beneath them shift. Golden motes drift\nupward. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
-   "preset": "Static",
-   "ratio": "16:9",
-   "duration": "3s",
-   "loop": true,
-   "tint": false,
-   "still": false,
-   "note": null
-  },
-  "hall": {
-   "title": "안쪽 방 · 스무 자리",
-   "seasonal": false,
-   "seasons": null,
-   "spec": [
-    "16:9",
-    "배경"
-   ],
-   "hint": null,
-   "image": "Korean romance-fantasy webtoon style. A long dim hall receding into\ndarkness, with twenty floor cushions arranged in rows. Above each\ncushion floats a small glowing flame-light in a different colour —\namber, rose, violet, teal — like waiting spirits. Most cushions are\nempty. Three ornate paper lanterns hang overhead. Golden motes drift\nthrough the air. Deep plum-violet shadows, mist along the floor.\nQuiet, expectant, mysterious. No people, no text. Aspect ratio 16:9.",
-   "motion": "Very slow dolly in down the hall between the rows of cushions. The\ncoloured flame-lights above each cushion flicker at different rhythms.\nMotes drift. The lanterns overhead sway gently. The far end stays in\ndarkness.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Dolly In · 16:9 · 4s)",
-   "preset": "Dolly In",
-   "ratio": "16:9",
-   "duration": "4s",
-   "loop": false,
-   "tint": false,
-   "still": false,
-   "note": null
-  },
-  "scroll": {
-   "title": "펼쳐지는 두루마리",
-   "seasonal": false,
-   "seasons": null,
-   "spec": [
-    "16:9",
-    "전환"
-   ],
-   "hint": null,
-   "image": "Korean romance-fantasy webtoon style. A long paper scroll unrolling\nbetween two dark wooden rods. Above the paper, glowing golden Chinese\ncharacters float free of the page, drifting slowly upward as if\nlifting off the surface. The hanji paper catches warm light. Motes of\ngold drift through a soft shaft of light from above. Deep plum-violet\nbackground. Magical, weightless. No hands, no people. Aspect ratio 16:9.",
-   "motion": "Static camera. The scroll unrolls smoothly to the right between the\ntwo rods. As the paper opens, glowing golden characters lift free of the\nsurface and drift slowly upward. Motes rise through the light.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s)",
-   "preset": "Static",
-   "ratio": "16:9",
-   "duration": "3s",
-   "loop": false,
-   "tint": false,
-   "still": false,
-   "note": null
-  },
-  "fold": {
-   "title": "반쯤 접힌 두루마리",
-   "seasonal": false,
-   "seasons": null,
-   "spec": [
-    "16:9",
-    "페이월"
-   ],
-   "hint": null,
-   "image": "Korean romance-fantasy webtoon style. A paper scroll folded halfway\nclosed, the upper half lit and readable-looking, the lower half creased\nover and falling into deep shadow. Warm amber light on the exposed\nportion only. No legible text, no hands. Aspect ratio 16:9.",
-   "motion": "Static camera. The scroll folds halfway closed in one smooth motion,\nthe lower half creasing over and falling into shadow. The exposed upper\nhalf stays lit.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 2s)",
-   "preset": "Static",
-   "ratio": "16:9",
-   "duration": "2s",
-   "loop": false,
-   "tint": false,
-   "still": false,
-   "note": null
-  },
-  "untie": {
-   "title": "붉은 끈 · 개봉",
-   "seasonal": false,
-   "seasons": null,
-   "spec": [
-    "1:1",
-    "결제완료"
-   ],
-   "hint": null,
-   "image": "Korean romance-fantasy webtoon style. A lacquered scroll case bound\nwith a red silk cord, the cord untying itself as golden light bursts\nout from the opening seam. Small golden blossoms of light scatter\noutward from the opening. A luminous ring rotates slowly behind.\nCentered, high contrast, deep plum-violet background. Joyful,\nrewarding, ceremonial. No hands, no text. Aspect ratio 1:1.",
-   "motion": "Static camera. The red silk cord unties itself and slips away from\nthe scroll case. Golden light bursts out from the opening seam and small\ngolden blossoms of light scatter outward, then settle. The ring behind\npulses once.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 1:1 · 2s)",
-   "preset": "Static",
-   "ratio": "1:1",
-   "duration": "2s",
-   "loop": false,
-   "tint": false,
-   "still": false,
-   "note": null
-  },
-  "ink": {
-   "title": "먹이 번지는 종이",
-   "seasonal": false,
-   "seasons": null,
-   "spec": [
-    "16:9",
-    "소품"
-   ],
-   "hint": null,
-   "image": "Korean romance-fantasy webtoon style. Close on a sheet of pale hanji\npaper with faint vertical column lines. A single drop of black ink has\nlanded at the center and is blooming outward in soft irregular rings.\nWarm amber light from one side, deep plum shadow. No hands, no text.\nAspect ratio 16:9.",
-   "motion": "Static camera, macro. A single drop of black ink falls onto the hanji\npaper and blooms outward in two soft irregular rings, then settles.\nOne motion only, then stillness.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 2s)",
-   "preset": "Static",
-   "ratio": "16:9",
-   "duration": "2s",
-   "loop": false,
-   "tint": false,
-   "still": false,
-   "note": "투표 반응(먹 번짐)과 <b>같은 클립</b>을 씁니다. 한 번 만들면 두 곳에서 쓰입니다."
-  },
-  "fork": {
-   "title": "갈림길",
-   "seasonal": false,
-   "seasons": null,
-   "spec": [
-    "16:9",
-    "고민 선택"
-   ],
-   "hint": null,
-   "image": "Korean romance-fantasy webtoon style. A path splitting into three\ndirections across a misty moonlit plain. Above each branch hovers a\nsmall floating lantern-flame in a different colour — violet, amber,\nrose — marking the way. Small wooden signposts stand blank beneath\nthem. Fireflies drift low over the grass. A pale moon above. Deep\nplum-violet tones, dreamlike and inviting. No people, no legible text.\nAspect ratio 16:9.",
-   "motion": "Static camera. The three floating lantern-flames above the signposts\nbob gently at different rhythms — the center one brightest. Fireflies\ndrift low across the misty plain. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
-   "preset": "Static",
-   "ratio": "16:9",
-   "duration": "3s",
-   "loop": true,
-   "tint": false,
-   "still": false,
-   "note": null
-  },
-  "altar": {
-   "title": "명식 받침 · 네 자리",
-   "seasonal": false,
-   "seasons": null,
-   "spec": [
-    "16:9",
-    "명식"
-   ],
-   "hint": null,
-   "image": "Korean romance-fantasy webtoon style. A ceremonial altar in a dark\nmystical chamber. Four blank wooden plaques hover in the air above a\nlow carved altar table, suspended and slowly floating, each faintly\nglowing. Two concentric luminous rings — one gold, one violet —\nrotate slowly behind them, marked with twelve radial ticks like a\ncelestial dial. A shaft of warm light falls from above. Golden motes\nof light rise through the beam. The altar's surface has four empty\ncarved slots waiting. Deep plum-violet shadows, mist along the floor.\nAwe-inspiring, sacred, no people, no text. Aspect ratio 16:9.",
-   "motion": "Static camera. Four blank wooden plaques rise slowly from the altar\nand settle hovering in the air, one after another from left to right.\nTwo concentric luminous rings rotate slowly behind them. Golden motes\ndrift upward through the shaft of light. At the end the third plaque\nglows brighter than the others.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 4s)",
-   "preset": "Static",
-   "ratio": "16:9",
-   "duration": "4s",
-   "loop": false,
-   "tint": true,
-   "still": false,
-   "note": "<b>카메라를 반드시 고정하세요.</b> 프리셋에서 Static 선택.<br>\n  카메라가 움직이면 목패의 한자가 흔들려 계산 신뢰가 깎입니다."
-  },
-  "facing": {
-   "title": "마주앉은 자리",
-   "seasonal": false,
-   "seasons": null,
-   "spec": [
-    "16:9",
-    "훅"
-   ],
-   "hint": null,
-   "image": "Korean romance-fantasy webtoon style. Two floor cushions facing each\nother across a dark wooden floor in a mystical room. Between them,\nfour small glowing plaques float in mid-air at chest height, casting\na soft pool of light on the floor beneath. Beaded curtains frame both\nedges of the composition. A constellation-painted folding screen\nbehind. One cushion is lit warm amber as if just occupied; the other\nwaits in shadow. Golden motes drift through the air. Deep plum-violet\ntones. No people, no text. Aspect ratio 16:9.",
-   "motion": "Static camera. The four glowing plaques hovering between the two\ncushions bob gently at different rhythms. The pool of light beneath them\nshifts. The beaded curtains sway. Motes drift. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
-   "preset": "Static",
-   "ratio": "16:9",
-   "duration": "3s",
-   "loop": true,
-   "tint": false,
-   "still": false,
-   "note": null
-  },
-  "seat": {
-   "title": "그 사람의 자리",
-   "seasonal": false,
-   "seasons": null,
-   "spec": [
-    "3:4",
-    "캐릭터 배경"
-   ],
-   "hint": null,
-   "image": "Korean romance-fantasy webtoon style. A single empty floor cushion\nlit by a shaft of warm light from above, in an otherwise dark\nmystical chamber. A faint luminous circular sigil hovers in the air\nbehind it. Beaded curtains hang at both edges of frame. Motes of\ncoloured light drift slowly upward around the cushion. The floor\nmirrors the glow faintly. Intimate, expectant, sacred. No people,\nno text. Aspect ratio 3:4.",
-   "motion": "Static camera. The luminous circular sigil behind the empty cushion\nrotates slowly. The shaft of light pulses gently. Coloured motes drift\nupward. The beaded curtains at the edges sway faintly. Seamlessly\nloopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s · seamless loop)",
-   "preset": "Static",
-   "ratio": "3:4",
-   "duration": "3s",
-   "loop": true,
-   "tint": true,
-   "still": false,
-   "note": "<b>무채색으로 뽑으세요.</b> 캐릭터 20인의 색이 각각 다릅니다.<br>\n  클립 하나에 앱에서 색을 입히면 20개를 안 만들어도 됩니다."
-  },
-  "roadmap": {
-   "title": "대운 길 · 이정표",
-   "seasonal": false,
-   "seasons": null,
-   "spec": [
-    "16:9",
-    "대운 맵"
-   ],
-   "hint": "가로 패럴랙스로 길을 따라 이동하는 느낌을 냅니다.",
-   "image": "Korean romance-fantasy webtoon style. A long winding path receding from\nlower-left into the upper-right distance, marked by six small stone\nmarkers. The near half glows warm amber; small floating lantern-flames\nhover above the far markers, waiting. Flowering shrubs bloom beside the\npath. A black cat sits on one of the distant markers. Fireflies and\npetals drift through the misty air. Full moon above. Contemplative,\nbeautiful, no people, no text. Aspect ratio 16:9.",
-   "motion": "Slow dolly right along the winding path, travelling from the near\nstone markers toward the distant ones. Ink washes bloom outward as the\ncamera passes. The floating lantern-flames above the far markers sway.\nFireflies drift low. The cat sitting on a marker turns its head as the\ncamera passes.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Dolly Right · 16:9 · 4s)",
-   "preset": "Dolly Right",
-   "ratio": "16:9",
-   "duration": "4s",
-   "loop": false,
-   "tint": true,
-   "still": false,
-   "note": null
-  },
-  "cardbg": {
-   "title": "공유 카드 문양",
-   "seasonal": false,
-   "seasons": null,
-   "spec": [
-    "1:1",
-    "엔딩 카드"
-   ],
-   "hint": "중앙을 <b>반드시 비워두세요.</b> 캐릭터와 이름은 앱에서 얹습니다.<br>\n 이 카드가 SNS에 퍼지는 <b>바이럴 자산</b>입니다.",
-   "image": "Korean romance-fantasy webtoon style. An ornate decorative card frame in\nluminous line-work: a double border with five-petal flower motifs at the\nfour corners, and a slowly rotating celestial ring at the center marked\nwith twelve radial ticks. A halo of eight small blossoms encircles the\nring. Soft radial glow behind. Rendered in thin gold and rose lines on a\ndeep plum-black ground. Completely empty at the center for a character\nillustration. Elegant, precious, keepsake-like. No text. Aspect ratio 1:1.",
-   "motion": "Static camera, centered. The celestial ring rotates slowly. The halo\nbehind pulses once, softly. Motes of light drift upward around the empty\ncenter. The decorative border stays perfectly still. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 1:1 · 3s · seamless loop)",
-   "preset": "Static",
-   "ratio": "1:1",
-   "duration": "3s",
-   "loop": true,
-   "tint": true,
-   "still": true,
-   "note": "<b>정지 PNG 를 반드시 함께 만드세요.</b><br>\n  SNS 공유 시 캡처가 되어야 하는데 영상은 저장이 안 됩니다.<br>\n  · 화면에서는 webm 루프<br>\n  · \"이미지로 저장\" 누르면 <b>PNG 버전</b>으로 교체 후 html2canvas"
-  },
-  "tray": {
-   "title": "목패를 늘어놓은 상",
-   "seasonal": false,
-   "seasons": null,
-   "spec": [
-    "16:9",
-    "상품 선택"
-   ],
-   "hint": null,
-   "image": "Korean romance-fantasy webtoon style. Four small wooden plaques laid on\na shallow lacquered tray on a low table, seen from a slight angle. The\nleftmost tilts forward and glows warmly from within. A single fresh\nblossom rests at the tray's corner. A soft shaft of light from above,\ngold motes drifting. Deep plum shadows. No legible text, no hands.\nAspect ratio 16:9.",
-   "motion": "Static camera. The four wooden plaques on the tray bob very gently at\ndifferent rhythms, the leftmost glowing brightest. The blossom at the\ntray's corner trembles slightly. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 2s · seamless loop)",
-   "preset": "Static",
-   "ratio": "16:9",
-   "duration": "2s",
-   "loop": true,
-   "tint": false,
-   "still": false,
-   "note": null
-  },
-  "banner": {
-   "title": "등불 배너",
-   "seasonal": false,
-   "seasons": null,
-   "spec": [
-    "16:9",
-    "오늘의 운세"
-   ],
-   "hint": null,
-   "image": "Korean romance-fantasy webtoon style. A single ornate Korean paper\nlantern hanging in the upper-left of a wide frame, glowing rose and\namber, with a flowering vine trailing beside it. A black cat sits below\nit, tail curled. Warm light fades across empty dark plum space to the\nright. Fireflies and gold motes drift through the glow. Mostly empty\ncomposition with room for text on the right. No people, no text.\nAspect ratio 16:9.",
-   "motion": "Static camera. The hanging lantern sways gently and its light shifts\nslowly across the dark space. The flowering vine trembles. The cat's\ntail flicks once. Fireflies and motes drift through the glow. Very\nsubtle. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
-   "preset": "Static",
-   "ratio": "16:9",
-   "duration": "3s",
-   "loop": true,
-   "tint": false,
-   "still": false,
-   "note": "<b>매일 보는 화면</b>입니다. 움직임을 가장 작게 잡으세요.<br>\n  크면 사흘이면 질립니다."
-  },
-  "oldpaper": {
-   "title": "오래된 종이 · 회고",
-   "seasonal": false,
-   "seasons": null,
-   "spec": [
-    "16:9",
-    "회고 루프"
-   ],
-   "hint": null,
-   "image": "Korean romance-fantasy webtoon style. An aged sheet of hanji paper\nlying at a slight angle, corners softly curled. A small pressed flower\nrests in the upper right corner, and a red seal-stamp is impressed at\nthe lower left. Faint vertical column lines, no legible writing. Warm\nlight falls across it from above, gold motes drifting. Deep plum\nbackground. Nostalgic, treasured. No hands, no text. Aspect ratio 16:9.",
-   "motion": "Static camera. The curled corners of the aged paper lift and settle\nvery slightly, as if in a faint draught. The pressed flower trembles.\nMotes drift through the warm light. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
-   "preset": "Static",
-   "ratio": "16:9",
-   "duration": "3s",
-   "loop": true,
-   "tint": false,
-   "still": false,
-   "note": null
-  },
-  "wall": {
-   "title": "후기 벽 · 붙은 종이쪽",
-   "seasonal": false,
-   "seasons": null,
-   "spec": [
-    "16:9",
-    "후기"
-   ],
-   "hint": null,
-   "image": "Korean romance-fantasy webtoon style. A wooden-panelled wall covered\nwith small square notes of pale hanji paper, each pinned with a tiny\npressed flower instead of a pin, hanging at slightly different angles\nand lifting faintly as if in a breeze. A flowering vine runs along the\ntop of the wall. A black cat dozes at the base. Warm amber light from\nabove, gold motes drifting. Lived-in, affectionate, accumulated over\ntime. No people, no legible text. Aspect ratio 16:9.",
-   "motion": "Static camera. The pinned paper notes lift and settle at different\nrhythms as if in a light breeze. The flowering vine above sways. The\nblack cat at the base blinks slowly. Motes drift. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
-   "preset": "Static",
-   "ratio": "16:9",
-   "duration": "3s",
-   "loop": true,
-   "tint": false,
-   "still": false,
-   "note": null
-  },
-  "coin": {
-   "title": "엽전 · 값을 치르다",
-   "seasonal": false,
-   "seasons": null,
-   "spec": [
-    "1:1",
-    "결제"
-   ],
-   "hint": null,
-   "image": "Korean romance-fantasy webtoon style. A small pile of traditional\nKorean brass coins with square center holes, resting on a dark wooden\nsurface, catching warm amber light from above. Shallow depth, deep plum\nbackground. No hands, no text. Aspect ratio 1:1.",
-   "motion": "Static camera. One brass coin slides off the top of the small pile and\nsettles beside it with a soft rock. The glow behind pulses once.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 1:1 · 2s)",
-   "preset": "Static",
-   "ratio": "1:1",
-   "duration": "2s",
-   "loop": false,
-   "tint": false,
-   "still": false,
-   "note": null
-  },
-  "handle": {
-   "title": "문고리 · 안쪽 그림자",
-   "seasonal": false,
-   "seasons": null,
-   "spec": [
-    "9:16",
-    "릴레이"
-   ],
-   "hint": "<b>릴레이 등장</b> 장면의 기준 이미지입니다.<br>\n 문(near)·인물(mid)·방(far) 3층으로 나누면 카메라가 들어가는 것처럼 보입니다.",
-   "image": "Korean romance-fantasy webtoon style. Close on a hand-less wooden\nlattice door with a brass ring handle, seen from inside. To the right,\na dark doorway opens onto a deeper room where a shadowed figure stands\nhalf-lit by warm lantern light from below. The figure's face is not\nvisible. Tense, quiet. No text. Aspect ratio 9:16.",
-   "motion": "Slow dolly in past the brass door handle toward the dark inner room.\nThe shadowed figure steps forward into the shaft of warm light. Their\nface becomes visible only at the very end. Dust drifts through the beam.\nQuiet, deliberate, slightly ominous.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Dolly In · 9:16 · 3s)",
-   "preset": "Dolly In",
-   "ratio": "9:16",
-   "duration": "3s",
-   "loop": false,
-   "tint": false,
-   "still": false,
-   "note": "<b>두 번째 결제가 갈리는 3초입니다.</b> 1차 출시에 이거 하나는 반드시."
-  }
- },
- "figures": {
-  "cheoneul": {
-   "note": null,
-   "hint": null,
-   "title": "흰 소매의 귀인",
-   "who": "천을귀인 天乙貴人",
-   "preset": "Dolly In",
-   "ratio": "3:4",
-   "duration": "3s",
-   "loop": true,
-   "tint": false,
-   "still": false,
-   "spec": [
-    "3:4",
-    "신살 인물",
-    "Dolly In"
-   ],
-   "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA serene guardian woman in flowing white hanbok, wide sleeves spread\nforward as if shielding someone unseen. Warm gold rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-   "motion": "sleeves drift slowly forward, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Dolly In · 3:4 · 3s)"
-  },
-  "taegeuk": {
-   "note": null,
-   "hint": null,
-   "title": "태극을 인 이",
-   "who": "태극귀인 太極貴人",
-   "preset": "Static",
-   "ratio": "3:4",
-   "duration": "3s",
-   "loop": true,
-   "tint": false,
-   "still": false,
-   "spec": [
-    "3:4",
-    "신살 인물",
-    "Static"
-   ],
-   "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA calm immortal holding a luminous circular emblem, half light half\nshadow. Teal rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-   "motion": "the circular emblem rotates once very slowly, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
-  },
-  "munchang": {
-   "note": null,
-   "hint": null,
-   "title": "붓을 든 서생",
-   "who": "문창귀인 文昌貴人",
-   "preset": "Static",
-   "ratio": "3:4",
-   "duration": "3s",
-   "loop": true,
-   "tint": false,
-   "still": false,
-   "spec": [
-    "3:4",
-    "신살 인물",
-    "Static"
-   ],
-   "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA refined young scholar holding a writing brush upright, scrolls at his\nside. Lavender rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-   "motion": "brush tip sways, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
-  },
-  "geumyeo": {
-   "note": null,
-   "hint": null,
-   "title": "가마를 끄는 이",
-   "who": "금여 金輿",
-   "preset": "Static",
-   "ratio": "3:4",
-   "duration": "3s",
-   "loop": true,
-   "tint": false,
-   "still": false,
-   "spec": [
-    "3:4",
-    "신살 인물",
-    "Static"
-   ],
-   "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nAn elegant attendant beside an ornate palanquin, one hand resting on its\npole. Rose rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-   "motion": "palanquin wheel turns a quarter, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
-  },
-  "amrok": {
-   "note": null,
-   "hint": null,
-   "title": "그림자 속의 손",
-   "who": "암록 暗祿",
-   "preset": "Static",
-   "ratio": "3:4",
-   "duration": "3s",
-   "loop": true,
-   "tint": false,
-   "still": false,
-   "spec": [
-    "3:4",
-    "신살 인물",
-    "Static"
-   ],
-   "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA half-hidden figure in shadow, one hand extended forward from behind.\nFace obscured. Slate rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-   "motion": "the extended hand tilts slightly, shadow breathes\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
-  },
-  "yangin": {
-   "note": null,
-   "hint": null,
-   "title": "칼을 쥔 무인",
-   "who": "양인 羊刃",
-   "preset": "Static",
-   "ratio": "3:4",
-   "duration": "3s",
-   "loop": true,
-   "tint": false,
-   "still": false,
-   "spec": [
-    "3:4",
-    "신살 인물",
-    "Static"
-   ],
-   "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA poised warrior resting a slender blade point-down, not raised.\nCrimson rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-   "motion": "blade catches a slow glint, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
-  },
-  "baekho": {
-   "note": null,
-   "hint": null,
-   "title": "흰 범",
-   "who": "백호대살 白虎大殺",
-   "preset": "Dolly In",
-   "ratio": "3:4",
-   "duration": "3s",
-   "loop": true,
-   "tint": false,
-   "still": false,
-   "spec": [
-    "3:4",
-    "신살 인물",
-    "Dolly In"
-   ],
-   "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA white tiger seated in profile, calm and watchful, NOT snarling.\nNo blood, no wounds. Pale silver rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-   "motion": "tail sweeps once, ears twitch, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Dolly In · 3:4 · 3s)"
-  },
-  "wonjin": {
-   "note": null,
-   "hint": null,
-   "title": "등을 돌린 그림자",
-   "who": "원진 怨嗔",
-   "preset": "Static",
-   "ratio": "3:4",
-   "duration": "3s",
-   "loop": true,
-   "tint": false,
-   "still": false,
-   "spec": [
-    "3:4",
-    "신살 인물",
-    "Static"
-   ],
-   "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nTwo figures back to back, slightly misaligned, neither facing the\nviewer. Muted violet-grey.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-   "motion": "both figures sway apart a few pixels, no faces\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
-  },
-  "dohwa": {
-   "note": null,
-   "hint": null,
-   "title": "꽃그늘의 사람",
-   "who": "도화 桃花",
-   "preset": "Static",
-   "ratio": "3:4",
-   "duration": "3s",
-   "loop": true,
-   "tint": false,
-   "still": false,
-   "spec": [
-    "3:4",
-    "신살 인물",
-    "Static"
-   ],
-   "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA striking person standing under falling blossoms, gaze drawing the eye.\nFully clothed in layered hanbok, dignified posture.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-   "motion": "blossoms fall past, hair lifts once, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
-  },
-  "yeokma": {
-   "note": null,
-   "hint": null,
-   "title": "말 위의 나그네",
-   "who": "역마 驛馬",
-   "preset": "Static",
-   "ratio": "3:4",
-   "duration": "3s",
-   "loop": true,
-   "tint": false,
-   "still": false,
-   "spec": [
-    "3:4",
-    "신살 인물",
-    "Static"
-   ],
-   "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA traveler on horseback in mid-stride, dust trailing behind.\nWarm sand rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-   "motion": "dust drifts backward, horse mane lifts\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
-  },
-  "hwagae": {
-   "note": null,
-   "hint": null,
-   "title": "일산 아래 홀로",
-   "who": "화개 華蓋",
-   "preset": "Static",
-   "ratio": "3:4",
-   "duration": "3s",
-   "loop": true,
-   "tint": false,
-   "still": false,
-   "spec": [
-    "3:4",
-    "신살 인물",
-    "Static"
-   ],
-   "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA solitary figure beneath a floral canopy, turned slightly away.\nLavender rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-   "motion": "canopy fringe sways, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
-  },
-  "gwaegang": {
-   "note": null,
-   "hint": null,
-   "title": "북두를 인 장수",
-   "who": "괴강 魁罡",
-   "preset": "Static",
-   "ratio": "3:4",
-   "duration": "3s",
-   "loop": true,
-   "tint": false,
-   "still": false,
-   "spec": [
-    "3:4",
-    "신살 인물",
-    "Static"
-   ],
-   "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA commander with the Big Dipper glowing above the head, steel-grey\narmor. Cool rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-   "motion": "the seven stars pulse once in sequence\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
-  },
-  "gongmang": {
-   "note": null,
-   "hint": null,
-   "title": "빈 자리",
-   "who": "공망 空亡",
-   "preset": "Static",
-   "ratio": "3:4",
-   "duration": "3s",
-   "loop": true,
-   "tint": false,
-   "still": false,
-   "spec": [
-    "3:4",
-    "신살 인물",
-    "Static"
-   ],
-   "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nAn empty seat. No person. A dashed outline where someone would be.\nNearly monochrome, deep indigo.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-   "motion": "the dashed outline fades in and out once. nothing else moves.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
-  }
- }
 }

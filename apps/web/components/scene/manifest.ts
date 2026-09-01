@@ -79,6 +79,16 @@ export const SCENES: SceneSpec[] = [
   { id: "desk", name: "붓·벼루·빈 종이", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
   { id: "ink", name: "먹이 번지는 종이", preset: "Static", ratio: "9:16", seconds: 5, loop: false },
   { id: "room", name: "실내·병풍·주렴", preset: "Static", ratio: "9:16", seconds: 5, loop: true },
+  /*
+   * ★ a4b 「성향 4글자」 몫. 이 화면은 발주서(docs/10)가 쓰인 뒤에
+   *   붙어서 제 장면이 없었고, a3 의 「먹이 번지는 종이」를 그대로
+   *   갖다 쓰고 있었습니다. 두 화면이 잇달아 나오는데 그림이 같으면
+   *   손님은 화면이 안 넘어간 줄 압니다.
+   *
+   *   이 화면이 하는 일은 **넉 자와 여덟 글자를 맞대 보는 것**입니다.
+   *   (셈에는 안 들어가고 어긋난 자리를 찾는 데만 씁니다)
+   */
+  { id: "mirror", name: "맞대어 보는 자리", preset: "Static", ratio: "9:16", seconds: 5, loop: true },
   { id: "fork", name: "갈림길", preset: "Static", ratio: "16:9", seconds: 3, loop: true, focus: "50% 55%" },
   { id: "altar", name: "명식 받침", preset: "Static", ratio: "9:16", seconds: 5, loop: false, tint: "recolor" },
   { id: "facing", name: "마주앉은 자리", preset: "Static", ratio: "9:16", seconds: 5, loop: true },

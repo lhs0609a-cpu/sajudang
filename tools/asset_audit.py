@@ -128,6 +128,35 @@ def have(sid: str) -> dict:
     return got
 
 
+# ★ 일부러 나눠 쓰는 자리.
+#
+#   같은 장면을 두 화면이 쓰는 것이 늘 잘못은 아닙니다. 바탕 질감이나
+#   같은 뜻의 자리는 나눠 써도 됩니다. 다만 **잇달아 나오는 두 화면**이
+#   같으면 손님은 화면이 안 넘어간 줄 압니다 — 실제로 a3 「날을 대다」와
+#   a4b 「성향 4글자」가 둘 다 「먹이 번지는 종이」였습니다.
+#
+#   그래서 나눠 쓰는 자리는 여기 **적어 두고** 씁니다. 적어 두지 않은
+#   것이 나오면 도구가 짚습니다.
+SHARED_OK = {
+    "gate":     "대문 · 공유본 건너오다 — 같은 대문입니다",
+    "oldpaper": "종이 질감 — 바탕으로 여러 자리에 깝니다",
+    "wall":     "후기 벽 — 인장첩과 리포트에서 같은 벽입니다",
+    "scroll":   "두루마리 — 리포트와 분석지가 같은 두루마리입니다",
+    "coin":     "엽전 — 한 화면 안의 두 갈래입니다",
+    "seat":     "그 사람의 자리",
+}
+
+
+def shared(used: dict) -> list:
+    """두 화면 이상이 같은 장면을 쓰는가."""
+    out = []
+    for sid, u in used.items():
+        screens = sorted({_screen(w) for w, _ in u})
+        if len(screens) > 1 and sid not in SHARED_OK:
+            out.append((sid, screens))
+    return out
+
+
 def main() -> int:
     man = read_manifest()
     used = read_usage()
@@ -263,6 +292,15 @@ def main() -> int:
                   % (sid, box, pct, cut, focus))
         print("     중요한 것을 위아래 끝에 두지 마세요 — 안 보입니다.")
         print("     가운데가 답이 아니면 manifest 의 focus 로 옮깁니다.")
+    sh = shared(used)
+    if sh:
+        bad = True
+        print("  ★ 두 화면이 **같은 장면**을 씁니다 — 잇달아 나오면")
+        print("     손님은 화면이 안 넘어간 줄 압니다:")
+        for sid, screens in sh:
+            print("     %-10s %s" % (sid, " · ".join(screens)))
+        print("     일부러 나눠 쓰는 것이면 SHARED_OK 에 까닭과 함께 적으세요.")
+
     if not draws or not users:
         bad = True
         print("  ★ 캐릭터 초상이 갈 자리가 없습니다.")

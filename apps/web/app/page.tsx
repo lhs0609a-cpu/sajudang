@@ -573,7 +573,7 @@ function EntryInner() {
     return (
       <Shell title="성향 4글자" onBack={back}>
         <Progress step={progressAt("a4b")!} total={PROGRESS_TOTAL} />
-        <Scene id="ink" />
+        <Scene id="mirror" />
         <Narration lines={["그가 종이 한 장을 더 꺼냈다."]} />
         <Say who="도령" html="혹시 <b>성향 검사</b>를 해본 적 있소?<br>네 글자로 나오는 그것 말이오." />
 
