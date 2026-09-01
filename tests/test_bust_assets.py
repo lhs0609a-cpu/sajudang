@@ -42,13 +42,19 @@ def test_size_and_transparency():
                        % (p.parent.name, *im.size))
             continue
         im = im.convert("RGBA")
-        # 네 모서리가 다 비어 있어야 배경이 지워진 것이다
+        # ★ **위** 두 모서리만 봅니다.
+        #
+        #   처음에는 네 모서리를 다 봤습니다. 그런데 가슴 위를 자른
+        #   초상은 옷이 아래 가장자리까지 닿습니다 — 아래 모서리가 찬
+        #   것은 배경이 남은 게 아니라 **옷입니다.** 정면 초상을 넣자마자
+        #   검사가 그걸 배경이라고 잘못 짚었습니다.
+        #
+        #   머리 위는 언제나 비어 있어야 합니다. 거기가 배경 자리입니다.
         w, h = im.size
-        corners = [im.getpixel(xy) for xy in
-                   ((2, 2), (w - 3, 2), (2, h - 3), (w - 3, h - 3))]
-        solid = [c for c in corners if c[3] > 40]
+        top = [im.getpixel(xy) for xy in ((2, 2), (w - 3, 2))]
+        solid = [c for c in top if c[3] > 40]
         if solid:
-            bad.append("%s — 배경이 남아 있소 (모서리 %d곳)"
+            bad.append("%s — 배경이 남아 있소 (머리 위 모서리 %d곳)"
                        % (p.parent.name, len(solid)))
         kb = p.stat().st_size // 1024
         if kb > MAX_KB:

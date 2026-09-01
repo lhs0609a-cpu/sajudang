@@ -1748,3 +1748,51 @@ body.has-rail-closed .stage { margin-left: 26px; }
   object-fit: cover;
   display: block;
 }
+
+/* ══════════════════════════════════════════════════════════
+ * 장면 안에 선 사람 (레이어드)
+ *
+ * ★ 전에는 배경 한 칸, 그 아래 초상 한 칸이었습니다. 두 그림이 따로
+ *   놓이면 손님에게는 「그림 두 장」이지 **그 방에 있는 사람**이
+ *   아닙니다. 도령이 방 안에 있어야 마주 앉은 느낌이 납니다.
+ *
+ * ★ 바닥에 발을 딛듯 아래 가운데에 세웁니다. 장면의 페이드가 그 위로
+ *   흐르므로 아래가 자연히 녹습니다.
+ * ══════════════════════════════════════════════════════════ */
+
+.scenefig {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  /*
+   * 86% 로 두면 사람이 방을 다 가립니다. 방이 보여야 「그 방에 있는
+   * 사람」이 되지, 안 보이면 그냥 초상입니다.
+   */
+  height: 76%;
+  z-index: 2;
+  pointer-events: none;
+  line-height: 0;
+}
+.scenefig img {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+  /* 바닥에서 살짝 녹입니다 — 잘린 네모로 보이면 스티커가 됩니다 */
+  -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent 100%);
+          mask-image: linear-gradient(to bottom, #000 78%, transparent 100%);
+  filter: drop-shadow(0 6px 22px rgba(0, 0, 0, .55));
+}
+
+/* 사람이 선 장면은 아래 페이드를 조금 늦춥니다 — 발끝을 다 먹으면
+   공중에 뜬 것처럼 보입니다 */
+.sceneart:has(.scenefig):not(.fill) > video,
+.sceneart:has(.scenefig):not(.fill) > img,
+.sceneart:has(.scenefig):not(.fill) > svg {
+  -webkit-mask-image: linear-gradient(to bottom,
+      transparent 0%, #000 5%, #000 86%, transparent 100%);
+          mask-image: linear-gradient(to bottom,
+      transparent 0%, #000 5%, #000 86%, transparent 100%);
+}
+
+@media (max-width: 420px) { .scenefig { height: 70%; } }

@@ -472,7 +472,7 @@ function EntryInner() {
     return (
       <Shell title="때를 묻다" onBack={back}>
         <Progress step={progressAt("a4")!} total={PROGRESS_TOTAL} />
-        <Scene id="room" />
+        <Scene id="room" figure />
         <Narration lines={["도령이 고개를 들었다."]} />
         {/*
           ★ 첫 대면. 여기가 손님이 그 사람의 얼굴을 처음 보는 자리입니다.
@@ -485,7 +485,14 @@ function EntryInner() {
             하필 여기인 까닭은 바로 윗줄에 있습니다 — 「도령이 고개를
             들었다」. 고개를 드는데 얼굴이 없으면 그 문장이 거짓말입니다.
         */}
-        <Meet />
+        {/*
+          ★ 도령을 **장면 안에** 세웠습니다 (위 Scene 의 figure).
+
+            전에는 배경 한 칸, 그 아래 초상 한 칸이었습니다. 두 그림이
+            따로 놓이면 손님에게는 「그림 두 장」이지 그 방에 있는
+            사람이 아닙니다. 여기서는 이름만 답니다.
+        */}
+        <Meet nameOnly />
         <Say who="도령">때는 아시오?</Say>
         <Narration lines={["", "대부분은 모른다.", "모른다고 해도 그는 개의치 않았다."]} />
 

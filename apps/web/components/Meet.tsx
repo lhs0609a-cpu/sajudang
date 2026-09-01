@@ -29,11 +29,16 @@ import CharArt from "@/components/CharArt";
 import { LENS_BY_ID } from "@/lib/lenses";
 import { useSession } from "@/lib/store";
 
-export default function Meet({ lens, note }: {
+export default function Meet({ lens, note, nameOnly }: {
   /** 누구를 만나는가. 없으면 지금 고른 캐릭터. */
   lens?: string;
   /** 이름 아래 한 줄. 없으면 그 사람의 전문 분야. */
   note?: string;
+  /**
+   * ★ 초상은 장면이 이미 세웠고 여기서는 **이름만** 낸다.
+   *   같은 얼굴을 두 번 그리면 두 사람으로 보입니다.
+   */
+  nameOnly?: boolean;
 }) {
   const cur = useSession((s) => s.cur);
   const l = LENS_BY_ID[lens ?? cur];
@@ -41,9 +46,11 @@ export default function Meet({ lens, note }: {
 
   return (
     <div className="meet" style={{ ["--c" as string]: l.color }}>
-      <div className="meetart">
-        <CharArt lens={l} size="full" />
-      </div>
+      {!nameOnly && (
+        <div className="meetart">
+          <CharArt lens={l} size="full" />
+        </div>
+      )}
       <div className="meetname">
         <b>{l.name}</b>
         <i>{l.hanja}</i>

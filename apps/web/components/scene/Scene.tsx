@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import PromptModal from "./PromptModal";
 import { RATIO_BOX, SCENE_BY_ID, SEASON_PALETTE } from "./manifest";
 import { seasonOf, useSession, type Season } from "@/lib/store";
+import { LENS_BY_ID } from "@/lib/lenses";
 
 function useReducedMotion() {
   const [reduced, setReduced] = useState(false);
@@ -166,8 +167,49 @@ function Media({ base, name, loop, tintClass, reduced, decorative }: {
  *   어긋나 보입니다. 같은 파일이라 내려받기는 한 번입니다.
  *   prefers-reduced-motion 이면 두 겹 다 poster.jpg 로 내려갑니다.
  */
-export default function Scene({ id, className, bleed }: {
+/**
+ * 장면 안에 선 사람.
+ *
+ * 그림이 없으면 아무것도 안 그립니다 — 자리표시 한자를 배경 위에
+ * 띄우면 그건 사람이 아니라 도장입니다.
+ */
+function SceneFigure({ lens }: { lens?: string }) {
+  const cur = useSession((st) => st.cur);
+  const l = LENS_BY_ID[lens ?? cur];
+  const [has, setHas] = useState(false);
+  useEffect(() => {
+    if (!l) return;
+    let alive = true;
+    fetch(`/char/${l.id}/bust.png`, { method: "HEAD" })
+      .then((r) => { if (alive) setHas(r.ok); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [l]);
+  if (!l || !has) return null;
+  return (
+    <span className="scenefig">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={`/char/${l.id}/bust.png`} alt={l.name} />
+    </span>
+  );
+}
+
+
+export default function Scene({ id, className, bleed, figure }: {
   id: string; className?: string; bleed?: boolean;
+  /**
+   * ★ 사람을 **장면 안에 세웁니다** (레이어드).
+   *
+   *   전에는 배경 한 칸, 그 아래 초상 한 칸이었습니다. 두 그림이 따로
+   *   놓이면 손님에게는 「그림 두 장」이지 **그 방에 있는 사람**이
+   *   아닙니다. 도령이 방 안에 있어야 마주 앉은 느낌이 납니다.
+   *
+   *   장면 위에 겹칩니다 — 바닥에 발을 딛듯 아래 가운데에 세우고,
+   *   장면의 페이드가 그 위로 흐르게 둡니다.
+   *
+   *   캐릭터 id 를 주면 그 사람, `true` 면 지금 고른 사람입니다.
+   */
+  figure?: string | true;
 }) {
   const spec = SCENE_BY_ID[id];
   const reduced = useReducedMotion();
@@ -242,6 +284,7 @@ export default function Scene({ id, className, bleed }: {
         } : undefined}
       >
         {body}
+        {figure && <SceneFigure lens={figure === true ? undefined : figure} />}
         {hasClip && spec.tint && <span className={`scene-tint ${spec.tint}`} />}
         {pickable && (
           <span className="slot">{hasClip ? "프롬프트" : `IMG · ${id}`}</span>
