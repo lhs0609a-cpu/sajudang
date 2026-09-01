@@ -1344,7 +1344,20 @@ body.has-rail-closed .stage { margin-left: 26px; }
  * 그리고 줄을 고르게 나눕니다. 가운데 정렬한 글에서 마지막 줄만
  * 짧게 남으면 정렬이 안 맞아 보입니다.
  */
-.nar, .promise, .say, .gatecopy .sm {
+/*
+ * 과부 줄(widow) — 마지막 줄에 조각만 홀로 남는 것.
+ *
+ *   왜 그리 말했는지까지 적어 드리오. 맞힌다고는
+ *   안 하오.                          ← 이것
+ *
+ * 글이 틀린 것도 버그도 아닌데 읽는 사람에게는 **덜 만든 것처럼**
+ * 보입니다. 가운데 정렬이면 더 티가 납니다.
+ *
+ * `pretty` 는 브라우저가 마지막 줄을 보고 앞줄에서 한 마디를 내려
+ * 보냅니다. 다만 `<br>` 이 섞이면 잘 안 먹으므로, 첫 화면처럼 중요한
+ * 자리는 글에서 직접 끊습니다 (tools/widow.py 가 셉니다).
+ */
+.nar, .promise, .say, .sm, .op, .warn p, .term, .lab, .cut p {
   text-wrap: pretty;
 }
 .gatecopy .promise, .gatecopy .nar {

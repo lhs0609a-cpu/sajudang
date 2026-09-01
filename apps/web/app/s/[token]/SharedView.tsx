@@ -124,8 +124,8 @@ export default function SharedView({ token }: { token: string }) {
       )}
 
       <p className="sm">
-        생년월일과 태어난 고을은 이 링크에 담기지 않았소.
-        {who ? ` ${who}님이 무엇이 담기는지 보고 보내신 것이오.` : ""}
+        생년월일과 태어난 고을은 이 링크에 담기지 않았소.
+        {who ? ` ${who}님이 무엇이 담기는지 보고 보내신 것이오.` : ""}
       </p>
 
       {/* ③ ★ 의심 풀기 — 우리가 먼저 꺼낸다.
@@ -139,7 +139,8 @@ export default function SharedView({ token }: { token: string }) {
           <div className="lab">이 글이 스스로 밝힌 흐린 부분</div>
           {d.caveats.map((c) => <p className="sm" key={c}>· {c}</p>)}
           <p className="sm" style={{ color: "var(--paper3)" }}>
-            잘 맞는 부분만 골라 보여드리지 않소. 흐린 데는 흐리다고 적소.
+            잘 맞는 부분만 골라 보여드리지 않소.
+            흐린 데는 흐리다고 적소.
           </p>
         </div>
       )}

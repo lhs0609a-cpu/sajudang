@@ -210,7 +210,8 @@ export default function ExtraAsk({
         {busy ? "다시 펴는 중이오" : "이걸로 보시오"}
       </button>
       <p className="sm">
-        안 적으셔도 되오. 그 자리 하나만 접히고 나머지는 그대로 있소.
+        안 적으셔도 되오.
+        그 자리 하나만 접히고 나머지는 그대로 있소.
       </p>
     </div>
   );

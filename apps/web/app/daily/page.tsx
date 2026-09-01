@@ -65,7 +65,7 @@ export default function DailyPage() {
           <p>오늘 벌써 {s.visits}번째요.</p>
           <p className="sm">
             운은 하루에 여러 번 바뀌지 않소. 자꾸 들여다본다고 달라질 것도 아니오.
-            오늘은 그만 보시고, 내일 오시오.
+            오늘은 그만 보시고, 내일 오시오.
           </p>
         </div>
       )}
