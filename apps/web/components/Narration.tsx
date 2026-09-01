@@ -1,6 +1,6 @@
 "use client";
 
-import CharArt from "@/components/CharArt";
+import CharArt, { type Mood } from "@/components/CharArt";
 import { LENS_BY_ID } from "@/lib/lenses";
 import { useSession } from "@/lib/store";
 
@@ -27,10 +27,12 @@ export function Narration({ lines }: { lines: string[] }) {
   );
 }
 
-export function Say({ who, children, html, lens }: {
+export function Say({ who, children, html, lens, mood }: {
   who: string; children?: React.ReactNode; html?: string;
   /** 말하는 사람. 없으면 지금 고른 캐릭터. */
   lens?: string;
+  /** 어떤 얼굴로 말하는가 — 짚는 말인가, 누그러뜨리는 말인가. */
+  mood?: Mood;
 }) {
   const cur = useSession((s) => s.cur);
   const l = LENS_BY_ID[lens ?? cur];
@@ -52,7 +54,7 @@ export function Say({ who, children, html, lens }: {
    */
   return (
     <div className="say">
-      {l && <span className="sayface"><CharArt lens={l} size="talk" /></span>}
+      {l && <span className="sayface"><CharArt lens={l} size="talk" mood={mood} /></span>}
       <span className="saybody">
         <small>{who}</small>
         {html ? <span dangerouslySetInnerHTML={{ __html: html }} /> : children}

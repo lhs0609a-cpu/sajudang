@@ -29,6 +29,28 @@ import PromptModal from "@/components/scene/PromptModal";
 
 type Size = "chip" | "talk" | "card" | "full";
 
+/*
+ * ★ 표정.
+ *
+ *   얼굴 한 장으로 다 하면 **짚는 순간과 누그러뜨리는 순간이 같은
+ *   얼굴**이 됩니다. 훅 0단은 아픈 데를 찌르는 자리이고, 만류 문구는
+ *   그만 보라고 달래는 자리인데, 같은 표정이면 둘 다 힘을 잃습니다.
+ *
+ *   문장 뱅크를 세어 보고 셋으로 정했습니다 —
+ *     짚는 말 26 · 누그러뜨리는 말 19 · 아니라고 하는 말 7
+ *   「아니라고 하는 말」은 짚는 얼굴에 접습니다. 일곱 마디를 위해
+ *   스무 명분을 더 그리는 것은 값이 안 맞습니다.
+ *
+ *   파일이 없으면 기본 얼굴로 내려옵니다 — 장면과 같은 규칙입니다.
+ */
+export type Mood = "base" | "cut" | "soft";
+
+const FILE: Record<Mood, string> = {
+  base: "bust.png",
+  cut: "bust_cut.png",     // 짚는 얼굴 — 훅 찌르기
+  soft: "bust_soft.png",   // 누그러뜨리는 얼굴 — 만류·마무리
+};
+
 const BOX: Record<Size, { w: number; h: number }> = {
   chip: { w: 48, h: 64 },     // 진열대 목록
   /*
@@ -41,27 +63,38 @@ const BOX: Record<Size, { w: number; h: number }> = {
 };
 
 /** 파일이 있는지 본다. 없으면 자리표시로 간다 — Scene 과 같은 방식. */
-function useBust(id: string) {
+function useBust(id: string, mood: Mood) {
   const [src, setSrc] = useState<string | null | undefined>(undefined);
   useEffect(() => {
     let alive = true;
-    const url = `/char/${id}/bust.png`;
-    fetch(url, { method: "HEAD" })
-      .then((r) => { if (alive) setSrc(r.ok ? url : null); })
-      .catch(() => { if (alive) setSrc(null); });
+    const want = `/char/${id}/${FILE[mood]}`;
+    const base = `/char/${id}/bust.png`;
+    const ok = (u: string) =>
+      fetch(u, { method: "HEAD" }).then((r) => r.ok).catch(() => false);
+
+    (async () => {
+      // 그 표정이 있으면 그걸, 없으면 기본 얼굴로 내려옵니다.
+      if (mood !== "base" && (await ok(want))) {
+        if (alive) setSrc(want);
+        return;
+      }
+      if (alive) setSrc((await ok(base)) ? base : null);
+    })();
     return () => { alive = false; };
-  }, [id]);
+  }, [id, mood]);
   return src;
 }
 
 export default function CharArt({
-  lens, size = "card", className,
+  lens, size = "card", className, mood = "base",
 }: {
   lens: LensInfo;
   size?: Size;
   className?: string;
+  /** 어떤 얼굴인가. 없으면 기본 얼굴로 내려옵니다. */
+  mood?: Mood;
 }) {
-  const bust = useBust(lens.id);
+  const bust = useBust(lens.id, mood);
   const { w, h } = BOX[size];
   const dim = !lens.released;
 

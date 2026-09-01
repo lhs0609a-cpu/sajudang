@@ -1721,3 +1721,22 @@ body.has-rail-closed .stage { margin-left: 26px; }
   letter-spacing: .04em;
   text-decoration: none;
 }
+
+/*
+ * 훅 한 마디 옆의 얼굴.
+ *
+ * ★ 여기가 손님이 가장 오래 머무는 자리입니다 — 다섯 번 누르고,
+ *   바로 뒤가 결제 갈림길입니다. 그런데 얼굴이 없었습니다.
+ *
+ * 글을 밀어내지 않게 오른쪽 위에 띄웁니다. 좁은 화면에서는 뺍니다 —
+ * 거기서는 글이 이겨야 합니다.
+ */
+.blk .hookface {
+  float: right;
+  margin: 0 0 8px 12px;
+  line-height: 0;
+}
+@media (max-width: 400px) {
+  .blk .hookface { display: none; }
+}
+@media print { .blk .hookface { display: none; } }

@@ -116,6 +116,38 @@ TAIL = ("Bust-up from the chest up, centered, subject occupying about 72% of\n"
         "no cast shadow, no vignette. No text, letters, numbers, logos or\n"
         "watermarks. Aspect ratio 3:4. High detail.")
 
+# ── 표정 두 벌 ─────────────────────────────────────────────
+#
+#   얼굴 한 장으로 다 하면 **짚는 순간과 누그러뜨리는 순간이 같은
+#   얼굴**이 됩니다. 훅 0단은 아픈 데를 찌르는 자리이고 만류 문구는
+#   달래는 자리인데, 같은 표정이면 둘 다 힘을 잃습니다.
+#
+#   문장 뱅크를 세어 셋으로 정했습니다 —
+#     짚는 말 26 · 누그러뜨리는 말 19 · 아니라고 하는 말 7
+#   「아니라고 하는 말」은 짚는 얼굴에 접습니다. 일곱 마디를 위해
+#   스무 명분을 더 그리는 것은 값이 안 맞습니다.
+#
+#   ★ 같은 사람이라야 합니다. 머리·옷·빛은 그대로 두고 **눈과 입만**
+#     바꿉니다. 얼굴이 달라지면 다른 사람이 됩니다.
+MOODS = {
+    "cut": (
+        "bust_cut.png", "짚는",
+        "Same character, same hair, same clothing, same lighting — only the\n"
+        "expression changes. Now the eyes are fixed directly on the viewer,\n"
+        "narrowed very slightly, pupils sharp. The mouth is a straight line,\n"
+        "no smile. One brow a fraction lower than the other. He has just\n"
+        "said something true that the viewer did not want said. Not angry,\n"
+        "not cruel — certain."),
+    "soft": (
+        "bust_soft.png", "누그러뜨리는",
+        "Same character, same hair, same clothing, same lighting — only the\n"
+        "expression changes. Now the eyes are lowered a little and softened,\n"
+        "the outer corners easing down. The faintest warmth at the mouth,\n"
+        "not quite a smile. The head tilts a few degrees toward the viewer.\n"
+        "He is letting the viewer off. Kind, unhurried, a little tired."),
+}
+
+
 MOTION = ("Static camera. The character blinks once, slowly. Hair and sleeve\n"
           "edges drift as if in still air. The eyes stay on the viewer.\n"
           "Nothing else moves — no head turn, no expression change.")
@@ -177,6 +209,15 @@ def one(l: dict, style: str, anim: str) -> list:
     out.append("")
     out.append(TAIL)
     out.append("")
+    for key in ("cut", "soft"):
+        fn, ko, extra = MOODS[key]
+        out.append("--- ①-%s 표정 · %s ---" % (ko, fn))
+        out.append(extra)
+        out.append("")
+        out.append("  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.")
+        out.append("  두는 곳  public/char/%s/%s" % (l["id"], fn))
+        out.append("")
+
     out.append("--- ② 모션 (선택 · clip.webm) ---")
     out.append(MOTION)
     out.append("")
@@ -252,6 +293,9 @@ def main() -> int:
                 "loop": True, "tint": False, "still": False,
                 "image": style + "\n\n" + who + "." + tone + "\n\n" + TAIL,
                 "motion": MOTION + "\n\n" + anim,
+                # 표정 두 벌 — 모달이 같이 보여 줍니다
+                "moods": {k: {"file": v[0], "ko": v[1], "image": v[2]}
+                          for k, v in MOODS.items()},
             }
         PROMPTS.write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n",
                            encoding="utf-8")

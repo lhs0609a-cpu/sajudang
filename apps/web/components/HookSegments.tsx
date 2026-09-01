@@ -8,6 +8,9 @@
  */
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { Say } from "@/components/Narration";
+import CharArt from "@/components/CharArt";
+import { LENS_BY_ID } from "@/lib/lenses";
 import { speakRemote } from "@/lib/sound";
 import { track } from "@/lib/track";
 import type { HookSegment } from "@shared/chart";
@@ -131,6 +134,8 @@ export default function HookSegments({
     }, 660);
   };
 
+  const lens = LENS_BY_ID[lensId];
+
   return (
     <>
       {/*
@@ -143,6 +148,18 @@ export default function HookSegments({
         <div className="blk in" key={seg.statement_id}>
           {/* ★ 몇 번째 마디인지. 0단은 label 이 비어 있어서 손님이
               어디쯤 왔는지 알 길이 없었습니다. */}
+          {/*
+            ★ 마디마다 그 사람의 얼굴을 답니다.
+
+              0단은 아픈 데를 찌르는 자리라 **짚는 얼굴**로 나갑니다.
+              말만 세고 얼굴이 평온하면 그 말이 안 꽂힙니다.
+              마지막 단은 마무리라 누그러뜨립니다.
+          */}
+          {lens && <span className="hookface">
+            <CharArt lens={lens} size="talk"
+                     mood={i === 0 ? "cut"
+                           : i >= segments.length - 1 ? "soft" : "base"} />
+          </span>}
           <div className="stepno">{i + 1} / {segments.length}</div>
           {seg.label && <div className="lab">{seg.label}</div>}
           {/*
@@ -180,7 +197,23 @@ export default function HookSegments({
             </>
           ) : (
             <div className="react on">
-              <div className="say"><small>{charName}</small>{replies[i]}</div>
+              {/*
+                ★ 여기가 얼굴이 없던 자리입니다.
+
+                  `<div className="say">` 를 직접 그리고 있어서, 얼굴을
+                  다는 `<Say>` 를 안 거쳤습니다. 그래서 **훅에만** 얼굴이
+                  없었습니다 — 손님이 「그렇소/아니오」를 다섯 번 누르며
+                  가장 오래 머무는 자리이고, 결제 갈림길 바로 앞입니다.
+
+                  표정도 갈립니다. 그렇다 하면 짚는 얼굴(cut), 아니라
+                  하면 물러서는 얼굴(soft)입니다. 세 번 아니라 했는데
+                  같은 얼굴로 계속 짚으면 그때 손님은 이게 녹음이라는
+                  걸 압니다.
+              */}
+              <Say who={charName}
+                   mood={replies[i] && seg.no === replies[i] ? "soft" : "cut"}>
+                {replies[i]}
+              </Say>
             </div>
           )}
         </div>

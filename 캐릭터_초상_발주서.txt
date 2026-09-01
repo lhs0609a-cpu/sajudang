@@ -30,6 +30,27 @@ Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
+--- ①-짚는 표정 · bust_cut.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are fixed directly on the viewer,
+narrowed very slightly, pupils sharp. The mouth is a straight line,
+no smile. One brow a fraction lower than the other. He has just
+said something true that the viewer did not want said. Not angry,
+not cruel — certain.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/pungun/bust_cut.png
+
+--- ①-누그러뜨리는 표정 · bust_soft.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are lowered a little and softened,
+the outer corners easing down. The faintest warmth at the mouth,
+not quite a smile. The head tilts a few degrees toward the viewer.
+He is letting the viewer off. Kind, unhurried, a little tired.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/pungun/bust_soft.png
+
 --- ② 모션 (선택 · clip.webm) ---
 Static camera. The character blinks once, slowly. Hair and sleeve
 edges drift as if in still air. The eyes stay on the viewer.
@@ -65,6 +86,27 @@ frame height, slight three-quarter angle, looking toward the viewer.
 Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
+
+--- ①-짚는 표정 · bust_cut.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are fixed directly on the viewer,
+narrowed very slightly, pupils sharp. The mouth is a straight line,
+no smile. One brow a fraction lower than the other. He has just
+said something true that the viewer did not want said. Not angry,
+not cruel — certain.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/baegun/bust_cut.png
+
+--- ①-누그러뜨리는 표정 · bust_soft.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are lowered a little and softened,
+the outer corners easing down. The faintest warmth at the mouth,
+not quite a smile. The head tilts a few degrees toward the viewer.
+He is letting the viewer off. Kind, unhurried, a little tired.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/baegun/bust_soft.png
 
 --- ② 모션 (선택 · clip.webm) ---
 Static camera. The character blinks once, slowly. Hair and sleeve
@@ -102,6 +144,27 @@ Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
+--- ①-짚는 표정 · bust_cut.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are fixed directly on the viewer,
+narrowed very slightly, pupils sharp. The mouth is a straight line,
+no smile. One brow a fraction lower than the other. He has just
+said something true that the viewer did not want said. Not angry,
+not cruel — certain.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/cheongam/bust_cut.png
+
+--- ①-누그러뜨리는 표정 · bust_soft.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are lowered a little and softened,
+the outer corners easing down. The faintest warmth at the mouth,
+not quite a smile. The head tilts a few degrees toward the viewer.
+He is letting the viewer off. Kind, unhurried, a little tired.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/cheongam/bust_soft.png
+
 --- ② 모션 (선택 · clip.webm) ---
 Static camera. The character blinks once, slowly. Hair and sleeve
 edges drift as if in still air. The eyes stay on the viewer.
@@ -137,6 +200,27 @@ frame height, slight three-quarter angle, looking toward the viewer.
 Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
+
+--- ①-짚는 표정 · bust_cut.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are fixed directly on the viewer,
+narrowed very slightly, pupils sharp. The mouth is a straight line,
+no smile. One brow a fraction lower than the other. He has just
+said something true that the viewer did not want said. Not angry,
+not cruel — certain.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/sigye/bust_cut.png
+
+--- ①-누그러뜨리는 표정 · bust_soft.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are lowered a little and softened,
+the outer corners easing down. The faintest warmth at the mouth,
+not quite a smile. The head tilts a few degrees toward the viewer.
+He is letting the viewer off. Kind, unhurried, a little tired.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/sigye/bust_soft.png
 
 --- ② 모션 (선택 · clip.webm) ---
 Static camera. The character blinks once, slowly. Hair and sleeve
@@ -174,6 +258,27 @@ Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
+--- ①-짚는 표정 · bust_cut.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are fixed directly on the viewer,
+narrowed very slightly, pupils sharp. The mouth is a straight line,
+no smile. One brow a fraction lower than the other. He has just
+said something true that the viewer did not want said. Not angry,
+not cruel — certain.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/eunbyeol/bust_cut.png
+
+--- ①-누그러뜨리는 표정 · bust_soft.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are lowered a little and softened,
+the outer corners easing down. The faintest warmth at the mouth,
+not quite a smile. The head tilts a few degrees toward the viewer.
+He is letting the viewer off. Kind, unhurried, a little tired.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/eunbyeol/bust_soft.png
+
 --- ② 모션 (선택 · clip.webm) ---
 Static camera. The character blinks once, slowly. Hair and sleeve
 edges drift as if in still air. The eyes stay on the viewer.
@@ -209,6 +314,27 @@ frame height, slight three-quarter angle, looking toward the viewer.
 Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
+
+--- ①-짚는 표정 · bust_cut.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are fixed directly on the viewer,
+narrowed very slightly, pupils sharp. The mouth is a straight line,
+no smile. One brow a fraction lower than the other. He has just
+said something true that the viewer did not want said. Not angry,
+not cruel — certain.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/jeokhyeol/bust_cut.png
+
+--- ①-누그러뜨리는 표정 · bust_soft.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are lowered a little and softened,
+the outer corners easing down. The faintest warmth at the mouth,
+not quite a smile. The head tilts a few degrees toward the viewer.
+He is letting the viewer off. Kind, unhurried, a little tired.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/jeokhyeol/bust_soft.png
 
 --- ② 모션 (선택 · clip.webm) ---
 Static camera. The character blinks once, slowly. Hair and sleeve
@@ -246,6 +372,27 @@ Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
+--- ①-짚는 표정 · bust_cut.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are fixed directly on the viewer,
+narrowed very slightly, pupils sharp. The mouth is a straight line,
+no smile. One brow a fraction lower than the other. He has just
+said something true that the viewer did not want said. Not angry,
+not cruel — certain.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/monghwa/bust_cut.png
+
+--- ①-누그러뜨리는 표정 · bust_soft.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are lowered a little and softened,
+the outer corners easing down. The faintest warmth at the mouth,
+not quite a smile. The head tilts a few degrees toward the viewer.
+He is letting the viewer off. Kind, unhurried, a little tired.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/monghwa/bust_soft.png
+
 --- ② 모션 (선택 · clip.webm) ---
 Static camera. The character blinks once, slowly. Hair and sleeve
 edges drift as if in still air. The eyes stay on the viewer.
@@ -281,6 +428,27 @@ frame height, slight three-quarter angle, looking toward the viewer.
 Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
+
+--- ①-짚는 표정 · bust_cut.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are fixed directly on the viewer,
+narrowed very slightly, pupils sharp. The mouth is a straight line,
+no smile. One brow a fraction lower than the other. He has just
+said something true that the viewer did not want said. Not angry,
+not cruel — certain.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/seoyeok/bust_cut.png
+
+--- ①-누그러뜨리는 표정 · bust_soft.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are lowered a little and softened,
+the outer corners easing down. The faintest warmth at the mouth,
+not quite a smile. The head tilts a few degrees toward the viewer.
+He is letting the viewer off. Kind, unhurried, a little tired.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/seoyeok/bust_soft.png
 
 --- ② 모션 (선택 · clip.webm) ---
 Static camera. The character blinks once, slowly. Hair and sleeve
@@ -318,6 +486,27 @@ Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
+--- ①-짚는 표정 · bust_cut.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are fixed directly on the viewer,
+narrowed very slightly, pupils sharp. The mouth is a straight line,
+no smile. One brow a fraction lower than the other. He has just
+said something true that the viewer did not want said. Not angry,
+not cruel — certain.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/paeseon/bust_cut.png
+
+--- ①-누그러뜨리는 표정 · bust_soft.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are lowered a little and softened,
+the outer corners easing down. The faintest warmth at the mouth,
+not quite a smile. The head tilts a few degrees toward the viewer.
+He is letting the viewer off. Kind, unhurried, a little tired.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/paeseon/bust_soft.png
+
 --- ② 모션 (선택 · clip.webm) ---
 Static camera. The character blinks once, slowly. Hair and sleeve
 edges drift as if in still air. The eyes stay on the viewer.
@@ -353,6 +542,27 @@ frame height, slight three-quarter angle, looking toward the viewer.
 Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
+
+--- ①-짚는 표정 · bust_cut.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are fixed directly on the viewer,
+narrowed very slightly, pupils sharp. The mouth is a straight line,
+no smile. One brow a fraction lower than the other. He has just
+said something true that the viewer did not want said. Not angry,
+not cruel — certain.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/myeonsang/bust_cut.png
+
+--- ①-누그러뜨리는 표정 · bust_soft.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are lowered a little and softened,
+the outer corners easing down. The faintest warmth at the mouth,
+not quite a smile. The head tilts a few degrees toward the viewer.
+He is letting the viewer off. Kind, unhurried, a little tired.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/myeonsang/bust_soft.png
 
 --- ② 모션 (선택 · clip.webm) ---
 Static camera. The character blinks once, slowly. Hair and sleeve
@@ -390,6 +600,27 @@ Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
+--- ①-짚는 표정 · bust_cut.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are fixed directly on the viewer,
+narrowed very slightly, pupils sharp. The mouth is a straight line,
+no smile. One brow a fraction lower than the other. He has just
+said something true that the viewer did not want said. Not angry,
+not cruel — certain.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/wolha/bust_cut.png
+
+--- ①-누그러뜨리는 표정 · bust_soft.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are lowered a little and softened,
+the outer corners easing down. The faintest warmth at the mouth,
+not quite a smile. The head tilts a few degrees toward the viewer.
+He is letting the viewer off. Kind, unhurried, a little tired.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/wolha/bust_soft.png
+
 --- ② 모션 (선택 · clip.webm) ---
 Static camera. The character blinks once, slowly. Hair and sleeve
 edges drift as if in still air. The eyes stay on the viewer.
@@ -425,6 +656,27 @@ frame height, slight three-quarter angle, looking toward the viewer.
 Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
+
+--- ①-짚는 표정 · bust_cut.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are fixed directly on the viewer,
+narrowed very slightly, pupils sharp. The mouth is a straight line,
+no smile. One brow a fraction lower than the other. He has just
+said something true that the viewer did not want said. Not angry,
+not cruel — certain.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/hongmae/bust_cut.png
+
+--- ①-누그러뜨리는 표정 · bust_soft.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are lowered a little and softened,
+the outer corners easing down. The faintest warmth at the mouth,
+not quite a smile. The head tilts a few degrees toward the viewer.
+He is letting the viewer off. Kind, unhurried, a little tired.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/hongmae/bust_soft.png
 
 --- ② 모션 (선택 · clip.webm) ---
 Static camera. The character blinks once, slowly. Hair and sleeve
@@ -462,6 +714,27 @@ Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
+--- ①-짚는 표정 · bust_cut.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are fixed directly on the viewer,
+narrowed very slightly, pupils sharp. The mouth is a straight line,
+no smile. One brow a fraction lower than the other. He has just
+said something true that the viewer did not want said. Not angry,
+not cruel — certain.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/yeondam/bust_cut.png
+
+--- ①-누그러뜨리는 표정 · bust_soft.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are lowered a little and softened,
+the outer corners easing down. The faintest warmth at the mouth,
+not quite a smile. The head tilts a few degrees toward the viewer.
+He is letting the viewer off. Kind, unhurried, a little tired.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/yeondam/bust_soft.png
+
 --- ② 모션 (선택 · clip.webm) ---
 Static camera. The character blinks once, slowly. Hair and sleeve
 edges drift as if in still air. The eyes stay on the viewer.
@@ -497,6 +770,27 @@ frame height, slight three-quarter angle, looking toward the viewer.
 Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
+
+--- ①-짚는 표정 · bust_cut.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are fixed directly on the viewer,
+narrowed very slightly, pupils sharp. The mouth is a straight line,
+no smile. One brow a fraction lower than the other. He has just
+said something true that the viewer did not want said. Not angry,
+not cruel — certain.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/hwagyeong/bust_cut.png
+
+--- ①-누그러뜨리는 표정 · bust_soft.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are lowered a little and softened,
+the outer corners easing down. The faintest warmth at the mouth,
+not quite a smile. The head tilts a few degrees toward the viewer.
+He is letting the viewer off. Kind, unhurried, a little tired.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/hwagyeong/bust_soft.png
 
 --- ② 모션 (선택 · clip.webm) ---
 Static camera. The character blinks once, slowly. Hair and sleeve
@@ -534,6 +828,27 @@ Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
+--- ①-짚는 표정 · bust_cut.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are fixed directly on the viewer,
+narrowed very slightly, pupils sharp. The mouth is a straight line,
+no smile. One brow a fraction lower than the other. He has just
+said something true that the viewer did not want said. Not angry,
+not cruel — certain.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/haengsu/bust_cut.png
+
+--- ①-누그러뜨리는 표정 · bust_soft.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are lowered a little and softened,
+the outer corners easing down. The faintest warmth at the mouth,
+not quite a smile. The head tilts a few degrees toward the viewer.
+He is letting the viewer off. Kind, unhurried, a little tired.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/haengsu/bust_soft.png
+
 --- ② 모션 (선택 · clip.webm) ---
 Static camera. The character blinks once, slowly. Hair and sleeve
 edges drift as if in still air. The eyes stay on the viewer.
@@ -569,6 +884,27 @@ frame height, slight three-quarter angle, looking toward the viewer.
 Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
+
+--- ①-짚는 표정 · bust_cut.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are fixed directly on the viewer,
+narrowed very slightly, pupils sharp. The mouth is a straight line,
+no smile. One brow a fraction lower than the other. He has just
+said something true that the viewer did not want said. Not angry,
+not cruel — certain.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/hunjang/bust_cut.png
+
+--- ①-누그러뜨리는 표정 · bust_soft.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are lowered a little and softened,
+the outer corners easing down. The faintest warmth at the mouth,
+not quite a smile. The head tilts a few degrees toward the viewer.
+He is letting the viewer off. Kind, unhurried, a little tired.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/hunjang/bust_soft.png
 
 --- ② 모션 (선택 · clip.webm) ---
 Static camera. The character blinks once, slowly. Hair and sleeve
@@ -606,6 +942,27 @@ Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
+--- ①-짚는 표정 · bust_cut.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are fixed directly on the viewer,
+narrowed very slightly, pupils sharp. The mouth is a straight line,
+no smile. One brow a fraction lower than the other. He has just
+said something true that the viewer did not want said. Not angry,
+not cruel — certain.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/yakcho/bust_cut.png
+
+--- ①-누그러뜨리는 표정 · bust_soft.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are lowered a little and softened,
+the outer corners easing down. The faintest warmth at the mouth,
+not quite a smile. The head tilts a few degrees toward the viewer.
+He is letting the viewer off. Kind, unhurried, a little tired.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/yakcho/bust_soft.png
+
 --- ② 모션 (선택 · clip.webm) ---
 Static camera. The character blinks once, slowly. Hair and sleeve
 edges drift as if in still air. The eyes stay on the viewer.
@@ -641,6 +998,27 @@ frame height, slight three-quarter angle, looking toward the viewer.
 Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
+
+--- ①-짚는 표정 · bust_cut.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are fixed directly on the viewer,
+narrowed very slightly, pupils sharp. The mouth is a straight line,
+no smile. One brow a fraction lower than the other. He has just
+said something true that the viewer did not want said. Not angry,
+not cruel — certain.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/ilgwan/bust_cut.png
+
+--- ①-누그러뜨리는 표정 · bust_soft.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are lowered a little and softened,
+the outer corners easing down. The faintest warmth at the mouth,
+not quite a smile. The head tilts a few degrees toward the viewer.
+He is letting the viewer off. Kind, unhurried, a little tired.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/ilgwan/bust_soft.png
 
 --- ② 모션 (선택 · clip.webm) ---
 Static camera. The character blinks once, slowly. Hair and sleeve
@@ -678,6 +1056,27 @@ Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
+--- ①-짚는 표정 · bust_cut.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are fixed directly on the viewer,
+narrowed very slightly, pupils sharp. The mouth is a straight line,
+no smile. One brow a fraction lower than the other. He has just
+said something true that the viewer did not want said. Not angry,
+not cruel — certain.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/nopa/bust_cut.png
+
+--- ①-누그러뜨리는 표정 · bust_soft.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are lowered a little and softened,
+the outer corners easing down. The faintest warmth at the mouth,
+not quite a smile. The head tilts a few degrees toward the viewer.
+He is letting the viewer off. Kind, unhurried, a little tired.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/nopa/bust_soft.png
+
 --- ② 모션 (선택 · clip.webm) ---
 Static camera. The character blinks once, slowly. Hair and sleeve
 edges drift as if in still air. The eyes stay on the viewer.
@@ -713,6 +1112,27 @@ frame height, slight three-quarter angle, looking toward the viewer.
 Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
+
+--- ①-짚는 표정 · bust_cut.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are fixed directly on the viewer,
+narrowed very slightly, pupils sharp. The mouth is a straight line,
+no smile. One brow a fraction lower than the other. He has just
+said something true that the viewer did not want said. Not angry,
+not cruel — certain.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/dongja/bust_cut.png
+
+--- ①-누그러뜨리는 표정 · bust_soft.png ---
+Same character, same hair, same clothing, same lighting — only the
+expression changes. Now the eyes are lowered a little and softened,
+the outer corners easing down. The faintest warmth at the mouth,
+not quite a smile. The head tilts a few degrees toward the viewer.
+He is letting the viewer off. Kind, unhurried, a little tired.
+
+  나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
+  두는 곳  public/char/dongja/bust_soft.png
 
 --- ② 모션 (선택 · clip.webm) ---
 Static camera. The character blinks once, slowly. Hair and sleeve
