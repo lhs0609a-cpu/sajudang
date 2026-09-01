@@ -212,7 +212,7 @@ Deep plum-violet shadows. No hands, no people, no text.
 Aspect ratio 16:9.
 
 --------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Static · 16:9 · 3s)
+  ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 3s)
 --------------------------------------------------------------------------
 
 Static camera. The floating brush bobs gently in the air, ink glinting
@@ -247,7 +247,7 @@ Warm amber light from one side, deep plum shadow. No hands, no text.
 Aspect ratio 16:9.
 
 --------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Static · 16:9 · 2s)
+  ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 5s)
 --------------------------------------------------------------------------
 
 Static camera, macro. A single drop of black ink falls onto the hanji
@@ -286,7 +286,7 @@ Deep plum-violet shadows. Empty, no people, no text.
 Aspect ratio 16:9.
 
 --------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Static · 16:9 · 4s)
+  ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 5s)
 --------------------------------------------------------------------------
 
 Static camera. The three hanging lanterns flicker at slightly
@@ -326,7 +326,7 @@ out of focus above. No hands, no faces, no text, no letters of any
 script. Aspect ratio 9:16.
 
 --------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Static · 16:9 · 3s)
+  ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 5s)
 --------------------------------------------------------------------------
 
 Static camera. The two rows breathe very slightly out of phase —
@@ -362,7 +362,7 @@ plum-violet tones, dreamlike and inviting. No people, no legible text.
 Aspect ratio 16:9.
 
 --------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Static · 16:9 · 3s)
+  ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 3s)
 --------------------------------------------------------------------------
 
 Static camera. The three floating lantern-flames above the signposts
@@ -402,7 +402,7 @@ carved slots waiting. Deep plum-violet shadows, mist along the floor.
 Awe-inspiring, sacred, no people, no text. Aspect ratio 16:9.
 
 --------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Static · 16:9 · 4s)
+  ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 5s)
 --------------------------------------------------------------------------
 
 Static camera. Four blank wooden plaques rise slowly from the altar
@@ -441,7 +441,7 @@ waits in shadow. Golden motes drift through the air. Deep plum-violet
 tones. No people, no text. Aspect ratio 16:9.
 
 --------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Static · 16:9 · 3s)
+  ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 5s)
 --------------------------------------------------------------------------
 
 Static camera. The four glowing plaques hovering between the two
@@ -482,7 +482,7 @@ through the air. Deep plum-violet shadows, mist along the floor.
 Quiet, expectant, mysterious. No people, no text. Aspect ratio 16:9.
 
 --------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Dolly In · 16:9 · 4s)
+  ② 모션 · 힉스필드   (프리셋 Dolly In · 9:16 · 4s)
 --------------------------------------------------------------------------
 
 Very slow dolly in down the hall between the rows of cushions. The
@@ -521,7 +521,7 @@ mirrors the glow faintly. Intimate, expectant, sacred. No people,
 no text. Aspect ratio 3:4.
 
 --------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Static · 3:4 · 3s)
+  ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 3s)
 --------------------------------------------------------------------------
 
 Static camera. The luminous circular sigil behind the empty cushion
@@ -558,7 +558,7 @@ the air. The background falls into deep plum-violet darkness.
 Mysterious, inviting, like an offering hall. No people. Aspect ratio 16:9.
 
 --------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Static · 16:9 · 3s)
+  ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 3s)
 --------------------------------------------------------------------------
 
 Static camera. The six hanging wooden plaques sway very slightly on
@@ -599,7 +599,7 @@ gold drift through a soft shaft of light from above. Deep plum-violet
 background. Magical, weightless. No hands, no people. Aspect ratio 16:9.
 
 --------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Static · 16:9 · 3s)
+  ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 3s)
 --------------------------------------------------------------------------
 
 Static camera. The scroll unrolls smoothly to the right between the
@@ -636,7 +636,7 @@ petals drift through the misty air. Full moon above. Contemplative,
 beautiful, no people, no text. Aspect ratio 16:9.
 
 --------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Dolly Right · 16:9 · 4s)
+  ② 모션 · 힉스필드   (프리셋 Dolly Right · 9:16 · 4s)
 --------------------------------------------------------------------------
 
 Slow dolly right along the winding path, travelling from the near
@@ -671,7 +671,7 @@ over and falling into deep shadow. Warm amber light on the exposed
 portion only. No legible text, no hands. Aspect ratio 16:9.
 
 --------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Static · 16:9 · 2s)
+  ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 2s)
 --------------------------------------------------------------------------
 
 Static camera. The scroll folds halfway closed in one smooth motion,
@@ -713,7 +713,7 @@ deep plum-black ground. Completely empty at the center for a character
 illustration. Elegant, precious, keepsake-like. No text. Aspect ratio 1:1.
 
 --------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Static · 1:1 · 3s)
+  ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 3s)
 --------------------------------------------------------------------------
 
 Static camera, centered. The celestial ring rotates slowly. The halo
@@ -749,7 +749,7 @@ above, gold motes drifting. Lived-in, affectionate, accumulated over
 time. No people, no legible text. Aspect ratio 16:9.
 
 --------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Static · 16:9 · 3s)
+  ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 3s)
 --------------------------------------------------------------------------
 
 Static camera. The pinned paper notes lift and settle at different
@@ -784,7 +784,7 @@ light falls across it from above, gold motes drifting. Deep plum
 background. Nostalgic, treasured. No hands, no text. Aspect ratio 16:9.
 
 --------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Static · 16:9 · 3s)
+  ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 3s)
 --------------------------------------------------------------------------
 
 Static camera. The curled corners of the aged paper lift and settle
@@ -822,7 +822,7 @@ surface, catching warm amber light from above. Shallow depth, deep plum
 background. No hands, no text. Aspect ratio 1:1.
 
 --------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Static · 1:1 · 2s)
+  ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 2s)
 --------------------------------------------------------------------------
 
 Static camera. One brass coin slides off the top of the small pile and
@@ -856,7 +856,7 @@ Centered, high contrast, deep plum-violet background. Joyful,
 rewarding, ceremonial. No hands, no text. Aspect ratio 1:1.
 
 --------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Static · 1:1 · 2s)
+  ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 2s)
 --------------------------------------------------------------------------
 
 Static camera. The red silk cord unties itself and slips away from
@@ -892,7 +892,7 @@ gold motes drifting. Deep plum shadows. No legible text, no hands.
 Aspect ratio 16:9.
 
 --------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Static · 16:9 · 2s)
+  ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 2s)
 --------------------------------------------------------------------------
 
 Static camera. The four wooden plaques on the tray bob very gently at
@@ -978,7 +978,7 @@ composition with room for text on the right. No people, no text.
 Aspect ratio 16:9.
 
 --------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Static · 16:9 · 3s)
+  ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 3s)
 --------------------------------------------------------------------------
 
 Static camera. The hanging lantern sways gently and its light shifts
@@ -1018,7 +1018,7 @@ gold drift through the air. Deep plum-violet shadows. Inviting,
 gentle, no people, no text. Aspect ratio 16:9.
 
 --------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Static · 16:9 · 3s)
+  ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 3s)
 --------------------------------------------------------------------------
 
 Static camera. Thin steam curls upward from the teacup. The black cat
@@ -1064,7 +1064,7 @@ background. Precious, collectible, no people, no legible text.
 Aspect ratio 3:4.
 
 --------------------------------------------------------------------------
-  ② 모션 · 힉스필드   (프리셋 Static · 3:4 · 2s)
+  ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 2s)
 --------------------------------------------------------------------------
 
 Static camera, top-down on the open booklet. A red seal stamp presses

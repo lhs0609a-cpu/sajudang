@@ -91,6 +91,32 @@ for (const s of SEASONS) bySeason[s.k] = evalWith(s.k).SCN;
  *   여기서 이어 붙입니다. 참조본이 원본인 것은 그대로 두고, 자란
  *   만큼만 더합니다.
  */
+/*
+ * ★ 비율과 길이는 **선언**에서 읽습니다.
+ *
+ *   전에는 얼어 있는 참조본의 값을 그대로 찍어서, 원본을 전부 9:16 으로
+ *   받기로 한 뒤에도 시트가 「16:9 · 2s」 라고 시켰습니다. 발주서가 틀린
+ *   비율을 가리키면 그린 사람이 그 비율로 그립니다.
+ */
+const MANIFEST = fs.readFileSync(
+  "apps/web/components/scene/manifest.ts", "utf8")
+  .split(NL).filter((l) => !l.trim().startsWith("//")).join(NL);
+const SPEC = {};
+for (const m of MANIFEST.matchAll(
+    /\{\s*id:\s*"(\w+)"[^}]*?ratio:\s*"([^"]+)"[^}]*?seconds:\s*(\d+)/g)) {
+  /*
+   * ★ 장면 그림은 **언제나 9:16** 으로 그립니다.
+   *
+   *   선언의 `ratio` 는 이제 「보여 주는 상자」입니다. 화면에서는 높이의
+   *   3분의 2를 차지하는 띠로 잘라 쓰고, 남는 데는 cover 로 버립니다.
+   *   그러니 그리는 사람에게 시킬 비율은 상자가 아니라 **원본**입니다.
+   *   상자를 시키면 세로가 모자라 위아래가 잘립니다.
+   *
+   *   길이는 선언 그대로 씁니다.
+   */
+  SPEC[m[1]] = { ar: "9:16", du: m[3] + "s" };
+}
+
 const EXTRA = JSON.parse(fs.readFileSync(FIGJSON, "utf8")).scenes || {};
 for (const [id, v] of Object.entries(EXTRA)) {
   if (SCN[id]) continue;
@@ -331,7 +357,8 @@ for (const it of items) {
   P();
   P(bar("-"));
   P("  ② 모션 · 힉스필드   (프리셋 " + (it.mo.ps || "Static") +
-    " · " + (it.mo.ar || "16:9") + " · " + (it.mo.du || "3s") + ")");
+    " · " + ((SPEC[it.id] || {}).ar || it.mo.ar || "9:16") +
+    " · " + ((SPEC[it.id] || {}).du || it.mo.du || "3s") + ")");
   P(bar("-"));
   P();
   P(it.motion.replace(/\s+$/, ""));
