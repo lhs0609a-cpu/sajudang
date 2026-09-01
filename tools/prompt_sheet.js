@@ -75,11 +75,40 @@ const DEFAULT_SEASON = { k: "summer", ko: "여름 · 능소화" };
 
 const base = evalWith("summer");
 const { SCN, MO, ANIMBASE, TINT } = base;
+
 const bySeason = {};
 for (const s of SEASONS) bySeason[s.k] = evalWith(s.k).SCN;
 
+/*
+ * ★ 참조 구현체에 없는 장면을 이어 붙입니다.
+ *
+ *   장면 프롬프트는 reference/sajudang.html 에서 뽑습니다. 그런데 그
+ *   파일은 **얼어 있는 참조본**이라, 나중에 붙인 화면의 장면은 거기에
+ *   없습니다. 그러면 그 장면은 시트에 **영영 안 실립니다** —
+ *   a4b 「성향 4글자」 몫으로 만든 mirror 가 그랬습니다.
+ *
+ *   앱이 쓰는 묶음(asset-prompts.json)에 있는데 참조본에 없는 것은
+ *   여기서 이어 붙입니다. 참조본이 원본인 것은 그대로 두고, 자란
+ *   만큼만 더합니다.
+ */
+const EXTRA = JSON.parse(fs.readFileSync(FIGJSON, "utf8")).scenes || {};
+for (const [id, v] of Object.entries(EXTRA)) {
+  if (SCN[id]) continue;
+  // 참조본은 제목을 `t` 로 씁니다. 이름을 안 맞추면 차례에서 터집니다.
+  const e = { t: v.title, prompt: v.image, spec: v.spec, hint: v.hint };
+  SCN[id] = e;
+  // 계절판마다도 같은 것을 둡니다 — 그림은 계절을 안 타지만, 시트가
+  // 계절판에서 그림을 꺼내 오기 때문입니다.
+  for (const k of Object.keys(bySeason)) bySeason[k][id] = e;
+  if (v.motion) MO[id] = { hg: v.motion };
+}
+
 function rawPrompt(scn, id) {
-  const p = scn[id].prompt;
+  // ★ 참조본에 없는 장면(나중에 붙인 것)은 계절을 안 탑니다.
+  //   여기서 막지 않으면 계절 판별이 그 장면에서 터집니다.
+  const e = scn[id];
+  if (!e) return "";
+  const p = e.prompt;
   return (typeof p === "function" ? p() : p) || "";
 }
 
@@ -101,11 +130,12 @@ const ORDER = [
     ["gate", "a1 골목 — 맨 처음 보는 화면 · 공유 링크로 들어와도 여기"],
     ["door", "a1 골목 — 문이 열리는 순간 (★ 붙임 3 참고)"],
     ["desk", "a2 이름을 적다"],
-    ["ink", "a3 생년월일시 · a5 고민 고르기"],
-    ["room", "a4 방 안"],
-    ["fork", "a6 갈림길"],
-    ["altar", "a7 상 위"],
-    ["facing", "a8 마주 앉다"],
+    ["ink", "a3 날·고을 — 먹이 번지는 종이"],
+    ["room", "a4 때를 묻다 — 실내·병풍·주렴"],
+    ["mirror", "a4b 성향 4글자 — 넉 자와 여덟 글자를 맞대다"],
+    ["fork", "a5 걸리는 것 — 갈림길"],
+    ["altar", "a6 글자가 서다 — 명식 받침"],
+    ["facing", "a7 도령이 말하다 — 마주앉은 자리"],
   ]],
   ["2부 · 진열대 — 캐릭터 고르기", [
     ["hall", "b1 진열대 들머리"],

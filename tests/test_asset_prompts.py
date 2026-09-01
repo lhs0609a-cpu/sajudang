@@ -53,8 +53,22 @@ def test_every_scene_and_figure_has_both_prompts():
 
 
 def test_counts():
+    """
+    ★ 수를 손으로 박아 두지 않습니다.
+
+      장면이 하나 늘 때마다 검사가 깨졌습니다. 그때 고쳐야 할 것은
+      **시트를 다시 만드는 일**인데, 숫자만 고치고 넘어가면 시트에
+      그 장면이 빠진 채로 남습니다. 실제로 그렇게 될 뻔했습니다.
+
+      선언(manifest)에서 세고, 프롬프트가 그만큼 있는지 봅니다.
+      주석 처리한 장면(door)은 발주 목록이 아니지만 프롬프트는 남아
+      있으므로, 프롬프트가 **모자라지만 않으면** 됩니다.
+    """
     b = bundle()
-    assert len(b["scenes"]) == 24
+    declared = _manifest_ids()
+    have = set(b["scenes"])
+    missing = declared - have
+    assert not missing, "프롬프트가 없는 장면: %s" % sorted(missing)
     assert len(b["figures"]) == 13
 
 
@@ -159,31 +173,43 @@ def test_extractor_reads_the_source_not_the_output():
 # ══════════════════════════════════════════════════════════
 # 넘겨 준 텍스트 한 장
 # ══════════════════════════════════════════════════════════
+def _manifest_ids() -> set:
+    """선언된 장면 이름. 주석 처리한 줄은 발주 목록이 아닙니다."""
+    src = (ROOT / "apps" / "web" / "components" / "scene"
+           / "manifest.ts").read_text(encoding="utf-8")
+    src = chr(10).join(l for l in src.splitlines()
+                       if not l.lstrip().startswith("//"))
+    return set(re.findall(r'\{\s*id:\s*"(\w+)"', src))
+
+
 def sheet() -> str:
     return SHEET.read_text(encoding="utf-8")
 
 
-N = 37       # 장면 24 + 인물 13. 대문도 한 장이므로 늘지 않습니다.
+# ★ 시트에 실린 수는 프롬프트 묶음에서 셉니다. 손으로 박아 두면
+#   장면이 늘 때 시트를 안 만들고 숫자만 고치게 됩니다.
+def _n() -> int:
+    return len(entries())
 
 
 def test_sheet_exists_and_lists_every_item():
-    assert len(entries()) == N
-    heads = re.findall(r"^\s{2}(\d{2}) / %d\s" % N, sheet(), re.M)
-    assert len(heads) == N, "항목 %d개만 있습니다" % len(heads)
+    N = _n()
+    heads = re.findall(r"^\s{2}(\d{2}) / %d\s" % _n(), sheet(), re.M)
+    assert len(heads) == _n(), "항목 %d개만 있습니다" % len(heads)
     assert [int(x) for x in heads] == list(range(1, N + 1)), "번호가 건너뜁니다"
 
 
 def test_sheet_has_both_prompt_blocks_for_every_item():
     s = sheet()
     # 붙임 4 에 계절판 넷이 더 실려 있습니다 — 안 만들어도 되는 것입니다
-    assert s.count("① 이미지 · 제미나이") == N + 4
-    assert s.count("② 모션 · 힉스필드") == N
+    assert s.count("① 이미지 · 제미나이") == _n() + 4
+    assert s.count("② 모션 · 힉스필드") == _n()
 
 
 def test_sheet_never_drops_the_video_anchor():
     """항목마다 하나씩. 머리말에도 한 번 나오므로 통째로 세면 안 됩니다."""
-    blocks = re.split(r"^={70,}$\n^\s{2}\d{2} / %d\s" % N, sheet(), flags=re.M)[1:]
-    assert len(blocks) == N
+    blocks = re.split(r"^={70,}$\n^\s{2}\d{2} / %d\s" % _n(), sheet(), flags=re.M)[1:]
+    assert len(blocks) == _n()
     bad = [b.splitlines()[0].strip() for b in blocks if ANCHOR not in b]
     assert not bad, "영상 앵커가 빠진 항목: %s" % bad
 

@@ -3,8 +3,8 @@
   reference/sajudang.html 과 docs/16 에서 그대로 뽑은 것입니다
 ==========================================================================
 
-  이미지 37장  (장면 24 + 신살 인물 13)
-  영상 37편
+  이미지 38장  (장면 25 + 신살 인물 13)
+  영상 38편
 
   한 항목마다 이 순서입니다
 
@@ -48,52 +48,53 @@
     03  붓 · 벼루 · 빈 종이             public/scene/desk/
     04  먹이 번지는 종이                 public/scene/ink/
     05  실내 · 좌식 · 병풍              public/scene/room/
-    06  갈림길                       public/scene/fork/
-    07  명식 받침 · 네 자리              public/scene/altar/
-    08  마주앉은 자리                   public/scene/facing/
+    06  맞대어 보는 자리                 public/scene/mirror/
+    07  갈림길                       public/scene/fork/
+    08  명식 받침 · 네 자리              public/scene/altar/
+    09  마주앉은 자리                   public/scene/facing/
 
   2부 · 진열대 — 캐릭터 고르기
-    09  안쪽 방 · 스무 자리              public/scene/hall/
-    10  그 사람의 자리                  public/scene/seat/
-    11  진열대 · 걸린 목패               public/scene/shelf/
+    10  안쪽 방 · 스무 자리              public/scene/hall/
+    11  그 사람의 자리                  public/scene/seat/
+    12  진열대 · 걸린 목패               public/scene/shelf/
 
   3부 · 리포트
-    12  펼쳐지는 두루마리                 public/scene/scroll/
-    13  대운 길 · 이정표                public/scene/roadmap/
-    14  반쯤 접힌 두루마리                public/scene/fold/
-    15  공유 카드 문양                  public/scene/cardbg/
-    16  후기 벽 · 붙은 종이쪽             public/scene/wall/
-    17  오래된 종이 · 회고               public/scene/oldpaper/
+    13  펼쳐지는 두루마리                 public/scene/scroll/
+    14  대운 길 · 이정표                public/scene/roadmap/
+    15  반쯤 접힌 두루마리                public/scene/fold/
+    16  공유 카드 문양                  public/scene/cardbg/
+    17  후기 벽 · 붙은 종이쪽             public/scene/wall/
+    18  오래된 종이 · 회고               public/scene/oldpaper/
 
   4부 · 결제
-    18  엽전 · 값을 치르다               public/scene/coin/
-    19  붉은 끈 · 개봉                 public/scene/untie/
-    20  목패를 늘어놓은 상                public/scene/tray/
+    19  엽전 · 값을 치르다               public/scene/coin/
+    20  붉은 끈 · 개봉                 public/scene/untie/
+    21  목패를 늘어놓은 상                public/scene/tray/
 
   5부 · 릴레이
-    21  문고리 · 안쪽 그림자              public/scene/handle/
+    22  문고리 · 안쪽 그림자              public/scene/handle/
 
   6부 · 오늘의 일진
-    22  등불 배너                     public/scene/banner/
-    23  다과상 · 차 한 잔               public/scene/tea/
+    23  등불 배너                     public/scene/banner/
+    24  다과상 · 차 한 잔               public/scene/tea/
 
   7부 · 인장첩
-    24  인장첩                       public/scene/sealbook/
+    25  인장첩                       public/scene/sealbook/
 
   8부 · 신살 인물 — 분석지에 나오는 사람들
-    25  흰 소매의 귀인                  public/sinsal/cheoneul/
-    26  태극을 인 이                   public/sinsal/taegeuk/
-    27  붓을 든 서생                   public/sinsal/munchang/
-    28  가마를 끄는 이                  public/sinsal/geumyeo/
-    29  그림자 속의 손                  public/sinsal/amrok/
-    30  칼을 쥔 무인                   public/sinsal/yangin/
-    31  흰 범                       public/sinsal/baekho/
-    32  등을 돌린 그림자                 public/sinsal/wonjin/
-    33  꽃그늘의 사람                   public/sinsal/dohwa/
-    34  말 위의 나그네                  public/sinsal/yeokma/
-    35  일산 아래 홀로                  public/sinsal/hwagae/
-    36  북두를 인 장수                  public/sinsal/gwaegang/
-    37  빈 자리                      public/sinsal/gongmang/
+    26  흰 소매의 귀인                  public/sinsal/cheoneul/
+    27  태극을 인 이                   public/sinsal/taegeuk/
+    28  붓을 든 서생                   public/sinsal/munchang/
+    29  가마를 끄는 이                  public/sinsal/geumyeo/
+    30  그림자 속의 손                  public/sinsal/amrok/
+    31  칼을 쥔 무인                   public/sinsal/yangin/
+    32  흰 범                       public/sinsal/baekho/
+    33  등을 돌린 그림자                 public/sinsal/wonjin/
+    34  꽃그늘의 사람                   public/sinsal/dohwa/
+    35  말 위의 나그네                  public/sinsal/yeokma/
+    36  일산 아래 홀로                  public/sinsal/hwagae/
+    37  북두를 인 장수                  public/sinsal/gwaegang/
+    38  빈 자리                      public/sinsal/gongmang/
 
 
 
@@ -102,7 +103,7 @@
 ##########################################################################
 
 ==========================================================================
-  01 / 37   대문 · 사계
+  01 / 38   대문 · 사계
 ==========================================================================
   화면   a1 골목 — 맨 처음 보는 화면 · 공유 링크로 들어와도 여기
   폴더   public/scene/gate/
@@ -156,7 +157,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  02 / 37   열리는 문
+  02 / 38   열리는 문
 ==========================================================================
   화면   a1 골목 — 문이 열리는 순간 (★ 붙임 3 참고)
   폴더   public/scene/door/
@@ -190,7 +191,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  03 / 37   붓 · 벼루 · 빈 종이
+  03 / 38   붓 · 벼루 · 빈 종이
 ==========================================================================
   화면   a2 이름을 적다
   폴더   public/scene/desk/
@@ -228,9 +229,9 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  04 / 37   먹이 번지는 종이
+  04 / 38   먹이 번지는 종이
 ==========================================================================
-  화면   a3 생년월일시 · a5 고민 고르기
+  화면   a3 날·고을 — 먹이 번지는 종이
   폴더   public/scene/ink/
   규격   16:9 · 2s · 프리셋 Static · 한 번만
   메모   투표 반응(먹 번짐)과 같은 클립을 씁니다. 한 번 만들면 두 곳에서 쓰입니다.
@@ -263,9 +264,9 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  05 / 37   실내 · 좌식 · 병풍
+  05 / 38   실내 · 좌식 · 병풍
 ==========================================================================
-  화면   a4 방 안
+  화면   a4 때를 묻다 — 실내·병풍·주렴
   폴더   public/scene/room/
   규격   16:9 · 4s · 프리셋 Static · 이어붙여 반복
 
@@ -303,9 +304,48 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  06 / 37   갈림길
+  06 / 38   맞대어 보는 자리
 ==========================================================================
-  화면   a6 갈림길
+  화면   a4b 성향 4글자 — 넉 자와 여덟 글자를 맞대다
+  폴더   public/scene/mirror/
+  규격   16:9 · 3s · 프리셋 Static · 한 번만
+  참고   a4b 성향 4글자. 넉 자와 여덟 글자를 **맞대어** 보는 자리라, 두 벌이 나란히 놓이고 어긋난 데가 드러나는 그림이라야 합니다. 글자를 그리지 마세요 — 어느 나라 글자를 넣어도 틀립니다.
+
+--------------------------------------------------------------------------
+  ① 이미지 · 제미나이
+--------------------------------------------------------------------------
+
+Korean romance-fantasy webtoon style, vertical composition.
+A low lacquered table seen from slightly above. On the left, four
+small blank wooden tablets stand in a row, warm amber glow. On the
+right, four pale paper slips lie flat in a matching row, cool blue
+glow. Between the two rows a faint vertical seam of light runs down
+the table, where the two glows meet and do not quite align.
+Dark plum interior, drifting dust motes, a single hanging lantern
+out of focus above. No hands, no faces, no text, no letters of any
+script. Aspect ratio 9:16.
+
+--------------------------------------------------------------------------
+  ② 모션 · 힉스필드   (프리셋 Static · 16:9 · 3s)
+--------------------------------------------------------------------------
+
+Static camera. The two rows breathe very slightly out of phase —
+the amber row brightens as the blue row dims, then reverses, over
+about four seconds. The seam of light between them flickers once,
+softly, where they misalign. Dust motes drift upward. Nothing
+moves position; only light shifts.
+
+This is a 2D hand-drawn animation, not live action. Preserve the
+illustration style exactly: flat cel shading, uniform lineart, painted
+texture. Do not add photographic realism, skin pores, film grain or 3D
+lighting. Do not redraw or reshape any element. Animate only what is
+described above; everything else stays completely still.
+
+
+==========================================================================
+  07 / 38   갈림길
+==========================================================================
+  화면   a5 걸리는 것 — 갈림길
   폴더   public/scene/fork/
   규격   16:9 · 3s · 프리셋 Static · 이어붙여 반복
 
@@ -339,9 +379,9 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  07 / 37   명식 받침 · 네 자리
+  08 / 38   명식 받침 · 네 자리
 ==========================================================================
-  화면   a7 상 위
+  화면   a6 글자가 서다 — 명식 받침
   폴더   public/scene/altar/
   규격   16:9 · 4s · 프리셋 Static · 한 번만 · ★ 앱이 흑백으로 바꾼 뒤 캐릭터 색을 입힙니다
   메모   카메라를 반드시 고정하세요. 프리셋에서 Static 선택.
@@ -381,9 +421,9 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  08 / 37   마주앉은 자리
+  09 / 38   마주앉은 자리
 ==========================================================================
-  화면   a8 마주 앉다
+  화면   a7 도령이 말하다 — 마주앉은 자리
   폴더   public/scene/facing/
   규격   16:9 · 3s · 프리셋 Static · 이어붙여 반복
 
@@ -423,7 +463,7 @@ described above; everything else stays completely still.
 ##########################################################################
 
 ==========================================================================
-  09 / 37   안쪽 방 · 스무 자리
+  10 / 38   안쪽 방 · 스무 자리
 ==========================================================================
   화면   b1 진열대 들머리
   폴더   public/scene/hall/
@@ -460,7 +500,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  10 / 37   그 사람의 자리
+  11 / 38   그 사람의 자리
 ==========================================================================
   화면   b2 자리
   폴더   public/scene/seat/
@@ -499,7 +539,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  11 / 37   진열대 · 걸린 목패
+  12 / 38   진열대 · 걸린 목패
 ==========================================================================
   화면   b3 걸린 목패
   폴더   public/scene/shelf/
@@ -541,7 +581,7 @@ described above; everything else stays completely still.
 ##########################################################################
 
 ==========================================================================
-  12 / 37   펼쳐지는 두루마리
+  13 / 38   펼쳐지는 두루마리
 ==========================================================================
   화면   c1 두루마리 · c7 분석지
   폴더   public/scene/scroll/
@@ -576,7 +616,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  13 / 37   대운 길 · 이정표
+  14 / 38   대운 길 · 이정표
 ==========================================================================
   화면   c2 길 그림
   폴더   public/scene/roadmap/
@@ -615,7 +655,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  14 / 37   반쯤 접힌 두루마리
+  15 / 38   반쯤 접힌 두루마리
 ==========================================================================
   화면   c3 접힌 데
   폴더   public/scene/fold/
@@ -648,7 +688,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  15 / 37   공유 카드 문양
+  16 / 38   공유 카드 문양
 ==========================================================================
   화면   c4 패 뒷면
   폴더   public/scene/cardbg/
@@ -690,7 +730,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  16 / 37   후기 벽 · 붙은 종이쪽
+  17 / 38   후기 벽 · 붙은 종이쪽
 ==========================================================================
   화면   c5 벽 · m1 인장첩
   폴더   public/scene/wall/
@@ -726,7 +766,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  17 / 37   오래된 종이 · 회고
+  18 / 38   오래된 종이 · 회고
 ==========================================================================
   화면   c6 낡은 종이 · p1 값
   폴더   public/scene/oldpaper/
@@ -766,7 +806,7 @@ described above; everything else stays completely still.
 ##########################################################################
 
 ==========================================================================
-  18 / 37   엽전 · 값을 치르다
+  19 / 38   엽전 · 값을 치르다
 ==========================================================================
   화면   p2 엽전
   폴더   public/scene/coin/
@@ -798,7 +838,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  19 / 37   붉은 끈 · 개봉
+  20 / 38   붉은 끈 · 개봉
 ==========================================================================
   화면   p3 매듭을 풀다
   폴더   public/scene/untie/
@@ -834,7 +874,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  20 / 37   목패를 늘어놓은 상
+  21 / 38   목패를 늘어놓은 상
 ==========================================================================
   화면   p4 소반
   폴더   public/scene/tray/
@@ -874,7 +914,7 @@ described above; everything else stays completely still.
 ##########################################################################
 
 ==========================================================================
-  21 / 37   문고리 · 안쪽 그림자
+  22 / 38   문고리 · 안쪽 그림자
 ==========================================================================
   화면   r1 손잡이
   폴더   public/scene/handle/
@@ -917,7 +957,7 @@ described above; everything else stays completely still.
 ##########################################################################
 
 ==========================================================================
-  22 / 37   등불 배너
+  23 / 38   등불 배너
 ==========================================================================
   화면   d1 현수막
   폴더   public/scene/banner/
@@ -956,7 +996,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  23 / 37   다과상 · 차 한 잔
+  24 / 38   다과상 · 차 한 잔
 ==========================================================================
   화면   d2 차 한 잔
   폴더   public/scene/tea/
@@ -1001,7 +1041,7 @@ described above; everything else stays completely still.
 ##########################################################################
 
 ==========================================================================
-  24 / 37   인장첩
+  25 / 38   인장첩
 ==========================================================================
   화면   m2 인장첩
   폴더   public/scene/sealbook/
@@ -1046,7 +1086,7 @@ described above; everything else stays completely still.
 ##########################################################################
 
 ==========================================================================
-  25 / 37   흰 소매의 귀인
+  26 / 38   흰 소매의 귀인
 ==========================================================================
   화면   천을귀인 天乙貴人 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/cheoneul/
@@ -1091,7 +1131,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  26 / 37   태극을 인 이
+  27 / 38   태극을 인 이
 ==========================================================================
   화면   태극귀인 太極貴人 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/taegeuk/
@@ -1136,7 +1176,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  27 / 37   붓을 든 서생
+  28 / 38   붓을 든 서생
 ==========================================================================
   화면   문창귀인 文昌貴人 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/munchang/
@@ -1181,7 +1221,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  28 / 37   가마를 끄는 이
+  29 / 38   가마를 끄는 이
 ==========================================================================
   화면   금여 金輿 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/geumyeo/
@@ -1226,7 +1266,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  29 / 37   그림자 속의 손
+  30 / 38   그림자 속의 손
 ==========================================================================
   화면   암록 暗祿 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/amrok/
@@ -1271,7 +1311,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  30 / 37   칼을 쥔 무인
+  31 / 38   칼을 쥔 무인
 ==========================================================================
   화면   양인 羊刃 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/yangin/
@@ -1316,7 +1356,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  31 / 37   흰 범
+  32 / 38   흰 범
 ==========================================================================
   화면   백호대살 白虎大殺 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/baekho/
@@ -1361,7 +1401,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  32 / 37   등을 돌린 그림자
+  33 / 38   등을 돌린 그림자
 ==========================================================================
   화면   원진 怨嗔 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/wonjin/
@@ -1406,7 +1446,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  33 / 37   꽃그늘의 사람
+  34 / 38   꽃그늘의 사람
 ==========================================================================
   화면   도화 桃花 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/dohwa/
@@ -1451,7 +1491,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  34 / 37   말 위의 나그네
+  35 / 38   말 위의 나그네
 ==========================================================================
   화면   역마 驛馬 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/yeokma/
@@ -1496,7 +1536,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  35 / 37   일산 아래 홀로
+  36 / 38   일산 아래 홀로
 ==========================================================================
   화면   화개 華蓋 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/hwagae/
@@ -1541,7 +1581,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  36 / 37   북두를 인 장수
+  37 / 38   북두를 인 장수
 ==========================================================================
   화면   괴강 魁罡 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/gwaegang/
@@ -1586,7 +1626,7 @@ described above; everything else stays completely still.
 
 
 ==========================================================================
-  37 / 37   빈 자리
+  38 / 38   빈 자리
 ==========================================================================
   화면   공망 空亡 — 명식에 이 신살이 있는 사람에게만 나옵니다
   폴더   public/sinsal/gongmang/
@@ -1656,6 +1696,7 @@ described above; everything else stays completely still.
   [ ]  public/scene/desk/            붓 · 벼루 · 빈 종이
   [ ]  public/scene/ink/             먹이 번지는 종이
   [ ]  public/scene/room/            실내 · 좌식 · 병풍
+  [ ]  public/scene/mirror/          맞대어 보는 자리
   [ ]  public/scene/fork/            갈림길
   [ ]  public/scene/altar/           명식 받침 · 네 자리
   [ ]  public/scene/facing/          마주앉은 자리
