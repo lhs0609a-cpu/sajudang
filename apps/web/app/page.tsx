@@ -320,7 +320,10 @@ function EntryInner() {
       <Shell title="이름을 적다" onBack={back}>
         <Progress step={progressAt("a2")!} total={PROGRESS_TOTAL} />
         <Scene id="desk" />
-        <Narration lines={["도령이 붓을 들었다.", "종이는 아직 비어 있다."]} />
+        {/* ★ 그림에는 붓이 **떠 있습니다** — 잡은 손이 없습니다.
+            「붓을 들었다」 고 적으면 손님이 둘 중 무엇을 믿을지 몰라
+            합니다. 그림이 더 좋으니 글을 맞춥니다. */}
+        <Narration lines={["붓이 저 혼자 떠올랐다.", "종이는 아직 비어 있다."]} />
         <Say who="도령">그대를 뭐라 적으면 되겠소?</Say>
         <input className="fld ser" placeholder="이름 또는 별명" maxLength={12}
                value={s.name} onChange={(e) => s.set({ name: e.target.value })} />
@@ -637,7 +640,18 @@ function EntryInner() {
       <Shell title="걸리는 것" onBack={back}>
         <Progress step={progressAt("a5")!} total={PROGRESS_TOTAL} />
         <Scene id="fork" />
-        <Narration lines={["붓을 내려놓고, 그가 물었다."]} />
+        {/*
+          ★ 글이 그림과 어긋나 있었습니다.
+
+            여기 그림은 밤 들판의 갈림길입니다 — 등 셋과 팻말 셋.
+            그런데 글은 「붓을 내려놓고, 그가 물었다」 였습니다. 실내에서
+            붓을 내려놓는 장면인데 화면은 바깥입니다.
+
+            손님은 둘 중 무엇을 믿을지 몰라 합니다. 그림을 다시 뽑는
+            것보다 글을 맞추는 것이 싸고, 여기서는 글이 그림을 받아
+            주는 편이 더 낫습니다 — 갈림길이 이 화면의 뜻입니다.
+        */}
+        <Narration lines={["길이 세 갈래로 갈리는 데서, 그가 물었다."]} />
         <Say who="도령">
           {s.name ? `${s.name}. 무엇이 걸려서 예까지 왔소?` : "무엇이 걸려서 예까지 왔소?"}
         </Say>

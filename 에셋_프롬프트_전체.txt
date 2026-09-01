@@ -309,31 +309,36 @@ described above; everything else stays completely still.
   화면   a4b 성향 4글자 — 넉 자와 여덟 글자를 맞대다
   폴더   public/scene/mirror/
   규격   16:9 · 3s · 프리셋 Static · 한 번만
-  참고   a4b 성향 4글자. 넉 자와 여덟 글자를 **맞대어** 보는 자리라, 두 벌이 나란히 놓이고 어긋난 데가 드러나는 그림이라야 합니다. 글자를 그리지 마세요 — 어느 나라 글자를 넣어도 틀립니다.
+  참고   a4b 성향 4글자. 화면의 글은 「그가 종이 한 장을 더 꺼냈다」다. 그러니 손이 종이를 꺼내는 순간이라야 한다. ★ 얼굴은 넣지 마라 — 도령 얼굴은 초상으로 따로 나온다. 배경에 또 그리면 같은 사람이 둘이 된다. 손목까지만. ★ 글자도 넣지 마라 — 어느 나라 글자를 넣어도 틀린다.
 
 --------------------------------------------------------------------------
   ① 이미지 · 제미나이
 --------------------------------------------------------------------------
 
 Korean romance-fantasy webtoon style, vertical composition.
-A low lacquered table seen from slightly above. On the left, four
-small blank wooden tablets stand in a row, warm amber glow. On the
-right, four pale paper slips lie flat in a matching row, cool blue
+A low lacquered table seen from above at a steep angle. A man's hand
+and forearm enter from the upper right in a dark indigo sleeve with
+silver trim, drawing a single pale paper slip out from under a small
+stack and laying it down. On the table to the left, four small blank
+wooden tablets already stand in a row, warm amber glow. The paper slip
+he is placing joins three others lying flat on the right, cool blue
 glow. Between the two rows a faint vertical seam of light runs down
-the table, where the two glows meet and do not quite align.
-Dark plum interior, drifting dust motes, a single hanging lantern
-out of focus above. No hands, no faces, no text, no letters of any
-script. Aspect ratio 9:16.
+the table where the two glows meet and do not quite align.
+Dark plum interior, drifting dust motes, a single hanging lantern out
+of focus above. Only the hand and sleeve — no face, no head, no body
+above the elbow. No text, no letters of any script, no numbers.
+Aspect ratio 9:16.
 
 --------------------------------------------------------------------------
   ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 5s)
 --------------------------------------------------------------------------
 
-Static camera. The two rows breathe very slightly out of phase —
-the amber row brightens as the blue row dims, then reverses, over
-about four seconds. The seam of light between them flickers once,
-softly, where they misalign. Dust motes drift upward. Nothing
-moves position; only light shifts.
+Static camera. The hand finishes laying the paper slip down and
+withdraws slowly out of frame to the upper right. Then stillness: the
+two rows breathe very slightly out of phase — the amber row brightens
+as the blue row dims, then reverses. The seam of light between them
+flickers once, softly, where they misalign. Dust motes drift upward.
+The hand does not come back.
 
 This is a 2D hand-drawn animation, not live action. Preserve the
 illustration style exactly: flat cel shading, uniform lineart, painted
