@@ -49,6 +49,8 @@ interface Bundle {
   PIPE: string;
   scenes: Record<string, PromptEntry>;
   figures: Record<string, PromptEntry>;
+  /* 스무 사람의 초상. tools/char_sheet.py --json 이 넣습니다. */
+  chars?: Record<string, PromptEntry>;
 }
 
 let cache: Bundle | null = null;
@@ -91,7 +93,7 @@ function Block({ n, label, text, dir }: {
 export default function PromptModal({
   kind, id, onClose,
 }: {
-  kind: "scene" | "figure";
+  kind: "scene" | "figure" | "char";
   id: string;
   onClose: () => void;
 }) {
@@ -119,7 +121,9 @@ export default function PromptModal({
   }, [onClose]);
 
   const e = data
-    ? (kind === "scene" ? data.scenes[id] : data.figures[id])
+    ? (kind === "scene" ? data.scenes[id]
+       : kind === "char" ? (data.chars ?? {})[id]
+       : data.figures[id])
     : null;
 
   /*
@@ -131,7 +135,9 @@ export default function PromptModal({
    */
   const seasonal = kind === "scene" && !!e?.seasonal;
   const image = seasonal ? (e?.seasons?.[season] ?? e?.image) : e?.image;
-  const dir = kind === "scene" ? `/scene/${id}/` : `/sinsal/${id}/`;
+  const dir = kind === "scene" ? `/scene/${id}/`
+            : kind === "char" ? `/char/${id}/`
+            : `/sinsal/${id}/`;
 
   return (
     <div className="pmod on" onClick={onClose}>

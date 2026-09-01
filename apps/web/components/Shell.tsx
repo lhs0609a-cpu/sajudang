@@ -60,6 +60,8 @@ export function TopBar({ title, skipTo, onBack }: {
 }) {
   const router = useRouter();
   const seals = useSession((s) => s.seals);
+  const admin = useSession((s) => s.admin);
+  const setSession = useSession((s) => s.set);
   return (
     <div className="top">
       {/*
@@ -72,6 +74,26 @@ export function TopBar({ title, skipTo, onBack }: {
       <button className="tb" onClick={() => (onBack ? onBack() : router.back())}
               aria-label="뒤로">←</button>
       <SoundToggle />
+      {/*
+        ★ 관리자만 보이는 모드 전환.
+
+          전에는 레일을 열어야만 「유저 모드로」 가 있었습니다. 레일을
+          닫아 두고 화면을 보다가 손님 눈으로 보고 싶어지면 주소를
+          손으로 고쳐야 했습니다.
+
+          손님에게는 이 칸이 아예 없습니다 — 있는지도 모릅니다.
+      */}
+      {admin && (
+        <button className="tb mode" onClick={() => {
+          setSession({ admin: false });
+          router.push("/");
+        }}>
+          회원 화면
+        </button>
+      )}
+      {admin && (
+        <Link className="tb mode" href="/admin">주인</Link>
+      )}
       <span className="tt">{title}</span>
       <Link className="tb" href="/daily" aria-label="오늘의 일진">日</Link>
       <Link className="tb" href="/me" aria-label="인장첩">印 {seals.length}</Link>

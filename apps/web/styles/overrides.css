@@ -1712,3 +1712,12 @@ body.has-rail-closed .stage { margin-left: 26px; }
 }
 
 @media print { .meet { display: none; } }
+
+/* 관리자만 보이는 모드 전환 — 손님에게는 이 칸이 아예 없습니다 */
+.tb.mode {
+  color: var(--gold);
+  border-color: var(--gold);
+  font-size: var(--fs-1);
+  letter-spacing: .04em;
+  text-decoration: none;
+}

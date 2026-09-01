@@ -226,6 +226,38 @@ def main() -> int:
     for l in rows:
         lines += one(l, style, anim)
 
+    # ── 화면이 읽는 묶음에도 넣는다 ─────────────────────────
+    #
+    # ★ 장면은 눌러서 프롬프트를 볼 수 있는데 캐릭터는 못 봤습니다.
+    #   프롬프트가 이 도구(파이썬) 안에만 있어서 화면이 읽을 길이
+    #   없었기 때문입니다. asset-prompts.json 에 `chars` 로 넣습니다 —
+    #   장면·신살 인물과 **같은 자리**입니다.
+    if "--json" in sys.argv:
+        d = json.loads(PROMPTS.read_text(encoding="utf-8"))
+        d["chars"] = {}
+        for l in ls:
+            look = LOOK.get(l["archetype"])
+            sexw = "man" if l.get("sex") == "M" else "woman"
+            who = look or ("a %s in Korean hanbok" % sexw)
+            tone = (" Key light subtly tinted %s." % COLOR[l["id"]]
+                    if COLOR.get(l["id"]) else "")
+            d["chars"][l["id"]] = {
+                "title": "%s %s" % (l["name"], l["hanja"]),
+                "who": "%s · %s" % (l["group"], l["archetype"]),
+                "hint": "전문 %s · %s원" % (l.get("specialty", "—"),
+                                          format(l["price"], ",")),
+                "spec": ["3:4", "초상", "768×1024 투명 PNG · 눈높이 y=380"],
+                "seasonal": False, "seasons": None, "note": None,
+                "preset": "Static", "ratio": "3:4", "duration": "3s",
+                "loop": True, "tint": False, "still": False,
+                "image": style + "\n\n" + who + "." + tone + "\n\n" + TAIL,
+                "motion": MOTION + "\n\n" + anim,
+            }
+        PROMPTS.write_text(json.dumps(d, ensure_ascii=False, indent=2) + "\n",
+                           encoding="utf-8")
+        print("화면이 읽는 묶음에 %d명을 넣었습니다 — %s"
+              % (len(d["chars"]), PROMPTS.name))
+
     text = "\n".join(lines)
     if "--write" in sys.argv:
         i = sys.argv.index("--write")

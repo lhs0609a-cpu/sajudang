@@ -142,8 +142,14 @@ def test_modal_says_one_image_is_enough():
     src = MODAL.read_text(encoding="utf-8")
     assert "seasons?.[season]" in src
     assert "한 장이면 되오" in src
-    # 폴더는 기본 폴더를 알려 줘야 합니다
-    assert "`/scene/${id}/` : `/sinsal/${id}/`" in src
+    # 폴더는 기본 폴더를 알려 줘야 합니다.
+    #
+    # ★ 전에는 저 줄을 **글자 그대로** 견줬습니다. 그래서 캐릭터 초상을
+    #   같은 모달에 붙이자마자 깨졌습니다 — 고친 것은 옳은데 검사가
+    #   막았습니다. 보려는 것은 「어느 폴더에 넣으라고 말하는가」이지
+    #   그 줄이 어떻게 생겼는가가 아닙니다.
+    for folder in ("/scene/${id}/", "/sinsal/${id}/", "/char/${id}/"):
+        assert folder in src, "%s 를 안 알려 줍니다" % folder
 
 
 # ══════════════════════════════════════════════════════════
