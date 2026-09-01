@@ -81,7 +81,7 @@ export const SCENES: SceneSpec[] = [
   { id: "room", name: "실내·병풍·주렴", preset: "Static", ratio: "9:16", seconds: 5, loop: true },
   { id: "fork", name: "갈림길", preset: "Static", ratio: "16:9", seconds: 3, loop: true, focus: "50% 55%" },
   { id: "altar", name: "명식 받침", preset: "Static", ratio: "9:16", seconds: 5, loop: false, tint: "recolor" },
-  { id: "facing", name: "마주앉은 자리", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
+  { id: "facing", name: "마주앉은 자리", preset: "Static", ratio: "9:16", seconds: 5, loop: true },
   { id: "shelf", name: "진열대", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
   { id: "hall", name: "스무 자리", preset: "Dolly In", ratio: "16:9", seconds: 4, loop: false },
   { id: "seat", name: "그 사람의 자리", preset: "Static", ratio: "3:4", seconds: 3, loop: true, tint: "recolor" },

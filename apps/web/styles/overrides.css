@@ -1497,3 +1497,48 @@ body.has-rail-closed .stage { margin-left: 26px; }
 .cutbody, .cutbody p, .saying, .lastcut {
   text-wrap: pretty;
 }
+
+/*
+ * 캐릭터가 무엇을 잘 보는 사람인가.
+ *
+ * ★ 진열대에 스무 명이 늘어서 있는데 손님이 아는 것은 이름과
+ *   「차가운 미남」 같은 생김새뿐이었습니다. **무엇을 사는지 모른 채**
+ *   고르라는 셈입니다. 전문 분야를 생김새보다 **앞에·크게** 냅니다 —
+ *   고르는 근거는 생김새가 아니라 이쪽이라야 합니다.
+ */
+.who .spec {
+  color: var(--paper);
+  font-size: var(--fs-3);
+}
+.who .arch {
+  color: var(--paper3);
+  font-size: var(--fs-1);
+  letter-spacing: .02em;
+}
+.nm .spec { color: var(--c); font-weight: 400; }
+
+/* 관리자 레일 — 이전 · 지금 · 다음 */
+.rail .nav {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.rail .nav b {
+  text-align: center;
+  color: var(--gold);
+  font-family: var(--mono);
+  font-size: var(--fs-2);
+  font-weight: 400;
+}
+.rail .nav button {
+  font-family: var(--mono);
+  font-size: var(--fs-2);
+  padding: 4px 8px;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  color: var(--paper2);
+  cursor: pointer;
+}
+.rail .nav button:disabled { opacity: .35; cursor: default; }

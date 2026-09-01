@@ -55,7 +55,16 @@ function LobbyInner() {
                     <b style={{ color: l.released ? l.color : "var(--paper3)" }}>
                       {l.released ? l.name : "● ● ●"}
                     </b>
-                    <span>{l.released ? l.archetype : "아직 자리에 없소"}</span>
+                    {/*
+                      ★ 생김새 말고 **무엇을 잘 보는 사람인지**를 앞에 냅니다.
+                        전에는 「차가운 미남」 같은 생김새뿐이라, 손님이
+                        무엇을 사는지 모른 채 골라야 했습니다. 재회가 걸린
+                        사람은 연담을, 돈이 걸린 사람은 행수를 찾아야 합니다.
+                    */}
+                    <span className="spec">
+                      {l.released ? l.specialty : "아직 자리에 없소"}
+                    </span>
+                    {l.released && <span className="arch">{l.archetype}</span>}
                   </span>
                 </button>
               ))}
@@ -76,7 +85,9 @@ function LobbyInner() {
         <div className="mec">
           <div>
             <div className="gz" style={{ color: lens.color }}>{lens.name} · {lens.hanja}</div>
-            <div className="nm">{lens.archetype}</div>
+            <div className="nm">
+              <b className="spec">{lens.specialty}</b> · {lens.archetype}
+            </div>
             <div className="tr">{lens.group}</div>
           </div>
         </div>

@@ -82,6 +82,14 @@ export default function DevRail() {
     return (params.get(k) ?? (k === "step" ? "a1" : "b1")) === v;
   };
 
+  /*
+   * 화면 32개를 **한 줄로** 편 것. 그룹은 사람이 찾기 좋으라고 나눈
+   * 것이고, 흐름을 지나가려면 순서가 필요합니다.
+   */
+  const FLAT = SCREEN_GROUPS.flatMap((g) => g.items);
+  const navAt = FLAT.findIndex((it) => here(it.href));
+
+
   const recalc = async () => {
     // 날짜를 지역 변수로 빼서 타입을 좁힙니다 (store 는 number | null).
     const { year, month, day } = s;
@@ -240,6 +248,34 @@ export default function DevRail() {
               </option>
             ))}
           </select>
+
+          {/*
+            ── 지금 어디인가 · 이전 · 다음 ──────────────────────
+
+            ★ 화면이 32개인데 목록에서 매번 눈으로 찾아 눌러야 했습니다.
+              흐름을 확인하려면 순서대로 지나가 봐야 하는데, 그 순서가
+              레일 어디에도 없었습니다.
+
+              여기서 **한 줄로 펴서** 이전·다음으로 바로 넘깁니다.
+              지금 자리는 이름으로 찍습니다.
+          */}
+          <span className="gh">지금 자리</span>
+          <div className="nav">
+            <button disabled={navAt <= 0}
+                    onClick={() => navAt > 0 && router.push(FLAT[navAt - 1].href)}>
+              ← 이전
+            </button>
+            <b>{navAt < 0 ? "목록 밖" :
+                `${FLAT[navAt].id} · ${FLAT[navAt].name}`}</b>
+            <button disabled={navAt < 0 || navAt >= FLAT.length - 1}
+                    onClick={() => navAt >= 0 && navAt < FLAT.length - 1 &&
+                                   router.push(FLAT[navAt + 1].href)}>
+              다음 →
+            </button>
+          </div>
+          <div className="fx">
+            <div>{navAt < 0 ? "—" : `${navAt + 1} / ${FLAT.length}`}</div>
+          </div>
 
           {/* ── 화면 ── */}
           {SCREEN_GROUPS.map((g) => (

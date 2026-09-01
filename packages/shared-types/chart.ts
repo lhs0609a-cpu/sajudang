@@ -226,6 +226,8 @@ export interface LensPublic {
   hanja: string | null;
   group: string | null;
   archetype: string | null;
+  /** 무엇을 잘 보는 사람인가 (진열대·릴레이 카드에 붙습니다) */
+  specialty?: string | null;
   call: string | null;
   price: number | null;
   released: boolean;
