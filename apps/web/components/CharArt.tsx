@@ -85,6 +85,30 @@ function useBust(id: string, mood: Mood) {
   return src;
 }
 
+/*
+ * 움직이는 초상이 있는가.
+ *
+ * ★ 작은 칸에서는 안 씁니다. 48×64 짜리 조각에서 눈 깜빡임은 안 보이고
+ *   영상만 스무 벌 받아 옵니다. 큰 자리(첫 대면·그 사람의 자리)에서만
+ *   씁니다.
+ *
+ * ★ 기본 얼굴일 때만 씁니다. 표정이 따로 있는 자리는 그 표정이 뜻이라,
+ *   움직이는 기본 얼굴로 덮으면 뜻이 사라집니다.
+ */
+function useClip(id: string, on: boolean) {
+  const [ok, setOk] = useState(false);
+  useEffect(() => {
+    if (!on) return;
+    let alive = true;
+    fetch(`/char/${id}/clip.webm`, { method: "HEAD" })
+      .then((r) => { if (alive) setOk(r.ok); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [id, on]);
+  return ok;
+}
+
+
 export default function CharArt({
   lens, size = "card", className, mood = "base",
 }: {
@@ -95,6 +119,14 @@ export default function CharArt({
   mood?: Mood;
 }) {
   const bust = useBust(lens.id, mood);
+  const wantClip = (size === "full" || size === "card") && mood === "base";
+  const clip = useClip(lens.id, wantClip && !!bust);
+
+  /* 동작 줄이기를 켠 사람에게는 멈춘 그림으로 냅니다 */
+  const [still, setStill] = useState(false);
+  useEffect(() => {
+    setStill(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }, []);
   const { w, h } = BOX[size];
   const dim = !lens.released;
 
@@ -128,7 +160,14 @@ export default function CharArt({
       {open && (
         <PromptModal kind="char" id={lens.id} onClose={() => setOpen(false)} />
       )}
-      {bust ? (
+      {clip && !still ? (
+        <video width={w} height={h} poster={bust ?? undefined}
+               autoPlay muted playsInline loop aria-label={lens.name}>
+          <source src={`/char/${lens.id}/clip.webm`} type="video/webm" />
+          {/* mp4 는 투명이 없어 바탕색이 구워져 있습니다 */}
+          <source src={`/char/${lens.id}/clip.mp4`} type="video/mp4" />
+        </video>
+      ) : bust ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={bust} alt={lens.name} width={w} height={h} loading="lazy" />
       ) : (

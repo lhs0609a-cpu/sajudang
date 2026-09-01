@@ -1740,3 +1740,11 @@ body.has-rail-closed .stage { margin-left: 26px; }
   .blk .hookface { display: none; }
 }
 @media print { .blk .hookface { display: none; } }
+
+/* 움직이는 초상 — 멈춘 그림과 같은 자리에 같은 크기로 */
+.charart video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
