@@ -76,7 +76,7 @@ export const SCENES: SceneSpec[] = [
   //   발주 목록에서 뺍니다 — 안 쓸 것을 만들지 않습니다.
   //   쓸 자리가 생기면 이 줄을 되살리고 화면에 <Scene id="door"/> 를 넣으세요.
   // { id: "door", name: "열리는 문", preset: "Static", ratio: "9:16", seconds: 2, loop: false },
-  { id: "desk", name: "붓·벼루·빈 종이", preset: "Static", ratio: "16:9", seconds: 3, loop: true, box: "16:9" },   // 원본이 가로다 (9:16 로 다시 받으면 box 를 지운다)
+  { id: "desk", name: "붓·벼루·빈 종이", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
   { id: "ink", name: "먹이 번지는 종이", preset: "Static", ratio: "16:9", seconds: 2, loop: false },
   { id: "room", name: "실내·병풍·주렴", preset: "Static", ratio: "16:9", seconds: 4, loop: true },
   { id: "fork", name: "갈림길", preset: "Static", ratio: "16:9", seconds: 3, loop: true, focus: "50% 55%" },

@@ -1383,3 +1383,33 @@ body.has-rail-closed .stage { margin-left: 26px; }
           mask-image: radial-gradient(120% 100% at 50% 50%, #000 52%, transparent 100%);
   pointer-events: none;
 }
+
+/*
+ * ★ 화면이 대화처럼 한 줄씩 뜬다.
+ *
+ *   Shell 이 놓인 순서대로 animation-delay 를 다시 매깁니다. 여기서는
+ *   **무엇이 움직이는가**만 정합니다 — 스크립트가 안 돌거나 첫 프레임
+ *   에서도 글이 갑자기 튀지 않게, 기본 지연 0 으로 같은 움직임을 겁니다.
+ *
+ *   장면(.sceneart)과 진행 막대(.prog)는 뺍니다. 배경이라 처음부터
+ *   있어야 합니다 — 배경이 뒤늦게 뜨면 화면이 덜컹거립니다.
+ */
+.scr > *:not(.prog):not(.sceneart):not(.nr) {
+  animation: beatIn .34s cubic-bezier(.2, .7, .3, 1) both;
+}
+
+@keyframes beatIn {
+  from { opacity: 0; transform: translateY(9px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* 나레이션 줄은 참조 구현체의 up 을 그대로 쓰되 빠르기만 줄입니다 */
+.nr .l { animation-duration: .42s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .scr > *, .nr .l {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

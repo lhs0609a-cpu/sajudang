@@ -16,7 +16,7 @@
  */
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useSession } from "@/lib/store";
 import { LENS_BY_ID } from "@/lib/lenses";
 import { api, apiMisconfigured } from "@/lib/api";
@@ -100,6 +100,36 @@ export default function Shell({
     return () => document.body.classList.remove("has-rail");
   }, [admin]);
 
+  /*
+   * ★ 화면 전체가 대화처럼 한 줄씩 뜬다.
+   *
+   *   전에는 나레이션 블록 **안에서만** 0.72초씩 늦었습니다. 그래서
+   *   「붓을 내려놓고, 그가 물었다」 와 「무엇이 걸려서 예까지 왔소?」 와
+   *   고민 여섯 칸이 **한꺼번에** 떴습니다. 대화가 아니라 게시물입니다.
+   *
+   *   순서는 화면 단위여야 합니다. 여기서 놓인 순서(DOM 순서 = 보이는
+   *   순서)대로 다시 매깁니다. 페이지마다 손댈 필요가 없습니다.
+   *
+   *   빠르기 — 한 칸 0.16초, 전체는 1.5초에서 멈춥니다. 대화처럼 이어
+   *   보이면서, 버튼을 누르려는 사람이 기다리지 않는 선입니다. 느리면
+   *   연출이 아니라 지연입니다.
+   *
+   *   장면과 진행 막대는 뺍니다 — 배경이라 처음부터 있어야 합니다.
+   */
+  const scrRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const root = scrRef.current;
+    if (!root) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const els = root.querySelectorAll<HTMLElement>(
+      ":scope > *:not(.prog):not(.sceneart):not(.nr), .nr > .l");
+    let t = 0;
+    els.forEach((el) => {
+      el.style.animationDelay = t.toFixed(2) + "s";
+      t = Math.min(t + 0.16, 1.5);
+    });
+  });
+
   // 계산 서버가 안 붙은 배포본이면 조용히 실패하지 않고 알린다
   const [noApi, setNoApi] = useState(false);
   useEffect(() => setNoApi(apiMisconfigured()), []);
@@ -127,7 +157,7 @@ export default function Shell({
             </p>
           </div>
         )}
-        <div className="scr">
+        <div className="scr" ref={scrRef}>
           {children}
           {legal && <Legal />}
         </div>
