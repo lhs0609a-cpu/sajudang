@@ -23,10 +23,12 @@ from . import guard
 from . import lens as lens_mod
 from . import lens_cuts as lens_cuts_mod
 from . import rarity as rarity_mod
+from . import why as _why
 from . import sinsal as sinsal_mod
 from . import terms as terms_mod
 from . import voice as voice_mod
-from .bank import element_word, josa
+from .bank import (amount_adj, amount_word, count_word,
+                   element_word, josa)
 
 import json as _json
 import re as _re
@@ -187,7 +189,9 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         ("시주", "산출됨" if c["hour_used"] else "제외 — 세 기둥으로 계산"),
     ]
     cuts.append(_cut(
-        "chart", "명식", "여덟 글자" if f.hour_known else "여섯 글자",
+        "chart", "명식",
+        _why.line("여덟 글자" if f.hour_known else "여섯 글자",
+                  "월지", "강약"),
         ('<div class="pillars">%s</div><div class="calc">%s</div>%s'
          % ("".join('<div class="p"><span class="lb">%s</span><b>%s</b></div>'
                     % (p["label"], p["gz"]) for p in f.pillars),
@@ -207,14 +211,34 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     #   전에는 마지막 축이 없어 52가지였고, 한 문장이 8.6%를 가져갔습니다.
     cuts.append(_cut(
         "lack", "1 · 없는 것부터",
-        "%s %s%s" % (element_word(weak), f.elements[weak],
-                     " (동률 %d)" % len(f.weak_els) if len(f.weak_els) > 1 else ""),
-        ('<p class="tale">눈에 띄는 건 %s %s인 게 아니오. '
-         '<b>%s %s밖에 없는 것</b>이지.</p>'
+        # ★ 원점수(`불 0.3`)를 그대로 내면 그건 근거가 아니라 계기판입니다.
+        #   손님은 0.3 이 큰지 작은지 모릅니다. 사람 말로 냅니다.
+        _why.line(
+            "%s %s%s" % (element_word(weak), amount_word(f.elements[weak]),
+                         " (동률 %d)" % len(f.weak_els)
+                         if len(f.weak_els) > 1 else ""),
+            "용신", "용신"),
+        # ★ 세는 수를 **되돌려** 놓습니다.
+        #
+        #   원점수(`물 4.0`)를 걷어 냈더니 이 컷에 확인할 수 있는 수가
+        #   하나도 안 남아, 어떤 사람이 읽어도 맞는 말이 됐습니다
+        #   (tests/test_falsifiable.py 가 잡았습니다). 대신 **겉에
+        #   보이는 글자 수**를 냅니다 — 손님이 만세력을 펴고 세면
+        #   같은 수가 나와야 하는, 틀릴 수 있는 수입니다.
+        ('<p class="tale">눈에 띄는 건 %s %s 게 아니오. '
+         '<b>%s %s 것</b>이지.</p>'
+         '<p class="tale">여덟 글자 겉에 %s <b>%s</b>, '
+         '%s <b>%s</b>. 세어 보시오.</p>'
          '<p class="tale">%s <b>%s</b>이오. 그게 없이 살아온 것이오.</p>'
          '<p class="tale">%s</p>'
-         % (josa(element_word(strong), "이", "가"), f.elements[strong],
-            josa(element_word(weak), "이", "가"), f.elements[weak],
+         % (josa(element_word(strong), "이", "가"),
+            amount_adj(f.elements[strong]),
+            josa(element_word(weak), "이", "가"),
+            amount_adj(f.elements[weak]),
+            josa(element_word(strong), "은", "는"),
+            _how_many(f, strong),
+            josa(element_word(weak), "은", "는"),
+            _how_many(f, weak),
             josa(element_word(weak), "은", "는"), lack["w"],
             B["LACK_LIVED"][top]) + also),
         0, sid="lack:%s:%s" % (weak, top)))
@@ -237,7 +261,9 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     parts = rr["parts"]
     cuts.append(_cut(
         "rarity", "몇이나 되는가",
-        "표본 %s명" % format(rr["sample"], ","),
+        ("표본 %s명 — 인구에서 몇 명인지를 **센** 것이오. "
+         "맞힌다는 말이 아니라 세었다는 말이오 〔희소도 · 표본 계수〕"
+         % format(rr["sample"], ",")),
         ('<p class="tale">%s</p>'
          '<p class="tale">%s %s %s %s</p>'
          '<p class="tale">%s</p><p class="tale">%s</p>'
@@ -259,7 +285,8 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     # ★ 곱하는 축에 **흐름(5)** 을 더했습니다.
     cuts.append(_cut(
         "why", "2 · 왜 반복되나",
-        "%s %d · %s · %s 흐름" % (top, f.ten_gods[top], f.strength, f.flow),
+        _why.line("%s %d · %s · %s 흐름"
+                  % (top, f.ten_gods[top], f.strength, f.flow), top, "십신"),
         ('<p class="tale">%s. 그리고 %s.</p><p class="tale">%s</p>'
          '<p class="tale">그래서 끝에서 <b>%s</b>.</p>'
          '<p class="tale">%s</p>'
@@ -285,7 +312,9 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     # ★ 곱하는 축에 **일간(10)** 을 더했습니다.
     cuts.append(_cut(
         "place", "3 · 어느 자리에서",
-        "일지 %s%s · %s일간" % (f.day_ji, " 충" if f.ilji_chung else "", f.day_gan),
+        _why.line("일지 %s%s · %s일간"
+                  % (f.day_ji, " 충" if f.ilji_chung else "", f.day_gan),
+                  "일지", "십신"),
         # ★ 셀 수 있는 줄. 이 컷은 일지·일간을 보면서 **개수를 안 냈습니다** —
         #   그래서 틀릴 수가 없었습니다. 관·재·식상을 세어 박습니다.
         ('<p class="cnt"><b>관성 %d · 재성 %d · 식상 %d.</b></p>'
@@ -358,9 +387,10 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
 
     cuts.append(_cut(
         "daeun_now", "4 · 지금 어디에",
-        "대운 %s · %s%s · 세운 %s%s" % (
+        _why.line("대운 %s · %s%s · 세운 %s%s" % (
             daeun["gz"], f.daeun_ten_god,
             "" if f.daeun_started else " · 진입 전", sun_g, sun_j),
+            "대운", ""),
         (lead + '<p class="tale">이 구간의 성격은 <b>%s</b>. %s</p>%s%s'
          % (f.daeun_ten_god,
             "조용히 지나가지 않는 구간이오." if heavy
@@ -378,7 +408,8 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     season = bank_mod.born_season(f)
     cuts.append(_cut(
         "yongsin", "5 · 필요한 것",
-        "용신 %s · %s생 · %s" % (f.yongsin, season, top),
+        _why.line("용신 %s · %s생 · %s" % (f.yongsin, season, top),
+                  "용신", "용신"),
         ('<p class="tale">그대에게 필요한 건 <b>%s</b>이오.</p>'
          '<p class="tale">%s</p>'
          '<p class="tale">%s 사람에게서 그걸 구하면 그 사람이 지치오. '
@@ -396,8 +427,9 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     # ── 7 · 대운 맵 ─────────────────────────────────────
     cuts.append(_cut(
         "daeun_map", "6 · 대운 맵",
-        "대운수 %d · %s" % (f.daeun[0]["start_age"],
-                          "순행" if f.forward else "역행"),
+        _why.line("대운수 %d · %s" % (f.daeun[0]["start_age"],
+                                    "순행" if f.forward else "역행"),
+                  "대운", ""),
         ('<div class="dmap">%s</div>'
          '<p class="note">대운수는 절입일까지의 실제 일수 ÷ 3 으로 셈했소.</p>'
          % "".join(
@@ -428,7 +460,8 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         body = '<p class="tale">%s</p>' % T["none"]["sinsal"]
     cuts.append(_cut(
         "sinsal", "이름 붙은 자리",
-        "신살 %d · 공망 %s" % (len(f.sinsal), f.gongmang),
+        _why.line("신살 %d · 공망 %s" % (len(f.sinsal), f.gongmang),
+                  "신살", "신살"),
         body + '<p class="sm">신살 표는 유파마다 다르오. 우리가 쓰는 표를 '
                '문서에 적어 두었소.</p>',
         0, sid="sinsal:%s" % ",".join(x["key"] for x in f.sinsal)))
@@ -460,7 +493,8 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
                    B["HELPER_NONE_WAY"][f.yongsin]))
     cuts.append(_cut(
         "helper", "누가 돕는가",
-        "길신 %d자리" % len({h["pillar"] for h in f.helpers}),
+        _why.line("길신 %d자리" % len({h["pillar"] for h in f.helpers}),
+                  "신살", "신살"),
         body, 1, sid=("helper:%s" % ",".join(
             sorted({h["sinsal"] + ":" + h["pillar"] for h in f.helpers}))
             if f.helpers else "helper:none:%s:%s" % (f.strength, f.yongsin))))
@@ -474,7 +508,9 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
            % " · ".join(a["bad_sinsal"])) if a["bad_sinsal"] else ""
     cuts.append(_cut(
         "ancestor", "뿌리 · 조상 자리",
-        "년주 %s · %s / %s" % (a["pillar"], a["gan_ten_god"], a["ji_ten_god"]),
+        _why.line("년주 %s · %s / %s"
+                  % (a["pillar"], a["gan_ten_god"], a["ji_ten_god"]),
+                  "궁위", "신살"),
         # ★ 조상 자리도 셀 수 있는 것이 하나도 없었습니다.
         #   년주는 **몇 살까지 크게 작용하는 자리**인지 이 집이 이미
         #   압니다(궁위). 나이를 박으면 틀릴 수 있는 말이 됩니다.
@@ -500,7 +536,9 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
                 '다시 재면 달라지기도 하오 — 그건 그 검사의 성질이오.</p>')
         cuts.append(_cut(
             "axis", "7 · 겹친 자리와 어긋난 자리",
-            "사주 %s ↔ 입력 %s" % (bank_mod.axis_string(f), axis4.upper()),
+            _why.line("사주 %s ↔ 입력 %s"
+                      % (bank_mod.axis_string(f), axis4.upper()),
+                      "대조", ""),
             ('<p class="tale">여덟 글자에서 나온 넉 자는 <b>%s</b>. '
              '그대가 적은 건 <b>%s</b>.</p>%s%s'
              % (bank_mod.axis_string(f), axis4.upper(),
@@ -544,8 +582,11 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
 
         cuts.append(_cut(
             "axis", "7 · 물은 자리와 센 자리",
-            "%s → %s %d · 가장 센 자리 %s · %s"
-            % (word, grp, asked, loud, f.strength),
+            # 훅 2.5단과 **같은 말꼴**로 냅니다 — 「관성 3」이 아니라
+            # 「관성이 셋」. 표가 아니라 말이라야 근거로 읽힙니다.
+            _why.line("%s → %s %s · 가장 센 자리 %s · %s"
+                      % (word, josa(grp, "이", "가"), count_word(asked),
+                         loud, f.strength), grp, "십신"),
             body, 2,
             sid="rcax:%s:%s:%d:%s:%s"
                 % (concern, grp, min(asked, 4), loud, f.strength)))
@@ -599,7 +640,9 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     season = bank_mod.born_season(f)
     cuts.append(_cut(
         "week", "이번 주 한 가지",
-        "%s · %s생 · %s일간" % (element_word(f.yongsin), season, f.day_gan),
+        _why.line("%s · %s생 · %s일간"
+                  % (element_word(f.yongsin), season, f.day_gan),
+                  "용신", "용신"),
         ('<p class="tale">%s</p><p class="tale">%s</p>'
          '<p class="tale">%s</p>'
          '<p class="sm">다음에 오시거든 <b>했는지만</b> 말해 주시오. '
@@ -638,7 +681,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         '그건 글자에 없소.</p>',
     ]
     cuts.append(_cut(
-        "closing_cut", "덮으며", "여덟 글자 하나",
+        "closing_cut", "덮으며", _why.line("여덟 글자 하나", "명식", ""),
         "".join(close_bits), 0,
         sid="close:%s:%s" % (f.strength, weak)))
 
@@ -731,6 +774,34 @@ def apply_view(cuts: list, view: dict) -> list:
         return (2, 0)
 
     return sorted(out, key=key)
+
+
+def _visible(f, el: str) -> int:
+    """
+    여덟 글자 **겉에 보이는** 그 기운의 개수.
+
+    ★ `f.elements` 와 다릅니다. 저건 지장간까지 가중치를 매겨 더한
+      점수라 손님이 확인할 수 없습니다. 이건 손님이 만세력을 펴고
+      **직접 세면 같은 수가 나오는** 값입니다.
+
+      틀릴 수 있는 말이라야 근거입니다 — 손님이 세어 보고 다르면
+      우리가 진 것입니다. 그 자리를 남겨 둡니다.
+    """
+    from .constants import ELEMENT_OF_GAN, ELEMENT_OF_JI
+    n = 0
+    for p in f.pillars:
+        if ELEMENT_OF_GAN.get(p["gan"]) == el:
+            n += 1
+        if ELEMENT_OF_JI.get(p["ji"]) == el:
+            n += 1
+    return n
+
+
+def _how_many(f, el: str) -> str:
+    """센 것을 말로. 0은 「하나도 없소」 — 「없음 자」 는 말이 아니오."""
+    n = _visible(f, el)
+    # 「넷 자요」 는 말이 아니오. 수사는 그대로 두고 세는 말은 뺍니다.
+    return "하나도 없소" if n == 0 else "%s이오" % count_word(n)
 
 
 def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
