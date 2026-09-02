@@ -11,17 +11,17 @@ GET  /v1/funnel — 퍼널 조회 (열쇠 필요).
 """
 from __future__ import annotations
 
-import hmac
-import os
 
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header
+from keyguard import require_key as _guard
 from pydantic import BaseModel, Field
 
 import analytics
 
 router = APIRouter(prefix="/v1", tags=["events"])
 
-FUNNEL_KEY = os.getenv("FUNNEL_KEY", "").strip()
+# 열쇠는 keyguard 한 자리에 있습니다. 여기서 또 읽으면 그 순간
+# 둘이 갈립니다 — 한쪽만 고치는 날이 옵니다.
 
 
 class EventIn(BaseModel):
@@ -53,10 +53,12 @@ def clear_events(x_funnel_key: str | None = Header(default=None)) -> dict:
     진짜 숫자를 0 부터 세기. 실사용이 시작된 뒤에는 부르지 마세요.
     지운 것은 돌아오지 않습니다.
     """
-    if not FUNNEL_KEY:
-        raise HTTPException(503, "FUNNEL_KEY 가 설정되지 않았습니다.")
-    if not x_funnel_key or not hmac.compare_digest(x_funnel_key, FUNNEL_KEY):
-        raise HTTPException(401, "열쇠가 맞지 않습니다.")
+    # ★ 지키는 코드를 여기 두지 않습니다.
+    #
+    #   전에는 이 함수 안에서 직접 견주고, admin.py 는 제 나름의
+    #   `_guard()` 를 따로 뒀습니다. 같은 일을 두 곳에서 하면 한쪽만
+    #   고치는 날이 오고, 그날 열린 쪽은 아무도 모릅니다.
+    _guard(x_funnel_key)
     return {"ok": True, "deleted": analytics.clear()}
 
 
@@ -69,8 +71,5 @@ def get_funnel(x_funnel_key: str | None = Header(default=None)) -> dict:
     전환율을 읽어 갑니다. 키를 안 정해 두면 아예 닫습니다 — 열어 두는
     쪽이 기본이면 언젠가 그대로 배포됩니다.
     """
-    if not FUNNEL_KEY:
-        raise HTTPException(503, "FUNNEL_KEY 가 설정되지 않았습니다.")
-    if not x_funnel_key or not hmac.compare_digest(x_funnel_key, FUNNEL_KEY):
-        raise HTTPException(401, "열쇠가 맞지 않습니다.")
+    _guard(x_funnel_key)
     return analytics.funnel()

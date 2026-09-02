@@ -2278,3 +2278,65 @@ body.has-rail-closed .stage { margin-left: 26px; }
   line-height: 1.74;
   color: var(--teal);
 }
+
+/* ── 법정 고지 화면 ──────────────────────────────────────
+ *
+ * 읽으라고 두는 글이 아니라 **닿을 수 있게** 두는 글입니다. 그래도
+ * 읽을 사람은 끝까지 읽으므로, 줄 간격과 폭은 본문과 같게 둡니다.
+ */
+.legalpg h1 {
+  font-family: var(--serif); font-size: var(--fs-8);
+  color: var(--gold); margin-bottom: 14px;
+}
+.ltabs { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 16px; }
+.ltabs .op { flex: 0 0 auto; padding: 7px 13px; }
+.ltabs .op.on { border-color: var(--gold); color: var(--gold); }
+
+.legalpg .doc h2, .legalpg .biz h2 {
+  font-family: var(--serif); font-size: var(--fs-7);
+  color: var(--paper); margin: 6px 0 12px;
+}
+.legalpg .doc h3 {
+  font-family: var(--serif); font-size: var(--fs-5);
+  color: var(--teal); margin: 18px 0 6px;
+}
+.legalpg .doc p {
+  font-family: var(--serif); font-size: var(--fs-4);
+  line-height: 1.85; color: var(--paper2); margin: 0 0 9px;
+}
+.legalpg .doc p.note {
+  border-left: 2px solid var(--line2); padding-left: 11px;
+  color: var(--paper3);
+}
+.legalpg .ptbl { width: 100%; border-collapse: collapse; margin: 8px 0 4px; }
+.legalpg .ptbl th, .legalpg .ptbl td {
+  border: 1px solid var(--line); padding: 7px 9px; text-align: left;
+  font-family: var(--serif); font-size: var(--fs-3);
+  line-height: 1.6; color: var(--paper2); vertical-align: top;
+}
+.legalpg .ptbl th { color: var(--teal); }
+
+/* 사업자 표시 — 빈칸이면 빈칸이라 말합니다. 가짜를 띄우지 않습니다 */
+.legalpg .biz { margin-top: 26px; padding-top: 18px;
+                border-top: 1px solid var(--line); }
+.legalpg .biz .warn {
+  font-family: var(--mono); font-size: var(--fs-2);
+  color: var(--gold); margin-bottom: 10px;
+}
+.legalpg .biz dl { display: grid; gap: 6px; }
+.legalpg .biz dl > div { display: flex; gap: 10px; }
+.legalpg .biz dt {
+  flex: 0 0 138px; font-family: var(--mono); font-size: var(--fs-2);
+  color: var(--paper3);
+}
+.legalpg .biz dd {
+  flex: 1 1 auto; min-width: 0;
+  font-family: var(--serif); font-size: var(--fs-3); color: var(--paper2);
+}
+.legalpg .biz dd em { font-style: normal; color: var(--paper3); opacity: .6; }
+.legalpg .back { margin-top: 22px; }
+
+/* 하단 고지의 링크 */
+.legal .llinks { margin-top: 9px; }
+.legal .llinks a { color: var(--paper3); text-decoration: underline; }
+.legal .llinks a:hover { color: var(--gold); }

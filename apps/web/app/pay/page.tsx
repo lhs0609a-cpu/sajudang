@@ -19,6 +19,7 @@ import { LENS_BY_ID } from "@/lib/lenses";
 import { useSession, type Tier } from "@/lib/store";
 import { track, useScreen } from "@/lib/track";
 import { openCheckout } from "@/lib/toss";
+import { SELLABLE } from "@/lib/biz";
 import type { ReportResponse } from "@shared/chart";
 
 /* 목패의 모양은 lib/api.ts 한 곳에만 적습니다 — 여기 또 적으면
@@ -358,6 +359,24 @@ function PayInner() {
                      */
                     if (!order.client_key) {
                       throw new Error("결제 열쇠가 없소.");
+                    }
+                    /*
+                     * ★ 사업자 표시가 없으면 값을 안 받습니다.
+                     *
+                     *   전자상거래법 제10조는 파는 사람이 누구인지를
+                     *   밝히라 합니다. 표시 없이 돈을 받으면 미신고
+                     *   영업으로 보입니다. 결제 열쇠가 없으면 거절하는
+                     *   것과 **같은 규칙**입니다 — 열린 쪽이 기본이면
+                     *   언젠가 그대로 배포됩니다.
+                     *
+                     *   무료 구간은 그대로 열어 둡니다. 표시 의무는
+                     *   **판매**에 붙는 것이라, 안 파는 동안 서비스를
+                     *   닫을 이유가 없습니다.
+                     */
+                    if (!SELLABLE) {
+                      throw new Error(
+                        "아직 값을 받을 수 없소. 가게 표시가 덜 되었소."
+                      );
                     }
                     await openCheckout({
                       clientKey: order.client_key,

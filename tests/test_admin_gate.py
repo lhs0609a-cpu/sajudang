@@ -36,8 +36,19 @@ def test_admin_is_closed_without_a_key(monkeypatch):
 
 
 def test_admin_refuses_a_wrong_key():
-    import routers.admin as adm
-    adm.FUNNEL_KEY = "right"
+    """
+    ★ 열쇠를 **문지기 자리**에 꽂습니다.
+
+      전에는 `routers.admin.FUNNEL_KEY` 에 꽂았습니다. 그런데 지키는
+      코드가 keyguard 한 자리로 모이면서 그 이름이 없어졌고, 검사가
+      503(열쇠 미설정)을 받았습니다.
+
+      검사가 **어디에 있는지**를 못 박아 두면, 옮기는 순간 뜻이 그대로
+      인데도 빨개집니다. 뜻으로 씁니다 — 「틀린 열쇠는 막고 맞는
+      열쇠는 연다」.
+    """
+    import keyguard
+    keyguard.FUNNEL_KEY = "right"
     try:
         c = _client()
         assert c.get("/v1/admin/overview",
@@ -45,14 +56,40 @@ def test_admin_refuses_a_wrong_key():
         assert c.get("/v1/admin/overview",
                      headers={"x-funnel-key": "right"}).status_code == 200
     finally:
-        adm.FUNNEL_KEY = ""
+        keyguard.FUNNEL_KEY = ""
 
 
 def test_admin_uses_the_same_key_as_funnel():
-    """열쇠가 둘이면 하나만 걸어 두는 날이 온다."""
-    src = (ROOT / "services" / "api" / "routers" / "admin.py").read_text(
-        encoding="utf-8")
-    assert 'os.getenv("FUNNEL_KEY"' in src
+    """
+    열쇠가 둘이면 하나만 걸어 두는 날이 온다.
+
+    ★ 이제 **같은 문지기를 부르는가**로 봅니다. 전에는 admin.py 안에
+      `os.getenv("FUNNEL_KEY"` 가 있는지 봤는데, 그건 「같은 열쇠를
+      쓴다」 가 아니라 「같은 코드를 베껴 뒀다」 를 지키는 것이었습니다.
+      베낀 코드는 한쪽만 고쳐집니다.
+    """
+    api = ROOT / "services" / "api"
+    for fn in ("routers/admin.py", "routers/events.py"):
+        src = (api / fn).read_text(encoding="utf-8")
+        assert "from keyguard import" in src, fn
+        # 제 나름의 열쇠를 또 읽으면 안 됩니다 — 그 순간 둘이 갈립니다.
+        assert 'os.getenv("FUNNEL_KEY"' not in src, fn
+
+
+def test_모든_조회문에_문지기가_붙어_있다():
+    """
+    ★ 문이 하나 늘 때 지킴을 빠뜨리는 것이 이 자리의 사고입니다.
+
+      영업 정보를 내는 파일에서는 `@router.get` 마다 `_guard(` 가
+      있어야 합니다. 손님이 쓰는 수집 문(post)은 안 잠급니다.
+    """
+    api = ROOT / "services" / "api" / "routers"
+    for fn in ("admin.py", "events.py"):
+        src = (api / fn).read_text(encoding="utf-8")
+        gets = len(re.findall(r"@router\.get", src))
+        guards = len(re.findall(r"_guard\(", src))
+        assert guards >= gets, "%s — 조회문 %d개 중 지킴 %d개" % (
+            fn, gets, guards)
 
 
 def test_admin_screen_is_not_counted_in_the_funnel():

@@ -51,6 +51,20 @@ export function Legal() {
   return (
     <div className="legal">
       {LEGAL.map((l) => <p key={l}>{l}</p>)}
+      {/*
+       * ★ 전자상거래법 제10조 — 사업자 표시와 약관·방침·환불은
+       *   **상시** 닿을 수 있어야 합니다. 결제 화면에만 두면
+       *   결제 전에 못 읽습니다.
+       */}
+      <p className="llinks">
+        <a href="/legal">이용약관</a>
+        <span aria-hidden="true"> · </span>
+        <a href="/legal">개인정보처리방침</a>
+        <span aria-hidden="true"> · </span>
+        <a href="/legal">환불정책</a>
+        <span aria-hidden="true"> · </span>
+        <a href="/legal">사업자 정보</a>
+      </p>
     </div>
   );
 }

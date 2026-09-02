@@ -172,9 +172,15 @@ def test_funnel_order_matches_the_real_flow():
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("EVENT_LOG_PATH", str(tmp_path / "e.jsonl"))
     monkeypatch.setenv("FUNNEL_KEY", "k" * 24)
-    # routers 패키지가 events 를 속성으로 붙들고 있어 패키지째 비웁니다
+    # routers 패키지가 events 를 속성으로 붙들고 있어 패키지째 비웁니다.
+    #
+    # ★ keyguard 도 같이 비웁니다. 문지기가 한 자리로 모이면서 열쇠를
+    #   그 모듈이 읽습니다 — 안 비우면 처음 불러올 때 읽은 값이 남아
+    #   여기서 setenv 한 열쇠가 안 먹습니다. 혼자 돌리면 통과하고
+    #   전량에서만 터져서 찾기가 고약합니다.
     for m in [k for k in list(sys.modules)
-              if k in ("analytics", "main") or k.startswith("routers")]:
+              if k in ("analytics", "main", "keyguard")
+              or k.startswith("routers")]:
         sys.modules.pop(m, None)
     from fastapi.testclient import TestClient
     import main
@@ -202,9 +208,15 @@ def test_funnel_is_closed_when_no_key_is_set(tmp_path, monkeypatch):
     """열어 두는 쪽이 기본이면 언젠가 그대로 배포된다."""
     monkeypatch.setenv("EVENT_LOG_PATH", str(tmp_path / "e.jsonl"))
     monkeypatch.delenv("FUNNEL_KEY", raising=False)
-    # routers 패키지가 events 를 속성으로 붙들고 있어 패키지째 비웁니다
+    # routers 패키지가 events 를 속성으로 붙들고 있어 패키지째 비웁니다.
+    #
+    # ★ keyguard 도 같이 비웁니다. 문지기가 한 자리로 모이면서 열쇠를
+    #   그 모듈이 읽습니다 — 안 비우면 처음 불러올 때 읽은 값이 남아
+    #   여기서 setenv 한 열쇠가 안 먹습니다. 혼자 돌리면 통과하고
+    #   전량에서만 터져서 찾기가 고약합니다.
     for m in [k for k in list(sys.modules)
-              if k in ("analytics", "main") or k.startswith("routers")]:
+              if k in ("analytics", "main", "keyguard")
+              or k.startswith("routers")]:
         sys.modules.pop(m, None)
     from fastapi.testclient import TestClient
     import main

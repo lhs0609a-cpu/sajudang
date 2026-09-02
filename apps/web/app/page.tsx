@@ -26,6 +26,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
 import { useScreen } from "@/lib/track";
 import { birthMessageFrom, birthProblem } from "@/lib/birth";
+import { needsGuardian } from "@/lib/biz";
 import Scene from "@/components/scene/Scene";
 import { Narration, Progress, Say } from "@/components/Narration";
 import { CalcPanel, ElementBar, ManseTable, Pillars, Summary } from "@/components/Chart";
@@ -236,6 +237,17 @@ function EntryInner() {
     const { year, month, day } = s;
     if (year === null || month === null || day === null) {
       setError("날을 다 적어야 명식을 세우오.");
+      return;
+    }
+    // ★ 만 14세 미만은 법정대리인 동의 없이 개인정보를 못 받습니다
+    //   (개인정보보호법 제22조의2). 나이를 **또 묻지 않습니다** —
+    //   생년월일은 사주를 보려고 이미 받았습니다. 한 번 받은 것으로
+    //   셈할 수 있는 걸 다시 물으면 그 자리에서 나갑니다.
+    if (needsGuardian(year, month, day)) {
+      setError(
+        "만 열네 살이 안 되었소. 그 나이에는 부모님 동의가 있어야 "
+        + "생년월일을 받을 수 있소 — 법이 그러하오. 어른과 함께 오시오."
+      );
       return;
     }
     setBusy(true);

@@ -30,6 +30,7 @@ from collections import Counter
 from datetime import date, datetime
 
 from fastapi import APIRouter, Header, HTTPException
+from keyguard import require_key as _guard
 
 import analytics
 import payments
@@ -37,18 +38,8 @@ import store
 
 router = APIRouter(prefix="/v1/admin", tags=["admin"])
 
-FUNNEL_KEY = os.getenv("FUNNEL_KEY", "").strip()
-
-
-def _guard(key: str | None) -> None:
-    """
-    퍼널과 **같은 열쇠**를 씁니다. 둘을 따로 두면 하나만 걸어 두고
-    다른 하나는 열린 채 배포되는 날이 옵니다.
-    """
-    if not FUNNEL_KEY:
-        raise HTTPException(503, "FUNNEL_KEY 가 설정되지 않았습니다.")
-    if not key or not hmac.compare_digest(key, FUNNEL_KEY):
-        raise HTTPException(401, "열쇠가 맞지 않습니다.")
+# 문지기는 keyguard 한 자리에 있습니다. 퍼널과 **같은 열쇠**를 씁니다 —
+# 둘을 따로 두면 하나만 걸어 두고 다른 하나는 열린 채 배포됩니다.
 
 
 def _sales() -> dict:
