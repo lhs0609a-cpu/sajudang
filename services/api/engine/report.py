@@ -301,10 +301,18 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         "why", "2 · 왜 반복되나",
         _why.line("%s %d · %s · %s 흐름"
                   % (top, f.ten_gods[top], f.strength, f.flow), top, "십신"),
-        ('<p class="tale">%s. 그리고 %s.</p><p class="tale">%s</p>'
-         '<p class="tale">그래서 끝에서 <b>%s</b>.</p>'
+        # ★ 주어를 답니다. 여기가 손님이 짚은 자리입니다 (2026-09-02) —
+        #   "먼저 만든다. 그리고 과정에서 즐거움을 얻는다." 는 누구
+        #   얘긴지 안 적힌 사전 뜻풀이였습니다. 가운데 st_line 한 줄만
+        #   손님에게 하는 말이고 앞뒤가 붕 떠 있었습니다.
+        #   `patt["bs"]` 는 문단에 쓰는 문장꼴입니다 — `b`(맨꼴)는 훅
+        #   1단이 「…는 사람일 뿐이오」로 쓰므로 그대로 둡니다.
+        ('<p class="tale">%s %s. 그리고 %s.</p><p class="tale">%s</p>'
+         '<p class="tale">그래서 끝에서 %s <b>%s</b>.</p>'
          '<p class="tale">%s</p>'
-         % (bank_mod._pick("IGNITE", top, concern), patt["b"], st_line,
+         % (josa(you, "은", "는"), bank_mod._pick("IGNITE", top, concern),
+            patt.get("bs") or patt["b"], st_line,
+            josa(you, "은", "는"),
             bank_mod._pick("BLAME", top, f.strength),
             B["WHY_TAIL"][f.flow])
          # 물으러 온 그 자리를 때립니다.

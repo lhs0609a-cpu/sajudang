@@ -45,7 +45,10 @@ def _ts() -> dict:
 
 
 # 두 곳이 **반드시** 같아야 하는 것
-MUST_MATCH = ("name", "hanja", "group", "price", "specialty", "archetype")
+# ★ topics 도 여기 있습니다. 카드에 적히는 「재회」 「돈」 「시험」 이
+#   서버와 갈리면, 손님이 고른 이유와 실제로 받는 것이 어긋납니다.
+MUST_MATCH = ("name", "hanja", "group", "price", "specialty", "archetype",
+              "topics")
 
 
 def test_both_sources_list_the_same_people():

@@ -14,6 +14,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Shell from "@/components/Shell";
 import Scene from "@/components/scene/Scene";
+import CharArt from "@/components/CharArt";
 import { Narration, Say } from "@/components/Narration";
 import { api } from "@/lib/api";
 import { LENS_BY_ID } from "@/lib/lenses";
@@ -68,7 +69,7 @@ export default function RelayPage() {
   return (
     <Shell title="이어지다" legal>
       <Scene id="handle" />
-      {err && <Say who="도령">{err}</Say>}
+      {err && <Say who="도령" lens="pungun">{err}</Say>}
 
       {data?.blocked ? (
         <div className="warn">
@@ -85,11 +86,25 @@ export default function RelayPage() {
           {data?.forced.map((id) => {
             const l = LENS_BY_ID[id];
             return (
-              <div className="dz" key={id} style={{ borderColor: "var(--teal)" }}>
+              <div className="dz face" key={id} style={{ borderColor: "var(--teal)" }}>
                 <div className="k">값 없이</div>
-                <p style={{ fontFamily: "var(--serif)", fontSize: 18, color: l?.color }}>
-                  {l?.name}
-                </p>
+                {/* ★ 얼굴이 없었습니다 (2026-09-02). 이 집이 파는 것은
+                    해석이 아니라 **그 사람**인데, 이어 붙이는 자리에
+                    이름과 값만 있었습니다. */}
+                <div className="dzhead">
+                  {l && <CharArt lens={l} size="card" />}
+                  <div>
+                    <p style={{ fontFamily: "var(--serif)", fontSize: 18,
+                                color: l?.color }}>
+                      {l?.name}
+                    </p>
+                    {l && (
+                      <span className="topics">
+                        {l.topics.split(" · ").map((t) => <i key={t}>{t}</i>)}
+                      </span>
+                    )}
+                  </div>
+                </div>
                 <p className="sm">{l?.quote}</p>
                 <button className="btn gh mt" onClick={() => void go(id)}>
                   차 한 잔 하고 간다
@@ -104,12 +119,28 @@ export default function RelayPage() {
               {data.recommend.map((r) => {
                 const l = LENS_BY_ID[r.lens_id];
                 return (
-                  <div className="dz" key={r.lens_id}>
-                    <p style={{ fontFamily: "var(--serif)", fontSize: 18, color: l?.color }}>
-                      {r.name}
-                    </p>
+                  <div className="dz face" key={r.lens_id}>
+                    {/* ★ 얼굴을 붙입니다. 이름·근거·값만으로는 스무 명이
+                        서로 구별되지 않습니다. 그림이 없으면 그 사람의
+                        색과 한자로 자리만 잡습니다 (CharArt). */}
+                    <div className="dzhead">
+                      {l && <CharArt lens={l} size="card" />}
+                      <div>
+                        <p style={{ fontFamily: "var(--serif)", fontSize: 18,
+                                    color: l?.color }}>
+                          {r.name}
+                        </p>
+                        {l && (
+                          <span className="topics">
+                            {l.topics.split(" · ").map((t) => <i key={t}>{t}</i>)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                     <span className="src">근거 · {r.reason}</span>
-                    {r.quote && <p className="sm" style={{ marginTop: 6 }}>{r.quote}</p>}
+                    {r.quote && (
+                      <Say who={r.name} lens={r.lens_id}>{r.quote}</Say>
+                    )}
                     <div className="og c2 mt">
                       <button
                         className="op"

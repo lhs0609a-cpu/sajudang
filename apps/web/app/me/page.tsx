@@ -38,7 +38,7 @@ function MeInner() {
           대가를 주고받은 글은 싣지 않습니다.
         </p>
         {s.seals.length === 0 && (
-          <Say who="도령">아직 남기실 자리가 없소. 한 사람이라도 끝까지 들어보시오.</Say>
+          <Say who="도령" lens="pungun">아직 남기실 자리가 없소. 한 사람이라도 끝까지 들어보시오.</Say>
         )}
         <button className="btn gh mt" onClick={() => setTab("f2")}>인장첩으로</button>
       </Shell>

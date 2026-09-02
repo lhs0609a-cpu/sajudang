@@ -60,7 +60,7 @@ export default function SummaryPage() {
       </Shell>
     );
   }
-  if (err) return <Shell title="분석지"><Say who="도령">{err}</Say></Shell>;
+  if (err) return <Shell title="분석지"><Say who="도령" lens="pungun">{err}</Say></Shell>;
   if (!sm) return <Shell title="분석지"><Narration lines={["종이를 편다."]} /></Shell>;
 
   const shareUrl = share

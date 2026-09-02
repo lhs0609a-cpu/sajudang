@@ -131,7 +131,40 @@ for (const id of Object.keys(SCN)) {
     note: mo.note || null,
   };
 }
-fs.writeFileSync(process.argv[3], JSON.stringify(out, null, 1), "utf8");
+/*
+ * ★ 있던 것을 지우면서 덮어쓰지 않는다.
+ *
+ *   2026-09-02 에 hall 프롬프트 한 줄을 고치려고 이걸 통째로 다시
+ *   돌렸더니, **캐릭터 초상 프롬프트 20종과 mirror 장면이 함께
+ *   사라졌습니다.** 그 둘은 참조 구현체에 없고 이 파일에만 삽니다
+ *   (mirror 는 발주서가 쓰인 뒤에 붙은 화면이고, chars 는 여기서
+ *   따로 씁니다). 재생성은 **참조 구현체에 있는 것만** 압니다.
+ *
+ *   그래서 있던 열쇠가 빠지면 멈춥니다. 한 덩이만 고칠 거면 이 도구를
+ *   돌리지 말고 그 값만 갈아 끼우세요.
+ */
+const OUT = process.argv[3];
+if (fs.existsSync(OUT)) {
+  const prev = JSON.parse(fs.readFileSync(OUT, "utf8"));
+  const lost = [];
+  for (const k of Object.keys(prev)) {
+    if (!(k in out)) { lost.push(k); continue; }
+    if (prev[k] && typeof prev[k] === "object" && !Array.isArray(prev[k])) {
+      for (const sub of Object.keys(prev[k])) {
+        if (!(sub in (out[k] || {}))) lost.push(k + "." + sub);
+      }
+    }
+  }
+  if (lost.length) {
+    console.error("덮어쓰면 사라지는 것 " + lost.length + " 개:");
+    console.error("  " + lost.join(", "));
+    console.error("참조 구현체에 없는 것들입니다. 여기서만 사는 값이라");
+    console.error("통째로 다시 뽑으면 잃습니다. 고칠 값만 갈아 끼우세요.");
+    console.error("정말 버리려면 --force 를 주세요.");
+    if (!process.argv.includes("--force")) process.exit(1);
+  }
+}
+fs.writeFileSync(OUT, JSON.stringify(out, null, 1), "utf8");
 const v = Object.values(out.scenes);
 console.log(
   `장면 ${v.length}개 · 이미지 프롬프트 ${v.filter((x) => x.image).length}` +

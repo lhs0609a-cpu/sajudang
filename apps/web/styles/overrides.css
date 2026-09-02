@@ -2340,3 +2340,120 @@ body.has-rail-closed .stage { margin-left: 26px; }
 .legal .llinks { margin-top: 9px; }
 .legal .llinks a { color: var(--paper3); text-decoration: underline; }
 .legal .llinks a:hover { color: var(--gold); }
+
+/* ══════════ 뜸과 한 컷씩 뜨기 ══════════
+   ★ 손님이 2026-09-02 에 짚은 둘입니다.
+
+     ① "글이 길면 스크롤 내리면 뜨고, 내리면 뜨고 하게. 압도당하지
+        않게."   → .rv (components/Reveal.tsx)
+     ② "분석할 때는 텀을 들여. 너무 빨라. 나오는 속도가 기대감도
+        어느 정도 줘야지."   → .think (components/Thinking.tsx)
+
+   ★ 아직 안 뜬 자리도 **높이를 잡아 둡니다**(.rvhold). 안 그러면
+     아래 것이 위로 튀어 올라와 손님이 읽던 자리를 잃습니다.
+   ------------------------------------------------------ */
+.rv { position: relative; }
+.rv0 { min-height: 96px; }
+.rv2 { animation: rvIn .42s ease both; }
+@keyframes rvIn { from { opacity: 0; transform: translateY(9px); } }
+
+.rvhold { min-height: 96px; }
+
+/* 무엇을 보는 중인지 — 한 줄. 컷이 뜨기 전 그 자리에 섭니다. */
+.thinking {
+  display: flex; align-items: center; gap: 8px;
+  min-height: 96px; margin: 0;
+  font-family: var(--mono); font-size: var(--fs-3);
+  color: var(--paper3);
+}
+.thinking span { opacity: .85; }
+
+/* 점 셋 — 차례로 밝아집니다 */
+.thinking i, .dots i {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--c); opacity: .25;
+  animation: dotUp 1.05s ease-in-out infinite;
+}
+.thinking i:nth-of-type(2), .dots i:nth-of-type(2) { animation-delay: .16s; }
+.thinking i:nth-of-type(3), .dots i:nth-of-type(3) { animation-delay: .32s; }
+@keyframes dotUp { 0%, 100% { opacity: .25; } 50% { opacity: .95; } }
+
+.dots { display: inline-flex; gap: 4px; margin-left: 7px;
+        vertical-align: middle; }
+
+/* 뜸 상자 — 계산 장면(.calcrun)과 같은 결로 둡니다 */
+.calcrun.think { min-height: 148px; }
+.calcrun.think .whoIs {
+  font-family: var(--serif); font-size: var(--fs-3);
+  color: var(--gold); margin-bottom: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rv2, .thinking i, .dots i { animation: none; }
+  .rv0, .rvhold, .thinking { min-height: 0; }
+}
+
+/* 종이에서는 뜸도 빈 자리도 없습니다. Reveal 이 beforeprint 에 다 펴 둡니다 */
+@media print {
+  .rv2 { animation: none; }
+  .rv0, .rvhold { min-height: 0; }
+  .thinking { display: none; }
+}
+
+/* ══════════ 스무 사람 — 고른 자리에 불이 들어온다 ══════════
+   ★ 손님이 2026-09-02 에 짚었습니다 — "캐릭터 클릭하면 그 캐릭터가
+     비추이면서, 아래 그 캐릭터 있는 곳으로 이동해줘야지."
+     전에는 누르는 즉시 다른 화면으로 넘어가 목록을 잃었습니다.
+   ------------------------------------------------------ */
+.op.face.lit {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold), 0 0 18px -6px var(--gold);
+  background: linear-gradient(180deg,
+              rgba(229, 184, 122, .08), transparent 70%), var(--bg2);
+}
+
+.seatnow {
+  margin-top: 22px; padding-top: 18px;
+  border-top: 1px solid var(--line);
+  scroll-margin-top: 12px;
+  animation: rvIn .38s ease both;
+}
+.seatnow .lab { color: var(--gold); }
+
+@media (prefers-reduced-motion: reduce) {
+  .seatnow { animation: none; }
+}
+
+/* ══════════ 상담 분야 · 이어지는 자리의 얼굴 ══════════
+   ★ 손님이 2026-09-02 에 짚은 둘입니다.
+
+     ① "캐릭터별로 뭘 위주로 상담하는지를 나타내라니까 — 재회인지
+        사랑인지 돈인지 시험합격인지."
+        전에는 「왜 하필 지금」 「신살과 자리」처럼 **읽는 법**만
+        적혀 있었습니다. 그건 이 집이 쓰는 말입니다.
+     ② "이런 데에도 각각 초상화 다 넣어야 하고."
+        이어 붙이는 자리(h1)에 이름·근거·값만 있었습니다.
+   ------------------------------------------------------ */
+.topics { display: flex; flex-wrap: wrap; gap: 4px; margin: 3px 0 1px; }
+.topics i {
+  font-style: normal;
+  font-family: var(--mono); font-size: var(--fs-2);
+  color: var(--gold);
+  border: 1px solid rgba(229, 184, 122, .32);
+  background: rgba(229, 184, 122, .06);
+  border-radius: 2px; padding: 1px 6px;
+  white-space: nowrap;
+}
+.op.face .topics { margin-bottom: 2px; }
+.op.off .topics { display: none; }
+
+.topicrow { display: flex; align-items: flex-start; gap: 9px; margin: 10px 0 2px; }
+.topicrow .k {
+  flex: 0 0 auto; font-family: var(--mono); font-size: var(--fs-2);
+  color: var(--paper3); padding-top: 2px;
+}
+
+/* 이어지는 자리 — 얼굴을 왼쪽에 세우고 이름·분야를 옆에 */
+.dzhead { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 6px; }
+.dzhead > div { min-width: 0; flex: 1 1 auto; }
+.dz.face .charart.card { flex: 0 0 auto; }

@@ -222,7 +222,7 @@ export default function HookSegments({
                   같은 얼굴로 계속 짚으면 그때 손님은 이게 녹음이라는
                   걸 압니다.
               */}
-              <Say who={charName}
+              <Say who={charName} lens={lensId}
                    mood={replies[i] && seg.no === replies[i] ? "soft" : "cut"}>
                 {replies[i]}
               </Say>

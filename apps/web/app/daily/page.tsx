@@ -57,7 +57,7 @@ export default function DailyPage() {
         <b>일진</b>은 <b>그날의 기운</b>이오. 날마다 두 글자가 서는데,
         그것이 그대 여덟 글자와 어디서 맞물리는지를 보오.
       </p>
-      {err && <Say who="도령">{err}</Say>}
+      {err && <Say who="도령" lens="pungun">{err}</Say>}
 
       {/* 하루 3회 접속 시 만류 — 늘리지 마세요 */}
       {s.visits >= VISIT_WARN_AT && (
@@ -104,7 +104,7 @@ export default function DailyPage() {
           <p className="sm">{data.score_says}</p>
           {/* ★ 줄 단위로 그립니다. 관계·일간·신강약·계절·용신을 곱해 만든
               다섯 줄이라, 한 문단으로 뭉치면 읽히지 않습니다. */}
-          <Say who="도령">
+          <Say who="도령" lens="pungun">
             {data.lines.map((l, i) => (
               <p key={i} style={i ? { marginTop: 8 } : undefined}>{l}</p>
             ))}

@@ -393,7 +393,7 @@ function EntryInner() {
             켠 사람에게는 그냥 있습니다.
         */}
         <Meet note="처음 뵙겠소" />
-        <Say who="도령">그대를 뭐라 적으면 되겠소?</Say>
+        <Say who="도령" lens="pungun">그대를 뭐라 적으면 되겠소?</Say>
         <input className="fld ser" placeholder="이름 또는 별명" maxLength={12}
                value={s.name} onChange={(e) => s.set({ name: e.target.value })} />
         {/*
@@ -404,7 +404,7 @@ function EntryInner() {
             빼앗기지 않게 하려면 무엇에 쓰는지를 말해야 합니다.
         */}
         <Narration lines={["", "본명을 적을 이유는 없다.", "셈에는 쓰이지 않는다."]} />
-        <Say who="도령">셈에는 안 쓰이오. 다만 <b>내가 그대를 부를 때</b> 쓰오.</Say>
+        <Say who="도령" lens="pungun">셈에는 안 쓰이오. 다만 <b>내가 그대를 부를 때</b> 쓰오.</Say>
 
         <button className="btn" onClick={() => go("a5")}>
           {named ? "적는다" : "그냥 넘어간다"}
@@ -461,7 +461,7 @@ function EntryInner() {
         <Narration lines={["붓끝이 종이에 닿았다.", "먹이 한 방울 번졌다."]} />
         {/* ★ 앞에서 고른 고민을 되받습니다. 먼저 마음을 정한 사람은
             뒤이은 수고를 자기 결정과 맞추려 합니다. */}
-        <Say who="도령">
+        <Say who="도령" lens="pungun">
           {askWord ? `${askWord}이 걸려 오셨다 했지. 그럼 날부터 대시오.` : "태어난 날을 대시오."}
         </Say>
         <div className="f3">
@@ -526,7 +526,7 @@ function EntryInner() {
           </>
         )}
 
-        <Say who="도령">남녀에 따라 운이 흐르는 방향이 반대요. 이건 반드시 있어야 하오.</Say>
+        <Say who="도령" lens="pungun">남녀에 따라 운이 흐르는 방향이 반대요. 이건 반드시 있어야 하오.</Say>
         <div className="og c2">
           {([["F", "여인"], ["M", "사내"]] as const).map(([v, label]) => (
             <button key={v} className={`op ${s.sex === v ? "on" : ""}`}
@@ -589,7 +589,7 @@ function EntryInner() {
             사람이 아닙니다. 여기서는 이름만 답니다.
         */}
         <Meet nameOnly />
-        <Say who="도령">때는 아시오?</Say>
+        <Say who="도령" lens="pungun">때는 아시오?</Say>
         <Narration lines={["", "대부분은 모른다.", "모른다고 해도 그는 개의치 않았다."]} />
 
         {/* ★ "모르오" 를 눈에 띄게. 여기서 막히면 그대로 이탈한다. (docs/08 §3) */}
@@ -697,7 +697,7 @@ function EntryInner() {
         <Progress step={progressAt("a4b")!} total={PROGRESS_TOTAL} />
         <Scene id="mirror" />
         <Narration lines={["그가 종이 한 장을 더 꺼냈다."]} />
-        <Say who="도령" html="혹시 <b>성향 검사</b>를 해본 적 있소?<br>네 글자로 나오는 그것 말이오." />
+        <Say who="도령" lens="pungun" html="혹시 <b>성향 검사</b>를 해본 적 있소?<br>네 글자로 나오는 그것 말이오." />
 
         {/*
           ★ 무엇을 위해 묻는지를 **먼저** 말합니다.
@@ -759,7 +759,7 @@ function EntryInner() {
             주는 편이 더 낫습니다 — 갈림길이 이 화면의 뜻입니다.
         */}
         <Narration lines={["길이 세 갈래로 갈리는 데서, 그가 물었다."]} />
-        <Say who="도령">
+        <Say who="도령" lens="pungun">
           {s.name ? `${s.name}. 무엇이 걸려서 예까지 왔소?` : "무엇이 걸려서 예까지 왔소?"}
         </Say>
         <Narration lines={["", "한참 답이 나오지 않았다.", "하나만 고르라면—"]} />
@@ -813,7 +813,7 @@ function EntryInner() {
         {busy && <Narration lines={["도령이 종이를 폈다.", "붓이 움직인다."]} />}
         {error && (
           <>
-            <Say who="도령">{error}</Say>
+            <Say who="도령" lens="pungun">{error}</Say>
             {/* ★ 여기가 막다른 길이었습니다.
                 '다시 세운다' 는 같은 값으로 재시도만 해서, 잘못 적은
                 사람은 영영 빠져나올 수 없었습니다. 고치러 갈 길을 냅니다. */}
@@ -988,7 +988,7 @@ function EntryInner() {
           </p>
         </div>
       )}
-      {error && <Say who="도령">{error}</Say>}
+      {error && <Say who="도령" lens="pungun">{error}</Say>}
       {segments && s.chartId && (
         <HookSegments
           segments={segments}

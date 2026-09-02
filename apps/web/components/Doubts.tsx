@@ -89,7 +89,7 @@ export default function Doubts({
   return (
     <div className="blk in doubts">
       <div className="lab">믿기 어려우실 게요</div>
-      {!compact && <Say who="도령">{lead}</Say>}
+      {!compact && <Say who="도령" lens="pungun">{lead}</Say>}
       {DOUBTS.map((x, i) => (
         <div className={"dq " + (open === i ? "on" : "")} key={x.q}>
           <button className="qh" onClick={() => setOpen(open === i ? null : i)}>

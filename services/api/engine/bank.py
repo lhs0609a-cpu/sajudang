@@ -26,6 +26,7 @@ from typing import Optional
 
 from . import guard
 from . import terms
+from . import voice as _voice
 from . import why as _why
 from .constants import ELEMENT_OF_GAN
 
@@ -493,10 +494,18 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     rs = bank()["RESULT"][weak]
     bl = _pick("BLAME", top, strength)
     seq = [igkey, fl["k"], rs["k"]]
+    # ★ 주어를 답니다.
+    #
+    #   IGNITE·BLAME 은 **조각**이라 그 자체로는 주어가 없습니다
+    #   ("먼저 만드오" · "더 잘 만들지 못한 걸 탓하오"). 순서 상자
+    #   (seq)에서는 그게 맞지만, 문단에 그대로 떨어뜨리면 누구 얘긴지
+    #   안 적힌 글이 됩니다 — 손님이 2026-09-02 에 그걸 짚었습니다.
+    #   가운데 줄은 앞 줄에서 주어가 이어지니 다시 안 답니다.
+    you_n = josa(esc_you, "은", "는")
     lines = [
-        "%s. 누가 시킨 것도 아닌데." % ig,
+        "%s %s. 누가 시킨 것도 아닌데." % (you_n, ig),
         "그러다 <b>%s</b>, %s." % (fl["t"], rs["t"]),
-        "그리고 %s" % bl,
+        "그리고 %s %s." % (you_n, bl),
     ]
     # ★ 태어난 달의 기운 한 줄. 월지에서 봅니다.
     #   시기는 말하지 않습니다 — '언제' 는 유료 구간(대운)의 몫입니다.
@@ -628,6 +637,15 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
         before = set(seen)
         s["html"] = terms.gloss(s["html"], seen)
         s["html"] += terms.picture_box(seen - before)
+
+    # ★ 뱅크에 박아 둔 「그대」를 그 캐릭터의 호칭으로 바꿉니다.
+    #
+    #   뱅크는 하오체 한 벌 · 호칭 한 벌로 씁니다 (voice.py 머리말).
+    #   리포트는 이 갈아 끼우기를 이미 거치는데 **훅만 안 거쳤습니다.**
+    #   그래서 STAB_GAN 의 "그대는 곧은 나무요" 가 자네라 부르는
+    #   캐릭터에게서도 「그대」로 나갔습니다. 조사도 같이 맞춥니다.
+    for s in segs:
+        s["html"] = _voice.address(s["html"], you)
     return segs
 
 

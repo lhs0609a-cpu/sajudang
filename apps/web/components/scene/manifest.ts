@@ -109,7 +109,14 @@ export const SCENES: SceneSpec[] = [
   { id: "coin", name: "엽전", preset: "Static", ratio: "1:1", seconds: 2, loop: false },
   { id: "tea", name: "다과상", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
   { id: "sealbook", name: "인장첩", preset: "Static", ratio: "3:4", seconds: 2, loop: false },
-  { id: "oldpaper", name: "오래된 종이", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
+  // ★ 16:9 로 적혀 있었지만 실제로 들어온 그림은 9:16 입니다
+  //   (2026-09-01 부터 원본이 전부 세로). 적힌 값을 그림에 맞춥니다.
+  //
+  //   focus 를 아래로 내린 이유 — 4:3 상자는 세로의 42%만 보입니다.
+  //   가운데로 두면 **인장과 눌린 꽃이 둘 다 잘려 나가고** 줄만 그은
+  //   빈 종이가 남습니다. 70% 로 내리면 인장·꽃·종이 아래 끝이 다
+  //   들어옵니다. 인장은 이 집의 표라 잘리면 안 됩니다.
+  { id: "oldpaper", name: "오래된 종이", preset: "Static", ratio: "9:16", seconds: 3, loop: true, focus: "50% 70%" },
   { id: "wall", name: "후기 벽", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
   { id: "banner", name: "등불 배너", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
 ];

@@ -12,15 +12,34 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
 import Scene from "@/components/scene/Scene";
 import ExtraAsk from "@/components/ExtraAsk";
+import Reveal from "@/components/Reveal";
+import Thinking from "@/components/Thinking";
 import { Narration, Say } from "@/components/Narration";
 import { api, ApiError } from "@/lib/api";
 import { LENS_BY_ID } from "@/lib/lenses";
 import { useSession } from "@/lib/store";
+import { thinkOf } from "@/lib/think";
 import type { ReportResponse } from "@shared/chart";
 
 type Tab = "c1" | "c2" | "c3" | "c4" | "c5" | "c6";
 
 const TABS: Tab[] = ["c1", "c2", "c3", "c4", "c5", "c6"];
+
+/*
+ * 두루마리를 펴는 동안 찍는 줄.
+ *
+ * ★ 넷 다 **실제로 이 사이에 서버가 하는 일**입니다. 지어낸 뜸이
+ *   아닙니다 — 근거 줄에 같은 말이 그대로 적혀 나옵니다.
+ *   (engine/report.py 의 컷 순서와 같습니다)
+ */
+const OPENING_BEATS = [
+  "여덟 글자를 다시 펴는 중",
+  "월지와 일지를 견주는 중",
+  "대운을 십 년 단위로 세는 중",
+  "이 사람 눈으로 다시 읽는 중",
+];
+/** 뜸 넉 줄이 다 서는 데 걸리는 시간. Thinking 의 박자와 맞춥니다. */
+const OPENING_MS = 260 + OPENING_BEATS.length * 760 + 320;
 
 /** 두루마리를 얼마나 내려왔는가. 얇은 막대 한 줄. */
 function ScrollProgress() {
@@ -61,6 +80,8 @@ function ReportInner() {
   const [rep, setRep] = useState<ReportResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [rating, setRating] = useState(0);
+  /* 뜸이 끝났는가. 서버가 빨라도 이 장면을 지우지 않습니다 (a6 과 같은 결). */
+  const [opened, setOpened] = useState(false);
 
   /*
    * 이 캐릭터가 따로 받는 것.
@@ -94,6 +115,8 @@ function ReportInner() {
     setAsking(false);
     setErr(null);
     setRep(null);
+    /* 사람이 바뀌면 뜸도 처음부터. 새 사람이 새로 읽는 것입니다. */
+    setOpened(false);
   }
 
   /*
@@ -202,6 +225,16 @@ function ReportInner() {
     return () => { alive = false; };
   }, [s.chartId, lensId, s.tier, s.concern, s.axis4, s.sessionId, extras]);
 
+  /*
+   * 뜸은 **글이 도착한 뒤부터** 셉니다. 도착 전부터 세면 느린 날에는
+   * 뜸이 끝나고도 빈 화면이 남습니다.
+   */
+  useEffect(() => {
+    if (!rep || opened) return;
+    const t = setTimeout(() => setOpened(true), OPENING_MS);
+    return () => clearTimeout(t);
+  }, [rep, opened]);
+
   if (!s.chartId) {
     return (
       <Shell title="읽다">
@@ -218,7 +251,7 @@ function ReportInner() {
      */
     return (
       <Shell title="읽다">
-        <Say who="도령">{err}</Say>
+        <Say who={lens?.name ?? "도령"} lens={lensId}>{err}</Say>
         <button className="btn mt" onClick={() => {
           setErr(null); setExtras(null); setRep(null);
         }}>
@@ -233,8 +266,34 @@ function ReportInner() {
       </Shell>
     );
   }
-  if (!rep) {
-    return <Shell title="읽다"><Narration lines={["두루마리를 편다."]} /></Shell>;
+  /*
+   * ★ 여기가 "두루마리를 편다." 한 줄이던 자리입니다.
+   *
+   *   그 사이에 서버는 명식을 다시 읽고, 대운을 세고, 그 캐릭터 몫의
+   *   관점 컷을 짓습니다. 진짜로 일하는데 화면은 한 줄이었고, 빠를
+   *   때는 그 한 줄조차 안 보이고 열여덟 컷이 통째로 떨어졌습니다.
+   *   손님이 2026-09-02 에 그걸 짚었습니다 — "너무 빨라. 나오는
+   *   속도가 기대감도 어느 정도 줘야지."
+   *
+   *   그래서 무엇을 보는 중인지 한 줄씩 찍고, 다 찍기 전에는 넘기지
+   *   않습니다. 건너뛰는 길은 냅니다.
+   */
+  if (!rep || !opened) {
+    return (
+      <Shell title="읽다">
+        <Scene id="scroll" className="hero" />
+        <Thinking
+          who={lens?.name}
+          lines={OPENING_BEATS}
+          onSkip={rep ? () => setOpened(true) : undefined}
+        />
+        {!rep && (
+          <p className="sm mt">
+            글은 다 펼치면 한 컷씩 뜨오. 내리는 만큼만 나오니 서두르지 마시오.
+          </p>
+        )}
+      </Shell>
+    );
   }
 
   const daeunCut = rep.cuts.find((c) => c.id === "daeun_map");
@@ -292,7 +351,7 @@ function ReportInner() {
         <Scene id="oldpaper" />
         {/* 청동자는 무거운 리포트 뒤에 붙는 안전망입니다.
             여기서는 값을 권하지 않습니다. 브레이크는 매출보다 앞섭니다. */}
-        <Say who={rep.lens.name}>여기선 값을 받지 않소. 본 것이 전부요.</Say>
+        <Say who={rep.lens.name} lens={lensId}>여기선 값을 받지 않소. 본 것이 전부요.</Say>
         <button className="btn mt" onClick={() => setTab("c2")}>본문으로</button>
       </Shell>
     );
@@ -302,7 +361,7 @@ function ReportInner() {
       <Shell title="여기서부터" legal>
         <Scene id="fold" />
         <Narration lines={["두루마리가 반쯤 접혀 있다."]} />
-        <Say who={rep.lens.name}>
+        <Say who={rep.lens.name} lens={lensId}>
           여기까지가 값 없이 하는 얘기요. 나머지에는 <b>왜</b>와 <b>언제</b>가 들어 있소.
         </Say>
         {/*
@@ -374,7 +433,7 @@ function ReportInner() {
     return (
       <Shell title="남기다" legal>
         <Scene id="wall" />
-        <Say who={rep.lens.name}>어떻게 보셨소?</Say>
+        <Say who={rep.lens.name} lens={lensId}>어떻게 보셨소?</Say>
         <div className="og c2" style={{ gridTemplateColumns: "repeat(5,1fr)" }}>
           {[1, 2, 3, 4, 5].map((n) => (
             <button key={n} className={`op ${rating === n ? "on" : ""}`}
@@ -402,7 +461,7 @@ function ReportInner() {
         </p>
 
         {reviewSay ? (
-          <Say who={rep.lens.name}>{reviewSay}</Say>
+          <Say who={rep.lens.name} lens={lensId}>{reviewSay}</Say>
         ) : (
           <button
             className="btn mt"
@@ -484,23 +543,36 @@ function ReportInner() {
           <p className="saying" dangerouslySetInnerHTML={{ __html: rep.opening }} />
         )}
 
+        {/*
+          ★ 한 컷씩 뜹니다 (2026-09-02).
+
+            전에는 열여덟~스물두 컷이 한꺼번에 쏟아졌습니다. 그러면
+            손님은 읽는 게 아니라 **훑습니다.** 한 컷씩 뜨면 그 컷
+            하나를 보게 되고, 읽는 속도를 손님이 정합니다.
+
+            뜨기 전 한 줄은 그 컷이 **실제로 보는 자리**입니다 —
+            근거 줄에서 뽑습니다(lib/think.ts). 지어낸 뜸이 아니라
+            대 볼 수 있는 말이라야 합니다.
+
+            첫 컷은 이미 화면에 있으니 기다리지 않습니다(eager).
+        */}
         {body.map((c, i) => (
-          <div
-            className={"blk in" + (c.id.startsWith("lc_") ? " own" : "")}
-            key={c.id}
-          >
-            {/* ★ 끝이 끝으로 읽히게 합니다.
-                closing_cut 의 자리 고정은 이미 돼 있는데, 손님은 그게
-                마지막인 줄 모른 채 지나갑니다. 기억은 마지막이 지배합니다. */}
-            {i === body.length - 1 && body.length > 1 && (
-              <p className="lastcut">이제 마지막 자리요.</p>
-            )}
-            <div className="lab">{c.title}</div>
-            {/* ★ 근거를 본문 위에, 본문과 같은 급으로 둡니다.
-                전에는 8.5px 딱지라 아무도 안 봤습니다. */}
-            <span className="src">{c.source}</span>
-            <div className="cutbody" dangerouslySetInnerHTML={{ __html: c.html }} />
-          </div>
+          <Reveal key={c.id} think={thinkOf(c.source)} eager={i === 0}>
+            <div className={"blk in" + (c.id.startsWith("lc_") ? " own" : "")}>
+              {/* ★ 끝이 끝으로 읽히게 합니다.
+                  closing_cut 의 자리 고정은 이미 돼 있는데, 손님은 그게
+                  마지막인 줄 모른 채 지나갑니다. 기억은 마지막이 지배합니다. */}
+              {i === body.length - 1 && body.length > 1 && (
+                <p className="lastcut">이제 마지막 자리요.</p>
+              )}
+              <div className="lab">{c.title}</div>
+              {/* ★ 근거를 본문 위에, 본문과 같은 급으로 둡니다.
+                  전에는 8.5px 딱지라 아무도 안 봤습니다. */}
+              <span className="src">{c.source}</span>
+              <div className="cutbody"
+                   dangerouslySetInnerHTML={{ __html: c.html }} />
+            </div>
+          </Reveal>
         ))}
 
         {rep.closing && (

@@ -13,6 +13,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
 import Scene from "@/components/scene/Scene";
+import Reveal from "@/components/Reveal";
 import { Narration, Say } from "@/components/Narration";
 import { api, ApiError } from "@/lib/api";
 import { LENS_BY_ID } from "@/lib/lenses";
@@ -20,6 +21,7 @@ import { useSession, type Tier } from "@/lib/store";
 import { track, useScreen } from "@/lib/track";
 import { openCheckout } from "@/lib/toss";
 import { SELLABLE } from "@/lib/biz";
+import { thinkOf } from "@/lib/think";
 import type { ReportResponse } from "@shared/chart";
 
 /* 목패의 모양은 lib/api.ts 한 곳에만 적습니다 — 여기 또 적으면
@@ -234,9 +236,15 @@ function PayInner() {
     return (
       <Shell title="값 없이 한 겹 더">
         <Scene id="oldpaper" />
-        {err && <Say who={charName}>{err}</Say>}
+        {err && <Say who={charName} lens={s.cur}>{err}</Say>}
+        {/*
+          ★ 한 컷씩 뜹니다 (2026-09-02). 여기가 손님이 "압도당한다" 고
+            짚은 자리입니다 — 여덟 컷 1,592자가 한 화면에 통째로
+            서 있었습니다. 뜨기 전 한 줄은 그 컷이 실제로 보는 자리라,
+            뜸이 곧 근거 예고가 됩니다 (lib/think.ts).
+        */}
         {cuts.map((c, i) => (
-          <div key={c.id}>
+          <Reveal key={c.id} think={thinkOf(c.source)} eager={i === 0}>
             <div className="blk in">
               <div className="lab">{c.title}</div>
               <span className="src">근거 · {c.source}</span>
@@ -247,7 +255,7 @@ function PayInner() {
               <Beat cut={c} chartId={s.chartId!} lensId={s.cur}
                     concern={s.concern} charName={charName} />
             )}
-          </div>
+          </Reveal>
         ))}
         {free && (
           <>
@@ -262,7 +270,7 @@ function PayInner() {
                 이 명식에서 지금 잠긴 자리를 **이름으로 부릅니다.**
                 막연한 미끼는 오히려 안 끌립니다. 제목은 이미 좋습니다.
             */}
-            <Say who={charName} html={
+            <Say who={charName} lens={s.cur} html={
               names.length
                 ? `아직 안 편 자리가 <b>${free.locked.length}</b> 남았소.<br>` +
                   `「${names.join("」 「")}」${names.length >= 3 ? " …" : ""}`
@@ -451,7 +459,7 @@ function PayInner() {
         )}
 
         {/* 값을 치른 직후가 이 집이 가장 따뜻해야 할 자리입니다. */}
-        <Say who={charName}>
+        <Say who={charName} lens={s.cur}>
           잘 오셨소. 이제 감춰 둔 자리를 펴 드리리다.
         </Say>
         {/* ★ 결제 직후에 탭을 한 번 더 누르게 하고 있었습니다.

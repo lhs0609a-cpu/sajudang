@@ -57,7 +57,7 @@ export default function SharedView({ token }: { token: string }) {
     return (
       <Shell title="건너오다" legal>
         <Scene id="gate" className="hero" />
-        <Say who="도령">{err}</Say>
+        <Say who="도령" lens="pungun">{err}</Say>
         <button className="btn mt" onClick={() => router.push("/")}>
           나도 내 운명을 확인해 본다
         </button>
@@ -147,7 +147,7 @@ export default function SharedView({ token }: { token: string }) {
 
       {/* ④ 그제야 권한다 */}
       <div className="blk in">
-        <Say who="도령">
+        <Say who="도령" lens="pungun">
           {who ? `${who}님 것은 여기까지요.` : "받으신 것은 여기까지요."}
           <br />그대 여덟 글자도 세워보시겠소? 값은 아직 묻지 않소.
         </Say>
