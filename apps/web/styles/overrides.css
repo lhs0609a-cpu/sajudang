@@ -1716,6 +1716,20 @@ body.has-rail-closed .stage { margin-left: 26px; }
 .meetart {
   position: relative;
   line-height: 0;
+  /*
+   * ★ 아래만 녹이고 있었습니다.
+   *
+   *   ::after 가 바탕색으로 아랫단을 덮어 주지만, **옆과 위는 그냥
+   *   잘린 채**였습니다. 첫 대면에서 얼굴이 제일 크게 나오는 자리라
+   *   그 네모가 제일 잘 보입니다.
+   *
+   *   네 변을 다 녹이려면 덮개가 아니라 마스크라야 합니다 — 덮개는
+   *   바탕색을 알아야 하고, 마스크는 무엇 위에 놓이든 녹습니다.
+   */
+  -webkit-mask-image: radial-gradient(88% 96% at 50% 42%,
+              #000 54%, rgba(0, 0, 0, .5) 80%, transparent 100%);
+          mask-image: radial-gradient(88% 96% at 50% 42%,
+              #000 54%, rgba(0, 0, 0, .5) 80%, transparent 100%);
 }
 /* 아래를 바탕색으로 녹입니다 — 초상이 네모로 잘려 보이면 스티커가 됩니다 */
 .meetart::after {

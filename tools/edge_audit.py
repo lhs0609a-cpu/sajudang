@@ -45,8 +45,16 @@ ART = (".charart", ".sayface", ".meetart", ".hookface", ".scenefig",
 # 추상화 — 그 자체가 판이라 경계가 있어도 됩니다
 ABSTRACT = (".abs", ".pattern", ".texture")
 
-# 녹이는 장치
-SOFT = ("mask-image", "mask", "::after", "::before", "radial-gradient")
+# 녹이는 장치 — **마스크만** 셉니다.
+#
+# ★ 처음엔 ::after 도 녹임으로 셌습니다. 그래서 .meetart 가 통과했는데,
+#   실제 배포본을 열어 보니 **아래만** 녹고 옆·위는 잘린 채였습니다.
+#   덮개(::after 에 바탕색 그라데이션)는 한 변밖에 못 덮고, 바탕색이
+#   무엇인지도 알아야 합니다. 마스크는 네 변을 다 녹이고 무엇 위에
+#   놓이든 녹습니다.
+#
+#   도구가 헐거우면 고쳤다고 착각합니다. 그게 제일 나쁩니다.
+SOFT = ("mask-image",)
 
 
 def rules(text: str):
