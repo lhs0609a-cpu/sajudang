@@ -171,6 +171,19 @@ def _voice_stats() -> dict:
             "dir": str(voice.CACHE)}
 
 
+def _rarity_stats() -> dict:
+    from engine import rarity as rr
+    from routers import chart as chart_router
+    out: dict = {"why": chart_router.rarity_why()}
+    try:
+        out["seed"] = str(rr.SEED)
+        out["has_table"] = (rr.SEED / "rarity.json").exists()
+        out["stale"] = rr.is_stale()
+    except Exception as e:                       # noqa: BLE001
+        out["error"] = "%s: %s" % (type(e).__name__, e)
+    return out
+
+
 @app.get("/health")
 def health() -> dict:
     from engine import timezone_kr as tz
@@ -187,5 +200,8 @@ def health() -> dict:
         "payments_reason": payments.DISABLED_REASON,
         # 소리 — 열쇠가 있어야 납니다. 없으면 화면이 조용히 넘어갑니다.
         "voice": _voice_stats(),
+        # 희소도가 안 나오면 **왜인지**. 곁가지라 조용히 빠지는데,
+        # 조용히 빠지면 배포본에서 원인을 못 찾습니다.
+        "rarity": _rarity_stats(),
         "cors_origins": CORS_ORIGINS,
     }

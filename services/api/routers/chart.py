@@ -47,6 +47,14 @@ def get_chart(chart_id: str) -> ChartResponse:
                          rarity=_rarity(f))
 
 
+# 마지막으로 못 센 까닭 셋. /health 가 보여 줍니다.
+_RARITY_WHY: list[str] = []
+
+
+def rarity_why() -> list[str]:
+    return list(_RARITY_WHY)
+
+
 def _rarity(feat: dict) -> dict | None:
     """
     이 배치가 인구에서 몇 명인가.
@@ -58,6 +66,8 @@ def _rarity(feat: dict) -> dict | None:
     from engine.features import Features
     try:
         if rr.is_stale():
+            _RARITY_WHY.append("표가 지금 축과 안 맞습니다 (make_rarity 를 다시)")
+            del _RARITY_WHY[:-3]
             return None
         f = Features(**feat)
         look = rr.look(f)
@@ -69,8 +79,12 @@ def _rarity(feat: dict) -> dict | None:
             "ilju_gz": (look.get("ilju") or {}).get("gz"),
             "ilju_per10k": (look.get("ilju") or {}).get("per10k"),
         }
-    except Exception:                            # noqa: BLE001
-        # 희소도는 곁가지입니다. 못 세면 명식은 그대로 나갑니다.
+    except Exception as e:                       # noqa: BLE001
+        # 희소도는 곁가지라 명식은 그대로 나갑니다. 다만 **왜 못 셌는지**는
+        # 남깁니다 — 삼키면 배포본에서 「그냥 안 나온다」가 되고, 그때는
+        # 표가 없는 건지 코드가 틀린 건지 알 길이 없습니다.
+        _RARITY_WHY.append("%s: %s" % (type(e).__name__, e))
+        del _RARITY_WHY[:-3]
         return None
 
 
