@@ -1053,12 +1053,33 @@ body.has-rail-closed .stage { margin-left: 26px; }
    자리표시는 얼굴을 흉내내지 않습니다 — 반쯤 그린 얼굴은 없는 것보다
    나쁩니다. 그 사람의 색과 한자 한 글자로 자리만 잡습니다.
    ------------------------------------------------------ */
+/*
+ * ★ 가장자리는 **그라데이션으로 녹입니다.** 하드 컷을 두지 않습니다.
+ *
+ *   손님이 짚은 것: "경계선이 너무 뚜렷하잖아. 항상 경계선은
+ *   그라데이션으로 페이드아웃 느낌 나도록."
+ *
+ *   어두운 배경 위에 잘라 붙인 네모가 그대로 보이면 합성한 티가
+ *   납니다. 이 집은 배경 **안에** 사람을 넣는 설계라(docs/16),
+ *   경계가 보이면 그 설계가 무너집니다.
+ *
+ *   테두리도 같이 걷습니다 — 마스크를 씌워도 border 는 그 위에
+ *   그대로 그려져서, 녹인 자리에 선만 남습니다.
+ *
+ *   추상화는 예외입니다(그 자체가 판이라). 여기 걸리는 건 사람과
+ *   장면뿐입니다.
+ */
 .charart {
   position: relative;
   flex: 0 0 auto;
   overflow: hidden;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--cc) 16%, transparent), transparent 70%);
-  border: 1px solid color-mix(in srgb, var(--cc) 34%, transparent);
+  background: radial-gradient(120% 92% at 50% 30%,
+              color-mix(in srgb, var(--cc) 13%, transparent) 0%,
+              transparent 72%);
+  -webkit-mask-image: radial-gradient(112% 104% at 50% 40%,
+              #000 56%, rgba(0, 0, 0, .55) 82%, transparent 100%);
+          mask-image: radial-gradient(112% 104% at 50% 40%,
+              #000 56%, rgba(0, 0, 0, .55) 82%, transparent 100%);
 }
 .charart img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .charart .ph {
@@ -1664,6 +1685,11 @@ body.has-rail-closed .stage { margin-left: 26px; }
   line-height: 0;
   /* 세로 획(.say 의 왼쪽 선)과 겹치지 않게 살짝 띄웁니다 */
   margin-top: 2px;
+  /* 작은 얼굴일수록 네모가 더 눈에 띕니다 — 둥글게 녹입니다 */
+  -webkit-mask-image: radial-gradient(96% 96% at 50% 42%,
+              #000 52%, rgba(0, 0, 0, .5) 80%, transparent 100%);
+          mask-image: radial-gradient(96% 96% at 50% 42%,
+              #000 52%, rgba(0, 0, 0, .5) 80%, transparent 100%);
 }
 .saybody { flex: 1 1 auto; min-width: 0; }
 
@@ -1763,6 +1789,15 @@ body.has-rail-closed .stage { margin-left: 26px; }
   float: right;
   margin: 0 0 8px 12px;
   line-height: 0;
+  /*
+   * 글 사이에 흘려 넣는 얼굴이라 더 넓게 녹입니다. 글과 그림이
+   * 맞닿는 자리에 선이 보이면 글이 그림을 피해 흐르는 게 아니라
+   * 상자를 피해 흐르는 것처럼 보입니다.
+   */
+  -webkit-mask-image: radial-gradient(104% 100% at 50% 40%,
+              #000 48%, rgba(0, 0, 0, .45) 78%, transparent 100%);
+          mask-image: radial-gradient(104% 100% at 50% 40%,
+              #000 48%, rgba(0, 0, 0, .45) 78%, transparent 100%);
 }
 @media (max-width: 400px) {
   .blk .hookface { display: none; }
