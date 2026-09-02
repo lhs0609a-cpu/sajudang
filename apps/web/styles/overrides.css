@@ -1284,10 +1284,29 @@ body.has-rail-closed .stage { margin-left: 26px; }
 .sceneart:not(.fill) > video,
 .sceneart:not(.fill) > img,
 .sceneart:not(.fill) > svg {
-  -webkit-mask-image: linear-gradient(to bottom,
-      transparent 0%, #000 5%, #000 74%, transparent 100%);
-          mask-image: linear-gradient(to bottom,
-      transparent 0%, #000 5%, #000 74%, transparent 100%);
+  /*
+   * ★ 좌우도 함께 지웁니다.
+   *
+   *   위아래만 물리면 그림이 여전히 **세로 두 변이 칼로 자른 듯**
+   *   서 있습니다. 넓은 화면에서 장면이 가운데 기둥처럼 놓이면
+   *   그 두 변이 바탕의 검정과 부딪혀 「붙여 넣은 사진」이 됩니다.
+   *
+   *   가로·세로 두 장을 겹쳐 **둘 다 검은 데만** 남깁니다
+   *   (mask-composite: intersect). 표준 키워드가 안 먹는
+   *   구형 웹킷을 위해 source-in 도 같이 답니다.
+   */
+  -webkit-mask-image:
+      linear-gradient(to bottom,
+        transparent 0%, #000 6%, #000 74%, transparent 100%),
+      linear-gradient(to right,
+        transparent 0%, #000 7%, #000 93%, transparent 100%);
+          mask-image:
+      linear-gradient(to bottom,
+        transparent 0%, #000 6%, #000 74%, transparent 100%),
+      linear-gradient(to right,
+        transparent 0%, #000 7%, #000 93%, transparent 100%);
+  -webkit-mask-composite: source-in;
+          mask-composite: intersect;
 }
 
 /* 대문은 글이 그림 위에 얹혀서 아래를 지우면 글 받침이 사라집니다.
@@ -1295,6 +1314,8 @@ body.has-rail-closed .stage { margin-left: 26px; }
 .sceneart.fill > video,
 .sceneart.fill > img,
 .sceneart.fill > svg {
+  /* 대문은 그림이 화면을 다 덮으므로 좌우를 지우면 바탕이 드러납니다.
+     위만 물립니다 — 아래는 깔개(::after)가 맡습니다. */
   -webkit-mask-image: linear-gradient(to bottom,
       transparent 0%, #000 4%, #000 100%);
           mask-image: linear-gradient(to bottom,
@@ -2000,3 +2021,130 @@ body.has-rail-closed .stage { margin-left: 26px; }
 
 /* 넘칠 수 있는 자리는 잘라 둔다 — 삐져나간 글이 옆 글 위에 앉습니다 */
 .calc, .term, .rare, .fork8, .blk { overflow-wrap: anywhere; }
+
+/* ══════════════════════════════════════════════════════════
+ * 만세력처럼 보기
+ *
+ * ★ 손님은 쓰던 만세력 앱과 대 봅니다. 우리 화면이 다른 모양이면
+ *   한 줄씩 눈으로 옮겨 가며 견줘야 하고, 그러다 지칩니다.
+ *   만세력이 늘 그리는 모양 그대로 둡니다 — 오른쪽부터 시·일·월·년,
+ *   위가 천간 아래가 지지, 그 아래 지장간.
+ * ══════════════════════════════════════════════════════════ */
+
+.manse {
+  border: 1px solid var(--line);
+  background: var(--bg2);
+  padding: 12px 13px 11px;
+  margin-top: 13px;
+}
+.manse .t {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: var(--fs-1);
+  letter-spacing: .12em;
+  color: var(--teal);
+  margin-bottom: 9px;
+}
+.manse .dim { color: var(--paper3); }
+
+.mt { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.mt td {
+  text-align: center;
+  padding: 5px 2px;
+  border: 1px solid var(--line);
+  vertical-align: middle;
+}
+.mt tr.lab td {
+  border: none;
+  font-family: var(--mono);
+  font-size: var(--fs-1);
+  letter-spacing: .1em;
+  color: var(--paper3);
+  padding-bottom: 3px;
+}
+.mt tr.gan td, .mt tr.ji td { position: relative; padding: 7px 2px 5px; }
+.mt tr.gan b, .mt tr.ji b {
+  display: block;
+  font-family: var(--serif);
+  font-size: var(--fs-8);
+  font-weight: 400;
+  line-height: 1.15;
+}
+.mt tr.gan i, .mt tr.ji i {
+  display: block;
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: var(--fs-1);
+  color: var(--paper3);
+  margin-top: 1px;
+}
+/* 일간에 「나」 표를 답니다 — 여덟 글자 중 어느 것이 나인지가
+   이 표에서 가장 먼저 알아야 할 것입니다. */
+.mt tr.gan em {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: var(--fs-1);
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  padding: 0 3px;
+  line-height: 1.5;
+}
+.mt tr.hid td {
+  padding: 4px 2px;
+  font-family: var(--serif);
+  font-size: var(--fs-3);
+  letter-spacing: .12em;
+  color: var(--paper3);
+}
+.mt tr.hid span { margin: 0 1px; }
+
+/* 오행 색 — 막대와 같은 색이라야 눈이 이어집니다 */
+.el-목, .mt .el-목 b { color: #8FBF8A; }
+.el-화, .mt .el-화 b { color: #E08A7A; }
+.el-토, .mt .el-토 b { color: #D9B27C; }
+.el-금, .mt .el-금 b { color: #CBD3DA; }
+.el-수, .mt .el-수 b { color: #7FA6D8; }
+
+/* 오행 몇 개 — 만세력이 늘 아래에 붙이는 그 줄 */
+.mcount {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  margin: 10px 0 5px;
+}
+.mcount > div {
+  border: 1px solid var(--line);
+  padding: 6px 2px;
+  text-align: center;
+}
+.mcount b {
+  display: block;
+  font-size: var(--fs-3);
+  font-weight: 400;
+}
+.mcount span {
+  display: block;
+  font-family: var(--mono);
+  font-size: var(--fs-2);
+  color: var(--paper2);
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+
+/* 셈 표에서 「집마다 다름」 딱지 */
+.calc .r .v em.fork {
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: var(--fs-1);
+  letter-spacing: .06em;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  padding: 1px 5px;
+  margin-left: 5px;
+  white-space: nowrap;
+}

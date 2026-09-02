@@ -128,6 +128,111 @@ export function ElementBar({ f }: { f: Features }) {
 }
 
 /** 셈에 쓴 것 — 계산 정밀도가 이 서비스의 자산이므로 사용자에게 보여준다. (docs/05 §10) */
+/*
+ * 지장간 — 지지 속에 숨은 천간.
+ *
+ * ★ 서버(engine/constants.py HIDDEN)와 **같은 표**입니다. 두 곳이
+ *   다르면 화면과 셈이 다른 말을 하게 됩니다. 검사가 지킵니다.
+ *
+ * ★ 이걸 보여 주는 까닭 — 손님이 「나무가 0개인데 왜 0.3이냐」 고
+ *   묻습니다. 답이 여기 있습니다: 亥 안에 甲이 들어 있습니다.
+ *   말로만 하면 안 믿고, 표로 보여 주면 셀 수 있습니다.
+ */
+const HIDDEN: Record<string, string[]> = {
+  子: ["癸"], 丑: ["己", "癸", "辛"], 寅: ["甲", "丙", "戊"], 卯: ["乙"],
+  辰: ["戊", "乙", "癸"], 巳: ["丙", "庚", "戊"], 午: ["丁", "己"],
+  未: ["己", "丁", "乙"], 申: ["庚", "壬", "戊"], 酉: ["辛"],
+  戌: ["戊", "辛", "丁"], 亥: ["壬", "甲"],
+};
+
+/**
+ * 만세력처럼 보는 표.
+ *
+ * ★ 왜 이걸 따로 두나
+ *
+ *   손님은 쓰던 만세력 앱과 대 봅니다. 우리 화면이 다른 모양이면
+ *   **한 줄씩 눈으로 옮겨** 가며 견줘야 합니다. 그러다 지칩니다.
+ *
+ *   만세력이 늘 그리는 모양 그대로 둡니다 — 오른쪽부터 시·일·월·년,
+ *   위가 천간 아래가 지지, 그 아래 지장간. 그러면 나란히 놓고
+ *   **눈으로 바로** 견줄 수 있습니다.
+ *
+ * ★ 순서가 거꾸로인 까닭
+ *
+ *   만세력은 오른쪽에서 왼쪽으로 읽습니다(시 · 일 · 월 · 년). 우리
+ *   화면은 왼쪽부터 년주였습니다. 익숙한 순서를 바꾸면 그것만으로
+ *   「다른 값」처럼 보입니다.
+ */
+export function ManseTable({ f }: { f: Features }) {
+  const cols = [...f.pillars].reverse();      // 시 · 일 · 월 · 년
+  const plain = countPlain(f.pillars);
+  const day = f.pillars.find((p) => p.label === "일주");
+
+  return (
+    <div className="manse">
+      <div className="t">
+        <span>■ 만세력처럼 보기</span>
+        <span className="dim">오른쪽부터 시 · 일 · 월 · 년</span>
+      </div>
+
+      <table className="mt">
+        <tbody>
+          <tr className="lab">
+            {cols.map((p) => <td key={p.label}>{p.label}</td>)}
+          </tr>
+          <tr className="gan">
+            {cols.map((p) => (
+              <td key={p.label} className={`el-${EL_GAN[p.gan] ?? ""}`}>
+                <b>{p.gan}</b>
+                <i>{EL_KO[EL_GAN[p.gan]] ?? ""}</i>
+                {p.gan === day?.gan && p.label === "일주" && (
+                  <em>나</em>
+                )}
+              </td>
+            ))}
+          </tr>
+          <tr className="ji">
+            {cols.map((p) => (
+              <td key={p.label} className={`el-${EL_JI[p.ji] ?? ""}`}>
+                <b>{p.ji}</b>
+                <i>{EL_KO[EL_JI[p.ji]] ?? ""}</i>
+              </td>
+            ))}
+          </tr>
+          <tr className="hid">
+            {cols.map((p) => (
+              <td key={p.label}>
+                {(HIDDEN[p.ji] ?? []).map((g) => (
+                  <span key={g} className={`el-${EL_GAN[g] ?? ""}`}>{g}</span>
+                ))}
+              </td>
+            ))}
+          </tr>
+        </tbody>
+      </table>
+      <p className="sm dim">
+        아랫줄은 <b>지장간</b> — 지지 속에 숨은 천간이오. 글자로는 안
+        보이지만 셈에는 듭니다. 나무가 없는데 0.3 이 나오는 까닭이
+        여기 있소.
+      </p>
+
+      <div className="mcount">
+        {(["수", "금", "토", "화", "목"] as const).map((k) => (
+          <div key={k} className={`el-${k}`}>
+            <b>{EL_KO[k]}</b>
+            <span>{plain[k] ?? 0}개</span>
+          </div>
+        ))}
+      </div>
+      <p className="sm dim">
+        여덟 글자만 세면 이렇소. 지장간까지 넣어 무게를 매긴 값은 위의
+        막대에 있소.
+      </p>
+    </div>
+  );
+}
+
+
 export function CalcPanel({ f }: { f: Features }) {
   const c = f.correction;
   const rows: [string, React.ReactNode][] = [
@@ -138,8 +243,10 @@ export function CalcPanel({ f }: { f: Features }) {
       ? <><s>{c.before}</s> → <b>{c.after}</b>{c.day_shift
           ? <b> ({c.day_shift > 0 ? "익" : "전"}일)</b> : null}</>
       : "시각 미상 — 보정 없음"],
-    ["절기", <>{c.jieqi_name} 절입 {c.jieqi_at_kst} 기준 <i className="gl">(계절이 바뀌는 마디 스물넷 · 넘어가는 시각까지 셉니다)</i></>],
-    ["자시", <>{c.zi_policy} <i className="gl">(밤 11시부터 다음 날로 보는가)</i></>],
+    ["절기", <>{c.jieqi_name} 절입 {c.jieqi_at_kst} 기준 <em className="fork">집마다 다름</em>
+      <i className="gl">(계절이 바뀌는 마디 스물넷 · 넘어가는 시각까지 셉니다)</i></>],
+    ["자시", <>{c.zi_policy} <em className="fork">집마다 다름</em>
+      <i className="gl">(밤 11시부터 다음 날로 보는가)</i></>],
     ["시주", c.hour_used
       ? <b>산출됨</b>
       : <b style={{ color: "var(--gold)" }}>제외 — 세 기둥으로 계산</b>],
@@ -160,6 +267,28 @@ export function CalcPanel({ f }: { f: Features }) {
           {c.boundary_note}
         </p>
       )}
+
+      {/*
+        ★ 집마다 다른 자리를 **누구에게나** 밝힙니다.
+
+          전에는 실제로 갈리는 사람에게만 말했습니다. 그런데 손님은
+          자기가 안 걸리는 줄도 모르고 다른 만세력과 대 봅니다.
+          「어디가 다를 수 있는지」 를 먼저 알면, 같게 나왔을 때도
+          그게 우연이 아니라는 걸 압니다.
+
+          그리고 안 걸리는 사람에게는 **안 걸린다고** 말해 줍니다 —
+          그게 이 화면에서 가장 안심되는 한 줄입니다.
+      */}
+      <p className="sm dim" style={{ marginTop: 9 }}>
+        위 둘(<b>절기 기준</b> · <b>자시</b>)은 집마다 다르게 정하오.
+        이 집은 <b>진태양시로 고친 시각</b>과 견주고, 밤 11시는
+        <b> 다음 날</b>로 보오. 다르게 정한 집도 정식이오 —
+        틀린 게 아니라 <b>고른 것이 다른</b> 것이오.
+        {" "}
+        {c.boundary_note
+          ? <b style={{ color: "var(--gold)" }}>그대는 그 자리에 걸리오.</b>
+          : <b>그대는 그 자리에 안 걸리니, 어느 집에서 보아도 같소.</b>}
+      </p>
     </div>
   );
 }

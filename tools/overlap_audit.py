@@ -45,6 +45,8 @@ OK_NOWRAP = (
     ".tb", ".pil", ".op", ".chip", ".tag", ".slot", ".lk",
     "td:first-child", ".sndhint", ".stepno", ".eb", ".src",
     ".gz", "button", ".ttl", ".tt",
+    # 「집마다 다름」 — 넉 자 딱지라 끊기면 오히려 이상합니다
+    "em.fork",
 )
 
 # 줄 높이 0 이 **맞는** 자리 — 그림을 담는 껍데기.

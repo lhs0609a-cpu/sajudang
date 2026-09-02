@@ -28,7 +28,7 @@ import { useScreen } from "@/lib/track";
 import { birthMessageFrom, birthProblem } from "@/lib/birth";
 import Scene from "@/components/scene/Scene";
 import { Narration, Progress, Say } from "@/components/Narration";
-import { CalcPanel, ElementBar, Pillars, Summary } from "@/components/Chart";
+import { CalcPanel, ElementBar, ManseTable, Pillars, Summary } from "@/components/Chart";
 import HookSegments from "@/components/HookSegments";
 import Doubts from "@/components/Doubts";
 import Meet from "@/components/Meet";
@@ -921,6 +921,10 @@ function EntryInner() {
 
             <Summary f={s.features} />
             <ElementBar f={s.features} />
+
+            {/* ★ 쓰던 만세력과 나란히 놓고 볼 수 있게. 모양이 다르면
+                한 줄씩 눈으로 옮겨 가며 견줘야 하고, 그러다 지칩니다. */}
+            <ManseTable f={s.features} />
             <CalcPanel f={s.features} />
             <button className="btn mt" onClick={() => go("a7")}>
               내 팔자가 무슨 말인지 듣는다
