@@ -179,6 +179,15 @@ def _rarity_stats() -> dict:
         out["seed"] = str(rr.SEED)
         out["has_table"] = (rr.SEED / "rarity.json").exists()
         out["stale"] = rr.is_stale()
+        # ★ 컨테이너에서 **직접 세어 봅니다.**
+        #
+        #   배포본에서 값이 안 나오는데 까닭도 안 남았습니다. 그러면
+        #   「안 불린 것」인지 「불렸는데 실패한 것」인지 모릅니다.
+        #   여기서 한 번 세어 보면 엔진 쪽인지 라우터 쪽인지 갈립니다.
+        from engine.calendar import build_chart
+        from engine.features import build_features
+        f = build_features(build_chart(1993, 11, 25, 13, 0, "M", True))
+        out["sample"] = rr.look(f).get("words")
     except Exception as e:                       # noqa: BLE001
         out["error"] = "%s: %s" % (type(e).__name__, e)
     return out
