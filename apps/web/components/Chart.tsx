@@ -164,11 +164,47 @@ export function CalcPanel({ f }: { f: Features }) {
   );
 }
 
+/* 글자 그대로 세기 — 손님이 직접 셀 수 있는 수라야 합니다.
+   서버의 상수와 같은 표입니다 (engine/constants.py). */
+const EL_GAN: Record<string, string> = {
+  甲: "목", 乙: "목", 丙: "화", 丁: "화", 戊: "토",
+  己: "토", 庚: "금", 辛: "금", 壬: "수", 癸: "수",
+};
+const EL_JI: Record<string, string> = {
+  子: "수", 丑: "토", 寅: "목", 卯: "목", 辰: "토", 巳: "화",
+  午: "화", 未: "토", 申: "금", 酉: "금", 戌: "토", 亥: "수",
+};
+const EL_KO: Record<string, string> = {
+  목: "나무", 화: "불", 토: "흙", 금: "쇠", 수: "물",
+};
+
+function countPlain(pillars: { gan: string; ji: string }[]) {
+  const n: Record<string, number> = { 목: 0, 화: 0, 토: 0, 금: 0, 수: 0 };
+  for (const p of pillars) {
+    if (EL_GAN[p.gan]) n[EL_GAN[p.gan]] += 1;
+    if (EL_JI[p.ji]) n[EL_JI[p.ji]] += 1;
+  }
+  return n;
+}
+
+/** 「물 4 · 금 2 · 흙 1 · 불 1 · 나무 없음」 */
+function elWords(n: Record<string, number>, dec = false) {
+  return Object.entries(n)
+    .sort((a, b) => b[1] - a[1])
+    .map(([k, v]) => `${EL_KO[k] ?? k} ${v === 0 ? "없음"
+      : dec ? v.toFixed(1).replace(/\.0$/, "") : v}`)
+    .join(" · ");
+}
+
 export function Summary({ f }: { f: Features }) {
   const weakWords = (f.weak_els ?? [f.weak_el]).map((e) => EL_WORD[e] ?? e);
   const strong = EL_WORD[f.strong_el] ?? f.strong_el;
   const yong = EL_WORD[f.yongsin] ?? f.yongsin;
   const turn = f.daeun[0]?.start_age;
+
+  const plain = countPlain(f.pillars);
+  const plainWords = elWords(plain);
+  const weightWords = elWords(f.elements as unknown as Record<string, number>, true);
 
   return (
     <div className="sum">
@@ -198,13 +234,32 @@ export function Summary({ f }: { f: Features }) {
           이걸 어디서 얻을지가 이 집이 보는 자리요.</span>
       </div>
 
+      {/*
+        ★ 여기서 신뢰가 깨지고 있었습니다.
+
+          「가장 많은 건 물 4, 가장 적은 건 나무 0.3」 이라고 냈습니다.
+          그런데 손님은 여덟 글자를 **직접 셉니다.** 세어 보면 나무는
+          0개인데 화면은 0.3 이라 하고, 금은 2개인데 2.3 이라 합니다.
+          그러면 「이거 진짜 사주 맞나」 가 됩니다.
+
+          0.3 은 지지 속에 숨은 글자(지장간)까지 넣어 **무게를 매긴**
+          값입니다. 명리에서 쓰는 정식 셈이지만, **그 말을 안 하면
+          그냥 틀린 수**입니다.
+
+          그래서 순서를 뒤집습니다 —
+            1. 손님이 직접 셀 수 있는 수를 먼저 냅니다 (여덟 글자)
+            2. 숨은 글자까지 넣은 수를 그 다음에, 까닭과 함께
+      */}
       <div className="term">
-        <span className="k">넘치는 것 · 모자란 것</span>
+        <span className="k">기운 세기</span>
         <span className="v">
-          가장 많은 건 <b>{strong}</b> {f.elements[f.strong_el as keyof typeof f.elements]},
-          가장 적은 건 <b>{weakWords.join(" · ")}</b>{" "}
-          {f.elements[f.weak_el as keyof typeof f.elements]}.
-          여덟 글자를 다섯 기운으로 나눠 센 것이오.
+          <b>여덟 글자로 세면</b> {plainWords}.
+          <br />
+          <span className="dim">
+            지지(아랫글자) 속에 <b>숨은 글자</b>가 더 있소. 그것까지 넣어
+            무게를 매기면 {weightWords}. 그래서 글자로는 없는 기운이
+            0.3 처럼 나오오 — 戌 안에 辛이 든 것 같은 자리요.
+          </span>
         </span>
       </div>
 
