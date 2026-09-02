@@ -921,6 +921,29 @@ body.has-rail-closed .stage { margin-left: 26px; }
   background: rgba(217, 139, 165, .05);
 }
 
+/* 시·분 두 칸만. 셋째 칸은 자리만 잡습니다 */
+.f3.hm label { white-space: normal; }
+
+/*
+ * ★ 되읽는 줄.
+ *   오후를 12시간 빼고 적는 실수를 여기서 잡습니다 — 「새벽 3시
+ *   55분에 나셨소」 를 보면 손님이 그 자리에서 알아봅니다.
+ */
+.echo {
+  margin-top: 9px;
+  font-family: var(--serif); font-size: var(--fs-4);
+  line-height: 1.7; color: var(--gold);
+}
+.echo .warn2 { color: var(--paper3); }
+.echo .warn2 b { color: var(--rose); font-weight: 400; }
+
+/* 모르겠다고 한 사람에게만 열리는 겹 */
+.vague {
+  margin-top: 14px; padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.vague > .sm { margin-bottom: 9px; }
+
 /* ══════════ 글자가 서는 장면 ══════════
    .calcrun  표준시 → 고을 → 절기 를 한 줄씩 찍는다
 
