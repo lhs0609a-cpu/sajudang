@@ -31,10 +31,16 @@ def test_shell_sequences_atoms_at_any_depth():
 def test_beat_is_fast_enough_to_not_be_a_wait():
     """느리면 연출이 아니라 지연이다."""
     src = (WEB / "components" / "Shell.tsx").read_text(encoding="utf-8")
-    step = re.search(r"t \+ (0\.\d+)", src)
-    cap = re.search(r"Math\.min\(t \+ 0\.\d+, (\d+(?:\.\d+)?)\)", src)
-    assert step and float(step.group(1)) <= 0.22, "한 칸이 너무 늦다"
-    assert cap and float(cap.group(1)) <= 1.8, "마지막 것이 너무 늦게 뜬다"
+    # ★ 간격은 방금 뜬 것의 **길이**를 따릅니다. 고정 간격이 아니라
+    #   글자 수로 정하므로, 상한 둘만 봅니다.
+    # ★ 간격은 **무엇인지**와 **길이**를 함께 봅니다.
+    #   대사는 잠깐 두고, 서술은 흐르고, 버튼은 곧바로 옵니다.
+    cap = re.search(r"Math\.min\(t \+ gap, (\d+(?:\.\d+)?)\)", src)
+    assert cap and float(cap.group(1)) <= 3.6, "마지막 것이 너무 늦게 뜬다"
+    assert "textContent" in src, "길이를 안 보고 있다"
+    assert 'classList.contains("say")' in src, "대사를 따로 안 본다"
+    for cap_s in re.findall(r"Math\.min\((\d\.\d+), Math\.max", src):
+        assert float(cap_s) <= 1.2, "한 칸이 너무 늦다: %s" % cap_s
 
 
 def test_background_does_not_wait():

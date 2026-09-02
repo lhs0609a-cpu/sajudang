@@ -1859,3 +1859,48 @@ body.has-rail-closed .stage { margin-left: 26px; }
   color: var(--paper);
 }
 .tx.losing b { color: var(--c); font-variant-numeric: tabular-nums; }
+
+/* ══════════════════════════════════════════════════════════
+ * 첫 등장 — 도령이 떠오르듯 나타난다
+ *
+ * ★ 사람은 처음 본 얼굴로 그 뒤의 목소리를 듣습니다. 그냥 놓여 있는
+ *   것과 **떠오르는 것**은 다릅니다 — 하나는 그림이고 하나는 등장입니다.
+ *
+ * ★ 소리치지 않습니다. 크게 튀어나오면 광고가 되고, 이 집은 조용한
+ *   집입니다. 아래에서 살짝 올라오며 밝아지고, 그 뒤로는 아주 느리게
+ *   숨 쉽니다.
+ * ══════════════════════════════════════════════════════════ */
+
+.meet .meetart {
+  animation: meetIn 1.15s cubic-bezier(.2, .7, .3, 1) both;
+}
+@keyframes meetIn {
+  from { opacity: 0; transform: translateY(16px) scale(.985); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* 그 뒤로는 숨만 쉽니다 — 살아 있다는 표시지 움직임이 아닙니다 */
+.meet .meetart img,
+.meet .meetart video {
+  animation: meetBreath 7.5s ease-in-out 1.2s infinite;
+}
+@keyframes meetBreath {
+  0%, 100% { transform: none; }
+  50%      { transform: translateY(-3px) scale(1.006); }
+}
+
+/* 그 사람의 색이 뒤에서 한 번 번집니다 */
+.meet .meetart::before {
+  animation: meetGlow 1.6s ease-out .25s both;
+}
+@keyframes meetGlow {
+  from { opacity: 0; }
+  to   { opacity: .17; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .meet .meetart,
+  .meet .meetart img,
+  .meet .meetart video,
+  .meet .meetart::before { animation: none; opacity: 1; transform: none; }
+}
