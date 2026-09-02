@@ -38,6 +38,8 @@ export interface SessionState {
   chartId: string | null;
   /** 희소도 — 센 값. 없으면 화면이 그 자리를 접는다 */
   rarity: import("@shared/chart").Rarity | null;
+  /** 다른 만세력과 갈릴 수 있는 자리. 먼저 말해 줍니다. */
+  divergence: { cases: import("@shared/chart").DivergenceCase[] } | null;
   features: Features | null;
 
   /* 진행 */
@@ -93,6 +95,7 @@ const initial = {
   concern: "love" as Concern,
   chartId: null,
   rarity: null,
+  divergence: null,
   features: null,
   cur: DEFAULT_LENS,
   read: [] as string[],

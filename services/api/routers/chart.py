@@ -47,6 +47,72 @@ def get_chart(chart_id: str) -> ChartResponse:
                          rarity=_rarity(f))
 
 
+def _divergence(req: "ChartRequest") -> dict | None:
+    """
+    다른 만세력과 갈릴 수 있는 자리인가 — **먼저** 말한다.
+
+    ★ 왜 먼저 말하나
+
+      손님은 다른 만세력과 대 봅니다. 백 명 중 넷다섯이 다르게 나옵니다
+      (tools/divergence.py). 그때 「우리가 맞소」 도 「그쪽이 맞소」 도
+      답이 아닙니다 — 갈리는 자리는 **계산이 아니라 선택**입니다.
+
+      발견당하면 「틀린 집」이 되고, 먼저 말하면 「아는 집」이 됩니다.
+      같은 사실인데 순서가 다릅니다.
+
+    ★ 다른 답도 같이 냅니다
+
+      감추면 숨긴 것이 됩니다. 저쪽 유파로는 무엇이 되는지까지 적어야
+      손님이 스스로 견줄 수 있습니다.
+    """
+    from engine import calendar as cal
+
+    def build(**over):
+        old = {k: getattr(cal, k) for k in over}
+        for k, v in over.items():
+            setattr(cal, k, v)
+        try:
+            return cal.build_chart(
+                req.year, req.month, req.day, req.hour, req.minute,
+                req.sex, hour_known=req.hour_known, city=req.birth_city)
+        finally:
+            for k, v in old.items():
+                setattr(cal, k, v)
+
+    try:
+        base = build()
+        mine = [p.gz for p in base.pillars]
+        out = []
+
+        for over, why, ours, theirs in (
+            ({"ZI_POLICY": "야자시"},
+             "밤 11시 이후에 나셨소",
+             "조자시 — 다음 날로 넘겨 보오",
+             "야자시 — 그날로 두고 보는 집이 있소"),
+            ({"JIEQI_BASIS": "standard"},
+             "절기가 바뀌는 언저리에 나셨소",
+             "진태양시로 고친 시각과 견주오",
+             "표준시 그대로 견주는 집이 있소"),
+        ):
+            try:
+                alt = [p.gz for p in build(**over).pillars]
+            except Exception:                    # noqa: BLE001
+                continue
+            if alt == mine:
+                continue
+            names = ["년주", "월주", "일주", "시주"]
+            moved = [names[i] for i in range(min(len(mine), len(alt)))
+                     if mine[i] != alt[i]]
+            out.append({
+                "why": why, "ours": ours, "theirs": theirs,
+                "moved": moved,
+                "mine": " ".join(mine), "alt": " ".join(alt),
+            })
+        return {"cases": out} if out else None
+    except Exception:                            # noqa: BLE001
+        return None
+
+
 # 마지막으로 못 센 까닭 셋. /health 가 보여 줍니다.
 _RARITY_WHY: list[str] = []
 
@@ -94,7 +160,8 @@ def post_chart(req: ChartRequest) -> ChartResponse:
     cached = store.get_json(store.k_chart(key))
     if cached is not None:
         return ChartResponse(chart_id=key, features=cached, cached=True,
-                             rarity=_rarity(cached))
+                             rarity=_rarity(cached),
+                             divergence=_divergence(req))
 
     try:
         chart = build_chart(
@@ -113,4 +180,5 @@ def post_chart(req: ChartRequest) -> ChartResponse:
     # 만들어지므로 사용자에게는 아무 차이가 없습니다.
     store.set_json(store.k_chart(key), features, ttl=CHART_TTL)
     return ChartResponse(chart_id=key, features=features, cached=False,
-                         rarity=_rarity(features))
+                         rarity=_rarity(features),
+                         divergence=_divergence(req))

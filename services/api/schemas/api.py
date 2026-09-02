@@ -46,6 +46,9 @@ class ChartResponse(BaseModel):
     #   (tools/make_rarity.py 가 4만 명을 세어 표를 만듭니다).
     #   값 없이 줄 수 있는 것 중 가장 센 한 줄입니다.
     rarity: Optional[dict] = None
+    # ★ 다른 만세력과 갈릴 수 있는 자리. 백 명 중 넷다섯이 걸립니다.
+    #   발견당하면 「틀린 집」이 되고, 먼저 말하면 「아는 집」이 됩니다.
+    divergence: Optional[dict] = None
 
 
 class HookRequest(BaseModel):

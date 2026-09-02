@@ -1904,3 +1904,35 @@ body.has-rail-closed .stage { margin-left: 26px; }
   .meet .meetart video,
   .meet .meetart::before { animation: none; opacity: 1; transform: none; }
 }
+
+/* ══════════════════════════════════════════════════════════
+ * 집마다 갈리는 자리
+ *
+ * ★ 겁주는 상자가 아닙니다. 「우리가 이걸 알고 있고, 저쪽 답도
+ *   적어 둔다」 는 표시입니다. 그래서 경고색을 안 씁니다 —
+ *   붉게 칠하면 손님은 제 사주에 문제가 있는 줄 압니다.
+ * ══════════════════════════════════════════════════════════ */
+
+.fork8 {
+  border: 1px solid var(--line);
+  background: var(--bg2);
+  padding: 12px 14px;
+  margin: 14px 0;
+}
+.forkt { width: 100%; border-collapse: collapse; margin: 8px 0 6px; }
+.forkt td {
+  padding: 6px 6px;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-3);
+  color: var(--paper2);
+  vertical-align: top;
+}
+.forkt tr.on td { color: var(--paper); }
+.forkt tr.on td:first-child { color: var(--c); }
+.forkt td:first-child { white-space: nowrap; width: 4.2em; }
+.forkt td.gz {
+  font-family: var(--serif);
+  letter-spacing: .08em;
+  text-align: right;
+  white-space: nowrap;
+}

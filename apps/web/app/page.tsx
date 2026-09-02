@@ -249,7 +249,8 @@ function EntryInner() {
         sex: s.sex, birth_city: s.city,
       });
       s.set({ chartId: res.chart_id, features: res.features,
-              rarity: res.rarity ?? null });
+              rarity: res.rarity ?? null,
+              divergence: res.divergence ?? null });
     } catch (e) {
       // 서버가 거절한 이유를 이 집의 말로 옮깁니다. 영어 원문이 뜨면
       // 그 순간 몰입이 깨지고, 무엇을 고쳐야 하는지도 모릅니다.
@@ -840,6 +841,48 @@ function EntryInner() {
               전부요 — 더도 덜도 없소.
             </p>
             <Pillars f={s.features} />
+
+            {/*
+              ★ 다른 만세력과 갈릴 수 있는 자리는 **우리가 먼저** 말합니다.
+
+                손님은 다른 만세력과 대 봅니다. 백 명 중 넷다섯이 다르게
+                나옵니다 (tools/divergence.py — 밤 11시대 4.4명, 절입
+                언저리 0.1명).
+
+                그때 「우리가 맞소」 도 「그쪽이 맞소」 도 답이 아닙니다.
+                갈리는 자리는 **계산이 아니라 선택**이기 때문입니다.
+
+                발견당하면 「틀린 집」이 되고, 먼저 말하면 「아는 집」이
+                됩니다. 같은 사실인데 순서가 다릅니다.
+
+                저쪽 답까지 적습니다 — 감추면 숨긴 것이 됩니다.
+            */}
+            {s.divergence?.cases?.map((c, i) => (
+              <div className="fork8" key={i}>
+                <div className="lab">여기는 집마다 갈리는 자리요</div>
+                <p className="sm">{c.why}. 그래서 <b>{c.moved.join(" · ")}</b>가
+                  달라질 수 있소.</p>
+                <table className="forkt">
+                  <tbody>
+                    <tr className="on">
+                      <td>이 집</td>
+                      <td>{c.ours}</td>
+                      <td className="gz">{c.mine}</td>
+                    </tr>
+                    <tr>
+                      <td>다른 집</td>
+                      <td>{c.theirs}</td>
+                      <td className="gz">{c.alt}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p className="sm">
+                  둘 다 명리에서 쓰는 법이오. 어느 쪽이 맞다고는 안 하오 —
+                  <b> 이 집은 위엣것으로 봅니다.</b> 다른 만세력과 대 보고
+                  다르거든, 틀린 게 아니라 여기서 갈린 것이오.
+                </p>
+              </div>
+            ))}
 
             {/*
               ★ 값 없이 줄 수 있는 것 중 가장 센 한 줄.

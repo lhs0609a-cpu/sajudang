@@ -168,11 +168,33 @@ export interface Rarity {
   ilju_per10k: number | null;
 }
 
+/**
+ * 다른 만세력과 갈릴 수 있는 자리.
+ *
+ * ★ 백 명 중 넷다섯이 걸립니다 (tools/divergence.py).
+ *   갈리는 까닭은 **계산이 아니라 선택**입니다 — 조자시로 볼지
+ *   야자시로 볼지, 절입을 진태양시와 견줄지 표준시와 견줄지.
+ *   둘 다 명리에서 쓰는 정식 유파라 어느 쪽도 상대를 못 이깁니다.
+ *
+ * ★ 발견당하면 「틀린 집」이 되고, 먼저 말하면 「아는 집」이 됩니다.
+ *   같은 사실인데 순서가 다릅니다. 그래서 저쪽 답까지 같이 냅니다 —
+ *   감추면 숨긴 것이 됩니다.
+ */
+export interface DivergenceCase {
+  why: string;      // 밤 11시 이후에 나셨소
+  ours: string;     // 조자시 — 다음 날로 넘겨 보오
+  theirs: string;   // 야자시 — 그날로 두고 보는 집이 있소
+  moved: string[];  // 일주 · 시주
+  mine: string;     // 癸酉 癸亥 辛亥 戊子
+  alt: string;      // 癸酉 癸亥 庚戌 丙子
+}
+
 export interface ChartResponse {
   chart_id: string;
   features: Features;
   cached: boolean;
   rarity?: Rarity | null;
+  divergence?: { cases: DivergenceCase[] } | null;
 }
 
 /* ── 훅 ─────────────────────────────────────────────────── */
