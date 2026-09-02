@@ -28,6 +28,7 @@ from pathlib import Path
 from typing import Optional
 
 from . import guard
+from . import real as _real
 from . import why as _why
 from .bank import born_season, element_word, josa
 
@@ -341,36 +342,46 @@ def _counted(f, axes: list) -> str:
                 (_next_turn(f)[0] - 1) if _next_turn(f) else int(f.age))
         if ax in ("zero_band", "weak_el", "yongsin"):
             el = f.yongsin if ax == "yongsin" else f.weak_el
-            return "여덟 자에 %s가 %s요" % (element_word(el), _num(f.elements[el]))
+            # ★ 조사를 박아 두면 안 됩니다. 「물가 4」 「흙가 1」 이
+            #   그대로 나갔습니다 — 물·흙은 받침이 있어 「이」 입니다.
+            return ("여덟 자에 %s %s"
+                    % (josa(element_word(el), "이", "가"),
+                       _numend(f.elements[el])))
         if ax in ("strong_el", "gap_band", "score_band", "strength"):
-            return ("%s가 %s인데 %s는 %s요"
-                    % (element_word(f.strong_el), _num(f.elements[f.strong_el]),
-                       element_word(f.weak_el), _num(f.elements[f.weak_el])))
+            return ("%s %s인데 %s %s"
+                    % (josa(element_word(f.strong_el), "이", "가"),
+                       _num(f.elements[f.strong_el]),
+                       josa(element_word(f.weak_el), "은", "는"),
+                       _numend(f.elements[f.weak_el])))
         if ax in ("ilji_state", "day_ji", "palace"):
             el = JI.get(f.day_ji)
             if el:
-                return ("일지가 %s요 — 여덟 자에 %s가 %s"
-                        % (f.day_ji, element_word(el), _num(f.elements[el])))
+                return ("일지가 %s요 — 여덟 자에 %s %s"
+                        % (f.day_ji, josa(element_word(el), "이", "가"),
+                           _num(f.elements[el])))
             return turn()
         if ax in ("day_gan", "deuk"):
             el = EL.get(f.day_gan)
             if el:
-                return ("%s일간이오 — 여덟 자에 %s가 %s"
-                        % (f.day_gan, element_word(el), _num(f.elements[el])))
+                return ("%s일간이오 — 여덟 자에 %s %s"
+                        % (f.day_gan, josa(element_word(el), "이", "가"),
+                           _num(f.elements[el])))
             return turn()
         if ax in ("month_ji", "season", "johu", "seupjo"):
             mj = f.pillars[1]["gz"][1]
             el = JI.get(mj)
             if el:
-                return ("월지가 %s요 — 여덟 자에 %s가 %s"
-                        % (mj, element_word(el), _num(f.elements[el])))
+                return ("월지가 %s요 — 여덟 자에 %s %s"
+                        % (mj, josa(element_word(el), "이", "가"),
+                           _num(f.elements[el])))
             return turn()
         if ax == "year_ji":
             yj = f.pillars[0]["gz"][1]
             el = JI.get(yj)
             if el:
-                return ("년지가 %s요 — 여덟 자에 %s가 %s"
-                        % (yj, element_word(el), _num(f.elements[el])))
+                return ("년지가 %s요 — 여덟 자에 %s %s"
+                        % (yj, josa(element_word(el), "이", "가"),
+                           _num(f.elements[el])))
             return turn()
         if ax == "hour_known":
             return ("여덟 자를 다 셌소 — %d살까지 본 것이오" % int(f.age)
@@ -381,13 +392,29 @@ def _counted(f, axes: list) -> str:
     return turn()
 
 
+def _numend(v) -> str:
+    """
+    수 자리에 **맺음까지** 함께 낸다.
+
+    ★ 「1도 안 되오요」 가 나가고 있었습니다.
+
+      틀을 「%s요」 로 써 두고 그 자리에 「1도 안 되오」 를 넣으니
+      어미가 겹쳤습니다. 수는 「4요」 로 맺고, 수가 아닌 말은 제
+      맺음을 갖고 있으니 여기서 갈라 냅니다.
+    """
+    n = float(v)
+    if 0 < n < 1:
+        return "1도 안 되오"
+    return "%s요" % _num(v)
+
+
 def _num(v) -> str:
     """개수를 사람 말로. 소수점은 안 냅니다 — 내부 척도로 보입니다."""
     n = float(v)
     if n == 0:
         return "0"
     if n < 1:
-        return "1도 안 되오"
+        return "1도 안 되"
     return "%d" % round(n)
 
 
@@ -446,6 +473,9 @@ def build(f, lens_id: Optional[str]) -> list:
 
     w = _words(f)
     out = []
+    # 같은 축이 컷 두셋에 걸립니다. 매번 같은 줄을 붙이면
+    # 손님은 녹음인 줄 압니다. 한 장에 한 번만 붙입니다.
+    real_seen: set = set()
     for spec in specs:
         ka, ta = _pick(spec["a"], f, spec["id"])
         kb, tb = _pick(spec["b"], f, spec["id"])
@@ -473,11 +503,21 @@ def build(f, lens_id: Optional[str]) -> list:
         if cnt and not any(ch.isdigit() for ch in cnt):
             cnt = _counted(f, ["age_band"])
         cnt_html = ('<p class="cnt"><b>%s.</b></p>' % cnt) if cnt else ""
-        body = ('<p class="tale">%s</p>%s<p class="tale">%s</p>'
-                '<p class="tale">%s%s</p>%s'
-                % (spec["lead"].format(**w), cnt_html, ta.format(**w),
+        # ★ 뜬 말 뒤에 **살림의 말**을 붙입니다.
+        #
+        #   관점 컷 2,381줄 중 634줄(27%)이 「힘·자리·결」 로만 되어
+        #   있었습니다. 낱개로 고치면 다음에 컷을 넣을 때 또 빠지므로,
+        #   그 634줄을 내는 **축 값**마다 한 줄씩 둡니다.
+        #   용어는 안 지웁니다 — 이 집의 근거라서, 그 자리에서 풀어야
+        #   근거가 됩니다.
+        real_a = _real.add(spec["a"]["axis"], ka, real_seen)
+        real_b = _real.add(spec["b"]["axis"], kb, real_seen)
+        body = ('<p class="tale">%s</p>%s<p class="tale">%s%s</p>'
+                '<p class="tale">%s%s%s</p>%s'
+                % (spec["lead"].format(**w), cnt_html,
+                   ta.format(**w), real_a,
                    tb.format(**w), (" " + tc.format(**w)) if tc else "",
-                   tail_html))
+                   real_b, tail_html))
         out.append({
             "id": spec["id"],
             "title": spec["title"],

@@ -25,6 +25,7 @@ from . import lens_cuts as lens_cuts_mod
 from . import rarity as rarity_mod
 from . import why as _why
 from . import bite as _bite
+from . import flavor as _flavor
 from . import sinsal as sinsal_mod
 from . import terms as terms_mod
 from . import voice as voice_mod
@@ -911,6 +912,17 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
     #   있어야 봅니다.
     seen: set = set()
     tone = view.get("voice")
+    # ★ 말버릇은 **어미를 갈아 끼운 뒤**에 답니다.
+    #
+    #   어미 다섯 결만으로는 안 갈렸습니다 — 뱅크가 하오체 한 벌로
+    #   쓰여 있어 하오체 캐릭터 여섯은 손댄 줄이 0% 였고, 적혈랑과
+    #   패선생의 리포트가 77% 글자 그대로 같았습니다.
+    #
+    #   사람을 알아보게 하는 건 어미가 아니라 말버릇입니다. 묻는
+    #   꼬리는 어미 축과 **겹치지 않아** 하오체 여섯도 서로 갈립니다.
+    #   덤으로 주어가 섭니다 — 묻는 순간 그 문장은 손님에게 하는
+    #   말이 됩니다.
+    asked: set = set()
     for c in cuts:
         before = set(seen)
         c["html"] = terms_mod.gloss(
@@ -921,6 +933,12 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
         #   합쇼체 캐릭터의 리포트에서 이 줄만 하오체로 남아, 한 화면
         #   안에서 말투가 갈렸습니다 — 스무 명에서 464군데였습니다
         #   (tests/test_voice.py 가 잡았습니다). 같은 층을 태웁니다.
+        # 공통 컷에 그 사람 관점을 심습니다. 4,900원짜리는 열세 컷 중
+        # 제 몫이 **한 컷**뿐이라, 공통 컷이 안 갈리면 서로 같은
+        # 상품이 됩니다. 컷을 더 주면 값 사다리가 무너지니 대신
+        # 같은 자리를 **그 사람 눈으로** 보게 합니다.
+        c["html"] = _flavor.side(c["html"], lens_id, c["id"], you)
+        c["html"] = _flavor.ask(c["html"], lens_id, asked)
         c["html"] += voice_mod.speak(
             voice_mod.address(terms_mod.picture_box(seen - before), you),
             tone)

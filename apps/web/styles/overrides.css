@@ -2209,3 +2209,23 @@ body.has-rail-closed .stage { margin-left: 26px; }
   color: var(--paper);
   letter-spacing: -.005em;
 }
+
+/* ── 곁말 — 그 캐릭터가 이 자리를 어떻게 보는가 ──────────
+ *
+ * 공통 컷은 스무 명이 같은 글을 씁니다. 그래서 4,900원짜리 둘은
+ * 리포트가 82% 글자 그대로 같았습니다. 여기에 그 사람의 관점을
+ * 한 줄 심습니다 — 같은 자리를 봐도 도령과 패선생은 다른 것을
+ * 말합니다. 그게 이 집이 파는 것이기도 합니다.
+ *
+ * 본문보다 살짝 물러서되 팩폭보다는 조용하게. 말하는 사람이
+ * 바뀌었다는 것만 보이면 됩니다.
+ */
+.side {
+  margin: 13px 0 2px;
+  padding: 9px 0 0;
+  border-top: 1px dashed var(--line2);
+  font-family: var(--serif);
+  font-size: var(--fs-4);
+  line-height: 1.74;
+  color: var(--teal);
+}

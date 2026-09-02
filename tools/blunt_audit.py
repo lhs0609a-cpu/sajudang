@@ -72,6 +72,27 @@ BANNED = re.compile(r"다치|병들|앓|죽|이혼|헤어지|사고 나|망하|�
                     r"사라|팔라|낫는다|고친다")
 
 
+def paras(html: str):
+    """
+    **문단** 단위. 손님은 문장을 따로 읽지 않습니다.
+
+    ★ 문장으로만 재면 고친 것이 안 보입니다.
+
+      뜬 문장 뒤에 산 문장을 붙였더니 문장 수는 그대로였습니다 —
+      뜬 문장은 여전히 뜬 문장이니까요. 그런데 손님은 그 둘을 이어
+      읽고 뜻을 압니다. 그러니 두 눈금을 다 냅니다: 문장 단위는
+      **아직 남은 안개**를 보여 주고, 문단 단위는 **손님이 실제로
+      막히는 자리**를 보여 줍니다.
+    """
+    body = BOX.sub(" ", html)
+    out = []
+    for m in re.finditer(r"<p[^>]*>(.*?)</p>", body, re.S):
+        t = re.sub(r"\s+", " ", TAG.sub(" ", m.group(1))).strip()
+        if len(t) > 8:
+            out.append(t)
+    return out
+
+
 def sentences(html: str):
     """비유 상자를 뺀 **본문**만. 상자는 사전이지 글이 아니오."""
     body = BOX.sub(" ", html)
@@ -86,6 +107,7 @@ def main() -> int:
     lenses = [l["id"] for l in released()]
 
     lines = []
+    plines = []
     for _ in range(n):
         f = build_features(build_chart(
             rng.randint(1960, 2006), rng.randint(1, 12), rng.randint(1, 28),
@@ -94,6 +116,7 @@ def main() -> int:
                               "health"])
         for s in build_hook(f, concern):
             lines += sentences(s["html"])
+            plines += paras(s["html"])
         try:
             r = build_report(f, "cid", rng.choice(lenses), "all", concern,
                              None)
@@ -101,8 +124,11 @@ def main() -> int:
             continue
         for c in r["cuts"]:
             lines += sentences(c["html"])
+            plines += paras(c["html"])
 
     tot = len(lines) or 1
+    ptot = len(plines) or 1
+    pbad = sum(1 for t in plines if AIR.search(t) and not LIFE.search(t))
     air = sum(1 for s in lines if AIR.search(s))
     life = sum(1 for s in lines if LIFE.search(s))
     both = sum(1 for s in lines if AIR.search(s) and not LIFE.search(s))
@@ -119,6 +145,10 @@ def main() -> int:
           % (both, 100.0 * both / tot))
     print("  ③ 물러서는 줄          %4d  %3.0f%%   ← 안 아픈 줄"
           % (hedge, 100.0 * hedge / tot))
+    print()
+    print("  ★★ 문단 단위 — 손님이 실제로 막히는 자리")
+    print("     뜬 말만 있는 문단     %4d / %4d  %3.0f%%"
+          % (pbad, ptot, 100.0 * pbad / ptot))
     if bad:
         print("\n  ★ 선을 넘은 줄 %d — 세게 말하는 것과 다릅니다" % len(bad))
         for s in bad[:5]:
