@@ -2190,3 +2190,22 @@ body.has-rail-closed .stage { margin-left: 26px; }
 }
 .gls p:first-of-type { margin-top: 0; }
 .gls p b { color: var(--gold); font-weight: 700; }
+
+/* ── 뼈 때리는 줄 ────────────────────────────────────────
+ *
+ * 손님 말: "쎈 말도 거침없이 뱉어야 한다. 팩폭 때릴 수 있도록."
+ *
+ * 본문과 **같은 무게로 두면 안 됩니다.** 묻혀서 안 읽힙니다. 그렇다고
+ * 상자로 가두면 광고처럼 보여 읽기 전에 건너뜁니다. 왼쪽에 굵은 금
+ * 하나만 긋고 글자만 키웁니다 — 도령이 몸을 앞으로 기울인 자리요.
+ */
+.bite {
+  margin: 16px 0 4px;
+  padding: 2px 0 2px 14px;
+  border-left: 3px solid var(--gold);
+  font-family: var(--serif);
+  font-size: var(--fs-6);
+  line-height: 1.72;
+  color: var(--paper);
+  letter-spacing: -.005em;
+}

@@ -24,6 +24,7 @@ from . import lens as lens_mod
 from . import lens_cuts as lens_cuts_mod
 from . import rarity as rarity_mod
 from . import why as _why
+from . import bite as _bite
 from . import sinsal as sinsal_mod
 from . import terms as terms_mod
 from . import voice as voice_mod
@@ -175,6 +176,9 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     patt = B["PATT"][top]
     daeun = f.daeun[f.daeun_now]
     cuts = []
+    # 같은 팩폭이 한 장에 두 번 안 나가게 세는 자리.
+    #   두 번째로 돌아오는 순간 손님은 이게 녹음인 줄 압니다.
+    bit: set = set()
 
     # ── 1 · 명식과 셈에 쓴 것 ─────────────────────────────
     c = f.correction
@@ -240,7 +244,11 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
             josa(element_word(weak), "은", "는"),
             _how_many(f, weak),
             josa(element_word(weak), "은", "는"), lack["w"],
-            B["LACK_LIVED"][top]) + also),
+            B["LACK_LIVED"][top])
+         # ★ 뜬 말을 걷어낸 자리에 **살림의 말**을 박습니다.
+         #   「빈자리가 크오」 는 안 아프고 「끊어야 할 때 못 끊소」 는
+         #   아픕니다. 아픈 것은 세기가 아니라 정확도입니다.
+         + _bite.lack_html(weak, bit) + also),
         0, sid="lack:%s:%s" % (weak, top)))
 
     # ── 2b · 몇이나 되는가 (희소도) ───────────────────────
@@ -278,9 +286,14 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
 
     # ── 3 · 왜 반복되나 ──────────────────────────────────
     st_line = {
-        "신강": "게다가 신강이오. 쏟을 힘은 넘치는데 받을 그릇이 없지.",
-        "신약": "게다가 신약이오. 채워야 하는데 채울 그릇도 없소.",
-        "중화": "중화라 크게 티는 안 났을 게요. 그래서 더 오래 몰랐지.",
+        # ★ 「그릇」 은 명리 안에서만 뜻이 있는 말이오. 손님이
+        #   어제 한 일로 적습니다.
+        "신강": "게다가 신강이오. 밀어붙일 힘은 남는데 그걸 어디다 "
+                "쓸지를 못 골랐소. 그래서 안 해도 될 일까지 하오.",
+        "신약": "게다가 신약이오. 쓸 힘이 넉넉지 않은데 그마저 남 "
+                "먼저 주오. 저녁이면 말수가 줄어들 게요.",
+        "중화": "중화라 크게 티가 안 났을 게요. 남들이 그대를 "
+                "무난하다 했을 텐데, 그 말이 제일 싫었을 게요.",
     }[f.strength]
     # ★ 곱하는 축에 **흐름(5)** 을 더했습니다.
     cuts.append(_cut(
@@ -292,7 +305,9 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
          '<p class="tale">%s</p>'
          % (bank_mod._pick("IGNITE", top, concern), patt["b"], st_line,
             bank_mod._pick("BLAME", top, f.strength),
-            B["WHY_TAIL"][f.flow])),
+            B["WHY_TAIL"][f.flow])
+         # 물으러 온 그 자리를 때립니다.
+         + _bite.html(concern, top, f.strength, bit)),
         0, sid="why:%s:%s:%s:%s" % (top, concern, f.strength, f.flow)))
 
     # ── 4 · 어느 자리에서 ────────────────────────────────
@@ -395,7 +410,10 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
          % (f.daeun_ten_god,
             "조용히 지나가지 않는 구간이오." if heavy
             else "크게 흔들리진 않소. 다지는 구간이지.",
-            when, sewoon)),
+            when, sewoon)
+         # 지금 판의 어디쯤인가. 고민·없는 기운과 **무관한 축**이라
+         # 한 장 안에서 서로 다른 데를 때립니다.
+         + _bite.phase_html(f.age, f.daeun[0]["start_age"], bit)),
         1, sid="daeun:%s:%s" % (f.daeun_ten_god, sun_tg)))
 
     # ── 6 · 필요한 것 (용신 + 다과상) ────────────────────
