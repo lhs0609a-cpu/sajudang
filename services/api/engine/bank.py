@@ -620,9 +620,14 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     # ★ 훅에서도 어려운 말을 **한 벌에 한 번** 풉니다.
     #   0단이 손님이 이 집에서 처음 읽는 글입니다. 거기서 「편관」이
     #   풀이 없이 나오면 그 순간 손님은 압도당합니다.
+    #   ★ 뜻만으로는 모자랍니다. 「편관(나를 누르는 힘)」 을 읽어도
+    #     그림이 안 그려집니다. 처음 나온 단 밑에 비유를 한 줄 답니다 —
+    #     「위에서 몰아붙이는 자리요. 급한 일과 마감이 그것이오.」
     seen: set = set()
     for s in segs:
+        before = set(seen)
         s["html"] = terms.gloss(s["html"], seen)
+        s["html"] += terms.picture_box(seen - before)
     return segs
 
 

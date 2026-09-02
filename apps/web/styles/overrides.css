@@ -2157,3 +2157,36 @@ body.has-rail-closed .stage { margin-left: 26px; }
   margin-left: 5px;
   white-space: nowrap;
 }
+
+/* ── 비유 상자 — 「이게 무슨 말이오」 ─────────────────────
+ *
+ * 괄호 풀이는 뜻만 줍니다. 그림은 이 상자가 그립니다. 모르는 말을
+ * 만난 **그 컷 밑에** 붙습니다 — 리포트 끝에 몰아 두면 안 봅니다.
+ *
+ * 본문보다 한 단 물러서 보이게 둡니다. 읽어야 하는 글이 아니라
+ * 막혔을 때 짚는 글이라, 본문과 같은 무게로 서면 읽기를 끊습니다.
+ */
+.gls {
+  margin: 14px 0 2px;
+  padding: 11px 13px 10px;
+  border-left: 2px solid var(--line2);
+  background: rgba(255, 255, 255, .022);
+}
+.gls em {
+  display: block;
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: var(--fs-1);
+  letter-spacing: .14em;
+  color: var(--teal);
+  margin-bottom: 7px;
+}
+.gls p {
+  font-family: var(--serif);
+  font-size: var(--fs-4);
+  line-height: 1.75;
+  color: var(--paper2);
+  margin: 5px 0 0;
+}
+.gls p:first-of-type { margin-top: 0; }
+.gls p b { color: var(--gold); font-weight: 700; }

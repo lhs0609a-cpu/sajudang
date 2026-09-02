@@ -261,7 +261,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     parts = rr["parts"]
     cuts.append(_cut(
         "rarity", "몇이나 되는가",
-        ("표본 %s명 — 인구에서 몇 명인지를 **센** 것이오. "
+        ("표본 %s명 — 인구에서 몇 명인지를 센 것이오. "
          "맞힌다는 말이 아니라 세었다는 말이오 〔희소도 · 표본 계수〕"
          % format(rr["sample"], ",")),
         ('<p class="tale">%s</p>'
@@ -882,11 +882,30 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
     #
     #   `seen` 을 컷들이 나눠 씁니다 — 한 장 안에서 같은 말을 열 번
     #   풀면 읽기를 방해합니다. 처음 만나는 자리에서만 답니다.
+    # ★ 뜻만 바꿔 말한 것은 푼 게 아닙니다.
+    #
+    #   괄호는 「상관(밖으로 내지르는 힘)」 처럼 **뜻**을 답니다. 그런데
+    #   재보니 쉰넷 중 그림이 그려지는 것은 둘뿐이었습니다 — 모르는
+    #   말을 모르는 말로 바꾼 셈이라 손님은 읽고도 여전히 모릅니다.
+    #
+    #   그래서 그 말이 **처음 나온 컷 밑에** 비유를 한 줄 답니다.
+    #   리포트 끝에 몰아 두지 않습니다 — 모르는 말을 만난 그 자리에
+    #   있어야 봅니다.
     seen: set = set()
     tone = view.get("voice")
     for c in cuts:
+        before = set(seen)
         c["html"] = terms_mod.gloss(
             voice_mod.speak(voice_mod.address(c["html"], you), tone), seen)
+        # ★ 비유 상자도 **그 사람 목소리로** 말해야 합니다.
+        #
+        #   처음엔 말투를 갈아 끼운 **뒤에** 붙였습니다. 그랬더니
+        #   합쇼체 캐릭터의 리포트에서 이 줄만 하오체로 남아, 한 화면
+        #   안에서 말투가 갈렸습니다 — 스무 명에서 464군데였습니다
+        #   (tests/test_voice.py 가 잡았습니다). 같은 층을 태웁니다.
+        c["html"] += voice_mod.speak(
+            voice_mod.address(terms_mod.picture_box(seen - before), you),
+            tone)
     for l in locked:
         if l.get("teaser"):
             # 맛보기도 손님이 읽는 글입니다. 같은 층을 태웁니다.
