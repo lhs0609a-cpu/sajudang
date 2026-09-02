@@ -14,6 +14,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
 import Scene from "@/components/scene/Scene";
 import Reveal from "@/components/Reveal";
+import ActOut from "@/components/ActOut";
 import { Narration, Say } from "@/components/Narration";
 import { api, ApiError } from "@/lib/api";
 import { LENS_BY_ID } from "@/lib/lenses";
@@ -412,6 +413,10 @@ function PayInner() {
                 </p>
               </div>
             )}
+            <ActOut kind="끊긴 동작" next="감춰 둔 자리">
+              값이 건너가면 <b>그 자리에서</b> 열리오. 기다릴 것 없소.<br />
+              마음이 바뀌면 <b>7일 안에</b> 도로 무르오 — 안 연 자리는 그대로 돌려주오.
+            </ActOut>
             <button className="btn gh" onClick={() => router.push("/pay?step=d1")}>
               다시 고르겠습니다
             </button>
@@ -462,6 +467,13 @@ function PayInner() {
         <Say who={charName} lens={s.cur}>
           잘 오셨소. 이제 감춰 둔 자리를 펴 드리리다.
         </Say>
+        <ActOut kind="끊긴 동작" next="본문">
+          {granted?.cuts
+            ? <>열렸소. <b>{granted.cuts}컷</b>이 기다리고 있소.</>
+            : <>열렸소. 감춰 둔 자리가 기다리고 있소.</>}
+          <br />
+          <b>아직 한 줄도 안 보셨소.</b>
+        </ActOut>
         {/* ★ 결제 직후에 탭을 한 번 더 누르게 하고 있었습니다.
             "읽으러 간다" → 표지(c1) → "편다" → 본문. 값을 치른 직후는
             마찰을 0으로 둬야 할 구간입니다. 표지는 다시 읽으러 올 때 씁니다. */}

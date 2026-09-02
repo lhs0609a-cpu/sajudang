@@ -13,6 +13,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Shell from "@/components/Shell";
+import ActOut from "@/components/ActOut";
 import Scene from "@/components/scene/Scene";
 import { Narration, Say } from "@/components/Narration";
 import SinsalFigure from "@/components/scene/SinsalFigure";
@@ -162,6 +163,11 @@ export default function SummaryPage() {
         )}
       </div>
 
+      <ActOut kind="끊긴 동작" next="이어지는 자리">
+        한 장에 담기는 것은 <b>여덟 글자와 읽은 자리</b>뿐이오.
+        생년월일시도, 태어난 고을도 안 담기오.<br />
+        <b>담기지 않은 것이 아직 이 집에 있소.</b>
+      </ActOut>
       <button className="btn gh mt" onClick={() => router.push("/relay")}>
         이어서 다른 사람에게
       </button>

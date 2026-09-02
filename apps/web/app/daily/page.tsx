@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Shell from "@/components/Shell";
 import Scene from "@/components/scene/Scene";
+import ActOut from "@/components/ActOut";
 import { Narration, Say } from "@/components/Narration";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/store";
@@ -127,6 +128,15 @@ export default function DailyPage() {
         용신에 맞는 차를 내오. 리포트를 열면 함께 나오오.
       </p>
 
+      {/*
+        ★ 일진이 「오늘은 이렇소」로 끝났습니다. 매일 오는 자리라
+          **왜 어제와 다른지**를 말해 줘야 내일도 옵니다. 날마다
+          간지가 한 글자 바뀌는 것은 셈에서 나온 참말입니다.
+      */}
+      <ActOut kind="남긴 물음" next="스무 사람">
+        오늘은 이렇소. <b>내일은 글자가 하나 바뀌오.</b><br />
+        같은 사람인데 날마다 다른 까닭이 거기 있소.
+      </ActOut>
       <button className="btn gh mt" onClick={() => router.push("/lobby")}>진열대로</button>
     </Shell>
   );

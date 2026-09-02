@@ -14,6 +14,7 @@ import Scene from "@/components/scene/Scene";
 import ExtraAsk from "@/components/ExtraAsk";
 import Reveal from "@/components/Reveal";
 import Thinking from "@/components/Thinking";
+import ActOut from "@/components/ActOut";
 import { Narration, Say } from "@/components/Narration";
 import { api, ApiError } from "@/lib/api";
 import { LENS_BY_ID } from "@/lib/lenses";
@@ -298,6 +299,25 @@ function ReportInner() {
 
   const daeunCut = rep.cuts.find((c) => c.id === "daeun_map");
 
+  /*
+   * 액트아웃이 쓰는 값 셋. **셈에서 나온 것만** 씁니다 —
+   * 「곧 큰 일이 있소」 같은 지어낸 말은 이 집이 금지한 것입니다.
+   *
+   *   ownCount   그 캐릭터만 보는 자리(lc_) 가 몇인가
+   *   firstOwn   그중 첫 자리의 이름 — 「더 있소」는 예고가 아닙니다
+   *   nextTurn   다음으로 대운이 바뀌는 나이. 그 해에 무슨 일이 난다는
+   *              말은 안 합니다. **읽는 자리가 바뀐다**는 말입니다.
+   */
+  const ownCuts = rep.cuts.filter((c) => c.id.startsWith("lc_"));
+  const ownCount = ownCuts.length;
+  const firstOwn = ownCuts[0];
+  const nextTurn = (() => {
+    const f = s.features;
+    if (!f?.daeun || typeof f.daeun_now !== "number") return null;
+    const nx = f.daeun[f.daeun_now + 1];
+    return nx && typeof nx.start_age === "number" ? nx.start_age : null;
+  })();
+
   /* c1 · 표지 */
   if (tab === "c1") {
     return (
@@ -316,6 +336,16 @@ function ReportInner() {
             {rep.locked.length > 0 && ` · 잠긴 자리 ${rep.locked.length}컷`}
           </p>
         </div>
+        {/*
+           ★ 표지가 「N컷이오」로 끝났습니다. 수는 있는데 **그중 무엇이
+             그대만의 것인지**가 없었습니다. 관점 컷(lc_)은 이 사람을
+             고른 까닭 그 자체라, 표지에서 이름을 불러 줘야 합니다.
+         */}
+        <ActOut kind="끊긴 동작" next={firstOwn?.title}>
+          {rep.cuts.length}컷이오. 그중 <b>{ownCount}</b>은 {rep.lens.name}만
+          보는 자리요 — 다른 열아홉은 그 자리를 안 보오.<br />
+          <b>펴기 전까지는 무엇이 적혔는지 나도 말하지 않소.</b>
+        </ActOut>
         <button className="btn mt" onClick={() => setTab("c2")}>내 것을 펴겠습니다</button>
       </Shell>
     );
@@ -338,6 +368,13 @@ function ReportInner() {
               <button className="btn mt" onClick={() => setTab("c4")}>어디까지 볼지 고르겠습니다</button>
             )}
           </>
+        )}
+        {nextTurn != null && (
+          <ActOut kind="밝힘" next="지금 어디에">
+            다음으로 마디가 바뀌는 때는 <b>{nextTurn}살</b>이오.
+            그 해에 무슨 일이 난다는 말은 하지 않소 — <b>읽는 자리가
+            바뀐다</b>는 말이오.
+          </ActOut>
         )}
         <button className="btn gh mt" onClick={() => setTab("c2")}>본문으로</button>
       </Shell>
@@ -423,6 +460,11 @@ function ReportInner() {
         <p className="sm mt">
           중앙 문양은 에셋이 들어오면 교체됩니다. (docs/10 §5 — 정지 PNG 필수)
         </p>
+        <ActOut kind="남긴 물음" next="남기다">
+          이 카드에는 <b>여덟 글자와 읽은 자리</b>만 담기오.
+          생년월일시도 고을도 안 담기오.<br />
+          <b>그런데 받은 사람은 제 것을 세워 보고 싶어지오.</b> 왜 그렇겠소?
+        </ActOut>
         <button className="btn gh mt" onClick={() => setTab("c6")}>다 읽었습니다</button>
       </Shell>
     );
@@ -472,6 +514,11 @@ function ReportInner() {
           </button>
         )}
 
+        <ActOut kind="끊긴 동작" next="이어지는 자리">
+          다 읽으셨소. <b>인장이 하나 남았소.</b><br />
+          인장은 이 자리를 끝까지 본 사람에게만 붙소 —
+          모으면 인장첩에 남고, 남긴 말은 다음 사람이 보오.
+        </ActOut>
         <button className="btn gh mt" onClick={async () => {
           /* 아직 안 보낸 말이 있으면 나가기 전에 보냅니다.
              손님이 친 글자를 버리지 않습니다. */

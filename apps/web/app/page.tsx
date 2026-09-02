@@ -33,6 +33,7 @@ import { CalcPanel, ElementBar, ManseTable, Pillars, Summary } from "@/component
 import HookSegments from "@/components/HookSegments";
 import Doubts from "@/components/Doubts";
 import Meet from "@/components/Meet";
+import ActOut from "@/components/ActOut";
 import { api, ApiError } from "@/lib/api";
 import { LENS_BY_ID } from "@/lib/lenses";
 import { CONCERNS, seasonOf, useSession, type Concern } from "@/lib/store";
@@ -386,6 +387,12 @@ function EntryInner() {
           <div className="gatecopy">
             <Narration lines={beats} />
             <p className="promise" dangerouslySetInnerHTML={{ __html: PROMISE }} />
+            {/* 막을 끊는 한 줄 — 묻고 답하지 않습니다 */}
+            <ActOut kind="남긴 물음">
+              들어오는 사람은 하나같이 같은 걸 묻소.<br />
+              <b>「어제도 있던 일인데, 왜 하필 오늘이오?」</b><br />
+              그건 대문에서 답할 말이 아니오.
+            </ActOut>
             <button className="btn mt" onClick={() => go("a2")}>
               내 운명을 확인하겠습니다
             </button>
@@ -465,6 +472,10 @@ function EntryInner() {
             <b> 여기까지 값은 안 받소.</b>
           </p>
         )}
+        <ActOut kind="끊긴 동작" next="걸리는 것">
+          이름은 셈에 <b>한 글자도</b> 안 들어가오.<br />
+          <b>그런데 딱 한 번, 부를 일이 생기오.</b> 그게 어디겠소?
+        </ActOut>
       </Shell>
     );
   }
@@ -782,6 +793,11 @@ function EntryInner() {
           </div>
         )}
 
+        <ActOut kind="밝힘" next="성향 넉 자">
+          같은 시각에 나도 <b>서울에서는 32분을 되돌려</b> 셈하오.
+          해가 서울 위에 오는 때가 시계보다 그만큼 늦기 때문이오.<br />
+          <b>그 32분에서 시주가 갈리는 사람이 있소.</b>
+        </ActOut>
         <p className="sm mt">
           때를 모르면 시주를 세우지 않소. 열두 시로 채워 넣는 집도 있으나,
           그건 없는 걸 지어내는 것이오.<br />
@@ -1040,6 +1056,15 @@ function EntryInner() {
                 한 줄씩 눈으로 옮겨 가며 견줘야 하고, 그러다 지칩니다. */}
             <ManseTable f={s.features} />
             <CalcPanel f={s.features} />
+            {/*
+              ★ 여기가 「셈이 끝났다」로 끝나고 있었습니다. 셈은 끝났지만
+                **해석은 한 마디도 안 했습니다.** 그걸 말해 줘야 다음이
+                궁금해집니다 — 끝난 일보다 안 끝난 일이 오래 남습니다.
+            */}
+            <ActOut kind="끊긴 동작" next="왜 하필 지금">
+              여덟 글자가 다 섰소. <b>아직 아무 말도 안 했소.</b><br />
+              여기까지는 셈이고, 읽는 것은 지금부터요.
+            </ActOut>
             <button className="btn mt" onClick={() => go("a7")}>
               무슨 말인지 듣겠습니다
             </button>
@@ -1139,6 +1164,18 @@ function EntryInner() {
               지금 나가면 그게 <b>왜 그때인지</b> 모른 채로 지나가오.
             </p>
           )}
+          {/*
+            ★ 여기가 당김 0점이던 자리입니다. 손님이 가장 오래 머물고
+              (「그렇소/아니오」를 다섯 번) 결제 갈림길이 바로 뒤인데,
+              다섯 단이 끝나면 그냥 끝났습니다.
+
+              앞을 깎지 않고 **안 한 말**로 끊습니다 — 다섯을 했다는
+              것은 참이고, 이름 붙은 자리를 아직 안 했다는 것도 참입니다.
+          */}
+          <ActOut kind="남긴 물음" next="없는 것부터">
+            다섯 마디를 했소. 다 <b>여덟 글자 겉</b>에서 한 말이오.<br />
+            <b>정작 없는 것은 아직 안 셌소.</b> 그건 어디서 채우겠소?
+          </ActOut>
           <button className="btn mt" onClick={() => router.push("/pay?step=d0")}>
             값 없이 내 것을 한 겹 더
           </button>

@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import Shell from "@/components/Shell";
 import Scene from "@/components/scene/Scene";
 import CharArt from "@/components/CharArt";
+import ActOut from "@/components/ActOut";
 import { Narration, Say } from "@/components/Narration";
 import { api } from "@/lib/api";
 import { LENS_BY_ID } from "@/lib/lenses";
@@ -183,6 +184,18 @@ export default function RelayPage() {
               </p>
               {/* ★ 유예하는 길을 따로 냅니다. 세션만 닫고 제외는 안 합니다 —
                   브레이크는 그대로면서 손님이 무엇을 고르는지 알게 됩니다. */}
+              {/*
+                ★ 당김 0점이던 자리입니다. 옆자리를 늘어놓고 끝났습니다.
+                  브레이크(세션당 둘)는 그대로 두고, 그걸 **고를 이유**로
+                  씁니다 — 지어낸 압박이 아니라 이미 있는 규칙입니다.
+              */}
+              <ActOut kind="딜레마" next="그 사람이 먼저 보는 자리">
+                오늘 이을 수 있는 자리는{" "}
+                <b>{Math.max(0, data.breaks.per_session_relay - s.relayUsed)}</b>이오.
+                <br />
+                한 자리에서 몰아 듣는다고 더 알게 되지 않소 —{" "}
+                <b>고른 하나를 끝까지 듣는 편이 낫소.</b>
+              </ActOut>
               <button className="btn gh mt" onClick={() => router.push("/lobby")}>
                 오늘은 그만 듣겠습니다
               </button>

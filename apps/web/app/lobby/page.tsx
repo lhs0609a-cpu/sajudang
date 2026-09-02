@@ -11,6 +11,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
 import Scene from "@/components/scene/Scene";
 import CharArt from "@/components/CharArt";
+import ActOut from "@/components/ActOut";
 import { Narration, Say } from "@/components/Narration";
 import { CalcPanel, ElementBar, Pillars, Summary } from "@/components/Chart";
 import { LENSES, LENS_BY_ID } from "@/lib/lenses";
@@ -73,7 +74,9 @@ function LobbyInner() {
     return (
       <Shell title="스무 사람">
         <Scene id="hall" />
-        <Narration lines={["스무 개의 자리가 있다.", "불이 켜진 자리는 몇 되지 않는다."]} />
+        <Narration lines={["스무 개의 자리가 있다.",
+                           "스무 자리에 다 불이 켜져 있다.",
+                           "오늘 앉을 수 있는 자리는 그중 둘이다."]} />
         <p className="sm">
           이름을 누르면 아래에 그 사람 자리가 열리오.
         </p>
@@ -188,6 +191,17 @@ function LobbyInner() {
           </div>
         )}
 
+        {/*
+          ★ 당김 0점이던 자리입니다. 스무 명을 늘어놓고 끝났습니다.
+            고르기 어려운 것이 문제가 아니라 **골라야 할 이유**가
+            없던 것이 문제입니다. 브레이크(세션당 둘)를 그대로 두고
+            그걸 **고를 이유**로 씁니다 — 지어낸 압박이 아닙니다.
+        */}
+        <ActOut kind="딜레마" next="그 사람의 자리">
+          스물을 다 들을 수는 없소. <b>한 자리에서 이을 수 있는 건 둘이오.</b><br />
+          여덟 글자는 하나인데 읽는 눈이 스물이라, 누구를 고르느냐가
+          곧 <b>무엇을 볼 것인가</b>요.
+        </ActOut>
         <button className="btn gh mt" onClick={() => setTab("b1")}>진열대로</button>
       </Shell>
     );
@@ -232,6 +246,12 @@ function LobbyInner() {
         ) : (
           <p className="sm mt">아직 자리에 없는 사람이오.</p>
         )}
+        <ActOut kind="남긴 물음" next="무료 구간">
+          {lens.name}이 먼저 보는 자리는 <b>「{lens.specialty}」</b>요.
+          같은 여덟 글자인데 다른 <b>열아홉</b>은 거기를 안 보오.<br />
+          그럼 {lens.name}은 그대 글자에서 <b>무엇을 먼저 짚겠소?</b>
+          여기까지는 값이 안 드오.
+        </ActOut>
         <button className="btn gh" onClick={() => setTab("b2")}>스무 사람으로</button>
       </Shell>
     );
@@ -246,6 +266,12 @@ function LobbyInner() {
             <Summary f={s.features} />
             <ElementBar f={s.features} />
             <CalcPanel f={s.features} />
+            <ActOut kind="밝힘" next="스무 사람">
+              여기 여덟 글자 중 <b>둘</b>은 태어난 <b>시각</b>에서 나오오.
+              시각을 대강만 알면 그 둘이 절반은 어긋나오 — 그러면
+              오행 개수가 바뀌고, <b>없던 기운이 생기고 있던 기운이 사라지오.</b><br />
+              그래서 이 집은 시주를 지어내지 않소.
+            </ActOut>
           </>
         ) : (
           <>
@@ -281,6 +307,12 @@ function LobbyInner() {
           <b>인장첩</b><span>모은 인장 {s.seals.length}</span>
         </button>
       </div>
+      <ActOut kind="끊긴 동작" next="스무 사람">
+        목패는 <b>{LENSES.length}</b>이오. 그대가 들은 자리는{" "}
+        <b>{s.read.length}</b>이오.<br />
+        같은 여덟 글자를 두 사람이 읽으면 <b>겹치는 데가 어디고 갈리는
+        데가 어딘지</b>가 보이오. 그게 이 집이 파는 것이오.
+      </ActOut>
     </Shell>
   );
 }

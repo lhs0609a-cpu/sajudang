@@ -2528,3 +2528,31 @@ body.has-rail-closed .stage { margin-left: 26px; }
   font-size: var(--fs-3); line-height: 1.75; color: #E8A87C;
   margin-bottom: 3px; list-style: "— " outside;
 }
+
+/* ══════════ 액트아웃 — 막을 끊는 한 줄 ══════════
+   ★ 손님이 2026-09-02 에 시킨 것 — "미드처럼 다음 화로 넘어가고
+     싶어 궁금해 미치겠을 정도로."
+   자리는 **버튼 바로 위**로 고정입니다. 기억은 마지막이 지배합니다.
+   ------------------------------------------------------ */
+.actout {
+  margin: 18px 0 12px;
+  padding: 12px 14px 12px 15px;
+  border-left: 2px solid var(--gold);
+  background: linear-gradient(90deg,
+              rgba(229, 184, 122, .07), transparent 78%);
+}
+.actout p {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: var(--fs-5);
+  line-height: 1.8;
+  color: var(--paper);
+}
+.actout p b { color: var(--gold); font-weight: 400; }
+.actout .nextname {
+  margin-top: 7px;
+  font-family: var(--mono);
+  font-size: var(--fs-2);
+  color: var(--paper3);
+}
+.actout .nextname b { color: var(--gold); }
