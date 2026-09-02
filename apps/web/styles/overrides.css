@@ -320,7 +320,8 @@ body:has(.gatehero) .stage { padding-bottom: 0; }
   background: linear-gradient(180deg, rgba(229,184,122,.07), transparent 70%);
 }
 .sumhead .gz {
-  font-family: var(--serif); font-size: var(--fs-8); color: var(--c); margin-top: 4px;
+  font-family: var(--hanja); font-weight: 600;
+  font-size: var(--fs-8); color: var(--c); margin-top: 4px;
 }
 .sumhead .hl {
   font-family: var(--serif); font-size: var(--fs-7); color: var(--paper);
@@ -357,7 +358,12 @@ body:has(.gatehero) .stage { padding-bottom: 0; }
 .ss.good, .hp { border-left-color: var(--c); }
 .ss.warn { border-left-color: var(--ember); }
 .ss .hd, .hp .hd { display: flex; align-items: baseline; gap: 7px; }
-.ss .hj { font-family: var(--serif); font-size: var(--fs-3); color: var(--paper3); }
+/* 작은 한자는 400 으로 두면 획이 서로 붙어 뭉갭니다. 크게 뽑을
+   때와 반대 이유로 굵기를 줍니다. */
+.ss .hj {
+  font-family: var(--hanja); font-weight: 500;
+  font-size: var(--fs-3); color: var(--paper3);
+}
 .ss .tag, .hp .tag {
   font-family: var(--mono); font-size: var(--fs-2); border: 1px solid var(--line2);
   padding: 1px 5px; color: var(--paper3);
@@ -721,7 +727,8 @@ body.has-rail-closed .stage { margin-left: 26px; }
    일간이 다른 사람이 같은 말을 듣고 있었습니다. 눈에 들어와야 뜻이 있습니다.
    ------------------------------------------------------ */
 .stab p.gan {
-  font-family: var(--serif);
+  font-family: var(--hanja);
+  font-weight: 600;
   font-size: var(--fs-7);
   line-height: 1.8;
   margin-top: 12px;
@@ -1712,9 +1719,9 @@ body.has-rail-closed .stage { margin-left: 26px; }
   margin-top: -6px;
 }
 .meetname b {
-  font-family: var(--serif);
+  font-family: var(--hanja);
   font-size: var(--fs-7);
-  font-weight: 400;
+  font-weight: 600;
   color: var(--c);
 }
 .meetname i {
@@ -2067,9 +2074,11 @@ body.has-rail-closed .stage { margin-left: 26px; }
 .mt tr.gan td, .mt tr.ji td { position: relative; padding: 7px 2px 5px; }
 .mt tr.gan b, .mt tr.ji b {
   display: block;
-  font-family: var(--serif);
+  /* ★ 명식 여덟 글자는 이 집의 얼굴이오. 명조 400 으로 크게 뽑으면
+     획이 죽어 표가 흐릿해집니다. 한자 전용 글꼴에 굵기를 줍니다. */
+  font-family: var(--hanja);
   font-size: var(--fs-8);
-  font-weight: 400;
+  font-weight: 600;
   line-height: 1.15;
 }
 .mt tr.gan i, .mt tr.ji i {

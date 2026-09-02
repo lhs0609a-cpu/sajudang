@@ -30,6 +30,41 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
      *   뭉개지고 명리 용어가 엉뚱하게 바뀝니다.
      */
     <html lang="ko" translate="no">
+      {/*
+       * ★ 글꼴을 여기서 받아 옵니다.
+       *
+       *   tokens.css 는 이름만 적어 뒀고 받아 오는 자리가 없었습니다.
+       *   그래서 본문이 시스템 고정폭으로 그려졌습니다 — 사주 보는
+       *   집인데 터미널처럼 보였습니다.
+       *
+       *   next/font 대신 <link> 를 씁니다. 구글의 css2 는 한글을
+       *   unicode-range 로 백여 조각으로 쪼개 **쓰는 조각만** 내려
+       *   보냅니다. 한글 글꼴은 통째로 받으면 수 MB 라, CJK 에서는
+       *   이 쪽이 훨씬 가볍습니다.
+       *
+       *   display=swap — 글꼴을 기다리며 글을 감추지 않습니다.
+       *   첫 화면이 비어 보이는 것보다 잠깐 대체 글꼴로 보이는 게
+       *   낫습니다.
+       */}
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="stylesheet"
+          href={
+            "https://fonts.googleapis.com/css2" +
+            "?family=Nanum+Myeongjo:wght@400;700;800" +
+            "&family=Noto+Serif+KR:wght@400;500;600;700" +
+            "&family=Noto+Sans+KR:wght@400;500;700" +
+            "&family=IBM+Plex+Mono:wght@400;500" +
+            "&display=swap"
+          }
+        />
+      </head>
       <body spellCheck={false}>{children}</body>
     </html>
   );

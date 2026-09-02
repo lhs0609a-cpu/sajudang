@@ -54,9 +54,28 @@
   --fs-7: 19.5px;   /* 소제목                   (전 17~19px) */
   --fs-8: 23px;     /* 제목                     (전 20~22px) */
 
-  --serif: "Gowun Batang", serif;
-  --sans: "Noto Sans KR", sans-serif;
-  --mono: "IBM Plex Mono", monospace;
+  /* ── 글꼴 ─────────────────────────────────────────────
+   *
+   * ★ 이름만 적어 두고 **받아 오지 않고 있었습니다.**
+   *   손님 기기에 "Gowun Batang" 이 있을 리 없으니 전부 시스템
+   *   대체 글꼴로 떨어졌습니다. layout.tsx 가 이제 받아 옵니다.
+   *
+   * ★ 고정폭에는 한글이 한 자도 없습니다.
+   *   IBM Plex Mono 는 라틴 글꼴입니다. 그래서 --mono 가 걸린
+   *   한글이 시스템 고정폭으로 떨어져 자간이 벌어지고 획이
+   *   뭉갰습니다. 뒤에 Noto Sans KR 을 받쳐 둡니다 — 글꼴 대체는
+   *   **글자 하나씩** 일어나므로, 숫자는 고정폭으로 자리를 맞추고
+   *   한글만 제대로 된 고딕으로 떨어집니다.
+   *
+   * ★ 한자를 따로 둡니다.
+   *   명조를 크게 뽑으면 획이 죽습니다. 명식의 여덟 글자는 이 집의
+   *   얼굴인데 얇게 나오고 있었습니다. Noto Serif KR 은 굵기가
+   *   아홉 단이고 한자를 다 갖고 있습니다.
+   */
+  --serif: "Nanum Myeongjo", "Noto Serif KR", serif;
+  --hanja: "Noto Serif KR", "Nanum Myeongjo", serif;
+  --sans: "Noto Sans KR", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", "Noto Sans KR", monospace;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
