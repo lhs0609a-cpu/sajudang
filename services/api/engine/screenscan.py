@@ -67,6 +67,9 @@ KIND = {
     "f2": "list", "r1": "beat", "h1": "list", "s2": "beat",
 }
 
+# 화면이 스스로 적은 액트아웃 — <ActOut kind="딜레마" …>
+ACT_DECL = re.compile(r'<ActOut\s[^>]*kind="([^"]+)"')
+
 TSX_STR = re.compile(r'"([^"\\<>{}\n]{6,200})"')
 # ★ 줄을 넘는 글도 잡습니다.
 #
@@ -95,6 +98,15 @@ CODEY = re.compile(r"=>|className|useState|const |return |;|\)\s*\{|\bprops\b")
 def _strip_code(src: str) -> str:
     src = re.sub(r"/\*.*?\*/", " ", src, flags=re.S)
     return re.sub(r"//[^\n]*", " ", src)
+
+
+def _declared(chunk: str) -> list:
+    """이 조각이 선언한 액트아웃 꼴."""
+    out = []
+    for k in ACT_DECL.findall(chunk):
+        if k not in out:
+            out.append(k)
+    return out
 
 
 def _readable(chunk: str) -> str:
@@ -129,13 +141,16 @@ def _entry_screens() -> dict:
     out = {}
     for i in range(len(marks) - 1):
         sid, a = marks[i]
-        got = _readable(src[a:marks[i + 1][1]])
-        if len(got) > len(out.get(sid, "")):
-            out[sid] = got
+        chunk = src[a:marks[i + 1][1]]
+        got = _readable(chunk)
+        if len(got) > len(out.get(sid, ("", []))[0]):
+            out[sid] = (got, _declared(chunk))
     # a7 은 훅 부품이 그립니다. page.tsx 만 보면 텅 빈 것으로 나옵니다.
     part = WEB / "components" / "HookSegments.tsx"
     if part.exists() and "a7" in out:
-        out["a7"] += " " + _readable(_strip_code(part.read_text(encoding="utf-8")))
+        t, d = out["a7"]
+        out["a7"] = (t + " " + _readable(_strip_code(
+            part.read_text(encoding="utf-8"))), d)
     return out
 
 
@@ -160,18 +175,19 @@ def _tab_screens() -> dict:
                    "app/summary/page.tsx": "c7",
                    "app/daily/page.tsx": "g1"}.get(rel)
             if sid:
-                out[sid] = _readable(src)
+                out[sid] = (_readable(src), _declared(src))
             continue
         marks.append(("__end__", len(src)))
         for i in range(len(marks) - 1):
             sid, a = marks[i]
-            got = _readable(src[a:marks[i + 1][1]])
+            chunk = src[a:marks[i + 1][1]]
+            got = _readable(chunk)
             # ★ 가장 **긴** 덩이를 씁니다.
             #   처음 나온 것을 쓰면 `if (step !== "a6") return;` 같은
             #   효과 안의 한 줄이 그 화면 전체 행세를 합니다 — a6 이
             #   실제로 0자로 잡혔습니다.
-            if len(got) > len(out.get(sid, "")):
-                out[sid] = got
+            if len(got) > len(out.get(sid, ("", []))[0]):
+                out[sid] = (got, _declared(chunk))
     return out
 
 
@@ -232,9 +248,11 @@ def _engine_text() -> dict:
 # ══════════════════════════════════════════════════════════
 def scan_all() -> list:
     """모든 화면의 점수. 관리자 화면과 CLI 가 같이 씁니다."""
-    text = {}
-    text.update(_entry_screens())
-    text.update(_tab_screens())
+    pairs = {}
+    pairs.update(_entry_screens())
+    pairs.update(_tab_screens())
+    text = {k: v[0] for k, v in pairs.items()}
+    decl = {k: v[1] for k, v in pairs.items()}
     # 엔진 글이 있는 화면은 **엔진 글이 이깁니다** — 손님이 읽는 것은
     # 코드에 박힌 안내가 아니라 실제로 나온 해석입니다.
     eng = _engine_text()
@@ -245,7 +263,8 @@ def scan_all() -> list:
     for sid, html in text.items():
         if sid not in KO:
             continue
-        rows.append(D.score(sid, KO[sid], html, KIND.get(sid, "read")))
+        rows.append(D.score(sid, KO[sid], html, KIND.get(sid, "read"),
+                            declared=decl.get(sid)))
     order = list(KO)
     rows.sort(key=lambda r: order.index(r["id"]))
     return rows

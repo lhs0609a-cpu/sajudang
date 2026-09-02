@@ -336,6 +336,15 @@ function ReportInner() {
             {rep.locked.length > 0 && ` · 잠긴 자리 ${rep.locked.length}컷`}
           </p>
         </div>
+        <span className="src">
+          근거 · 여덟 글자 하나 · {rep.lens.name}의 눈 하나 · 읽는 자리
+          {" "}{rep.cuts.length}컷
+        </span>
+        <p className="sm">
+          여덟 글자는 하나요. 읽는 눈이 스물이오.
+          <b> 같은 산을 스무 군데서 그린 그림</b> 같은 것이라, 어느 그림도
+          거짓이 아니고 어느 하나도 산 전부가 아니오.
+        </p>
         {/*
            ★ 표지가 「N컷이오」로 끝났습니다. 수는 있는데 **그중 무엇이
              그대만의 것인지**가 없었습니다. 관점 컷(lc_)은 이 사람을
@@ -444,6 +453,17 @@ function ReportInner() {
     const nameCut = rep.cuts.find((c) => c.id === "lack");
     return (
       <Shell title="공유 카드">
+        <Narration lines={["도령이 종이 한 장을 잘라 내밀었다."]} />
+        <span className="src">
+          근거 · {s.features?.day_gan} 일간 · {s.features?.strength} ·
+          {" "}읽은 자리 {rep.cuts.length}컷
+        </span>
+        <p className="sm">
+          <b>일간(日干)</b>은 여덟 글자 가운데 <b>그대 자신</b>을 가리키는
+          한 글자요. 여덟이 다 그대인 게 아니라, <b>그중 하나가 그대이고
+          나머지 일곱이 그 둘레</b>요 — 마당 한가운데 선 사람과 담장
+          같은 것이오.
+        </p>
         <div className="card">
           <Scene id="cardbg" />
           <div className="cardin">

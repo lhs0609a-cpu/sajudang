@@ -70,6 +70,12 @@ export default function RelayPage() {
   return (
     <Shell title="이어지다" legal>
       <Scene id="handle" />
+      {/*
+        ★ 콜드 오픈이 없었습니다. 화면이 목록부터 시작해서, 손님은
+          여기가 무슨 자리인지 모른 채 이름 넷을 봅니다.
+      */}
+      <Narration lines={["도령이 문고리를 놓았다.",
+                         "옆방에서 인기척이 났다."]} />
       {err && <Say who="도령" lens="pungun">{err}</Say>}
 
       {data?.blocked ? (
@@ -192,9 +198,11 @@ export default function RelayPage() {
               <ActOut kind="딜레마" next="그 사람이 먼저 보는 자리">
                 오늘 이을 수 있는 자리는{" "}
                 <b>{Math.max(0, data.breaks.per_session_relay - s.relayUsed)}</b>이오.
+                {" "}스물 중 <b>{s.read.length}</b>은 이미 들으셨소.
                 <br />
-                한 자리에서 몰아 듣는다고 더 알게 되지 않소 —{" "}
-                <b>고른 하나를 끝까지 듣는 편이 낫소.</b>
+                한 상에 열 그릇을 놓으면 맛을 못 보오.{" "}
+                <b>한 사람을 끝까지 듣는 편이 낫소</b> — 그래서 하루에
+                둘까지만 잇소.
               </ActOut>
               <button className="btn gh mt" onClick={() => router.push("/lobby")}>
                 오늘은 그만 듣겠습니다

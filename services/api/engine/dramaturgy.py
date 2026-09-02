@@ -147,7 +147,8 @@ FLOOR = {"input": 120, "beat": 260, "read": 900, "list": 200}
 
 
 def score(sid: str, title: str, html: str, kind: str = "read",
-          next_named: Optional[str] = None) -> dict:
+          next_named: Optional[str] = None,
+          declared: Optional[list] = None) -> dict:
     """
     화면 하나의 네 점수와 **무엇이 모자란지**.
 
@@ -155,6 +156,16 @@ def score(sid: str, title: str, html: str, kind: str = "read",
     html       손님이 실제로 읽는 글 (HTML 그대로)
     kind       input 입력 · beat 한 마디 · read 읽는 자리 · list 고르는 자리
     next_named 화면 밖에서 다음 자리를 이름으로 예고했으면 그 이름
+    declared   화면이 `<ActOut kind="딜레마">` 로 **선언한** 액트아웃
+
+    ★ 왜 선언을 받나
+
+      말뭉치로만 찾으면 글을 고칠 때마다 정규식을 쫓아가게 됩니다.
+      그건 글을 고치는 게 아니라 **검사에 맞춰 쓰는 것**입니다.
+
+      `ActOut` 은 자리가 고정된 부품이고(버튼 바로 위) 무슨 꼴인지
+      스스로 적습니다. 그러면 그건 **있는 것**입니다. 말뭉치는
+      부품을 안 쓰는 자리 — 엔진이 짓는 글 — 를 위해 남겨 둡니다.
     """
     body = GLS.sub(" ", html or "")
     text = plain(body)
@@ -180,7 +191,9 @@ def score(sid: str, title: str, html: str, kind: str = "read",
     if not cold:
         miss.append("콜드 오픈이 없소 — 첫 줄이 설명이오. 사건이나 물음부터 여시오")
 
-    kinds = [k for k, rx in ACT_OUT.items() if rx.search(tail)]
+    kinds = list(declared or [])
+    kinds += [k for k, rx in ACT_OUT.items()
+              if rx.search(tail) and k not in kinds]
     act = 30 if kinds else 0
     if not act:
         miss.append("액트아웃이 없소 — 끝이 그냥 끝나오. "
