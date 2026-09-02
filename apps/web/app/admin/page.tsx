@@ -45,6 +45,28 @@ type Overview = {
   house: Record<string, unknown>;
 };
 
+/*
+ * 연출 점수 — 화면마다 「다음 화가 보고 싶어지는가」.
+ *
+ * ★ 서버가 **실제로 나가는 글을 그 자리에서 재서** 냅니다.
+ *   지어낸 숫자가 아니라, 문장을 고치면 바로 움직이는 값입니다.
+ *   (engine/dramaturgy.py · engine/screenscan.py)
+ */
+type ScreenScore = {
+  id: string; title: string; kind: string; chars: number;
+  pull: number; bite: number; depth: number; plain: number; total: number;
+  actout: string[]; missing: string[];
+};
+type Drama = {
+  at: string;
+  summary: {
+    screens: number; pull: number; bite: number; depth: number;
+    plain: number; total: number;
+    weakest: { id: string; title: string; total: number }[];
+  };
+  screens: ScreenScore[];
+};
+
 const won = (n: number) => n.toLocaleString("ko-KR") + "원";
 
 export default function AdminPage() {
@@ -53,6 +75,8 @@ export default function AdminPage() {
   const [key, setKey] = useState("");
   const [typed, setTyped] = useState("");
   const [data, setData] = useState<Overview | null>(null);
+  const [drama, setDrama] = useState<Drama | null>(null);
+  const [openRow, setOpenRow] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -71,6 +95,20 @@ export default function AdminPage() {
       if (r.status === 503) throw new Error("서버에 FUNNEL_KEY 가 없습니다.");
       if (!r.ok) throw new Error("가져오지 못했습니다 (" + r.status + ")");
       setData(await r.json());
+      /*
+       * ★ 연출 점수는 **매출과 함께** 받아 옵니다.
+       *
+       *   손님이 "항상 연동해서 점수 보여줘" 라 했습니다. 따로 누르게
+       *   해 두면 안 누르고, 안 누르면 없는 것과 같습니다.
+       *   실패해도 매출 화면은 안 막습니다 — 점수는 곁다리입니다.
+       */
+      try {
+        const d = await fetch(BASE + "/v1/admin/screens",
+                              { headers: { "x-funnel-key": k } });
+        setDrama(d.ok ? await d.json() : null);
+      } catch {
+        setDrama(null);
+      }
     } catch (e) {
       setErr(e instanceof Error ? e.message : "가져오지 못했습니다.");
       setData(null);
@@ -184,6 +222,75 @@ export default function AdminPage() {
           <div><b>{data?.live.active_15m ?? "—"}</b><span>지금 도는 사람</span></div>
           <div><b>{data?.funnel?.sessions ?? "—"}</b><span>들어온 사람</span></div>
         </div>
+      </section>
+
+      {/* ── 연출 점수 ────────────────────────────────── */}
+      <section>
+        <h2>다음 화가 보고 싶어지는가</h2>
+        {!drama ? (
+          <p className="sm">점수를 못 가져왔소.</p>
+        ) : (
+          <>
+            <div className="kpi">
+              <div><b>{drama.summary.pull}</b><span>당김</span></div>
+              <div><b>{drama.summary.bite}</b><span>팩폭</span></div>
+              <div><b>{drama.summary.depth}</b><span>충실</span></div>
+              <div><b>{drama.summary.plain}</b><span>쉬움</span></div>
+              <div><b>{drama.summary.total}</b><span>합 (화면 {drama.summary.screens})</span></div>
+            </div>
+            {drama.summary.pull < 60 && (
+              <p className="admbad">
+                <b>당김이 {drama.summary.pull}점.</b> 미드는 막마다 끊습니다 —
+                밝힘 · 뒤집기 · 딜레마 · 끊긴 동작 · 남긴 물음 중 하나로.
+                끝이 그냥 끝나는 화면은 다음으로 안 데려갑니다.
+              </p>
+            )}
+            {/*
+              ★ 표는 **낮은 것부터**. 좋은 것부터 보여 주면 고칠 자리가
+                아래로 밀려 안 봅니다.
+            */}
+            <table className="admt drama">
+              <thead>
+                <tr>
+                  <th>화면</th><th className="n">당김</th><th className="n">팩폭</th>
+                  <th className="n">충실</th><th className="n">쉬움</th>
+                  <th className="n">합</th><th>액트아웃</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...drama.screens].sort((a, b) => a.total - b.total).map((r) => (
+                  <tr key={r.id}
+                      className={"clk " + (r.total < 50 ? "bad"
+                                 : r.total < 65 ? "mid" : "good")}
+                      onClick={() => setOpenRow(openRow === r.id ? null : r.id)}>
+                    <td>
+                      <b>{r.id}</b> {r.title}
+                      {openRow === r.id && r.missing.length > 0 && (
+                        <ul className="lack">
+                          {r.missing.map((m, i) => <li key={i}>{m}</li>)}
+                        </ul>
+                      )}
+                      {openRow === r.id && r.missing.length === 0 && (
+                        <p className="sm">모자란 데가 없소.</p>
+                      )}
+                    </td>
+                    <td className="n">{r.pull}</td>
+                    <td className="n">{r.bite}</td>
+                    <td className="n">{r.depth}</td>
+                    <td className="n">{r.plain}</td>
+                    <td className="n"><b>{r.total}</b></td>
+                    <td className="sm">{r.actout.join(" · ") || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="sm">
+              줄을 누르면 <b>무엇이 모자란지</b> 나오오.
+              점수는 지어낸 값이 아니라 <b>지금 나가는 글</b>을 그 자리에서
+              잰 것이오 — 문장을 고치면 바로 움직이오.
+            </p>
+          </>
+        )}
       </section>
 
       {/* ── 어디서 나가는가 ──────────────────────────── */}

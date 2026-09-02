@@ -1,0 +1,228 @@
+"""
+화면마다 손님이 **실제로 읽는 글**을 모아 연출 점수를 매긴다.
+
+    from engine.screenscan import scan_all
+    scan_all()   →  [{id, title, pull, bite, depth, plain, total, missing…}]
+
+★ 두 군데에서 옵니다
+
+    엔진이 짓는 글    훅 5단 · 리포트 컷 · 일진 · 분석지
+                     — 사람마다 다릅니다. 표본 하나를 실제로 돌립니다.
+    화면이 든 글      a1 골목 · a2 이름 · a3 날 · a4 때 · b1 진열대 …
+                     — 코드에 박힌 글입니다. 그대로 읽습니다.
+
+  두 벌을 **같은 자로** 잽니다. 안 그러면 입력 화면만 늘 붉거나
+  리포트만 늘 푸릅니다.
+
+★ 점수는 관리자 화면과 CLI 가 **같은 것**을 봅니다
+
+  `engine/dramaturgy.py` 한 자리에서 잽니다. 도구가 따로 재면
+  "도구는 통과인데 화면은 붉은" 자리가 생깁니다.
+"""
+from __future__ import annotations
+
+import re
+from datetime import date
+from functools import lru_cache
+from pathlib import Path
+from typing import Optional
+
+from . import dramaturgy as D
+
+WEB = Path(__file__).resolve().parents[3] / "apps" / "web"
+
+# ══════════════════════════════════════════════════════════
+# 화면 이름표 — docs/08 §1
+# ══════════════════════════════════════════════════════════
+KO = {
+    "a1": "골목", "a2": "이름", "a5": "걸리는 것", "a3": "날·고을",
+    "a4": "때", "a4b": "성향 넉 자", "a6": "글자가 서다", "a7": "훅 5단",
+    "b1": "진열대", "b2": "스무 사람", "b3": "그 사람", "b4": "내 명식",
+    "c1": "표지", "c2": "본문", "c3": "대운 맵", "c4": "페이월",
+    "c5": "공유 카드", "c6": "남기다", "c7": "분석지", "c8": "내보내기",
+    "d0": "무료 6단", "d1": "어디까지", "d2": "값을 치르다", "d3": "다 됐소",
+    "f2": "인장첩", "r1": "후기", "g1": "오늘", "g2": "이번 주", "g3": "다과상",
+    "h1": "이어지다", "s1": "받은 글", "s2": "나도 보기",
+}
+
+# 화면 종류 — 기준 분량이 다릅니다
+KIND = {
+    "a1": "input", "a2": "input", "a3": "input", "a4": "input",
+    "a4b": "input", "a5": "input", "b1": "list", "b2": "list",
+    "b3": "list", "b4": "read", "c1": "beat", "c4": "list",
+    "c5": "beat", "c6": "beat", "d1": "list", "d2": "beat", "d3": "beat",
+    "f2": "list", "r1": "beat", "h1": "list", "s2": "beat",
+}
+
+TSX_STR = re.compile(r'"([^"\\]{6,200})"')
+JSX_TEXT = re.compile(r">([^<>{}\n]{6,200})<")
+
+
+def _strip_code(src: str) -> str:
+    src = re.sub(r"/\*.*?\*/", " ", src, flags=re.S)
+    return re.sub(r"//[^\n]*", " ", src)
+
+
+def _readable(chunk: str) -> str:
+    """코드 조각에서 손님이 읽는 한국어만 긁어낸다."""
+    out = []
+    for m in list(TSX_STR.finditer(chunk)) + list(JSX_TEXT.finditer(chunk)):
+        t = m.group(1).strip()
+        if not re.search(r"[가-힣]", t):
+            continue
+        # 클래스 이름·주소·키는 글이 아닙니다
+        if re.match(r"^[a-z0-9 _\-/.]+$", t) or t.startswith("/"):
+            continue
+        out.append(t)
+    # 같은 글이 두 번 잡히면(문자열 + JSX) 한 번만 셉니다
+    seen, uniq = set(), []
+    for t in out:
+        if t not in seen:
+            seen.add(t)
+            uniq.append(t)
+    return " ".join(uniq)
+
+
+@lru_cache(maxsize=1)
+def _entry_screens() -> dict:
+    """a1~a7 — `step === "a4"` 로 갈린 덩이."""
+    src = _strip_code((WEB / "app" / "page.tsx").read_text(encoding="utf-8"))
+    marks = [(m.group(1), m.start())
+             for m in re.finditer(r'step === "(\w+)"', src)]
+    marks.append(("__end__", len(src)))
+    out = {}
+    for i in range(len(marks) - 1):
+        sid, a = marks[i]
+        got = _readable(src[a:marks[i + 1][1]])
+        if len(got) > len(out.get(sid, "")):
+            out[sid] = got
+    # a7 은 훅 부품이 그립니다. page.tsx 만 보면 텅 빈 것으로 나옵니다.
+    part = WEB / "components" / "HookSegments.tsx"
+    if part.exists() and "a7" in out:
+        out["a7"] += " " + _readable(_strip_code(part.read_text(encoding="utf-8")))
+    return out
+
+
+@lru_cache(maxsize=1)
+def _tab_screens() -> dict:
+    """`tab === "c2"` 로 갈린 화면들 — 진열대·리포트·값·모으다."""
+    out = {}
+    for rel in ("app/lobby/page.tsx", "app/report/[id]/page.tsx",
+                "app/pay/page.tsx", "app/me/page.tsx", "app/daily/page.tsx",
+                "app/relay/page.tsx", "app/summary/page.tsx"):
+        p = WEB / rel
+        if not p.exists():
+            continue
+        src = _strip_code(p.read_text(encoding="utf-8"))
+        marks = [(m.group(1), m.start())
+                 for m in re.finditer(r'(?:tab|step) === "(\w+)"', src)]
+        if not marks:
+            # 탭이 없는 화면은 통째로 한 화면입니다
+            sid = {"app/relay/page.tsx": "h1",
+                   "app/summary/page.tsx": "c7"}.get(rel)
+            if sid:
+                out[sid] = _readable(src)
+            continue
+        marks.append(("__end__", len(src)))
+        for i in range(len(marks) - 1):
+            sid, a = marks[i]
+            got = _readable(src[a:marks[i + 1][1]])
+            # ★ 가장 **긴** 덩이를 씁니다.
+            #   처음 나온 것을 쓰면 `if (step !== "a6") return;` 같은
+            #   효과 안의 한 줄이 그 화면 전체 행세를 합니다 — a6 이
+            #   실제로 0자로 잡혔습니다.
+            if len(got) > len(out.get(sid, "")):
+                out[sid] = got
+    return out
+
+
+# ══════════════════════════════════════════════════════════
+# 엔진이 짓는 글 — 표본 하나를 실제로 돌린다
+# ══════════════════════════════════════════════════════════
+#
+# ★ 한 사람만 봅니다. 사람마다 문장이 갈리지만 **구조**는 같습니다 —
+#   여기서 재는 것은 구조입니다. 문장 쏠림은 dup_rate 가 봅니다.
+SAMPLE = (1993, 11, 25, 15, 55, "M")
+
+
+def _engine_text() -> dict:
+    from .bank import build_hook
+    from .calendar import build_chart
+    from .daily import build_daily
+    from .features import build_features
+    from .report import build_report
+
+    y, m, d, h, mi, sex = SAMPLE
+    f = build_features(build_chart(y, m, d, h, mi, sex, city="서울"),
+                       as_of=date.today())
+    out = {}
+
+    segs = build_hook(f, "work", "INTJ", name="", you="그대")
+    out["a7"] = "".join(s["html"] for s in segs)
+
+    free = build_report(f, "scan", "pungun", "free", "work", "INTJ")
+    out["d0"] = "".join(
+        '<span class="src">근거 · %s</span>%s' % (c["source"], c["html"])
+        for c in free["cuts"])
+    if free.get("locked"):
+        out["c4"] = " ".join(
+            "「%s」 %s" % (l["title"], l.get("teaser") or "")
+            for l in free["locked"])
+
+    paid = build_report(f, "scan", "pungun", "one", "work", "INTJ")
+    out["c2"] = (paid.get("opening") or "") + "".join(
+        '<span class="src">근거 · %s</span>%s' % (c["source"], c["html"])
+        for c in paid["cuts"]) + (paid.get("closing") or "")
+    mapcut = [c for c in paid["cuts"] if c["id"] == "daeun_map"]
+    if mapcut:
+        out["c3"] = ('<span class="src">근거 · %s</span>%s'
+                     % (mapcut[0]["source"], mapcut[0]["html"]))
+
+    # 일진은 html 을 안 냅니다 — 줄로 옵니다.
+    dly = build_daily(f, on=date.today())
+    out["g1"] = " ".join(filter(None, [
+        dly.get("text") or "",
+        " ".join(dly.get("lines") or []),
+        " ".join(dly.get("notes") or []),
+        dly.get("score_says") or "",
+        '<span class="src">근거 · %s</span>' % (dly.get("source") or ""),
+    ]))
+    return out
+
+
+# ══════════════════════════════════════════════════════════
+def scan_all() -> list:
+    """모든 화면의 점수. 관리자 화면과 CLI 가 같이 씁니다."""
+    text = {}
+    text.update(_entry_screens())
+    text.update(_tab_screens())
+    # 엔진 글이 있는 화면은 **엔진 글이 이깁니다** — 손님이 읽는 것은
+    # 코드에 박힌 안내가 아니라 실제로 나온 해석입니다.
+    eng = _engine_text()
+    for sid, html in eng.items():
+        text[sid] = html + " " + text.get(sid, "")
+
+    rows = []
+    for sid, html in text.items():
+        if sid not in KO:
+            continue
+        rows.append(D.score(sid, KO[sid], html, KIND.get(sid, "read")))
+    order = list(KO)
+    rows.sort(key=lambda r: order.index(r["id"]))
+    return rows
+
+
+def summary(rows: Optional[list] = None) -> dict:
+    rows = rows if rows is not None else scan_all()
+    if not rows:
+        return {"screens": 0}
+    avg = lambda k: round(sum(r[k] for r in rows) / len(rows))  # noqa: E731
+    weak = sorted(rows, key=lambda r: r["total"])[:5]
+    return {
+        "screens": len(rows),
+        "pull": avg("pull"), "bite": avg("bite"),
+        "depth": avg("depth"), "plain": avg("plain"),
+        "total": avg("total"),
+        "weakest": [{"id": r["id"], "title": r["title"], "total": r["total"]}
+                    for r in weak],
+    }

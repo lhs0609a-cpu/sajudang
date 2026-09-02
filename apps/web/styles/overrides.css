@@ -2501,3 +2501,30 @@ body.has-rail-closed .stage { margin-left: 26px; }
 .dzhead { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 6px; }
 .dzhead > div { min-width: 0; flex: 1 1 auto; }
 .dz.face .charart.card { flex: 0 0 auto; }
+
+/* ══════════ 연출 점수 표 ══════════
+   ★ 손님이 2026-09-02 에 시킨 것 — "페이지마다 매력도를 점수로,
+     뭐가 부족한지도, 항상 연동해서."
+   낮은 것부터 위로 올립니다. 좋은 것부터 보여 주면 고칠 자리가
+   아래로 밀려 안 봅니다.
+   ------------------------------------------------------ */
+.admt.drama th {
+  padding: 5px 8px; text-align: left;
+  font-family: var(--mono); font-size: var(--fs-1);
+  color: var(--paper3); letter-spacing: .1em;
+  border-bottom: 1px solid var(--line2);
+}
+.admt.drama th.n { text-align: right; }
+.admt.drama tr.clk { cursor: pointer; }
+.admt.drama tr.clk:hover td { background: rgba(229, 184, 122, .05); }
+.admt.drama tr.bad td.n { color: #E8A87C; }
+.admt.drama tr.mid td.n { color: var(--gold); }
+.admt.drama tr.good td.n { color: #7FC4BC; }
+.admt.drama td { vertical-align: top; }
+
+/* 무엇이 모자란가 — 줄을 누르면 열립니다 */
+.admt .lack { margin: 7px 0 3px; padding-left: 15px; }
+.admt .lack li {
+  font-size: var(--fs-3); line-height: 1.75; color: #E8A87C;
+  margin-bottom: 3px; list-style: "— " outside;
+}

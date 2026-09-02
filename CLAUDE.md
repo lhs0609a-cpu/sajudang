@@ -312,6 +312,7 @@ python tools/make_rarity.py        # 희소도 표 다시 세기 (축을 고쳤�
 .\dev.ps1 subject          # ★ 주어 감사 — 누구 얘긴지 안 적힌 문장
 .\dev.ps1 hours            # ★ 때 칸 감사 — 네 시간 칸이 시주를 얼마나 틀리나
 .\dev.ps1 buttons          # ★ 버튼 말투 — 손님이 누르는 것은 손님의 말인가
+.\dev.ps1 drama            # ★ 연출 점수 — 다음 화가 보고 싶어지는가 (--why)
 .\dev.ps1 plan             # 회귀 50건 — 무엇부터 (유파 20건이 남음)
 .\dev.ps1 fill <파일>       # 받아적은 기대값 대조
 .\dev.ps1 funnel           # 퍼널 — 어디서 나가는가

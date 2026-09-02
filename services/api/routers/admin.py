@@ -124,6 +124,43 @@ def overview(x_funnel_key: str | None = Header(default=None)) -> dict:
     }
 
 
+@router.get("/screens")
+def screens(x_funnel_key: str | None = Header(default=None)) -> dict:
+    """
+    화면마다 **연출 점수** — 다음 화가 보고 싶어지는가.
+
+    ★ 손님이 시킨 것 (2026-09-02)
+
+      "관리자 페이지에서는 페이지마다 매력도를 측정해서, 실제 내용이
+      팩트를 때리고 다음 화로 넘어갈 수밖에 없게 설계했는지, 내용은
+      충실한지, 쉬운지를 지표로 각 페이지마다 다 점수로 표시해줘.
+      뭐가 부족한지도 나타내고. 항상 연동해서 점수 보여줘."
+
+    ★ 지어낸 점수가 아닙니다
+
+      **실제로 나가는 글**을 그 자리에서 재서 냅니다 — 엔진이 짓는
+      화면은 표본 하나를 진짜로 돌리고, 코드에 박힌 화면은 그 글을
+      그대로 읽습니다. 그러니 문장을 고치면 이 숫자가 바로 움직입니다.
+
+    ★ 캐시를 안 겁니다
+
+      고치고 새로 고쳤는데 옛 점수가 나오면 도구를 안 믿게 됩니다.
+      스무 화면 재는 데 1초가 안 걸립니다.
+    """
+    _guard(x_funnel_key)
+    from engine import screenscan
+
+    # 코드를 고치면 바로 다시 읽어야 합니다. lru_cache 를 비웁니다.
+    screenscan._entry_screens.cache_clear()
+    screenscan._tab_screens.cache_clear()
+    rows = screenscan.scan_all()
+    return {
+        "at": datetime.now().isoformat(timespec="seconds"),
+        "summary": screenscan.summary(rows),
+        "screens": rows,
+    }
+
+
 @router.get("/ping")
 def ping(x_funnel_key: str | None = Header(default=None)) -> dict:
     """열쇠가 맞는지만 봅니다 — 화면이 문을 열기 전에 묻는 자리."""
