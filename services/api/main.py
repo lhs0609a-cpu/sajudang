@@ -179,15 +179,6 @@ def _rarity_stats() -> dict:
         out["seed"] = str(rr.SEED)
         out["has_table"] = (rr.SEED / "rarity.json").exists()
         out["stale"] = rr.is_stale()
-        # ★ 컨테이너에서 **직접 세어 봅니다.**
-        #
-        #   배포본에서 값이 안 나오는데 까닭도 안 남았습니다. 그러면
-        #   「안 불린 것」인지 「불렸는데 실패한 것」인지 모릅니다.
-        #   여기서 한 번 세어 보면 엔진 쪽인지 라우터 쪽인지 갈립니다.
-        from engine.calendar import build_chart
-        from engine.features import build_features
-        f = build_features(build_chart(1993, 11, 25, 13, 0, "M", True))
-        out["sample"] = rr.look(f).get("words")
     except Exception as e:                       # noqa: BLE001
         out["error"] = "%s: %s" % (type(e).__name__, e)
     return out
@@ -209,8 +200,13 @@ def health() -> dict:
         "payments_reason": payments.DISABLED_REASON,
         # 소리 — 열쇠가 있어야 납니다. 없으면 화면이 조용히 넘어갑니다.
         "voice": _voice_stats(),
-        # 희소도가 안 나오면 **왜인지**. 곁가지라 조용히 빠지는데,
-        # 조용히 빠지면 배포본에서 원인을 못 찾습니다.
+        # 희소도가 안 나오면 **왜인지**.
+        #
+        # ★ 곁가지라 조용히 빠집니다. 조용히 빠지면 배포본에서 원인을
+        #   못 찾습니다 — 실제로 한 번 헤맸습니다. 다만 그때의 진짜
+        #   원인은 서버가 아니라 **재는 쪽**이었습니다: 셸이 요청 본문을
+        #   망가뜨려 400 이 왔는데, 그 응답을 「값이 없다」로 읽었습니다.
+        #   숫자가 안 보이면 서버를 파기 전에 **묻는 방법**부터 봅니다.
         "rarity": _rarity_stats(),
         "cors_origins": CORS_ORIGINS,
     }
