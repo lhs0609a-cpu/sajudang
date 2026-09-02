@@ -18,6 +18,7 @@
     migrate-sqlite 로컬 SQLite 로 마이그레이션 왕복 시험
     screens        화면 연결 그래프 — 고아·막다른·죽은 버튼
     subject        ★ 주어 감사 — 누구 얘긴지 안 적힌 문장 찾기
+    hours          ★ 때 칸 감사 — 네 시간 칸이 시주를 얼마나 틀리나
     flow           전체 플로우 훑기 — 32화면을 실제 브라우저로 열어 확인
     api            API 서버 (http://localhost:8000/docs)
     infra          postgres + redis 컨테이너
@@ -108,6 +109,7 @@ switch ($Task) {
   "crosscheck" { Need-Venv; Push-Location $Root; & $Py tools\crosscheck.py @Rest; Pop-Location }
   "screens" { Need-Venv; Push-Location $Root; & $Py tools\screen_graph.py; Pop-Location }
   "subject" { Need-Venv; Push-Location $Root; & $Py tools\subject_audit.py @Rest; Pop-Location }
+  "hours"   { Need-Venv; Push-Location $Root; & $Py tools\hour_bucket_audit.py; Pop-Location }
   "flow" {
     Need-Venv
     $target = if ($Rest) { $Rest[0] } else { "http://localhost:3000" }

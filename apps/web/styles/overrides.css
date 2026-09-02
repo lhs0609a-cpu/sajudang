@@ -900,6 +900,27 @@ body.has-rail-closed .stage { margin-left: 26px; }
 }
 .exact .sm { margin-bottom: 8px; }
 
+/*
+ * ★ 시·분이 첫 자리입니다 (2026-09-02).
+ *
+ *   칸을 먼저 고르게 하면 그 순간 한복판 시각이 적힙니다. 재보니
+ *   칸을 고른 사람의 51.7% 가 틀린 시주를 받습니다
+ *   (tools/hour_bucket_audit.py). 아는 사람이 먼저 적을 자리를
+ *   눈에 띄게 둡니다.
+ */
+.exact.first {
+  margin-top: 4px;
+  border-color: rgba(229, 184, 122, .5);
+  background: linear-gradient(180deg,
+              rgba(229, 184, 122, .06), transparent 72%), var(--bg2);
+}
+
+/* 칸으로 세우려는 사람에게 무엇을 무릅쓰는지 그 자리에 적습니다 */
+.exact.bucketwarn {
+  border-color: rgba(217, 139, 165, .45);
+  background: rgba(217, 139, 165, .05);
+}
+
 /* ══════════ 글자가 서는 장면 ══════════
    .calcrun  표준시 → 고을 → 절기 를 한 줄씩 찍는다
 

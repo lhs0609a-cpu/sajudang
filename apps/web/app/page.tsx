@@ -592,93 +592,126 @@ function EntryInner() {
         <Say who="도령" lens="pungun">때는 아시오?</Say>
         <Narration lines={["", "대부분은 모른다.", "모른다고 해도 그는 개의치 않았다."]} />
 
-        {/* ★ "모르오" 를 눈에 띄게. 여기서 막히면 그대로 이탈한다. (docs/08 §3) */}
-        <button className="btn" style={{ marginBottom: 12 }}
+        {/*
+          ★ 순서를 뒤집었습니다 (2026-09-02).
+
+            손님이 1993-11-25 **15시 55분**생인데 화면이 13시로 셈해
+            시주가 壬午 로 섰습니다. 만세력은 甲申 이오 — 여덟 글자 중
+            둘이 다르고, 그래서 **불이 하나 생기고 나무가 하나
+            사라졌습니다.**
+
+            까닭은 계산이 아니라 **입력**이었습니다. 네 시간짜리 칸을
+            한 시각으로 뭉개고 있었습니다. 재보니 —
+
+                칸을 고른 사람의 51.7% 가 틀린 시주를 받습니다.
+                다섯 칸은 정확히 절반씩 틀립니다.
+                (tools/hour_bucket_audit.py)
+
+            시·분 칸은 있었습니다. 다만 **칸을 먼저 고른 뒤 작은 링크를
+            눌러야** 열렸고, 칸을 고르는 순간 이미 한복판 시각이
+            적혔습니다. 아는 사람이 두 번 더 눌러야 제 시각을 쓰는
+            구조였습니다 — 그러니 아무도 안 눌렀습니다.
+
+            그래서 시·분을 **먼저, 그냥** 냅니다. 칸은 대강만 아는
+            사람의 길로 내려갑니다.
+        */}
+        <div className="exact first">
+          <p className="sm">
+            시·분을 아시면 적으시오. <b>적은 그대로 셈하오.</b>
+          </p>
+          <div className="f3">
+            <div>
+              <label>시</label>
+              <input className="fld" inputMode="numeric" maxLength={2}
+                     placeholder="15"
+                     value={s.hourKnown && s.hour !== null ? s.hour : ""}
+                     onChange={(e) => {
+                       const t = e.target.value.replace(/[^0-9]/g, "").slice(0, 2);
+                       // 손으로 적은 시각은 칸이 아닙니다. 칸 표시를
+                       // 지워야 아래 경고가 안 따라다닙니다.
+                       setPickedHour(null);
+                       if (t === "") {
+                         s.set({ hourKnown: true, hour: null,
+                                 features: null, chartId: null });
+                         return;
+                       }
+                       // 24 를 치면 23 으로 잡아 둡니다. 지우고 다시
+                       // 칠 수 있어야 하므로 값 자체는 막지 않습니다.
+                       s.set({ hourKnown: true, hour: Math.min(23, Number(t)),
+                               features: null, chartId: null });
+                     }} />
+            </div>
+            <div>
+              <label>분</label>
+              <input className="fld" inputMode="numeric" maxLength={2}
+                     placeholder="55"
+                     value={s.minute ? String(s.minute) : ""}
+                     onChange={(e) => {
+                       const t = e.target.value.replace(/[^0-9]/g, "").slice(0, 2);
+                       s.set({ minute: t === "" ? 0 : Math.min(59, Number(t)),
+                               features: null, chartId: null });
+                     }} />
+            </div>
+            <div />
+          </div>
+          <button className="btn mt"
+                  disabled={!s.hourKnown || s.hour === null}
+                  onClick={() => go("a4b")}>
+            이 때로 내 것을 세우겠소
+          </button>
+        </div>
+
+        {/*
+          대강만 아는 사람의 길. 여기서 고른 값은 **한복판 시각**이라
+          시주가 둘 중 하나로 갈립니다. 감추지 않고 그 자리에 적습니다.
+        */}
+        <button className="lk mt" onClick={() => setExact((v) => !v)}>
+          {exact ? "때 칸 접기" : "시·분은 모르고 대강만 아시오?"}
+        </button>
+
+        {exact && (
+          <div className="og c2 mt">
+            {HOURS.map(([label, range, h], idx) => (
+              <button key={label}
+                      className={`op ${pickedHour === idx ? "on" : ""}`}
+                      onClick={() => {
+                        s.set({ hourKnown: true, hour: h, minute: 0,
+                                features: null, chartId: null });
+                        setPickedHour(idx);
+                      }}>
+                <b>{label}</b><span>{range}</span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {exact && bucket && (
+          <div className="exact bucketwarn">
+            <p className="sm">
+              <b>{bucket[0]}</b>({bucket[1]}) 은 네 시간이오. 지금은 한복판인{" "}
+              <b>{String(bucket[2]).padStart(2, "0")}시</b>로 셈하오 —{" "}
+              <b>둘 중 하나는 다른 시주가 되오.</b> 시·분을 아시면 위에
+              적으시오. 정 모르겠거든 <b>모른다</b> 하시오. 지어낸 시주보다
+              없는 시주가 낫소.
+            </p>
+            <button className="btn mt" disabled={s.hour === null}
+                    onClick={() => go("a4b")}>
+              그래도 이 칸으로 세우겠소
+            </button>
+          </div>
+        )}
+
+        {/* ★ "모르오" 는 그대로 눈에 둡니다. 여기서 막히면 그대로
+            이탈합니다 (docs/08 §3). 다만 이제 첫 버튼은 아닙니다 —
+            아는 사람이 먼저 적을 자리가 위에 있습니다. */}
+        <button className="btn gh mt"
                 onClick={() => {
                   s.set({ hourKnown: false, hour: null, features: null, chartId: null });
+                  setPickedHour(null);
                   go("a4b");
                 }}>
           모르오 · 세 기둥으로 보겠소
         </button>
-
-        <div className="og c2">
-          {HOURS.map(([label, range, h], idx) => (
-            <button key={label}
-                    className={`op ${pickedHour === idx ? "on" : ""}`}
-                    onClick={() => {
-                      s.set({ hourKnown: true, hour: h, minute: 0,
-                              features: null, chartId: null });
-                      setPickedHour(HOURS.findIndex(([n]) => n === label));
-                      setExact(false);
-                    }}>
-              <b>{label}</b><span>{range}</span>
-            </button>
-          ))}
-        </div>
-
-        {/*
-          ★ 여기가 이 집의 1번 규칙을 어기고 있었습니다.
-            네 시간짜리 칸이 한 시각으로 뭉개져서, 07:50 생이 "아침" 을
-            고르면 09:00 으로 기록되고 **진시가 사시가 됩니다.** 아래
-            문구는 "지어내지 않는다" 고 말하는데 칸은 지어내고 있었습니다.
-
-            여섯 칸은 모르는 사람의 길로 남기고, 아는 사람에게 한 겹
-            더 엽니다. 안 열면 경계에 걸린 사실을 그대로 적습니다.
-        */}
-        {s.hourKnown && bucket && (
-          <div className="exact">
-            {!exact ? (
-              <>
-                <p className="sm">
-                  <b>{bucket[0]}</b>({bucket[1]}) 으로 두면 <b>{String(bucket[2]).padStart(2, "0")}시</b>로 셈하오.
-                  두 시간 안으로만 아시면 <b>두 시주 중 어디인지 갈리오.</b>
-                </p>
-                <button className="lk" onClick={() => setExact(true)}>
-                  시·분을 아시오? 적으면 그대로 셈하겠소
-                </button>
-              </>
-            ) : (
-              <>
-                <p className="sm">아는 만큼만 적으시오. 모르는 자리는 비워 두시오.</p>
-                <div className="f3">
-                  <div>
-                    <label>시</label>
-                    <input className="fld" inputMode="numeric" maxLength={2}
-                           placeholder={String(bucket[2])}
-                           value={s.hour ?? ""}
-                           onChange={(e) => {
-                             const t = e.target.value.replace(/[^0-9]/g, "").slice(0, 2);
-                             if (t === "") {
-                               s.set({ hour: null, features: null, chartId: null });
-                               return;
-                             }
-                             // 24 를 치면 23 으로 잡아 둡니다. 지우고 다시
-                             // 칠 수 있어야 하므로 값 자체는 막지 않습니다.
-                             s.set({ hour: Math.min(23, Number(t)),
-                                     features: null, chartId: null });
-                           }} />
-                  </div>
-                  <div>
-                    <label>분</label>
-                    <input className="fld" inputMode="numeric" maxLength={2}
-                           placeholder="0"
-                           value={s.minute ? String(s.minute) : ""}
-                           onChange={(e) => {
-                             const t = e.target.value.replace(/[^0-9]/g, "").slice(0, 2);
-                             s.set({ minute: t === "" ? 0 : Math.min(59, Number(t)),
-                                     features: null, chartId: null });
-                           }} />
-                  </div>
-                  <div />
-                </div>
-              </>
-            )}
-            <button className="btn mt" disabled={s.hour === null}
-                    onClick={() => go("a4b")}>
-              이 때로 내 것을 세우겠소
-            </button>
-          </div>
-        )}
 
         <p className="sm mt">
           때를 모르면 시주를 세우지 않소. 열두 시로 채워 넣는 집도 있으나,
