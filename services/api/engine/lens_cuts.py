@@ -28,6 +28,7 @@ from pathlib import Path
 from typing import Optional
 
 from . import guard
+from . import why as _why
 from .bank import born_season, element_word, josa
 
 SEED = Path(__file__).resolve().parents[3] / "seed"
@@ -480,7 +481,12 @@ def build(f, lens_id: Optional[str]) -> list:
         out.append({
             "id": spec["id"],
             "title": spec["title"],
-            "source": spec["source"].format(a=ka, b=kb, **w),
+            # ★ 근거에 **그 축이 무엇을 재는 자리인지**를 붙입니다.
+            #   전에는 읽은 것만 나열해서 「그래서 뭐」 가 됐습니다
+            #   (tools/evidence_audit.py — 이치 0%).
+            "source": _why.axis_line(
+                spec["source"].format(a=ka, b=kb, **w),
+                axes[0] if axes else ""),
             "html": guard.enforce(body, {"cut": spec["id"]}),
             "min_level": int(spec.get("min_level", 1)),
             "statement_id": "%s:%s:%s:%s" % (spec["id"], ka, kb, kc),
