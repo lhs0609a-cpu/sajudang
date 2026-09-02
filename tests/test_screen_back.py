@@ -61,8 +61,12 @@ def test_extra_ask_is_fresh_for_each_character():
 
 
 def test_choices_failure_is_not_swallowed():
-    """고를 것을 못 받으면 영영 「펴는 중이오」 였다."""
+    """고를 것을 못 받으면 영영 「펴는 중」 이었다."""
     code = dict((p.name, c) for p, c in _screens())["ExtraAsk.tsx"]
     assert ".catch(() => {})" not in code, "실패를 통째로 삼킨다"
     src = (WEB / "components" / "ExtraAsk.tsx").read_text(encoding="utf-8")
-    assert "다시 펴 본다" in src, "다시 해 볼 길이 없다"
+    # ★ 문구가 아니라 **길**을 지킵니다.
+    #   전에는 "다시 펴 본다" 를 글자 그대로 찾았습니다. 2026-09-02 에
+    #   버튼 말투를 합쇼체로 바꾸자("다시 펴 보겠습니다") 길은 그대로인데
+    #   검사가 깨졌습니다. 검사가 지켜야 하는 것은 말투가 아닙니다.
+    assert "다시 펴" in src, "다시 해 볼 길이 없다"

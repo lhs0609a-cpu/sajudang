@@ -81,7 +81,7 @@ export default function ExtraAsk({
       <div className="ask blk">
         <p className="sm">고를 것을 못 펴겠소. 이 자리 하나만 접히오.</p>
         <button className="btn gh mt" onClick={() => setTryAt((n) => n + 1)}>
-          다시 펴 본다
+          다시 펴 보겠습니다
         </button>
       </div>
     );
@@ -207,7 +207,7 @@ export default function ExtraAsk({
       {body}
       <button className="btn mt" disabled={!ready || busy}
               onClick={() => onSubmit(build())}>
-        {busy ? "다시 펴는 중이오" : "이걸로 보시오"}
+        {busy ? "다시 펴는 중입니다" : "이걸로 봐 주십시오"}
       </button>
       <p className="sm">
         안 적으셔도 되오.

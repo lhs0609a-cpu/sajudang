@@ -79,10 +79,10 @@ function Beat({ cut, chartId, lensId, concern, charName }: {
     <div className="beat">
       <span className="q">…짚이오?</span>
       <div className="vt">
-        <button onClick={() => answer(true)}>그렇소</button>
-        <button onClick={() => answer(false)}>아니오</button>
+        <button onClick={() => answer(true)}>그렇습니다</button>
+        <button onClick={() => answer(false)}>아닙니다</button>
       </div>
-      <button className="lk vt3" onClick={() => answer(null)}>글쎄올시다</button>
+      <button className="lk vt3" onClick={() => answer(null)}>잘 모르겠습니다</button>
     </div>
   );
 }
@@ -276,7 +276,7 @@ function PayInner() {
                   `「${names.join("」 「")}」${names.length >= 3 ? " …" : ""}`
                 : "여기까지가 값 없이 하는 얘기요."} />
             <button className="btn mt" onClick={() => router.push("/pay?step=d1")}>
-              어디까지 볼지 고른다
+              어디까지 볼지 고르겠습니다
             </button>
             {/*
               ★ 이 버튼은 그대로 둡니다 — 브레이크는 매출보다 앞섭니다.
@@ -285,7 +285,7 @@ function PayInner() {
                 손에 뭔가를 들고 나가게 합니다.
             */}
             <button className="btn gh" onClick={() => router.push("/summary")}>
-              오늘은 여기까지 · 본 것을 한 장으로 받아 간다
+              오늘은 여기까지 · 본 것을 한 장으로 받겠습니다
             </button>
           </>
         )}
@@ -401,7 +401,7 @@ function PayInner() {
                   }
                 }}
               >
-                값을 치른다
+                값을 치르겠습니다
               </button>
             ) : (
               <div className="warn">
@@ -413,7 +413,7 @@ function PayInner() {
               </div>
             )}
             <button className="btn gh" onClick={() => router.push("/pay?step=d1")}>
-              다시 고른다
+              다시 고르겠습니다
             </button>
           </>
         )}
@@ -467,7 +467,7 @@ function PayInner() {
             마찰을 0으로 둬야 할 구간입니다. 표지는 다시 읽으러 올 때 씁니다. */}
         <button className="btn mt"
                 onClick={() => router.push("/report/" + s.cur + "?tab=c2")}>
-          바로 읽으러 간다
+          바로 읽겠습니다
         </button>
       </Shell>
     );
@@ -523,7 +523,7 @@ function PayInner() {
         </div>
       )}
       <button className="btn mt" onClick={() => router.push("/pay?step=d2")}>
-        이걸로 내 것을 연다
+        이걸로 열겠습니다
       </button>
       <button className="btn gh" onClick={() => router.push("/pay?step=d0")}>
         값 없이 볼 수 있는 것부터

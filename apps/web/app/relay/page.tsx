@@ -61,7 +61,7 @@ export default function RelayPage() {
     return (
       <Shell title="이어지다">
         <Narration lines={["먼저 글자를 세워야 하오."]} />
-        <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 본다</button>
+        <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 보겠습니다</button>
       </Shell>
     );
   }
@@ -107,7 +107,7 @@ export default function RelayPage() {
                 </div>
                 <p className="sm">{l?.quote}</p>
                 <button className="btn gh mt" onClick={() => void go(id)}>
-                  차 한 잔 하고 간다
+                  차 한 잔 하고 가겠습니다
                 </button>
               </div>
             );
@@ -147,7 +147,7 @@ export default function RelayPage() {
                         disabled={!r.released}
                         onClick={() => void go(r.lens_id)}
                       >
-                        <b>{r.released ? "듣는다" : "아직 자리에 없소"}</b>
+                        <b>{r.released ? "듣겠습니다" : "아직 자리에 없습니다"}</b>
                         {/* ★ 여기 보이는 값이 그대로 청구됩니다.
                             전에는 카드가 캐릭터 값을 보여 주고 결제는
                             티어 값을 물려, 스무 캐릭터의 값이 한 번도
@@ -170,8 +170,8 @@ export default function RelayPage() {
                         className="op"
                         onClick={() => { s.markSkipped(r.lens_id); }}
                       >
-                        <b>이 사람은 됐소</b>
-                        <span>다시 권하지 않소</span>
+                        <b>이 사람은 됐습니다</b>
+                        <span>다시 권하지 않습니다</span>
                       </button>
                     </div>
                   </div>
@@ -184,7 +184,7 @@ export default function RelayPage() {
               {/* ★ 유예하는 길을 따로 냅니다. 세션만 닫고 제외는 안 합니다 —
                   브레이크는 그대로면서 손님이 무엇을 고르는지 알게 됩니다. */}
               <button className="btn gh mt" onClick={() => router.push("/lobby")}>
-                오늘은 그만 듣겠소
+                오늘은 그만 듣겠습니다
               </button>
             </>
           ) : (

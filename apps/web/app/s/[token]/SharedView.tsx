@@ -59,7 +59,7 @@ export default function SharedView({ token }: { token: string }) {
         <Scene id="gate" className="hero" />
         <Say who="도령" lens="pungun">{err}</Say>
         <button className="btn mt" onClick={() => router.push("/")}>
-          나도 내 운명을 확인해 본다
+          나도 내 운명을 확인해 보겠습니다
         </button>
       </Shell>
     );
@@ -152,10 +152,10 @@ export default function SharedView({ token }: { token: string }) {
           <br />그대 여덟 글자도 세워보시겠소? 값은 아직 묻지 않소.
         </Say>
         <button className="btn mt" onClick={() => router.push("/")}>
-          내 여덟 글자를 세운다
+          내 여덟 글자를 세우겠습니다
         </button>
         <button className="btn gh" onClick={() => router.push("/lobby")}>
-          어떤 사람들이 있는지부터 본다
+          어떤 사람들이 있는지부터 보겠습니다
         </button>
         <p className="sm mt" style={{ textAlign: "center", color: "var(--paper3)" }}>
           이 종이는 {d.views}번 열렸소

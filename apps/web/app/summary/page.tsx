@@ -56,7 +56,7 @@ export default function SummaryPage() {
     return (
       <Shell title="분석지">
         <Narration lines={["먼저 글자를 세워야 하오."]} />
-        <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 본다</button>
+        <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 보겠습니다</button>
       </Shell>
     );
   }
@@ -153,7 +153,7 @@ export default function SummaryPage() {
               void navigator.clipboard?.writeText(shareUrl);
               setCopied(true);
             }}>
-              {copied ? "베꼈소" : "링크 베끼기"}
+              {copied ? "베꼈습니다" : "링크 베끼기"}
             </button>
             <p className="sm mt">담기는 것 · {share.includes.join(" · ")}</p>
             <p className="sm">담기지 않는 것 · {share.excludes.join(" · ")}</p>

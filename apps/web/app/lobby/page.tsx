@@ -126,7 +126,7 @@ function LobbyInner() {
                       </span>
                     )}
                     <span className="spec">
-                      {l.released ? l.specialty : "아직 자리에 없소"}
+                      {l.released ? l.specialty : "아직 자리에 없습니다"}
                     </span>
                     {l.released && <span className="arch">{l.epithet}</span>}
                   </span>
@@ -168,14 +168,14 @@ function LobbyInner() {
               s.markRead(pickedLens.id);
               router.push(`/report/${pickedLens.id}`);
             }}>
-              이 사람에게 듣는다
+              이 사람에게 듣겠습니다
             </button>
             <p className="sm">
               무료 구간까지는 값을 묻지 않소.
               {" "}{pickedLens.price.toLocaleString()}원부터.
             </p>
             <button className="btn gh" onClick={() => setTab("b3")}>
-              이 사람 자리를 크게 본다
+              이 사람 자리를 크게 보겠습니다
             </button>
             <button className="btn gh" onClick={() => {
               setPicked(null);
@@ -183,7 +183,7 @@ function LobbyInner() {
                 behavior: reducedMotion() ? "auto" : "smooth", block: "start",
               });
             }}>
-              스무 사람 목록으로 돌아간다
+              스무 사람 목록으로 돌아가겠습니다
             </button>
           </div>
         )}
@@ -223,7 +223,7 @@ function LobbyInner() {
               s.markRead(lens.id);
               router.push(`/report/${lens.id}`);
             }}>
-              이 사람에게 듣는다
+              이 사람에게 듣겠습니다
             </button>
             <p className="sm mt">
               무료 구간까지는 값을 묻지 않소. {lens.price.toLocaleString()}원부터.
@@ -250,7 +250,7 @@ function LobbyInner() {
         ) : (
           <>
             <Narration lines={["아직 글자를 세우지 않았소."]} />
-            <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 본다</button>
+            <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 보겠습니다</button>
           </>
         )}
         <button className="btn gh mt" onClick={() => setTab("b1")}>진열대로</button>
@@ -269,7 +269,7 @@ function LobbyInner() {
         </button>
         <button className="op" onClick={() => setTab("b4")}>
           <b>내 명식</b>
-          <span>{s.features ? "여덟 글자와 셈에 쓴 것" : "아직 세우지 않았소"}</span>
+          <span>{s.features ? "여덟 글자와 셈에 쓴 것" : "아직 세우지 않았습니다"}</span>
         </button>
         <button className="op" onClick={() => router.push("/daily")}>
           <b>오늘의 일진</b><span>값 없이 매일</span>

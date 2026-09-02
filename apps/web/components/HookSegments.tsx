@@ -198,13 +198,13 @@ export default function HookSegments({
           {replies[i] === undefined ? (
             <>
               <div className="vt">
-                <button onClick={() => vote(i, true)}>그렇소</button>
-                <button onClick={() => vote(i, false)}>아니오</button>
+                <button onClick={() => vote(i, true)}>그렇습니다</button>
+                <button onClick={() => vote(i, false)}>아닙니다</button>
               </div>
               {/* ★ 세 번째 길. 이게 없어서 애매한 사람이 거짓 '그렇소' 를
                   눌렀고, 아무것도 안 누르면 다음 단이 안 열렸습니다. */}
               <button className="lk vt3" onClick={() => vote(i, null)}>
-                글쎄올시다 · 그냥 계속 듣겠소
+                잘 모르겠습니다 · 그냥 듣겠습니다
               </button>
             </>
           ) : (

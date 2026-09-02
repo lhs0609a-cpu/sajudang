@@ -73,7 +73,7 @@ function MeInner() {
           문자에 남으니, 그걸로 되찾습니다.
       */}
       <div className="ask mt">
-        <div className="lab">치른 것을 못 찾겠소?</div>
+        <div className="lab">치른 것을 못 찾겠습니다?</div>
         <p className="sm">
           기기를 바꾸셨거나 이 브라우저를 비우셨으면 여기서 되찾으시오.
           <b>주문번호</b>는 결제 영수증과 승인 문자에 적혀 있소.
@@ -99,12 +99,12 @@ function MeInner() {
                     setFinding(false);
                   }
                 }}>
-          {finding ? "찾는 중이오" : "되찾는다"}
+          {finding ? "찾는 중입니다" : "되찾겠습니다"}
         </button>
         {say && <p className="sm mt">{say}</p>}
       </div>
 
-      <button className="btn gh mt" onClick={() => setTab("r1")}>후기를 남긴다</button>
+      <button className="btn gh mt" onClick={() => setTab("r1")}>후기를 남기겠습니다</button>
       <button className="btn gh" onClick={() => router.push("/lobby")}>진열대로</button>
       <button className="btn gh" onClick={() => { s.reset(); router.push("/"); }}>
         처음부터 다시

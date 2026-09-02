@@ -239,7 +239,7 @@ function ReportInner() {
     return (
       <Shell title="읽다">
         <Narration lines={["먼저 글자를 세워야 하오."]} />
-        <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 본다</button>
+        <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 보겠습니다</button>
       </Shell>
     );
   }
@@ -255,13 +255,13 @@ function ReportInner() {
         <button className="btn mt" onClick={() => {
           setErr(null); setExtras(null); setRep(null);
         }}>
-          다시 펴 본다
+          다시 펴 보겠습니다
         </button>
         <button className="btn gh" onClick={() => router.push("/lobby")}>
           진열대로
         </button>
         <button className="btn gh" onClick={() => router.push("/me")}>
-          치른 것을 못 찾겠소
+          치른 것을 못 찾겠습니다
         </button>
       </Shell>
     );
@@ -316,7 +316,7 @@ function ReportInner() {
             {rep.locked.length > 0 && ` · 잠긴 자리 ${rep.locked.length}컷`}
           </p>
         </div>
-        <button className="btn mt" onClick={() => setTab("c2")}>내 것을 편다</button>
+        <button className="btn mt" onClick={() => setTab("c2")}>내 것을 펴겠습니다</button>
       </Shell>
     );
   }
@@ -335,7 +335,7 @@ function ReportInner() {
           <>
             <Narration lines={["대운 맵은 아직 잠겨 있소."]} />
             {rep.sells && (
-              <button className="btn mt" onClick={() => setTab("c4")}>어디까지 볼지 고른다</button>
+              <button className="btn mt" onClick={() => setTab("c4")}>어디까지 볼지 고르겠습니다</button>
             )}
           </>
         )}
@@ -395,7 +395,7 @@ function ReportInner() {
           </div>
         ))}
         <button className="btn mt" onClick={() => router.push("/pay?step=d1")}>
-          어디까지 볼지 고른다
+          어디까지 볼지 고르겠습니다
         </button>
         <button className="btn gh" onClick={() => setTab("c2")}>본문으로</button>
       </Shell>
@@ -423,7 +423,7 @@ function ReportInner() {
         <p className="sm mt">
           중앙 문양은 에셋이 들어오면 교체됩니다. (docs/10 §5 — 정지 PNG 필수)
         </p>
-        <button className="btn gh mt" onClick={() => setTab("c6")}>다 읽었소</button>
+        <button className="btn gh mt" onClick={() => setTab("c6")}>다 읽었습니다</button>
       </Shell>
     );
   }
@@ -468,7 +468,7 @@ function ReportInner() {
             disabled={!hasReview || reviewBusy}
             onClick={sendReview}
           >
-            {reviewBusy ? "받아 적는 중이오" : "남긴다"}
+            {reviewBusy ? "받아 적는 중입니다" : "남기겠습니다"}
           </button>
         )}
 
@@ -479,7 +479,7 @@ function ReportInner() {
           if (!s.seals.includes(lensId)) s.set({ seals: [...s.seals, lensId] });
           router.push("/relay");
         }}>
-          인장을 받고 나간다
+          인장을 받고 나가겠습니다
         </button>
       </Shell>
     );
@@ -591,7 +591,7 @@ function ReportInner() {
 
       <div className="handles noprint">
         <button onClick={() => window.print()}>
-          내 것을 종이로 받는다 (PDF)
+          내 것을 종이로 받겠습니다 (PDF)
         </button>
         <button onClick={() => void makeLink()} disabled={sharing}>
           {sharing ? "고리를 엮는 중…" : shareUrl ? "고리 다시 복사" : "고리 만들어 나누기"}
@@ -600,7 +600,7 @@ function ReportInner() {
           <button onClick={() => setTab("c4")}>잠긴 {rep.locked.length}컷</button>
         )}
         {daeunCut && <button onClick={() => setTab("c3")}>대운 맵</button>}
-        <button onClick={() => setTab("c6")}>다 읽었소</button>
+        <button onClick={() => setTab("c6")}>다 읽었습니다</button>
       </div>
 
       {shareMsg && <p className="handlenote noprint">{shareMsg}</p>}

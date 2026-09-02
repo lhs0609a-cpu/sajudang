@@ -16,7 +16,7 @@
  *   a2~a5 **건너뛰기를 뗐습니다.** 이 구간을 건너뛴 손님은 명식이 없어
  *         진열대에서 아무것도 못 봅니다 — 이탈로만 이어지는 버튼이었습니다.
  *   a4  "모르오" 를 **크게**. 여기서 막히면 그대로 이탈한다.
- *   a4b "모르오 · 사주만으로 보겠소" 를 그리드 **위**로 올렸다.
+ *   a4b "모르겠습니다 · 사주만으로 보겠습니다" 를 그리드 **위**로 올렸다.
  *   a7  값을 아직 묻지 않는다. 무료 6단이 먼저다.
  *
  * ★ 계산은 서버(/v1/chart)가 합니다. 여기서 사주를 세지 않습니다.
@@ -387,7 +387,7 @@ function EntryInner() {
             <Narration lines={beats} />
             <p className="promise" dangerouslySetInnerHTML={{ __html: PROMISE }} />
             <button className="btn mt" onClick={() => go("a2")}>
-              내 운명을 확인하러 간다
+              내 운명을 확인하겠습니다
             </button>
             <p className="sm mt" style={{ color: "var(--paper3)" }}>
               {SEASON_PALETTE[season].ko}
@@ -446,7 +446,7 @@ function EntryInner() {
         <Say who="도령" lens="pungun">셈에는 안 쓰이오. 다만 <b>내가 그대를 부를 때</b> 쓰오.</Say>
 
         <button className="btn" onClick={() => go("a5")}>
-          {named ? "적는다" : "그냥 넘어간다"}
+          {named ? "이 이름으로 하겠습니다" : "그냥 넘어가겠습니다"}
         </button>
         {/* 빈 채로 넘어가는 것도 **고른 것**이 되게 합니다. */}
         {!named && (
@@ -548,7 +548,7 @@ function EntryInner() {
           <p className="sm mt">
             고을은 <b>{s.city}</b>로 두었소.{" "}
             <button className="lk" onClick={() => setCityOpen(true)}>
-              서울이 아니시오?
+              서울이 아닙니다
             </button>
           </p>
         ) : (
@@ -580,7 +580,7 @@ function EntryInner() {
         {/* ★ 자동 진행을 없앴습니다. 되돌릴 여지를 줍니다. */}
         <button className="btn mt" disabled={!filled || !!bad}
                 onClick={() => go("a4")}>
-          내 날을 다 적었소
+          다 적었습니다
         </button>
         {(!filled || bad) && (
           <p className="sm mt" style={{ textAlign: "center" }}>
@@ -719,14 +719,14 @@ function EntryInner() {
           <button className="btn mt"
                   disabled={!s.hourKnown || s.hour === null}
                   onClick={() => go("a4b")}>
-            이 때로 내 것을 세우겠소
+            이 시각으로 세우겠습니다
           </button>
         </div>
 
         {/* ② 모르겠다 → 대강 칸 */}
         {!vague ? (
           <button className="btn gh mt" onClick={() => setVague(true)}>
-            시각은 모르겠소
+            시각은 모르겠습니다
           </button>
         ) : (
           <div className="vague">
@@ -764,7 +764,7 @@ function EntryInner() {
                 </p>
                 <button className="btn mt" disabled={s.hour === null}
                         onClick={() => go("a4b")}>
-                  그래도 이 칸으로 세우겠소
+                  그래도 이 칸으로 세우겠습니다
                 </button>
               </div>
             )}
@@ -777,7 +777,7 @@ function EntryInner() {
                       setPickedHour(null);
                       go("a4b");
                     }}>
-              그것도 모르겠소 · 세 기둥으로 보겠소
+              그것도 모르겠습니다 · 세 기둥으로 보겠습니다
             </button>
           </div>
         )}
@@ -817,7 +817,7 @@ function EntryInner() {
             여기에도 적용합니다 — 훑는 순서상 아래에 두면 가장 늦게 보입니다. */}
         <button className="btn gh" style={{ marginBottom: 12 }}
                 onClick={() => { s.set({ axis4: null }); go("a6"); }}>
-          모르오 · 사주만으로 보겠소
+          모르겠습니다 · 사주만으로 보겠습니다
         </button>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 5, margin: "14px 0" }}>
@@ -920,10 +920,10 @@ function EntryInner() {
                 '다시 세운다' 는 같은 값으로 재시도만 해서, 잘못 적은
                 사람은 영영 빠져나올 수 없었습니다. 고치러 갈 길을 냅니다. */}
             <button className="btn" onClick={() => go("a3")}>
-              내 날을 고쳐 적는다
+              날을 고쳐 적겠습니다
             </button>
             <button className="btn gh" onClick={() => void buildChart()}>
-              다시 세워 본다
+              다시 세워 보겠습니다
             </button>
           </>
         )}
@@ -936,7 +936,7 @@ function EntryInner() {
               ))}
             </div>
             <button className="btn gh mt" onClick={() => setCalcAt(beats.length)}>
-              다 됐소, 건너뛰겠소
+              다 됐습니다 · 건너뛰겠습니다
             </button>
             {/* 세는 동안 읽을 것을 둡니다 — 기다림이 빈 시간이 되지 않게. */}
             <Doubts compact first={null} />
@@ -1041,7 +1041,7 @@ function EntryInner() {
             <ManseTable f={s.features} />
             <CalcPanel f={s.features} />
             <button className="btn mt" onClick={() => go("a7")}>
-              내 팔자가 무슨 말인지 듣는다
+              무슨 말인지 듣겠습니다
             </button>
           </>
         )}
@@ -1143,7 +1143,7 @@ function EntryInner() {
             값 없이 내 것을 한 겹 더
           </button>
           <button className="btn gh" onClick={() => router.push("/pay?step=d1")}>
-            어디까지 볼지 고른다
+            어디까지 볼지 고르겠습니다
           </button>
           <p className="sm mt" style={{ textAlign: "center" }}>값은 아직 묻지 않았다</p>
         </div>

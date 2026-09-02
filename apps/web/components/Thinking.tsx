@@ -81,7 +81,7 @@ export default function Thinking({
       </div>
       {onSkip && (
         <button className="btn gh mt" onClick={onSkip}>
-          다 됐소, 건너뛰겠소
+          다 됐습니다 · 건너뛰겠습니다
         </button>
       )}
     </>
