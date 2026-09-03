@@ -994,8 +994,25 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
     #   덤으로 주어가 섭니다 — 묻는 순간 그 문장은 손님에게 하는
     #   말이 됩니다.
     asked: set = set()
+    # ★ 그림을 고르는 수 — 사람마다 다른 비유가 나오게.
+    #
+    #   한 장뿐이면 스무 명이 같은 문장을 씁니다. 일간과 모자란
+    #   기운으로 뽑으니 명식이 다르면 그림도 갈립니다.
+    fig_pick = (ord(f.day_gan) + len(f.weak_el or "") * 7
+                + len(f.strength or "")) % 4
+    lc_nth = 0                  # 몇 번째 관점 컷인가
     for c in cuts:
         before = set(seen)
+        # ★ 그림 층은 **말투 층보다 먼저**입니다.
+        #
+        #   뒤에 붙이면 이 줄만 하오체로 남아 한 화면 안에서 말투가
+        #   갈립니다 — 비유 상자에서 이미 겪은 자리입니다
+        #   (tests/test_voice.py 가 464군데를 잡았습니다).
+        if c["id"].startswith("lc_"):
+            c["html"] = _flavor.lc_figure(c["html"], lc_nth, fig_pick)
+            lc_nth += 1
+        else:
+            c["html"] = _flavor.figure(c["html"], c["id"], fig_pick)
         c["html"] = terms_mod.gloss(
             voice_mod.speak(voice_mod.address(c["html"], you), tone), seen)
         # ★ 비유 상자도 **그 사람 목소리로** 말해야 합니다.

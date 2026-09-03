@@ -611,6 +611,29 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
                bank()["NAME_FLOW"][flow],
                josa(element_word(weak), "이", "가"),
                bank()["NAME_POST"][strength]))
+    # ★ 훅에 **셀 수 있는 값**을 하나 박습니다.
+    #
+    #   재보니 훅 다섯 단에 틀릴 수 있는 말이 **하나도** 없었습니다.
+    #   나이도 해도 글자 수도 없이 성격 얘기만 이어집니다. 그런 말은
+    #   어떤 관찰에서도 살아남아서 「맞다」 는 나와도 「소름 돋는다」 는
+    #   안 나옵니다 (CLAUDE.md 「틀릴 수 없는 말만 쓰기」).
+    #
+    #   그래서 **바뀌는 때**를 댑니다. 그 해에 무슨 일이 난다고는 하지
+    #   않습니다 — 읽는 자리가 갈리는 나이만 셉니다. 이건 명식에서
+    #   나온 수라 틀릴 수 있고, 그래서 맞으면 셉니다.
+    turn = None
+    for d in (f.daeun or []):
+        if d.get("start_age") is not None and d["start_age"] > (f.age or 0):
+            turn = d["start_age"]
+            break
+    if turn is not None:
+        post += (" 그대는 지금 <b>%d살</b>이고, <b>%d살</b>에 읽는 자리가"
+                 " 한 번 갈리오 — 같은 방인데 창을 다른 쪽으로 낸"
+                 " 것처럼요." % (f.age or 0, turn))
+    else:
+        post += (" 지금 마디가 마지막 칸이오 — 갈아탈 물길이 "
+                 "더는 없는 셈이오.")
+
     segs.append(_seg(
         stage="3", label="3 · 이름",
         source=_why.line(

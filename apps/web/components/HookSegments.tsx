@@ -38,7 +38,9 @@ function Agreement({ statementId }: { statementId: string }) {
     return (
       <div className="agr seen">
         <span className="dot" />
-        <span>이 문장을 <b>{data.seen.toLocaleString()}명</b>이 받아 갔소</span>
+        {/* ★ 마침표를 답니다. 없으면 이 줄이 아래 버튼 글자와 한
+            덩이로 읽혀, 막을 끊는 마지막 줄이 예순 자가 넘습니다. */}
+        <span>이 문장을 <b>{data.seen.toLocaleString()}명</b>이 받아 갔소.</span>
       </div>
     );
   }
@@ -47,7 +49,7 @@ function Agreement({ statementId }: { statementId: string }) {
       <span>이 문장에</span>
       <div className="bar"><i style={{ ["--w" as string]: `${data.rate}%` }} /></div>
       <b>{data.rate}%</b>
-      <span>가 &quot;그렇다&quot; · {data.total?.toLocaleString()}명</span>
+      <span>가 &quot;그렇다&quot; · {data.total?.toLocaleString()}명.</span>
     </div>
   );
 }
@@ -197,6 +199,11 @@ export default function HookSegments({
 
           {replies[i] === undefined ? (
             <>
+              {/* ★ 막을 끊는 마지막 줄. 없으면 근거 줄과 버튼 글자가
+                  한 덩이로 읽혀 끝이 무뎌집니다. 그리고 이건 참인
+                  말입니다 — 「아니오」 둘이면 2단이 축을 바꿉니다
+                  (bank.TURN_AT). 누르는 것이 다음 단을 정하오. */}
+              <p className="sm hookhint">누르는 대로 다음 단이 갈리오.</p>
               <div className="vt">
                 <button onClick={() => vote(i, true)}>그렇습니다</button>
                 <button onClick={() => vote(i, false)}>아닙니다</button>

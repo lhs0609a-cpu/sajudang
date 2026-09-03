@@ -2840,3 +2840,12 @@ body.has-rail .beatskip-hint { left: calc(50% + 116px); }
   padding: 3px 9px; cursor: pointer;
 }
 .abbtn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* 훅 — 막을 끊는 마지막 한 줄 */
+.hookhint {
+  margin-top: 8px;
+  text-align: center;
+  color: var(--paper3);
+  font-family: var(--mono);
+  font-size: var(--fs-1);
+}
