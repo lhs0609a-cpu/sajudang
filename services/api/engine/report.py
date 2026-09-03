@@ -452,19 +452,48 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         1, sid="yongsin:%s:%s:%s:%s" % (f.yongsin, f.strength, season, top)))
 
     # ── 7 · 대운 맵 ─────────────────────────────────────
+    #
+    # ★ 표만 내고 있었습니다 — 쉬움 16점, 스물일곱 화면 중 꼴찌.
+    #
+    #   칸마다 「비견 · 편관 · 정인」 이 적혀 있는데 그게 무엇인지 한
+    #   번도 안 풀었습니다. 표는 셈이지 말이 아닙니다. 읽는 법을 얹어야
+    #   표가 말이 됩니다 — b4 내 명식에서 겪은 것과 같은 자리입니다.
+    #
+    #   ★ 「그때 무슨 일이 난다」 는 말은 여전히 안 합니다. 바뀌는 때만
+    #     셉니다 (docs/11). 여기 적는 것은 전부 이미 셈이 끝난 값입니다.
+    dm_grid = "".join(
+        '<div class="d%s"><span class="age">%d</span>'
+        '<b>%s</b><span class="tg">%s</span></div>'
+        % (" now" if d["index"] == f.daeun_now else "",
+           d["start_age"], d["gz"], d["ten_god"])
+        for d in f.daeun)
+    dm_where = (
+        '그대는 <b>%d살</b>에 첫 칸에 들었고, 지금은 <b>%d살</b> 칸에 서 있소.'
+        % (f.daeun[0]["start_age"], f.daeun[f.daeun_now]["start_age"])
+        if f.daeun_started else
+        '첫 칸은 <b>%d살</b>부터요. 그대는 아직 그 앞에 서 있소.'
+        % f.daeun[0]["start_age"])
     cuts.append(_cut(
         "daeun_map", "6 · 대운 맵",
         _why.line("대운수 %d · %s" % (f.daeun[0]["start_age"],
                                     "순행" if f.forward else "역행"),
                   "대운", ""),
-        ('<div class="dmap">%s</div>'
-         '<p class="note">대운수는 절입일까지의 실제 일수 ÷ 3 으로 셈했소.</p>'
-         % "".join(
-             '<div class="d%s"><span class="age">%d</span>'
-             '<b>%s</b><span class="tg">%s</span></div>'
-             % (" now" if d["index"] == f.daeun_now else "",
-                d["start_age"], d["gz"], d["ten_god"])
-             for d in f.daeun)),
+        ('<p class="tale">대운 (십 년마다 바뀌는 큰 마디) 이오. '
+         '한 칸이 십 년이고, 칸은 모두 <b>%d개</b>요.</p>'
+         '<p class="tale">%s</p>'
+         '<p class="tale">칸 위의 수는 그 칸이 <b>시작되는 나이</b>요. '
+         '가운데 두 글자는 그 열 해에 붙은 두 글자요.</p>'
+         '<p class="tale">아래는 십신 (그 열 해가 나에게 무엇으로 오는가) '
+         '이오. 칸마다 다르오.</p>'
+         '<p class="tale">지도를 펴 놓고 <b>지금 선 자리</b>에 손가락을 '
+         '얹은 셈이오.</p>'
+         '<div class="dmap">%s</div>'
+         '<p class="note">칸은 %s으로 흐르오 — 달력을 %s 세는 것이오.</p>'
+         '<p class="note">대운수는 절입 (절기가 드는 순간) 까지의 실제 '
+         '일수 ÷ 3 으로 셈했소.</p>'
+         % (len(f.daeun), dm_where, dm_grid,
+            "순행" if f.forward else "역행",
+            "앞으로" if f.forward else "거꾸로")),
         2))
 
     # ── 7b · 이름 붙은 자리 (신살) ─────────────────────────

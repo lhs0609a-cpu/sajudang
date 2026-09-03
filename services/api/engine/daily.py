@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from datetime import date
 
+from . import terms as terms_mod
 from .calendar import day_ganji
 from .constants import CHUNG, CONTROLS, ELEMENT_OF_GAN, GENERATES, element_of
 from .bank import bank, born_season, element_word
@@ -40,6 +41,29 @@ def relation(day_el: str, me_el: str) -> str:
     if CONTROLS[day_el] == me_el:
         return "눌리는"
     return "기운을 받는"
+
+
+# 일진 화면이 실제로 쓰는 어려운 말. 화면에 박힌 것(일진 · 용신)까지
+# 함께 냅니다 — 손님은 엔진 글과 화면 글을 갈라 읽지 않습니다.
+DAILY_TERMS = ("일진", "일간", "일지", "지지", "신강", "신약", "용신", "충")
+
+
+def _pictures(body: list, notes: list, f) -> str:
+    """
+    이 일진에서 나온 말의 그림 한 줄을 상자로 묶는다.
+
+    ★ 왜 여기에도 다나
+
+      일진은 **값 없이 매일** 오는 자리라 처음 오는 사람이 어려운 말을
+      여기서 처음 만납니다. 그런데 풀이가 한 줄도 없었습니다 —
+      「단단히 가르는 일간이라」 「신강 · 겨울생」 이 그대로 지나갔습니다.
+      리포트 컷은 `terms.picture_box` 로 이미 이걸 합니다.
+    """
+    said = " ".join(list(body) + list(notes) + [f.strength or ""])
+    # 일진 · 일간 · 용신은 화면과 근거 줄에 **늘** 있습니다.
+    used = [t for t in DAILY_TERMS
+            if t in said or t in ("일진", "일간", "용신")]
+    return terms_mod.picture_box(used)
 
 
 def build_daily(f, on: date | None = None) -> dict:
@@ -126,6 +150,9 @@ def build_daily(f, on: date | None = None) -> dict:
         "notes": notes,
         "source": "%s일간 ↔ 오늘 %s(%s) · %s · %s생"
                   % (f.day_gan, gan + ji, element_word(el), f.strength, season),
+        # 이 화면에서 나온 어려운 말의 **그림 한 줄**. 리포트 컷이
+        # 하는 것과 같은 상자입니다 — 모르는 말을 만난 그 자리에 둡니다.
+        "terms_html": _pictures(body, notes, f),
         "statement_id": "daily:%s:%s:%s:%s:%s" % (rel, f.day_gan, f.strength,
                                                   season, f.yongsin),
         "free": True,

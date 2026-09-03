@@ -359,6 +359,15 @@ export interface DailyResponse {
   lines: string[];
   notes: string[];
   source: string;
+  /**
+   * 「이게 무슨 말이오」 상자 — 이 일진에서 나온 어려운 말의 그림 한 줄.
+   *
+   * ★ 일진은 값 없이 매일 오는 자리라, 처음 오는 사람이 어려운 말을
+   *   여기서 처음 만납니다. 그런데 풀이가 한 줄도 없었습니다 —
+   *   「단단히 가르는 일간이라」 「신강 · 겨울생」 이 그대로 지나갔습니다.
+   *   리포트 컷이 이미 쓰는 상자와 같은 것입니다.
+   */
+  terms_html: string;
   statement_id: string;
   free: boolean;
 }

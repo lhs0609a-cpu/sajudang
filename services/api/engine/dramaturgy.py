@@ -277,8 +277,21 @@ def score(sid: str, title: str, html: str, kind: str = "read",
     depth = s_len + has_src + s_cnt
 
     # ── ④ 쉬움 ────────────────────────────────────────────
+    #
+    # ★ 「이게 무슨 말이오」 상자는 **풀이로는 세고 비유로는 안 셉니다.**
+    #
+    #   `terms.picture_box` 는 그 컷에서 처음 나온 말의 그림을 한 상자로
+    #   묶어 컷 밑에 답니다. 그런데 자는 그 상자를 통째로 걷어내고
+    #   재고 있었습니다 — 말을 풀어 놓고도 「풀이 없이 지나가오」 가
+    #   나왔습니다. 상자는 손님이 그 자리에서 읽는 글입니다.
+    #
+    #   다만 비유 점수는 여전히 **본문만** 봅니다. 상자를 달았다고
+    #   본문이 그림이 되지는 않습니다 — 그러면 상자 하나로 스무 컷이
+    #   전부 통과합니다.
+    boxed = " ".join(GLS.findall(html or ""))
     used = [w for w in HARD if HARD_AT[w].search(text)]
-    glossed = [w for w in used if HARD_GLOSSED[w].search(text)]
+    glossed = [w for w in used
+               if HARD_GLOSSED[w].search(text) or ("<b>%s</b>" % w) in boxed]
     s_gloss = round(45 * (1.0 if not used else _pct(len(glossed), len(used))))
     if used and s_gloss < 27:
         miss.append("어려운 말이 풀이 없이 지나가오 — %s"

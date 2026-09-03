@@ -265,6 +265,8 @@ def _engine_text() -> dict:
         " ".join(dly.get("lines") or []),
         " ".join(dly.get("notes") or []),
         dly.get("score_says") or "",
+        # 「이게 무슨 말이오」 상자도 손님이 그 자리에서 읽습니다.
+        dly.get("terms_html") or "",
         '<span class="src">근거 · %s</span>' % (dly.get("source") or ""),
     ]))
     return out

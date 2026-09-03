@@ -211,6 +211,8 @@ function LobbyInner() {
     return (
       <Shell screen="b3" title={lens.name}>
         <Scene id="seat" />
+        {/* ★ 여는 줄이 없었습니다. 초상이 대뜸 뜨고 이름이 붙습니다. */}
+        <Narration lines={["자리에 사람이 앉아 있다.", "이쪽을 보고 있지는 않다."]} />
         {/* 그 사람의 자리 — 초상이 서는 곳 */}
         <div className="facebox"><CharArt lens={lens} size="full" /></div>
         <div className="mec">
@@ -246,9 +248,20 @@ function LobbyInner() {
         ) : (
           <p className="sm mt">아직 자리에 없는 사람이오.</p>
         )}
+        {/*
+          ★ 이 자리가 무엇을 근거로 한 말인지 없었습니다.
+            「먼저 보는 자리」 는 취향이 아니라 이 집이 스무 사람에게
+            **하나씩 나눠 준 자리**입니다. 그걸 밝혀야 스물이 왜
+            스물인지가 섭니다.
+        */}
+        <span className="src">
+          근거 · 먼저 보는 자리 「{lens.specialty}」 — 스무 사람이 하나씩
+          나눠 가진 것이오
+        </span>
         <ActOut kind="남긴 물음" next="무료 구간">
           {lens.name}이 먼저 보는 자리는 <b>「{lens.specialty}」</b>요.
-          같은 여덟 글자인데 다른 <b>열아홉</b>은 거기를 안 보오.<br />
+          같은 여덟 글자인데 다른 <b>열아홉</b>은 거기를 안 보오 —
+          여덟 글자에 <b>돋보기를 한 자리에만</b> 대는 셈이오.<br />
           그럼 {lens.name}은 그대 글자에서 <b>무엇을 먼저 짚겠소?</b>
           여기까지는 값이 안 드오.
         </ActOut>

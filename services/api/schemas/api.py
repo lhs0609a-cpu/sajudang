@@ -189,5 +189,9 @@ class DailyResponse(BaseModel):
     lines: list
     notes: list
     source: str
+    # 이 화면에서 나온 어려운 말의 그림 상자 (engine/terms.picture_box).
+    # 일진은 값 없이 매일 오는 자리라, 처음 오는 사람이 어려운 말을
+    # 여기서 처음 만납니다. 리포트 컷이 하는 것과 같은 상자입니다.
+    terms_html: str = ""
     statement_id: str
     free: bool
