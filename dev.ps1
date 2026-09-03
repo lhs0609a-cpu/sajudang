@@ -22,6 +22,7 @@
     hours          ★ 때 칸 감사 — 네 시간 칸이 시주를 얼마나 틀리나
     buttons        ★ 버튼 말투 — 손님이 누르는 것은 손님의 말인가
     voice          ★ 말투 감사 — 한 사람 안에서 말투가 갈리는가 (--show)
+    say            ★ 말풍선 길이 — 한 번에 쏟는 자리 (--show)
     drama          ★ 연출 점수 — 다음 화가 보고 싶어지는가 (--why)
     flow           전체 플로우 훑기 — 32화면을 실제 브라우저로 열어 확인
     api            API 서버 (http://localhost:8000/docs)
@@ -116,6 +117,7 @@ switch ($Task) {
   "hours"   { Need-Venv; Push-Location $Root; & $Py tools\hour_bucket_audit.py; Pop-Location }
   "buttons" { Need-Venv; Push-Location $Root; & $Py tools\button_voice_audit.py @Rest; Pop-Location }
   "voice"   { Need-Venv; Push-Location $Root; & $Py tools\voice_audit.py @Rest; Pop-Location }
+  "say"     { Need-Venv; Push-Location $Root; & $Py tools\say_length.py @Rest; Pop-Location }
   "drama"   { Need-Venv; Push-Location $Root; & $Py tools\drama_audit.py @Rest; Pop-Location }
   "flow" {
     Need-Venv
