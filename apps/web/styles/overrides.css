@@ -1558,6 +1558,24 @@ body.has-rail-closed .stage { margin-left: 26px; }
   pointer-events: none;
 }
 
+/*
+ * ★ 지금 읽을 한 마디만 밝게 (2026-09-04).
+ *
+ *   한 마디씩 뜨기는 했는데 앞엣것이 안 물러나서, 다 뜨고 나면 결국
+ *   벽이었습니다 — 대문에서 열네 줄이 한꺼번에 서 있었습니다.
+ *   새 마디가 뜨면 앞 마디는 물러납니다.
+ *
+ *   지우지는 않습니다. 대문의 「여기까지 값은 안 받소」 는 약속이고,
+ *   지운 약속은 안 한 약속입니다. 그리고 자리가 사라지면 굴리는 동안
+ *   화면이 출렁여 읽던 데를 잃습니다.
+ *
+ *   흐름이 멎으면 Shell 이 표를 떼어 도로 다 밝힙니다.
+ */
+.scr [data-beat] { transition: opacity .55s ease; }
+.scr [data-beat].dim { opacity: .26; }
+/* 서두르는 손님·모션 줄이기·종이 — 물러난 것도 도로 밝힙니다 */
+.scr.beatskip [data-beat].dim { opacity: 1 !important; }
+
 /* 알갱이를 품은 상자는 제 몫으로 안 뜹니다 — 안엣것이 뜹니다 */
 .scr > *:has(> .say), .scr > *:has(.nr .l) {
   animation: none;
@@ -1579,7 +1597,7 @@ body.has-rail-closed .stage { margin-left: 26px; }
 .nr .l { animation-duration: .42s; }
 
 @media (prefers-reduced-motion: reduce) {
-  .scr > *, .nr .l, .scr [data-beatwait] {
+  .scr > *, .nr .l, .scr [data-beatwait], .scr [data-beat].dim {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
@@ -1589,7 +1607,7 @@ body.has-rail-closed .stage { margin-left: 26px; }
 
 /* 종이에는 기다리는 자리가 없습니다 — 안 뜬 글은 빈 종이가 됩니다. */
 @media print {
-  .scr [data-beatwait], .scr [data-beat] {
+  .scr [data-beatwait], .scr [data-beat], .scr [data-beat].dim {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;

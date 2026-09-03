@@ -80,6 +80,13 @@ const HOLD_UI = 0.26;
  *   고장입니다. 눈에 들어온 순서대로 세되, 밀린 줄은 여기서 끊습니다.
  */
 const QUEUE_MAX = 1.6;
+/**
+ * 마디가 더 안 뜨면 이만큼 뒤에 **도로 다 밝힙니다.**
+ *
+ * ★ 물러난 채로 두면 다시 읽을 수가 없습니다. 흐름이 멎었다는 건
+ *   손님이 따라잡았다는 뜻이고, 그때부터 화면은 읽는 자리입니다.
+ */
+const DIM_REST = 1.1;
 
 /** 이 화면을 이미 봤는가. 세션이 끝나면 잊습니다. */
 const SEEN_KEY = "sajudang-beat-seen";
@@ -345,26 +352,77 @@ export default function Shell({
   const eyeRef = useRef<IntersectionObserver | null>(null);
   /** 줄 선 것들이 언제까지 차 있는가 (performance.now 기준) */
   const queueRef = useRef(0);
+  /*
+   * ★ 한 마디만 밝게 (2026-09-04).
+   *
+   *   한 마디씩 뜨기는 했는데 **앞엣것이 안 물러나서**, 다 뜨고 나면
+   *   결국 벽이었습니다. 손님이 말했습니다 —
+   *
+   *       "처음부터 글이 너무 많잖아. 차례대로 글을 띄어주던가.
+   *        누가 한번에 이걸 읽어. 차례대로 띄어주고 사라지고 하는것도
+   *        아니고. 전반적으로 이게 제일 중요해."
+   *
+   *   그래서 새 마디가 뜨면 앞 마디는 **물러납니다**(옅어짐). 지금 읽을
+   *   한 마디만 밝습니다.
+   *
+   *   ★ 지우지는 않습니다. 대문의 「여기까지 값은 안 받소」 는 약속이고,
+   *     지운 약속은 안 한 약속입니다. 그리고 자리가 사라지면 굴리는
+   *     동안 화면이 출렁여 읽던 데를 잃습니다.
+   *
+   *   ★ 흐름이 멎으면 **도로 다 밝힙니다.** 손님이 따라잡았다는 뜻이라,
+   *     그때부터는 다시 읽을 수 있어야 합니다.
+   */
+  const litRef = useRef<HTMLElement | null>(null);
+  const restoreRef = useRef<number | null>(null);
+  const timersRef = useRef<number[]>([]);
+
+  /* 이 마디를 밝히고 앞엣것을 물린다. */
+  const lightUp = useCallback((el: HTMLElement) => {
+    const prev = litRef.current;
+    if (prev && prev !== el) prev.classList.add("dim");
+    litRef.current = el;
+    // 흐름이 멎으면 도로 다 밝힙니다 — 따라잡은 사람은 다시 읽습니다.
+    if (restoreRef.current) window.clearTimeout(restoreRef.current);
+    restoreRef.current = window.setTimeout(() => {
+      scrRef.current?.querySelectorAll(".dim")
+        .forEach((e) => e.classList.remove("dim"));
+      litRef.current = null;
+    }, DIM_REST * 1000);
+  }, []);
 
   /* 다 편다 — 손님이 서두를 때, 인쇄할 때, 모션을 줄일 때. */
   const revealAll = useCallback(() => {
     doneRef.current = true;
     eyeRef.current?.disconnect();
+    timersRef.current.forEach(window.clearTimeout);
+    timersRef.current = [];
+    if (restoreRef.current) window.clearTimeout(restoreRef.current);
+    scrRef.current?.querySelectorAll(".dim")
+      .forEach((e) => e.classList.remove("dim"));
+    litRef.current = null;
     scrRef.current?.classList.add("beatskip");
     setPacing(false);
     markSeen(screen);
   }, [screen]);
 
-  /* 화면을 뜨면 지켜보던 것을 놓습니다. */
-  useEffect(() => () => eyeRef.current?.disconnect(), []);
+  /* 화면을 뜨면 지켜보던 것과 시계를 놓습니다. */
+  useEffect(() => () => {
+    eyeRef.current?.disconnect();
+    timersRef.current.forEach(window.clearTimeout);
+    if (restoreRef.current) window.clearTimeout(restoreRef.current);
+  }, []);
 
   useBeforePaint(() => {
     const root = scrRef.current;
     if (!root || doneRef.current) return;
 
     // 움직임을 줄이는 손님, 그리고 이 세션에서 이미 본 화면은 안 늦춥니다.
+    //
+    // ★ 다만 **관리자는 뺍니다** (2026-09-04). 화면을 고치는 사람은 같은
+    //   화면을 스무 번 엽니다. 두 번째부터 안 늦추면 고친 연출을 볼 수가
+    //   없어, 손님이 「차례대로 안 뜬다」 고 한 것도 실은 이 자리였습니다.
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        || seenBefore(screen)) {
+        || (!admin && seenBefore(screen))) {
       revealAll();
       return;
     }
@@ -429,6 +487,8 @@ export default function Shell({
           el.style.animationDelay = wait.toFixed(2) + "s";
           delete el.dataset.beatwait;
           el.dataset.beat = "";
+          timersRef.current.push(window.setTimeout(
+            () => lightUp(el), wait * 1000));
           queueRef.current = now + (wait + holdOf(el)) * 1000;
         }
       }, { rootMargin: "0px 0px -12% 0px" });
@@ -448,6 +508,9 @@ export default function Shell({
       // 표를 다는 순간 CSS 가 움직이기 시작합니다. 지연을 **먼저**
       // 적어야 합니다 — 순서가 바뀌면 지연 없이 튀어 오릅니다.
       el.dataset.beat = "";
+      // 이 마디가 뜨는 때에 맞춰 밝히고 앞엣것을 물립니다.
+      timersRef.current.push(window.setTimeout(
+        () => lightUp(el), t * 1000));
       t += holdOf(el);
     });
     // 첫 화면이 다 뜬 뒤에 접힌 것들이 이어지도록 줄을 맞춰 둡니다.
