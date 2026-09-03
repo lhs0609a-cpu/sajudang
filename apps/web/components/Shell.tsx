@@ -73,6 +73,13 @@ const HOLD_MIN = 0.42;
 const HOLD_MAX = 2.8;
 /** 버튼·입력칸 — 글이 아니니 곧바로. 누르려는 사람을 세우지 않습니다. */
 const HOLD_UI = 0.26;
+/**
+ * 굴려 내려온 자리에서 줄이 밀려도 이보다는 안 기다린다.
+ *
+ * ★ 빨리 굴린 손님이 앞의 열 덩이를 다 기다리면 그건 연출이 아니라
+ *   고장입니다. 눈에 들어온 순서대로 세되, 밀린 줄은 여기서 끊습니다.
+ */
+const QUEUE_MAX = 1.6;
 
 /** 이 화면을 이미 봤는가. 세션이 끝나면 잊습니다. */
 const SEEN_KEY = "sajudang-beat-seen";
@@ -320,14 +327,36 @@ export default function Shell({
   const doneRef = useRef(false);
   const endRef = useRef(0);
   const [pacing, setPacing] = useState(false);
+  /*
+   * ★ 접힌 자리를 지켜보는 눈 (2026-09-03).
+   *
+   *   전에는 첫 화면(fold) 안만 늦추고, 그 아래는 **처음부터 다 떠**
+   *   있었습니다. 「아직 아무도 안 읽는 자리를 기다리면 지연이다」 는
+   *   맞는 말인데, 그 결론이 「그럼 그냥 다 띄우자」 였습니다. 그래서
+   *   긴 화면은 위 몇 줄만 대화이고 나머지는 벽이었습니다.
+   *
+   *   손님이 말했습니다 — "글자 사람이 읽어내려가는 속도에 맞춰서
+   *   전부 나오게 하라니까 모든 페이지 전부."
+   *
+   *   답은 기다리는 게 아니라 **눈에 들어올 때 세는** 것입니다. 굴려서
+   *   그 자리에 닿으면 그때부터 읽는 속도로 뜹니다. 천천히 굴리면
+   *   닿는 대로 바로 뜨고, 빨리 굴리면 줄을 서서 차례로 뜹니다.
+   */
+  const eyeRef = useRef<IntersectionObserver | null>(null);
+  /** 줄 선 것들이 언제까지 차 있는가 (performance.now 기준) */
+  const queueRef = useRef(0);
 
   /* 다 편다 — 손님이 서두를 때, 인쇄할 때, 모션을 줄일 때. */
   const revealAll = useCallback(() => {
     doneRef.current = true;
+    eyeRef.current?.disconnect();
     scrRef.current?.classList.add("beatskip");
     setPacing(false);
     markSeen(screen);
   }, [screen]);
+
+  /* 화면을 뜨면 지켜보던 것을 놓습니다. */
+  useEffect(() => () => eyeRef.current?.disconnect(), []);
 
   useBeforePaint(() => {
     const root = scrRef.current;
@@ -380,19 +409,50 @@ export default function Shell({
     const fold = window.innerHeight;
     let folded = false;
 
+    /*
+     * 접힌 자리를 지켜보는 눈. 한 번만 만듭니다.
+     *
+     * ★ 줄을 세우되 **오래는 안 세웁니다.** 빨리 굴려 내려온 손님이
+     *   열 덩이를 다 기다리면 그건 연출이 아니라 고장입니다. 밀린 줄이
+     *   QUEUE_MAX 를 넘으면 거기서부터 다시 셉니다.
+     */
+    if (!eyeRef.current) {
+      eyeRef.current = new IntersectionObserver((entries) => {
+        for (const en of entries) {
+          if (!en.isIntersecting) continue;
+          const el = en.target as HTMLElement;
+          eyeRef.current?.unobserve(el);
+          if (el.dataset.beat !== undefined) continue;
+          const now = performance.now();
+          const wait = Math.min(QUEUE_MAX,
+                                Math.max(0, (queueRef.current - now) / 1000));
+          el.style.animationDelay = wait.toFixed(2) + "s";
+          delete el.dataset.beatwait;
+          el.dataset.beat = "";
+          queueRef.current = now + (wait + holdOf(el)) * 1000;
+        }
+      }, { rootMargin: "0px 0px -12% 0px" });
+    }
+
     seq.forEach((el) => {
-      if (el.dataset.beat !== undefined) return;
+      if (el.dataset.beat !== undefined
+          || el.dataset.beatwait !== undefined) return;
+      if (folded || el.getBoundingClientRect().top > fold) {
+        folded = true;
+        // 접힌 자리 — 눈에 들어올 때 그때부터 셉니다.
+        el.dataset.beatwait = "";
+        eyeRef.current!.observe(el);
+        return;
+      }
       el.style.animationDelay = t.toFixed(2) + "s";
       // 표를 다는 순간 CSS 가 움직이기 시작합니다. 지연을 **먼저**
       // 적어야 합니다 — 순서가 바뀌면 지연 없이 튀어 오릅니다.
       el.dataset.beat = "";
-      if (folded) return;
-      if (el.getBoundingClientRect().top > fold) {
-        folded = true;
-        return;
-      }
       t += holdOf(el);
     });
+    // 첫 화면이 다 뜬 뒤에 접힌 것들이 이어지도록 줄을 맞춰 둡니다.
+    queueRef.current = Math.max(queueRef.current,
+                                performance.now() + t * 1000);
 
     if (t <= 0) return;
     endRef.current = Math.max(endRef.current, performance.now() + t * 1000);

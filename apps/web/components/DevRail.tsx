@@ -78,12 +78,17 @@ const AX: [keyof ScreenScore, string, string][] = [
   ["clear", "명확", "무엇을 보고 한 말인지"],
   ["plain", "쉬움", "어려운 말을 푸는가"],
   ["figure", "비유", "그림이 그려지는가"],
+  // ★ 앞의 여섯은 무슨 말을 했는지를, 이 둘은 그 말이 화면 폭에
+  //    어떻게 앉는지를 봅니다 (engine/typo.py).
+  ["measure", "줄길이", "한 줄이 눈에 편한가"],
+  ["pace", "읽기속도", "한 번에 얼마나 쏟는가"],
 ];
 
 interface ScreenScore {
   id: string; title: string; total: number;
   pull: number; bite: number; heart: number;
   clear: number; plain: number; figure: number;
+  measure: number; pace: number; secs: number;
   missing: string[];
 }
 

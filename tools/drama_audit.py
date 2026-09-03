@@ -50,18 +50,20 @@ def main() -> int:
 
     print("연출 감사 — 화면 %d" % s["screens"])
     print("=" * 72)
-    print("  당김 %3d · 팩폭 %3d · 울림 %3d · 명확 %3d · 쉬움 %3d · 비유 %3d"
-          % (s["pull"], s["bite"], s["heart"], s["clear"],
-             s["plain"], s["figure"]))
+    print("  당김 %3d · 팩폭 %3d · 울림 %3d · 명확 %3d"
+          % (s["pull"], s["bite"], s["heart"], s["clear"]))
+    print("  쉬움 %3d · 비유 %3d · 줄길이 %3d · 읽기속도 %3d"
+          % (s["plain"], s["figure"], s["measure"], s["pace"]))
     print("  →  합 %d (%s)" % (s["total"], grade(s["total"])))
     print("-" * 76)
-    print("%-5s %-10s %4s %4s %4s %4s %4s %4s %5s  %s"
+    print("%-5s %-10s %4s %4s %4s %4s %4s %4s %5s %6s %5s  %s"
           % ("id", "이름", "당김", "팩폭", "울림", "명확", "쉬움", "비유",
-             "합", "액트아웃"))
+             "줄길이", "읽기속도", "합", "액트아웃"))
     for r in sorted(rows, key=lambda r: r["total"]):
-        print("%-5s %-10s %4d %4d %4d %4d %4d %4d %5d  %s"
+        print("%-5s %-10s %4d %4d %4d %4d %4d %4d %5d %6d %5d  %s"
               % (r["id"], r["title"], r["pull"], r["bite"], r["heart"],
-                 r["clear"], r["plain"], r["figure"], r["total"],
+                 r["clear"], r["plain"], r["figure"],
+                 r["measure"], r["pace"], r["total"],
                  " · ".join(r["actout"]) or "—"))
         if a.why:
             for m in r["missing"]:

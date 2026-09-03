@@ -33,18 +33,28 @@ from engine import dramaturgy as D          # noqa: E402
 from engine import screenscan as S          # noqa: E402
 
 # 손님이 부른 이름 그대로
-AXES = ("pull", "bite", "heart", "clear", "plain", "figure")
-KO = ("당김", "팩폭", "울림", "명확", "쉬움", "비유")
+# ★ 여덟이 된 까닭 (2026-09-03)
+#
+#   손님이 「읽기속도랑 줄길이도 넣어줘」 라 했습니다. 앞의 여섯은
+#   **무슨 말을 했는가**를 봅니다. 뒤의 둘은 그 말이 **화면 폭에
+#   어떻게 앉는가**를 봅니다 — 같은 문장도 한 줄에 마흔 자로 앉으면
+#   눈이 되돌아올 자리를 잃습니다.
+#
+#   화면 폭과 글자 크기는 `engine/typo.py` 가 압니다. `tools/widow.py`
+#   와 **같은 자**입니다 — 두 벌로 두면 언젠가 한쪽만 고칩니다.
+AXES = ("pull", "bite", "heart", "clear", "plain", "figure",
+        "measure", "pace")
+KO = ("당김", "팩폭", "울림", "명확", "쉬움", "비유", "줄길이", "읽기속도")
 
 
 def test_six_axes_exist():
-    """넷으로 되돌아가면 「눈물이 핑」 은 다시 아무도 안 잰다."""
+    """축을 줄이면 그 자리는 다시 아무도 안 잰다."""
     got = D.score("t", "재보기", "<p>그대는 참아 왔소.</p>")
     for k in AXES:
         assert k in got, "%s 축이 없다" % k
         assert 0 <= got[k] <= 100, "%s 가 0~100 밖이다: %s" % (k, got[k])
-    assert got["total"] == round(sum(got[k] for k in AXES) / 6), \
-        "합이 여섯의 평균이 아니다"
+    assert got["total"] == round(sum(got[k] for k in AXES) / len(AXES)), \
+        "합이 여덟 축의 평균이 아니다"
 
 
 def test_every_screen_carries_all_six():

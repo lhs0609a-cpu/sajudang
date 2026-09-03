@@ -185,7 +185,14 @@ def _readable(chunk: str) -> str:
         if t not in seen:
             seen.add(t)
             uniq.append(t)
-    return " ".join(uniq)
+    # ★ 조각 사이는 **줄바꿈**으로 잇습니다.
+    #
+    #   여기서 나오는 조각 하나하나가 화면에서는 따로 앉는 덩이입니다
+    #   (문단 · 나레이션 한 줄 · 버튼). 빈칸으로 이으면 줄길이·읽기속도
+    #   축이 화면 하나를 **한 문단**으로 보고, 어느 화면이나 「벽으로
+    #   읽히오」 가 됩니다. 글자를 세는 자리(plain)는 공백을 고르므로
+    #   앞의 여섯 축은 그대로입니다.
+    return "\n".join(uniq)
 
 
 # 화면 파일 — 손님이 도는 순서대로
@@ -433,29 +440,38 @@ def _engine_text() -> dict:
     out["a7"] = "".join(s["html"] for s in segs)
 
     free = build_report(f, "scan", "pungun", "free", "work", "INTJ")
-    out["d0"] = "".join(
-        '<span class="src">근거 · %s</span>%s' % (c["source"], c["html"])
+    # ★ 따로 서는 것은 **따로 잇습니다** (줄바꿈으로).
+    #
+    #   화면에서 근거 딱지는 컷 위에 따로 앉고, 접힌 컷들은 각각
+    #   제 상자에 앉습니다. 그걸 빈칸으로 이어 붙이면 줄길이·읽기속도
+    #   축이 한 덩이로 보고 「안 끊고 83초를 이어 가오」 라 합니다 —
+    #   실제로는 여섯 상자에 나뉘어 있는데요.
+    NL = chr(10)
+    out["d0"] = NL.join(
+        '<span class="src">근거 · %s</span>%s%s'
+        % (c["source"], NL, c["html"])
         for c in free["cuts"])
     if free.get("locked"):
-        out["c4"] = " ".join(
-            "「%s」 %s" % (l["title"], l.get("teaser") or "")
+        out["c4"] = NL.join(
+            "「%s」%s%s" % (l["title"], NL, l.get("teaser") or "")
             for l in free["locked"])
 
     paid = build_report(f, "scan", "pungun", "one", "work", "INTJ")
-    out["c2"] = (paid.get("opening") or "") + "".join(
-        '<span class="src">근거 · %s</span>%s' % (c["source"], c["html"])
-        for c in paid["cuts"]) + (paid.get("closing") or "")
+    out["c2"] = ((paid.get("opening") or "") + NL + NL.join(
+        '<span class="src">근거 · %s</span>%s%s'
+        % (c["source"], NL, c["html"])
+        for c in paid["cuts"]) + NL + (paid.get("closing") or ""))
     mapcut = [c for c in paid["cuts"] if c["id"] == "daeun_map"]
     if mapcut:
-        out["c3"] = ('<span class="src">근거 · %s</span>%s'
-                     % (mapcut[0]["source"], mapcut[0]["html"]))
+        out["c3"] = ('<span class="src">근거 · %s</span>%s%s'
+                     % (mapcut[0]["source"], NL, mapcut[0]["html"]))
 
     # 일진은 html 을 안 냅니다 — 줄로 옵니다.
     dly = build_daily(f, on=date.today())
-    out["g1"] = " ".join(filter(None, [
+    out["g1"] = NL.join(filter(None, [
         dly.get("text") or "",
-        " ".join(dly.get("lines") or []),
-        " ".join(dly.get("notes") or []),
+        NL.join(dly.get("lines") or []),
+        NL.join(dly.get("notes") or []),
         dly.get("score_says") or "",
         # 「이게 무슨 말이오」 상자도 손님이 그 자리에서 읽습니다.
         dly.get("terms_html") or "",
@@ -491,12 +507,16 @@ def scan_all() -> list:
             # 화면 글의 **앞은 앞에, 끝은 끝에** 두고 그 사이에 넣습니다.
             # 콜드 오픈은 첫 두 줄을, 버튼은 마지막 한 줄을 봅니다 —
             # 둘 다 화면 글이라야 실제로 보이는 것과 같아집니다.
+            # ★ 이을 때도 **줄바꿈으로** 잇습니다. 빈칸으로 이으면
+            #   화면 글이 도로 한 덩이가 되어, 줄길이·읽기속도 축이
+            #   없는 벽을 봅니다 (_readable 과 같은 까닭).
+            nl = chr(10)
             ls = D._lines(text.get(sid, ""))
-            head = " ".join(ls[:-TAIL_KEEP]) if len(ls) > TAIL_KEEP else ""
-            tail = " ".join(ls[-TAIL_KEEP:]) if ls else ""
-            text[sid] = " ".join(x for x in (head, html, tail) if x)
+            head = nl.join(ls[:-TAIL_KEEP]) if len(ls) > TAIL_KEEP else ""
+            tail = nl.join(ls[-TAIL_KEEP:]) if ls else ""
+            text[sid] = nl.join(x for x in (head, html, tail) if x)
         else:
-            text[sid] = html + " " + text.get(sid, "")
+            text[sid] = html + chr(10) + text.get(sid, "")
 
     rows = []
     for sid, html in text.items():
@@ -530,6 +550,9 @@ def summary(rows: Optional[list] = None) -> dict:
         "pull": avg("pull"), "bite": avg("bite"),
         "heart": avg("heart"), "clear": avg("clear"),
         "plain": avg("plain"), "figure": avg("figure"),
+        # 글이 앉은 모양 — 줄길이와 읽는 시간 (engine/typo.py)
+        "measure": avg("measure"), "pace": avg("pace"),
+        "secs": sum(r["secs"] for r in rows),
         "total": avg("total"),
         "weakest": [{"id": r["id"], "title": r["title"], "total": r["total"]}
                     for r in weak],

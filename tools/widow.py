@@ -49,49 +49,26 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "apps" / "web"
 
-# 틀 440 · .scr 좌우 22 → 396. 가운데 정렬 글은 .gatecopy 가 26 을 더 먹는다.
-WIDTH = 396
-GATE_WIDTH = 388
+# ★ 셈은 **엔진에 한 벌** 있습니다 (services/api/engine/typo.py).
+#
+#   주인 화면의 줄길이 축이 같은 자를 써야 합니다. 두 벌로 두면
+#   화면 폭을 바꾸는 날 한쪽만 고칩니다 — 도구는 알고 점수는 모르는
+#   일이 생깁니다. `tests/test_typo.py` 가 둘이 같은지 봅니다.
+sys.path.insert(0, str(ROOT / "services" / "api"))
+from engine import typo as _typo                       # noqa: E402
 
-# 클래스 → 글자 크기(px). tokens.css 의 사다리와 짝입니다.
-SIZE = {
-    "nr": 16.0,        # --fs-5  나레이션
-    "say": 17.5,       # --fs-6  도령의 말
-    "promise": 16.0,   # --fs-5
-    "sm": 14.0,        # --fs-3  부가 설명
-    "btn": 15.0,       # --fs-4  버튼
-    "lab": 13.0,
-    "cut": 16.0,       # --fs-5  리포트 본문
-    "btn": 15.0,       # --fs-2
-}
+WIDTH = _typo.WIDTH
+GATE_WIDTH = _typo.GATE_WIDTH
+
+SIZE = _typo.SIZE
 
 # 과부로 보는 길이 — 마지막 줄이 이보다 짧으면 짚습니다
-WIDOW = 4
+WIDOW = _typo.WIDOW
+
+width_of = _typo.width_of
 
 
-def width_of(ch: str) -> float:
-    """한글은 거의 1em, 나머지는 절반쯤."""
-    return 1.0 if "가" <= ch <= "힣" or "一" <= ch <= "鿿" else 0.5
-
-
-def wrap(text: str, px: float, box: int) -> list[str]:
-    """띄어쓰기에서만 끊습니다 (word-break: keep-all)."""
-    cap = box / px
-    lines, cur, w = [], "", 0.0
-    for word in text.split(" "):
-        ww = sum(width_of(c) for c in word)
-        if cur and w + 0.5 + ww > cap:
-            lines.append(cur)
-            cur, w = word, ww
-        else:
-            if cur:
-                cur += " "
-                w += 0.5
-            cur += word
-            w += ww
-    if cur:
-        lines.append(cur)
-    return lines
+wrap = _typo.wrap
 
 
 def strip_tags(s: str) -> str:

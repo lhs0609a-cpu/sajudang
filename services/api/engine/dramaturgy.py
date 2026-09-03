@@ -53,6 +53,7 @@ import re
 from typing import Optional
 
 from . import terms
+from . import typo as _typo
 
 TAG = re.compile(r"<[^>]+>")
 GLS = re.compile(r'<(?:div|span) class="gls[^"]*">.*?</(?:div|span)>', re.S)
@@ -218,6 +219,36 @@ def _lines(text: str) -> list:
 # ★ 기준 분량은 화면 종류마다 다릅니다.
 #   입력 화면에 리포트만큼 쓰면 그건 충실한 게 아니라 방해입니다.
 FLOOR = {"input": 120, "beat": 260, "read": 900, "list": 200}
+
+# ★ 이 종류의 화면을 읽는 데 몇 초가 알맞은가 (engine/typo.py 의 자로)
+#
+#   입력 화면에 리포트만큼 쏟으면 그건 충실한 게 아니라 방해입니다.
+#   반대로 읽는 자리는 길어도 됩니다 — 값을 치르고 온 사람입니다.
+#
+# ★ 어떻게 정했나
+#
+#   분량 기준(FLOOR)은 «적어도 이만큼» 이고, 이 수는 «이만큼까지는
+#   편하다» 입니다. 손님이 한 화면에 머무는 시간을 생각해 잡았습니다 —
+#   입력 화면은 읽으면서 **치기까지** 하므로 짧게, 값을 치르고 읽는
+#   자리는 길게. 리포트는 목패에 「약 N분」 이라 적어 파는 물건이라
+#   길이 자체가 값입니다.
+#
+#   만점은 이 수 아래, 0점은 두 배 위입니다.
+#
+# ★ 읽는 자리(read)가 700초가 아니라 1,200초인 까닭
+#
+#   값을 치른 리포트는 스물두 컷 만 자가 넘습니다. 분당 550자로
+#   열아홉 분이고, 목패에 **「읽는 데 약 19분」 이라 적어 놓고 파는**
+#   물건입니다. 게다가 한 컷씩 뜨고(`components/Reveal.tsx`) 진행
+#   막대가 붙습니다. 그 길이는 사고가 아니라 상품입니다.
+#
+#   그래서 여기 기준은 「이만큼이면 오래 잡는다」가 아니라 「이보다
+#   길면 값을 치른 사람도 못 끝낸다」로 잡습니다.
+PACE_CAP = {"input": 80, "beat": 90, "list": 110, "read": 1200}
+
+# 안 끊고 이어 가도 되는 최대 — 한 문단이 이보다 길면 숨이 찹니다.
+# 22초면 200자 남짓입니다. 그보다 길면 한 컷씩 띄우거나 줄을 나누시오.
+BREATH_MAX = 22
 
 
 def score(sid: str, title: str, html: str, kind: str = "read",
@@ -402,11 +433,112 @@ def score(sid: str, title: str, html: str, kind: str = "read",
     if figure < 60:
         miss.append("비유가 모자라오 — 그림이 그려지는 한 줄을 다시오")
 
-    total = round((pull + bite + heart + clear + plain_s + figure) / 6)
+    # ── ⑦ 줄길이 — 한 줄이 눈에 편한가 ────────────────────
+    #
+    # ★ 손님이 시킨 것 (2026-09-03)
+    #
+    #   "폰트종류, 가독성, 폰트크기 등등 … 읽기속도랑 줄길이도 넣어줘"
+    #
+    # ★ 글이 아니라 **앉은 모양**을 봅니다
+    #
+    #   앞의 여섯 축은 무슨 말을 했는지를 봅니다. 이 축은 그 말이
+    #   화면 폭에 어떻게 앉는지를 봅니다. 같은 문장도 한 줄에 마흔
+    #   자로 앉으면 눈이 되돌아올 자리를 잃습니다.
+    #
+    #   화면 폭(396px)과 글자 크기는 `engine/typo.py` 가 압니다 —
+    #   `tools/widow.py` 와 **같은 자**입니다.
+    #
+    #   세 가지를 셉니다
+    #     한 줄     열넉~서른넉 자에 드는가
+    #     과부 줄   문단 끝에 조각만 남지 않는가
+    #     문단 키   한 문단이 일곱 줄을 안 넘는가
+    # ★ 짧은 줄을 **아무 데서나 세면 안 됩니다.**
+    #
+    #   문단의 **마지막 줄은 원래 짧습니다** — 그게 정상입니다. 버튼
+    #   글자·라벨·근거 딱지도 한 줄짜리라 짧습니다. 그걸 다 세면
+    #   어느 화면이나 「조각 줄 스물다섯」 이 나오고, 그 숫자는
+    #   고칠 데를 안 가리킵니다.
+    #
+    #   그래서 **문단 중간 줄**만 아래로 잽니다. 위로는(너무 긴 줄)
+    #   모든 줄을 잽니다 — 긴 줄은 어디 있든 눈이 되돌아올 자리를
+    #   잃습니다.
+    paras = _typo.paragraphs(body)
+    wrapped = [_typo.wrap(pg) for pg in paras]
+    rows = [ln for w in wrapped for ln in w]
+    if rows:
+        def _w(ln):
+            return sum(_typo.width_of(c) for c in ln)
+
+        mid = [ln for w in wrapped for ln in w[:-1]]     # 마지막 줄 뺀 것
+        long_ = sum(1 for ln in rows if _w(ln) > _typo.LINE_MAX)
+        short_ = sum(1 for ln in mid if _w(ln) < _typo.LINE_MIN)
+        bad = long_ + short_
+        s_line = round(60 * max(0.0, 1.0 - bad / max(1, len(rows))))
+
+        # ★ 과부 줄은 **여기서 안 셉니다.**
+        #
+        #   문단 끝에 「두었소.」 한 마디만 남는 것을 과부 줄이라 합니다.
+        #   그런데 이 집은 그걸 이미 `text-wrap: pretty` 로 브라우저에
+        #   맡겨 두었습니다 (overrides.css) — 브라우저가 마지막 줄을 보고
+        #   앞줄에서 한 마디를 내려 줍니다.
+        #
+        #   그리고 화면에 박힌 글은 `tools/widow.py` 가 따로 셉니다.
+        #   엔진이 조합하는 글은 조각 길이를 재도 조합된 결과가 어디서
+        #   끊길지 모르므로 **일부러 안 셉니다** (tests/test_widow.py
+        #   머리말). 여기서 세면 그 결정을 뒤집는 셈이고, 실제로
+        #   본문 한 자리에서만 서른네 개가 잡혔습니다 — 전부 브라우저가
+        #   고쳐 주는 것들입니다.
+        #
+        #   대신 그 몫을 **줄길이**에 얹습니다. 늑대가 안 왔는데 늑대라
+        #   외치는 자는 곧 아무도 안 믿습니다.
+        walls = sum(1 for w in wrapped if len(w) > _typo.PARA_MAX_LINES)
+        s_wall = 40 if not walls else max(0, 40 - walls * 12)
+        measure = s_line + s_wall
+        if s_line < 36:
+            miss.append("줄이 눈에 안 맞소 — 긴 줄 %d · 문단 중간의 "
+                        "조각 줄 %d (한 줄 %d~%d 자)"
+                        % (long_, short_, _typo.LINE_MIN, _typo.LINE_MAX))
+        if walls:
+            miss.append("한 문단이 %d줄을 넘는 자리가 %d 있소 — 벽으로 읽히오"
+                        % (_typo.PARA_MAX_LINES, walls))
+    else:
+        measure = 0
+        miss.append("잴 글이 없소")
+
+    # ── ⑧ 읽기속도 — 몇 초짜리 화면인가 ──────────────────
+    #
+    # ★ 분량(명확)과 다릅니다
+    #
+    #   명확은 «할 말을 다 했는가» 를 봅니다. 이 축은 «한 번에 얼마나
+    #   쏟는가» 를 봅니다. 같은 900자라도 한 덩이로 쏟으면 훑게 되고,
+    #   끊어 놓으면 읽습니다. 이 집은 이미 한 컷씩 띄우기로 정해
+    #   두었는데(`components/Reveal.tsx`) 그걸 재는 자가 없었습니다.
+    #
+    #   두 가지를 셉니다
+    #     화면 길이     이 종류의 화면이 이만큼이면 오래 잡는가
+    #     숨 쉴 자리    안 끊고 이어지는 가장 긴 덩이가 몇 초인가
+    secs = _typo.seconds(n)
+    cap = PACE_CAP.get(kind, PACE_CAP["read"])
+    s_total = round(60 * max(0.0, min(1.0, (cap * 2.0 - secs) / cap)))
+    longest = max((_typo.seconds(len(pg)) for pg in paras), default=0.0)
+    s_breath = round(40 * max(0.0, min(1.0,
+                    (BREATH_MAX * 2 - longest) / BREATH_MAX)))
+    pace = s_total + s_breath
+    if s_total < 36:
+        miss.append("한 화면이 기오 — 읽는 데 %d초 (이 자리 기준 %d초)"
+                    % (round(secs), cap))
+    if s_breath < 24:
+        miss.append("숨 쉴 자리가 없소 — 안 끊고 %d초를 이어 가오 "
+                    "(%d초 아래로 끊으시오)" % (round(longest), BREATH_MAX))
+
+    total = round((pull + bite + heart + clear + plain_s + figure
+                   + measure + pace) / 8)
     return {
         "id": sid, "title": title, "kind": kind, "chars": n,
         "pull": pull, "bite": bite, "heart": heart,
         "clear": clear, "plain": plain_s, "figure": figure,
+        "measure": measure, "pace": pace,
+        "secs": round(secs),
         "total": total,
         "actout": kinds,
         "missing": miss,

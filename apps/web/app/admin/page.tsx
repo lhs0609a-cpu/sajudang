@@ -78,7 +78,14 @@ type ScreenScore = {
      울림 눈물이 핑 도는가 · 명확 무엇을 보고 한 말인지 ·
      쉬움 어려운 말을 푸는가 · 비유 그림이 그려지는가 */
   pull: number; bite: number; heart: number;
-  clear: number; plain: number; figure: number; total: number;
+  clear: number; plain: number; figure: number;
+  /* 글이 **앉은 모양** — 앞의 여섯 축은 무슨 말을 했는지를 보고,
+     이 둘은 그 말이 화면 폭에 어떻게 앉는지를 봅니다.
+     줄길이   한 줄이 열넉~서른넉 자에 드는가 · 벽처럼 선 문단이 없는가
+     읽기속도 이 종류의 화면치고 오래 잡지 않는가 · 숨 쉴 자리가 있는가
+     (engine/typo.py — tools/widow.py 와 같은 자) */
+  measure: number; pace: number; secs: number;
+  total: number;
   actout: string[]; missing: string[];
 };
 type Drama = {
@@ -105,7 +112,9 @@ type Drama = {
     source?: "source" | "snapshot" | "none";
     snapshot_at?: string | null;
     pull?: number; bite?: number; heart?: number;
-    clear?: number; plain?: number; figure?: number; total?: number;
+    clear?: number; plain?: number; figure?: number;
+    measure?: number; pace?: number; secs?: number;
+    total?: number;
     weakest?: { id: string; title: string; total: number }[];
   };
   screens: ScreenScore[];
@@ -624,6 +633,8 @@ export default function AdminPage() {
               <div><b>{drama.summary.clear}</b><span>명확</span></div>
               <div><b>{drama.summary.plain}</b><span>쉬움</span></div>
               <div><b>{drama.summary.figure}</b><span>비유</span></div>
+              <div><b>{drama.summary.measure}</b><span>줄길이</span></div>
+              <div><b>{drama.summary.pace}</b><span>읽기속도</span></div>
               <div><b>{drama.summary.total}</b><span>합 (화면 {drama.summary.screens})</span></div>
             </div>
             {(drama.summary.pull ?? 100) < 60 && (
@@ -643,6 +654,7 @@ export default function AdminPage() {
                   <th>화면</th><th className="n">당김</th><th className="n">팩폭</th>
                   <th className="n">울림</th><th className="n">명확</th>
                   <th className="n">쉬움</th><th className="n">비유</th>
+                  <th className="n">줄길이</th><th className="n">읽기속도</th>
                   <th className="n">합</th><th>액트아웃</th>
                 </tr>
               </thead>
@@ -669,6 +681,12 @@ export default function AdminPage() {
                     <td className="n">{r.clear}</td>
                     <td className="n">{r.plain}</td>
                     <td className="n">{r.figure}</td>
+                    <td className="n">{r.measure}</td>
+                    {/* 읽는 데 걸리는 시간을 함께 냅니다 — 점수만으로는
+                        「길다」 가 얼마나 긴지 모릅니다. */}
+                    <td className="n" title={`읽는 데 약 ${Math.round(r.secs / 60)}분`}>
+                      {r.pace}
+                    </td>
                     <td className="n"><b>{r.total}</b></td>
                     <td className="sm">{r.actout.join(" · ") || "—"}</td>
                   </tr>

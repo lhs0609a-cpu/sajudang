@@ -1546,6 +1546,18 @@ body.has-rail-closed .stage { margin-left: 26px; }
   animation: beatIn .34s cubic-bezier(.2, .7, .3, 1) both;
 }
 
+/*
+ * ★ 접힌 자리에서 차례를 기다리는 것 (2026-09-03).
+ *
+ *   눈에 들어오기 전까지는 안 보입니다. **자리는 그대로 차지합니다** —
+ *   높이가 0 이면 굴리는 동안 화면이 출렁이고, 손님이 보던 자리를
+ *   잃습니다. 그리고 안 보이는 동안 눌리지도 않아야 합니다.
+ */
+.scr [data-beatwait] {
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* 알갱이를 품은 상자는 제 몫으로 안 뜹니다 — 안엣것이 뜹니다 */
 .scr > *:has(> .say), .scr > *:has(.nr .l) {
   animation: none;
@@ -1567,7 +1579,17 @@ body.has-rail-closed .stage { margin-left: 26px; }
 .nr .l { animation-duration: .42s; }
 
 @media (prefers-reduced-motion: reduce) {
-  .scr > *, .nr .l {
+  .scr > *, .nr .l, .scr [data-beatwait] {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    pointer-events: auto;
+  }
+}
+
+/* 종이에는 기다리는 자리가 없습니다 — 안 뜬 글은 빈 종이가 됩니다. */
+@media print {
+  .scr [data-beatwait], .scr [data-beat] {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
@@ -1585,10 +1607,12 @@ body.has-rail-closed .stage { margin-left: 26px; }
  *   모션 줄이기와 **같은 모양**입니다. 안 보이는 것보다 그냥 보이는
  *   쪽이 늘 안전합니다.
  */
-.scr.beatskip [data-beat], .scr.beatskip .nr .l {
+.scr.beatskip [data-beat], .scr.beatskip [data-beatwait],
+.scr.beatskip .nr .l {
   animation: none !important;
   opacity: 1 !important;
   transform: none !important;
+  pointer-events: auto;
 }
 
 /*
