@@ -311,8 +311,10 @@ function LobbyInner() {
           <b>내 명식</b>
           <span>{s.features ? "여덟 글자와 셈에 쓴 것" : "아직 세우지 않았습니다"}</span>
         </button>
+        {/* ★ 「일진」 이 풀이 없이 지나가고 있었습니다. 여덟 글자를 아직
+              한 번도 못 본 손님이 여기서 처음 만나는 말입니다. */}
         <button className="op" onClick={() => router.push("/daily")}>
-          <b>오늘의 일진</b><span>값 없이 매일</span>
+          <b>오늘의 일진</b><span>일진 (그날에 서는 두 글자) · 값 없이 매일</span>
         </button>
         <button className="op" onClick={() => router.push("/summary")}>
           <b>분석지</b><span>한 장으로 받아보고 내보내기</span>
@@ -322,10 +324,14 @@ function LobbyInner() {
         </button>
       </div>
       <ActOut kind="끊긴 동작" next="스무 사람">
-        목패는 <b>{LENSES.length}</b>이오. 그대가 들은 자리는{" "}
-        <b>{s.read.length}</b>이오.<br />
-        같은 여덟 글자를 두 사람이 읽으면 <b>겹치는 데가 어디고 갈리는
-        데가 어딘지</b>가 보이오. 그게 이 집이 파는 것이오.
+        목패는 <b>{LENSES.length}개</b>요. 그대가 들은 자리는{" "}
+        <b>{s.read.length}곳</b>이오.<br />
+        {/* ★ 스물이 왜 스물인지가 없었습니다. 「관점이 여럿」 은 뜬 말이라,
+              같은 집을 어디서 보느냐로 바꿔 말합니다. */}
+        한 사람이 여덟 글자를 다 보지는 않소. 저마다 <b>제 눈에 드는
+        자리만</b> 짚소 — 같은 집을 대문에서 본 그림과 뒷마당에서 본
+        그림 같은 것이오.<br />
+        <b>겹치는 데와 갈리는 데</b>, 그게 이 집이 파는 것이오.
       </ActOut>
     </Shell>
   );

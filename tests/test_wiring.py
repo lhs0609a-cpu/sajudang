@@ -316,3 +316,25 @@ def test_hour_unknown_never_invents_a_pillar():
         assert all(p["label"] != "시주" for p in f.pillars)
         assert f.correction["hour_used"] is False
         assert sum(f.ten_gods.values()) == 5
+
+
+# ══════════════════════════════════════════════════════════
+# 검사 명령이 실제로 도는가
+# ══════════════════════════════════════════════════════════
+def test_dev_ps1_has_no_control_characters():
+    """
+    dev.ps1 에 제어문자가 박히면 그 명령은 조용히 죽는다.
+
+    ★ 실제로 났던 일 (2026-09-03 발견)
+
+      `tools\button_voice_audit.py` 가 파일 안에서 `tools<BS>utton_…`
+      으로 저장돼 있었다. 셸 heredoc 이 역슬래시-b 를 **백스페이스**로
+      바꿔 넣은 것이다. 그래서 `.\dev.ps1 buttons` 는 몇 판 내내
+      "can't open file" 로 죽고 있었고, 버튼 말투는 아무도 안 재고
+      있었다. 검사 명령이 죽으면 검사가 통과한 것처럼 보인다.
+    """
+    from pathlib import Path
+    src = (Path(__file__).resolve().parents[1] / "dev.ps1") \
+        .read_text(encoding="utf-8-sig")
+    bad = sorted({c for c in src if ord(c) < 32 and c not in "\t\r\n"})
+    assert not bad, "dev.ps1 에 제어문자가 있다: %r" % bad

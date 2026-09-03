@@ -54,7 +54,7 @@ KO = {
     "c1": "표지", "c2": "본문", "c3": "대운 맵", "c4": "페이월",
     "c5": "공유 카드", "c6": "남기다", "c7": "분석지", "c8": "내보내기",
     "d0": "무료 6단", "d1": "어디까지", "d2": "값을 치르다", "d3": "다 됐소",
-    "f2": "인장첩", "r1": "후기", "g1": "오늘", "g2": "이번 주", "g3": "다과상",
+    "f2": "인장첩", "r1": "다녀간 사람들", "g1": "오늘", "g2": "이번 주", "g3": "다과상",
     "h1": "이어지다", "s1": "받은 글", "s2": "나도 보기",
 }
 
@@ -83,6 +83,8 @@ ACT_NEXT = re.compile(r'<ActOut\s[^>]*next=(?:"([^"]+)"|\{([^{}]+)\})')
 
 # 화면이 스스로 적은 이름 — <Shell screen="a7">
 SCREEN_DECL = re.compile(r'<Shell\s[^>]*screen="(\w+)"')
+# 화면이 갈리는 자리 — `if (step === "a6") {`
+BRANCH = re.compile(r'if \((?:step|tab) === "\w+"')
 
 TSX_STR = re.compile(r'"([^"\\<>{}\n]{6,200})"')
 # ★ 줄을 넘는 글도 잡습니다.
@@ -162,8 +164,26 @@ PAGES = ("app/page.tsx", "app/lobby/page.tsx", "app/report/[id]/page.tsx",
 
 
 def _split(src: str) -> dict:
-    """`<Shell screen="a7">` 가 선 자리부터 다음 선언까지가 한 화면."""
-    marks = [(m.group(1), m.start()) for m in SCREEN_DECL.finditer(src)]
+    """
+    `<Shell screen="a7">` 가 선 자리부터 다음 선언까지가 한 화면.
+
+    ★ 다만 **갈림에서부터** 셉니다.
+
+      화면 글이 늘 Shell 안에 있지는 않습니다. a6 은 뜸에 찍을 여섯
+      줄을 Shell 앞에서 `const beats = [...]` 로 짓습니다. Shell 자리만
+      보고 자르면 그 여섯 줄이 **앞 화면(a5)의 글**로 붙습니다 —
+      a5 가 「서머타임 구간이오」 를 제 글로 들고 있었습니다.
+
+      그래서 덩이는 그 화면의 갈림(`if (step === "a6")`)에서 엽니다.
+      갈림이 없는 화면(마지막 return)은 Shell 자리에서 엽니다.
+    """
+    marks = []
+    branches = [m.start() for m in BRANCH.finditer(src)]
+    prev = 0
+    for m in SCREEN_DECL.finditer(src):
+        head = [b for b in branches if prev <= b < m.start()]
+        marks.append((m.group(1), head[-1] if head else m.start()))
+        prev = m.end()
     if not marks:
         return {}
     marks.append(("__end__", len(src)))

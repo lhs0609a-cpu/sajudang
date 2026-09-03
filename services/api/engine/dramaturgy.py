@@ -143,6 +143,18 @@ HEDGE = re.compile(r"게요|쯤|아마|조금|약간|다소|수도 있|편이|�
 # ④ 쉬움 — 손님이 알아들을 수 있는가
 # ══════════════════════════════════════════════════════════
 HARD = tuple(sorted(terms.MEANING, key=len, reverse=True))
+# ★ 낱말 **머리**에서만 셉니다.
+#
+#   그냥 `w in text` 로 세면 「성격」 안의 「격」 이 걸립니다. 격은 이 집의
+#   한 글자짜리 어려운 말이고, 성격은 손님이 매일 쓰는 말입니다. 실제로
+#   「성격이 아니라 눌러 온 값」 이라는 줄 하나 때문에 화면 하나가
+#   「격을 안 풀었소」 로 내려앉았습니다.
+#
+#   앞이 한글이 아니면 낱말의 머리입니다. 뒤는 안 봅니다 — 「시주를」
+#   「대운이」 처럼 조사가 붙는 게 보통이라서요.
+HARD_AT = {w: re.compile(r"(?<![가-힣])" + re.escape(w)) for w in HARD}
+HARD_GLOSSED = {w: re.compile(r"(?<![가-힣])" + re.escape(w) + r"\s*[（(]")
+                for w in HARD}
 SENT = re.compile(r"(?<=[.!?…])\s+")
 
 
@@ -265,8 +277,8 @@ def score(sid: str, title: str, html: str, kind: str = "read",
     depth = s_len + has_src + s_cnt
 
     # ── ④ 쉬움 ────────────────────────────────────────────
-    used = [w for w in HARD if w in text]
-    glossed = [w for w in used if re.search(re.escape(w) + r"\s*[（(]", text)]
+    used = [w for w in HARD if HARD_AT[w].search(text)]
+    glossed = [w for w in used if HARD_GLOSSED[w].search(text)]
     s_gloss = round(45 * (1.0 if not used else _pct(len(glossed), len(used))))
     if used and s_gloss < 27:
         miss.append("어려운 말이 풀이 없이 지나가오 — %s"

@@ -314,6 +314,13 @@ function PayInner() {
     return (
       <Shell screen="d2" title="값을 치르다" legal>
         <Scene id="coin" />
+        {/*
+          ★ 값부터 들이밀고 있었습니다. 스물일곱 화면에서 **여는 줄이
+            아예 없는** 유일한 자리였는데, 하필 지갑을 여는 자리입니다.
+            무슨 일이 벌어지는지 한 줄 놓고 시작합니다.
+        */}
+        <Narration lines={["도령이 셈한 종이를 상 위에 올려놓았다.",
+                           "값이 적힌 목패가 그 옆에 섰다."]} />
 
         {err && (
           <div className="warn">
@@ -338,6 +345,21 @@ function PayInner() {
                 </p>
               )}
             </div>
+            {/*
+              ★ 이 수가 어디서 나온 것인지 한 번도 안 밝혔습니다.
+                컷 수는 **서버가 이 명식으로 실제로 뽑아 셉니다**
+                (`POST /v1/pay/tiers`). 미리 적어 둔 홍보 문구였던 적이
+                있어서 — 「18컷」이라 적고 11컷이 나갔습니다 — 어디서 센
+                수인지를 값 옆에 답니다.
+            */}
+            <span className="src">
+              근거 · 컷 수와 글자 수는 이 명식으로 실제로 뽑아 센 것이오
+            </span>
+            <p className="sm">
+              이 값은 <b>이 자리 하나</b> 값이오. 스무 사람을 다 사는 것이
+              아니라 <b>한 사람의 눈</b>을 빌리는 셈이오 — 목패에 적힌 값이
+              그대로 건너가오.
+            </p>
             <p className="sm">오늘 치른 값 {order.purchases_today} / {order.per_day_limit}건</p>
 
             {/*

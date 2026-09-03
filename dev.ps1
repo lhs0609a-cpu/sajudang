@@ -1,4 +1,4 @@
-<#
+﻿<#
   성신당 개발 명령 모음 (Windows).  사용:  .\dev.ps1 <명령>
 
   == 파이썬 ==
@@ -112,7 +112,7 @@ switch ($Task) {
   "screens" { Need-Venv; Push-Location $Root; & $Py tools\screen_graph.py; Pop-Location }
   "subject" { Need-Venv; Push-Location $Root; & $Py tools\subject_audit.py @Rest; Pop-Location }
   "hours"   { Need-Venv; Push-Location $Root; & $Py tools\hour_bucket_audit.py; Pop-Location }
-  "buttons" { Need-Venv; Push-Location $Root; & $Py toolsutton_voice_audit.py @Rest; Pop-Location }
+  "buttons" { Need-Venv; Push-Location $Root; & $Py tools\button_voice_audit.py @Rest; Pop-Location }
   "drama"   { Need-Venv; Push-Location $Root; & $Py tools\drama_audit.py @Rest; Pop-Location }
   "flow" {
     Need-Venv
