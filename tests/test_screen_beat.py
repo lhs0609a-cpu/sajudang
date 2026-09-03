@@ -28,19 +28,57 @@ def test_shell_sequences_atoms_at_any_depth():
     assert "compareDocumentPosition" in src, "보이는 순서대로 매기지 않는다"
 
 
-def test_beat_is_fast_enough_to_not_be_a_wait():
-    """느리면 연출이 아니라 지연이다."""
+def test_beat_follows_reading_speed():
+    """
+    한 덩이는 **그 덩이를 읽을 만큼** 두고 다음으로 넘긴다.
+
+    ★ 전에는 전체가 3.2초에서 멈췄다.
+
+      그래서 스무 줄이든 두 줄이든 3.2초 뒤에는 화면이 통째로 차
+      있었다. 그건 읽는 속도가 아니라 **뜨는 순서**다 — 손님이 첫 줄을
+      읽기도 전에 마지막 줄과 버튼이 이미 거기 있다. 손님이 두 번
+      말한 자리다: "사람이 읽는 속도가 있을 거 아냐."
+    """
     src = (WEB / "components" / "Shell.tsx").read_text(encoding="utf-8")
-    # ★ 간격은 방금 뜬 것의 **길이**를 따릅니다. 고정 간격이 아니라
-    #   글자 수로 정하므로, 상한 둘만 봅니다.
-    # ★ 간격은 **무엇인지**와 **길이**를 함께 봅니다.
-    #   대사는 잠깐 두고, 서술은 흐르고, 버튼은 곧바로 옵니다.
-    cap = re.search(r"Math\.min\(t \+ gap, (\d+(?:\.\d+)?)\)", src)
-    assert cap and float(cap.group(1)) <= 3.6, "마지막 것이 너무 늦게 뜬다"
+    assert "const CPS" in src, "읽는 속도를 안 보고 있다"
     assert "textContent" in src, "길이를 안 보고 있다"
     assert 'classList.contains("say")' in src, "대사를 따로 안 본다"
-    for cap_s in re.findall(r"Math\.min\((\d\.\d+), Math\.max", src):
-        assert float(cap_s) <= 1.2, "한 칸이 너무 늦다: %s" % cap_s
+    assert not re.search(r"Math\.min\(t \+ ", src), \
+        "전체에 상한을 다시 걸었다 — 그러면 읽는 속도가 아니라 순서다"
+
+    cps = float(re.search(r"const CPS = (\d+(?:\.\d+)?)", src).group(1))
+    assert 7 <= cps <= 14, "읽는 속도가 사람 속도가 아니다: %s" % cps
+    # 한 덩이는 상한을 둔다. 긴 문단은 다 읽을 때까지 안 기다린다.
+    hi = float(re.search(r"const HOLD_MAX = (\d+(?:\.\d+)?)", src).group(1))
+    assert hi <= 3.0, "한 덩이가 너무 오래 붙잡는다: %s" % hi
+
+
+def test_slow_reveal_always_has_a_way_out():
+    """
+    늦추는 데는 **건너뛰는 길**이 있어야 한다.
+
+    없으면 그건 연출이 아니라 지연이다. 특히 두 번째 오는 사람에게.
+    """
+    src = (WEB / "components" / "Shell.tsx").read_text(encoding="utf-8")
+    css = (WEB / "styles" / "overrides.css").read_text(encoding="utf-8")
+
+    # ① 손님이 서두르면 그 자리에서 다 편다
+    assert "revealAll" in src, "다 펴는 길이 없다"
+    for ev in ("pointerdown", "keydown", "wheel", "beforeprint"):
+        assert '"%s"' % ev in src, "%s 로는 못 건너뛴다" % ev
+    assert "beatskip" in css, "다 펴는 표에 CSS 가 없다"
+
+    # ② 눌러도 된다는 걸 알아야 누른다
+    assert "beatskip-hint" in src and "beatskip-hint" in css, \
+        "건너뛸 수 있다는 표시가 없다"
+
+    # ③ 두 번째 오는 사람에게 같은 뜸은 지연이다
+    assert "seenBefore" in src and "sessionStorage" in src, \
+        "본 화면을 기억하지 않는다"
+
+    # ④ 안 뜬 것은 눌리지도 않아야 한다 — 안 보이는 버튼이 눌린다
+    assert "pointer-events: none" in css.split("@keyframes beatIn")[1][:200], \
+        "안 뜬 덩이가 클릭을 먹는다"
 
 
 def test_background_does_not_wait():

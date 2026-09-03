@@ -1523,8 +1523,15 @@ body.has-rail-closed .stage { margin-left: 26px; }
   animation: none;
 }
 
+/*
+ * ★ 안 뜬 것은 **눌리지도 않아야** 합니다.
+ *
+ *   `both` 로 채워 두면 지연 동안 안 보이지만, 자리는 차지하고 클릭도
+ *   먹습니다. 전에는 전체가 3.2초라 티가 안 났는데, 이제 읽는 속도로
+ *   가면 버튼이 십 초쯤 **안 보이는 채로 눌리는** 자리가 생깁니다.
+ */
 @keyframes beatIn {
-  from { opacity: 0; transform: translateY(9px); }
+  from { opacity: 0; transform: translateY(9px); pointer-events: none; }
   to   { opacity: 1; transform: none; }
 }
 
@@ -1538,6 +1545,51 @@ body.has-rail-closed .stage { margin-left: 26px; }
     transform: none !important;
   }
 }
+
+/*
+ * ★ 서두르는 손님 — 그 자리에서 다 편다.
+ *
+ *   화면 아무 데나 누르거나, 키를 치거나, 아래로 굴리면 Shell 이
+ *   .scr 에 이 표를 답니다. 지연을 0 으로 고치는 게 아니라 움직임
+ *   자체를 끕니다 — 지연 중인 애니메이션의 지연만 바꾸면 브라우저마다
+ *   다시 도는 곳이 있어 글이 두 번 떠오릅니다.
+ *
+ *   모션 줄이기와 **같은 모양**입니다. 안 보이는 것보다 그냥 보이는
+ *   쪽이 늘 안전합니다.
+ */
+.scr.beatskip [data-beat], .scr.beatskip .nr .l {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/*
+ * 「한 번에 다 보겠습니다」 — 늦추는 동안에만 뜹니다.
+ *
+ * 무대 아래에 붙습니다. 읽던 자리를 가리지 않게 낮고 옅게 둡니다.
+ */
+.beatskip-hint {
+  position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%);
+  z-index: 40;
+  padding: 7px 14px; border-radius: 999px;
+  border: 1px solid var(--line); background: rgba(10, 7, 16, .82);
+  backdrop-filter: blur(3px);
+  font-family: var(--mono); font-size: var(--fs-1); letter-spacing: .1em;
+  color: var(--paper3); cursor: pointer;
+  /* ★ beatIn 을 그대로 쓰면 끝 프레임의 transform:none 이 가운데
+     맞춤(translateX)을 지워 오른쪽으로 밀립니다. 제 몫으로 하나 둡니다. */
+  animation: hintIn .5s ease .9s both;   /* 첫 줄을 읽을 틈은 두고 뜹니다 */
+}
+@keyframes hintIn {
+  from { opacity: 0; transform: translate(-50%, 8px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+.beatskip-hint:hover { color: var(--paper2); border-color: var(--paper3); }
+body.has-rail .beatskip-hint { left: calc(50% + 116px); }
+@media (max-width: 900px) {
+  body.has-rail .beatskip-hint { left: 50%; }
+}
+@media print { .beatskip-hint { display: none; } }
 
 /* ══════════════════════════════════════════════════════════
  * 소리 켜고 끄기

@@ -17,7 +17,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  Suspense, useEffect, useLayoutEffect, useRef, useState,
+  Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState,
 } from "react";
 
 /*
@@ -34,6 +34,84 @@ import {
  */
 const useBeforePaint =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
+
+/* ══════════════════════════════════════════════════════════
+ * 읽는 속도 — 손님이 읽을 만큼 두고 다음 것을 낸다
+ * ══════════════════════════════════════════════════════════
+ *
+ * ★ 손님이 두 번 한 말 (2026-09-02 · 09-03)
+ *
+ *   "처음부터 모든 대사가 나오게 하지 말라니까. 사람이 읽는 속도가
+ *   있을 거 아냐. 전체 페이지 전부 다 설계해야지."
+ *
+ * ★ 무엇이 잘못이었나
+ *
+ *   차례는 있었는데 **전체가 3.2초에서 멈췄습니다.** 그래서 스무 줄이든
+ *   두 줄이든 3.2초 뒤에는 화면이 통째로 차 있었습니다. 그건 읽는
+ *   속도가 아니라 **뜨는 순서**입니다 — 늦게 뜨는 것뿐이지, 손님이
+ *   첫 줄을 읽기도 전에 마지막 줄과 버튼이 이미 거기 있습니다.
+ *
+ *   이제 한 덩이는 **그 덩이를 읽을 만한 시간**을 두고 다음으로 넘깁니다.
+ *   한글 묵독은 분당 오륙백 자쯤 — 초당 열 자로 잡습니다.
+ *
+ * ★ 그래서 세 가지를 함께 답니다. 이게 없으면 연출이 아니라 지연입니다.
+ *
+ *   ① 누르면 즉시 다 뜬다   화면 아무 데나 누르거나, 키를 치거나,
+ *                          아래로 굴리면 그 화면은 그 자리에서 다 폅니다.
+ *                          읽는 속도를 정하는 건 결국 손님입니다.
+ *   ② 두 번째는 안 늦춘다   한 번 본 화면은 이 세션 동안 바로 다 뜹니다.
+ *                          같은 뜸을 두 번 보면 그건 지연입니다.
+ *   ③ 접힌 데는 안 센다     첫 화면 밖으로 넘어가는 것은 기다리지
+ *                          않습니다 — 아직 아무도 안 읽는 자리입니다.
+ */
+
+/** 초당 몇 자를 읽는가. 한글 묵독 분당 600자쯤. */
+const CPS = 10;
+/** 짧은 줄도 이만큼은 둔다 — 안 그러면 두 줄이 한 줄처럼 보입니다. */
+const HOLD_MIN = 0.42;
+/** 한 덩이가 아무리 길어도 여기서 끊는다. 긴 문단은 눈으로 훑습니다. */
+const HOLD_MAX = 2.8;
+/** 버튼·입력칸 — 글이 아니니 곧바로. 누르려는 사람을 세우지 않습니다. */
+const HOLD_UI = 0.26;
+
+/** 이 화면을 이미 봤는가. 세션이 끝나면 잊습니다. */
+const SEEN_KEY = "sajudang-beat-seen";
+
+function seenBefore(screen?: string): boolean {
+  if (!screen) return false;
+  try {
+    return (sessionStorage.getItem(SEEN_KEY) ?? "").split(",").includes(screen);
+  } catch {
+    return false;                   // 사생활 보호 모드 — 조용히 늦춥니다
+  }
+}
+
+function markSeen(screen?: string) {
+  if (!screen) return;
+  try {
+    const got = (sessionStorage.getItem(SEEN_KEY) ?? "").split(",")
+      .filter(Boolean);
+    if (!got.includes(screen)) {
+      sessionStorage.setItem(SEEN_KEY, [...got, screen].join(","));
+    }
+  } catch { /* 못 적어도 화면은 돕니다 */ }
+}
+
+/** 이 덩이 하나를 읽는 데 걸리는 시간(초). */
+function holdOf(el: HTMLElement): number {
+  // 버튼·칸은 글이 아닙니다. 안에 버튼을 품은 무리도 마찬가지입니다 —
+  // 여섯 칸을 하나씩 띄우면 고르는 화면이 느려집니다.
+  if (el.tagName === "BUTTON"
+      || el.querySelector("button, input, select, textarea")) {
+    return HOLD_UI;
+  }
+  const chars = (el.textContent ?? "").trim().length;
+  if (!chars) return HOLD_UI;
+  // 대사는 말하고 나서 **잠깐 둡니다.** 사람이 말하면 상대가 읽을 틈이
+  // 있어야 대화입니다. 서술은 장면이라 조금 빠르게 흘러갑니다.
+  const settle = el.classList.contains("say") ? 0.34 : 0.12;
+  return Math.min(HOLD_MAX, Math.max(HOLD_MIN, chars / CPS + settle));
+}
 import { useSession } from "@/lib/store";
 import { LENS_BY_ID } from "@/lib/lenses";
 import { api, apiMisconfigured } from "@/lib/api";
@@ -176,26 +254,38 @@ export default function Shell({
   }, [admin]);
 
   /*
-   * ★ 화면 전체가 대화처럼 한 줄씩 뜬다.
+   * ★ 화면 전체가 손님이 읽는 속도로 뜬다.
    *
-   *   전에는 나레이션 블록 **안에서만** 0.72초씩 늦었습니다. 그래서
-   *   「붓을 내려놓고, 그가 물었다」 와 「무엇이 걸려서 예까지 왔소?」 와
-   *   고민 여섯 칸이 **한꺼번에** 떴습니다. 대화가 아니라 게시물입니다.
-   *
-   *   순서는 화면 단위여야 합니다. 여기서 놓인 순서(DOM 순서 = 보이는
-   *   순서)대로 다시 매깁니다. 페이지마다 손댈 필요가 없습니다.
-   *
-   *   빠르기 — 한 칸 0.16초, 전체는 1.5초에서 멈춥니다. 대화처럼 이어
-   *   보이면서, 버튼을 누르려는 사람이 기다리지 않는 선입니다. 느리면
-   *   연출이 아니라 지연입니다.
+   *   순서는 화면 단위입니다. 여기 놓인 순서(DOM 순서 = 보이는 순서)대로
+   *   차례를 매깁니다 — 페이지마다 손댈 필요가 없습니다. 스물일곱 화면이
+   *   전부 이 한 자리를 지납니다.
    *
    *   장면과 진행 막대는 뺍니다 — 배경이라 처음부터 있어야 합니다.
    */
   const scrRef = useRef<HTMLDivElement>(null);
+  const doneRef = useRef(false);
+  const endRef = useRef(0);
+  const [pacing, setPacing] = useState(false);
+
+  /* 다 편다 — 손님이 서두를 때, 인쇄할 때, 모션을 줄일 때. */
+  const revealAll = useCallback(() => {
+    doneRef.current = true;
+    scrRef.current?.classList.add("beatskip");
+    setPacing(false);
+    markSeen(screen);
+  }, [screen]);
+
   useBeforePaint(() => {
     const root = scrRef.current;
-    if (!root) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!root || doneRef.current) return;
+
+    // 움직임을 줄이는 손님, 그리고 이 세션에서 이미 본 화면은 안 늦춥니다.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        || seenBefore(screen)) {
+      revealAll();
+      return;
+    }
+
     /*
      * 대화 알갱이 — 나레이션 한 줄, 대사 한 마디. 어디에 있든 줍니다.
      *
@@ -222,63 +312,79 @@ export default function Shell({
     const seq = [...tops, ...atoms].sort((a, b) =>
       a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1);
 
+    /*
+     * ★ 차례는 **이번에 새로 온 것**만 셉니다.
+     *
+     *   훅처럼 한 마디씩 늘어나는 화면에서는 이 효과가 여러 번 돕니다.
+     *   그때 이미 뜬 것들의 시간까지 더하면, 새로 온 한 줄이 앞선 열
+     *   줄만큼 기다립니다 — 전체 상한이 있을 때는 안 보이던 탈입니다.
+     *   이미 뜬 것은 차례에서 빼고 0 부터 다시 셉니다.
+     */
     let t = 0;
+    // 첫 화면 밖은 안 셉니다. 아직 아무도 안 읽는 자리를 기다리면
+    // 그건 연출이 아니라 지연입니다.
+    const fold = window.innerHeight;
+    let folded = false;
+
     seq.forEach((el) => {
-      // 이미 떠 있는 것은 건드리지 않습니다 — 훅처럼 한 마디씩 늘어나는
-      // 화면에서 앞말이 다시 떠오르면 읽던 자리를 잃습니다.
-      if (el.dataset.beat === undefined) {
-        el.style.animationDelay = t.toFixed(2) + "s";
-        // 표를 다는 순간 CSS 가 움직이기 시작합니다. 지연을 **먼저**
-        // 적어야 합니다 — 순서가 바뀌면 지연 없이 튀어 오릅니다.
-        el.dataset.beat = "";
+      if (el.dataset.beat !== undefined) return;
+      el.style.animationDelay = t.toFixed(2) + "s";
+      // 표를 다는 순간 CSS 가 움직이기 시작합니다. 지연을 **먼저**
+      // 적어야 합니다 — 순서가 바뀌면 지연 없이 튀어 오릅니다.
+      el.dataset.beat = "";
+      if (folded) return;
+      if (el.getBoundingClientRect().top > fold) {
+        folded = true;
+        return;
       }
-      /*
-       * ★ 다음 것이 뜨는 때는 **방금 뜬 것의 길이**를 따릅니다.
-       *
-       *   전에는 길든 짧든 0.16초로 똑같이 밀었습니다. 그러면 긴 문장
-       *   뒤에 다음 줄이 곧바로 떠서 눈이 못 따라가고, 짧은 줄 뒤에는
-       *   괜히 기다립니다. 사람의 눈은 글자 수를 따라 움직입니다.
-       *
-       *   한글은 눈으로 훑을 때 초당 예닐곱 자쯤 지나갑니다. 다만
-       *   **다 읽을 때까지 기다리지는 않습니다** — 다음 줄이 보이기
-       *   시작하는 정도면 됩니다. 그래서 그 절반쯤으로 잡습니다.
-       *
-       *     짧은 줄(6자)   0.17초
-       *     한 문장(20자)  0.34초
-       *     긴 문단(60자)  0.55초에서 멈춤
-       *
-       *   전체는 2.2초에서 멈춥니다. 그 뒤 것은 손님이 내려서 봅니다 —
-       *   화면 밖의 글을 기다리게 하면 그건 연출이 아니라 지연입니다.
-       */
-      const chars = (el.textContent ?? "").trim().length;
-      const isSay = el.classList.contains("say");
-      const isLine = el.classList.contains("l");
-
-      /*
-       * ★ 대사와 서술과 버튼은 **무게가 다릅니다.**
-       *
-       *   전에는 셋을 같은 간격으로 밀었습니다. 그러면 도령이 두 마디를
-       *   거의 동시에 하는 것처럼 보입니다 — 대화가 아니라 자막입니다.
-       *
-       *     대사(.say)   한 마디를 하고 **잠깐 둡니다.** 사람이 말하고
-       *                  나면 상대가 읽을 틈이 있어야 대화입니다.
-       *     서술(.l)     장면 설명이라 빠르게 흘러갑니다.
-       *     그 밖        버튼·칸. 글이 다 뜬 뒤 곧바로 옵니다 —
-       *                  누르려는 사람을 기다리게 하면 안 됩니다.
-       */
-      const gap = isSay
-        ? Math.min(1.0, Math.max(0.45, 0.32 + chars * 0.014))
-        : isLine
-          ? Math.min(0.5, Math.max(0.12, 0.08 + chars * 0.012))
-          : 0.12;
-
-      /*
-       * 전체는 3.2초에서 멈춥니다. 그 뒤 것은 손님이 내려서 봅니다 —
-       * 화면 밖의 글을 기다리게 하면 그건 연출이 아니라 지연입니다.
-       */
-      t = Math.min(t + gap, 3.2);
+      t += holdOf(el);
     });
+
+    if (t <= 0) return;
+    endRef.current = Math.max(endRef.current, performance.now() + t * 1000);
+    setPacing(true);
   });
+
+  /* 다 뜨고 나면 「한 번에 다 보겠습니다」 를 거둡니다. */
+  useEffect(() => {
+    if (!pacing) return;
+    const left = Math.max(0, endRef.current - performance.now());
+    const id = setTimeout(() => {
+      setPacing(false);
+      markSeen(screen);
+    }, left + 400);
+    return () => clearTimeout(id);
+  }, [pacing, screen]);
+
+  /*
+   * ★ 읽는 속도를 정하는 건 결국 손님입니다.
+   *
+   *   누르거나, 키를 치거나, 아래로 굴리면 그 화면은 그 자리에서 다
+   *   폅니다. 이게 없으면 연출이 아니라 지연입니다 — 두 번째 오는
+   *   사람에게 같은 뜸은 특히요.
+   */
+  useEffect(() => {
+    if (!pacing) return;
+    const go = () => revealAll();
+    const keys = (e: KeyboardEvent) => {
+      // 글자를 치는 중이면 건드리지 않습니다 — 이름·생년월일 칸입니다.
+      const el = e.target as HTMLElement | null;
+      if (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return;
+      go();
+    };
+    window.addEventListener("pointerdown", go);
+    window.addEventListener("wheel", go, { passive: true });
+    window.addEventListener("touchmove", go, { passive: true });
+    window.addEventListener("keydown", keys);
+    window.addEventListener("beforeprint", go);
+    return () => {
+      window.removeEventListener("pointerdown", go);
+      window.removeEventListener("wheel", go);
+      window.removeEventListener("touchmove", go);
+      window.removeEventListener("keydown", keys);
+      window.removeEventListener("beforeprint", go);
+    };
+  }, [pacing, revealAll]);
 
   /*
    * 배경음.
@@ -322,6 +428,19 @@ export default function Shell({
           {children}
           {legal && <Legal />}
         </div>
+        {/*
+          ★ 늦추는 데는 반드시 **건너뛰는 길**이 있어야 합니다.
+            뜸에 그렇게 하기로 이미 정해 두었고(lib/think), 화면 전체를
+            읽는 속도로 내보내는 지금은 더 그렇습니다. 화면 아무 데나
+            눌러도 되지만, **눌러도 된다는 걸 알아야** 누릅니다.
+
+          ★ 손님의 말이라 합쇼체입니다. 도령의 말이 아닙니다.
+        */}
+        {pacing && (
+          <button className="beatskip-hint noprint" onClick={revealAll}>
+            한 번에 다 보겠습니다
+          </button>
+        )}
       </div>
       </div>
     </>
