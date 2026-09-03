@@ -147,6 +147,52 @@ export function Legal() {
   );
 }
 
+/*
+ * 대문 밖 처마 — 어느 화면에나 서는 아래 띠.
+ *
+ * ★ 손님이 시킨 것 (2026-09-03)
+ *
+ *   "사람들이 이 프로그램 잘 쓸 수 있도록 관리유지할 수 있는 전반적인
+ *   관리자페이지도 신설해서 하단에 네비게이터푸터링크로 관리자
+ *   로그인하고 들어갈 수 있도록 설계해야해."
+ *
+ * ★ 두 가지가 여기서 한꺼번에 풀립니다
+ *
+ *   ① 주인 자리로 가는 길이 **없었습니다.** 주소를 외운 사람만
+ *      들어갔습니다 — `.\dev.ps1 screens` 가 `/admin` 을 고아 화면으로
+ *      찍고 있었습니다. `/legal` 도 같았습니다.
+ *
+ *   ② 약관·방침·환불은 전자상거래법 제10조상 **상시** 닿을 수
+ *      있어야 합니다. 그런데 `<Legal>` 은 `legal` 을 켠 화면에만
+ *      붙어 있었습니다. 처마는 어느 화면에나 섭니다.
+ *
+ * ★ 주인 자리는 링크만 열려 있고 **문은 잠겨 있습니다.**
+ *   `/admin` 은 FUNNEL_KEY 를 받아야 열립니다 (keyguard). 길을
+ *   숨기는 것은 잠금이 아닙니다 — 그건 가림입니다.
+ */
+export function SiteFooter() {
+  return (
+    <nav className="sitefoot noprint" aria-label="아래 길">
+      {/* ★ 넉 줄을 한 줄에 다 걸면 마지막 줄에 「정보」만 홀로 남습니다
+          (tests/test_widow.py). 셋과 하나로 나눠 답니다. */}
+      <p className="lk">
+        <a href="/legal">이용약관</a>
+        <span aria-hidden="true"> · </span>
+        <a href="/legal">개인정보처리방침</a>
+        <span aria-hidden="true"> · </span>
+        <a href="/legal">환불정책</a>
+      </p>
+      <p className="hn">
+        성신당 星辰堂
+        <span aria-hidden="true"> · </span>
+        <a href="/legal">사업자 정보</a>
+        <span aria-hidden="true"> · </span>
+        <a className="own" href="/admin">주인 자리</a>
+      </p>
+    </nav>
+  );
+}
+
 export function TopBar({ title, skipTo, onBack }: {
   title: string; skipTo?: string; onBack?: () => void;
 }) {
@@ -435,6 +481,9 @@ export default function Shell({
         <div className="scr" ref={scrRef}>
           {children}
           {legal && <Legal />}
+          {/* 처마는 어느 화면에나 섭니다 — 대문(bare)만 빼고.
+              대문은 첫 3초를 파는 자리라 아래 띠가 시선을 나눕니다. */}
+          {!bare && <SiteFooter />}
         </div>
         {/*
           ★ 늦추는 데는 반드시 **건너뛰는 길**이 있어야 합니다.

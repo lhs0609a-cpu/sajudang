@@ -15,6 +15,7 @@
     plan           ★ 회귀 50건 — 무엇부터 볼지
     fill <파일>     받아적은 기대값을 대조 (--write 로 fixtures 에 써넣음)
     funnel         ★ 퍼널 — 어디서 나가는가 (FUNNEL_KEY 필요)
+    admin-pass     주인 자리 아이디·비밀번호 걸기 (해시만 저장)
     migrate-sqlite 로컬 SQLite 로 마이그레이션 왕복 시험
     screens        화면 연결 그래프 — 고아·막다른·죽은 버튼
     subject        ★ 주어 감사 — 누구 얘긴지 안 적힌 문장 찾기
@@ -145,7 +146,30 @@ switch ($Task) {
       $env:FUNNEL_KEY = "dev"
       Write-Host "FUNNEL_KEY 가 없어 'dev' 로 띄웁니다 (개발 전용)" -ForegroundColor DarkGray
     }
+    # 주인 문(아이디·비밀번호)은 .env 에 있습니다. 평문은 없고 해시뿐입니다.
+    # 저장소에 안 실립니다(.gitignore). 바꾸려면 .\dev.ps1 admin-pass
+    $envFile = Join-Path $Root ".env"
+    if (Test-Path $envFile) {
+      Get-Content $envFile | ForEach-Object {
+        if ($_ -match '^\s*([A-Z_][A-Z0-9_]*)\s*=\s*(.*)$') {
+          $n = $Matches[1]; $v = $Matches[2].Trim()
+          if (-not [Environment]::GetEnvironmentVariable($n)) {
+            [Environment]::SetEnvironmentVariable($n, $v)
+          }
+        }
+      }
+      if ($env:ADMIN_EMAIL) {
+        Write-Host "주인 문: $env:ADMIN_EMAIL" -ForegroundColor DarkGray
+      }
+    }
     & $Py -m uvicorn main:app --reload --port 8000
+    Pop-Location
+  }
+
+  # 주인 비밀번호를 새로 건다. 평문은 어디에도 안 적힙니다 — 해시만.
+  "admin-pass" {
+    Need-Venv; Push-Location $Root
+    & $Py tools\admin_pass.py @Rest
     Pop-Location
   }
 

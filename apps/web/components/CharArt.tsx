@@ -88,9 +88,15 @@ function useBust(id: string, mood: Mood) {
 /*
  * 움직이는 초상이 있는가.
  *
- * ★ 작은 칸에서는 안 씁니다. 48×64 짜리 조각에서 눈 깜빡임은 안 보이고
- *   영상만 스무 벌 받아 옵니다. 큰 자리(첫 대면·그 사람의 자리)에서만
- *   씁니다.
+ * ★ 진열대 조각(48×64)에서는 안 씁니다. 스무 명이 한 화면에 늘어서는
+ *   자리라 영상 스무 벌을 한꺼번에 받아 옵니다.
+ *
+ * ★ 대사 옆(talk)에는 **씁니다** (2026-09-03).
+ *
+ *   전에는 「작은 칸에서는 눈 깜빡임이 안 보인다」고 뺐습니다. 그건
+ *   전신이 66×88 로 줄어 얼굴이 22px 이던 때의 말입니다 — 그때는
+ *   정말 안 보였습니다. 이제 얼굴로 잘라 쓰니(overrides.css) 그
+ *   칸에서도 눈과 입이 보입니다. 한 화면에 한 사람이라 값도 쌉니다.
  *
  * ★ 기본 얼굴일 때만 씁니다. 표정이 따로 있는 자리는 그 표정이 뜻이라,
  *   움직이는 기본 얼굴로 덮으면 뜻이 사라집니다.
@@ -119,7 +125,7 @@ export default function CharArt({
   mood?: Mood;
 }) {
   const bust = useBust(lens.id, mood);
-  const wantClip = (size === "full" || size === "card") && mood === "base";
+  const wantClip = size !== "chip" && mood === "base";
   const clip = useClip(lens.id, wantClip && !!bust);
 
   /* 동작 줄이기를 켠 사람에게는 멈춘 그림으로 냅니다 */

@@ -96,7 +96,19 @@ function RailScore({ screen }: { screen: string | null }) {
     if (!screen) { setRow(null); return; }
     let alive = true;
     let key = "";
-    try { key = localStorage.getItem("sd.adminkey") ?? ""; } catch { /* */ }
+    let tok = "";
+    try {
+      key = localStorage.getItem("sd.adminkey") ?? "";
+      /*
+       * ★ 주인 자리에서 아이디로 들어왔으면 그 쪽지를 그대로 씁니다.
+       *
+       *   레일은 열쇠(FUNNEL_KEY)만 보고 있었습니다. 그런데 사람은
+       *   이제 아이디·비밀번호로 들어옵니다 — 로그인해 두고도 레일에는
+       *   「점수를 못 가져왔소」 가 떴습니다. 문이 둘이면 두 문을 다
+       *   봐야 합니다 (keyguard.require_admin).
+       */
+      tok = localStorage.getItem("sd.admintoken") ?? "";
+    } catch { /* */ }
     /*
      * ★ 개발에서는 열쇠 없이도 점수가 뜹니다.
      *
@@ -106,20 +118,39 @@ function RailScore({ screen }: { screen: string | null }) {
      *   dev.ps1 api 가 다는 임시 열쇠를 씁니다.
      *   배포본은 API 주소가 로컬이 아니라 이 줄이 안 닿습니다.
      */
-    if (!key && /^https?:\/\/(localhost|127\.0\.0\.1)/.test(API_BASE)) {
+    if (!key && !tok && /^https?:\/\/(localhost|127\.0\.0\.1)/.test(API_BASE)) {
       key = "dev";
     }
-    if (!key) { setErr("열쇠"); return; }
+    if (!key && !tok) { setErr("주인 자리에서 들어오시오"); return; }
     setErr(null);
-    fetch(`${API_BASE}/v1/admin/screens`, { headers: { "x-funnel-key": key } })
+    const h: Record<string, string> = {};
+    if (tok) h["x-admin-token"] = tok;
+    if (key) h["x-funnel-key"] = key;
+    fetch(`${API_BASE}/v1/admin/screens`, { headers: h })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
       .then((d) => {
         if (!alive) return;
+        /*
+         * ★ 배포본은 화면 소스가 없어 못 잽니다. 그때 숫자를 그리면
+         *   반쪽 점수가 멀쩡한 점수처럼 보입니다 (screenscan.has_source).
+         */
+        if (d.summary && d.summary.has_source === false) {
+          setRow(null);
+          setErr("이 서버는 못 재오 (로컬에서 보시오)");
+          return;
+        }
         const got = (d.screens as ScreenScore[]).find((x) => x.id === screen);
         setRow(got ?? null);
         if (!got) setErr("이 화면은 아직 안 재오");
       })
-      .catch(() => alive && setErr("점수를 못 가져왔소"));
+      /*
+       * ★ 「못 가져왔소」 한 줄은 무엇을 해야 할지 안 알려 줍니다.
+       *   서버가 안 떠 있는 것인지 문이 안 열린 것인지 갈라 적습니다.
+       */
+      .catch((e) => alive && setErr(
+        String(e.message) === "401" ? "문이 안 열리오 — 주인 자리에서 들어오시오"
+          : String(e.message) === "503" ? "주인 문이 아직 안 걸렸소"
+          : "API 가 안 떠 있소 (.\\dev.ps1 api)"));
     return () => { alive = false; };
   }, [screen, n]);
 
