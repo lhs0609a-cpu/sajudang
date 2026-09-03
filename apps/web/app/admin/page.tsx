@@ -185,10 +185,17 @@ export default function AdminPage() {
      그릴지 화면이 정해야 합니다. 이 자리는 열쇠 없이 물어볼 수
      있고, 걸렸는지 아닌지만 답합니다 (아이디는 안 흘립니다). */
   useEffect(() => {
+    /*
+     * ★ 서버가 아직 옛것이면 이 자리가 404 입니다.
+     *
+     *   그때 `null` 로 두면 화면은 로그인 칸을 그리고, 손님(주인)은
+     *   아이디를 넣어 봐야 또 404 를 만납니다. **없는 문을 그리는
+     *   것**이라 열쇠 칸으로 물러섭니다 — 옛 서버에서도 열쇠는 됩니다.
+     */
     fetch(BASE + "/v1/admin/gate")
-      .then((r) => (r.ok ? r.json() : null))
+      .then((r) => (r.ok ? r.json() : { login: false, key: true }))
       .then(setGate)
-      .catch(() => setGate(null));
+      .catch(() => setGate({ login: false, key: true }));
   }, []);
 
   const load = useCallback(async (k: string, t: string, quiet = false) => {
@@ -317,7 +324,7 @@ export default function AdminPage() {
             아이디 문이 아직 안 걸린 집에서는 이쪽이 유일한 길이라
             접어 두되 없애지는 않습니다.
         */}
-        <details className="admalt">
+        <details className="admalt" open={gate?.login === false}>
           <summary>열쇠로 열겠습니다 (도구용)</summary>
           <input className="fld mt" type="password" placeholder="FUNNEL_KEY"
                  value={typed} onChange={(e) => setTyped(e.target.value)}
