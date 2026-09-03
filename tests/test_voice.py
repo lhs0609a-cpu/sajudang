@@ -48,20 +48,63 @@ def reports(f):
 # ★ 불규칙 활용을 건드리면 한 글자 차이로 문장이 깨집니다.
 #   「쉽소 → 쉬워요」(ㅂ), 「그렇소 → 그래요」(ㅎ), 「다르오 → 달라요」(르).
 #   그래서 **어간을 그대로 두고 붙이기만 하는 어미**로만 짰습니다.
+#
+# ★ 2026-09-03 — 해요체·반말이 「네요/지」 한 결이던 것을 넓혔습니다.
+#   여덟 문장이 잇달아 「…없네요 …것이네요 …후회했네요」 로 끝나서
+#   손님이 읽다 멈췄습니다. 해요체의 본디 어미는 아요/어요입니다.
+#   **불규칙이 걸리는 자리는 그대로 물러섭니다** — 아래 쉽소(ㅂ)·
+#   그렇소(ㅎ)·다르오(르)·것이오(무받침)가 여전히 「네요」 인 것이
+#   그 증거입니다. 넓힌 것은 받침이 성한 어간과 「하·되」 뿐입니다.
 @pytest.mark.parametrize("word,want", [
-    ("있소", {"hapsyo": "있습니다", "hage": "있네", "banmal": "있지", "haeyo": "있네요"}),
-    ("하오", {"hapsyo": "합니다", "hage": "하네", "banmal": "하지", "haeyo": "하네요"}),
+    ("있소", {"hapsyo": "있습니다", "hage": "있네", "banmal": "있어", "haeyo": "있어요"}),
+    ("하오", {"hapsyo": "합니다", "hage": "하네", "banmal": "해", "haeyo": "해요"}),
     ("쉽소", {"hapsyo": "쉽습니다", "hage": "쉽네", "banmal": "쉽지", "haeyo": "쉽네요"}),
     ("그렇소", {"hapsyo": "그렇습니다", "hage": "그렇네", "banmal": "그렇지", "haeyo": "그렇네요"}),
     ("다르오", {"hapsyo": "다릅니다", "hage": "다르네", "banmal": "다르지", "haeyo": "다르네요"}),
-    ("것이오", {"hapsyo": "것입니다", "hage": "것이네", "banmal": "것이지", "haeyo": "것이네요"}),
-    ("보겠소", {"hapsyo": "보겠습니다", "hage": "보겠네", "banmal": "보겠지", "haeyo": "보겠네요"}),
-    ("않았소", {"hapsyo": "않았습니다", "hage": "않았네", "banmal": "않았지", "haeyo": "않았네요"}),
+    ("것이오", {"hapsyo": "것입니다", "hage": "것이네", "banmal": "것이야", "haeyo": "것이에요"}),
+    ("보겠소", {"hapsyo": "보겠습니다", "hage": "보겠네", "banmal": "보겠어", "haeyo": "보겠어요"}),
+    ("않았소", {"hapsyo": "않았습니다", "hage": "않았네", "banmal": "않았어", "haeyo": "않았어요"}),
 ])
 def test_endings_do_not_touch_the_stem(word, want):
     for v, expect in want.items():
         assert V._word(word, v) == expect, (word, v)
     assert V._word(word, V.HAO) == word, "하오체는 원문 그대로여야 합니다"
+
+
+def test_the_source_bracket_does_not_stop_the_ending():
+    """
+    ★ 근거 줄은 「…보오 〔자평 명리 · 용신〕」 처럼 **어미 뒤에 출처**가
+      붙어 끝납니다. 문장 끝을 못 잡으면 근거 줄 전부가 하오체로 남아,
+      해요체 캐릭터의 한 화면에 말투가 둘이 됩니다. 손님이 그걸 보고
+      멈췄습니다 (2026-09-03).
+    """
+    s = "모자란 쪽을 채워 주는 기운을 용신이라 하오 〔자평 명리 · 용신〕"
+    assert "합니다 〔" in V.speak(s, V.HAPSYO)
+    assert "하네 〔" in V.speak(s, V.HAGE)
+
+
+def test_a_noun_ending_in_yo_is_a_hao_ending_too():
+    """
+    ★ 「자리요 · 33세요 · 庚戌요」 는 하오체의 명사 종결(…이오 의 준말)
+      입니다. 어간이 없어 어떤 말투로도 안 바뀌고 그대로 나갔습니다 —
+      한 문단 안에서 「…자리요. …그것입니다.」 로 갈렸습니다.
+    """
+    assert V.speak("그것은 자리요.", V.HAPSYO) == "그것은 자리입니다."
+    assert V.speak("지금 33세요.", V.HAEYO) == "지금 33세예요."
+    assert V.speak("일주는 庚戌요.", V.HAGE) == "일주는 庚戌네."
+    # 해요체 동사는 건드리지 않습니다 — 「흘러요」 가 「흘러입니다」 가 되면 안 됩니다
+    assert V.speak("물이 흘러요.", V.HAPSYO) == "물이 흘러요."
+
+
+def test_a_question_keeps_asking():
+    """
+    ★ 「그리 보이오?」 를 서술문 어미로 갈면 「보입니다?」 가 됩니다.
+      묻는 자리는 이 집에 흔합니다 — 손님 응답을 받는 자리가 전부
+      물음이기 때문입니다.
+    """
+    assert V.speak("그리 보이오?", V.HAPSYO) == "그리 보입니까?"
+    assert V.speak("그렇지 않소?", V.HAEYO) == "그렇지 않나요?"
+    assert V.speak("그렇지 않소?", V.HAGE) == "그렇지 않나?"
 
 
 def test_the_informal_voices_drop_the_honorific(f):

@@ -23,6 +23,7 @@
 from __future__ import annotations
 
 import json
+import re
 from functools import lru_cache
 from pathlib import Path
 from typing import Optional
@@ -30,7 +31,7 @@ from typing import Optional
 from . import guard
 from . import real as _real
 from . import why as _why
-from .bank import born_season, element_word, josa
+from .bank import born_season, element_word, josa, josa_hanja
 
 SEED = Path(__file__).resolve().parents[3] / "seed"
 
@@ -306,6 +307,43 @@ def _next_turn(f) -> Optional[tuple]:
     return age, max(0, age - int(f.age))
 
 
+# ══════════════════════════════════════════════════════════
+# 자리표시 뒤의 조사
+# ══════════════════════════════════════════════════════════
+#
+# ★ 「여덟 자리에서 {strong} 이 두텁고 {weak} 가 얇소」 라고 쓰여 있었습니다.
+#
+#   조사를 **손으로 박아** 두니 갈아 끼운 낱말의 받침과 어긋납니다.
+#   손님 화면에 「쇠 이 두텁고 불 가 얇아요」 가 그대로 나갔습니다.
+#   근거를 대는 줄에서 조사가 틀리면 근거가 아니라 흠으로 읽힙니다.
+#
+#   자리표시 43군데가 이렇게 쓰여 있었고, 절반은 맞고 절반은 틀렸습니다
+#   — 맞은 쪽은 우연히 받침이 맞은 것입니다.
+#
+# ★ 한자는 **읽는 소리**로 고릅니다. 申은 '신' 이라 申이, 午는 '오' 라 午가.
+_JOSA_AFTER = re.compile(
+    r"\{(\w+)\}\s*([이가은는을를와과])(?=\s|$|[.,!?)\]<])")
+_JOSA_PAIR = {"이": ("이", "가"), "가": ("이", "가"),
+              "은": ("은", "는"), "는": ("은", "는"),
+              "을": ("을", "를"), "를": ("을", "를"),
+              "와": ("과", "와"), "과": ("과", "와")}
+
+
+def _fmt(tpl: str, w: dict) -> str:
+    """자리표시를 갈아 끼우되 뒤따르는 조사를 받침에 맞춘다."""
+    def sub(m):
+        key, j = m.group(1), m.group(2)
+        if key not in w:
+            return m.group(0)
+        val = str(w[key])
+        hard, soft = _JOSA_PAIR[j]
+        if not val:
+            return val
+        return (josa(val, hard, soft) if "가" <= val[-1] <= "힣"
+                else josa_hanja(val, hard, soft))
+    return _JOSA_AFTER.sub(sub, tpl).format(**w)
+
+
 def _counted(f, axes: list) -> str:
     """
     이 컷이 보는 자리를 세어 한 줄로.
@@ -490,7 +528,7 @@ def build(f, lens_id: Optional[str]) -> list:
         #   숫자가 아니라 **글자**를 댑니다 — 내부 척도는 여기 안 옵니다.
         tail = spec.get("tail")
         tail_html = ('<p class="ev"><span class="evk">읽은 자리</span>%s</p>'
-                     % tail.format(**w)) if tail else ""
+                     % _fmt(tail, w)) if tail else ""
 
         # ★ 센 것 한 줄. 이 컷이 보는 자리를 세어 박습니다 —
         #   틀릴 수 있는 말이라야 맞았을 때 뼈가 남습니다.
@@ -514,9 +552,9 @@ def build(f, lens_id: Optional[str]) -> list:
         real_b = _real.add(spec["b"]["axis"], kb, real_seen)
         body = ('<p class="tale">%s</p>%s<p class="tale">%s%s</p>'
                 '<p class="tale">%s%s%s</p>%s'
-                % (spec["lead"].format(**w), cnt_html,
-                   ta.format(**w), real_a,
-                   tb.format(**w), (" " + tc.format(**w)) if tc else "",
+                % (_fmt(spec["lead"], w), cnt_html,
+                   _fmt(ta, w), real_a,
+                   _fmt(tb, w), (" " + _fmt(tc, w)) if tc else "",
                    real_b, tail_html))
         out.append({
             "id": spec["id"],
@@ -525,7 +563,7 @@ def build(f, lens_id: Optional[str]) -> list:
             #   전에는 읽은 것만 나열해서 「그래서 뭐」 가 됐습니다
             #   (tools/evidence_audit.py — 이치 0%).
             "source": _why.axis_line(
-                spec["source"].format(a=ka, b=kb, **w),
+                _fmt(spec["source"], dict(w, a=ka, b=kb)),
                 axes[0] if axes else ""),
             "html": guard.enforce(body, {"cut": spec["id"]}),
             "min_level": int(spec.get("min_level", 1)),

@@ -192,9 +192,100 @@ PAGES = ("app/page.tsx", "app/lobby/page.tsx", "app/report/[id]/page.tsx",
          "app/s/[token]/SharedView.tsx")
 
 
+# ★ 찍어 둔 화면 글 — 배포본에서도 점수를 내기 위해 (2026-09-03)
+#
+#   배포 이미지에는 `seed/` 와 `services/api/` 만 들어갑니다. 화면 글은
+#   `apps/web` 에 있으니 fly 에서는 스물일곱 중 여섯만 잡혀서, 관리자
+#   화면이 「이 서버에서는 못 재오」 라고 적고 끝났습니다. 손님이
+#   「관리자 페이지에서 각 페이지별로 점수 다 볼 수 있어야 한다」 고
+#   했습니다.
+#
+#   그래서 소스에서 **읽어 낸 글**(화면마다 글 · 액트아웃 선언 · 다음
+#   자리 · 호명)을 `seed/screen_text.json` 에 찍어 둡니다. seed 는
+#   이미지에 들어가니 배포본이 그걸 읽습니다. 소스가 있으면 소스가
+#   이깁니다 — 찍어 둔 것은 소스가 없을 때만 씁니다.
+#
+#   ★ 찍어 둔 것은 **낡습니다.** 그래서 찍은 때와 소스의 지문을 같이
+#     적고, 관리자 화면은 「찍어 둔 글로 잰 것」 이라고 말합니다.
+#     tests/test_screen_snapshot.py 가 소스와 어긋나면 잡습니다 —
+#     `.\dev.ps1 drama` 가 돌 때마다 다시 찍습니다.
+SNAP = Path(__file__).resolve().parents[3] / "seed" / "screen_text.json"
+
+
+def _source_files() -> list:
+    """글을 읽는 소스 파일 전부 — 지문은 이걸로 냅니다."""
+    out = [WEB / rel for rel in PAGES]
+    out.append(WEB / "components" / "HookSegments.tsx")
+    return [p for p in out if p.exists()]
+
+
+def source_fingerprint() -> str:
+    import hashlib
+    h = hashlib.sha1()
+    for p in _source_files():
+        h.update(p.read_bytes())
+    return h.hexdigest()[:12]
+
+
+def _from_source() -> dict:
+    out = {}
+    for rel in PAGES:
+        p = WEB / rel
+        if p.exists():
+            out.update(_split(_strip_code(p.read_text(encoding="utf-8"))))
+    # a7 은 훅 부품이 그립니다. page.tsx 만 보면 껍데기만 잡힙니다.
+    part = WEB / "components" / "HookSegments.tsx"
+    if part.exists() and "a7" in out:
+        t, d, nx, ad = out["a7"]
+        out["a7"] = (t + " " + _readable(_strip_code(
+            part.read_text(encoding="utf-8"))), d, nx, ad)
+    return out
+
+
+def write_snapshot() -> dict:
+    """소스에서 읽은 글을 seed 에 찍는다. 소스가 없으면 아무것도 안 한다."""
+    if not WEB.exists():
+        return {}
+    from datetime import datetime
+    import json
+    body = {
+        "_at": datetime.now().isoformat(timespec="seconds"),
+        "_fingerprint": source_fingerprint(),
+        "screens": {sid: list(v) for sid, v in _from_source().items()},
+    }
+    SNAP.write_text(json.dumps(body, ensure_ascii=False, indent=1) + chr(10),
+                    encoding="utf-8")
+    return body
+
+
+def _read_snapshot() -> Optional[dict]:
+    if not SNAP.exists():
+        return None
+    import json
+    try:
+        return json.loads(SNAP.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
+def source_mode() -> str:
+    """source · snapshot · none — 어느 글로 재는가."""
+    if WEB.exists():
+        return "source"
+    return "snapshot" if _read_snapshot() else "none"
+
+
+def snapshot_at() -> Optional[str]:
+    """찍어 둔 글의 때. 소스로 잴 때는 None."""
+    if WEB.exists():
+        return None
+    snap = _read_snapshot()
+    return snap.get("_at") if snap else None
+
+
 def has_source() -> bool:
     """
-    화면 소스를 읽을 수 있는가.
+    화면 소스를 읽을 수 있는가 — 찍어 둔 글이 있어도 참입니다.
 
     ★ 이 자는 **소스 파일을 읽어서** 셉니다 — 화면 글이 코드에 박혀
       있기 때문입니다. 그런데 배포 이미지(Dockerfile)에는  와
@@ -207,7 +298,7 @@ def has_source() -> bool:
       틀린 숫자를 내느니 **못 잰다고 말합니다.** 연출 점수는 글을
       고치는 자리에서 쓰는 자입니다.
     """
-    return WEB.exists()
+    return WEB.exists() or _read_snapshot() is not None
 
 
 # 모듈 자리에 놓인 글 덩이 — `const PROMISE = "…"` · `const OPENING = {…}`
@@ -290,18 +381,12 @@ def _split(src: str) -> dict:
 @lru_cache(maxsize=1)
 def _screens() -> dict:
     """화면마다 (읽는 글 · 선언한 액트아웃 · 이름으로 부른 다음 자리)."""
-    out = {}
-    for rel in PAGES:
-        p = WEB / rel
-        if p.exists():
-            out.update(_split(_strip_code(p.read_text(encoding="utf-8"))))
-    # a7 은 훅 부품이 그립니다. page.tsx 만 보면 껍데기만 잡힙니다.
-    part = WEB / "components" / "HookSegments.tsx"
-    if part.exists() and "a7" in out:
-        t, d, nx, ad = out["a7"]
-        out["a7"] = (t + " " + _readable(_strip_code(
-            part.read_text(encoding="utf-8"))), d, nx, ad)
-    return out
+    if WEB.exists():
+        return _from_source()
+    snap = _read_snapshot()
+    if not snap:
+        return {}
+    return {sid: tuple(v) for sid, v in snap.get("screens", {}).items()}
 
 
 # ══════════════════════════════════════════════════════════
@@ -410,7 +495,8 @@ def scan_all() -> list:
 def summary(rows: Optional[list] = None) -> dict:
     rows = rows if rows is not None else scan_all()
     if not rows:
-        return {"screens": 0, "has_source": has_source()}
+        return {"screens": 0, "has_source": has_source(),
+                "source": source_mode(), "snapshot_at": snapshot_at()}
     avg = lambda k: round(sum(r[k] for r in rows) / len(rows))  # noqa: E731
     weak = sorted(rows, key=lambda r: r["total"])[:5]
     return {
@@ -418,6 +504,10 @@ def summary(rows: Optional[list] = None) -> dict:
         # 화면 소스를 읽을 수 있었는가. 배포본은 못 읽습니다 — 그때는
         # 숫자가 반쪽이라, 화면이 숫자 대신 그 사실을 말해야 합니다.
         "has_source": has_source(),
+        # source 소스째 · snapshot 찍어 둔 글 · none 못 잼.
+        # 찍어 둔 글이면 관리자 화면이 그 때를 함께 적습니다.
+        "source": source_mode(),
+        "snapshot_at": snapshot_at(),
         "pull": avg("pull"), "bite": avg("bite"),
         "heart": avg("heart"), "clear": avg("clear"),
         "plain": avg("plain"), "figure": avg("figure"),

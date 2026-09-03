@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "services" / "api"))
 
 from engine.dramaturgy import grade            # noqa: E402
-from engine.screenscan import scan_all, summary  # noqa: E402
+from engine.screenscan import scan_all, summary, write_snapshot  # noqa: E402
 
 
 def main() -> int:
@@ -27,6 +27,12 @@ def main() -> int:
 
     rows = scan_all()
     s = summary(rows)
+    # ★ 돌 때마다 배포본 몫을 찍어 둡니다 (seed/screen_text.json).
+    #   배포 이미지에는 apps/web 이 없어서, 이걸 안 찍으면 fly 의
+    #   관리자 화면은 「못 재오」 로 끝납니다. 소스가 없는 자리에서는
+    #   아무것도 안 씁니다.
+    if write_snapshot():
+        print("  (배포본 몫을 찍어 두었소: seed/screen_text.json)")
 
     # ★ 화면 소스를 못 읽으면 **숫자를 안 냅니다.**
     #

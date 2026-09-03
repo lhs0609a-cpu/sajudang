@@ -195,7 +195,7 @@ described above; everything else stays completely still.
 ==========================================================================
   화면   a2 이름을 적다
   폴더   public/scene/desk/
-  규격   16:9 · 3s · 프리셋 Static · 이어붙여 반복
+  규격   9:16 · 3s · 프리셋 Static · 이어붙여 반복
 
 --------------------------------------------------------------------------
   ① 이미지 · 제미나이
@@ -209,7 +209,7 @@ its tip. Two or three sheets of paper drift weightlessly in the air.
 A faint luminous constellation ring glows behind the desk. Golden
 motes of light rise slowly through a soft shaft of light from above.
 Deep plum-violet shadows. No hands, no people, no text.
-Aspect ratio 16:9.
+Aspect ratio 9:16.
 
 --------------------------------------------------------------------------
   ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 3s)
@@ -233,7 +233,7 @@ described above; everything else stays completely still.
 ==========================================================================
   화면   a3 날·고을 — 먹이 번지는 종이
   폴더   public/scene/ink/
-  규격   16:9 · 2s · 프리셋 Static · 한 번만
+  규격   9:16 · 5s · 프리셋 Static · 한 번만
   메모   투표 반응(먹 번짐)과 같은 클립을 씁니다. 한 번 만들면 두 곳에서 쓰입니다.
 
 --------------------------------------------------------------------------
@@ -244,7 +244,7 @@ Korean romance-fantasy webtoon style. Close on a sheet of pale hanji
 paper with faint vertical column lines. A single drop of black ink has
 landed at the center and is blooming outward in soft irregular rings.
 Warm amber light from one side, deep plum shadow. No hands, no text.
-Aspect ratio 16:9.
+Aspect ratio 9:16.
 
 --------------------------------------------------------------------------
   ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 5s)
@@ -268,7 +268,7 @@ described above; everything else stays completely still.
 ==========================================================================
   화면   a4 때를 묻다 — 실내·병풍·주렴
   폴더   public/scene/room/
-  규격   16:9 · 4s · 프리셋 Static · 이어붙여 반복
+  규격   9:16 · 5s · 프리셋 Static · 이어붙여 반복
 
 --------------------------------------------------------------------------
   ① 이미지 · 제미나이
@@ -283,7 +283,7 @@ face each other; between them a small incense burner sends thin
 threads of smoke curling upward. A pale glowing ring of light floats
 in the air above. Golden motes drift through a soft shaft of light.
 Deep plum-violet shadows. Empty, no people, no text.
-Aspect ratio 16:9.
+Aspect ratio 9:16.
 
 --------------------------------------------------------------------------
   ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 5s)
@@ -308,7 +308,7 @@ described above; everything else stays completely still.
 ==========================================================================
   화면   a4b 성향 4글자 — 넉 자와 여덟 글자를 맞대다
   폴더   public/scene/mirror/
-  규격   16:9 · 3s · 프리셋 Static · 한 번만
+  규격   9:16 · 5s · 프리셋 Static · 한 번만
   참고   a4b 성향 4글자. 화면의 글은 「그가 종이 한 장을 더 꺼냈다」다. 그러니 손이 종이를 꺼내는 순간이라야 한다. ★ 얼굴은 넣지 마라 — 도령 얼굴은 초상으로 따로 나온다. 배경에 또 그리면 같은 사람이 둘이 된다. 손목까지만. ★ 글자도 넣지 마라 — 어느 나라 글자를 넣어도 틀린다.
 
 --------------------------------------------------------------------------
@@ -352,7 +352,7 @@ described above; everything else stays completely still.
 ==========================================================================
   화면   a5 걸리는 것 — 갈림길
   폴더   public/scene/fork/
-  규격   16:9 · 3s · 프리셋 Static · 이어붙여 반복
+  규격   9:16 · 3s · 프리셋 Static · 이어붙여 반복
 
 --------------------------------------------------------------------------
   ① 이미지 · 제미나이
@@ -364,7 +364,7 @@ small floating lantern-flame in a different colour — violet, amber,
 rose — marking the way. Small wooden signposts stand blank beneath
 them. Fireflies drift low over the grass. A pale moon above. Deep
 plum-violet tones, dreamlike and inviting. No people, no legible text.
-Aspect ratio 16:9.
+Aspect ratio 9:16.
 
 --------------------------------------------------------------------------
   ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 3s)
@@ -388,7 +388,7 @@ described above; everything else stays completely still.
 ==========================================================================
   화면   a6 글자가 서다 — 명식 받침
   폴더   public/scene/altar/
-  규격   16:9 · 4s · 프리셋 Static · 한 번만 · ★ 앱이 흑백으로 바꾼 뒤 캐릭터 색을 입힙니다
+  규격   9:16 · 5s · 프리셋 Static · 한 번만 · ★ 앱이 흑백으로 바꾼 뒤 캐릭터 색을 입힙니다
   메모   카메라를 반드시 고정하세요. 프리셋에서 Static 선택.
          카메라가 움직이면 목패의 한자가 흔들려 계산 신뢰가 깎입니다.
 
@@ -404,7 +404,7 @@ rotate slowly behind them, marked with twelve radial ticks like a
 celestial dial. A shaft of warm light falls from above. Golden motes
 of light rise through the beam. The altar's surface has four empty
 carved slots waiting. Deep plum-violet shadows, mist along the floor.
-Awe-inspiring, sacred, no people, no text. Aspect ratio 16:9.
+Awe-inspiring, sacred, no people, no text. Aspect ratio 9:16.
 
 --------------------------------------------------------------------------
   ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 5s)
@@ -430,7 +430,7 @@ described above; everything else stays completely still.
 ==========================================================================
   화면   a7 도령이 말하다 — 마주앉은 자리
   폴더   public/scene/facing/
-  규격   16:9 · 3s · 프리셋 Static · 이어붙여 반복
+  규격   9:16 · 5s · 프리셋 Static · 이어붙여 반복
 
 --------------------------------------------------------------------------
   ① 이미지 · 제미나이
@@ -443,7 +443,7 @@ a soft pool of light on the floor beneath. Beaded curtains frame both
 edges of the composition. A constellation-painted folding screen
 behind. One cushion is lit warm amber as if just occupied; the other
 waits in shadow. Golden motes drift through the air. Deep plum-violet
-tones. No people, no text. Aspect ratio 16:9.
+tones. No people, no text. Aspect ratio 9:16.
 
 --------------------------------------------------------------------------
   ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 5s)
@@ -472,19 +472,41 @@ described above; everything else stays completely still.
 ==========================================================================
   화면   b1 진열대 들머리
   폴더   public/scene/hall/
-  규격   16:9 · 4s · 프리셋 Dolly In · 한 번만
+  규격   9:16 · 4s · 프리셋 Dolly In · 한 번만
 
 --------------------------------------------------------------------------
   ① 이미지 · 제미나이
 --------------------------------------------------------------------------
 
-Korean romance-fantasy webtoon style. A long dim hall receding into
-darkness, with twenty floor cushions arranged in rows. Above each
-cushion floats a small glowing flame-light in a different colour —
-amber, rose, violet, teal — like waiting spirits. Most cushions are
-empty. Three ornate paper lanterns hang overhead. Golden motes drift
-through the air. Deep plum-violet shadows, mist along the floor.
-Quiet, expectant, mysterious. No people, no text. Aspect ratio 16:9.
+Korean romance-fantasy webtoon style, vertical composition. A long dim
+hall receding upward into darkness, twenty floor cushions in two facing
+rows running away from the viewer. Every cushion is taken — twenty
+different fortune-tellers in hanbok, all ages and builds, each waiting
+in their own posture. The four nearest sit at the vertical centre of
+the frame and read clearly:
+a composed young nobleman with cool distant eyes, black hair tied high
+with a jade pin, deep indigo scholar's robe with silver trim;
+a formidable old woman with a lined face and fierce clear eyes, white
+hair in a tight knot, patched dark hanbok, a long smoking pipe resting
+on her shoulder;
+a striking woman in a loose crimson hanbok slipping off one shoulder,
+hair falling free, a knowing half-smile;
+a serene monk with long silver-white hair loose over one shoulder,
+plain undyed hemp robe, eyes closed.
+Behind them, half-read in the middle rows: a slender man in round
+brass-rimmed spectacles bent over a ledger; a pale young woman in
+gauzy lilac that seems to drift; a man with a lazy amused grin holding
+a single card between two fingers; a woman with red thread wound
+loosely round her fingers; a magnificent woman in richly embroidered
+deep red with her arms crossed; a boy of about fourteen with sleeves
+too long for his arms. The farthest rows are silhouettes only.
+Above each cushion floats a small glowing flame-light in that reader's
+own colour — amber, silver-blue, crimson, lilac, moss green, teal,
+rose, muted gold — twenty colours, no two alike. Faces soften with
+distance and the far end fades into shadow. Three ornate paper
+lanterns hang overhead. Golden motes drift through the air. Deep
+plum-violet shadows, mist along the floor. Quiet, expectant,
+mysterious. No text. Aspect ratio 9:16.
 
 --------------------------------------------------------------------------
   ② 모션 · 힉스필드   (프리셋 Dolly In · 9:16 · 4s)
@@ -501,7 +523,7 @@ texture. Do not add photographic realism, skin pores, film grain or 3D
 lighting. Do not redraw or reshape any element. Animate only what is
 described above; everything else stays completely still.
 
-(Preset: Dolly In · 16:9 · 4s)
+(Preset: Dolly In · 9:16 · 4s)
 
 
 ==========================================================================
@@ -509,7 +531,7 @@ described above; everything else stays completely still.
 ==========================================================================
   화면   b2 자리
   폴더   public/scene/seat/
-  규격   3:4 · 3s · 프리셋 Static · 이어붙여 반복 · ★ 앱이 흑백으로 바꾼 뒤 캐릭터 색을 입힙니다
+  규격   9:16 · 3s · 프리셋 Static · 이어붙여 반복 · ★ 앱이 흑백으로 바꾼 뒤 캐릭터 색을 입힙니다
   메모   무채색으로 뽑으세요. 캐릭터 20인의 색이 각각 다릅니다.
          클립 하나에 앱에서 색을 입히면 20개를 안 만들어도 됩니다.
 
@@ -523,7 +545,7 @@ mystical chamber. A faint luminous circular sigil hovers in the air
 behind it. Beaded curtains hang at both edges of frame. Motes of
 coloured light drift slowly upward around the cushion. The floor
 mirrors the glow faintly. Intimate, expectant, sacred. No people,
-no text. Aspect ratio 3:4.
+no text. Aspect ratio 9:16.
 
 --------------------------------------------------------------------------
   ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 3s)
@@ -548,7 +570,7 @@ described above; everything else stays completely still.
 ==========================================================================
   화면   b3 걸린 목패
   폴더   public/scene/shelf/
-  규격   16:9 · 3s · 프리셋 Static · 이어붙여 반복
+  규격   9:16 · 3s · 프리셋 Static · 이어붙여 반복
 
 --------------------------------------------------------------------------
   ① 이미지 · 제미나이
@@ -560,7 +582,7 @@ carved with a single Chinese character that glows warm amber from
 within, as if lit from inside the wood. Each plaque casts a soft pool
 of light beneath it. Golden motes of light drift slowly upward through
 the air. The background falls into deep plum-violet darkness.
-Mysterious, inviting, like an offering hall. No people. Aspect ratio 16:9.
+Mysterious, inviting, like an offering hall. No people. Aspect ratio 9:16.
 
 --------------------------------------------------------------------------
   ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 3s)
@@ -590,7 +612,7 @@ described above; everything else stays completely still.
 ==========================================================================
   화면   c1 두루마리 · c7 분석지
   폴더   public/scene/scroll/
-  규격   16:9 · 3s · 프리셋 Static · 한 번만
+  규격   9:16 · 3s · 프리셋 Static · 한 번만
 
 --------------------------------------------------------------------------
   ① 이미지 · 제미나이
@@ -601,7 +623,7 @@ between two dark wooden rods. Above the paper, glowing golden Chinese
 characters float free of the page, drifting slowly upward as if
 lifting off the surface. The hanji paper catches warm light. Motes of
 gold drift through a soft shaft of light from above. Deep plum-violet
-background. Magical, weightless. No hands, no people. Aspect ratio 16:9.
+background. Magical, weightless. No hands, no people. Aspect ratio 9:16.
 
 --------------------------------------------------------------------------
   ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 3s)
@@ -625,7 +647,7 @@ described above; everything else stays completely still.
 ==========================================================================
   화면   c2 길 그림
   폴더   public/scene/roadmap/
-  규격   16:9 · 4s · 프리셋 Dolly Right · 한 번만 · ★ 앱이 흑백으로 바꾼 뒤 캐릭터 색을 입힙니다
+  규격   9:16 · 4s · 프리셋 Dolly Right · 한 번만 · ★ 앱이 흑백으로 바꾼 뒤 캐릭터 색을 입힙니다
   참고   가로 패럴랙스로 길을 따라 이동하는 느낌을 냅니다.
 
 --------------------------------------------------------------------------
@@ -638,7 +660,7 @@ markers. The near half glows warm amber; small floating lantern-flames
 hover above the far markers, waiting. Flowering shrubs bloom beside the
 path. A black cat sits on one of the distant markers. Fireflies and
 petals drift through the misty air. Full moon above. Contemplative,
-beautiful, no people, no text. Aspect ratio 16:9.
+beautiful, no people, no text. Aspect ratio 9:16.
 
 --------------------------------------------------------------------------
   ② 모션 · 힉스필드   (프리셋 Dolly Right · 9:16 · 4s)
@@ -664,7 +686,7 @@ described above; everything else stays completely still.
 ==========================================================================
   화면   c3 접힌 데
   폴더   public/scene/fold/
-  규격   16:9 · 2s · 프리셋 Static · 한 번만
+  규격   9:16 · 2s · 프리셋 Static · 한 번만
 
 --------------------------------------------------------------------------
   ① 이미지 · 제미나이
@@ -673,7 +695,7 @@ described above; everything else stays completely still.
 Korean romance-fantasy webtoon style. A paper scroll folded halfway
 closed, the upper half lit and readable-looking, the lower half creased
 over and falling into deep shadow. Warm amber light on the exposed
-portion only. No legible text, no hands. Aspect ratio 16:9.
+portion only. No legible text, no hands. Aspect ratio 9:16.
 
 --------------------------------------------------------------------------
   ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 2s)
@@ -697,7 +719,7 @@ described above; everything else stays completely still.
 ==========================================================================
   화면   c4 패 뒷면
   폴더   public/scene/cardbg/
-  규격   1:1 · 3s · 프리셋 Static · 이어붙여 반복 · ★ 앱이 흑백으로 바꾼 뒤 캐릭터 색을 입힙니다 · PNG 정지컷도 함께
+  규격   9:16 · 3s · 프리셋 Static · 이어붙여 반복 · ★ 앱이 흑백으로 바꾼 뒤 캐릭터 색을 입힙니다 · PNG 정지컷도 함께
   메모   정지 PNG 를 반드시 함께 만드세요.
          SNS 공유 시 캡처가 되어야 하는데 영상은 저장이 안 됩니다.
          · 화면에서는 webm 루프
@@ -715,7 +737,7 @@ four corners, and a slowly rotating celestial ring at the center marked
 with twelve radial ticks. A halo of eight small blossoms encircles the
 ring. Soft radial glow behind. Rendered in thin gold and rose lines on a
 deep plum-black ground. Completely empty at the center for a character
-illustration. Elegant, precious, keepsake-like. No text. Aspect ratio 1:1.
+illustration. Elegant, precious, keepsake-like. No text. Aspect ratio 9:16.
 
 --------------------------------------------------------------------------
   ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 3s)
@@ -739,7 +761,7 @@ described above; everything else stays completely still.
 ==========================================================================
   화면   c5 벽 · m1 인장첩
   폴더   public/scene/wall/
-  규격   16:9 · 3s · 프리셋 Static · 이어붙여 반복
+  규격   9:16 · 3s · 프리셋 Static · 이어붙여 반복
 
 --------------------------------------------------------------------------
   ① 이미지 · 제미나이
@@ -751,7 +773,7 @@ pressed flower instead of a pin, hanging at slightly different angles
 and lifting faintly as if in a breeze. A flowering vine runs along the
 top of the wall. A black cat dozes at the base. Warm amber light from
 above, gold motes drifting. Lived-in, affectionate, accumulated over
-time. No people, no legible text. Aspect ratio 16:9.
+time. No people, no legible text. Aspect ratio 9:16.
 
 --------------------------------------------------------------------------
   ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 3s)
@@ -775,7 +797,7 @@ described above; everything else stays completely still.
 ==========================================================================
   화면   c6 낡은 종이 · p1 값
   폴더   public/scene/oldpaper/
-  규격   16:9 · 3s · 프리셋 Static · 이어붙여 반복
+  규격   9:16 · 3s · 프리셋 Static · 이어붙여 반복
 
 --------------------------------------------------------------------------
   ① 이미지 · 제미나이
@@ -786,7 +808,7 @@ lying at a slight angle, corners softly curled. A small pressed flower
 rests in the upper right corner, and a red seal-stamp is impressed at
 the lower left. Faint vertical column lines, no legible writing. Warm
 light falls across it from above, gold motes drifting. Deep plum
-background. Nostalgic, treasured. No hands, no text. Aspect ratio 16:9.
+background. Nostalgic, treasured. No hands, no text. Aspect ratio 9:16.
 
 --------------------------------------------------------------------------
   ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 3s)
@@ -815,7 +837,7 @@ described above; everything else stays completely still.
 ==========================================================================
   화면   p2 엽전
   폴더   public/scene/coin/
-  규격   1:1 · 2s · 프리셋 Static · 한 번만
+  규격   9:16 · 2s · 프리셋 Static · 한 번만
 
 --------------------------------------------------------------------------
   ① 이미지 · 제미나이
@@ -824,7 +846,7 @@ described above; everything else stays completely still.
 Korean romance-fantasy webtoon style. A small pile of traditional
 Korean brass coins with square center holes, resting on a dark wooden
 surface, catching warm amber light from above. Shallow depth, deep plum
-background. No hands, no text. Aspect ratio 1:1.
+background. No hands, no text. Aspect ratio 9:16.
 
 --------------------------------------------------------------------------
   ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 2s)
@@ -847,7 +869,7 @@ described above; everything else stays completely still.
 ==========================================================================
   화면   p3 매듭을 풀다
   폴더   public/scene/untie/
-  규격   1:1 · 2s · 프리셋 Static · 한 번만
+  규격   9:16 · 2s · 프리셋 Static · 한 번만
 
 --------------------------------------------------------------------------
   ① 이미지 · 제미나이
@@ -858,7 +880,7 @@ with a red silk cord, the cord untying itself as golden light bursts
 out from the opening seam. Small golden blossoms of light scatter
 outward from the opening. A luminous ring rotates slowly behind.
 Centered, high contrast, deep plum-violet background. Joyful,
-rewarding, ceremonial. No hands, no text. Aspect ratio 1:1.
+rewarding, ceremonial. No hands, no text. Aspect ratio 9:16.
 
 --------------------------------------------------------------------------
   ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 2s)
@@ -883,7 +905,7 @@ described above; everything else stays completely still.
 ==========================================================================
   화면   p4 소반
   폴더   public/scene/tray/
-  규격   16:9 · 2s · 프리셋 Static · 이어붙여 반복
+  규격   9:16 · 2s · 프리셋 Static · 이어붙여 반복
 
 --------------------------------------------------------------------------
   ① 이미지 · 제미나이
@@ -894,7 +916,7 @@ a shallow lacquered tray on a low table, seen from a slight angle. The
 leftmost tilts forward and glows warmly from within. A single fresh
 blossom rests at the tray's corner. A soft shaft of light from above,
 gold motes drifting. Deep plum shadows. No legible text, no hands.
-Aspect ratio 16:9.
+Aspect ratio 9:16.
 
 --------------------------------------------------------------------------
   ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 2s)
@@ -966,7 +988,7 @@ described above; everything else stays completely still.
 ==========================================================================
   화면   d1 현수막
   폴더   public/scene/banner/
-  규격   16:9 · 3s · 프리셋 Static · 이어붙여 반복
+  규격   9:16 · 3s · 프리셋 Static · 이어붙여 반복
   메모   매일 보는 화면입니다. 움직임을 가장 작게 잡으세요.
          크면 사흘이면 질립니다.
 
@@ -980,7 +1002,7 @@ amber, with a flowering vine trailing beside it. A black cat sits below
 it, tail curled. Warm light fades across empty dark plum space to the
 right. Fireflies and gold motes drift through the glow. Mostly empty
 composition with room for text on the right. No people, no text.
-Aspect ratio 16:9.
+Aspect ratio 9:16.
 
 --------------------------------------------------------------------------
   ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 3s)
@@ -1005,7 +1027,7 @@ described above; everything else stays completely still.
 ==========================================================================
   화면   d2 차 한 잔
   폴더   public/scene/tea/
-  규격   16:9 · 3s · 프리셋 Static · 이어붙여 반복
+  규격   9:16 · 3s · 프리셋 Static · 이어붙여 반복
   참고   재방문 보상 화면입니다. 두 번째 방문부터 도령이 차를 내어줍니다.
          "다음에 오면 차를 내어드리겠소" — 이 약속이 재방문 이유가 됩니다.
 
@@ -1020,7 +1042,7 @@ neatly, and a single flower resting in a shallow dish. A small black
 cat sits at the edge of the table, watching. Warm lantern light from
 above, a faint rose-coloured luminous ring floating behind. Motes of
 gold drift through the air. Deep plum-violet shadows. Inviting,
-gentle, no people, no text. Aspect ratio 16:9.
+gentle, no people, no text. Aspect ratio 9:16.
 
 --------------------------------------------------------------------------
   ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 3s)
@@ -1050,7 +1072,7 @@ described above; everything else stays completely still.
 ==========================================================================
   화면   m2 인장첩
   폴더   public/scene/sealbook/
-  규격   3:4 · 2s · 프리셋 Static · 한 번만
+  규격   9:16 · 2s · 프리셋 Static · 한 번만
   메모   인장을 새로 받았을 때만 재생하세요. 평소엔 정지 이미지.
   참고   수집 장치. 사람을 만날 때마다 인장을 하나씩 받습니다.
          스무 개를 다 모으면 한정 카드를 줍니다.
@@ -1066,7 +1088,7 @@ small squares. Four squares bear glowing coloured seal-stamps in
 different hues; the rest are empty and faintly outlined, waiting.
 Warm lantern light from above, gold motes drifting. Deep plum-violet
 background. Precious, collectible, no people, no legible text.
-Aspect ratio 3:4.
+Aspect ratio 9:16.
 
 --------------------------------------------------------------------------
   ② 모션 · 힉스필드   (프리셋 Static · 9:16 · 2s)

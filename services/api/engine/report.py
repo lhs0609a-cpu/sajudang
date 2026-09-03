@@ -231,7 +231,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         #   보이는 글자 수**를 냅니다 — 손님이 만세력을 펴고 세면
         #   같은 수가 나와야 하는, 틀릴 수 있는 수입니다.
         ('<p class="tale">눈에 띄는 건 %s %s 게 아니오. '
-         '<b>%s %s 것</b>이지.</p>'
+         '<b>%s %s 것</b>이오.</p>'
          '<p class="tale">여덟 글자 겉에 %s <b>%s</b>, '
          '%s <b>%s</b>. 세어 보시오.</p>'
          '<p class="tale">%s <b>%s</b>이오. 그게 없이 살아온 것이오.</p>'
@@ -281,7 +281,13 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
             R["zero"][parts["zero"]], R["strength"][parts["strength"]],
             R["helper"][parts["helper"]], R["ilji"][parts["ilji"]],
             band["line"].format(words=rr["words"]), band["tail"],
-            R["ilju"].format(gz=rr["ilju"]["gz"], words=rr["ilju"]["words"]),
+            R["ilju"].format(gz=rr["ilju"]["gz"], words=rr["ilju"]["words"])
+            # ★ 한자 두 자를 던져 놓고 「그대 자신을 가리키는 한 칸」 이라
+            #   했습니다 (2026-09-03). 손님은 그 칸이 무엇인지 모릅니다.
+            #   글자마다 그림이 있으니 그것을 답니다 — 셈은 맞는데
+            #   읽을 수가 없던 자리입니다.
+            + (' <span class="gz-pic">%s</span>'
+               % terms_mod.ganji_picture(rr["ilju"]["gz"])),
             R["note"].format(sample=format(rr["sample"], ",")))),
         0, sid="rarity:%s:%s" % (rr["key"], rr["ilju"]["gz"])))
 
@@ -292,9 +298,9 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         "신강": "게다가 신강이오. 밀어붙일 힘은 남는데 그걸 어디다 "
                 "쓸지를 못 골랐소. 그래서 안 해도 될 일까지 하오.",
         "신약": "게다가 신약이오. 쓸 힘이 넉넉지 않은데 그마저 남 "
-                "먼저 주오. 저녁이면 말수가 줄어들 게요.",
-        "중화": "중화라 크게 티가 안 났을 게요. 남들이 그대를 "
-                "무난하다 했을 텐데, 그 말이 제일 싫었을 게요.",
+                "먼저 주오. 저녁이면 말수가 줄어들 것이오.",
+        "중화": "중화라 크게 티가 안 났을 것이오. 남들이 그대를 "
+                "무난하다 했을 텐데, 그 말이 제일 싫었을 것이오.",
     }[f.strength]
     # ★ 곱하는 축에 **흐름(5)** 을 더했습니다.
     cuts.append(_cut(
@@ -324,7 +330,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         place = ('일지 <b>%s</b>가 부딪히고 있소. 사람 자리가 조용할 수 없는 배치요.'
                  % f.day_ji)
     else:
-        place = '일지 <b>%s</b>는 조용한 편이오. 대신 밖에서 흔들리지.' % f.day_ji
+        place = '일지 <b>%s</b>는 조용한 편이오. 대신 밖에서 흔들리오.' % f.day_ji
     if f.gwan >= 2:
         lean = "관이 둘이라 책임이 앞장서오."
     elif f.jae >= 2:
@@ -404,7 +410,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     # 십신은 대개 받침이 있소 — 비견·식신·상관·편관·정관·편인·정인.
     # 조사를 안 보고 붙이면 "상관요" 가 나옵니다. (bank.josa)
     sewoon = ('<p class="tale">해로 좁혀 보면 <b>%d년은 %s%s</b> — '
-              '<b>%s</b>의 해요. 내년 %d년은 <b>%s%s</b>, <b>%s</b></p>'
+              '<b>%s</b>의 해가 되오. 내년 %d년은 <b>%s%s</b>, <b>%s</b></p>'
               % (this_year, sun_g, sun_j, sun_tg,
                  this_year + 1, nxt_g, nxt_j,
                  josa(nxt_tg, "이오.", "요.")))
@@ -418,7 +424,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         (lead + '<p class="tale">이 구간의 성격은 <b>%s</b>. %s</p>%s%s'
          % (f.daeun_ten_god,
             "조용히 지나가지 않는 구간이오." if heavy
-            else "크게 흔들리진 않소. 다지는 구간이지.",
+            else "크게 흔들리진 않소. 다지는 구간이오.",
             when, sewoon)
          # 지금 판의 어디쯤인가. 고민·없는 기운과 **무관한 축**이라
          # 한 장 안에서 서로 다른 데를 때립니다.
@@ -502,16 +508,44 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         rows = []
         for sv in f.sinsal:
             m = T["meaning"].get(sv["key"], {})
+            # ★ 이름과 한자만 있고 **뜻이 없었습니다** (2026-09-03).
+            #
+            #   「태극귀인 太極貴人 길신 / 월주 · 寅亥」 뒤에 곧바로
+            #   본문이 왔습니다. 손님은 「귀인」 도 「길신」 도 「월주」 도
+            #   모르는 채 한자 넉 자를 봅니다. `one` 이라는 한 줄 뜻이
+            #   `sinsal.json` 에 **이미 들어 있는데 아무도 안 썼습니다.**
+            one = ('<div class="one">%s</div>' % m["one"]) if m.get("one") else ""
+            # ★ 「나한테 어떤 의미인가」 — 궁위가 그 답입니다.
+            #   어느 기둥에 들었는지는 적혀 있었는데 그 기둥이 무엇인지는
+            #   안 적혀 있었습니다. 년주는 웃대, 월주는 자란 집…
+            #   `palace_lead` 도 이미 있었고 년주 하나에만 쓰이고 있었습니다.
+            where = next((x for x in sv["at"] if x in T["palace_lead"]), "")
+            mine = ('<p class="mine"><span class="evk">그대에게는</span>%s</p>'
+                    % T["palace_lead"][where]) if where else ""
             rows.append(
                 '<div class="ss %s"><div class="hd"><b>%s</b>'
                 '<span class="hj">%s</span><span class="tag">%s</span></div>'
-                '<div class="at">%s · %s</div><p>%s</p>%s</div>'
+                '%s<div class="at">%s · %s</div>'
+                '<div class="ssfig" data-sinsal="%s"></div>'
+                '<p>%s</p>%s%s</div>'
                 % ("good" if sv["kind"] == "길신" else "warn",
-                   sv["name"], sv["hanja"], sv["kind"],
+                   sv["name"], sv["hanja"], sv["kind"], one,
                    " · ".join(sv["at"]), sv["target"],
-                   m.get("text", ""),
+                   # ★ 인물 그림이 들어갈 빈 자리. 화면이 포털로 꽂습니다
+                   #   (components/SinsalSlots.tsx). 분석지에는 이미 있는데
+                   #   값을 치르고 보는 리포트에만 없었습니다.
+                   sv["key"],
+                   m.get("text", ""), mine,
                    ('<p class="sm">%s</p>' % m["caution"]) if m.get("caution") else ""))
-        body = "".join(rows)
+        # ★ 「귀인」 은 terms 표에 두지 않습니다 — 「태극귀인」 안쪽에
+        #   걸려 이름이 「태극귀인(옛사람이 좋게 본…)」 이 됩니다.
+        #   묶음말은 여기서 한 번에 풉니다.
+        body = ('<p class="sm">이름 붙은 자리를 <b>신살</b>이라 하오. '
+                '좋게 보던 것은 <b>길신</b>이고, 그중 크게 치는 것에는 '
+                '<b>귀인</b>이라 이름을 붙였소. 조심해 보던 것은 <b>살</b>, '
+                '어느 쪽도 아닌 것은 <b>특수</b>요. '
+                '복이나 화를 보장하는 표가 아니라 <b>자리를 가리키는 '
+                '표</b>요.</p>') + "".join(rows)
     else:
         body = '<p class="tale">%s</p>' % T["none"]["sinsal"]
     cuts.append(_cut(

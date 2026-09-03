@@ -4,9 +4,13 @@
  * 신살 인물 — 이름표가 아니라 곁에 선 사람으로 보이게.
  *
  * 폴백 순서 (Scene 과 같은 구조)
- *   1. public/sinsal/{key}/clip.webm|mp4  가 있으면 영상
- *   2. 없으면 SVG 실루엣 + 등장 연출
- *   3. prefers-reduced-motion 이면 정지 (poster 또는 정지 SVG)
+ *   1. public/sinsal/{key}/figure.png     가 있으면 그 그림  ← 기본
+ *   2. public/sinsal/{key}/clip.webm|mp4  가 있으면 영상
+ *   3. 없으면 SVG 실루엣 + 등장 연출
+ *   4. prefers-reduced-motion 이면 정지 (poster 또는 정지 SVG)
+ *
+ * ★ 인물은 **움직이지 않는 것이 기본**입니다 (2026-09-03). 글 옆에
+ *   서 있는 초상이라 스물여섯이 한꺼번에 움직이면 글을 못 읽습니다.
  *
  * 모션은 참조 구현체의 캐릭터 관례를 그대로 씁니다.
  *   mBody 호흡 4.6s · mFx 입자 상승 · mProp 소품 흔들림 · blinkk 눈 깜빡임
@@ -50,6 +54,29 @@ function useHasClip(key: string) {
   useEffect(() => {
     let alive = true;
     fetch(`/sinsal/${key}/poster.jpg`, { method: "HEAD" })
+      .then((r) => alive && setHas(r.ok))
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [key]);
+  return has;
+}
+
+/**
+ * 움직이지 않는 초상 — `public/sinsal/{key}/figure.png`
+ *
+ * ★ 이 길이 없었습니다 (2026-09-03).
+ *   영상(clip)이 있거나 SVG 실루엣이거나, 둘뿐이었습니다. 그런데 신살
+ *   인물은 글 옆에 서 있는 초상이라 움직일 이유가 없습니다 — 스물여섯이
+ *   한꺼번에 움직이면 글을 못 읽습니다. 손님이 「애니메이션은 필요
+ *   없다」 고 못박았고, 그림 한 장만 받기로 했습니다.
+ *
+ *   영상보다 **앞**에 옵니다. 그림을 넣으면 그게 나옵니다.
+ */
+function useFigure(key: string) {
+  const [has, setHas] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    fetch(`/sinsal/${key}/figure.png`, { method: "HEAD" })
       .then((r) => alive && setHas(r.ok))
       .catch(() => {});
     return () => { alive = false; };
@@ -270,6 +297,7 @@ export default function SinsalFigure({
   const f = figureOf(sinsalKey);
   const reduced = useReducedMotion();
   const hasClip = useHasClip(sinsalKey);
+  const hasFigure = useFigure(sinsalKey);
   const { ref, seen } = useAppear<HTMLDivElement>();
   const [open, setOpen] = useState(false);
 
@@ -300,7 +328,10 @@ export default function SinsalFigure({
         }}
       >
         <span className="halo" />
-        {hasClip && !still ? (
+        {hasFigure ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={`/sinsal/${sinsalKey}/figure.png`} alt={f.title} />
+        ) : hasClip && !still ? (
           <video autoPlay muted playsInline loop
                  poster={`/sinsal/${sinsalKey}/poster.jpg`}>
             <source src={`/sinsal/${sinsalKey}/clip.webm`} type="video/webm" />
@@ -321,7 +352,7 @@ export default function SinsalFigure({
             <Silhouette f={f} uid={uid} />
           </svg>
         )}
-        <span className="slot">{hasClip ? "프롬프트" : `IMG · ${sinsalKey}`}</span>
+        <span className="slot">{(hasFigure || hasClip) ? "프롬프트" : `IMG · ${sinsalKey}`}</span>
       </div>
       {open && (
         <PromptModal kind="figure" id={sinsalKey} onClose={() => setOpen(false)} />

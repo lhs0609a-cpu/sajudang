@@ -364,19 +364,19 @@ def _concern_axis_seg(f, concern: str, esc_you: str) -> dict:
     if asked == 0:
         body = lead + '<p class="hit">%s</p>' % (B["CONCERN_EMPTY"] % grp)
         q, yes, no = ("…짚이오?",
-                      "그럴 게요. 없는 자리는 애써도 안 늘어나오 — 빌려 쓰는 법을 봐야 하오.",
-                      "그럼 다른 데서 메우고 계신 게요. 그것도 공짜는 아니오.")
+                      "그럴 것이오. 없는 자리는 애써도 안 늘어나오 — 빌려 쓰는 법을 봐야 하오.",
+                      "그럼 다른 데서 메우고 계신 것이오. 그것도 공짜는 아니오.")
     elif same:
         body = lead + '<p class="hit">%s</p>' % B["CONCERN_SAME"][grp]
         q, yes, no = ("…그렇소?",
-                      "그럴 게요. 가장 센 자리가 가장 안 보이는 법이오.",
-                      "그럼 아직 안 터진 게요. 센 자리는 늦게 터지오.")
+                      "그럴 것이오. 가장 센 자리가 가장 안 보이는 법이오.",
+                      "그럼 아직 안 터진 것이오. 센 자리는 늦게 터지오.")
     else:
         body = (lead
                 + '<p class="hit">헌데 %s</p>' % B["CONCERN_ELSE"][loud]
                 + '<p class="tale">%s</p>' % B["WHY_TAIL"][loud])
         q, yes, no = ("…물으신 자리가 거기가 맞소?",
-                      "그럴 게요. 물음은 %s에서 났는데 걸린 데는 딴 자리요." % word,
+                      "그럴 것이오. 물음은 %s에서 났는데 걸린 데는 딴 자리요." % word,
                       "그럼 물으신 자리가 맞소. 그건 그것대로 보겠소.")
 
     return _seg(
@@ -478,7 +478,7 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
             % (josa(top, "이", "가"), count_word(f.ten_gods[top]), strength),
             strength if strength in ("신강", "신약", "중화") else top,
             "강약" if strength in ("신강", "신약", "중화") else "십신"),
-        body=('<p class="neg">사람들이 %s를 두고 <span class="strk">%s</span>고 하지. '
+        body=('<p class="neg">사람들이 %s를 두고 <span class="strk">%s</span>고 하오. '
               '아니오.<br><span class="strk d2">%s</span>는 말도 틀렸소.<br><br>'
               '<b>%s는 사람일 뿐이오.</b></p>')
              % (esc_you, m1, m2, truth),
@@ -574,9 +574,9 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
         else:
             label = "2.5 · 겹친 자리와 어긋난 자리"
             q = "…짚이는 데가 있소?"
-            yes = ("그럴 게요. 그 사이가 그대를 가장 지치게 하오." if cmp["deep"]
+            yes = ("그럴 것이오. 그 사이가 그대를 가장 지치게 하오." if cmp["deep"]
                    else "그 한두 자리가 늘 걸리는 자리요.")
-            no = "그럼 아직 안 부딪힌 게요. 어긋난 자리는 늦게 값을 물리오."
+            no = "그럼 아직 안 부딪힌 것이오. 어긋난 자리는 늦게 값을 물리오."
         segs.append(_seg(
             stage="2.5", label=label,
             source="사주 %s ↔ 입력 %s" % (axis_string(f), _html.escape(axis4.upper())),
@@ -623,7 +623,7 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
               % (word, post)),
         question="이제 알겠소?",
         yes="알면 됐소. 아는 것과 고치는 것은 또 다른 얘기지만.",
-        no="지금 아니라 하셔도 이름은 남소. 다음에 걸릴 때 떠오를 게요.",
+        no="지금 아니라 하셔도 이름은 남소. 다음에 걸릴 때 떠오르오.",
         sid="name:%s:%s:%s" % (weak, flow, strength)))
 
     # ★ 훅에서도 어려운 말을 **한 벌에 한 번** 풉니다.

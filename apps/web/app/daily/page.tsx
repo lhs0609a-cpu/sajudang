@@ -138,7 +138,8 @@ export default function DailyPage() {
       <div className="lab mt">g3 · 차 한 잔</div>
       <Scene id="tea" />
       <p className="sm">
-        용신에 맞는 차를 내오. 리포트를 열면 함께 나오오.
+        용신(모자란 것을 채워 줄 기운)에 맞는 차를 내오.
+        리포트를 열면 함께 나오오.
       </p>
 
       {/*

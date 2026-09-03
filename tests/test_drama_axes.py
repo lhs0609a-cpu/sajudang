@@ -136,12 +136,21 @@ def test_summary_carries_has_source():
 
 
 def test_summary_says_it_cannot_measure_without_sources(monkeypatch, tmp_path):
-    """화면 소스가 없으면 깃발이 내려가야 한다 — 숫자가 나와도."""
+    """
+    화면 소스도 찍어 둔 글도 없으면 깃발이 내려가야 한다 — 숫자가 나와도.
+
+    ★ 2026-09-03 부터 소스가 없어도 **찍어 둔 글**(seed/screen_text.json)
+      이 있으면 잽니다 — 배포본이 그 길로 점수를 냅니다. 그러니 여기서는
+      둘 다 없는 자리를 흉내 냅니다. 찍어 둔 글이 있는 쪽은
+      tests/test_screen_snapshot.py 가 봅니다.
+    """
     monkeypatch.setattr(S, "WEB", tmp_path / "없는자리")
+    monkeypatch.setattr(S, "SNAP", tmp_path / "없는_스냅.json")
     S._screens.cache_clear()
     try:
         sm = S.summary(S.scan_all())
         assert sm["has_source"] is False
+        assert sm["source"] == "none"
         # 엔진 글은 여전히 잡히므로 숫자 자체는 나옵니다. 그래서 더
         # 위험합니다 — 읽는 쪽이 깃발을 봐야 합니다.
         assert sm["screens"] < 10, "소스 없이 스물일곱이 잡힐 리 없소"

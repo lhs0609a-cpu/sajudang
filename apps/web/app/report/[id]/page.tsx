@@ -13,6 +13,7 @@ import Shell from "@/components/Shell";
 import Scene from "@/components/scene/Scene";
 import ExtraAsk from "@/components/ExtraAsk";
 import Reveal from "@/components/Reveal";
+import SinsalSlots from "@/components/SinsalSlots";
 import Thinking from "@/components/Thinking";
 import ActOut from "@/components/ActOut";
 import { Narration, Say } from "@/components/Narration";
@@ -727,8 +728,12 @@ function ReportInner() {
               {/* ★ 근거를 본문 위에, 본문과 같은 급으로 둡니다.
                   전에는 8.5px 딱지라 아무도 안 봤습니다. */}
               <span className="src">{c.source}</span>
-              <div className="cutbody"
-                   dangerouslySetInnerHTML={{ __html: c.html }} />
+              {/* ★ 신살 컷에는 인물 그림이 들어갑니다. 분석지에는 이미
+                  있었는데 값을 치르고 보는 쪽에는 없었습니다. */}
+              {c.id === "sinsal"
+                ? <SinsalSlots html={c.html} />
+                : <div className="cutbody"
+                       dangerouslySetInnerHTML={{ __html: c.html }} />}
             </div>
           </Reveal>
         ))}

@@ -22,6 +22,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SCREEN_GROUPS, useSession } from "@/lib/store";
+import AssetBoard from "@/components/AssetBoard";
 
 const BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 const KEY = "sd.adminkey";
@@ -100,6 +101,9 @@ type Drama = {
      *   (services/api/engine/screenscan.has_source)
      */
     has_source: boolean;
+    /** source 소스째 · snapshot 찍어 둔 글(배포본) · none 못 잼 */
+    source?: "source" | "snapshot" | "none";
+    snapshot_at?: string | null;
     pull?: number; bite?: number; heart?: number;
     clear?: number; plain?: number; figure?: number; total?: number;
     weakest?: { id: string; title: string; total: number }[];
@@ -566,7 +570,7 @@ export default function AdminPage() {
             그 서버에 <b>화면 소스가 없는 것</b>이오 —
             {" "}<code>.\dev.ps1 api</code> 로 띄운 로컬에서 보시오.
           </p>
-        ) : !drama.summary.has_source ? (
+        ) : drama.summary.source === "none" || !drama.summary.has_source ? (
           /*
             ★ 여기가 **가장 나쁜 자리**였습니다.
 
@@ -597,6 +601,22 @@ export default function AdminPage() {
           </div>
         ) : (
           <>
+            {/*
+              ★ 배포본은 소스가 없어 **찍어 둔 글**(seed/screen_text.json)
+                로 잽니다. 숫자는 같되 낡을 수 있으니, 언제 찍은 것인지를
+                숫자 위에 적습니다. 그래야 「고쳤는데 안 움직인다」 를
+                버그가 아니라 「다시 찍어야 한다」 로 읽습니다.
+            */}
+            {drama.summary.source === "snapshot" && (
+              <p className="sm">
+                이 서버에는 화면 소스가 없어 <b>찍어 둔 글</b>로 쟀소
+                {drama.summary.snapshot_at
+                  ? ` (${drama.summary.snapshot_at.replace("T", " ")} 에 찍음)`
+                  : ""}.
+                글을 고쳤으면 <code>.\dev.ps1 drama</code> 를 돌려 다시 찍고
+                배포하시오.
+              </p>
+            )}
             <div className="kpi">
               <div><b>{drama.summary.pull}</b><span>당김</span></div>
               <div><b>{drama.summary.bite}</b><span>팩폭</span></div>
@@ -761,6 +781,12 @@ export default function AdminPage() {
           </tbody>
         </table>
       </section>
+
+      {/* ★ 에셋 현황 — 무엇이 아직 없는가.
+          장면·캐릭터·신살 인물은 파일이 있으면 쓰고 없으면 자리표시로
+          버팁니다. 좋은 구조인데, 그 대가로 **없는 것이 화면에서 티가
+          안 납니다.** 여기서 한눈에 봅니다. */}
+      <AssetBoard />
     </main>
   );
 }

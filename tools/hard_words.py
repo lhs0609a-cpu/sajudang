@@ -37,6 +37,8 @@ WEB = ROOT / "apps" / "web"
 if str(ROOT / "services" / "api") not in sys.path:
     sys.path.insert(0, str(ROOT / "services" / "api"))
 
+from engine import terms as terms_mod          # noqa: E402
+
 # ══════════════════════════════════════════════════════════
 # 어려운 말과 그 뜻
 # ══════════════════════════════════════════════════════════
@@ -117,18 +119,41 @@ FALSE = {"세운": ("세운다", "세운 ", "세운다면", "세운다는")}
 
 
 def _real(text: str, term: str, at: int) -> bool:
+    """
+    이 자리의 그 글자가 **정말 그 용어인가.**
+
+    ★ 엔진이 쓰는 잣대를 그대로 씁니다 (2026-09-03).
+      전에는 「격」 을 109번 세고 66번을 「안 풀림」 이라 했는데, 실은
+      **성격 · 가격 · 자격**이었습니다. 도구가 부풀면 진짜 빠진 자리가
+      그 안에 묻힙니다. `engine.terms` 가 화면에 풀이를 달 때 쓰는
+      표(NOT_AFTER · NOT_BEFORE)를 여기서도 봅니다 — 두 잣대가 갈리면
+      도구를 못 믿습니다.
+    """
     for bad in FALSE.get(term, ()):
         if text[at:at + len(bad)] == bad:
             return False
-    return True
+    return terms_mod._ok(text, term, at, at + len(term))
+
+
+# 그 말 바로 뒤에 열리는 풀이 — 「일진 (그날에 서는 두 글자)」
+#
+# ★ 표에 적어 둔 문구와 **글자가 같아야만** 풀린 것으로 세고 있었습니다
+#   (2026-09-03). 화면은 「그날에 새로 서는 두 글자」 라고 제 말로
+#   풀어 놓았는데 표에는 「그날의 기운」 이라 적혀 있어서, 잘 풀어 둔
+#   자리가 「안 풀림」 으로 잡혔습니다. 도구가 틀리면 사람이 그 목록을
+#   안 봅니다. **풀이가 있는가**를 보지, 문구가 같은가를 보지 않습니다.
+_OPENS = re.compile(r"\s*[（(<]|\s*—\s*[가-힣]|\s*<i")
 
 
 def glossed(text: str, term: str, meaning: str) -> bool:
-    """그 말 곁에 뜻이 있는가. 뜻의 앞 대여섯 자로 봅니다."""
+    """그 말 곁에 뜻이 있는가."""
     key = meaning.split("·")[0].strip()[:4]
     for m in re.finditer(re.escape(term), text):
         window = text[m.start(): m.end() + NEAR]
         if key and key in window:
+            return True
+        # 바로 뒤에 괄호나 줄표로 풀이가 열리면 풀린 것으로 봅니다
+        if _OPENS.match(text[m.end(): m.end() + 4]):
             return True
     return False
 

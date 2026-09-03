@@ -160,7 +160,17 @@ export default function PromptModal({
                              borderColor: "currentColor" }}>
                 {e.preset}
               </span>
-              <span>{e.ratio}</span>
+              {/*
+                ★ 시키는 비율은 `ratio` 가 아니라 `spec[0]` 입니다.
+
+                  `ratio` 는 2026-09-01 부터 **보여 주는 상자**입니다
+                  (manifest.SceneSpec.box 주석). 장면 원본은 전부 9:16
+                  인데 여기서 상자를 찍는 바람에, 이 창은 hall 을 보면서
+                  「16:9」 라고 시키고 있었습니다. 발주서가 틀린 비율을
+                  가리키면 그린 사람이 그 비율로 그립니다 — 시트(
+                  tools/prompt_sheet.js)는 이미 고쳤는데 창만 남았습니다.
+              */}
+              <span>{e.spec?.[0] ?? e.ratio}</span>
               <span>{e.duration}</span>
               {e.loop && <span style={{ color: "var(--teal)" }}>seamless loop</span>}
               {e.tint && <span style={{ color: "var(--lav)" }}>무채색 · 앱에서 착색</span>}
@@ -169,10 +179,24 @@ export default function PromptModal({
 
             <div className="hint" style={{ borderColor: "var(--teal)" }}>
               <b>제작 순서</b><br />
-              ① 제미나이로 시작 이미지 1장<br />
-              ② 힉스필드 업로드 → 아래 ② 프롬프트 + 프리셋 <b>{e.preset}</b><br />
-              ③ webm(VP9) + mp4(H.264) + poster.jpg<br />
-              ④ <b>{dir}</b> 에 배치하면 코드 수정 없이 교체되오
+              {kind === "figure" ? (
+                <>
+                  ① 제미나이로 그림 1장 (3:4 세로)<br />
+                  ② <b>{dir}</b> 에 <code>figure.png</code> 로 넣으면 코드
+                  수정 없이 교체되오<br />
+                  <span style={{ opacity: .7 }}>
+                    인물은 움직이지 않소 — 글 옆에 서 있는 초상이라
+                    스물여섯이 한꺼번에 움직이면 글을 못 읽소.
+                  </span>
+                </>
+              ) : (
+                <>
+                  ① 제미나이로 시작 이미지 1장<br />
+                  ② 힉스필드 업로드 → 아래 ② 프롬프트 + 프리셋 <b>{e.preset}</b><br />
+                  ③ webm(VP9) + mp4(H.264) + poster.jpg<br />
+                  ④ <b>{dir}</b> 에 배치하면 코드 수정 없이 교체되오
+                </>
+              )}
             </div>
 
             {seasonal && (
@@ -196,7 +220,18 @@ export default function PromptModal({
                   : "시작 이미지 · 제미나이"}
                 text={image} />
             )}
-            {e.motion && (
+            {/*
+              ★ 신살 인물은 **그림 한 장**이면 됩니다 (2026-09-03).
+
+                장면은 배경이라 움직여야 화면이 삽니다. 그런데 신살
+                인물은 글 옆에 서 있는 초상이라, 스물여섯 자리에서
+                동시에 움직이면 글을 읽을 수가 없습니다. 손님이
+                「애니메이션은 필요 없다」 고 못박았습니다.
+
+                프롬프트를 지우지는 않습니다 — 나중에 쓸 수 있게 묶음에
+                그대로 두고, **주문서에서만 감춥니다.**
+            */}
+            {e.motion && kind !== "figure" && (
               <Block n="②" label="모션 · 힉스필드" text={e.motion}
                      dir="영상 앵커가 붙어 있소. 통째로 복사하시오 — 빼면 3초 안에 얼굴이 사진처럼 변하오." />
             )}

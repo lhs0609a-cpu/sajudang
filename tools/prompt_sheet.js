@@ -119,7 +119,32 @@ for (const m of MANIFEST.matchAll(
 
 const EXTRA = JSON.parse(fs.readFileSync(FIGJSON, "utf8")).scenes || {};
 for (const [id, v] of Object.entries(EXTRA)) {
-  if (SCN[id]) continue;
+  /*
+   * ★ 참조본에 있어도 **글은 묶음이 최신**입니다.
+   *
+   *   시트는 그림 프롬프트를 참조본에서 읽는데, 참조본은 얼어 있습니다.
+   *   2026-09-01 에 「Aspect ratio 16:9」 를 9:16 으로 고친 것은 묶음
+   *   (asset-prompts.json)에만 들어갔고, 그래서 **손에 쥐는 발주서는
+   *   그 뒤로도 열여섯 자리에서 16:9 를 시키고 있었습니다.** 앱의
+   *   프롬프트 창과 종이가 서로 다른 비율을 시킨 셈입니다.
+   *
+   *   그러니 참조본에 있는 것도 묶음의 글로 덮습니다. 순서는
+   *   참조본 → (extract, 덮어쓰기 금지) → 묶음 → 시트 입니다.
+   *
+   *   ★ 계절을 타는 장면은 빼둡니다. 그건 계절마다 글이 다시 쓰이는데
+   *     묶음에는 한 벌(여름)만 있어서, 덮으면 넉 장이 한 장이 됩니다.
+   */
+  if (SCN[id]) {
+    if (v.seasonal) continue;
+    if (v.image) {
+      SCN[id].prompt = v.image;
+      for (const k of Object.keys(bySeason))
+        if (bySeason[k][id]) bySeason[k][id].prompt = v.image;
+    }
+    if (v.spec) SCN[id].spec = v.spec;
+    if (v.motion) MO[id] = Object.assign({}, MO[id] || {}, { hg: v.motion });
+    continue;
+  }
   // 참조본은 제목을 `t` 로 씁니다. 이름을 안 맞추면 차례에서 터집니다.
   const e = { t: v.title, prompt: v.image, spec: v.spec, hint: v.hint };
   SCN[id] = e;
@@ -262,8 +287,17 @@ const strip = (h) => (h || "")
   .filter((x) => x.length)
   .join(NL + "         ");
 
-function spec(m) {
-  const out = [m.ar || "16:9", m.du || "3s", "프리셋 " + (m.ps || "Static")];
+/*
+ * ★ 「규격」 줄도 선언에서 읽습니다 (② 모션 줄과 같은 값).
+ *
+ *   여기만 참조본의 `ar` 을 찍는 바람에, 같은 장 안에서 규격은 16:9
+ *   라 하고 모션은 9:16 이라 하는 자리가 있었습니다. 신살 인물은
+ *   선언에 없으니 참조본의 3:4 로 내려옵니다 — 그건 세로 얼굴이 맞습니다.
+ */
+function spec(m, id) {
+  const sp = SPEC[id] || {};
+  const out = [sp.ar || m.ar || "9:16", sp.du || m.du || "3s",
+               "프리셋 " + (m.ps || "Static")];
   out.push(m.loop ? "이어붙여 반복" : "한 번만");
   if (m.tint) out.push("★ 앱이 흑백으로 바꾼 뒤 캐릭터 색을 입힙니다");
   if (m.still) out.push("PNG 정지컷도 함께");
@@ -344,7 +378,7 @@ for (const it of items) {
   P(bar("="));
   P("  화면   " + it.where);
   P("  폴더   " + it.dir);
-  P("  규격   " + spec(it.mo));
+  P("  규격   " + spec(it.mo, it.id));
   if (it.mo.note) P("  메모   " + strip(it.mo.note));
   if (it.hint) P("  참고   " + strip(it.hint));
   if (it.extra) P("  참고   " + it.extra);

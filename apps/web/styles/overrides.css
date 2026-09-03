@@ -370,6 +370,34 @@ body:has(.gatehero) .stage { padding-bottom: 0; }
 }
 .ss .at { font-family: var(--mono); font-size: var(--fs-2); color: var(--paper3); margin: 3px 0 5px; }
 
+/* ── 신살 카드의 뜻과 궁위 ─────────────────────────────
+   ★ 이름과 한자만 있고 뜻이 없었습니다 (2026-09-03). 손님은
+     「태극귀인 太極貴人 길신」 을 읽고 아무것도 알지 못한 채
+     본문으로 들어갔습니다. 뜻 한 줄을 이름 바로 밑에 답니다. */
+.ss .one {
+  font-size: var(--fs-1);
+  color: var(--gold);
+  letter-spacing: -.01em;
+  margin: 4px 0 2px;
+}
+/* 「나한테 어떤 의미인가」 — 그 기둥이 무엇인지. 근거 줄과 같은 결. */
+.ss .mine {
+  margin-top: 7px;
+  padding-top: 6px;
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-1);
+  color: var(--paper2);
+}
+.ss .mine .evk {
+  font-family: var(--mono);
+  font-size: var(--fs-2);
+  color: var(--paper3);
+  margin-right: 6px;
+}
+
+/* 갑자 두 글자의 그림 — 「庚戌은 벼려진 쇠가 …」 */
+.gz-pic { color: var(--paper2); }
+
 .caveat {
   border: 1px dashed var(--line2); padding: 13px 14px; margin: 18px 0;
   background: rgba(114,106,128,.06);
@@ -2738,3 +2766,77 @@ body.has-rail .beatskip-hint { left: calc(50% + 116px); }
   transform-origin: 50% 37%;
   transform: scale(1.55);
 }
+
+
+/* ══════════════════════════════════════════════════════════
+   에셋 현황판 (관리자) — 실물을 늘어놓고 없는 것을 붉게
+   ══════════════════════════════════════════════════════════ */
+.assetboard { margin-top: 26px; }
+.assetboard .lab2 {
+  font-family: var(--mono);
+  font-size: var(--fs-2);
+  color: var(--paper3);
+  margin: 18px 0 8px;
+}
+.abtot { display: flex; gap: 8px; flex-wrap: wrap; align-items: stretch; margin: 8px 0 4px; }
+.abcard {
+  flex: 1 1 140px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex; flex-direction: column; gap: 2px;
+  font-family: var(--mono); font-size: var(--fs-2);
+  color: var(--paper2);
+}
+.abcard b { color: var(--gold); font-size: var(--fs-1); }
+.abonly {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: var(--fs-2); color: var(--paper2);
+  padding: 0 6px; cursor: pointer;
+}
+/* 타일 — 장면은 넓게(4:3 상자), 사람은 좁게 */
+.abgrid { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+.abgrid.char, .abgrid.figure { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.abtile {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg2);
+  display: flex; flex-direction: column;
+  min-width: 0;
+}
+/* ★ 없는 것은 테두리부터 붉습니다 — 훑어도 눈에 걸려야 합니다 */
+.abtile.lack { border-color: color-mix(in srgb, var(--rose) 60%, var(--line)); }
+.abart { cursor: pointer; position: relative; display: flex; justify-content: center; background: var(--bg); }
+.abart:focus-visible { outline: 1px solid var(--gold); }
+/* 장면은 상자 그대로, 사람은 가운데 세움 */
+.abgrid.char .abart, .abgrid.figure .abart { padding: 10px 0 4px; }
+.abart .sfig { margin: 0; }
+.abmeta { padding: 7px 9px 9px; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.abhead { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+/* 이름은 끊겨도 됩니다 — 자르면 「삼거리 노…」 가 됩니다 (test_no_overlap) */
+.abhead b { color: var(--paper); font-size: var(--fs-1); min-width: 0; overflow-wrap: anywhere; }
+.abid { font-family: var(--mono); font-size: var(--fs-2); color: var(--paper3); }
+.abdots { display: flex; gap: 4px; }
+.abdot {
+  flex: 1 1 0; min-width: 0;
+  text-align: center;
+  border-radius: 3px;
+  padding: 2px 0;
+  font-family: var(--mono); font-size: var(--fs-2);
+  border: 1px solid var(--rose);
+  color: var(--rose);
+}
+.abdot.on { border-color: var(--line); color: var(--paper3); }
+.abdot.na { border-color: transparent; color: var(--paper3); opacity: .5; }
+.abwhere { font-family: var(--mono); font-size: var(--fs-2); }
+.abwhere a { color: var(--paper3); text-decoration: none; }
+.abwhere a:hover { color: var(--gold); }
+.abbtn {
+  align-self: flex-start;
+  background: none; border: 1px solid var(--line); border-radius: 4px;
+  color: var(--paper2); font-family: var(--mono); font-size: var(--fs-2);
+  padding: 3px 9px; cursor: pointer;
+}
+.abbtn:hover { border-color: var(--gold); color: var(--gold); }
