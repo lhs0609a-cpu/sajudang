@@ -83,3 +83,65 @@ export const LENS_BY_ID: Record<string, LensInfo> =
   Object.fromEntries(LENSES.map((l) => [l.id, l]));
 
 export const DEFAULT_LENS = "pungun";
+
+/*
+ * ══════════════════════════════════════════════════════════
+ * 호칭 — 이 사람이 손님을 뭐라 부르는가
+ * ══════════════════════════════════════════════════════════
+ *
+ * ★ 왜 화면에도 있어야 하나
+ *
+ *   서버가 짓는 글은 `voice.address` 가 캐릭터마다 호칭을 갈아
+ *   끼웁니다. 그런데 **화면에 박아 넣은 대사**는 안 거칩니다.
+ *   그래서 캐릭터 자리(`<Say lens={...}>`)에 「그대」라고 적으면
+ *   자네라 부르는 훈장도, 손님이라 부르는 행수도, 아저씨라 부르는
+ *   청동자도 전부 「그대」라고 말합니다.
+ *
+ *   스무 명 중 「그대」를 쓰는 사람은 셋뿐입니다. 나머지 열일곱은
+ *   틀린 말을 하게 됩니다 — 훅에서 이미 한 번 겪은 자리입니다
+ *   (CLAUDE.md 「훅을 voice 없이 내보내기」).
+ *
+ * ★ seed/lens_view.json 과 같아야 합니다.
+ *   `tests/test_lens_sources_agree.py` 가 지킵니다.
+ */
+type Address = { you: string; you_else?: string; you_m?: string; you_f?: string };
+
+export const ADDRESS: Record<string, Address> = {
+  pungun: { you: "그대" },
+  baegun: { you: "당신" },
+  cheongam: { you: "자네" },
+  sigye: { you: "이름", you_else: "자네" },
+  eunbyeol: { you: "당신" },
+  jeokhyeol: { you: "너" },
+  monghwa: { you: "이름", you_else: "너" },
+  seoyeok: { you: "손님" },
+  paeseon: { you: "이름", you_else: "자네" },
+  myeonsang: { you: "그쪽" },
+  wolha: { you: "이름", you_else: "자네" },
+  hongmae: { you: "그쪽" },
+  yeondam: { you: "당신" },
+  hwagyeong: { you: "그대" },
+  haengsu: { you: "손님" },
+  hunjang: { you: "이름", you_else: "너" },
+  yakcho: { you: "그대" },
+  ilgwan: { you: "그쪽" },
+  nopa: { you: "자네" },
+  dongja: { you: "성별", you_else: "그쪽", you_m: "아저씨", you_f: "아주머니" },
+};
+
+/**
+ * 이 사람이 손님을 부르는 말. `engine/lens.you_of` 와 같은 규칙입니다.
+ *
+ * ★ 모르면 지어내지 않습니다 — 이름을 안 적었으면 그 캐릭터의
+ *   대신 부르는 말로 물러섭니다. 성별을 모를 때도 마찬가지입니다.
+ */
+export function youOf(lensId?: string | null, name = "",
+                      sex?: "M" | "F" | null): string {
+  const a = ADDRESS[lensId ?? ""] ?? ADDRESS[DEFAULT_LENS];
+  if (a.you === "이름") return name.trim() || a.you_else || "그대";
+  if (a.you === "성별") {
+    if (sex !== "M" && sex !== "F") return a.you_else || "그대";
+    return (sex === "M" ? a.you_m : a.you_f) || a.you_else || "그대";
+  }
+  return a.you;
+}

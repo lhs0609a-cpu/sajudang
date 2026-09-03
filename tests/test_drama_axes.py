@@ -109,3 +109,124 @@ def test_admin_table_shows_six_columns_too():
     for ko in KO:
         assert ko in src, "주인 자리 표에 %s 가 없다" % ko
     assert "depth" not in src, "옛 축(충실)이 남아 있다"
+
+
+# ══════════════════════════════════════════════════════════
+# 반쪽 점수를 멀쩡한 점수처럼 내지 않는가
+# ══════════════════════════════════════════════════════════
+#
+# ★ 무슨 일이 있었나 (2026-09-03)
+#
+#   연출 점수는 화면 글이 코드에 박혀 있어서 `apps/web/**/page.tsx` 를
+#   **소스째 읽어서** 셉니다. 그런데 배포 이미지(Dockerfile)에는
+#   `seed/` 와 `services/api/` 만 들어갑니다 — `apps/web` 이 없습니다.
+#
+#   그러면 스물일곱 화면이 **엔진이 짓는 여섯**으로 줄고, 그런데도
+#   합계는 그럴듯하게 나옵니다. 실제로 배포본 관리자 화면에
+#   「합 63 · 화면 6」 이 아무 표시 없이 떠 있었습니다.
+#
+#   `screenscan.has_source()` 가 그 사실을 이미 들고 있었습니다.
+#   **아무도 안 읽고 있었을 뿐입니다** — 화면도, 도구도.
+#
+#   틀린 숫자를 내느니 못 잰다고 말합니다.
+def test_summary_carries_has_source():
+    rows = S.scan_all()
+    assert S.summary(rows).get("has_source") is True, \
+        "저장소에서 돌리는데 화면 소스를 못 읽었소"
+
+
+def test_summary_says_it_cannot_measure_without_sources(monkeypatch, tmp_path):
+    """화면 소스가 없으면 깃발이 내려가야 한다 — 숫자가 나와도."""
+    monkeypatch.setattr(S, "WEB", tmp_path / "없는자리")
+    S._screens.cache_clear()
+    try:
+        sm = S.summary(S.scan_all())
+        assert sm["has_source"] is False
+        # 엔진 글은 여전히 잡히므로 숫자 자체는 나옵니다. 그래서 더
+        # 위험합니다 — 읽는 쪽이 깃발을 봐야 합니다.
+        assert sm["screens"] < 10, "소스 없이 스물일곱이 잡힐 리 없소"
+    finally:
+        S._screens.cache_clear()
+
+
+def _admin_page() -> str:
+    return (WEB / "app" / "admin" / "page.tsx").read_text(encoding="utf-8")
+
+
+def test_admin_screen_reads_the_flag():
+    """관리자 화면이 깃발을 보고 갈라야 한다."""
+    src = _admin_page()
+    assert "has_source" in src, \
+        "/admin 이 has_source 를 안 보오 — 반쪽 점수가 그대로 뜨오"
+
+
+def test_cli_reads_the_flag():
+    src = (ROOT / "tools" / "drama_audit.py").read_text(encoding="utf-8")
+    assert "has_source" in src, \
+        "drama_audit 이 has_source 를 안 보오"
+
+
+# ══════════════════════════════════════════════════════════
+# 재는 화면이 지도와 같은가 — 조용히 빠뜨리지 않는가
+# ══════════════════════════════════════════════════════════
+#
+# ★ 무슨 일이 있었나 (2026-09-03)
+#
+#   `tools/screen_graph.py` 는 「화면 32 / 32」 라 적고, 연출 자는
+#   스물일곱만 쟀습니다. **아무도 그 다섯을 안 물었습니다.**
+#
+#   빠진 다섯 중 s1·s2 는 `app/s/[token]/SharedView.tsx` 였습니다 —
+#   남이 보낸 링크로 **이 집을 처음 보는 사람**이 서는 자리입니다
+#   (docs/15). 그 화면이 점수 밖에 있었고, 넣어 보니 45점으로
+#   스물여덟 중 꼴찌였습니다.
+#
+#   나머지 셋(c8 내보내기 · g2 되짚기 · g3 차 한 잔)은 다른 화면
+#   **안의 구역**이라 따로 안 섭니다. 그건 빠진 게 아니라 없는
+#   것이라, 여기 적어 두고 셈에서 뺍니다.
+SECTIONS = {"c8", "g2", "g3", "s2"}   # 다른 화면 안의 구역
+
+
+def test_every_named_screen_is_measured():
+    S._screens.cache_clear()
+    got = set(S._screens())
+    want = set(S.KO) - SECTIONS
+    missing = sorted(want - got)
+    assert not missing, (
+        "이름은 있는데 점수를 안 재는 화면: %s\n"
+        "  `<Shell screen=\"…\">` 선언이 없거나 screenscan.PAGES 에 "
+        "그 파일이 없소." % missing)
+
+
+def test_share_entry_is_measured():
+    """공유로 건너오는 자리는 **처음 오는 사람**이 서는 곳이다."""
+    S._screens.cache_clear()
+    assert "s1" in S._screens(), \
+        "공유 유입 화면(s1)이 점수 밖에 있소 — 처음 오는 사람이 서는 자리요"
+
+
+# ══════════════════════════════════════════════════════════
+# 점수표가 **실시간**으로 붙어 있는가
+# ══════════════════════════════════════════════════════════
+#
+# ★ 손님이 시킨 것 (2026-09-03)
+#
+#   "성신당 연출감사표는 항상 관리자페이지에서 실시간으로 연동되어
+#   있는 점수표 볼 수 있게해줘. 수정하면 또 수정한거 파악해서 점수가
+#   매번 실시간으로 연동되어야해."
+#
+#   서버는 캐시를 안 겁니다 — `/v1/admin/screens` 가 부를 때마다
+#   `_screens.cache_clear()` 하고 다시 읽습니다. 그런데 **화면이 처음
+#   한 번만 물어봤습니다.** 글을 고치고 돌아와도 옛 점수가 그대로
+#   떠 있었고, 그러면 도구를 안 믿게 됩니다.
+def test_admin_screen_polls_for_fresh_scores():
+    src = _admin_page()
+    assert "setInterval" in src, "주인 화면이 되풀이해 안 묻소 — 실시간이 아니오"
+    assert "visibilitychange" in src, \
+        "안 보는 탭에도 계속 묻소 — 보고 있을 때만 물어야 하오"
+
+
+def test_screens_endpoint_clears_its_cache():
+    src = (ROOT / "services" / "api" / "routers" / "admin.py").read_text(
+        encoding="utf-8")
+    assert "cache_clear()" in src, \
+        "점수를 캐시한 채로 내면 고쳐도 안 움직이오"

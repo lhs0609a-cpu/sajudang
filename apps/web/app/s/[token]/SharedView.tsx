@@ -19,6 +19,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Shell from "@/components/Shell";
+import ActOut from "@/components/ActOut";
 import { useScreen } from "@/lib/track";
 import Scene from "@/components/scene/Scene";
 import { Narration, Say } from "@/components/Narration";
@@ -71,17 +72,64 @@ export default function SharedView({ token }: { token: string }) {
   const who = d.from_name || d.name;
 
   return (
-    <Shell title="건너오다" legal>
+    /*
+     * ★ 이 화면은 **한 번도 점수를 안 받고 있었습니다.**
+     *
+     *   `@screen s1 s2` 라 적혀 있어 화면 지도(screen_graph)는 32개를
+     *   다 세는데, 연출 자(screenscan)는 `<Shell screen="…">` 선언을
+     *   보고 잘라 냅니다. 여기에 그 선언이 없었고, 이 파일이 스캔
+     *   목록(PAGES)에도 없었습니다. 그래서 스물일곱만 재고 있었습니다.
+     *
+     *   하필 여기는 **남이 보낸 링크로 처음 들어오는 자리**입니다
+     *   (docs/15). 이 집을 처음 보는 사람이 가장 많이 서는 화면이
+     *   점수 밖에 있었습니다.
+     */
+    <Shell screen="s1" title="건너오다" legal>
       <Scene id="gate" className="hero" />
 
       {/* ① 누가 보냈는가 */}
+      {/*
+        ★ 여기가 스물여덟 중 **꼴찌(45)** 였습니다. 그리고 하필
+          이 집을 **처음 보는 사람**이 서는 자리입니다.
+
+          여는 줄이 「보내셨소」로 시작해 콜드 오픈이 아니었고,
+          받은 사람 얘기가 한 줄도 없었습니다. 남의 사주를 대신
+          읽어 주는 화면이라 더 그랬습니다 — 이 종이의 주인은
+          여기 없고, 보는 사람은 구경꾼이 됩니다.
+
+          ★ 파는 말은 안 얹습니다. 유입 화면입니다 (docs/15) —
+            적중률·과학·통계 같은 말은 이 집이 금지한 것입니다.
+            적는 건 **이 화면이 이미 아는 것**뿐입니다.
+      */}
       <Narration
         lines={
           who
-            ? [`${who}님이 이 종이를 보내셨소.`, "광고가 아니라, 아는 사람이 건넨 것이오."]
-            : ["누가 보냈는지는 적히지 않았소.", "받으신 종이만 여기 있소."]
+            ? [`${who}님이 이 종이를 보내 왔다.`,
+               "광고가 아니라, 아는 사람이 건넨 것이다."]
+            : ["누가 보냈는지는 적혀 있지 않다.",
+               "받은 종이만 여기 있다."]
         }
       />
+      <Say who="도령" lens="pungun">
+        여기 적힌 8글자는 그대 것이 아니오. 기둥 4자리를 옮긴
+        남의 글자요.
+        <br />
+        그런데도 끝까지 내려 보게 되오. <b>남의 것을 보면서 제
+        것을 견주기 때문</b>이오. 여기까지 오는 동안 벌써 한 번은
+        「나는 어떤가」 하셨소. 그러고도 묻기는 미뤄 두셨을 것이오 —
+        이런 걸 믿느냐 소리를 들을까 참은 적이 있어서요.
+        <br />
+        이 집은 맞힌다고 하지 않소. <b>무엇을 보고 한 말인지</b>를
+        칸마다 적어 둘 뿐이오. 흐린 데는 흐리다고 아래에 적어
+        두었으니, 대 보고 아니다 싶으면 닫으시오. 남이 건넨
+        종이는 대문 앞에 놓인 편지처럼, 뜯어 보고 그냥 두고 가도
+        되오. 여태 그런 편지를 몇 번 받아 보셨을 것이오.
+      </Say>
+      <span className="src">
+        근거 · 기둥 4자리에서 옮긴 8글자로 셈한 것이오 ·
+        생년월일시와 태어난 고을은 이 고리에 안 담기오 ·
+        고리는 90일이 지나면 스스로 닫히오
+      </span>
 
       {/* ② 친구의 것 */}
       <div className="card sumhead">
@@ -151,15 +199,32 @@ export default function SharedView({ token }: { token: string }) {
           {who ? `${who}님 것은 여기까지요.` : "받으신 것은 여기까지요."}
           <br />그대 여덟 글자도 세워보시겠소? 값은 아직 묻지 않소.
         </Say>
+        {/*
+          ★ 막이 그냥 끝나고 있었습니다. 남의 종이를 다 보고 나서
+            버튼 둘이 나올 뿐이라, 「나도 해볼까」가 손님 머릿속에서
+            혼자 서야 했습니다. 재촉이 아니라 **무엇이 다른지**를
+            한 줄로 말합니다 — 여기 있는 건 남의 글자입니다.
+        */}
+        <ActOut kind="남긴 물음" next="골목">
+          여기 있는 8글자는 끝까지 남의 것이오. 남의 옷을 걸쳐 본
+          것처럼, 품이 맞는지는 알아도 제 치수는 모르오.
+          <br />
+          <b>그대 것은 아직 한 글자도 안 섰소.</b>
+        </ActOut>
+        {/*
+          ★ 열린 횟수가 **버튼 아래**에 있었습니다. 그건 고를 때
+            보라고 있는 수인데, 다 고르고 난 자리에 놓여 있었습니다.
+            누르기 전에 보이게 위로 올립니다.
+        */}
+        <p className="sm" style={{ textAlign: "center", color: "var(--paper3)" }}>
+          이 종이는 {d.views}번 열렸소.
+        </p>
         <button className="btn mt" onClick={() => router.push("/")}>
           내 여덟 글자를 세우겠습니다
         </button>
         <button className="btn gh" onClick={() => router.push("/lobby")}>
           어떤 사람들이 있는지부터 보겠습니다
         </button>
-        <p className="sm mt" style={{ textAlign: "center", color: "var(--paper3)" }}>
-          이 종이는 {d.views}번 열렸소
-        </p>
       </div>
     </Shell>
   );

@@ -222,7 +222,8 @@ FLOOR = {"input": 120, "beat": 260, "read": 900, "list": 200}
 
 def score(sid: str, title: str, html: str, kind: str = "read",
           next_named: Optional[str] = None,
-          declared: Optional[list] = None) -> dict:
+          declared: Optional[list] = None,
+          addressed: bool = False) -> dict:
     """
     화면 하나의 네 점수와 **무엇이 모자란지**.
 
@@ -231,6 +232,8 @@ def score(sid: str, title: str, html: str, kind: str = "read",
     kind       input 입력 · beat 한 마디 · read 읽는 자리 · list 고르는 자리
     next_named 화면 밖에서 다음 자리를 이름으로 예고했으면 그 이름
     declared   화면이 `<ActOut kind="딜레마">` 로 **선언한** 액트아웃
+    addressed  화면이 손님을 **그 사람의 호칭**으로 부르는가
+               (`{you}` — 캐릭터마다 그대·자네·손님·아저씨로 갈립니다)
 
     ★ 왜 선언을 받나
 
@@ -321,7 +324,15 @@ def score(sid: str, title: str, html: str, kind: str = "read",
     #   「힘내시오」 「마음먹기 나름이오」 는 감정을 건드리는 게 아니라
     #   가르치는 것입니다. 손님이 울컥하는 건 알아준다고 느낄 때지
     #   훈계받을 때가 아닙니다. 이 집이 금지한 단정(docs/11)과 같은 결.
-    named_you = 25 if YOU.search(text) else 0
+    # ★ 호명은 말뭉치로만 찾으면 **잘 쓴 화면을 깎습니다.**
+    #
+    #   화면에 「그대」 라고 박아 두면 자는 셉니다. 그런데 그 화면은
+    #   자네라 부르는 사람에게도 「그대」 라고 말합니다 — 스무 명 중
+    #   열일곱이 틀린 말을 하게 됩니다. 제대로 고친 화면(`{you}`)은
+    #   값이라 글에 안 남고, 그래서 0점이 됐습니다.
+    #
+    #   선언은 읽습니다. `kind` · `next` 와 같은 자리입니다.
+    named_you = 25 if (addressed or YOU.search(text)) else 0
     if not named_you:
         miss.append("누구한테 하는 말인지 없소 — 「그대」 로 부르시오")
     feel_hits = len(FEEL.findall(text))

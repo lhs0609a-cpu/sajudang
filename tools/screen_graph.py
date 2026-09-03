@@ -21,6 +21,20 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT / "apps" / "web" / "app"
 
+# ══════════════════════════════════════════════════════════
+# 어느 화면에나 서는 껍데기
+# ══════════════════════════════════════════════════════════
+#
+# ★ `/admin` 과 `/legal` 이 계속 고아 화면으로 찍히고 있었습니다.
+#
+#   이 자는 `app/**/page.tsx` 와 그 형제 파일만 읽습니다. 그런데
+#   아래 처마(`Shell.SiteFooter`)는 **모든 화면에 붙는** 부품이라
+#   `components/Shell.tsx` 에 삽니다. 거기 있는 길은 화면마다 하나씩
+#   난 길인데 자는 한 번도 안 봤습니다.
+#
+#   껍데기에 적힌 길은 **모든 라우트에서 나가는 길**로 셉니다.
+CHROME = (ROOT / "apps" / "web" / "components" / "Shell.tsx",)
+
 # docs/08 §1 의 화면 대장 — 라우트마다 어떤 화면이 들어 있어야 하는가
 SCREEN_MAP = {
     "/": ["a1", "a2", "a3", "a4", "a4b", "a5", "a6", "a7"],
@@ -74,6 +88,15 @@ def scan() -> tuple[dict, list, list]:
                 edges[route].add(normalize(m.group(1), routes))
         if "router.back()" in src:
             edges[route].add("__back__")
+
+        # 껍데기에 난 길은 이 화면에서도 난 길이다 (처마 · 상단 띠)
+        for f in CHROME:
+            if not f.exists():
+                continue
+            chrome = f.read_text(encoding="utf-8")
+            for pat in (r'router\.push\(\s*"([^"]+)"', r'href="([^"]+)"'):
+                for m in re.finditer(pat, chrome):
+                    edges[route].add(normalize(m.group(1), routes))
 
         # 그 파일이 스스로 밝힌 화면 (@screen 태그)
         m = re.search(r"@screen\s+([a-z0-9 ]+)", src)

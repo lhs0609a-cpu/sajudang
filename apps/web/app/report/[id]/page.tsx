@@ -17,7 +17,7 @@ import Thinking from "@/components/Thinking";
 import ActOut from "@/components/ActOut";
 import { Narration, Say } from "@/components/Narration";
 import { api, ApiError } from "@/lib/api";
-import { LENS_BY_ID } from "@/lib/lenses";
+import { LENS_BY_ID, youOf } from "@/lib/lenses";
 import { useSession } from "@/lib/store";
 import { thinkOf } from "@/lib/think";
 import type { ReportResponse } from "@shared/chart";
@@ -74,6 +74,8 @@ function ReportInner() {
   const s = useSession();
   const lensId = params.id;
   const lens = LENS_BY_ID[lensId];
+  /* 이 사람이 손님을 부르는 말 (engine/lens.you_of 와 같은 규칙). */
+  const you = youOf(lensId, s.name, s.sex);
 
   const asked = query.get("tab") as Tab | null;
   const [tab, setTab] = useState<Tab>(asked && TABS.includes(asked) ? asked : "c1");
@@ -346,6 +348,33 @@ function ReportInner() {
           거짓이 아니고 어느 하나도 산 전부가 아니오.
         </p>
         {/*
+          ★ 표지가 일곱째로 낮았습니다 (연출 57).
+
+            이름과 컷 수와 「같은 산」 비유가 전부였습니다. 여는
+            자리인데 **읽으러 온 사람 얘기가 없어서**, 책 표지에
+            제목만 적힌 꼴이었습니다. 울림 20 · 팩폭 43.
+
+            표지에서 본문을 미리 말하면 안 됩니다. 그래서 여기
+            적는 건 **이 화면이 이미 아는 것**뿐입니다 — 기둥 4자리
+            8글자, 이 사람이 먼저 보는 자리, 그리고 읽는 법.
+        */}
+        <Say who={rep.lens.name} lens={lensId}>
+          {you}가 적어 낸 건 태어난 해·달·날·시 4자리요. 그걸 옮기니
+          8글자가 되었소. 여기 적힌 건 전부 그 여덟에서 나온 것이라,
+          없는 말은 한 줄도 안 얹었고 앞으로도 안 얹소.
+          <br />
+          <b>여태 사주를 본 적이 없지는 않을 것이오.</b>
+          {" "}보고 나서도 안 믿긴 채로 덮어 둔 일이 있었소. 맞는
+          말 같기는 한데 누구한테나 맞는 말 같아서, 물어보려다 참고
+          혼자 접어 둔 것이오. 그래서 이 집은 칸마다 <b>근거 줄</b>을
+          답니다 — 대 보시오. 못 대는 줄이 있으면 그건 내 잘못이오.
+          <br />
+          내가 먼저 보는 자리는 「{rep.lens.specialty ?? rep.lens.name}」이오.
+          나머지 19명은 같은 8글자를 놓고 다른 데를 먼저 짚소.
+          두루마리처럼 위에서 아래로 한 컷씩 뜨니, 훑지 말고
+          한 칸씩 보시오.
+        </Say>
+        {/*
            ★ 표지가 「N컷이오」로 끝났습니다. 수는 있는데 **그중 무엇이
              그대만의 것인지**가 없었습니다. 관점 컷(lc_)은 이 사람을
              고른 까닭 그 자체라, 표지에서 이름을 불러 줘야 합니다.
@@ -409,6 +438,25 @@ function ReportInner() {
         <Narration lines={["두루마리가 반쯤 접혀 있다."]} />
         <Say who={rep.lens.name} lens={lensId}>
           여기까지가 값 없이 하는 얘기요. 나머지에는 <b>왜</b>와 <b>언제</b>가 들어 있소.
+          <br />
+          {you}가 여기서 손을 뗄 것도 아오. 나가도 붙잡지 않소.
+          {" "}<b>여태 이런 데서 결제 단추를 눌렀다 후회한 적이 있소.</b>
+          {" "}그래서 접힌 자리마다 <b>무엇을 보고 한 말인지</b>를 먼저
+          적어 두었소 — 제목과 근거 줄은 값을 안 치러도 다 보이오.
+          가려 둔 건 <b>그 안의 글</b>뿐이오.
+          <br />
+          접힌 데를 억지로 궁금하게 만들 생각은 없소. 밥값 한 끼를
+          두고 재는 일이니, 오늘 밤 잠이 안 올 만큼 걸리는 게 아니면
+          접어 두고 가시오. 두루마리는 내일도 여기 그대로 있소 —
+          장에 내놓고 파는 물건이 아니라, 상 위에 펴 둔 종이처럼
+          말이오.
+          <br />
+          스무 사람 중 이 자리를 보는 건 나 1명이오. 같은 8글자를
+          두고 나머지 19명은 다른 데를 짚소. 그러니 여기서 접어도
+          그대가 놓치는 건 <b>내 눈 하나</b>지 그대의 여덟 글자가
+          아니오. 돈을 먼저 보고 싶으면 돈 보는 사람에게, 끊긴
+          연락이 걸리면 그 사람에게 가시오 — 열쇠 꾸러미에서 맞는
+          열쇠 하나를 골라 쥐는 것같이 하면 되오.
         </Say>
         {/*
           ★ 여기가 `가가가가 가가가가가 가가가` 였습니다. 자리표시
@@ -440,6 +488,18 @@ function ReportInner() {
             </p>
           </div>
         ))}
+        {/*
+          ★ 막이 그냥 끝나고 있었습니다. 접힌 목록 다음에 곧바로
+            버튼 둘이라, 값을 치를지 말지를 **목록만 보고** 정하게
+            했습니다. 여기는 딜레마로 끊는 자리입니다 — 다만 재촉이
+            아니라 접어 두는 쪽도 같이 냅니다.
+        */}
+        <ActOut kind="딜레마" next="어디까지 볼지">
+          접힌 자리는 오늘 다 열어도 되고, 하나도 안 열어도 되오.
+          <br />
+          <b>둘 다 답이오.</b> 다만 절반만 열어 두고 저녁 내내 그
+          생각을 붙들고 있는 것 — 그것만은 안 하시는 게 좋소.
+        </ActOut>
         <button className="btn mt" onClick={() => router.push("/pay?step=d1")}>
           어디까지 볼지 고르겠습니다
         </button>
@@ -495,7 +555,38 @@ function ReportInner() {
     return (
       <Shell screen="c6" title="남기다" legal>
         <Scene id="wall" />
-        <Say who={rep.lens.name} lens={lensId}>어떻게 보셨소?</Say>
+        <Narration lines={["벽에 붉은 인장이 줄지어 찍혀 있다.",
+                           "빈 칸이 하나 남아 있다."]} />
+        {/*
+          ★ 여기가 셋째로 낮았습니다 (연출 53).
+
+            「어떻게 보셨소?」 한 줄과 별 다섯 개, 빈 칸이 전부였습니다.
+            방금 스무 컷을 읽고 나온 사람에게 **아무 말도 안 걸고**
+            평점부터 물었습니다. 울림 20 · 명확 38 이 거기서 나왔습니다.
+
+            후기를 더 받으려고 재촉하는 게 아닙니다. 끝까지 읽은 것
+            자체가 이 화면이 아는 사실이라, 그걸 먼저 짚습니다.
+        */}
+        <Say who={rep.lens.name} lens={lensId}>
+          {you}는 이 자리를 여기까지 다 폈소. 도중에 덮고 나가는
+          사람이 훨씬 많소.
+          <br />
+          읽는 동안 어느 줄에선가 손이 멈췄소. 맞아서 멈춘 게 아니라,
+          <b> 여태 아무한테도 안 한 말</b>이 거기 적혀 있어서 멈추는
+          것이오. 혼자 삼키고 지나간 자리요. 그 줄이 어디였는지는
+          내가 모르오.
+          <br />
+          별을 다는 건 나를 위한 게 아니오. 다음에 이 자리 앞에 설
+          사람은 {you}가 남긴 줄을 먼저 읽고 값을 치를지 정하오.
+          {" "}벽에 인장을 하나 더 얹는 것처럼, 뒤에 오는 사람이
+          디딜 자리를 하나 놓는 셈이오.
+          {" "}빈 칸으로 두고 가도 되오. 그것도 답이오.
+        </Say>
+        <span className="src">
+          근거 · 이 자리를 끝까지 편 사람에게만 뜨는 칸이오 ·
+          별 5개 · 1,000글자까지 · 값을 치른 후기에만 「결제 확인됨」이
+          붙고, 인장은 1개 찍히오
+        </span>
         <div className="og c2" style={{ gridTemplateColumns: "repeat(5,1fr)" }}>
           {[1, 2, 3, 4, 5].map((n) => (
             <button key={n} className={`op ${rating === n ? "on" : ""}`}

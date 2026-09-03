@@ -86,6 +86,31 @@ SCREEN_DECL = re.compile(r'<Shell\s[^>]*screen="(\w+)"')
 # 화면이 갈리는 자리 — `if (step === "a6") {`
 BRANCH = re.compile(r'if \((?:step|tab) === "\w+"')
 
+# ★ 호명도 **선언**입니다.
+#
+#   화면에 박은 대사가 손님을 부를 때 「그대」 라고 적어 두면, 자네라
+#   부르는 훈장도 손님이라 부르는 행수도 전부 「그대」 라고 말합니다.
+#   스무 명 중 「그대」 를 쓰는 사람은 셋뿐이라, 그건 열일곱 자리에서
+#   틀린 말입니다 (`lenses.youOf` · `engine/lens.you_of`).
+#
+#   그래서 캐릭터가 말하는 자리는 `{you}` 로 씁니다. 그런데 그건
+#   **값**이라 글 긁는 자가 ▮ 로 지웁니다 — 제대로 고친 화면이
+#   「누구한테 하는 말인지 없소」 로 내려앉았습니다.
+#
+#   `next` · `kind` 에서 겪은 것과 같은 자리입니다. 선언은 읽습니다.
+ADDRESSED = re.compile(r"\{\s*you\s*\}|youOf\s*\(")
+
+# 엔진 글이 화면 **가운데**에 놓이는 자리. 나머지는 맨 위입니다.
+#
+#   c4  접힌 컷 목록 — 나레이션과 대사 아래에 놓입니다
+#   a7  훅 다섯 마디 — 위에 여는 줄(「도령이 종이에서 눈을 뗐다」)과
+#       무슨 일이 벌어질지 적은 안내가 있고, 아래에 마감과 버튼이
+#       있습니다. 엔진 글을 맨 앞에 붙이면 그 여는 줄이 안 보여
+#       「첫 줄이 설명이오」 가 나옵니다.
+ENGINE_MID = {"c4", "a7"}
+# 그 화면에서 **끝으로 남겨 두는** 줄 수 (액트아웃 + 버튼).
+TAIL_KEEP = 3
+
 TSX_STR = re.compile(r'"([^"\\<>{}\n]{6,200})"')
 # ★ 줄을 넘는 글도 잡습니다.
 #
@@ -160,7 +185,55 @@ def _readable(chunk: str) -> str:
 # 화면 파일 — 손님이 도는 순서대로
 PAGES = ("app/page.tsx", "app/lobby/page.tsx", "app/report/[id]/page.tsx",
          "app/pay/page.tsx", "app/me/page.tsx", "app/daily/page.tsx",
-         "app/relay/page.tsx", "app/summary/page.tsx")
+         "app/relay/page.tsx", "app/summary/page.tsx",
+         # ★ 공유로 건너오는 자리(s1). 이 파일이 빠져 있어서 **이 집을
+         #   처음 보는 사람이 서는 화면**이 점수 밖에 있었습니다.
+         #   글은 page.tsx 가 아니라 SharedView.tsx 가 들고 있습니다.
+         "app/s/[token]/SharedView.tsx")
+
+
+def has_source() -> bool:
+    """
+    화면 소스를 읽을 수 있는가.
+
+    ★ 이 자는 **소스 파일을 읽어서** 셉니다 — 화면 글이 코드에 박혀
+      있기 때문입니다. 그런데 배포 이미지(Dockerfile)에는  와
+       만 들어갑니다.  이 없습니다.
+
+      그러니 배포본에서 이걸 부르면 **엔진이 짓는 글 몇 개만** 재고
+      화면 글은 통째로 빠집니다. 스물일곱 화면이 여섯쯤으로 줄고
+      숫자는 그럴듯하게 나옵니다 — 그게 제일 나쁩니다.
+
+      틀린 숫자를 내느니 **못 잰다고 말합니다.** 연출 점수는 글을
+      고치는 자리에서 쓰는 자입니다.
+    """
+    return WEB.exists()
+
+
+# 모듈 자리에 놓인 글 덩이 — `const PROMISE = "…"` · `const OPENING = {…}`
+#
+# ★ 화면 글이 늘 화면 안에 있지는 않습니다.
+#
+#   대문(a1)은 약속 세 줄을 `PROMISE` 로, 계절 나레이션을 `OPENING` 으로
+#   **파일 맨 위에** 두고 씁니다. 덩이는 화면의 갈림에서 열리므로 그
+#   위에 있는 것은 어느 화면에도 안 붙습니다 — 그래서 대문이 **80자**로
+#   잡혔습니다. 실제로 손님이 읽는 것은 그 네 배입니다.
+#
+#   덩이가 그 이름을 **부르면** 그 글은 그 화면의 글입니다. 이름을
+#   안 부르는 화면에는 안 붙입니다. (`kind` · `next` · `{you}` 와 같은 결)
+TOPCONST = re.compile(
+    r"^const ([A-Z][A-Z0-9_]*)\s*(?::[^=\n]+)?=\s*(.*?)(?=^\S|\Z)",
+    re.M | re.S)
+
+
+def _top_copy(src: str) -> dict:
+    """모듈 자리 상수마다 (이름 → 읽는 글)."""
+    out = {}
+    for m in TOPCONST.finditer(src):
+        got = _readable(m.group(2))
+        if got:
+            out[m.group(1)] = got
+    return out
 
 
 def _split(src: str) -> dict:
@@ -187,15 +260,30 @@ def _split(src: str) -> dict:
     if not marks:
         return {}
     marks.append(("__end__", len(src)))
+    top = _top_copy(src)
     out = {}
     for i in range(len(marks) - 1):
         sid, a = marks[i]
         chunk = src[a:marks[i + 1][1]]
         got = _readable(chunk)
+        # 이 덩이가 이름을 부른 모듈 상수의 글을 함께 셉니다.
+        #
+        # ★ **부른 자리**를 봅니다. 늘 끝에 붙이면 콜드 오픈을 놓칩니다 —
+        #   대문은 계절 나레이션(`OPENING`)으로 여는데, 그걸 뒤에 붙이면
+        #   첫 줄이 액트아웃이 되어 「첫 줄이 설명이오」 가 나옵니다.
+        #   손님이 보는 순서와 자가 읽는 순서가 같아야 합니다.
+        head, tail = [], []
+        for nm, txt in top.items():
+            m = re.search(r"\b%s\b" % re.escape(nm), chunk)
+            if not m:
+                continue
+            (head if m.start() < len(chunk) * 0.3 else tail).append(txt)
+        got = " ".join([x for x in head] + [got] + [x for x in tail])
         # 한 화면이 여러 꼴로 나오면(못 세웠을 때 · 값을 치르는 중)
         # **가장 긴** 덩이가 그 화면입니다.
-        if len(got) > len(out.get(sid, ("", [], None))[0]):
-            out[sid] = (got, _declared(chunk), _next_named(chunk))
+        if len(got) > len(out.get(sid, ("", [], None, False))[0]):
+            out[sid] = (got, _declared(chunk), _next_named(chunk),
+                        bool(ADDRESSED.search(chunk)))
     return out
 
 
@@ -210,9 +298,9 @@ def _screens() -> dict:
     # a7 은 훅 부품이 그립니다. page.tsx 만 보면 껍데기만 잡힙니다.
     part = WEB / "components" / "HookSegments.tsx"
     if part.exists() and "a7" in out:
-        t, d, nx = out["a7"]
+        t, d, nx, ad = out["a7"]
         out["a7"] = (t + " " + _readable(_strip_code(
-            part.read_text(encoding="utf-8"))), d, nx)
+            part.read_text(encoding="utf-8"))), d, nx, ad)
     return out
 
 
@@ -279,11 +367,32 @@ def scan_all() -> list:
     text = {k: v[0] for k, v in pairs.items()}
     decl = {k: v[1] for k, v in pairs.items()}
     nxt = {k: v[2] for k, v in pairs.items()}
+    addr = {k: v[3] for k, v in pairs.items()}
     # 엔진 글이 있는 화면은 **엔진 글이 이깁니다** — 손님이 읽는 것은
     # 코드에 박힌 안내가 아니라 실제로 나온 해석입니다.
+    #
+    # ★ 다만 **놓이는 자리**가 화면마다 다릅니다.
+    #
+    #   a7 · c2 · c3 · d0 · g1 은 엔진 글이 곧 본문이라 맨 위에 옵니다.
+    #   c4 는 아닙니다 — 거기서 엔진이 주는 것은 **접힌 컷 목록**이고,
+    #   화면에서는 나레이션과 대사 **아래**에 놓입니다. 그런데 자는
+    #   그걸 맨 앞에 붙여 놓고 「첫 줄이 설명이오」 라 적었습니다.
+    #   손님이 보는 첫 줄은 「두루마리가 반쯤 접혀 있다」 입니다.
+    #
+    #   콜드 오픈은 **첫 두 줄**만 봅니다. 순서를 틀리면 그 자리가
+    #   통째로 헛됩니다.
     eng = _engine_text()
     for sid, html in eng.items():
-        text[sid] = html + " " + text.get(sid, "")
+        if sid in ENGINE_MID:
+            # 화면 글의 **앞은 앞에, 끝은 끝에** 두고 그 사이에 넣습니다.
+            # 콜드 오픈은 첫 두 줄을, 버튼은 마지막 한 줄을 봅니다 —
+            # 둘 다 화면 글이라야 실제로 보이는 것과 같아집니다.
+            ls = D._lines(text.get(sid, ""))
+            head = " ".join(ls[:-TAIL_KEEP]) if len(ls) > TAIL_KEEP else ""
+            tail = " ".join(ls[-TAIL_KEEP:]) if ls else ""
+            text[sid] = " ".join(x for x in (head, html, tail) if x)
+        else:
+            text[sid] = html + " " + text.get(sid, "")
 
     rows = []
     for sid, html in text.items():
@@ -291,7 +400,8 @@ def scan_all() -> list:
             continue
         rows.append(D.score(sid, KO[sid], html, KIND.get(sid, "read"),
                             next_named=nxt.get(sid),
-                            declared=decl.get(sid)))
+                            declared=decl.get(sid),
+                            addressed=bool(addr.get(sid))))
     order = list(KO)
     rows.sort(key=lambda r: order.index(r["id"]))
     return rows
@@ -300,11 +410,14 @@ def scan_all() -> list:
 def summary(rows: Optional[list] = None) -> dict:
     rows = rows if rows is not None else scan_all()
     if not rows:
-        return {"screens": 0}
+        return {"screens": 0, "has_source": has_source()}
     avg = lambda k: round(sum(r[k] for r in rows) / len(rows))  # noqa: E731
     weak = sorted(rows, key=lambda r: r["total"])[:5]
     return {
         "screens": len(rows),
+        # 화면 소스를 읽을 수 있었는가. 배포본은 못 읽습니다 — 그때는
+        # 숫자가 반쪽이라, 화면이 숫자 대신 그 사실을 말해야 합니다.
+        "has_source": has_source(),
         "pull": avg("pull"), "bite": avg("bite"),
         "heart": avg("heart"), "clear": avg("clear"),
         "plain": avg("plain"), "figure": avg("figure"),

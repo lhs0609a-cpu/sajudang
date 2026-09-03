@@ -92,3 +92,68 @@ def test_every_archetype_has_art_direction():
     missing = sorted({l["archetype"] for l in _seed().values()
                       if l["archetype"] not in char_sheet.LOOK})
     assert not missing, "그림 말이 없는 원형: %s" % missing
+
+
+# ══════════════════════════════════════════════════════════
+# 호칭 — 이 사람이 손님을 뭐라 부르는가
+# ══════════════════════════════════════════════════════════
+#
+# ★ 왜 지키나
+#
+#   서버가 짓는 글은 `voice.address` 가 캐릭터마다 호칭을 갈아
+#   끼운다. 그런데 **화면에 박아 넣은 대사**는 그 자를 안 거친다.
+#   그래서 캐릭터 자리(`<Say lens={...}>`)에 「그대」라고 적으면
+#   자네라 부르는 훈장도, 손님이라 부르는 행수도, 아저씨라 부르는
+#   청동자도 전부 「그대」라고 말한다.
+#
+#   스무 명 중 「그대」를 쓰는 사람은 셋뿐이다. 나머지 열일곱은
+#   틀린 말을 하게 된다 — 훅에서 이미 한 번 겪은 자리다
+#   (CLAUDE.md 「훅을 voice 없이 내보내기」).
+#
+#   그래서 화면에도 같은 표를 두었다(`lenses.ADDRESS` · `youOf`).
+#   표가 둘이면 언젠가 갈린다. 여기서 갈리지 않게 지킨다.
+VIEW = ROOT / "seed" / "lens_view.json"
+
+
+def _views() -> dict:
+    d = json.loads(VIEW.read_text(encoding="utf-8"))
+    return d.get("views", d)
+
+
+def _address_ts() -> dict:
+    """`apps/web/lib/lenses.ts` 의 ADDRESS 표."""
+    src = TS.read_text(encoding="utf-8")
+    m = re.search(r"export const ADDRESS[^=]*=\s*\{(.*?)\n\};", src, re.S)
+    assert m, "화면에 ADDRESS 표가 없다"
+    out = {}
+    for line in m.group(1).splitlines():
+        mm = re.match(r'\s*(\w+):\s*\{(.*)\},\s*$', line)
+        if not mm:
+            continue
+        out[mm.group(1)] = dict(re.findall(r'(\w+): "([^"]*)"', mm.group(2)))
+    return out
+
+
+def test_address_table_lists_the_same_people():
+    a, b = set(_seed()), set(_address_ts())
+    assert a == b, "호칭표에 한쪽에만 있는 사람: %s" % sorted(a ^ b)
+
+
+def test_address_words_agree():
+    """
+    ★ 「이름」·「성별」 은 값이 아니라 **규칙**이다. 그 규칙이 쓰는
+      대신 부르는 말(you_else · you_m · you_f)까지 같아야, 이름을
+      안 적은 손님에게 두 곳이 같은 말을 한다.
+    """
+    views, ts = _views(), _address_ts()
+    bad = []
+    for k, t in ts.items():
+        v = views.get(k, {})
+        for f in ("you", "you_else", "you_m", "you_f"):
+            want = v.get(f)
+            if f == "you" and not want:
+                want = "그대"          # lens.DEFAULT_YOU
+            got = t.get(f)
+            if (want or None) != (got or None):
+                bad.append("%s.%s  seed=%s  화면=%s" % (k, f, want, got))
+    assert not bad, "호칭이 서버와 다르다:\n  " + "\n  ".join(bad)

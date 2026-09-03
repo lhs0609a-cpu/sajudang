@@ -17,7 +17,7 @@ import Reveal from "@/components/Reveal";
 import ActOut from "@/components/ActOut";
 import { Narration, Say } from "@/components/Narration";
 import { api, ApiError } from "@/lib/api";
-import { LENS_BY_ID } from "@/lib/lenses";
+import { LENS_BY_ID, youOf } from "@/lib/lenses";
 import { useSession, type Tier } from "@/lib/store";
 import { track, useScreen } from "@/lib/track";
 import { openCheckout } from "@/lib/toss";
@@ -96,6 +96,9 @@ function PayInner() {
   const step = params.get("step") ?? "d1";
   const lens = LENS_BY_ID[s.cur];
   const charName = lens?.name ?? "도령";
+  /* 이 사람이 손님을 부르는 말. 화면에 박은 대사도 서버가 짓는 글과
+     같은 호칭을 써야 합니다 — 스무 명 중 「그대」는 셋뿐입니다. */
+  const you = youOf(s.cur, s.name, s.sex);
 
   const [free, setFree] = useState<ReportResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -486,9 +489,37 @@ function PayInner() {
         )}
 
         {/* 값을 치른 직후가 이 집이 가장 따뜻해야 할 자리입니다. */}
+        {/*
+          ★ 여기가 넷째로 낮았습니다 (연출 54).
+
+            「잘 오셨소」 한 줄이 전부였습니다. 값을 치른 **직후**인데
+            치른 사람 얘기가 없어서, 인장과 컷 수만 뜨는 영수증
+            화면이 됐습니다. 울림 20 · 명확 43 이 거기서 나왔습니다.
+
+            더 팔려고 붙이는 말이 아닙니다. 여기서 할 일은 **판 것을
+            줄이는 것**입니다 — 하루 2번 상한과 인장 1개를 다시
+            말하고, 다 읽고 나서 무엇을 하면 되는지까지 적습니다.
+        */}
         <Say who={charName} lens={s.cur}>
           잘 오셨소. 이제 감춰 둔 자리를 펴 드리리다.
+          <br />
+          {you}는 여기 오기까지 창을 닫았다 다시 열었소. 값이
+          아까워서가 아니라, 안 맞으면 어쩌나 싶어 미룬 것이오.
+          <b> 여태 그런 식으로 미뤄 둔 것이 하나 더 있소.</b>
+          <br />
+          붉은 끈은 한 번 풀면 다시 못 묶소. 그러니 오늘은 이것으로
+          그만두시오 — 이 집은 하루에 2번까지만 받고, 한 자리에
+          2명까지만 붙이오. 그 둘째 것도 웬만하면 말리오. 인장은
+          1개 찍혔고, 남은 자리는 내일도 그대로 있소.
+          <br />
+          글은 두루마리처럼 위에서 아래로 한 컷씩 뜨오. 훑지 말고
+          손가락으로 짚어 가며 보시오.
         </Say>
+        <span className="src">
+          근거 · 오늘 치른 값과 열린 자리를 서버가 세어 적은 것이오 ·
+          하루 2번 · 한 자리 2명 · 인장 1개 · 컷 수와 글자 수는
+          이 명식으로 센 것이지 미리 적어 둔 문구가 아니오
+        </span>
         <ActOut kind="끊긴 동작" next="본문">
           {granted?.cuts
             ? <>열렸소. <b>{granted.cuts}컷</b>이 기다리고 있소.</>
@@ -511,7 +542,34 @@ function PayInner() {
   return (
     <Shell screen="d1" title="어디까지 볼지">
       <Scene id="tray" />
-      <Narration lines={["목패 셋이 상 위에 놓였다."]} />
+      <Narration lines={["목패 셋이 상 위에 놓였다.",
+                         "도령이 그 앞에서 손을 뗀다."]} />
+      {/*
+        ★ 이 자리가 스물일곱 중 가장 낮았습니다 (연출 48).
+
+          목패 셋과 버튼만 있었습니다. 값을 견주는 자리인데 **누구
+          얘기인지가 없어서**, 손님은 남의 상 앞에 선 사람이 됩니다.
+          울림이 0 이었던 까닭입니다.
+
+          그래서 목패 앞에 한 마디를 답니다 — 여기까지 온 사람이
+          이미 한 일(무료 6단을 다 본 것)을 짚고, 이 집이 스스로
+          건 브레이크(하루 2번 · 한 자리 2명)를 먼저 말합니다.
+          파는 자리에서 상한을 먼저 말하는 게 이 집의 방식입니다.
+      */}
+      <Say who="도령" lens="pungun">
+        그대는 값 없이 여는 6단을 이미 다 보셨소.
+        <br />
+        거기서 그만두지 못하고 여기까지 오셨을 게요.
+        <br />
+        <b>고르기를 미루는 사람일수록 오래 서 있소.</b>
+        {" "}상 앞에서 망설이는 것은 값이 아까워서가 아니라,
+        고르고 나면 되돌릴 수 없다는 걸 알아서요.
+        <br />
+        이 집은 하루에 2번까지만 받고, 한 자리에 사람을 2명까지만
+        붙이오. 팔 수 있는 만큼 파는 집이 아니라 <b>재 놓고 파는
+        집</b>이라 그렇소. 목패는 저울 눈금처럼 칸이 갈려 있소 —
+        칸마다 컷 수와 글자 수를 적어 두었으니 견주어 보시오.
+      </Say>
       {!tiers ? (
         <p className="sm">목패를 편다…</p>
       ) : (
@@ -556,6 +614,12 @@ function PayInner() {
           ))}
         </div>
       )}
+      <ActOut kind="딜레마" next="값을 치르다">
+        셋을 다 열 수는 없소.
+        <br />
+        고르는 것은 <b>어느 목패</b>가 아니라, 그대가 여태 안 물어본
+        것 중 <b>무엇을 먼저 물을 것인가</b>요. 나머지는 오늘 안 열리오.
+      </ActOut>
       <button className="btn mt" onClick={() => router.push("/pay?step=d2")}>
         이걸로 열겠습니다
       </button>
