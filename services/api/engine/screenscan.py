@@ -220,10 +220,23 @@ def _source_files() -> list:
 
 
 def source_fingerprint() -> str:
+    """
+    글이 바뀌었는가.
+
+    ★ 줄끝은 안 셉니다.
+
+      전에는 파일 바이트를 그대로 넣었습니다. 그런데 이 저장소는
+      LF 로 적히고 윈도우에서 새로 받으면 git 이 CRLF 로 풀어 놓습니다.
+      그러면 **글이 한 자도 안 바뀌었는데** 지문이 달라져서, 새로 받은
+      사본에서는 「찍어 둔 글이 낡았소」 가 늘 뜹니다.
+
+      늑대가 안 왔는데 늑대라고 외치는 자는 곧 아무도 안 믿습니다.
+      줄끝을 고르고 셉니다.
+    """
     import hashlib
     h = hashlib.sha1()
     for p in _source_files():
-        h.update(p.read_bytes())
+        h.update(p.read_bytes().replace(b"\r\n", b"\n"))
     return h.hexdigest()[:12]
 
 
