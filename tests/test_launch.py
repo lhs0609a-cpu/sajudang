@@ -96,13 +96,50 @@ def test_화면에_금지어가_없다():
         assert neg.search(near), "금지어가 주장으로 쓰였소: %s" % near[:60]
 
 
+# ══════════════════════════════════════════════════════════
+# 문마다 지킴이 붙어 있는가
+# ══════════════════════════════════════════════════════════
+#
+# ★ 세는 법 (2026-09-03 에 고쳤습니다)
+#
+#   전에는 `@router.get` 수와 `_guard(` 수를 견줬습니다. 그런데 문이
+#   두 가지 더 생겼습니다 —
+#
+#     · 스스로 지키는 문 (`adminauth.session_of` 로 쪽지를 봅니다)
+#     · **일부러 여는 문** (`/gate` — 화면이 로그인 칸을 그릴지 열쇠
+#       칸을 그릴지 정하려면 열쇠 없이 물어봐야 합니다. 걸렸는지
+#       아닌지만 답하고 아이디는 안 흘립니다.)
+#
+#   수만 늘려 통과시키면 다음에 진짜로 빠뜨린 문이 안 걸립니다.
+#   그래서 **의도를 적게** 합니다 — 아래 표시가 없는 문은 여전히
+#   지킴이 있어야 합니다.
+OPEN_MARK = "# 문 없음:"           # 일부러 여는 문. 까닭을 뒤에 적는다
+SELF_MARK = "session_of("          # 스스로 쪽지를 보는 문
+
+
+def _unguarded(src: str) -> list:
+    """지킴도 없고 표시도 없는 조회문의 이름."""
+    bad = []
+    blocks = src.split("@router.get")[1:]
+    for b in blocks:
+        body = b.split("@router.")[0]
+        name = re.search(r"def (\w+)", body)
+        if "_guard(" in body or SELF_MARK in body or OPEN_MARK in body:
+            continue
+        bad.append(name.group(1) if name else "?")
+    return bad
+
+
 def test_영업정보_문마다_지킴이가_있다():
-    """문이 하나 늘 때 지킴을 빠뜨리는 것이 이 자리의 사고입니다."""
+    """
+    ★ 문이 하나 늘 때 지킴을 빠뜨리는 것이 이 자리의 사고입니다.
+
+      지킴도 없고 「일부러 연다」는 표시도 없는 조회문은 실수입니다.
+    """
+    api = API / "routers"
     for fn in ("admin.py", "events.py"):
-        src = (API / "routers" / fn).read_text(encoding="utf-8")
-        gets = len(re.findall(r"@router\.get", src))
-        guards = len(re.findall(r"_guard\(", src))
-        assert guards >= gets, "%s — 조회문 %d · 지킴 %d" % (fn, gets, guards)
+        bad = _unguarded((api / fn).read_text(encoding="utf-8"))
+        assert not bad, "%s — 지킴도 표시도 없는 문: %s" % (fn, bad)
 
 
 def test_문지기가_한_자리다():

@@ -42,3 +42,36 @@ def require_key(key: str | None) -> None:
         raise HTTPException(503, "FUNNEL_KEY 가 설정되지 않았습니다.")
     if not key or not hmac.compare_digest(key, FUNNEL_KEY):
         raise HTTPException(401, "열쇠가 맞지 않습니다.")
+
+
+def require_admin(key: str | None, token: str | None = None) -> None:
+    """
+    주인 자리 — 문이 **둘**입니다.
+
+        기계 문   `x-funnel-key`   도구가 씁니다 (tools/funnel.py)
+        사람 문   `x-admin-token`  아이디·비밀번호로 받은 쪽지
+
+    ★ 왜 둘인가
+
+      난수 스물네 자를 사람이 외워서 칠 수는 없습니다. 그렇다고
+      도구에 아이디·비밀번호를 심을 수도 없습니다. 쓰는 쪽이 다르니
+      문을 둘로 내되, **지키는 자리는 여기 하나**로 둡니다.
+
+    ★ 둘 다 없으면 닫습니다
+
+      어느 쪽도 안 걸어 두었으면 503 입니다. 열린 쪽이 기본이면
+      언젠가 그대로 배포됩니다.
+    """
+    import adminauth
+
+    if token and adminauth.session_of(token):
+        return
+    if FUNNEL_KEY:
+        if key and hmac.compare_digest(key, FUNNEL_KEY):
+            return
+        raise HTTPException(401, "열쇠가 맞지 않습니다.")
+    if adminauth.configured():
+        # 열쇠는 안 걸었고 아이디 문만 걸린 집. 쪽지가 있어야 합니다.
+        raise HTTPException(401, "주인 자리는 로그인해야 열리오.")
+    raise HTTPException(503, "주인 문이 아직 안 걸렸습니다 — "
+                             "FUNNEL_KEY 나 ADMIN_EMAIL 을 세우세요.")
