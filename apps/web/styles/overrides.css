@@ -2865,6 +2865,8 @@ body.has-rail .beatskip-hint { left: calc(50% + 116px); }
   color: var(--rose);
 }
 .abdot.on { border-color: var(--line); color: var(--paper3); }
+/* 그림은 있는데 프롬프트가 그 뒤에 바뀐 자리 — 없는 것과 다른 빛깔로 */
+.abdot.old { border-color: var(--gold); color: var(--gold); }
 .abdot.na { border-color: transparent; color: var(--paper3); opacity: .5; }
 .abwhere { font-family: var(--mono); font-size: var(--fs-2); }
 .abwhere a { color: var(--paper3); text-decoration: none; }
@@ -2884,4 +2886,46 @@ body.has-rail .beatskip-hint { left: calc(50% + 116px); }
   color: var(--paper3);
   font-family: var(--mono);
   font-size: var(--fs-1);
+}
+
+
+/* ══════════════════════════════════════════════════════════
+   접어 두는 말 — 읽고 싶은 사람만 편다
+   ══════════════════════════════════════════════════════════
+   ★ 적는 자리에 글이 너무 많았습니다. 지우는 대신 접습니다 —
+     화면은 짧아지고 글은 남습니다. 접힌 글은 분량 축에서 빠지고
+     팩폭·울림에는 그대로 셉니다 (engine/screenscan.py). */
+.fold { margin: 10px 0 2px; }
+.fold > summary {
+  display: inline-flex; align-items: center; gap: 6px;
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--mono);
+  font-size: var(--fs-1);
+  color: var(--paper3);
+  border-bottom: 1px dashed var(--line);
+  padding-bottom: 2px;
+}
+.fold > summary::-webkit-details-marker { display: none; }
+.fold > summary::after {
+  content: "＋";
+  font-size: var(--fs-2);
+  color: var(--gold);
+  opacity: .8;
+}
+.fold[open] > summary::after { content: "−"; }
+.fold > summary:hover { color: var(--paper2); border-color: var(--paper3); }
+.foldin {
+  margin-top: 9px;
+  padding-left: 11px;
+  border-left: 1px solid var(--line);
+  animation: beatIn .3s ease both;
+}
+/* 접힌 것 안의 대사는 얼굴을 안 답니다 — 곁말이라 목소리만 남깁니다 */
+.foldin .sayface { display: none; }
+.foldin .say .saybody { margin-left: 0; }
+/* 종이에는 접힌 것이 없습니다 — 값을 치른 사람이 빈 자리를 받으면 안 됩니다 */
+@media print {
+  .fold > summary { display: none; }
+  .foldin { border: 0; padding-left: 0; }
 }
