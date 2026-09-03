@@ -1,237 +1,237 @@
 {
- "_": [
-  "신살 인물 13종의 에셋 제작 프롬프트. docs/16 발주서를 프롬프트로 옮긴 것.",
-  "",
-  "★ 여기가 원본입니다. apps/web/public/asset-prompts.json 은",
-  "  tools/extract_asset_prompts.js 가 이 파일과 참조 구현체를 합쳐",
-  "  만드는 산출물이라 언제든 다시 만들어집니다. 고칠 일이 있으면",
-  "  이 파일을 고치고 추출기를 다시 도리시오.",
-  "",
-  "★ motion 끝의 영어 문단(2D hand-drawn animation…)은 지우지 마시오.",
-  "  빼면 3초 안에 얼굴이 사진처럼 변합니다. (docs/10 §2)",
-  "",
-  "★ 배경은 순백(#FFFFFF)입니다. 앱이 잘라내 인물만 띄웁니다.",
-  "  gongmang(공망)만 사람을 그리지 않습니다 — 그리면 뜻이 반대가 됩니다."
- ],
- "cheoneul": {
-  "title": "흰 소매의 귀인",
-  "who": "천을귀인 天乙貴人",
-  "preset": "Dolly In",
-  "ratio": "3:4",
-  "duration": "3s",
-  "loop": true,
-  "tint": false,
-  "still": false,
-  "spec": [
-   "3:4",
-   "신살 인물",
-   "Dolly In"
+  "_": [
+    "신살 인물 13종의 에셋 제작 프롬프트. docs/16 발주서를 프롬프트로 옮긴 것.",
+    "",
+    "★ 여기가 원본입니다. apps/web/public/asset-prompts.json 은",
+    "  tools/extract_asset_prompts.js 가 이 파일과 참조 구현체를 합쳐",
+    "  만드는 산출물이라 언제든 다시 만들어집니다. 고칠 일이 있으면",
+    "  이 파일을 고치고 추출기를 다시 도리시오.",
+    "",
+    "★ motion 끝의 영어 문단(2D hand-drawn animation…)은 지우지 마시오.",
+    "  빼면 3초 안에 얼굴이 사진처럼 변합니다. (docs/10 §2)",
+    "",
+    "★ 배경은 순백(#FFFFFF)입니다. 앱이 잘라내 인물만 띄웁니다.",
+    "  gongmang(공망)만 사람을 그리지 않습니다 — 그리면 뜻이 반대가 됩니다."
   ],
-  "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA serene guardian woman in flowing white hanbok, wide sleeves spread\nforward as if shielding someone unseen. Warm gold rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-  "motion": "sleeves drift slowly forward, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Dolly In · 3:4 · 3s)"
- },
- "taegeuk": {
-  "title": "태극을 인 이",
-  "who": "태극귀인 太極貴人",
-  "preset": "Static",
-  "ratio": "3:4",
-  "duration": "3s",
-  "loop": true,
-  "tint": false,
-  "still": false,
-  "spec": [
-   "3:4",
-   "신살 인물",
-   "Static"
-  ],
-  "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA calm immortal holding a luminous circular emblem, half light half\nshadow. Teal rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-  "motion": "the circular emblem rotates once very slowly, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
- },
- "munchang": {
-  "title": "붓을 든 서생",
-  "who": "문창귀인 文昌貴人",
-  "preset": "Static",
-  "ratio": "3:4",
-  "duration": "3s",
-  "loop": true,
-  "tint": false,
-  "still": false,
-  "spec": [
-   "3:4",
-   "신살 인물",
-   "Static"
-  ],
-  "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA refined young scholar holding a writing brush upright, scrolls at his\nside. Lavender rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-  "motion": "brush tip sways, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
- },
- "geumyeo": {
-  "title": "가마를 끄는 이",
-  "who": "금여 金輿",
-  "preset": "Static",
-  "ratio": "3:4",
-  "duration": "3s",
-  "loop": true,
-  "tint": false,
-  "still": false,
-  "spec": [
-   "3:4",
-   "신살 인물",
-   "Static"
-  ],
-  "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nAn elegant attendant beside an ornate palanquin, one hand resting on its\npole. Rose rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-  "motion": "palanquin wheel turns a quarter, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
- },
- "amrok": {
-  "title": "그림자 속의 손",
-  "who": "암록 暗祿",
-  "preset": "Static",
-  "ratio": "3:4",
-  "duration": "3s",
-  "loop": true,
-  "tint": false,
-  "still": false,
-  "spec": [
-   "3:4",
-   "신살 인물",
-   "Static"
-  ],
-  "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA half-hidden figure in shadow, one hand extended forward from behind.\nFace obscured. Slate rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-  "motion": "the extended hand tilts slightly, shadow breathes\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
- },
- "yangin": {
-  "title": "칼을 쥔 무인",
-  "who": "양인 羊刃",
-  "preset": "Static",
-  "ratio": "3:4",
-  "duration": "3s",
-  "loop": true,
-  "tint": false,
-  "still": false,
-  "spec": [
-   "3:4",
-   "신살 인물",
-   "Static"
-  ],
-  "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA poised warrior resting a slender blade point-down, not raised.\nCrimson rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-  "motion": "blade catches a slow glint, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
- },
- "baekho": {
-  "title": "흰 범",
-  "who": "백호대살 白虎大殺",
-  "preset": "Dolly In",
-  "ratio": "3:4",
-  "duration": "3s",
-  "loop": true,
-  "tint": false,
-  "still": false,
-  "spec": [
-   "3:4",
-   "신살 인물",
-   "Dolly In"
-  ],
-  "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA white tiger seated in profile, calm and watchful, NOT snarling.\nNo blood, no wounds. Pale silver rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-  "motion": "tail sweeps once, ears twitch, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Dolly In · 3:4 · 3s)"
- },
- "wonjin": {
-  "title": "등을 돌린 그림자",
-  "who": "원진 怨嗔",
-  "preset": "Static",
-  "ratio": "3:4",
-  "duration": "3s",
-  "loop": true,
-  "tint": false,
-  "still": false,
-  "spec": [
-   "3:4",
-   "신살 인물",
-   "Static"
-  ],
-  "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nTwo figures back to back, slightly misaligned, neither facing the\nviewer. Muted violet-grey.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-  "motion": "both figures sway apart a few pixels, no faces\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
- },
- "dohwa": {
-  "title": "꽃그늘의 사람",
-  "who": "도화 桃花",
-  "preset": "Static",
-  "ratio": "3:4",
-  "duration": "3s",
-  "loop": true,
-  "tint": false,
-  "still": false,
-  "spec": [
-   "3:4",
-   "신살 인물",
-   "Static"
-  ],
-  "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA striking person standing under falling blossoms, gaze drawing the eye.\nFully clothed in layered hanbok, dignified posture.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-  "motion": "blossoms fall past, hair lifts once, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
- },
- "yeokma": {
-  "title": "말 위의 나그네",
-  "who": "역마 驛馬",
-  "preset": "Static",
-  "ratio": "3:4",
-  "duration": "3s",
-  "loop": true,
-  "tint": false,
-  "still": false,
-  "spec": [
-   "3:4",
-   "신살 인물",
-   "Static"
-  ],
-  "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA traveler on horseback in mid-stride, dust trailing behind.\nWarm sand rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-  "motion": "dust drifts backward, horse mane lifts\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
- },
- "hwagae": {
-  "title": "일산 아래 홀로",
-  "who": "화개 華蓋",
-  "preset": "Static",
-  "ratio": "3:4",
-  "duration": "3s",
-  "loop": true,
-  "tint": false,
-  "still": false,
-  "spec": [
-   "3:4",
-   "신살 인물",
-   "Static"
-  ],
-  "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA solitary figure beneath a floral canopy, turned slightly away.\nLavender rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-  "motion": "canopy fringe sways, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
- },
- "gwaegang": {
-  "title": "북두를 인 장수",
-  "who": "괴강 魁罡",
-  "preset": "Static",
-  "ratio": "3:4",
-  "duration": "3s",
-  "loop": true,
-  "tint": false,
-  "still": false,
-  "spec": [
-   "3:4",
-   "신살 인물",
-   "Static"
-  ],
-  "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA commander with the Big Dipper glowing above the head, steel-grey\narmor. Cool rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-  "motion": "the seven stars pulse once in sequence\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
- },
- "gongmang": {
-  "title": "빈 자리",
-  "who": "공망 空亡",
-  "preset": "Static",
-  "ratio": "3:4",
-  "duration": "3s",
-  "loop": true,
-  "tint": false,
-  "still": false,
-  "spec": [
-   "3:4",
-   "신살 인물",
-   "Static"
-  ],
-  "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nAn empty seat. No person. A dashed outline where someone would be.\nNearly monochrome, deep indigo.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height, slight three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-  "motion": "the dashed outline fades in and out once. nothing else moves.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
- }
+  "cheoneul": {
+    "title": "흰 소매의 귀인",
+    "who": "천을귀인 天乙貴人",
+    "preset": "Dolly In",
+    "ratio": "3:4",
+    "duration": "3s",
+    "loop": true,
+    "tint": false,
+    "still": false,
+    "spec": [
+      "3:4",
+      "신살 인물",
+      "Dolly In"
+    ],
+    "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA serene guardian woman in flowing white hanbok, wide sleeves spread\nforward as if shielding someone unseen. Warm gold rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height. FRONT-FACING — squared to the camera, both eyes fully\nvisible and level, gaze straight at the viewer. No head turn, no\nprofile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+    "motion": "sleeves drift slowly forward, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Dolly In · 3:4 · 3s)"
+  },
+  "taegeuk": {
+    "title": "태극을 인 이",
+    "who": "태극귀인 太極貴人",
+    "preset": "Static",
+    "ratio": "3:4",
+    "duration": "3s",
+    "loop": true,
+    "tint": false,
+    "still": false,
+    "spec": [
+      "3:4",
+      "신살 인물",
+      "Static"
+    ],
+    "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA calm immortal holding a luminous circular emblem, half light half\nshadow. Teal rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height. FRONT-FACING — squared to the camera, both eyes fully\nvisible and level, gaze straight at the viewer. No head turn, no\nprofile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+    "motion": "the circular emblem rotates once very slowly, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
+  },
+  "munchang": {
+    "title": "붓을 든 서생",
+    "who": "문창귀인 文昌貴人",
+    "preset": "Static",
+    "ratio": "3:4",
+    "duration": "3s",
+    "loop": true,
+    "tint": false,
+    "still": false,
+    "spec": [
+      "3:4",
+      "신살 인물",
+      "Static"
+    ],
+    "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA refined young scholar holding a writing brush upright, scrolls at his\nside. Lavender rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height. FRONT-FACING — squared to the camera, both eyes fully\nvisible and level, gaze straight at the viewer. No head turn, no\nprofile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+    "motion": "brush tip sways, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
+  },
+  "geumyeo": {
+    "title": "가마를 끄는 이",
+    "who": "금여 金輿",
+    "preset": "Static",
+    "ratio": "3:4",
+    "duration": "3s",
+    "loop": true,
+    "tint": false,
+    "still": false,
+    "spec": [
+      "3:4",
+      "신살 인물",
+      "Static"
+    ],
+    "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nAn elegant attendant beside an ornate palanquin, one hand resting on its\npole. Rose rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height. FRONT-FACING — squared to the camera, both eyes fully\nvisible and level, gaze straight at the viewer. No head turn, no\nprofile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+    "motion": "palanquin wheel turns a quarter, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
+  },
+  "amrok": {
+    "title": "그림자 속의 손",
+    "who": "암록 暗祿",
+    "preset": "Static",
+    "ratio": "3:4",
+    "duration": "3s",
+    "loop": true,
+    "tint": false,
+    "still": false,
+    "spec": [
+      "3:4",
+      "신살 인물",
+      "Static"
+    ],
+    "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA half-hidden figure in shadow, one hand extended forward from behind.\nFace obscured. Slate rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height. FRONT-FACING — squared to the camera, both eyes fully\nvisible and level, gaze straight at the viewer. No head turn, no\nprofile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+    "motion": "the extended hand tilts slightly, shadow breathes\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
+  },
+  "yangin": {
+    "title": "칼을 쥔 무인",
+    "who": "양인 羊刃",
+    "preset": "Static",
+    "ratio": "3:4",
+    "duration": "3s",
+    "loop": true,
+    "tint": false,
+    "still": false,
+    "spec": [
+      "3:4",
+      "신살 인물",
+      "Static"
+    ],
+    "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA poised warrior resting a slender blade point-down, not raised.\nCrimson rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height. FRONT-FACING — squared to the camera, both eyes fully\nvisible and level, gaze straight at the viewer. No head turn, no\nprofile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+    "motion": "blade catches a slow glint, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
+  },
+  "baekho": {
+    "title": "흰 범",
+    "who": "백호대살 白虎大殺",
+    "preset": "Dolly In",
+    "ratio": "3:4",
+    "duration": "3s",
+    "loop": true,
+    "tint": false,
+    "still": false,
+    "spec": [
+      "3:4",
+      "신살 인물",
+      "Dolly In"
+    ],
+    "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA white tiger seated in profile, calm and watchful, NOT snarling.\nNo blood, no wounds. Pale silver rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height. Keep the pose described above — do not turn the subject\nto face the camera.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+    "motion": "tail sweeps once, ears twitch, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Dolly In · 3:4 · 3s)"
+  },
+  "wonjin": {
+    "title": "등을 돌린 그림자",
+    "who": "원진 怨嗔",
+    "preset": "Static",
+    "ratio": "3:4",
+    "duration": "3s",
+    "loop": true,
+    "tint": false,
+    "still": false,
+    "spec": [
+      "3:4",
+      "신살 인물",
+      "Static"
+    ],
+    "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nTwo figures back to back, slightly misaligned, neither facing the\nviewer. Muted violet-grey.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height. Keep the pose described above — do not turn the subject\nto face the camera.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+    "motion": "both figures sway apart a few pixels, no faces\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
+  },
+  "dohwa": {
+    "title": "꽃그늘의 사람",
+    "who": "도화 桃花",
+    "preset": "Static",
+    "ratio": "3:4",
+    "duration": "3s",
+    "loop": true,
+    "tint": false,
+    "still": false,
+    "spec": [
+      "3:4",
+      "신살 인물",
+      "Static"
+    ],
+    "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA striking person standing under falling blossoms, gaze drawing the eye.\nFully clothed in layered hanbok, dignified posture.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height. FRONT-FACING — squared to the camera, both eyes fully\nvisible and level, gaze straight at the viewer. No head turn, no\nprofile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+    "motion": "blossoms fall past, hair lifts once, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
+  },
+  "yeokma": {
+    "title": "말 위의 나그네",
+    "who": "역마 驛馬",
+    "preset": "Static",
+    "ratio": "3:4",
+    "duration": "3s",
+    "loop": true,
+    "tint": false,
+    "still": false,
+    "spec": [
+      "3:4",
+      "신살 인물",
+      "Static"
+    ],
+    "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA traveler on horseback in mid-stride, dust trailing behind.\nWarm sand rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height. FRONT-FACING — squared to the camera, both eyes fully\nvisible and level, gaze straight at the viewer. No head turn, no\nprofile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+    "motion": "dust drifts backward, horse mane lifts\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
+  },
+  "hwagae": {
+    "title": "일산 아래 홀로",
+    "who": "화개 華蓋",
+    "preset": "Static",
+    "ratio": "3:4",
+    "duration": "3s",
+    "loop": true,
+    "tint": false,
+    "still": false,
+    "spec": [
+      "3:4",
+      "신살 인물",
+      "Static"
+    ],
+    "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA solitary figure beneath a floral canopy, turned slightly away.\nLavender rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height. Keep the pose described above — do not turn the subject\nto face the camera.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+    "motion": "canopy fringe sways, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
+  },
+  "gwaegang": {
+    "title": "북두를 인 장수",
+    "who": "괴강 魁罡",
+    "preset": "Static",
+    "ratio": "3:4",
+    "duration": "3s",
+    "loop": true,
+    "tint": false,
+    "still": false,
+    "spec": [
+      "3:4",
+      "신살 인물",
+      "Static"
+    ],
+    "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA commander with the Big Dipper glowing above the head, steel-grey\narmor. Cool rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height. FRONT-FACING — squared to the camera, both eyes fully\nvisible and level, gaze straight at the viewer. No head turn, no\nprofile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+    "motion": "the seven stars pulse once in sequence\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
+  },
+  "gongmang": {
+    "title": "빈 자리",
+    "who": "공망 空亡",
+    "preset": "Static",
+    "ratio": "3:4",
+    "duration": "3s",
+    "loop": true,
+    "tint": false,
+    "still": false,
+    "spec": [
+      "3:4",
+      "신살 인물",
+      "Static"
+    ],
+    "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nAn empty seat. No person. A dashed outline where someone would be.\nNearly monochrome, deep indigo.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height. FRONT-FACING — squared to the camera, both eyes fully\nvisible and level, gaze straight at the viewer. No head turn, no\nprofile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+    "motion": "the dashed outline fades in and out once. nothing else moves.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)"
+  }
 }

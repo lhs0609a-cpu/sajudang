@@ -109,8 +109,19 @@ LOOK = {
                 "for his arms"),
 }
 
+# ★ 정면 초상입니다 (2026-09-03).
+#
+#   전에는 「slight three-quarter angle」 이라 비스듬히 나왔습니다. 이
+#   초상이 가장 크게 쓰이는 자리는 **대사 옆 66×88 조각**인데, 그 크기
+#   에서 얼굴을 살짝 돌리면 한쪽 눈이 묻히고 시선이 손님을 비껴갑니다.
+#   마주 앉은 자리라 눈이 마주쳐야 합니다.
+#
+#   금지도 같이 적습니다 — 생성기는 「정면」 한 마디로는 자꾸 3/4 로
+#   돌아갑니다. no head turn · no profile 까지 박아야 섭니다.
 TAIL = ("Bust-up from the chest up, centered, subject occupying about 72% of\n"
-        "frame height, slight three-quarter angle, looking toward the viewer.\n"
+        "frame height. FRONT-FACING PORTRAIT — head and shoulders squared to\n"
+        "the camera, both eyes fully visible and level, gaze straight at the\n"
+        "viewer. Symmetrical. No head turn, no profile, no three-quarter angle.\n"
         "\n"
         "Flat solid pure white (#FFFFFF) background — no gradient, no scenery,\n"
         "no cast shadow, no vignette. No text, letters, numbers, logos or\n"

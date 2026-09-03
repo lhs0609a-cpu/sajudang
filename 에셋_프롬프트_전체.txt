@@ -1136,7 +1136,9 @@ A serene guardian woman in flowing white hanbok, wide sleeves spread
 forward as if shielding someone unseen. Warm gold rim light.
 
 Bust-up from the chest up, centered, subject occupying about 70% of
-frame height, slight three-quarter angle.
+frame height. FRONT-FACING — squared to the camera, both eyes fully
+visible and level, gaze straight at the viewer. No head turn, no
+profile, no three-quarter angle.
 
 Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
@@ -1181,7 +1183,9 @@ A calm immortal holding a luminous circular emblem, half light half
 shadow. Teal rim light.
 
 Bust-up from the chest up, centered, subject occupying about 70% of
-frame height, slight three-quarter angle.
+frame height. FRONT-FACING — squared to the camera, both eyes fully
+visible and level, gaze straight at the viewer. No head turn, no
+profile, no three-quarter angle.
 
 Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
@@ -1226,7 +1230,9 @@ A refined young scholar holding a writing brush upright, scrolls at his
 side. Lavender rim light.
 
 Bust-up from the chest up, centered, subject occupying about 70% of
-frame height, slight three-quarter angle.
+frame height. FRONT-FACING — squared to the camera, both eyes fully
+visible and level, gaze straight at the viewer. No head turn, no
+profile, no three-quarter angle.
 
 Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
@@ -1271,7 +1277,9 @@ An elegant attendant beside an ornate palanquin, one hand resting on its
 pole. Rose rim light.
 
 Bust-up from the chest up, centered, subject occupying about 70% of
-frame height, slight three-quarter angle.
+frame height. FRONT-FACING — squared to the camera, both eyes fully
+visible and level, gaze straight at the viewer. No head turn, no
+profile, no three-quarter angle.
 
 Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
@@ -1316,7 +1324,9 @@ A half-hidden figure in shadow, one hand extended forward from behind.
 Face obscured. Slate rim light.
 
 Bust-up from the chest up, centered, subject occupying about 70% of
-frame height, slight three-quarter angle.
+frame height. FRONT-FACING — squared to the camera, both eyes fully
+visible and level, gaze straight at the viewer. No head turn, no
+profile, no three-quarter angle.
 
 Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
@@ -1361,7 +1371,9 @@ A poised warrior resting a slender blade point-down, not raised.
 Crimson rim light.
 
 Bust-up from the chest up, centered, subject occupying about 70% of
-frame height, slight three-quarter angle.
+frame height. FRONT-FACING — squared to the camera, both eyes fully
+visible and level, gaze straight at the viewer. No head turn, no
+profile, no three-quarter angle.
 
 Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
@@ -1406,7 +1418,8 @@ A white tiger seated in profile, calm and watchful, NOT snarling.
 No blood, no wounds. Pale silver rim light.
 
 Bust-up from the chest up, centered, subject occupying about 70% of
-frame height, slight three-quarter angle.
+frame height. Keep the pose described above — do not turn the subject
+to face the camera.
 
 Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
@@ -1451,7 +1464,8 @@ Two figures back to back, slightly misaligned, neither facing the
 viewer. Muted violet-grey.
 
 Bust-up from the chest up, centered, subject occupying about 70% of
-frame height, slight three-quarter angle.
+frame height. Keep the pose described above — do not turn the subject
+to face the camera.
 
 Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
@@ -1496,7 +1510,9 @@ A striking person standing under falling blossoms, gaze drawing the eye.
 Fully clothed in layered hanbok, dignified posture.
 
 Bust-up from the chest up, centered, subject occupying about 70% of
-frame height, slight three-quarter angle.
+frame height. FRONT-FACING — squared to the camera, both eyes fully
+visible and level, gaze straight at the viewer. No head turn, no
+profile, no three-quarter angle.
 
 Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
@@ -1541,7 +1557,9 @@ A traveler on horseback in mid-stride, dust trailing behind.
 Warm sand rim light.
 
 Bust-up from the chest up, centered, subject occupying about 70% of
-frame height, slight three-quarter angle.
+frame height. FRONT-FACING — squared to the camera, both eyes fully
+visible and level, gaze straight at the viewer. No head turn, no
+profile, no three-quarter angle.
 
 Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
@@ -1586,7 +1604,8 @@ A solitary figure beneath a floral canopy, turned slightly away.
 Lavender rim light.
 
 Bust-up from the chest up, centered, subject occupying about 70% of
-frame height, slight three-quarter angle.
+frame height. Keep the pose described above — do not turn the subject
+to face the camera.
 
 Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
@@ -1631,7 +1650,9 @@ A commander with the Big Dipper glowing above the head, steel-grey
 armor. Cool rim light.
 
 Bust-up from the chest up, centered, subject occupying about 70% of
-frame height, slight three-quarter angle.
+frame height. FRONT-FACING — squared to the camera, both eyes fully
+visible and level, gaze straight at the viewer. No head turn, no
+profile, no three-quarter angle.
 
 Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
@@ -1676,7 +1697,9 @@ An empty seat. No person. A dashed outline where someone would be.
 Nearly monochrome, deep indigo.
 
 Bust-up from the chest up, centered, subject occupying about 70% of
-frame height, slight three-quarter angle.
+frame height. FRONT-FACING — squared to the camera, both eyes fully
+visible and level, gaze straight at the viewer. No head turn, no
+profile, no three-quarter angle.
 
 Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
 no cast shadow, no vignette. No text, letters, numbers, logos or
