@@ -118,6 +118,9 @@ LOOK = {
 #
 #   금지도 같이 적습니다 — 생성기는 「정면」 한 마디로는 자꾸 3/4 로
 #   돌아갑니다. no head turn · no profile 까지 박아야 섭니다.
+# 초상 프롬프트를 마지막으로 고친 날 (정면으로 바꾼 날)
+REVISED = "2026-09-03"
+
 TAIL = ("Bust-up from the chest up, centered, subject occupying about 72% of\n"
         "frame height. FRONT-FACING PORTRAIT — head and shoulders squared to\n"
         "the camera, both eyes fully visible and level, gaze straight at the\n"
@@ -302,6 +305,12 @@ def main() -> int:
                 "seasonal": False, "seasons": None, "note": None,
                 "preset": "Static", "ratio": "3:4", "duration": "3s",
                 "loop": True, "tint": False, "still": False,
+                # ★ 프롬프트를 고친 날. 화면(AssetBoard)이 이 날짜와
+                #   그림 파일의 만든 날을 대 보고, 그림이 더 오래면
+                #   「프롬프트가 바뀜」 이라 찍습니다. 안 그러면 낡은
+                #   그림이 초록불로 남아 다 된 줄 압니다 — 도령 초상이
+                #   비스듬한 채 그랬습니다.
+                "revised": REVISED,
                 "image": style + "\n\n" + who + "." + tone + "\n\n" + TAIL,
                 "motion": MOTION + "\n\n" + anim,
                 # 표정 두 벌 — 모달이 같이 보여 줍니다

@@ -114,12 +114,15 @@ function rows(): Row[] {
   return out;
 }
 
-async function ok(url: string): Promise<boolean> {
+/** 있는가, 그리고 **언제 만든 것인가**. 없으면 null. */
+async function madeAt(url: string): Promise<number | null> {
   try {
     const r = await fetch(url, { method: "HEAD" });
-    return r.ok;
+    if (!r.ok) return null;
+    const lm = r.headers.get("last-modified");
+    return lm ? Date.parse(lm) : 0;
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -142,28 +145,67 @@ function Art({ r }: { r: Row }) {
 export default function AssetBoard() {
   const all = rows();
   const [have, setHave] = useState<Record<string, [boolean, boolean]>>({});
+  /*
+   * ★ 그림이 있어도 **낡았을 수 있습니다** (2026-09-03).
+   *
+   *   초상 프롬프트를 정면으로 고쳤는데, 이미 뽑아 둔 도령 그림은
+   *   비스듬한 채였습니다. 판은 「그림 있음」 이라 초록불을 켰고,
+   *   그래서 다 된 줄 알았습니다. 파일이 프롬프트보다 오래면 그렇게
+   *   말해야 합니다 — 판이 거짓말을 하면 안 봅니다.
+   */
+  const [revised, setRevised] = useState<Record<string, number>>({});
+  const [stale, setStale] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState(true);
   const [open, setOpen] = useState<{ kind: Kind; id: string } | null>(null);
   const [onlyMissing, setOnlyMissing] = useState(false);
+
+  /* 프롬프트를 언제 고쳤는가 — 묶음이 자리마다 적어 둡니다. */
+  useEffect(() => {
+    let alive = true;
+    fetch("/asset-prompts.json")
+      .then((r) => r.json())
+      .then((d) => {
+        if (!alive) return;
+        const at: Record<string, number> = {};
+        for (const grp of ["scenes", "chars", "figures"] as const) {
+          for (const [k, v] of Object.entries(d[grp] ?? {})) {
+            const rev = (v as { revised?: string }).revised;
+            if (rev) at[k] = Date.parse(rev);
+          }
+        }
+        setRevised(at);
+      })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, []);
 
   useEffect(() => {
     let alive = true;
     (async () => {
       const got: Record<string, [boolean, boolean]> = {};
+      const old: Record<string, boolean> = {};
       for (const r of all) {
-        const img = (await Promise.all(r.img.map(ok))).some(Boolean);
+        const times = await Promise.all(r.img.map(madeAt));
+        const made = times.filter((t): t is number => t !== null);
+        const img = made.length > 0;
         const clip = r.clip.length
-          ? (await Promise.all(r.clip.map(ok))).some(Boolean)
+          ? (await Promise.all(r.clip.map(madeAt))).some((t) => t !== null)
           : true;
         got[r.kind + ":" + r.id] = [img, clip];
+        // 프롬프트를 고친 날보다 그림이 오래면 낡은 것입니다.
+        const rev = revised[r.id];
+        if (img && rev && made.every((t) => t > 0 && t < rev)) {
+          old[r.id] = true;
+        }
         if (!alive) return;
         setHave({ ...got });
+        setStale({ ...old });
       }
       if (alive) setBusy(false);
     })();
     return () => { alive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [revised]);
 
   const kinds: Kind[] = ["scene", "char", "figure"];
   const tally = (k: Kind, which: 0 | 1) => {
@@ -173,7 +215,8 @@ export default function AssetBoard() {
   };
   const missing = (r: Row) => {
     const st = have[r.kind + ":" + r.id];
-    return !st || !st[0] || !st[1];
+    // 낡은 것도 채워야 할 자리입니다 — 「없는 것만」 에 같이 걸립니다.
+    return !st || !st[0] || !st[1] || !!stale[r.id];
   };
 
   return (
@@ -242,8 +285,11 @@ export default function AssetBoard() {
                         <span className="abid">{r.id}</span>
                       </div>
                       <div className="abdots">
-                        <span className={"abdot" + (img ? " on" : "")}>
-                          {img ? "그림" : "그림 없음"}
+                        <span className={"abdot"
+                                         + (stale[r.id] ? " old"
+                                            : img ? " on" : "")}>
+                          {stale[r.id] ? "프롬프트 바뀜"
+                           : img ? "그림" : "그림 없음"}
                         </span>
                         <span className={"abdot" + (r.clip.length === 0
                                                     ? " na"
