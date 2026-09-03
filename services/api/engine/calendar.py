@@ -33,6 +33,22 @@ ZI_POLICY: Literal["조자시", "야자시"] = "조자시"
 # 두 방식은 절입 전후 약 32분(서울 기준) 구간의 출생자에서만 결과가 갈립니다.
 JIEQI_BASIS: Literal["corrected", "standard"] = "corrected"
 
+# 시지·일주 경계를 **무슨 시각**으로 정하는가.
+#   "true_solar" — 고을의 진태양시로 고친 시각 (우리 선택 · 참조 구현체)
+#   "standard"   — 표준시 그대로. 경도 보정을 안 쓰는 만세력이 이쪽입니다.
+#
+# ★ 이 상수는 **바꾸라고 둔 것이 아닙니다.** 갈리는 자리를 손님에게
+#   먼저 말하려고 둔 것입니다 (`routers/chart._divergence` 가 잠깐
+#   뒤집어 저쪽 값을 함께 냅니다).
+#
+#   서울은 보정이 −32분이고 시지 경계는 두 시간마다 옵니다. 그래서
+#   경계 뒤 32분 안에 태어난 사람 — **넷 중 하나 남짓(26.9%)** — 이
+#   보정을 안 쓰는 만세력과 시주가 갈립니다. 조자시(4.4%)나
+#   절입(0.1%)보다 훨씬 흔한데, 여태 아무 말도 안 하고 있었습니다.
+#   2026-09-03 에 1993-11-25 13:00 서울로 실제로 걸렸습니다 —
+#   우리는 壬午(12:28 → 午), 저쪽은 癸未(13:00 → 未).
+HOUR_BASIS: Literal["true_solar", "standard"] = "true_solar"
+
 # 대운수 나머지 처리. "round" 반올림 / "floor" 버림
 DAEUN_ROUNDING: Literal["round", "floor"] = "round"
 DAEUN_COUNT = 8          # 대운 몇 구간까지 산출할지
@@ -226,7 +242,9 @@ def build_chart(year: int, month: int, day: int,
                  - total_off)
 
     # ② 진태양시 (균시차 미반영 — docs/05 §1-5, 2차 검토 항목)
-    solar_min = std_min + lon_min
+    #    HOUR_BASIS="standard" 는 경도 보정을 안 쓰는 집을 흉내 내는
+    #    자리입니다. 갈리는 값을 손님에게 함께 보이려고 씁니다.
+    solar_min = std_min + (lon_min if HOUR_BASIS == "true_solar" else 0.0)
     day_shift = 0
     if solar_min < 0:
         solar_min += 1440

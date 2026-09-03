@@ -56,6 +56,11 @@ def main() -> int:
 
     zi_hit = 0          # 조자시/야자시로 갈리는 사람
     jq_hit = 0          # 절입 기준으로 갈리는 사람
+    # ★ 여태 안 세던 자리. 셋 중 **가장 흔합니다.**
+    #   서울은 해가 남중하는 때가 표준시보다 32분 늦고, 시지 경계는 두
+    #   시간마다 옵니다. 그래서 경계 뒤 32분 안에 난 사람은 보정을 쓰는
+    #   집과 안 쓰는 집이 갈립니다.
+    lon_hit = 0         # 고을 보정(진태양시)으로 갈리는 사람
     both = Counter()
     made = 0
 
@@ -91,6 +96,15 @@ def main() -> int:
         except Exception:                        # noqa: BLE001
             pass
 
+        try:
+            other_lon = _flip(lambda: build_chart(y, m, d, h, mi, sex, True),
+                              HOUR_BASIS="standard")
+            if key(other_lon) != key(base):
+                lon_hit += 1
+                both["고을보정"] += 1
+        except Exception:                        # noqa: BLE001
+            pass
+
     print("=" * 76)
     print("  만세력 앱과 갈릴 수 있는 자리 — 표본 %d명" % made)
     print("=" * 76)
@@ -98,6 +112,7 @@ def main() -> int:
     print("  우리가 고른 것")
     print("    ZI_POLICY   = %s" % cal.ZI_POLICY)
     print("    JIEQI_BASIS = %s" % cal.JIEQI_BASIS)
+    print("    HOUR_BASIS  = %s" % cal.HOUR_BASIS)
     print()
     print("  %-14s %6s   %s" % ("갈리는 까닭", "사람", "백 명 중"))
     print("  " + "-" * 52)
@@ -106,7 +121,9 @@ def main() -> int:
                                        100.0 * zi_hit / made))
         print("  %-14s %6d   %.1f명" % ("절입 언저리 출생", jq_hit,
                                        100.0 * jq_hit / made))
-        tot = zi_hit + jq_hit
+        print("  %-14s %6d   %.1f명" % ("고을 보정 언저리", lon_hit,
+                                       100.0 * lon_hit / made))
+        tot = zi_hit + jq_hit + lon_hit
         print("  " + "-" * 52)
         print("  %-14s %6d   %.1f명" % ("합계(겹칠 수 있음)", tot,
                                        100.0 * tot / made))
