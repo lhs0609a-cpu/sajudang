@@ -155,6 +155,15 @@ export default function AssetBoard() {
    */
   const [revised, setRevised] = useState<Record<string, number>>({});
   const [stale, setStale] = useState<Record<string, boolean>>({});
+  /*
+   * ★ 영상도 낡습니다 (2026-09-04).
+   *
+   *   초상을 정면으로 바꾸고 나니 그림은 새로 뽑는데 **영상은 그대로**
+   *   비스듬한 채였습니다. 대사 옆 작은 얼굴은 그림(bust.png)을 쓰지만,
+   *   첫 대면·진열대·릴레이의 **큰 초상은 영상을 씁니다**(CharArt).
+   *   그림만 갈아 끼우면 큰 얼굴만 계속 옆을 봅니다.
+   */
+  const [staleClip, setStaleClip] = useState<Record<string, boolean>>({});
   const [busy, setBusy] = useState(true);
   const [open, setOpen] = useState<{ kind: Kind; id: string } | null>(null);
   const [onlyMissing, setOnlyMissing] = useState(false);
@@ -184,22 +193,29 @@ export default function AssetBoard() {
     (async () => {
       const got: Record<string, [boolean, boolean]> = {};
       const old: Record<string, boolean> = {};
+      const oldClip: Record<string, boolean> = {};
       for (const r of all) {
         const times = await Promise.all(r.img.map(madeAt));
         const made = times.filter((t): t is number => t !== null);
         const img = made.length > 0;
-        const clip = r.clip.length
-          ? (await Promise.all(r.clip.map(madeAt))).some((t) => t !== null)
-          : true;
+        const clipAt = r.clip.length
+          ? (await Promise.all(r.clip.map(madeAt)))
+              .filter((t): t is number => t !== null)
+          : [];
+        const clip = r.clip.length ? clipAt.length > 0 : true;
         got[r.kind + ":" + r.id] = [img, clip];
-        // 프롬프트를 고친 날보다 그림이 오래면 낡은 것입니다.
+        // 프롬프트를 고친 날보다 오래면 낡은 것입니다 — 그림도 영상도.
         const rev = revised[r.id];
-        if (img && rev && made.every((t) => t > 0 && t < rev)) {
-          old[r.id] = true;
+        if (rev) {
+          if (img && made.every((t) => t > 0 && t < rev)) old[r.id] = true;
+          if (clipAt.length && clipAt.every((t) => t > 0 && t < rev)) {
+            oldClip[r.id] = true;
+          }
         }
         if (!alive) return;
         setHave({ ...got });
         setStale({ ...old });
+        setStaleClip({ ...oldClip });
       }
       if (alive) setBusy(false);
     })();
@@ -216,7 +232,7 @@ export default function AssetBoard() {
   const missing = (r: Row) => {
     const st = have[r.kind + ":" + r.id];
     // 낡은 것도 채워야 할 자리입니다 — 「없는 것만」 에 같이 걸립니다.
-    return !st || !st[0] || !st[1] || !!stale[r.id];
+    return !st || !st[0] || !st[1] || !!stale[r.id] || !!staleClip[r.id];
   };
 
   return (
@@ -293,9 +309,11 @@ export default function AssetBoard() {
                         </span>
                         <span className={"abdot" + (r.clip.length === 0
                                                     ? " na"
+                                                    : staleClip[r.id] ? " old"
                                                     : clip ? " on" : "")}>
                           {r.clip.length === 0
                             ? "영상 안 씀"
+                            : staleClip[r.id] ? "영상 낡음"
                             : clip ? "영상" : "영상 없음"}
                         </span>
                       </div>

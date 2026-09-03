@@ -332,7 +332,6 @@ export default function Shell({
    */
   const scrRef = useRef<HTMLDivElement>(null);
   const doneRef = useRef(false);
-  const endRef = useRef(0);
   const [pacing, setPacing] = useState(false);
   /*
    * ★ 접힌 자리를 지켜보는 눈 (2026-09-03).
@@ -350,6 +349,19 @@ export default function Shell({
    *   닿는 대로 바로 뜨고, 빨리 굴리면 줄을 서서 차례로 뜹니다.
    */
   const eyeRef = useRef<IntersectionObserver | null>(null);
+  /*
+   * ★ 누르는 것은 따로 봅니다 (2026-09-04).
+   *
+   *   글은 화면 아래 22%에 걸치면 「아직 안 읽은 것」으로 두고 굴림을
+   *   기다립니다. 그런데 **버튼에 같은 문턱을 걸면 안 됩니다.** 대문의
+   *   「내 운명을 확인하겠습니다」 는 첫 화면 아래쪽에 있어서, 그대로
+   *   두면 손님이 굴려야 버튼이 나타납니다 — 굴릴 이유를 만들려다
+   *   누를 것을 감추는 꼴입니다.
+   *
+   *   누르는 것이 든 덩이는 **보이면 곧바로** 냅니다. 차례는 줄이
+   *   잡으므로 위의 글보다 먼저 튀어나오지 않습니다.
+   */
+  const eyeUiRef = useRef<IntersectionObserver | null>(null);
   /** 줄 선 것들이 언제까지 차 있는가 (performance.now 기준) */
   const queueRef = useRef(0);
   /*
@@ -394,6 +406,7 @@ export default function Shell({
   const revealAll = useCallback(() => {
     doneRef.current = true;
     eyeRef.current?.disconnect();
+    eyeUiRef.current?.disconnect();
     timersRef.current.forEach(window.clearTimeout);
     timersRef.current = [];
     if (restoreRef.current) window.clearTimeout(restoreRef.current);
@@ -408,6 +421,7 @@ export default function Shell({
   /* 화면을 뜨면 지켜보던 것과 시계를 놓습니다. */
   useEffect(() => () => {
     eyeRef.current?.disconnect();
+    eyeUiRef.current?.disconnect();
     timersRef.current.forEach(window.clearTimeout);
     if (restoreRef.current) window.clearTimeout(restoreRef.current);
   }, []);
@@ -457,29 +471,36 @@ export default function Shell({
      * ★ 차례는 **이번에 새로 온 것**만 셉니다.
      *
      *   훅처럼 한 마디씩 늘어나는 화면에서는 이 효과가 여러 번 돕니다.
-     *   그때 이미 뜬 것들의 시간까지 더하면, 새로 온 한 줄이 앞선 열
-     *   줄만큼 기다립니다 — 전체 상한이 있을 때는 안 보이던 탈입니다.
-     *   이미 뜬 것은 차례에서 빼고 0 부터 다시 셉니다.
+     *   이미 뜬 것은 다시 안 겁니다 (`data-beat` 를 보고 거릅니다).
      */
-    let t = 0;
-    // 첫 화면 밖은 안 셉니다. 아직 아무도 안 읽는 자리를 기다리면
-    // 그건 연출이 아니라 지연입니다.
-    const fold = window.innerHeight;
-    let folded = false;
-
     /*
-     * 접힌 자리를 지켜보는 눈. 한 번만 만듭니다.
+     * ★ 굴리는 대로 뜹니다 — 미리 띄우는 자리는 없습니다 (2026-09-04).
      *
-     * ★ 줄을 세우되 **오래는 안 세웁니다.** 빨리 굴려 내려온 손님이
-     *   열 덩이를 다 기다리면 그건 연출이 아니라 고장입니다. 밀린 줄이
-     *   QUEUE_MAX 를 넘으면 거기서부터 다시 셉니다.
+     *   전에는 **첫 화면 안은 시계로** 다 띄우고 그 아래만 굴림에
+     *   맡겼습니다. 그러니 첫 화면은 손 하나 안 대도 몇 초 만에 다
+     *   떠 버렸고, 손님이 말한 그대로였습니다 —
+     *
+     *       "사용자가 화면 내리는거에 맞춰서 글을 띄워줘.
+     *        미리 다 띄우면 안돼. 전체적으로 다. 모든 부분이 다 그래야해."
+     *
+     *   그래서 시계로 띄우는 길을 없앴습니다. **모든 마디가 눈에
+     *   들어올 때 뜹니다.** 한꺼번에 여럿이 들어오면(첫 화면) 줄을
+     *   세워 읽는 속도로 하나씩 냅니다 — 그래야 첫 화면도 대화입니다.
+     *
+     *   ★ 아래 22%는 아직 「눈에 들어온 것」이 아닙니다. 화면 끝에
+     *     걸친 글을 미리 띄우면 굴릴 이유가 없어집니다.
+     *
+     *   ★ 굴릴 수 없는 화면은 그 문턱을 안 겁니다. 굴릴 데가 없는데
+     *     아래 22%를 잠그면 그 글은 **영영 안 뜹니다.**
      */
-    if (!eyeRef.current) {
-      eyeRef.current = new IntersectionObserver((entries) => {
+    const canScroll =
+      document.documentElement.scrollHeight > window.innerHeight + 4;
+    const reveal = (entries: IntersectionObserverEntry[],
+                    who: IntersectionObserver) => {
         for (const en of entries) {
           if (!en.isIntersecting) continue;
           const el = en.target as HTMLElement;
-          eyeRef.current?.unobserve(el);
+          who.unobserve(el);
           if (el.dataset.beat !== undefined) continue;
           const now = performance.now();
           const wait = Math.min(QUEUE_MAX,
@@ -490,78 +511,106 @@ export default function Shell({
           timersRef.current.push(window.setTimeout(
             () => lightUp(el), wait * 1000));
           queueRef.current = now + (wait + holdOf(el)) * 1000;
+          // 다 떴으면 「한 번에 다 보겠습니다」 를 거둡니다.
+          if (!root.querySelector("[data-beatwait]")) {
+            timersRef.current.push(window.setTimeout(() => {
+              setPacing(false);
+              markSeen(screen);
+            }, (wait + holdOf(el)) * 1000 + 400));
+          }
         }
-      }, { rootMargin: "0px 0px -12% 0px" });
+    };
+    if (!eyeRef.current) {
+      eyeRef.current = new IntersectionObserver(
+        (e) => reveal(e, eyeRef.current!),
+        { rootMargin: canScroll ? "0px 0px -22% 0px" : "0px" });
+    }
+    if (!eyeUiRef.current) {
+      eyeUiRef.current = new IntersectionObserver(
+        (e) => reveal(e, eyeUiRef.current!), { rootMargin: "0px" });
     }
 
+    let added = 0;
     seq.forEach((el) => {
       if (el.dataset.beat !== undefined
           || el.dataset.beatwait !== undefined) return;
-      if (folded || el.getBoundingClientRect().top > fold) {
-        folded = true;
-        // 접힌 자리 — 눈에 들어올 때 그때부터 셉니다.
-        el.dataset.beatwait = "";
-        eyeRef.current!.observe(el);
-        return;
-      }
-      el.style.animationDelay = t.toFixed(2) + "s";
-      // 표를 다는 순간 CSS 가 움직이기 시작합니다. 지연을 **먼저**
-      // 적어야 합니다 — 순서가 바뀌면 지연 없이 튀어 오릅니다.
-      el.dataset.beat = "";
-      // 이 마디가 뜨는 때에 맞춰 밝히고 앞엣것을 물립니다.
-      timersRef.current.push(window.setTimeout(
-        () => lightUp(el), t * 1000));
-      t += holdOf(el);
+      el.dataset.beatwait = "";
+      // 누르는 것이 든 덩이는 문턱 없이 — 보이면 곧바로.
+      const ui = el.tagName === "BUTTON"
+        || el.querySelector("button, input, select, textarea, a");
+      (ui ? eyeUiRef.current! : eyeRef.current!).observe(el);
+      added += 1;
     });
-    // 첫 화면이 다 뜬 뒤에 접힌 것들이 이어지도록 줄을 맞춰 둡니다.
-    queueRef.current = Math.max(queueRef.current,
-                                performance.now() + t * 1000);
 
-    if (t <= 0) return;
-    endRef.current = Math.max(endRef.current, performance.now() + t * 1000);
-    setPacing(true);
+    if (added > 0) setPacing(true);
   });
 
-  /* 다 뜨고 나면 「한 번에 다 보겠습니다」 를 거둡니다. */
-  useEffect(() => {
-    if (!pacing) return;
-    const left = Math.max(0, endRef.current - performance.now());
-    const id = setTimeout(() => {
-      setPacing(false);
-      markSeen(screen);
-    }, left + 400);
-    return () => clearTimeout(id);
-  }, [pacing, screen]);
+  /*
+   * 「한 번에 다 보겠습니다」 를 거두는 것은 **관찰자가** 합니다 —
+   * 마지막 마디가 뜬 뒤에요. 시간으로 재면 굴림에 맡긴 뒤로는 맞지
+   * 않습니다: 손님이 안 굴리면 영영 안 끝나고, 그동안 「다 보겠습니다」
+   * 를 거두면 서두를 길이 사라집니다.
+   */
 
   /*
-   * ★ 읽는 속도를 정하는 건 결국 손님입니다.
+   * ★ 읽는 속도를 정하는 건 결국 손님입니다 — 다만 **굴림은 아닙니다.**
    *
-   *   누르거나, 키를 치거나, 아래로 굴리면 그 화면은 그 자리에서 다
-   *   폅니다. 이게 없으면 연출이 아니라 지연입니다 — 두 번째 오는
-   *   사람에게 같은 뜸은 특히요.
+   *   전에는 `wheel` 과 `touchmove` 도 다 펴는 손잡이였습니다. 그런데
+   *   이제 굴림이 **글을 띄우는 손잡이**입니다. 둘을 같이 걸면 굴리는
+   *   순간 통째로 펴져서, 손님은 늘 다 떠 있는 화면만 보게 됩니다.
+   *   모바일은 더합니다 — 손가락을 대는 순간 `pointerdown` 이 먼저
+   *   울려서, 굴리려던 사람이 건너뛰기를 누른 셈이 됐습니다.
+   *
+   *   그래서 **누름(click)과 키만** 답니다. 굴림은 굴림입니다.
+   *   서두르는 사람에게는 「한 번에 다 보겠습니다」 가 있습니다.
    */
   useEffect(() => {
     if (!pacing) return;
     const go = () => revealAll();
+    const tap = (e: MouseEvent) => {
+      // 버튼·링크·입력칸을 누른 것은 그 일을 하러 누른 것입니다.
+      const el = e.target as HTMLElement | null;
+      if (el?.closest("button, a, input, textarea, select, summary")) return;
+      go();
+    };
     const keys = (e: KeyboardEvent) => {
       // 글자를 치는 중이면 건드리지 않습니다 — 이름·생년월일 칸입니다.
       const el = e.target as HTMLElement | null;
       if (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return;
       go();
     };
-    window.addEventListener("pointerdown", go);
-    window.addEventListener("wheel", go, { passive: true });
-    window.addEventListener("touchmove", go, { passive: true });
+    window.addEventListener("click", tap);
     window.addEventListener("keydown", keys);
     window.addEventListener("beforeprint", go);
     return () => {
-      window.removeEventListener("pointerdown", go);
-      window.removeEventListener("wheel", go);
-      window.removeEventListener("touchmove", go);
+      window.removeEventListener("click", tap);
       window.removeEventListener("keydown", keys);
       window.removeEventListener("beforeprint", go);
     };
   }, [pacing, revealAll]);
+
+  /*
+   * ★ 바닥에 닿았는데 아직 안 뜬 것이 있으면 띄웁니다.
+   *
+   *   굴림에 맡기는 값에는 늘 이 위험이 있습니다 — 더 굴릴 데가 없는데
+   *   문턱 아래에 남은 글은 **영영 안 뜹니다.** 바닥은 「더 볼 것이
+   *   없다」 는 뜻이니, 거기서는 남은 것을 냅니다.
+   */
+  useEffect(() => {
+    if (!pacing) return;
+    const onScroll = () => {
+      const d = document.documentElement;
+      if (d.scrollTop + window.innerHeight < d.scrollHeight - 8) return;
+      const left = scrRef.current
+        ?.querySelectorAll<HTMLElement>("[data-beatwait]");
+      left?.forEach((el) => {
+        delete el.dataset.beatwait;
+        el.dataset.beat = "";
+      });
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [pacing]);
 
   /*
    * 배경음.
