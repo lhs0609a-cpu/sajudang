@@ -2608,3 +2608,39 @@ body.has-rail .beatskip-hint { left: calc(50% + 116px); }
   color: var(--paper3);
 }
 .actout .nextname b { color: var(--gold); }
+
+
+/* ══════════════════════════════════════════════════════════
+ * 레일의 연출 점수 — 보는 자리에 둔다
+ *
+ * 화면을 고치는 사람은 그 화면을 **보면서** 고칩니다. 점수가 다른
+ * 주소에 있으면 안 봅니다. 여섯 축을 레일 머리에 붙입니다.
+ * ══════════════════════════════════════════════════════════ */
+.rsc {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px;
+  margin: 6px 0 8px;
+}
+.rsc > div {
+  border: 1px solid var(--line); border-radius: 4px;
+  padding: 5px 2px; text-align: center; line-height: 1.25;
+}
+.rsc b { display: block; font-family: var(--mono); font-size: 14px; }
+.rsc span { font-size: 9px; color: var(--paper3); letter-spacing: .04em; }
+.rsc .ok  b { color: #7fd6a2; }
+.rsc .mid b { color: var(--gold); }
+.rsc .bad b { color: var(--ember); }
+.rsc .tot { grid-column: span 2; border-color: var(--paper3); }
+.rsc .tot b { font-size: 17px; }
+
+.rescore {
+  float: right; font-family: var(--mono); font-size: 9px;
+  color: var(--paper3); background: none; border: 0; cursor: pointer;
+}
+.rescore:hover { color: var(--gold); }
+
+/* 모자란 것 — 점수만 보이면 무엇을 고칠지 모릅니다 */
+.rmiss {
+  margin: 0 0 10px; padding: 0 0 0 12px;
+  font-size: 10px; line-height: 1.6; color: var(--paper3);
+}
+.rmiss li { margin: 2px 0; }

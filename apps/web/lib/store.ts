@@ -67,6 +67,11 @@ export interface SessionState {
   seasonOverride: Season | null;   // 진입 서사 4계절 확인
   ilganOverride: string | null;    // 일간 10색 테마 확인
 
+  /* 지금 보고 있는 화면 이름 (a7 · b1 · d1 …). Shell 이 적습니다.
+     관리자 레일이 **이 화면의 연출 점수**를 띄우는 데 씁니다.
+     저장하지 않습니다 — 화면을 옮기면 바로 바뀌는 값입니다. */
+  screen: string | null;
+
   set: (patch: Partial<SessionState>) => void;
   markRead: (id: string) => void;
   markSkipped: (id: string) => void;
@@ -109,6 +114,7 @@ const initial = {
   adminSet: false,
   seasonOverride: null as Season | null,
   ilganOverride: null as string | null,
+  screen: null as string | null,
 };
 
 export const useSession = create<SessionState>()(

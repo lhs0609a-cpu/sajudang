@@ -254,6 +254,14 @@ export default function Shell({
   }, [admin]);
 
   /*
+   * 지금 어느 화면인지 알린다 — 관리자 레일이 **이 화면의** 연출 점수를
+   * 띄우는 데 씁니다. 손님 화면에서는 아무 일도 안 합니다.
+   */
+  useEffect(() => {
+    if (screen) setSession({ screen });
+  }, [screen, setSession]);
+
+  /*
    * ★ 화면 전체가 손님이 읽는 속도로 뜬다.
    *
    *   순서는 화면 단위입니다. 여기 놓인 순서(DOM 순서 = 보이는 순서)대로

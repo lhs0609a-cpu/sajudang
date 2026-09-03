@@ -21,7 +21,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { api, ApiError } from "@/lib/api";
+import { API_BASE, api, ApiError } from "@/lib/api";
 import { LENSES } from "@/lib/lenses";
 import {
   CONCERNS, SCREEN_GROUPS, seasonOf, useSession,
@@ -48,6 +48,123 @@ const SEASONS: { k: Season; label: string }[] = [
 const ADMIN_DEFAULT = process.env.NEXT_PUBLIC_ADMIN_DEFAULT !== "0";
 
 const EL = { 목: "나무", 화: "불", 토: "흙", 금: "쇠", 수: "물" } as Record<string, string>;
+
+/*
+ * 이 화면의 연출 점수 — 여섯 축.
+ *
+ * ★ 손님이 시킨 것 (2026-09-02 · 09-03, 두 번)
+ *
+ *   "미드처럼 다음 무조건 보게 만들고, 팩폭하고, 감성적으로 눈물이 핑
+ *   돌게 하고, 명확하고, 쉽게 설명하고, 비유로 설명하고, 이런 거 점수로
+ *   만들어서 **각 페이지마다 몇 점인지 띄어놓으라고** 했잖아.
+ *   **수정해도 점수가 연동되게끔.**"
+ *
+ * ★ 여태 어디 있었나 — `/admin` 안에만 있었습니다.
+ *
+ *   화면을 고치는 사람은 그 화면을 **보면서** 고칩니다. 점수를 보려면
+ *   다른 주소로 옮겨 가서 표를 찾아 그 줄을 눈으로 짚어야 했습니다.
+ *   그러면 안 봅니다. 보는 자리에 있어야 봅니다.
+ *
+ * ★ 연동 — 지어낸 값이 아닙니다.
+ *
+ *   서버가 **지금 나가는 글**을 그 자리에서 다시 읽어 셉니다
+ *   (`engine/screenscan` 이 화면 파일과 엔진 글을 함께 봅니다).
+ *   글을 고치고 새로 고치면 숫자가 따라 움직입니다. 캐시를 안 겁니다.
+ */
+const AX: [keyof ScreenScore, string, string][] = [
+  ["pull", "당김", "다음 화가 보고 싶은가"],
+  ["bite", "팩폭", "틀릴 수 있는 말을 하는가"],
+  ["heart", "울림", "눈물이 핑 도는가"],
+  ["clear", "명확", "무엇을 보고 한 말인지"],
+  ["plain", "쉬움", "어려운 말을 푸는가"],
+  ["figure", "비유", "그림이 그려지는가"],
+];
+
+interface ScreenScore {
+  id: string; title: string; total: number;
+  pull: number; bite: number; heart: number;
+  clear: number; plain: number; figure: number;
+  missing: string[];
+}
+
+function RailScore({ screen }: { screen: string | null }) {
+  const [row, setRow] = useState<ScreenScore | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const [n, setN] = useState(0);
+
+  useEffect(() => {
+    if (!screen) { setRow(null); return; }
+    let alive = true;
+    let key = "";
+    try { key = localStorage.getItem("sd.adminkey") ?? ""; } catch { /* */ }
+    /*
+     * ★ 개발에서는 열쇠 없이도 점수가 뜹니다.
+     *
+     *   영업 정보 문은 열쇠 뒤에 있어야 맞습니다(keyguard). 그런데 그
+     *   문에 **연출 점수도 같이** 있어서, 화면을 고치는 사람이 점수를
+     *   보려면 먼저 열쇠부터 넣어야 했습니다. 로컬 API 일 때만
+     *   dev.ps1 api 가 다는 임시 열쇠를 씁니다.
+     *   배포본은 API 주소가 로컬이 아니라 이 줄이 안 닿습니다.
+     */
+    if (!key && /^https?:\/\/(localhost|127\.0\.0\.1)/.test(API_BASE)) {
+      key = "dev";
+    }
+    if (!key) { setErr("열쇠"); return; }
+    setErr(null);
+    fetch(`${API_BASE}/v1/admin/screens`, { headers: { "x-funnel-key": key } })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((d) => {
+        if (!alive) return;
+        const got = (d.screens as ScreenScore[]).find((x) => x.id === screen);
+        setRow(got ?? null);
+        if (!got) setErr("이 화면은 아직 안 재오");
+      })
+      .catch(() => alive && setErr("점수를 못 가져왔소"));
+    return () => { alive = false; };
+  }, [screen, n]);
+
+  if (!screen) return null;
+  return (
+    <>
+      <span className="gh">
+        연출 점수 · {screen}
+        <button className="lnk rescore" onClick={() => setN(n + 1)}>다시</button>
+      </span>
+      {err === "열쇠" ? (
+        <p className="sm">
+          점수는 <Link href="/admin">주인 자리</Link>에서 열쇠를 한 번
+          넣어야 보이오.
+        </p>
+      ) : !row ? (
+        <p className="sm">{err ?? "재는 중…"}</p>
+      ) : (
+        <>
+          <div className="rsc">
+            {AX.map(([k, label, why]) => {
+              const v = row[k] as number;
+              return (
+                <div key={k} className={v >= 80 ? "ok" : v >= 60 ? "mid" : "bad"}
+                     title={why}>
+                  <b>{v}</b><span>{label}</span>
+                </div>
+              );
+            })}
+            <div className={"tot " + (row.total >= 80 ? "ok"
+              : row.total >= 60 ? "mid" : "bad")}>
+              <b>{row.total}</b><span>합</span>
+            </div>
+          </div>
+          {/* 점수만 보이면 무엇을 고칠지 모릅니다. 모자란 것을 그대로 냅니다. */}
+          {row.missing.length > 0 && (
+            <ul className="rmiss">
+              {row.missing.slice(0, 6).map((m) => <li key={m}>{m}</li>)}
+            </ul>
+          )}
+        </>
+      )}
+    </>
+  );
+}
 
 export default function DevRail() {
   const s = useSession();
@@ -135,6 +252,8 @@ export default function DevRail() {
               숨기기
             </button>
           </div>
+
+          <RailScore screen={s.screen} />
 
           {/* ── 생년월일시 ── */}
           <span className="gh">생년월일시</span>

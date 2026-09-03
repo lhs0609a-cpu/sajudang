@@ -29,16 +29,19 @@ def main() -> int:
     s = summary(rows)
     print("연출 감사 — 화면 %d" % s["screens"])
     print("=" * 72)
-    print("  당김 %3d · 팩폭 %3d · 충실 %3d · 쉬움 %3d   →  합 %d (%s)"
-          % (s["pull"], s["bite"], s["depth"], s["plain"],
-             s["total"], grade(s["total"])))
-    print("-" * 72)
-    print("%-5s %-10s %5s %5s %5s %5s %6s  %s"
-          % ("id", "이름", "당김", "팩폭", "충실", "쉬움", "합", "액트아웃"))
+    print("  당김 %3d · 팩폭 %3d · 울림 %3d · 명확 %3d · 쉬움 %3d · 비유 %3d"
+          % (s["pull"], s["bite"], s["heart"], s["clear"],
+             s["plain"], s["figure"]))
+    print("  →  합 %d (%s)" % (s["total"], grade(s["total"])))
+    print("-" * 76)
+    print("%-5s %-10s %4s %4s %4s %4s %4s %4s %5s  %s"
+          % ("id", "이름", "당김", "팩폭", "울림", "명확", "쉬움", "비유",
+             "합", "액트아웃"))
     for r in sorted(rows, key=lambda r: r["total"]):
-        print("%-5s %-10s %5d %5d %5d %5d %6d  %s"
-              % (r["id"], r["title"], r["pull"], r["bite"], r["depth"],
-                 r["plain"], r["total"], " · ".join(r["actout"]) or "—"))
+        print("%-5s %-10s %4d %4d %4d %4d %4d %4d %5d  %s"
+              % (r["id"], r["title"], r["pull"], r["bite"], r["heart"],
+                 r["clear"], r["plain"], r["figure"], r["total"],
+                 " · ".join(r["actout"]) or "—"))
         if a.why:
             for m in r["missing"]:
                 print("        · %s" % m)

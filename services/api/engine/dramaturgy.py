@@ -140,6 +140,43 @@ HEDGE = re.compile(r"게요|쯤|아마|조금|약간|다소|수도 있|편이|�
 
 
 # ══════════════════════════════════════════════════════════
+# ③ 울림 — 눈물이 핑 도는가
+# ══════════════════════════════════════════════════════════
+#
+# ★ 감정은 못 세는 것이 아닙니다. **세는 자리**를 정하면 됩니다.
+#
+#   울림은 슬픈 낱말에서 오지 않습니다. 「이게 내 얘기다」 로 느낄 때
+#   옵니다. 그래서 세 자리를 봅니다 —
+#
+#     누구 얘기인가   호명(그대·자네)이 있는가. 없으면 남의 얘기입니다.
+#     겪은 일인가     지난 일을 짚는가. 「~했을 게요」 는 손님이 제
+#                    기억에서 답을 찾게 만듭니다.
+#     짧게 끊는가     긴 문장에서는 안 울립니다. 열네 자 아래 한 줄.
+
+# 호명 — voice.address 가 캐릭터마다 갈아 끼우는 그 자리입니다
+YOU = re.compile(r"그대|자네|그쪽|당신")
+
+# 겪은 마음의 말. 「슬프다」 같은 감정 이름이 아니라 **해 본 행동**입니다 —
+# 참았고, 미뤘고, 눌렀고, 버텼습니다. 이름표보다 이쪽이 울립니다.
+FEEL = re.compile(
+    r"참|눌러|눌렀|눌린|미뤄|미룬|미뤘|버티|버텼|지치|지쳤|외로|서럽|"
+    r"억울|서운|그립|후회|견디|견뎠|아프|아팠|울|두렵|불안|망설|삼키|"
+    r"혼자|말 못|못 했|안 했|놓쳤|잃")
+
+# 지난 일을 짚는 말 — 손님이 제 기억에서 답을 찾습니다
+LIVED = re.compile(r"했을 게요|였을 게요|했을 것이오|있었을|하곤|던 날|"
+                   r"던 것|한 적|온 날|아니었소|그랬다면|여태|늘 그랬")
+
+# ★ 훈계는 **감점**입니다.
+#   손님이 울컥하는 건 알아준다고 느낄 때지 가르침받을 때가 아닙니다.
+PREACH = re.compile(r"힘내|노력하시|긍정적|마음먹기|이겨내|극복하시|"
+                    r"努力|받아들이시오|감사하")
+
+# 비유 — 그림이 그려지는 한 줄
+FIGURE = re.compile(r"처럼|같이|마치|셈이오|셈입니다|셈이|빗대|듯이")
+
+
+# ══════════════════════════════════════════════════════════
 # ④ 쉬움 — 손님이 알아들을 수 있는가
 # ══════════════════════════════════════════════════════════
 HARD = tuple(sorted(terms.MEANING, key=len, reverse=True))
@@ -262,10 +299,50 @@ def score(sid: str, title: str, html: str, kind: str = "read",
         miss.append("물러서는 말이 많소 — 「게요·아마·쯤」을 걷으시오")
     bite = s_fals + s_life + s_firm
 
-    # ── ③ 충실 ────────────────────────────────────────────
+    # ── ③ 울림 — 눈물이 핑 도는가 ──────────────────────────
+    #
+    # ★ 손님이 시킨 것 중 여태 **하나도 안 세던** 축입니다.
+    #
+    #   "미드처럼 다음 무조건 보게 만들고, 팩폭하고, **감성적으로 눈물이
+    #   핑 돌게** 하고, 명확하고, 쉽게 설명하고, **비유로** 설명하고,
+    #   이런 거 점수로 만들어서 각 페이지마다 몇 점인지 띄워."
+    #
+    #   넷만 세고 있었습니다 — 당김·팩폭·충실·쉬움. 울림과 비유는
+    #   자리가 없었고(비유는 쉬움 안에 25점으로 얹혀 있었습니다),
+    #   그래서 「눈물이 핑」 은 아무도 안 재고 있었습니다.
+    #
+    # ★ 감정은 **못 세는 것**이 아닙니다. 세는 자리를 정하면 됩니다.
+    #
+    #   울림은 「슬픈 낱말」이 아니라 **누구 얘기인가 · 겪은 일인가 ·
+    #   짧게 끊는가** 에서 옵니다. 넷을 셉니다.
+    #
+    # ★ 그리고 훈계는 **감점**입니다.
+    #
+    #   「힘내시오」 「마음먹기 나름이오」 는 감정을 건드리는 게 아니라
+    #   가르치는 것입니다. 손님이 울컥하는 건 알아준다고 느낄 때지
+    #   훈계받을 때가 아닙니다. 이 집이 금지한 단정(docs/11)과 같은 결.
+    named_you = 25 if YOU.search(text) else 0
+    if not named_you:
+        miss.append("누구한테 하는 말인지 없소 — 「그대」 로 부르시오")
+    feel_hits = len(FEEL.findall(text))
+    s_feel = round(30 * _pct(feel_hits, max(1, n / 320)))
+    if s_feel < 18:
+        miss.append("겪은 마음의 말이 없소 — 참다·미루다·지치다 같은 말이오")
+    s_lived = 25 if LIVED.search(text) else 0
+    if not s_lived:
+        miss.append("겪은 일을 안 짚소 — 「~했을 게요」 처럼 지난 일을 대시오")
+    s_short = 20 if any(len(x) <= 14 for x in lines) else 0
+    if not s_short:
+        miss.append("숨 끊는 짧은 줄이 없소 — 열네 자 아래 한 줄을 두시오")
+    preach = len(PREACH.findall(text))
+    heart = max(0, named_you + s_feel + s_lived + s_short - 20 * min(1, preach))
+    if preach:
+        miss.append("훈계가 섞였소 — 「힘내시오」 는 알아주는 말이 아니오")
+
+    # ── ④ 명확 — 무엇을 보고 한 말인지 분명한가 ────────────
     floor = FLOOR.get(kind, FLOOR["read"])
-    s_len = round(45 * _pct(n, floor))
-    if s_len < 27:
+    s_len = round(20 * _pct(n, floor))
+    if s_len < 12:
         miss.append("분량이 얇소 — %d자 자리에 %d자요" % (floor, n))
     has_src = 30 if re.search(r'class="src"|근거 ·|근거·', html or "") else 0
     if not has_src and kind in ("read", "beat"):
@@ -274,9 +351,13 @@ def score(sid: str, title: str, html: str, kind: str = "read",
     s_cnt = round(25 * _pct(counted, 6))
     if s_cnt < 15:
         miss.append("셀 수 있는 값이 적소 — 개수·나이·해를 내시오")
-    depth = s_len + has_src + s_cnt
+    avg = (sum(len(x) for x in lines) / len(lines)) if lines else 0
+    s_sent = 25 if avg and avg <= 46 else (12 if avg and avg <= 60 else 0)
+    if s_sent < 25:
+        miss.append("문장이 기오 — 한 문장 평균 %d자요 (46자 아래로)" % avg)
+    clear = s_len + has_src + s_cnt + s_sent
 
-    # ── ④ 쉬움 ────────────────────────────────────────────
+    # ── ⑤ 쉬움 — 어려운 말을 풀어 주는가 ───────────────────
     #
     # ★ 「이게 무슨 말이오」 상자는 **풀이로는 세고 비유로는 안 셉니다.**
     #
@@ -292,26 +373,29 @@ def score(sid: str, title: str, html: str, kind: str = "read",
     used = [w for w in HARD if HARD_AT[w].search(text)]
     glossed = [w for w in used
                if HARD_GLOSSED[w].search(text) or ("<b>%s</b>" % w) in boxed]
-    s_gloss = round(45 * (1.0 if not used else _pct(len(glossed), len(used))))
-    if used and s_gloss < 27:
+    plain_s = round(100 * (1.0 if not used else _pct(len(glossed), len(used))))
+    if used and plain_s < 60:
         miss.append("어려운 말이 풀이 없이 지나가오 — %s"
                     % " · ".join(w for w in used if w not in glossed)[:40])
-    # ★ 뜻풀이는 푼 게 아닙니다. 「식신 = 밖으로 내놓는 힘」 은 모르는
-    #   말을 모르는 말로 바꾼 것입니다. **그림이 그려지는 한 줄**이
-    #   있어야 손님이 압니다 (tools/plain_audit.py 가 같은 것을 셉니다).
-    s_pic = 25 if re.search(r"처럼|같이|마치|셈이오|셈입니다|빗대", text) else 0
-    if not s_pic:
-        miss.append("비유가 없소 — 그림이 그려지는 한 줄을 다시오")
-    avg = (sum(len(l) for l in lines) / len(lines)) if lines else 0
-    s_sent = 30 if avg and avg <= 46 else (15 if avg and avg <= 60 else 0)
-    if s_sent < 30:
-        miss.append("문장이 기오 — 한 문장 평균 %d자요 (46자 아래로)" % avg)
-    easy = s_gloss + s_pic + s_sent
 
-    total = round((pull + bite + depth + easy) / 4)
+    # ── ⑥ 비유 — 그림이 그려지는 한 줄이 있는가 ────────────
+    #
+    # ★ 전에는 쉬움 안에 25점으로 얹혀 있었고 **있으면 만점**이었습니다.
+    #   그래서 스물두 컷짜리 리포트도 「셈이오」 한 번이면 통과였습니다.
+    #   이제 분량을 봅니다 — 450자마다 하나가 만점입니다.
+    #
+    #   뜻풀이는 푼 게 아닙니다. 「식신 = 밖으로 내놓는 힘」 은 모르는
+    #   말을 모르는 말로 바꾼 것입니다 (tools/plain_audit.py 와 같은 결).
+    fig_hits = len(FIGURE.findall(text))
+    figure = round(100 * _pct(fig_hits, max(1, n / 450)))
+    if figure < 60:
+        miss.append("비유가 모자라오 — 그림이 그려지는 한 줄을 다시오")
+
+    total = round((pull + bite + heart + clear + plain_s + figure) / 6)
     return {
         "id": sid, "title": title, "kind": kind, "chars": n,
-        "pull": pull, "bite": bite, "depth": depth, "plain": easy,
+        "pull": pull, "bite": bite, "heart": heart,
+        "clear": clear, "plain": plain_s, "figure": figure,
         "total": total,
         "actout": kinds,
         "missing": miss,

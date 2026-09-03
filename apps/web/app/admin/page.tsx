@@ -54,14 +54,19 @@ type Overview = {
  */
 type ScreenScore = {
   id: string; title: string; kind: string; chars: number;
-  pull: number; bite: number; depth: number; plain: number; total: number;
+  /* 여섯 축 — 손님이 이름 붙인 그대로입니다.
+     당김 다음 화가 보고 싶은가 · 팩폭 틀릴 수 있는 말인가 ·
+     울림 눈물이 핑 도는가 · 명확 무엇을 보고 한 말인지 ·
+     쉬움 어려운 말을 푸는가 · 비유 그림이 그려지는가 */
+  pull: number; bite: number; heart: number;
+  clear: number; plain: number; figure: number; total: number;
   actout: string[]; missing: string[];
 };
 type Drama = {
   at: string;
   summary: {
-    screens: number; pull: number; bite: number; depth: number;
-    plain: number; total: number;
+    screens: number; pull: number; bite: number; heart: number;
+    clear: number; plain: number; figure: number; total: number;
     weakest: { id: string; title: string; total: number }[];
   };
   screens: ScreenScore[];
@@ -234,8 +239,10 @@ export default function AdminPage() {
             <div className="kpi">
               <div><b>{drama.summary.pull}</b><span>당김</span></div>
               <div><b>{drama.summary.bite}</b><span>팩폭</span></div>
-              <div><b>{drama.summary.depth}</b><span>충실</span></div>
+              <div><b>{drama.summary.heart}</b><span>울림</span></div>
+              <div><b>{drama.summary.clear}</b><span>명확</span></div>
               <div><b>{drama.summary.plain}</b><span>쉬움</span></div>
+              <div><b>{drama.summary.figure}</b><span>비유</span></div>
               <div><b>{drama.summary.total}</b><span>합 (화면 {drama.summary.screens})</span></div>
             </div>
             {drama.summary.pull < 60 && (
@@ -253,7 +260,8 @@ export default function AdminPage() {
               <thead>
                 <tr>
                   <th>화면</th><th className="n">당김</th><th className="n">팩폭</th>
-                  <th className="n">충실</th><th className="n">쉬움</th>
+                  <th className="n">울림</th><th className="n">명확</th>
+                  <th className="n">쉬움</th><th className="n">비유</th>
                   <th className="n">합</th><th>액트아웃</th>
                 </tr>
               </thead>
@@ -276,8 +284,10 @@ export default function AdminPage() {
                     </td>
                     <td className="n">{r.pull}</td>
                     <td className="n">{r.bite}</td>
-                    <td className="n">{r.depth}</td>
+                    <td className="n">{r.heart}</td>
+                    <td className="n">{r.clear}</td>
                     <td className="n">{r.plain}</td>
+                    <td className="n">{r.figure}</td>
                     <td className="n"><b>{r.total}</b></td>
                     <td className="sm">{r.actout.join(" · ") || "—"}</td>
                   </tr>

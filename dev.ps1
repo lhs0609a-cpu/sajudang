@@ -137,6 +137,14 @@ switch ($Task) {
 
   "api" {
     Need-Venv; Push-Location "$Root\services\api"
+    # 열쇠가 없으면 영업 정보 문이 503 으로 닫힙니다(keyguard). 그건
+    # 배포에서 맞는 규칙인데, 개발에서는 **연출 점수까지 같이 막힙니다** —
+    # 화면을 고치면서 점수를 봐야 하는 자리라 여기서만 임시 열쇠를 답니다.
+    # 배포는 진짜 열쇠를 환경변수로 받으므로 이 줄이 닿지 않습니다.
+    if (-not $env:FUNNEL_KEY) {
+      $env:FUNNEL_KEY = "dev"
+      Write-Host "FUNNEL_KEY 가 없어 'dev' 로 띄웁니다 (개발 전용)" -ForegroundColor DarkGray
+    }
     & $Py -m uvicorn main:app --reload --port 8000
     Pop-Location
   }

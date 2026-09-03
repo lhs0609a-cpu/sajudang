@@ -306,7 +306,8 @@ def summary(rows: Optional[list] = None) -> dict:
     return {
         "screens": len(rows),
         "pull": avg("pull"), "bite": avg("bite"),
-        "depth": avg("depth"), "plain": avg("plain"),
+        "heart": avg("heart"), "clear": avg("clear"),
+        "plain": avg("plain"), "figure": avg("figure"),
         "total": avg("total"),
         "weakest": [{"id": r["id"], "title": r["title"], "total": r["total"]}
                     for r in weak],
