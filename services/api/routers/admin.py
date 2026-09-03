@@ -151,8 +151,7 @@ def screens(x_funnel_key: str | None = Header(default=None)) -> dict:
     from engine import screenscan
 
     # 코드를 고치면 바로 다시 읽어야 합니다. lru_cache 를 비웁니다.
-    screenscan._entry_screens.cache_clear()
-    screenscan._tab_screens.cache_clear()
+    screenscan._screens.cache_clear()
     rows = screenscan.scan_all()
     return {
         "at": datetime.now().isoformat(timespec="seconds"),

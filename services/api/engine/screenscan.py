@@ -67,8 +67,22 @@ KIND = {
     "f2": "list", "r1": "beat", "h1": "list", "s2": "beat",
 }
 
-# 화면이 스스로 적은 액트아웃 — <ActOut kind="딜레마" …>
+# 화면이 스스로 적은 액트아웃 — <ActOut kind="딜레마" next="본문">
 ACT_DECL = re.compile(r'<ActOut\s[^>]*kind="([^"]+)"')
+# ★ 예고도 **선언**입니다.
+#
+#   `next` 는 「다음 자리 — 「본문」」 으로 그려집니다. 그런데 그 글자는
+#   `ActOut.tsx` 안에 있고, 화면 파일에는 `next="본문"` 이라는 **속성**
+#   으로만 있습니다. 속성은 태그 안이라 글 긁는 자(JSX_TEXT)에 안 걸리고,
+#   두 글자짜리 이름은 문자열 자(TSX_STR, 여섯 자 이상)에도 안 걸립니다.
+#
+#   그래서 열아홉 자리 중 **열일곱이 이미 이름을 부르고 있는데** 도구는
+#   스물둘이 안 부른다고 적고 있었습니다. 어제 `kind` 에서 겪은 것과
+#   같은 자리입니다 — 선언은 읽고, 말뭉치는 부품을 안 쓰는 자리에.
+ACT_NEXT = re.compile(r'<ActOut\s[^>]*next=(?:"([^"]+)"|\{([^{}]+)\})')
+
+# 화면이 스스로 적은 이름 — <Shell screen="a7">
+SCREEN_DECL = re.compile(r'<Shell\s[^>]*screen="(\w+)"')
 
 TSX_STR = re.compile(r'"([^"\\<>{}\n]{6,200})"')
 # ★ 줄을 넘는 글도 잡습니다.
@@ -109,6 +123,16 @@ def _declared(chunk: str) -> list:
     return out
 
 
+def _next_named(chunk: str) -> Optional[str]:
+    """이 조각이 이름으로 부른 다음 자리. 값이 낀 것(`{firstOwn?.title}`)도
+    이름을 부르는 것입니다 — 무엇이 오는지 화면이 압니다."""
+    for lit, expr in ACT_NEXT.findall(chunk):
+        got = (lit or expr or "").strip()
+        if got:
+            return got
+    return None
+
+
 def _readable(chunk: str) -> str:
     """코드 조각에서 손님이 읽는 한국어만 긁어낸다."""
     out = []
@@ -131,63 +155,44 @@ def _readable(chunk: str) -> str:
     return " ".join(uniq)
 
 
-@lru_cache(maxsize=1)
-def _entry_screens() -> dict:
-    """a1~a7 — `step === "a4"` 로 갈린 덩이."""
-    src = _strip_code((WEB / "app" / "page.tsx").read_text(encoding="utf-8"))
-    marks = [(m.group(1), m.start())
-             for m in re.finditer(r'step === "(\w+)"', src)]
+# 화면 파일 — 손님이 도는 순서대로
+PAGES = ("app/page.tsx", "app/lobby/page.tsx", "app/report/[id]/page.tsx",
+         "app/pay/page.tsx", "app/me/page.tsx", "app/daily/page.tsx",
+         "app/relay/page.tsx", "app/summary/page.tsx")
+
+
+def _split(src: str) -> dict:
+    """`<Shell screen="a7">` 가 선 자리부터 다음 선언까지가 한 화면."""
+    marks = [(m.group(1), m.start()) for m in SCREEN_DECL.finditer(src)]
+    if not marks:
+        return {}
     marks.append(("__end__", len(src)))
     out = {}
     for i in range(len(marks) - 1):
         sid, a = marks[i]
         chunk = src[a:marks[i + 1][1]]
         got = _readable(chunk)
-        if len(got) > len(out.get(sid, ("", []))[0]):
-            out[sid] = (got, _declared(chunk))
-    # a7 은 훅 부품이 그립니다. page.tsx 만 보면 텅 빈 것으로 나옵니다.
-    part = WEB / "components" / "HookSegments.tsx"
-    if part.exists() and "a7" in out:
-        t, d = out["a7"]
-        out["a7"] = (t + " " + _readable(_strip_code(
-            part.read_text(encoding="utf-8"))), d)
+        # 한 화면이 여러 꼴로 나오면(못 세웠을 때 · 값을 치르는 중)
+        # **가장 긴** 덩이가 그 화면입니다.
+        if len(got) > len(out.get(sid, ("", [], None))[0]):
+            out[sid] = (got, _declared(chunk), _next_named(chunk))
     return out
 
 
 @lru_cache(maxsize=1)
-def _tab_screens() -> dict:
-    """`tab === "c2"` 로 갈린 화면들 — 진열대·리포트·값·모으다."""
+def _screens() -> dict:
+    """화면마다 (읽는 글 · 선언한 액트아웃 · 이름으로 부른 다음 자리)."""
     out = {}
-    for rel in ("app/lobby/page.tsx", "app/report/[id]/page.tsx",
-                "app/pay/page.tsx", "app/me/page.tsx", "app/daily/page.tsx",
-                "app/relay/page.tsx", "app/summary/page.tsx"):
+    for rel in PAGES:
         p = WEB / rel
-        if not p.exists():
-            continue
-        src = _strip_code(p.read_text(encoding="utf-8"))
-        marks = [(m.group(1), m.start())
-                 for m in re.finditer(r'(?:tab|step) === "(\w+)"', src)]
-        if not marks:
-            # 탭이 없는 화면은 통째로 한 화면입니다
-            # ★ 탭이 없는 화면. 여기 안 적으면 그 화면 글이 통째로
-            #   안 읽힙니다 — 일진(g1)이 실제로 0자로 잡혔습니다.
-            sid = {"app/relay/page.tsx": "h1",
-                   "app/summary/page.tsx": "c7",
-                   "app/daily/page.tsx": "g1"}.get(rel)
-            if sid:
-                out[sid] = (_readable(src), _declared(src))
-            continue
-        marks.append(("__end__", len(src)))
-        for i in range(len(marks) - 1):
-            sid, a = marks[i]
-            chunk = src[a:marks[i + 1][1]]
-            got = _readable(chunk)
-            # ★ 가장 **긴** 덩이를 씁니다.
-            #   처음 나온 것을 쓰면 `if (step !== "a6") return;` 같은
-            #   효과 안의 한 줄이 그 화면 전체 행세를 합니다 — a6 이
-            #   실제로 0자로 잡혔습니다.
-            if len(got) > len(out.get(sid, ("", []))[0]):
-                out[sid] = (got, _declared(chunk))
+        if p.exists():
+            out.update(_split(_strip_code(p.read_text(encoding="utf-8"))))
+    # a7 은 훅 부품이 그립니다. page.tsx 만 보면 껍데기만 잡힙니다.
+    part = WEB / "components" / "HookSegments.tsx"
+    if part.exists() and "a7" in out:
+        t, d, nx = out["a7"]
+        out["a7"] = (t + " " + _readable(_strip_code(
+            part.read_text(encoding="utf-8"))), d, nx)
     return out
 
 
@@ -248,11 +253,10 @@ def _engine_text() -> dict:
 # ══════════════════════════════════════════════════════════
 def scan_all() -> list:
     """모든 화면의 점수. 관리자 화면과 CLI 가 같이 씁니다."""
-    pairs = {}
-    pairs.update(_entry_screens())
-    pairs.update(_tab_screens())
+    pairs = dict(_screens())
     text = {k: v[0] for k, v in pairs.items()}
     decl = {k: v[1] for k, v in pairs.items()}
+    nxt = {k: v[2] for k, v in pairs.items()}
     # 엔진 글이 있는 화면은 **엔진 글이 이깁니다** — 손님이 읽는 것은
     # 코드에 박힌 안내가 아니라 실제로 나온 해석입니다.
     eng = _engine_text()
@@ -264,6 +268,7 @@ def scan_all() -> list:
         if sid not in KO:
             continue
         rows.append(D.score(sid, KO[sid], html, KIND.get(sid, "read"),
+                            next_named=nxt.get(sid),
                             declared=decl.get(sid)))
     order = list(KO)
     rows.sort(key=lambda r: order.index(r["id"]))

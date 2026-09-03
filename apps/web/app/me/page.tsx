@@ -29,7 +29,7 @@ function MeInner() {
 
   if (tab === "r1") {
     return (
-      <Shell title="남기다" legal>
+      <Shell screen="r1" title="남기다" legal>
         <Scene id="wall" />
         <Narration lines={["벽에 종이가 붙어 있다.", "검은 고양이가 그 아래 앉아 있다."]} />
         <p className="sm">
@@ -46,7 +46,7 @@ function MeInner() {
   }
 
   return (
-    <Shell title="인장첩">
+    <Shell screen="f2" title="인장첩">
       <Scene id="sealbook" />
       <Narration lines={["첩을 폈다.", "찍힌 인장은 " + s.seals.length + "개."]} />
       <div className="og c2">

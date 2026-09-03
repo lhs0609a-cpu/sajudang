@@ -321,7 +321,7 @@ function ReportInner() {
   /* c1 · 표지 */
   if (tab === "c1") {
     return (
-      <Shell title={`${rep.lens.name} · 표지`}>
+      <Shell screen="c1" title={`${rep.lens.name} · 표지`}>
         <Scene id="scroll" className="hero" />
         <div style={{ textAlign: "center" }}>
           <p style={{ fontFamily: "var(--serif)", fontSize: 24, color: lens?.color ?? "var(--c)" }}>
@@ -363,7 +363,7 @@ function ReportInner() {
   /* c3 · 대운 맵 */
   if (tab === "c3") {
     return (
-      <Shell title="대운 맵">
+      <Shell screen="c3" title="대운 맵">
         <Scene id="roadmap" />
         {daeunCut ? (
           <>
@@ -393,7 +393,7 @@ function ReportInner() {
   /* c4 · 페이월 — ★ 안 파는 자리에서는 아예 안 그립니다 */
   if (tab === "c4" && !rep.sells) {
     return (
-      <Shell title={rep.lens.name}>
+      <Shell screen="c4" title={rep.lens.name}>
         <Scene id="oldpaper" />
         {/* 청동자는 무거운 리포트 뒤에 붙는 안전망입니다.
             여기서는 값을 권하지 않습니다. 브레이크는 매출보다 앞섭니다. */}
@@ -404,7 +404,7 @@ function ReportInner() {
   }
   if (tab === "c4") {
     return (
-      <Shell title="여기서부터" legal>
+      <Shell screen="c4" title="여기서부터" legal>
         <Scene id="fold" />
         <Narration lines={["두루마리가 반쯤 접혀 있다."]} />
         <Say who={rep.lens.name} lens={lensId}>
@@ -452,7 +452,7 @@ function ReportInner() {
   if (tab === "c5") {
     const nameCut = rep.cuts.find((c) => c.id === "lack");
     return (
-      <Shell title="공유 카드">
+      <Shell screen="c5" title="공유 카드">
         <Narration lines={["도령이 종이 한 장을 잘라 내밀었다."]} />
         <span className="src">
           근거 · {s.features?.day_gan} 일간 · {s.features?.strength} ·
@@ -493,7 +493,7 @@ function ReportInner() {
   /* c6 · 피드백 */
   if (tab === "c6") {
     return (
-      <Shell title="남기다" legal>
+      <Shell screen="c6" title="남기다" legal>
         <Scene id="wall" />
         <Say who={rep.lens.name} lens={lensId}>어떻게 보셨소?</Say>
         <div className="og c2" style={{ gridTemplateColumns: "repeat(5,1fr)" }}>
@@ -557,7 +557,7 @@ function ReportInner() {
   const pillars = s.features?.pillars ?? [];
 
   return (
-    <Shell title={rep.lens.name}>
+    <Shell screen="c2" title={rep.lens.name}>
       {/*
         ★ 18~22컷이 진행 표시 없이 한 두루마리로 이어졌습니다.
           어디쯤 읽고 있는지, 얼마나 남았는지가 없어서 중도 이탈이 그대로

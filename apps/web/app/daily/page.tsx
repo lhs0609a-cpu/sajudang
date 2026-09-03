@@ -43,7 +43,7 @@ export default function DailyPage() {
 
   if (!s.chartId) {
     return (
-      <Shell title="오늘의 일진">
+      <Shell screen="g1" title="오늘의 일진">
         <Narration lines={["먼저 글자를 세워야 하오."]} />
         <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 보겠습니다</button>
       </Shell>
@@ -51,7 +51,7 @@ export default function DailyPage() {
   }
 
   return (
-    <Shell title="오늘의 일진">
+    <Shell screen="g1" title="오늘의 일진">
       <Scene id="banner" />
       {/* ★ 「일진」이 무엇인지 아무 데도 안 적혀 있었습니다. */}
       <p className="lede8">

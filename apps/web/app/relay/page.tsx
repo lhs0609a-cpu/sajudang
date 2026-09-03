@@ -60,7 +60,7 @@ export default function RelayPage() {
 
   if (!chartId) {
     return (
-      <Shell title="이어지다">
+      <Shell screen="h1" title="이어지다">
         <Narration lines={["먼저 글자를 세워야 하오."]} />
         <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 보겠습니다</button>
       </Shell>
@@ -68,7 +68,7 @@ export default function RelayPage() {
   }
 
   return (
-    <Shell title="이어지다" legal>
+    <Shell screen="h1" title="이어지다" legal>
       <Scene id="handle" />
       {/*
         ★ 콜드 오픈이 없었습니다. 화면이 목록부터 시작해서, 손님은

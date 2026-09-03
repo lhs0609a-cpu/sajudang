@@ -118,9 +118,28 @@ export function TopBar({ title, skipTo, onBack }: {
 }
 
 export default function Shell({
-  title, skipTo, bare, legal, onBack, children,
+  title, screen, skipTo, bare, legal, onBack, children,
 }: {
   title?: string;
+  /*
+   * 이 화면의 **이름**. docs/08 §1 의 것을 그대로 씁니다 (a7 · b1 · d1 …).
+   *
+   * ★ 왜 제목 말고 이름을 따로 다나
+   *
+   *   제목은 손님에게 보이는 말이라 바뀝니다 — 「도령이 말하다」 는
+   *   a7 이지만 제목만 봐서는 알 수 없습니다. 그리고 여러 화면이 같은
+   *   제목을 씁니다(읽다 · 분석지 · 값을 치르다).
+   *
+   *   자를 대는 쪽에서는 그동안 `step === "a7"` 같은 **조건문**을 찾아
+   *   화면을 갈랐습니다. 그런데 마지막 return 으로 떨어지는 화면
+   *   — a7 훅 · b1 진열대 · c2 본문 · d1 어디까지 — 은 그런 조건문이
+   *   없어서 **앞 화면에 섞였습니다.** a7 의 막 끝이 a6 의 점수로
+   *   올라가고, 진열대와 「어디까지」 는 아예 안 재지고 있었습니다.
+   *
+   *   화면이 제 이름을 적으면 그건 **있는 것**입니다. 액트아웃을
+   *   선언으로 받은 것과 같은 까닭입니다.
+   */
+  screen?: string;
   skipTo?: string;
   onBack?: () => void;     // 한 주소 위 여러 단계인 화면 (진입 흐름)
   bare?: boolean;          // a1 — 진입 서사 중에는 상단바를 숨긴다
@@ -285,6 +304,7 @@ export default function Shell({
       <div className="stage">
       <div
         className="phone"
+        data-screen={screen}
         data-ilgan={ilganOverride ?? features?.day_gan ?? undefined}
         style={themeColor ? ({ ["--c" as string]: themeColor }) : undefined}
       >

@@ -72,7 +72,7 @@ function LobbyInner() {
 
   if (tab === "b2") {
     return (
-      <Shell title="스무 사람">
+      <Shell screen="b2" title="스무 사람">
         <Scene id="hall" />
         <Narration lines={["스무 개의 자리가 있다.",
                            "스무 자리에 다 불이 켜져 있다.",
@@ -209,7 +209,7 @@ function LobbyInner() {
 
   if (tab === "b3") {
     return (
-      <Shell title={lens.name}>
+      <Shell screen="b3" title={lens.name}>
         <Scene id="seat" />
         {/* 그 사람의 자리 — 초상이 서는 곳 */}
         <div className="facebox"><CharArt lens={lens} size="full" /></div>
@@ -259,7 +259,7 @@ function LobbyInner() {
 
   if (tab === "b4") {
     return (
-      <Shell title="내 명식">
+      <Shell screen="b4" title="내 명식">
         {s.features ? (
           <>
             {/*
@@ -300,7 +300,7 @@ function LobbyInner() {
 
   /* b1 · 진열대 */
   return (
-    <Shell title="진열대">
+    <Shell screen="b1" title="진열대">
       <Scene id="shelf" />
       <Narration lines={["목패가 늘어서 있다.", "이름과 값이 적혀 있다."]} />
       <div className="og">

@@ -381,7 +381,7 @@ function EntryInner() {
      *   놓았습니다. 버튼도 "…" 이 아니라 무슨 일이 일어나는지 말합니다.
      */
     return (
-      <Shell bare>
+      <Shell screen="a1" bare>
         <div className="gatehero" onClick={() => go("a2")}>
           <Scene id="gate" className="fill" bleed />
           <div className="gatecopy">
@@ -416,7 +416,7 @@ function EntryInner() {
   if (step === "a2") {
     const named = s.name.trim().length > 0;
     return (
-      <Shell title="이름을 적다" onBack={back}>
+      <Shell screen="a2" title="이름을 적다" onBack={back}>
         <Progress step={progressAt("a2")!} total={PROGRESS_TOTAL} />
         <Scene id="desk" />
         {/* ★ 그림에는 붓이 **떠 있습니다** — 잡은 손이 없습니다.
@@ -505,7 +505,7 @@ function EntryInner() {
     };
     const askWord = CONCERNS.find((c) => c.id === s.concern)?.label ?? "";
     return (
-      <Shell title="날을 대다" onBack={back}>
+      <Shell screen="a3" title="날을 대다" onBack={back}>
         <Progress step={progressAt("a3")!} total={PROGRESS_TOTAL} />
         <Scene id="ink" />
         <Narration lines={["붓끝이 종이에 닿았다.", "먹이 한 방울 번졌다."]} />
@@ -616,7 +616,7 @@ function EntryInner() {
      */
     const bucket = pickedHour !== null ? HOURS[pickedHour] : undefined;
     return (
-      <Shell title="때를 묻다" onBack={back}>
+      <Shell screen="a4" title="때를 묻다" onBack={back}>
         <Progress step={progressAt("a4")!} total={PROGRESS_TOTAL} />
         <Scene id="room" figure />
         <Narration lines={["도령이 고개를 들었다."]} />
@@ -811,7 +811,7 @@ function EntryInner() {
 
   if (step === "a4b") {
     return (
-      <Shell title="성향 4글자" onBack={back}>
+      <Shell screen="a4b" title="성향 4글자" onBack={back}>
         <Progress step={progressAt("a4b")!} total={PROGRESS_TOTAL} />
         <Scene id="mirror" />
         <Narration lines={["그가 종이 한 장을 더 꺼냈다.",
@@ -869,7 +869,7 @@ function EntryInner() {
      *   이름 바로 뒤로 올렸습니다.
      */
     return (
-      <Shell title="걸리는 것" onBack={back}>
+      <Shell screen="a5" title="걸리는 것" onBack={back}>
         <Progress step={progressAt("a5")!} total={PROGRESS_TOTAL} />
         <Scene id="fork" />
         {/*
@@ -939,7 +939,7 @@ function EntryInner() {
     const done = calcAt >= beats.length;
 
     return (
-      <Shell title="글자가 서다" onBack={back}>
+      <Shell screen="a6" title="글자가 서다" onBack={back}>
         <Scene id="altar" />
         {busy && <Narration lines={["도령이 종이를 폈다.", "붓이 움직인다."]} />}
         {error && (
@@ -1094,7 +1094,7 @@ function EntryInner() {
 
   /* a7 · 훅 5단 — 값은 아직 묻지 않는다 */
   return (
-    <Shell title="도령이 말하다" onBack={back}>
+    <Shell screen="a7" title="도령이 말하다" onBack={back}>
       {/* ★ 진행 막대를 뗐습니다. 결과가 보상인 구간에서 막대는 남은
           보상이 아니라 **남은 노동**을 강조합니다. */}
       <Scene id="facing" />

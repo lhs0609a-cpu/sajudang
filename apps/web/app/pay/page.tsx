@@ -235,7 +235,7 @@ function PayInner() {
     const cuts = free?.cuts ?? [];
     const names = (free?.locked ?? []).map((l) => l.title).slice(0, 3);
     return (
-      <Shell title="값 없이 한 겹 더">
+      <Shell screen="d0" title="값 없이 한 겹 더">
         <Scene id="oldpaper" />
         {err && <Say who={charName} lens={s.cur}>{err}</Say>}
         {/*
@@ -301,7 +301,7 @@ function PayInner() {
     /* 결제창에서 막 돌아왔다 — 승인이 끝날 때까지 아무것도 누르지 못하게 */
     if (settling) {
       return (
-        <Shell title="값을 치르다" legal>
+        <Shell screen="d2" title="값을 치르다" legal>
           <Scene id="coin" />
           <Narration lines={["값이 건너가는 중이오.", "잠시만 기다리시오."]} />
           <p className="sm mt" style={{ textAlign: "center" }}>
@@ -312,7 +312,7 @@ function PayInner() {
     }
 
     return (
-      <Shell title="값을 치르다" legal>
+      <Shell screen="d2" title="값을 치르다" legal>
         <Scene id="coin" />
 
         {err && (
@@ -429,7 +429,7 @@ function PayInner() {
   /* d3 · 완료 */
   if (step === "d3") {
     return (
-      <Shell title="열렸소">
+      <Shell screen="d3" title="열렸소">
         <Scene id="untie" />
         <Narration lines={["붉은 끈이 풀렸다."]} />
 
@@ -487,7 +487,7 @@ function PayInner() {
 
   /* d1 · 어디까지 */
   return (
-    <Shell title="어디까지 볼지">
+    <Shell screen="d1" title="어디까지 볼지">
       <Scene id="tray" />
       <Narration lines={["목패 셋이 상 위에 놓였다."]} />
       {!tiers ? (

@@ -86,10 +86,35 @@ ACT_OUT = {
 NAMED_NEXT = re.compile(r"「[^」]{2,20}」|『[^』]{2,20}』|<b>[^<]{2,20}</b>\s*(?:컷|자리)")
 
 # 콜드 오픈 — 첫 줄이 설명이 아니라 사건이나 물음인가
-COLD_OK = re.compile(r"[?？]|했다|였다|들었다|섰다|왔다|났다|보였다|"
-                     r"가리켰다|폈다|내려놓았다|열렸다")
+#
+# ★ 낱말을 세지 않고 **말투**를 봅니다.
+#
+#   전에는 열한 개짜리 동사 목록이었습니다(`했다|였다|섰다`…). 그래서
+#   「붓끝이 종이에 닿았다」 도 「검은 고양이가 그 아래 앉아 있다」 도
+#   콜드 오픈이 아닌 것으로 나왔습니다. 목록에 없는 동사였을 뿐인데요.
+#   그 자를 고치려면 글을 쓸 때마다 목록에 동사를 보태야 합니다 —
+#   그건 자가 글을 쫓아다니는 것입니다.
+#
+#   이 집은 말투가 셋으로 갈려 있습니다. 집이 하는 말은 **하오체**
+#   (…오 · …소 · …요), 손님이 누르는 말은 **합쇼체**(…습니다),
+#   그리고 지문은 **한다체**(…다)뿐입니다. 그러니 「…다」 로 끝나는
+#   줄은 곧 지문이고, 지문으로 여는 것이 곧 콜드 오픈입니다.
+#   `(?<!니)` 로 합쇼체를 빼면 남는 것은 지문 한 벌입니다.
+NARR = re.compile(r"(?<!니)다[.!?…\"'」』]*$")
+ASK = re.compile(r"[?？]")
 COLD_BAD = re.compile(r"이란|이라 하오|말합니다|뜻이오|뜻입니다|설명|"
                       r"보는 법|이라고 하")
+
+
+def _cold_open(lines: list) -> bool:
+    """첫 두 줄 중 하나가 지문이거나 물음이면 연 것입니다."""
+    for s in lines[:2]:
+        s = s.strip()
+        if not s or COLD_BAD.search(s):
+            continue
+        if ASK.search(s) or NARR.search(s):
+            return True
+    return False
 
 
 # ══════════════════════════════════════════════════════════
@@ -174,7 +199,6 @@ def score(sid: str, title: str, html: str, kind: str = "read",
     miss = []
 
     # ── ① 당김 ────────────────────────────────────────────
-    head = " ".join(lines[:2])
     # ★ 끝을 **마지막 두 문장**으로만 보면 안 됩니다.
     #
     #   화면 글은 파일에 적힌 순서대로 읽히는데, 막을 끊는 줄 뒤에도
@@ -187,7 +211,7 @@ def score(sid: str, title: str, html: str, kind: str = "read",
     tail = " ".join(lines[cut:]) if lines else ""
     last = lines[-1] if lines else ""
 
-    cold = 25 if (COLD_OK.search(head) and not COLD_BAD.search(head)) else 0
+    cold = 25 if _cold_open(lines) else 0
     if not cold:
         miss.append("콜드 오픈이 없소 — 첫 줄이 설명이오. 사건이나 물음부터 여시오")
 

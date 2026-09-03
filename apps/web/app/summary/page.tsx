@@ -55,21 +55,21 @@ export default function SummaryPage() {
 
   if (!s.chartId) {
     return (
-      <Shell title="분석지">
+      <Shell screen="c7" title="분석지">
         <Narration lines={["먼저 글자를 세워야 하오."]} />
         <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 보겠습니다</button>
       </Shell>
     );
   }
-  if (err) return <Shell title="분석지"><Say who="도령" lens="pungun">{err}</Say></Shell>;
-  if (!sm) return <Shell title="분석지"><Narration lines={["종이를 편다."]} /></Shell>;
+  if (err) return <Shell screen="c7" title="분석지"><Say who="도령" lens="pungun">{err}</Say></Shell>;
+  if (!sm) return <Shell screen="c7" title="분석지"><Narration lines={["종이를 편다."]} /></Shell>;
 
   const shareUrl = share
     ? (typeof window !== "undefined" ? window.location.origin : "") + share.path
     : "";
 
   return (
-    <Shell title="분석지" legal>
+    <Shell screen="c7" title="분석지" legal>
       <Scene id="scroll" className="hero" />
 
       {/* 표지 — 카드로 잘라 나가는 부분 */}
