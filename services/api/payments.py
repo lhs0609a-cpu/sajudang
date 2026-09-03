@@ -349,6 +349,26 @@ def lookup_by_order(order_id: str) -> dict:
 PAID_STATES = {"DONE"}
 DEAD_STATES = {"CANCELED", "ABORTED", "EXPIRED"}
 
+# ══════════════════════════════════════════════════════════
+# 우리 장부에 적는 상태 — **토스의 말과 다릅니다**
+# ══════════════════════════════════════════════════════════
+#
+# ★ 여기서 매출이 통째로 사라지고 있었습니다 (2026-09-03).
+#
+#   주문에 적는 상태는 우리 말입니다 — `pending` → `paid` → `canceled`
+#   (`routers/pay.py`). 그런데 주인 화면의 매출 셈(`routers/admin._sales`)이
+#   토스의 말인 `PAID_STATES`(= {"DONE"})와 견주고 있었습니다.
+#
+#   두 어휘는 **한 번도 겹치지 않습니다.** 그래서 19,900원짜리를 치러도
+#   주인 화면에는 「총 매출 0원 · 치른 건 0 · 환불 0 · 전환 0.0%」 이
+#   떴습니다. 가게가 도는데 장부가 비어 있는 것입니다.
+#
+#   이름을 갈라 두고 한 자리에 적습니다. 장부를 세는 곳은 이걸 봅니다.
+#   `tests/test_admin_sales.py` 가 둘이 다시 안 섞이게 지킵니다.
+ORDER_PENDING = {"pending"}      # 주문만 만들고 아직 안 치른 것
+ORDER_PAID = {"paid"}            # 치른 것
+ORDER_DEAD = {"canceled"}        # 물린 것 (환불 · 취소)
+
 
 def cancel(payment_key: str, reason: str,
            amount: Optional[int] = None) -> PaymentResult:

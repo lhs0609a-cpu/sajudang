@@ -225,6 +225,10 @@ def prepare(req: PrepareRequest) -> PrepareResponse:
         "session_id": req.session_id, "chart_id": req.chart_id,
         "lens_id": req.lens_id, "tier": req.tier, "concern": req.concern,
         "amount": amount, "status": "pending", "payment_key": None,
+        # ★ 만든 때를 적습니다. 안 적으면 「값만 매기고 안 치른 주문」이
+        #   언제 것인지 몰라, 주인 화면이 방금 것과 사흘 묵은 것을
+        #   같은 줄에 놓습니다 (routers/admin._trouble).
+        "created_at": datetime.now(timezone.utc).isoformat(),
     }, ttl=DAY)
 
     cfg = payments.client_config()

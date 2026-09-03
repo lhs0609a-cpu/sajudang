@@ -257,3 +257,19 @@ def funnel() -> dict:
         "hook": hook,
         "counts": dict(Counter(r.get("name") for r in rows)),
     }
+
+
+def count(name: str) -> int:
+    """
+    사건 하나가 몇 번 일어났는가.
+
+    ★ 주인 화면이 「지금 결제가 막히고 있는가」 를 물을 때 씁니다.
+      `funnel()` 은 전체를 한 번 훑어 표를 만드는 자리라, 수 하나가
+      필요할 때 그걸 부르면 표 전체를 다시 셉니다.
+
+    ★ 화이트리스트 밖 이름은 0 입니다 — 없는 사건을 세는 척하지
+      않습니다.
+    """
+    if name not in EVENTS:
+        return 0
+    return sum(1 for r in _rows() if r.get("name") == name)
