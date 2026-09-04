@@ -2887,6 +2887,44 @@ body.has-rail .beatskip-hint { left: calc(50% + 116px); }
 /* 장면은 상자 그대로, 사람은 가운데 세움 */
 .abgrid.char .abart, .abgrid.figure .abart { padding: 10px 0 4px; }
 .abart .sfig { margin: 0; }
+
+/* 없는 자리 — 비워 두고 명령어만 폅니다.
+   ★ 자리표시를 그리면 판이 「다 찼다」고 거짓말을 합니다. 빈 데는
+      비어 보여야 합니다 (components/AssetBoard 의 Empty). */
+.abempty {
+  min-height: 160px;
+  display: flex; flex-direction: column;
+  border: 1px dashed color-mix(in srgb, var(--rose) 55%, var(--line));
+  background: repeating-linear-gradient(135deg,
+    transparent 0 7px,
+    color-mix(in srgb, var(--rose) 7%, transparent) 7px 8px);
+}
+.abgrid.char .abempty, .abgrid.figure .abempty { min-height: 190px; }
+.abetop {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 6px; padding: 5px 7px;
+  border-bottom: 1px dashed color-mix(in srgb, var(--rose) 40%, var(--line));
+}
+.ablack {
+  font-family: var(--mono); font-size: var(--fs-1);
+  letter-spacing: .06em; color: var(--rose);
+}
+.abetop button {
+  font-family: var(--mono); font-size: var(--fs-1);
+  color: var(--gold); background: none;
+  border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent);
+  border-radius: 2px; padding: 1px 7px; cursor: pointer;
+}
+.abetop button:hover { background: color-mix(in srgb, var(--gold) 12%, transparent); }
+.abempty pre {
+  /* ★ min-width:0 — 안 넣으면 flex 칸이 안 줄어들어 긴 명령어가
+     타일을 밀어냅니다 (tests/test_no_overlap). */
+  margin: 0; padding: 7px 8px; flex: 1; min-width: 0;
+  overflow: auto; max-height: 150px;
+  font-family: var(--mono); font-size: 10px; line-height: 1.5;
+  color: var(--paper3); white-space: pre-wrap; word-break: break-word;
+}
+@media print { .abempty pre { max-height: none; } }
 .abmeta { padding: 7px 9px 9px; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 .abhead { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
 /* 이름은 끊겨도 됩니다 — 자르면 「삼거리 노…」 가 됩니다 (test_no_overlap) */
@@ -3141,3 +3179,60 @@ body.has-rail .beatskip-hint { left: calc(50% + 116px); }
 .sndline:focus-visible { outline: 2px solid var(--gold, #d8a24a); outline-offset: 2px; }
 
 @media print { .sndline { display: none; } }
+
+/* ── 비유 — 한 걸음 물러서서 그림으로 말하는 한 줄 ────────
+ *
+ * ★ 전에는 **맨몸**이었습니다 (2026-09-04). `flavor.figure` 가
+ *   `html + " " + 그림` 으로 붙여, `</p>` 뒤에 이름 없는 글이
+ *   달렸습니다. 문단도 상자도 아니라 앞 문단에 그대로 이어 붙은
+ *   한 줄로 보였습니다.
+ *
+ *   비유는 방금 한 말을 **다른 눈으로 다시 보여 주는 자리**입니다.
+ *   같은 목소리로 이어 말하면 그냥 문장이 하나 더 늘어난 것이오.
+ *
+ * ★ 덤으로 눈이 쉬는 자리가 하나 생깁니다. 스무 줄이 줄글로만
+ *   이어지던 컷들이 여기서 갈립니다 (engine/typo._BREAK).
+ */
+.fig {
+  margin: 13px 0 2px;
+  padding: 0 0 0 15px;
+  border-left: 1px solid var(--line2);
+  font-family: var(--serif);
+  font-size: var(--fs-4);
+  line-height: 1.72;
+  color: var(--paper3);
+}
+.fig b { color: var(--paper2); font-weight: 400; }
+
+/* ── 어긋난 칸 — 넉 자와 여덟 글자가 갈리는 자리 ──────────
+ *
+ * ★ 세 칸이 **아무 구분 없이** 이어져 있었습니다 (2026-09-04).
+ *   `E → I` `F → T` `P → J` 는 나란한 세 항목인데, 스타일이
+ *   하나도 없어 한 문단처럼 흘렀습니다. 장면 상자 안이 열여섯 줄
+ *   줄글이 되어 그 상자 하나로 화면이 찼습니다.
+ *
+ *   칸마다 줄을 긋습니다. 글은 한 자도 안 바뀌고, 눈이 세 번 쉽니다.
+ */
+.gp + .gp,
+.mt + .gp {
+  margin-top: 13px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line2);
+}
+/* 「E → I」 는 이 칸의 이름표요 — 본문보다 앞에 섭니다 */
+.gp > b:first-child {
+  display: inline-block;
+  margin-bottom: 3px;
+  color: var(--c);
+  letter-spacing: .06em;
+}
+/* 눌러 온 값을 말하는 줄 — 한 걸음 물러섭니다 */
+.gp .w {
+  display: block;
+  margin-top: 5px;
+  font-size: var(--fs-4);
+  color: var(--paper3);
+}
+
+/* 일주 그림 — 비유와 같은 자리에 섭니다 (report.rarity) */
+.fig.gz b { color: var(--c); }

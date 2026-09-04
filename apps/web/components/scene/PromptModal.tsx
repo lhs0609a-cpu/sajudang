@@ -16,6 +16,10 @@
  * ★ 영상 앵커(ANIMBASE)가 빠지면 3초 안에 얼굴이 사진처럼 변합니다.
  *   모션 프롬프트에 이미 붙어 있으니 통째로 복사하세요.
  */
+import {
+  Bundle, PromptEntry, dirOf, entryOf, imagePrompt, loadPrompts,
+} from "@/lib/prompts";
+export type { PromptEntry };
 import { useEffect, useState } from "react";
 import { seasonOf, useSession } from "@/lib/store";
 
@@ -23,69 +27,6 @@ const SEASON_KO: Record<string, string> = {
   spring: "봄 · 벚꽃", summer: "여름 · 능소화",
   autumn: "가을 · 국화", winter: "겨울 · 매화",
 };
-
-export interface PromptEntry {
-  title: string;
-  who?: string | null;
-  /* 대문처럼 계절을 타는 장면 — 꽃이 계절마다 달라 그림이 넉 장 필요합니다 */
-  seasonal?: boolean;
-  seasons?: Record<string, string> | null;
-  spec?: string[] | null;
-  hint?: string | null;
-  image: string | null;
-  motion: string | null;
-  preset: string;
-  ratio: string;
-  duration: string;
-  loop: boolean;
-  tint: boolean;
-  still: boolean;
-  note?: string | null;
-  /*
-   * ★ 이 그림이 **그 화면에서 어떻게 걸리는가** (2026-09-04).
-   *
-   *   원본은 전부 9:16 세로인데 인라인 장면은 4:3 상자로 잘라 씁니다 —
-   *   세로의 42%만 보입니다. 그걸 모르고 그리면 주제가 잘려 나갑니다.
-   *   손으로 안 적습니다: `tools/prompt_use.py` 가 코드에서 읽어
-   *   박습니다. 화면을 옮기면 다시 돌리면 됩니다.
-   */
-  use?: string | null;
-}
-
-interface Bundle {
-  ANIMBASE: string;
-  TINT: string;
-  PIPE: string;
-  /*
-   * ★ 공통 촬영 규칙 — 명령어마다 손으로 적지 않습니다.
-   *
-   *   9:16 원본 · 글자와 워터마크 금지 · 세로 가운데 42% 안에 주제 ·
-   *   가장자리 6% 비우기 · 폰에서 396px 로 읽히는 덩어리.
-   *   쉰여덟 장에 손으로 적으면 한 장은 빠집니다. 한 자리에 두고
-   *   **복사되는 글에 붙여서** 냅니다.
-   */
-  SHOT: string;
-  SHOT_TINT: string;
-  SHOT_LOOP: string;
-  SHOT_FILL: string;
-  /* 초상은 **얼굴로 잘라** 씁니다 — 눈높이 37% 를 붙잡고 2.6배.
-     그 말이 없으면 턱이나 이마에 크롭이 떨어집니다. */
-  SHOT_CHAR: string;
-  SHOT_FIGURE: string;
-  scenes: Record<string, PromptEntry>;
-  figures: Record<string, PromptEntry>;
-  /* 스무 사람의 초상. tools/char_sheet.py --json 이 넣습니다. */
-  chars?: Record<string, PromptEntry>;
-}
-
-let cache: Bundle | null = null;
-
-async function load(): Promise<Bundle> {
-  if (cache) return cache;
-  const res = await fetch("/asset-prompts.json");
-  cache = (await res.json()) as Bundle;
-  return cache;
-}
 
 const PRESET_COLOR: Record<string, string> = {
   "Dolly In": "var(--gold)",
@@ -129,7 +70,7 @@ export default function PromptModal({
 
   useEffect(() => {
     let alive = true;
-    load()
+    loadPrompts()
       .then((d) => { if (alive) setData(d); })
       .catch(() => { if (alive) setErr("프롬프트를 불러오지 못했소."); });
     return () => { alive = false; };
@@ -145,11 +86,7 @@ export default function PromptModal({
     };
   }, [onClose]);
 
-  const e = data
-    ? (kind === "scene" ? data.scenes[id]
-       : kind === "char" ? (data.chars ?? {})[id]
-       : data.figures[id])
-    : null;
+  const e = entryOf(data, kind, id) ?? null;
 
   /*
    * 계절을 타는 장면(대문)이라도 **만드는 것은 한 장**입니다.
@@ -171,22 +108,8 @@ export default function PromptModal({
    *   장면마다 다른 몫(무채색·루프 이음새·글 얹히는 자리)은 그
    *   장면일 때만 붙습니다.
    */
-  const fullImage = (() => {
-    if (!image || !data) return image;
-    // 장면 · 초상 · 신살 인물은 규격이 다릅니다. 그 몫만 붙입니다.
-    const add = [kind === "char" ? data.SHOT_CHAR
-               : kind === "figure" ? data.SHOT_FIGURE
-               : data.SHOT];
-    if (kind === "scene") {
-      if (e?.tint) add.push(data.SHOT_TINT);
-      if (e?.loop) add.push(data.SHOT_LOOP);
-      if ((e?.use ?? "").includes("통째로 덮고")) add.push(data.SHOT_FILL);
-    }
-    return [image, ...add].join("\n\n");
-  })();
-  const dir = kind === "scene" ? `/scene/${id}/`
-            : kind === "char" ? `/char/${id}/`
-            : `/sinsal/${id}/`;
+  const fullImage = imagePrompt(data, kind, id, season);
+  const dir = dirOf(kind, id);
 
   return (
     <div className="pmod on" onClick={onClose}>

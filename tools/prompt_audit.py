@@ -37,7 +37,14 @@ ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "apps" / "web"
 PROMPTS = WEB / "public" / "asset-prompts.json"
 MANIFEST = WEB / "components" / "scene" / "manifest.ts"
-MODAL = WEB / "components" / "scene" / "PromptModal.tsx"
+# ★ 규칙을 붙이는 자리가 옮겨 갔습니다 (2026-09-04).
+#
+#   전에는 `PromptModal` 안에서 규칙을 붙였습니다. 그런데 에셋 현황판이
+#   **없는 자리에 명령어를 바로 펴** 보이게 되면서 같은 글이 두 군데서
+#   필요해졌습니다. 붙이는 규칙을 두 벌로 두면 한쪽만 고쳐지므로
+#   `lib/prompts.imagePrompt` 한 자리로 모았습니다. 창도 판도 그걸 부릅니다.
+#   자는 **글을 만드는 자리**를 봐야 합니다 — 그리는 자리가 아니라.
+MODAL = WEB / "lib" / "prompts.ts"
 
 # 명령어가 반드시 들고 있어야 하는 것 — 없으면 다시 뽑아야 합니다
 NEED_SHOT = ("SHOT", "SHOT_TINT", "SHOT_LOOP", "SHOT_FILL",
@@ -88,9 +95,9 @@ def main() -> int:
     for k in ("SHOT", "SHOT_TINT", "SHOT_LOOP", "SHOT_FILL",
               "SHOT_CHAR", "SHOT_FIGURE"):
         if "data.%s" % k not in modal:
-            bad.append("PromptModal 이 %s 를 안 붙이오 — 복사해도 안 따라가오" % k)
+            bad.append("lib/prompts 가 %s 를 안 붙이오 — 복사해도 안 따라가오" % k)
     print("  붙이는가      %s"
-          % ("예" if "fullImage" in modal else "**아니오**"))
+          % ("예" if "imagePrompt" in modal else "**아니오**"))
 
     # ── ② 선언이 서로 맞는가 ─────────────────────────────
     print("\n[2] 선언 — manifest ↔ 명령어")

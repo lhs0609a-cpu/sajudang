@@ -37,6 +37,7 @@ import SinsalFigure from "@/components/scene/SinsalFigure";
 import { SCENES } from "@/components/scene/manifest";
 import { LENSES } from "@/lib/lenses";
 import { FIGURES } from "@/lib/sinsalFigures";
+import { Bundle, imagePrompt, loadPrompts } from "@/lib/prompts";
 
 type Kind = "scene" | "char" | "figure";
 
@@ -132,6 +133,42 @@ const LABEL: Record<Kind, string> = {
 
 const lensOf = (id: string) => LENSES.find((l) => l.id === id);
 
+/**
+ * 없는 자리 — **비워 두고 명령어만** 편다.
+ *
+ * ★ 자리표시가 판을 거짓말시키고 있었습니다 (2026-09-04).
+ *
+ *   장면도 인물도 파일이 없으면 자리표시(SVG 실루엣·색과 한자)로
+ *   버팁니다. 손님 앞에서는 옳습니다 — 반쯤 그린 그림보다 낫고, 넣는
+ *   날까지 화면이 안 무너집니다.
+ *
+ *   그런데 **관리자 판에서도 그게 나왔습니다.** 신살 인물 열셋이
+ *   전부 그럴듯한 실루엣으로 서 있으니, 한눈에 보면 다 채워진 것처럼
+ *   보입니다. 붉은 점을 하나씩 읽어야 빈 데를 압니다 — 그러라고 만든
+ *   판이 아닙니다.
+ *
+ *   빈 자리는 **비웁니다.** 그리고 그 자리에 만들 명령어를 폅니다.
+ *   창을 열 것도 없이 바로 베껴서 제미나이에 넣으면 됩니다.
+ */
+function Empty({ text }: { text: string | null }) {
+  const [copied, setCopied] = useState(false);
+  if (!text) return <div className="abempty"><span className="ablack">없음</span></div>;
+  return (
+    <div className="abempty">
+      <div className="abetop">
+        <span className="ablack">없음</span>
+        <button onClick={(ev) => {
+          ev.stopPropagation();
+          void navigator.clipboard?.writeText(text);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1600);
+        }}>{copied ? "베꼈소" : "복사"}</button>
+      </div>
+      <pre>{text}</pre>
+    </div>
+  );
+}
+
 /** 실물 — 화면이 쓰는 그 부품을 그대로 부릅니다. */
 function Art({ r }: { r: Row }) {
   if (r.kind === "scene") return <Scene id={r.id} />;
@@ -154,6 +191,8 @@ export default function AssetBoard() {
    *   말해야 합니다 — 판이 거짓말을 하면 안 봅니다.
    */
   const [revised, setRevised] = useState<Record<string, number>>({});
+  /* 없는 자리에 바로 펴 줄 명령어. 창과 **같은 글**입니다 (lib/prompts). */
+  const [book, setBook] = useState<Bundle | null>(null);
   const [stale, setStale] = useState<Record<string, boolean>>({});
   /*
    * ★ 영상도 낡습니다 (2026-09-04).
@@ -171,10 +210,10 @@ export default function AssetBoard() {
   /* 프롬프트를 언제 고쳤는가 — 묶음이 자리마다 적어 둡니다. */
   useEffect(() => {
     let alive = true;
-    fetch("/asset-prompts.json")
-      .then((r) => r.json())
+    loadPrompts()
       .then((d) => {
         if (!alive) return;
+        setBook(d);
         const at: Record<string, number> = {};
         for (const grp of ["scenes", "chars", "figures"] as const) {
           for (const [k, v] of Object.entries(d[grp] ?? {})) {
@@ -293,7 +332,9 @@ export default function AssetBoard() {
                              setOpen({ kind: r.kind, id: r.id });
                            }
                          }}>
-                      <Art r={r} />
+                      {img === false
+                        ? <Empty text={imagePrompt(book, r.kind, r.id)} />
+                        : <Art r={r} />}
                     </div>
                     <div className="abmeta">
                       <div className="abhead">

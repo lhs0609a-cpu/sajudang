@@ -21,7 +21,23 @@ BUNDLE = ROOT / "apps" / "web" / "public" / "asset-prompts.json"
 FIG_SRC = ROOT / "seed" / "figure_prompts.json"
 SHEET = ROOT / "에셋_프롬프트_전체.txt"
 SCENE_TSX = ROOT / "apps" / "web" / "components" / "scene" / "Scene.tsx"
-MODAL = ROOT / "apps" / "web" / "components" / "scene" / "PromptModal.tsx"
+# ★ 프롬프트 창은 **두 자리**로 나뉘었습니다 (2026-09-04).
+#
+#   글을 만드는 자리는 `lib/prompts.ts`(창과 에셋 현황판이 같이 씁니다),
+#   보여 주는 자리는 `PromptModal.tsx` 입니다. 검사가 보려는 것은
+#   「기능이 그 말을 하는가」이지 어느 파일에 있는가가 아니므로 둘을
+#   붙여서 봅니다.
+MODAL_TSX = ROOT / "apps" / "web" / "components" / "scene" / "PromptModal.tsx"
+MODAL_LIB = ROOT / "apps" / "web" / "lib" / "prompts.ts"
+
+
+class _Both:
+    def read_text(self, **kw):
+        return (MODAL_TSX.read_text(**kw) + chr(10)
+                + MODAL_LIB.read_text(**kw))
+
+
+MODAL = _Both()
 
 ANCHOR = "2D hand-drawn animation"
 SEASONS = ["spring", "summer", "autumn", "winter"]
