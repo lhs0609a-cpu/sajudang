@@ -43,8 +43,9 @@ from engine import screenscan as S          # noqa: E402
 #   화면 폭과 글자 크기는 `engine/typo.py` 가 압니다. `tools/widow.py`
 #   와 **같은 자**입니다 — 두 벌로 두면 언젠가 한쪽만 고칩니다.
 AXES = ("pull", "bite", "heart", "clear", "plain", "figure",
-        "measure", "pace")
-KO = ("당김", "팩폭", "울림", "명확", "쉬움", "비유", "줄길이", "읽기속도")
+        "measure", "pace", "mark")
+KO = ("당김", "팩폭", "울림", "명확", "쉬움", "비유", "줄길이",
+      "읽기속도", "강조")
 
 
 def test_six_axes_exist():
@@ -54,7 +55,7 @@ def test_six_axes_exist():
         assert k in got, "%s 축이 없다" % k
         assert 0 <= got[k] <= 100, "%s 가 0~100 밖이다: %s" % (k, got[k])
     assert got["total"] == round(sum(got[k] for k in AXES) / len(AXES)), \
-        "합이 여덟 축의 평균이 아니다"
+        "합이 아홉 축의 평균이 아니다"
 
 
 def test_every_screen_carries_all_six():
@@ -249,3 +250,62 @@ def test_screens_endpoint_clears_its_cache():
         encoding="utf-8")
     assert "cache_clear()" in src, \
         "점수를 캐시한 채로 내면 고쳐도 안 움직이오"
+
+
+# ══════════════════════════════════════════════════════════
+# 강조 — 어디부터 보라고 정해 주는가
+# ══════════════════════════════════════════════════════════
+#
+# ★ 손님이 짚은 것 (2026-09-04)
+#
+#   "화면에 글이 너무 많은데 전부 어떻게 설계할 거야?"
+#
+#   그 말을 하며 보던 화면은 a1 골목이었습니다. 그런데 a1 은 스물아홉
+#   중 **가장 짧습니다** — 253자 · 28초. 읽기속도는 만점이었습니다.
+#
+#   양이 아니었습니다. 253자에 굵은 글씨가 **일곱 군데**였습니다.
+#   덩이 다섯이 전부 가운데 정렬에 전부 같은 크기인데 강조만 일곱이면
+#   눈이 어디부터 볼지 못 정합니다. 다 굵으면 아무것도 안 굵습니다.
+#
+#   여덟 축 중 아무도 이걸 안 보고 있었습니다.
+
+
+def test_the_mark_axis_catches_a_screen_that_bolds_everything():
+    """253자에 일곱 군데면 0점이라야 한다."""
+    thick = D.score("t", "다 굵은 화면", "<p>" + ("그대는 참아 왔소. " * 12) + "</p>",
+                    kind="input", marks=7, own=253)
+    thin = D.score("t", "고른 화면", "<p>" + ("그대는 참아 왔소. " * 12) + "</p>",
+                   kind="input", marks=3, own=600)
+    assert thick["mark"] == 0, thick["mark"]
+    assert thin["mark"] == 100, thin["mark"]
+    assert any("강조가 너무 많소" in m for m in thick["missing"])
+
+
+def test_the_engine_numbers_are_not_counted_as_emphasis():
+    """
+    ★ 엔진이 박는 <b> 는 **근거 값**이다 — 나이·연도·센 수.
+      이 집이 박으라고 못박아 둔 것이라, 그걸 세면 대운 맵이 0점이 된다.
+      화면이 제 손으로 쓴 글에서만 센다.
+    """
+    html = "<p>그대는 <b>6살</b>에 들었고 <b>35살</b>에 갈리오.</p>" * 6
+    got = D.score("t", "엔진 글", html, kind="read", marks=2, own=400)
+    assert got["mark"] == 100, got["mark"]
+
+
+def test_a_screen_that_marks_nothing_is_caught_too():
+    """너무 많은 것과 아예 없는 것은 같은 병이다 — 위계가 없다."""
+    got = D.score("t", "안 짚는 화면", "<p>그대는 참아 왔소.</p>",
+                  kind="read", marks=0, own=800)
+    assert got["mark"] == 0
+    assert any("짚어 주는 데가 없소" in m for m in got["missing"])
+
+
+def test_the_screens_own_copy_is_what_gets_measured():
+    """엔진 글을 끼운 뒤 길이가 아니라 **화면 제 글** 길이로 잰다."""
+    S._screens.cache_clear()
+    pairs = dict(S._screens())
+    if not pairs:
+        return                      # 배포본에는 소스가 없습니다
+    for sid, v in pairs.items():
+        assert len(v) >= 6, "%s 에 강조 칸이 없소 — .\\dev.ps1 drama" % sid
+        assert isinstance(v[5], int) and v[5] >= 0, sid

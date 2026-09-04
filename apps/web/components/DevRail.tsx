@@ -82,13 +82,16 @@ const AX: [keyof ScreenScore, string, string][] = [
   //    어떻게 앉는지를 봅니다 (engine/typo.py).
   ["measure", "줄길이", "한 줄이 눈에 편한가"],
   ["pace", "읽기속도", "한 번에 얼마나 쏟는가"],
+  // ★ 아홉째. 앞의 여덟이 다 좋은데도 무겁게 읽히는 자리를 봅니다 —
+  //    a1 은 253자로 가장 짧은데 굵은 글씨가 일곱이었습니다.
+  ["mark", "강조", "어디부터 보라고 정해 주는가"],
 ];
 
 interface ScreenScore {
   id: string; title: string; total: number;
   pull: number; bite: number; heart: number;
   clear: number; plain: number; figure: number;
-  measure: number; pace: number; secs: number;
+  measure: number; pace: number; mark: number; secs: number;
   missing: string[];
 }
 

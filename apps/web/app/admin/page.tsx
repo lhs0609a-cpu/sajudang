@@ -85,6 +85,11 @@ type ScreenScore = {
      읽기속도 이 종류의 화면치고 오래 잡지 않는가 · 숨 쉴 자리가 있는가
      (engine/typo.py — tools/widow.py 와 같은 자) */
   measure: number; pace: number; secs: number;
+  /* 강조 — 어디부터 보라고 정해 주는가.
+     다 굵으면 아무것도 안 굵고, 하나도 안 굵으면 어디부터 볼지가 없습니다.
+     화면이 **제 손으로 쓴 글**에서만 셉니다 — 엔진이 박는 나이·센 수는
+     장식이 아니라 근거 값이라 안 셉니다 (engine/dramaturgy.MARK_*) */
+  mark: number;
   total: number;
   actout: string[]; missing: string[];
 };
@@ -114,6 +119,7 @@ type Drama = {
     pull?: number; bite?: number; heart?: number;
     clear?: number; plain?: number; figure?: number;
     measure?: number; pace?: number; secs?: number;
+    mark?: number;
     total?: number;
     weakest?: { id: string; title: string; total: number }[];
   };
@@ -635,6 +641,7 @@ export default function AdminPage() {
               <div><b>{drama.summary.figure}</b><span>비유</span></div>
               <div><b>{drama.summary.measure}</b><span>줄길이</span></div>
               <div><b>{drama.summary.pace}</b><span>읽기속도</span></div>
+              <div><b>{drama.summary.mark}</b><span>강조</span></div>
               <div><b>{drama.summary.total}</b><span>합 (화면 {drama.summary.screens})</span></div>
             </div>
             {(drama.summary.pull ?? 100) < 60 && (
@@ -655,6 +662,7 @@ export default function AdminPage() {
                   <th className="n">울림</th><th className="n">명확</th>
                   <th className="n">쉬움</th><th className="n">비유</th>
                   <th className="n">줄길이</th><th className="n">읽기속도</th>
+                  <th className="n">강조</th>
                   <th className="n">합</th><th>액트아웃</th>
                 </tr>
               </thead>
@@ -687,6 +695,7 @@ export default function AdminPage() {
                     <td className="n" title={`읽는 데 약 ${Math.round(r.secs / 60)}분`}>
                       {r.pace}
                     </td>
+                    <td className="n">{r.mark}</td>
                     <td className="n"><b>{r.total}</b></td>
                     <td className="sm">{r.actout.join(" · ") || "—"}</td>
                   </tr>

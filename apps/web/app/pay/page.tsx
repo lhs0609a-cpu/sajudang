@@ -361,7 +361,7 @@ function PayInner() {
             <Say who={charName} lens={s.cur} html={
               wants.length
                 ? `아직 안 편 자리가 <b>${free.locked.length}</b> 남았소.<br>` +
-                  `그 중 넷은 <b>${wants.map((w) => w.want).join(" · ")}</b>이오.`
+                  `그 중 넷은 ${wants.map((w) => w.want).join(" · ")}이오.`
                 : names.length
                   ? `아직 안 편 자리가 <b>${free.locked.length}</b> 남았소.<br>` +
                     `「${names.join("」 「")}」${names.length >= 3 ? " …" : ""}`
@@ -375,7 +375,7 @@ function PayInner() {
             {wants.map((w, i) => (
               <div className="peek" key={w.want + i}>
                 <div className="pk">
-                  <b>{w.want}</b>
+                  {w.want}
                   <span dangerouslySetInnerHTML={{ __html: w.fact }} />
                 </div>
                 <p className="pkbody">
@@ -396,7 +396,7 @@ function PayInner() {
             <ActOut kind="딜레마" next="어디까지 볼지">
               여기까지가 값 없이 하는 몫이오. 다음 장은 값을 묻소.
               <br />
-              값 없이 여는 6단은 <b>같은 여덟 글자를 겉에서 훑은 것</b>이고,
+              값 없이 여는 6단은 같은 여덟 글자를 겉에서 훑은 것이고,
               접힌 데는 그 속을 갈라 본 것이오 — 겉껍질을 보고 열매를
               말한 것과, 쪼개어 씨를 세어 본 것처럼 다르오.
               <br />
@@ -438,7 +438,7 @@ function PayInner() {
           물음은 그대의 8글자에서 나온 것이오 — 아무에게나 하는 말이
           아니오.
           <br />
-          <b>앞머리만 보이고 나머지는 안 보내오.</b> 흐려 놓은 게
+          앞머리만 보이고 나머지는 안 보내오. 흐려 놓은 게
           아니라 <b>여기 없소</b> — 브라우저를 뒤져도 안 나오오.
           그게 이 집이 값을 받는 방식이오.
           <br />

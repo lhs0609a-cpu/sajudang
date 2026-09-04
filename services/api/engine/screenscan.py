@@ -390,9 +390,12 @@ def _from_source() -> dict:
     # a7 은 훅 부품이 그립니다. page.tsx 만 보면 껍데기만 잡힙니다.
     part = WEB / "components" / "HookSegments.tsx"
     if part.exists() and "a7" in out:
-        t, d, nx, ad, fd = out["a7"]
-        out["a7"] = (t + " " + _readable(_strip_code(
-            part.read_text(encoding="utf-8"))), d, nx, ad, fd)
+        t, d, nx, ad, fd, mk = out["a7"]
+        src = part.read_text(encoding="utf-8")
+        # 부품이 그리는 굵은 글씨도 손님 눈에는 이 화면의 것입니다.
+        out["a7"] = (t + " " + _readable(_strip_code(src)),
+                     d, nx, ad, fd,
+                     mk + len(MARK.findall(FOLD.sub(" ", src))))
     return out
 
 
@@ -522,6 +525,12 @@ def _top_copy(src: str) -> dict:
 #   안 가르면 접어도 점수가 그대로라, 접을 이유가 없어집니다.
 FOLD = re.compile(r"<Fold\b.*?</Fold>", re.S)
 
+# 굵은 글씨 — 「여기부터 보시오」 라고 정해 주는 자리.
+#
+# ★ 접힌 것은 **안 셉니다.** 기본으로는 아무도 안 펴니, 접힌 글의
+#   강조는 첫 화면에 서 있지 않습니다. 분량을 뺄 때와 같은 까닭입니다.
+MARK = re.compile(r"<(?:b|strong)\b")
+
 
 def _split(src: str) -> dict:
     """
@@ -573,7 +582,8 @@ def _split(src: str) -> dict:
             fold = sum(len(_readable(m.group(0)))
                        for m in FOLD.finditer(chunk))
             out[sid] = (got, _declared(chunk), _next_named(chunk),
-                        bool(ADDRESSED.search(chunk)), fold)
+                        bool(ADDRESSED.search(chunk)), fold,
+                        len(MARK.findall(FOLD.sub(" ", chunk))))
     return out
 
 
@@ -663,6 +673,8 @@ def scan_all() -> list:
     addr = {k: v[3] for k, v in pairs.items()}
     # 접힌 글 — 찍어 둔 옛 글에는 이 칸이 없으니 0 으로 받습니다.
     fold = {k: (v[4] if len(v) > 4 else 0) for k, v in pairs.items()}
+    # 화면에 박힌 굵은 글씨. 엔진이 낸 것은 score 가 html 에서 입니다.
+    mark = {k: (v[5] if len(v) > 5 else 0) for k, v in pairs.items()}
     # 엔진 글이 있는 화면은 **엔진 글이 이깁니다** — 손님이 읽는 것은
     # 코드에 박힌 안내가 아니라 실제로 나온 해석입니다.
     #
@@ -701,7 +713,9 @@ def scan_all() -> list:
                             next_named=nxt.get(sid),
                             declared=decl.get(sid),
                             addressed=bool(addr.get(sid)),
-                            folded=fold.get(sid, 0)))
+                            folded=fold.get(sid, 0),
+                            marks=mark.get(sid, 0),
+                            own=len(pairs.get(sid, ("",))[0])))
     order = list(KO)
     rows.sort(key=lambda r: order.index(r["id"]))
     return rows
@@ -728,6 +742,8 @@ def summary(rows: Optional[list] = None) -> dict:
         "plain": avg("plain"), "figure": avg("figure"),
         # 글이 앉은 모양 — 줄길이와 읽는 시간 (engine/typo.py)
         "measure": avg("measure"), "pace": avg("pace"),
+        # 어디부터 보라고 정해 주는가 (engine/dramaturgy.MARK_*)
+        "mark": avg("mark"),
         "secs": sum(r["secs"] for r in rows),
         "total": avg("total"),
         "weakest": [{"id": r["id"], "title": r["title"], "total": r["total"]}
