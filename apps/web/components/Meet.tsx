@@ -25,11 +25,12 @@
  *   흉내내지 않습니다 (CharArt 와 같은 규칙). 그림이 오는 날
  *   `public/char/{id}/bust.png` 에 넣기만 하면 그때부터 나옵니다.
  */
+import { useState } from "react";
 import CharArt from "@/components/CharArt";
 import { LENS_BY_ID } from "@/lib/lenses";
 import { useSession } from "@/lib/store";
 
-export default function Meet({ lens, note, nameOnly }: {
+export default function Meet({ lens, note, nameOnly, greet }: {
   /** 누구를 만나는가. 없으면 지금 고른 캐릭터. */
   lens?: string;
   /** 이름 아래 한 줄. 없으면 그 사람의 전문 분야. */
@@ -39,8 +40,29 @@ export default function Meet({ lens, note, nameOnly }: {
    *   같은 얼굴을 두 번 그리면 두 사람으로 보입니다.
    */
   nameOnly?: boolean;
+  /**
+   * 처음 만나는 자리인가.
+   *
+   * ★ 참이면 **소리까지 있는 인사**가 한 번 돕니다 (CharArt.greet).
+   *   이 집에서 도령이 손님에게 말을 거는 첫 순간이라, 여기서만
+   *   소리를 냅니다 — 뒤에 또 나오면 인사가 아니라 배경음입니다.
+   */
+  greet?: boolean;
 }) {
   const cur = useSession((s) => s.cur);
+  /*
+   * ★ 소리 스위치는 여기 삽니다 — 초상 **밖**입니다.
+   *
+   *   `.meetart` 도 `.charart` 도 네 변을 마스크로 녹입니다. 초상이
+   *   네모로 잘려 보이면 스티커가 되기 때문입니다. 그런데 마스크는
+   *   그 안의 것을 다 녹여서, 귀퉁이에 단추를 얹으면 단추도 같이
+   *   사라집니다. 그래서 이름 아래, 마스크가 안 닿는 자리에 둡니다.
+   *
+   *   브라우저가 막기 전에는 **안 보입니다.** 소리는 이미 나고 있고,
+   *   끌 일이 있는 사람만 손을 뻗으면 되니 그때 나옵니다.
+   */
+  const [on, setOn] = useState(true);
+  const [blocked, setBlocked] = useState(false);
   const l = LENS_BY_ID[lens ?? cur];
   if (!l) return null;
 
@@ -48,7 +70,10 @@ export default function Meet({ lens, note, nameOnly }: {
     <div className="meet" style={{ ["--c" as string]: l.color }}>
       {!nameOnly && (
         <div className="meetart">
-          <CharArt lens={l} size="full" />
+          <CharArt lens={l} size="full" greet={greet}
+                   soundOn={on} onSoundBlocked={() => {
+                     setBlocked(true); setOn(false);
+                   }} />
         </div>
       )}
       <div className="meetname">
@@ -56,6 +81,12 @@ export default function Meet({ lens, note, nameOnly }: {
         <i>{l.hanja}</i>
       </div>
       <div className="meetnote">{note ?? l.specialty}</div>
+      {greet && (blocked || on) && (
+        <button type="button" className="sndline"
+                onClick={() => { setBlocked(false); setOn(!on); }}>
+          {on ? "소리를 끄겠습니다" : "소리를 듣겠습니다"}
+        </button>
+      )}
     </div>
   );
 }

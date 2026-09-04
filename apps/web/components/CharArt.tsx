@@ -22,7 +22,7 @@
  *   반쯤 그린 얼굴은 없는 것보다 나쁩니다. 그 사람의 색과 한자 한 글자로
  *   자리만 잡습니다 — 에셋이 오면 그대로 갈아 끼웁니다.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { LensInfo } from "@/lib/lenses";
 import { useSession } from "@/lib/store";
 import PromptModal from "@/components/scene/PromptModal";
@@ -120,17 +120,68 @@ function useClip(id: string, on: boolean) {
 }
 
 
+/*
+ * 첫 인사 — **소리까지 있는** 한 번짜리 초상.
+ *
+ * ★ 왜 clip 과 따로 두나 (2026-09-04)
+ *
+ *   `clip.webm` 은 배경처럼 도는 초상입니다 — 소리 없이, 끝없이.
+ *   첫 인사는 그 반대입니다. 도령이 고개를 들고 한 번 인사하고
+ *   멈춥니다. 되풀이되면 인사가 아니라 태엽입니다.
+ *
+ *   그래서 파일도 따로 둡니다. 없으면 clip 으로, clip 도 없으면
+ *   멈춘 초상으로 물러섭니다 — 장면과 같은 규칙입니다.
+ *
+ *     public/char/{id}/greet.webm   VP9 + Opus
+ *     public/char/{id}/greet.mp4    H.264 + AAC (사파리)
+ *     public/char/{id}/greet.jpg    첫 프레임
+ */
+function useGreet(id: string, on: boolean) {
+  const [ok, setOk] = useState(false);
+  useEffect(() => {
+    if (!on) { setOk(false); return; }
+    let alive = true;
+    fetch(`/char/${id}/greet.webm`, { method: "HEAD" })
+      .then((r) => { if (alive) setOk(r.ok); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [id, on]);
+  return ok;
+}
+
+
 export default function CharArt({
-  lens, size = "card", className, mood = "base",
+  lens, size = "card", className, mood = "base", greet = false,
+  soundOn = true, onSoundBlocked,
 }: {
   lens: LensInfo;
   size?: Size;
   className?: string;
   /** 어떤 얼굴인가. 없으면 기본 얼굴로 내려옵니다. */
   mood?: Mood;
+  /**
+   * 처음 만나는 자리인가. 참이면 **소리까지 있는 인사**를 한 번 틉니다.
+   * 파일이 없으면 도는 초상으로, 그것도 없으면 멈춘 그림으로 갑니다.
+   */
+  greet?: boolean;
+  /**
+   * 소리를 낼 것인가.
+   *
+   * ★ 스위치를 여기 두지 않는 까닭 — `.charart` 도 `.meetart` 도
+   *   네 변을 **마스크로 녹입니다**. 초상이 네모로 잘려 보이면
+   *   스티커가 되기 때문입니다. 그런데 마스크는 그 안의 것을 다
+   *   녹여서, 귀퉁이에 단추를 얹으면 단추도 같이 사라집니다.
+   *   그래서 스위치는 마스크 **밖**(Meet)에 두고 여기는 상태만
+   *   받습니다.
+   */
+  soundOn?: boolean;
+  /** 브라우저가 소리를 막았을 때. 화면이 켜는 자리를 내라는 뜻입니다. */
+  onSoundBlocked?: () => void;
 }) {
   const bust = useBust(lens.id, mood);
-  const wantClip = size !== "chip" && size !== "talk" && mood === "base";
+  const wantGreet = greet && mood === "base";
+  const hello = useGreet(lens.id, wantGreet);
+  const wantClip = !hello && size !== "chip" && size !== "talk" && mood === "base";
   const clip = useClip(lens.id, wantClip && !!bust);
 
   /* 동작 줄이기를 켠 사람에게는 멈춘 그림으로 냅니다 */
@@ -153,6 +204,37 @@ export default function CharArt({
   const admin = useSession((st) => st.admin);
   const [open, setOpen] = useState(false);
 
+  /*
+   * ★ 소리는 **손님이 문을 열어 줘야** 납니다.
+   *
+   *   브라우저는 손님이 아직 아무것도 안 누른 문서에서 소리 나는
+   *   자동 재생을 막습니다. 대문에서 버튼을 누르고 들어온 사람은
+   *   그 누름이 문서에 남아 있어 그냥 납니다. 그런데 이 화면을
+   *   직접 열거나 새로 고친 사람에게는 안 납니다.
+   *
+   *   막히면 **조용히 물러섭니다** — 소리를 끄고 그림만 틉니다.
+   *   그리고 켜는 자리를 냅니다. 손님이 안 부른 소리를 억지로
+   *   밀어 넣지 않고, 못 듣고 지나치게 두지도 않습니다.
+   */
+  const vref = useRef<HTMLVideoElement | null>(null);
+  useEffect(() => {
+    const v = vref.current;
+    if (!v || !hello || still) return;
+    if (!soundOn) { v.muted = true; v.play().catch(() => {}); return; }
+    v.muted = false;
+    // 켤 때는 처음부터 — 인사를 반쯤 듣게 두지 않습니다.
+    v.currentTime = 0;
+    v.play().catch(() => {
+      // 브라우저가 막았소. 조용히 물러서고, 켜는 자리를 내라고 이릅니다.
+      v.muted = true;
+      v.play().catch(() => {});
+      onSoundBlocked?.();
+    });
+    // onSoundBlocked 는 화면이 매번 새로 만드는 함수라 여기 넣지 않습니다 —
+    // 넣으면 그릴 때마다 인사가 처음으로 되감깁니다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hello, still, soundOn]);
+
   return (
     <div
       className={`charart ${size} ${dim ? "off" : ""} ${className ?? ""}`}
@@ -171,7 +253,19 @@ export default function CharArt({
       {open && (
         <PromptModal kind="char" id={lens.id} onClose={() => setOpen(false)} />
       )}
-      {clip && !still ? (
+      {/*
+        ★ 첫 인사는 **한 번만** 돕니다 (loop 없음). 되풀이되면 인사가
+          아니라 태엽입니다. 끝나면 마지막 프레임에 멈춰 섭니다.
+      */}
+      {hello && !still ? (
+        <video ref={vref} width={w} height={h}
+               poster={`/char/${lens.id}/greet.jpg`}
+               autoPlay playsInline preload="auto" aria-label={lens.name}>
+          <source src={`/char/${lens.id}/greet.webm`} type="video/webm" />
+          {/* 사파리 몫 — VP9 를 못 읽습니다 */}
+          <source src={`/char/${lens.id}/greet.mp4`} type="video/mp4" />
+        </video>
+      ) : clip && !still ? (
         <video width={w} height={h} poster={bust ?? undefined}
                autoPlay muted playsInline loop aria-label={lens.name}>
           <source src={`/char/${lens.id}/clip.webm`} type="video/webm" />

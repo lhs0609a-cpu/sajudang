@@ -3095,3 +3095,38 @@ body.has-rail .beatskip-hint { left: calc(50% + 116px); }
 }
 .peek .pkmore b { color: var(--gold); }
 @media print { .peek .pkmask { display: none; } }
+
+/* ══════════════════════════════════════════════════════════
+   소리 — 첫 인사에만 나는 것
+   ══════════════════════════════════════════════════════════
+
+   ★ 초상 **밖**에 답니다. `.meetart` 와 `.charart` 는 네 변을
+     마스크로 녹이는데(스티커로 안 보이려고), 마스크는 그 안의
+     것을 다 녹입니다. 귀퉁이에 얹은 단추는 같이 사라집니다.
+
+   ★ 이건 손님이 누르는 것이니 **손님의 말**로 적습니다 —
+     「소리를 듣겠습니다」. 표지판이 아니라 결정입니다.
+*/
+.sndline {
+  margin-top: 8px;
+  padding: 3px 11px;
+  border: 1px solid var(--line, rgba(255, 255, 255, .16));
+  border-radius: 999px;
+  background: transparent;
+  color: var(--paper3, #9d968c);
+  font: inherit;
+  font-size: var(--fs-8, 12px);
+  letter-spacing: .02em;
+  cursor: pointer;
+  opacity: .62;
+  transition: opacity .18s ease, border-color .18s ease, color .18s ease;
+}
+.sndline:hover,
+.sndline:focus-visible {
+  opacity: 1;
+  color: var(--paper2, #e8e2d8);
+  border-color: color-mix(in srgb, var(--c, #d8a24a) 55%, transparent);
+}
+.sndline:focus-visible { outline: 2px solid var(--gold, #d8a24a); outline-offset: 2px; }
+
+@media print { .sndline { display: none; } }
