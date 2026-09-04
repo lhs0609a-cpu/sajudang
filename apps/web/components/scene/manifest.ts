@@ -70,12 +70,16 @@ export interface SceneSpec {
 
 export const SCENES: SceneSpec[] = [
   { id: "gate", name: "대문 · 사계", preset: "Dolly In", ratio: "9:16", seconds: 5, loop: false, tint: "grade", seasonal: true },
-  // ★ 아무 화면도 이걸 안 부릅니다 (tools/asset_audit.py).
-  //   만들어도 안 나옵니다. 대문(gate)이 이미 "열려 있는 문" 을
-  //   보여주고, 문고리(handle)가 릴레이에서 그 몫을 합니다.
-  //   발주 목록에서 뺍니다 — 안 쓸 것을 만들지 않습니다.
-  //   쓸 자리가 생기면 이 줄을 되살리고 화면에 <Scene id="door"/> 를 넣으세요.
-  // { id: "door", name: "열리는 문", preset: "Static", ratio: "9:16", seconds: 2, loop: false },
+  /*
+   * ★ 되살렸습니다 (2026-09-04).
+   *
+   *   「아무 화면도 안 부르니 발주 목록에서 뺀다」고 적어 두고,
+   *   쓸 자리가 생기면 되살리라고 남겨 두었던 줄입니다. 그 자리가
+   *   생겼습니다 — 엿보기(d1b) 「무엇이 열리는가」. 문이 열리며 빛이
+   *   새어 나오는데 안은 아직 안 보이는 그림이라, 이 화면의 뜻과
+   *   같습니다. 명령어는 그때 적어 둔 것이 그대로 있습니다.
+   */
+  { id: "door", name: "열리는 문", preset: "Static", ratio: "9:16", seconds: 2, loop: false },
   { id: "desk", name: "붓·벼루·빈 종이", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
   { id: "ink", name: "먹이 번지는 종이", preset: "Static", ratio: "9:16", seconds: 5, loop: false },
   { id: "room", name: "실내·병풍·주렴", preset: "Static", ratio: "9:16", seconds: 5, loop: true },

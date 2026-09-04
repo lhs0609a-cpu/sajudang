@@ -264,6 +264,7 @@ export const SCREEN_GROUPS: { group: string; label: string; items: ScreenLink[] 
     items: [
       { id: "d0", name: "무료 6단", href: "/pay?step=d0" },
       { id: "d1", name: "어디까지", href: "/pay?step=d1" },
+      { id: "d1b", name: "엿보기", href: "/pay?step=d1b" },
       { id: "d2", name: "결제", href: "/pay?step=d2" },
       { id: "d3", name: "완료", href: "/pay?step=d3" },
     ],

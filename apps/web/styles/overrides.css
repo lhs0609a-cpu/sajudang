@@ -3033,3 +3033,57 @@ body.has-rail .beatskip-hint { left: calc(50% + 116px); }
 /* 여덟이 다 선 자리 — 여기서 고리가 닫힙니다 */
 .peek.done { border-color: var(--c); }
 .peek.done .peekgz { color: var(--c); }
+
+/* ══════════════════════════════════════════════════════════
+ * 엿보기 — 물음은 보이고 답은 가려진 자리 (d1b)
+ * ══════════════════════════════════════════════════════════
+ *
+ * ★ 가린 칸은 **글자가 아니라 길이**입니다.
+ *
+ *   서버가 안 보낸 것을 화면이 그릴 수는 없습니다. 블러(filter)를
+ *   쓰면 그 아래 글이 DOM 에 있다는 뜻이라, 개발자도구로 벗겨집니다.
+ *   여기서는 애초에 글이 없고 **칸만** 있습니다 (docs/02 §7).
+ */
+.peek {
+  border: 1px solid var(--line);
+  background: var(--bg2);
+  padding: 13px 14px;
+  margin-bottom: 9px;
+}
+.peek .pk {
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 7px;
+}
+.peek .pk b {
+  font-family: var(--serif); font-size: var(--fs-4); color: var(--c);
+}
+.peek .pk span {
+  font-size: var(--fs-3); color: var(--paper2);
+}
+.peek .pkbody {
+  font-size: var(--fs-5); line-height: 1.75; color: var(--paper);
+  margin: 0 0 7px;
+}
+/* 가려 둔 자리 — 글자가 없으니 흐릴 것도 없습니다. 칸만 섭니다. */
+.peek .pkmask {
+  color: transparent;
+  background: linear-gradient(100deg,
+    var(--line) 0%, var(--line2) 40%, var(--line) 80%);
+  background-size: 220% 100%;
+  border-radius: 2px;
+  margin-left: 3px;
+  user-select: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .peek .pkmask { animation: pkshift 5.5s ease-in-out infinite; }
+}
+@keyframes pkshift {
+  0%, 100% { background-position: 0% 0; }
+  50%      { background-position: 100% 0; }
+}
+.peek .pkmore {
+  margin: 6px 0 0;
+  font-family: var(--mono); font-size: var(--fs-1); color: var(--paper3);
+}
+.peek .pkmore b { color: var(--gold); }
+@media print { .peek .pkmask { display: none; } }

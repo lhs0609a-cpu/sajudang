@@ -1,8 +1,9 @@
 "use client";
 
 /**
- * @screen d0 d1 d2 d3
- * D · 값을 치르다 — d0 무료 6단 · d1 어디까지 · d2 결제 · d3 완료
+ * @screen d0 d1 d1b d2 d3
+ * D · 값을 치르다 — d0 무료 6단 · d1 어디까지 · d1b 엿보기 ·
+ *                  d2 결제 · d3 완료
  *
  * ★ 금액과 하루 2건 상한은 **서버가 정합니다.** 여기서 계산하지 마세요.
  *   (CLAUDE.md 절대 규칙 4)
@@ -28,6 +29,13 @@ import type { ReportResponse } from "@shared/chart";
 /* 목패의 모양은 lib/api.ts 한 곳에만 적습니다 — 여기 또 적으면
    서버가 필드를 늘려도 이 화면만 모릅니다. */
 import type { Granted, TierCard } from "@/lib/api";
+
+/** 엿보기 한 줄 — 답은 안 옵니다. 앞머리와 가린 글자 수만. */
+interface PeekRow {
+  lens_id: string; lens_name: string;
+  ask: string; head: string; mask: number;
+  source: string | null; chars: number;
+}
 
 interface Order {
   order_id: string;
@@ -124,6 +132,14 @@ function PayInner() {
   const [tiers, setTiers] = useState<TierCard[] | null>(null);
   /* 값을 치른 직후 **무엇을 얻었는지**. ★ 서버가 셉니다. */
   const [granted, setGranted] = useState<Granted | null>(null);
+  /*
+   * 엿보기 — 목패를 고른 뒤, 값을 치르기 전에 보는 자리.
+   *
+   * ★ 답은 **안 옵니다.** 앞머리와 가린 글자 수만 옵니다.
+   *   블러가 아니라 서버가 안 보내는 것입니다 (engine/peek.py).
+   */
+  const [peek, setPeek] = useState<PeekRow[] | null>(null);
+  const [hidden, setHidden] = useState(0);
 
   useScreen(step);
 
@@ -154,6 +170,24 @@ function PayInner() {
       .catch((e) => { if (alive) setErr(e instanceof ApiError ? e.message : "목패를 펴지 못했소."); });
     return () => { alive = false; };
   }, [step, s.chartId, s.cur, s.concern, s.axis4, tiers]);
+
+  /* d1b · 엿보기 — 고른 목패가 여는 자리들 */
+  useEffect(() => {
+    if (step !== "d1b" || !s.chartId || !pick) return;
+    let alive = true;
+    api
+      .payPeek({ chart_id: s.chartId, lens_id: s.cur, tier: pick,
+                 concern: s.concern, axis4: s.axis4 })
+      .then((r) => {
+        if (!alive) return;
+        setPeek(r.rows);
+        setHidden(r.hidden);
+      })
+      .catch((e) => {
+        if (alive) setErr(e instanceof ApiError ? e.message : "엿보지 못했소.");
+      });
+    return () => { alive = false; };
+  }, [step, s.chartId, s.cur, s.concern, s.axis4, pick]);
 
   /* d0 · 무료 구간 */
   useEffect(() => {
@@ -332,6 +366,94 @@ function PayInner() {
   }
 
   /* d2 · 결제 */
+  /* ── d1b · 엿보기 ─────────────────────────────────── */
+  if (step === "d1b") {
+    const tier = tiers?.find((t) => t.id === pick);
+    return (
+      <Shell screen="d1b" title="무엇이 열리는가" onBack={() => router.push("/pay?step=d1")}>
+        {/* ★ 접힌 두루마리(fold)는 페이월(c4)이 씁니다. 잇달아 나오는
+            두 화면이 같은 그림이면 손님은 화면이 안 넘어간 줄 압니다
+            (tests/test_scene_not_shared.py). 「열리는 문」을 되살렸습니다 —
+            문이 열리며 빛이 새는데 안은 아직 안 보이는 그림이오. */}
+        <Scene id="door" />
+        <Narration lines={["도령이 접힌 자리에 손을 얹었다.",
+                           "아직 펴지는 않았다."]} />
+        <Say who={charName} lens={s.cur}>
+          {you}가 고른 것은 「{tier?.name ?? "그 목패"}」요. 여기 적힌
+          물음은 그대의 8글자에서 나온 것이오 — 아무에게나 하는 말이
+          아니오.
+          <br />
+          <b>앞머리만 보이고 나머지는 안 보내오.</b> 흐려 놓은 게
+          아니라 <b>여기 없소</b> — 브라우저를 뒤져도 안 나오오.
+          그게 이 집이 값을 받는 방식이오.
+          <br />
+          근거는 안 가리오. 무엇을 보고 한 말인지는 값을 치르기
+          전에도 보이오. 대 보고 아니다 싶으면 돌아가시오.
+          <br />
+          <b>여기서 창을 닫고 며칠 생각난 적이 있었소.</b> 값이
+          아까워서가 아니라, 뭐라 적혀 있었을까가 남아서요.
+          <br />
+          참고 미뤄 두면 그 자리가 더 커지오. 그 마음을 알고 하는
+          말이니 오늘 안 여셔도 되오.
+          <br />
+          이 집은 하루에 2번까지만 받고, 한 자리에 2명까지만 붙이오.
+          내일도 같은 자리에 있소.
+          <br />
+          아래 흐린 칸은 글을 가린 게 아니라 <b>빈 칸</b>이오.
+          자물쇠 안쪽이 안 보이는 것처럼, 열기 전에는 여기 아무것도
+          없소. 물음 6개에 근거 6줄은 지금 다 보이오.
+        </Say>
+
+        {err && <Say who="도령" lens="pungun">{err}</Say>}
+        {!peek && !err && <p className="sm">접힌 자리를 세는 중이오…</p>}
+
+        {peek && peek.map((r, i) => (
+          <div className="peek" key={r.lens_id + i}>
+            <div className="pk">
+              <b>{r.lens_name}</b>
+              <span>{r.ask}</span>
+            </div>
+            {/*
+              ★ 가린 칸은 **글자가 아니라 길이**입니다.
+                서버가 안 보낸 것을 화면이 그릴 수는 없습니다.
+                남은 글자 수만큼 칸을 그립니다.
+            */}
+            <p className="pkbody">
+              {r.head}
+              <span className="pkmask" aria-label={`가려진 ${r.mask}자`}>
+                {"▒".repeat(Math.min(22, Math.max(6, Math.round(r.mask / 12))))}
+              </span>
+            </p>
+            <span className="src">근거 · {r.source}</span>
+            <p className="pkmore">
+              여기서부터 <b>{r.mask}자</b>가 더 있소 ·
+              {" "}약 {Math.max(1, Math.round(r.chars / 550))}분치
+            </p>
+          </div>
+        ))}
+
+        {peek && peek.length > 0 && (
+          <ActOut kind="끊긴 동작" next="값을 치르다">
+            지금 안 보이는 글자가 <b>{hidden.toLocaleString()}자</b>요.
+            <br />
+            <b>물음은 그대 것이고, 답은 아직 내 쪽에 있소.</b>
+          </ActOut>
+        )}
+
+        <button className="btn mt" onClick={() => router.push("/pay?step=d2")}>
+          값을 치르고 펴겠습니다
+        </button>
+        {/* ★ 물러설 길은 늘 둡니다. 브레이크는 매출보다 앞섭니다. */}
+        <button className="btn gh" onClick={() => router.push("/pay?step=d1")}>
+          다른 목패를 보겠습니다
+        </button>
+        <button className="btn gh" onClick={() => router.push("/lobby")}>
+          오늘은 여기까지 하겠습니다
+        </button>
+      </Shell>
+    );
+  }
+
   if (step === "d2") {
     const tier = tiers?.find((t) => t.id === pick);
 
@@ -686,9 +808,19 @@ function PayInner() {
         고르는 것은 <b>어느 목패</b>가 아니라, 그대가 여태 안 물어본
         것 중 <b>무엇을 먼저 물을 것인가</b>요. 나머지는 오늘 안 열리오.
       </ActOut>
+      {/*
+        ★ 고르고 나서 곧바로 결제창으로 보내지 않습니다 (2026-09-04).
+
+          손님이 시킨 것 — "누르면 다음에는 각 캐릭터들이 나와서
+          «당신에게 가장 중요한 건 ~~» 블러 처리하고 … 궁금해서 결제
+          안 하고는 미칠 정도로."
+
+          엿보기 한 자리를 사이에 둡니다. 거기서 보이는 것은 **이미
+          계산된 그 사람의 컷**이고, 답은 서버에 남습니다.
+      */}
       <button className="btn mt" disabled={!pick}
-              onClick={() => router.push("/pay?step=d2")}>
-        {pick ? "이걸로 열겠습니다" : "먼저 목패를 고르시오"}
+              onClick={() => router.push("/pay?step=d1b")}>
+        {pick ? "무엇이 열리는지 보겠습니다" : "먼저 목패를 고르시오"}
       </button>
       <button className="btn gh" onClick={() => router.push("/pay?step=d0")}>
         값 없이 볼 수 있는 것부터

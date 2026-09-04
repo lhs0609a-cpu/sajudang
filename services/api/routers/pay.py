@@ -531,3 +531,65 @@ def get_order(order_id: str) -> dict:
         raise HTTPException(status_code=404, detail="모르는 주문이오.")
     # 내부 키는 내려보내지 않는다
     return {k: v for k, v in order.items() if k != "payment_key"}
+
+
+# ══════════════════════════════════════════════════════════
+# 엿보기 — 목패를 고른 뒤, 값을 치르기 전
+# ══════════════════════════════════════════════════════════
+class PeekRequest(BaseModel):
+    chart_id: str
+    lens_id: str
+    tier: str
+    concern: str = "love"
+    axis4: Optional[str] = None
+
+
+@router.post("/peek")
+def peek(req: PeekRequest) -> dict:
+    """
+    이 목패가 여는 자리들 — **물음과 가려진 답.**
+
+    ★ 블러가 아닙니다
+
+      글을 내려보내고 CSS 로 흐리면 개발자도구에서 그대로 읽힙니다.
+      여기서는 앞머리만 진짜로 보내고 **뒤는 서버에 남깁니다.** 화면은
+      길이만큼 흐린 칸을 그립니다 — 벗겨도 나올 게 없습니다.
+      (docs/02 §7 · 이 집의 절대 규칙)
+
+    ★ 근거는 안 가립니다
+
+      무엇을 보고 한 말인지는 값을 치르기 전에도 보여 줍니다.
+      가리는 것은 **답**이지 근거가 아닙니다.
+
+    ★ 지어낸 압박은 없습니다
+
+      남은 시간도 남은 자리도 없습니다. 궁금함은 그 사람의 여덟
+      글자에서 나와야지 시계에서 나오면 안 됩니다 (CLAUDE.md 규칙 4).
+    """
+    from engine import lens as lens_mod
+    from engine.features import Features
+    from engine.peek import build_peek
+    from routers.chart import load_features
+
+    if req.tier not in TIER_NAME:
+        raise HTTPException(status_code=422, detail="모르는 목패요.")
+
+    f = Features(**load_features(req.chart_id))
+    # 「이 자리 하나」는 그 사람만, 나머지는 스무 사람을 엽니다.
+    if req.tier == "one":
+        lens_ids = [req.lens_id]
+    else:
+        released = [l["id"] for l in lens_mod.released()]
+        # 고른 사람을 맨 앞에 둡니다 — 방금 그 사람 얘기를 듣고 왔습니다.
+        lens_ids = ([req.lens_id] +
+                    [i for i in released if i != req.lens_id])[:6]
+
+    rows = build_peek(f, req.chart_id, lens_ids, req.concern, req.axis4)
+    return {
+        "tier": req.tier,
+        "tier_name": TIER_NAME[req.tier],
+        "lenses": len(lens_ids),
+        "rows": rows,
+        # 가려 둔 글자를 다 더하면 얼마인가. 지어낸 수가 아니라 센 것입니다.
+        "hidden": sum(r["mask"] for r in rows),
+    }

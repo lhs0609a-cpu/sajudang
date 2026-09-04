@@ -227,6 +227,25 @@ export const api = {
     post<{ tiers: TierCard[]; lens_id: string;
             refund_notice: string; refund_say: string }>("/v1/pay/tiers", req),
 
+  /*
+   * 엿보기 — 목패를 고른 뒤, 값을 치르기 전.
+   *
+   * ★ 답은 **안 옵니다.** 앞머리와 «가린 글자 수» 만 옵니다.
+   *   블러가 아니라 서버가 안 보내는 것이라, 개발자도구로 벗겨도
+   *   나올 게 없습니다 (docs/02 §7).
+   */
+  payPeek: (req: {
+    chart_id: string; lens_id: string; tier: string;
+    concern?: string; axis4?: string | null;
+  }) => post<{
+    tier: string; tier_name: string; lenses: number; hidden: number;
+    rows: {
+      lens_id: string; lens_name: string;
+      ask: string; head: string; mask: number;
+      source: string | null; chars: number;
+    }[];
+  }>("/v1/pay/peek", req),
+
   payPrepare: (req: {
     session_id: string; chart_id: string; lens_id: string;
     tier: string; concern?: string;
