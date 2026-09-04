@@ -142,8 +142,29 @@ const AXIS4 = [
   "ISTJ", "ISFJ", "ESTJ", "ESFJ", "ISTP", "ISFP", "ESTP", "ESFP",
 ];
 
-const CITIES = ["서울", "인천", "수원", "춘천", "강릉", "대전", "청주", "전주",
-  "광주", "목포", "대구", "안동", "포항", "부산", "울산", "창원", "제주"];
+/*
+ * 태어난 고을 — ★ 고을 열일곱은 **경도표**지 행정구역이 아닙니다 (2026-09-04).
+ *
+ *   `calendar.CITY_LON` 이 이 열일곱의 경도만 들고 있고, 하는 일은 진태양시
+ *   보정 하나입니다. 그런데 화면에는 이름만 나열돼 있어서, 경기도에서 난
+ *   사람이 제 고을을 찾다가 목록에 없다고 봅니다 — 인구가 가장 많은
+ *   광역단체입니다. 수원이 거기 있는데도 못 찾습니다.
+ *
+ *   경도를 늘리지 않고 **묶음 이름만** 답니다. 성남·고양을 넣어 봐야
+ *   서울과 0.1° (24초) 차이라 시주가 갈리지 않습니다 — 없는 정밀도를
+ *   있는 것처럼 보이게 할 뿐입니다.
+ */
+const CITY_GROUPS: [string, string[]][] = [
+  ["서울", ["서울"]],
+  ["경기·인천", ["인천", "수원"]],
+  ["강원", ["춘천", "강릉"]],
+  ["충청·세종", ["대전", "청주"]],
+  ["전라", ["전주", "광주", "목포"]],
+  ["경북", ["대구", "안동", "포항"]],
+  ["경남·부산·울산", ["부산", "울산", "창원"]],
+  ["제주", ["제주"]],
+];
+const CITIES = CITY_GROUPS.flatMap(([, cs]) => cs);
 
 /*
  * 화면 순서. ★ 고민(a5)이 이름(a2) 바로 뒤로 올라왔습니다.
@@ -731,12 +752,18 @@ function EntryInner() {
             <label className="sm" style={{ display: "block", marginTop: 12 }}>태어난 고을</label>
             <select className="fld" value={s.city}
                     onChange={(e) => s.set({ city: e.target.value, features: null, chartId: null })}>
-              {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              {CITY_GROUPS.map(([g, cs]) => (
+                <optgroup key={g} label={g}>
+                  {cs.map((c) => <option key={c} value={c}>{c}</option>)}
+                </optgroup>
+              ))}
             </select>
             <p className="sm">
               고을마다 해가 가장 높이 뜨는 때가 다르오. 같은 시계를 고을마다
               다른 자리에 걸어 둔 셈이오 — 서울은 <b>32분</b>을 되돌리오.
               그만큼 시주 (태어난 시각의 두 글자) 가 갈릴 수 있소.
+              {" "}제 고을이 없거든 가까운 데를 고르시오. <b>30 km</b>면
+              되돌리는 시각이 <b>1분</b> 남짓 달라지오.
             </p>
           </>
         )}

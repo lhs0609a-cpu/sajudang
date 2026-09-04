@@ -24,6 +24,7 @@ import { track, useScreen } from "@/lib/track";
 import { openCheckout } from "@/lib/toss";
 import { SELLABLE } from "@/lib/biz";
 import { thinkOf } from "@/lib/think";
+import SinsalSlots from "@/components/SinsalSlots";
 import type { ReportResponse } from "@shared/chart";
 
 /* 목패의 모양은 lib/api.ts 한 곳에만 적습니다 — 여기 또 적으면
@@ -306,7 +307,23 @@ function PayInner() {
             <div className="blk in">
               <div className="lab">{c.title}</div>
               <span className="src">근거 · {c.source}</span>
-              <div dangerouslySetInnerHTML={{ __html: c.html }} />
+              {/*
+                ★ 신살 컷에 **인물이 안 붙고 있었습니다** (2026-09-04).
+
+                  서버는 이름마다 빈 자리를 남기고
+                  (`<div class="ssfig" data-sinsal="taegeuk">`),
+                  `SinsalSlots` 가 거기에 그림을 꽂습니다. 리포트(c2)와
+                  분석지(c7)와 건너온 자리(s1)에는 붙어 있었는데
+                  **무료 6단만 빠져 있었습니다** — 그냥 innerHTML 로
+                  부어서 빈 자리가 빈 채로 남았습니다.
+
+                  하필 신살은 **무료 컷**입니다. 값을 치르기 전에
+                  태극귀인·문창귀인·금여·양인을 만나는 자리가 여기인데,
+                  거기서 한자만 보고 있었습니다.
+              */}
+              {c.id === "sinsal"
+                ? <SinsalSlots html={c.html} />
+                : <div dangerouslySetInnerHTML={{ __html: c.html }} />}
             </div>
             {/* 세 컷마다 한 번. 벽을 걷는 리듬으로 되돌립니다. */}
             {i % 3 === 2 && i < cuts.length - 1 && c.statement_id && (

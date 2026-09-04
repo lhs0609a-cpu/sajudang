@@ -37,7 +37,7 @@ import sys
 from collections import deque
 from pathlib import Path
 
-from PIL import Image, ImageFilter, ImageStat
+from PIL import Image, ImageChops, ImageFilter, ImageStat
 
 ROOT = Path(__file__).resolve().parents[1]
 PUB = ROOT / "apps" / "web" / "public"
@@ -51,6 +51,53 @@ MARK = (0.836, 0.845, 0.935, 0.935)
 # 바탕으로 볼 밝기 — 이보다 밝고 색이 옅으면 바탕입니다
 BG_MIN = 232
 BG_SAT = 18
+
+
+# 초상 한 장의 무게. ★ 이 얼굴은 **첫 화면 대사 옆**에 뜹니다 (2026-09-04).
+#
+#   768x1024 RGBA 를 그대로 쓰면 800KB 입니다. 스무 사람이면 16MB 이고,
+#   그 중 첫 장은 손님이 도령의 첫 마디를 읽기도 전에 받습니다. 발주서는
+#   클립만 600KB 로 묶어 두었고 초상에는 한도가 없었습니다.
+SLIM_KB = 320
+
+# 팔레트로 줄인 뒤 얼마나 어긋나도 되는가 (0~255 자). 5 면 눈에 안 잡힙니다.
+SLIM_RMS = 5.0
+
+
+def slim(im: Image.Image) -> tuple:
+    """
+    팔레트로 줄인다. ★ 얼굴이 상하면 **안 줄인다.**
+
+    ✦ 를 덮을 때와 같은 규칙입니다 — 재 보고, 나쁘면 손대지 않습니다.
+    줄여서 띠가 생긴 얼굴은 무거운 얼굴보다 나쁩니다.
+    """
+    from io import BytesIO
+
+    def blob(x, **kw):
+        b = BytesIO()
+        x.save(b, "PNG", optimize=True, **kw)
+        return b.getvalue()
+
+    full = blob(im)
+    if len(full) <= SLIM_KB * 1024:
+        return im, "%d KB — 줄일 것 없소" % (len(full) // 1024)
+
+    # FASTOCTREE 만 알파를 함께 셉니다 (MEDIANCUT 은 알파를 버립니다)
+    q = im.quantize(colors=255, method=Image.FASTOCTREE)
+    small = blob(q)
+    if len(small) >= len(full):
+        return im, "줄여도 안 줄어드오 — 그대로 두오"
+
+    # 보이는 데(알파 있는 자리)만 재 봅니다. 투명한 데는 눈에 안 띕니다.
+    a, b = im.convert("RGB"), q.convert("RGBA").convert("RGB")
+    diff = ImageChops.difference(a, b)
+    mask = im.split()[3].point(lambda v: 255 if v > 128 else 0)
+    st = ImageStat.Stat(diff, mask=mask)
+    rms = (sum(v * v for v in st.rms) / 3.0) ** 0.5
+    if rms > SLIM_RMS:
+        return im, "줄이면 얼굴이 상하오 (어긋남 %.1f) — 그대로 두오" % rms
+    return q, "%d KB 를 %d KB 로 줄였소 (어긋남 %.1f)" % (
+        len(full) // 1024, len(small) // 1024, rms)
 
 
 def cover(im: Image.Image, size) -> Image.Image:
@@ -175,8 +222,11 @@ def main() -> int:
         keep = out.with_suffix(".png.bak")
         shutil.copy2(out, keep)
         print("  ★  있던 것은 %s 로 밀어 두었소" % keep.name)
+    im, why = slim(im)
+    print("  ④  %s" % why)
+
     im.save(out, "PNG", optimize=True)
-    print("  ④  넣었소 — %d KB" % (out.stat().st_size // 1024))
+    print("  ⑤  넣었소 — %d KB" % (out.stat().st_size // 1024))
 
     # 큰 초상은 영상을 씁니다. 그게 낡았으면 얼굴이 둘이 됩니다.
     clip = where / "clip.webm"
