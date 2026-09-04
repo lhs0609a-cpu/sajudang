@@ -2821,24 +2821,38 @@ body.has-rail .beatskip-hint { left: calc(50% + 116px); }
  *   그 자리를 붙잡고 확대해 **얼굴만** 남깁니다. 상자는 그대로고
  *   `.charart` 가 이미 `overflow: hidden` 이라 넘치는 몸은 잘립니다.
  *
+ * ★ 너무 당기고 있었습니다 (2026-09-04).
+ *
+ *   초상이 한 장뿐일 때 정한 값이라 2.6·2.2 였습니다. 스무 장이 다
+ *   들어오고 나서 스무 칸을 잘라 보니 **머리 위가 잘리고 턱이
+ *   날아갔습니다** — 상투도 비녀도 안 보이고 입까지만 나왔습니다.
+ *
+ *   2.2 로 자르면 보이는 자리가 y 146~612 입니다. 이 그림들은
+ *   머리 위가 10~80, 턱이 600~700 이라 위아래가 다 모자랍니다.
+ *   1.45 로 낮추면 y 0~701 이 보여 머리부터 턱까지 다 들어옵니다.
+ *   눈이 아니라 **머리통 가운데**(34%)를 붙잡습니다.
+ *
+ *   ★ 눈높이 37% 는 그대로 맞습니다 — 스무 장을 재 보니 눈이
+ *     320~384 였습니다. 틀린 것은 붙잡는 자리가 아니라 **배율**이었습니다.
+ *
  * ★ 자리표시(.ph)는 안 건드립니다 — 한자 한 글자는 이미 가운데입니다.
  */
 .charart.talk img,
 .charart.talk video,
 .charart.chip img,
 .charart.chip video {
-  transform-origin: 50% 37%;     /* 발주서가 정한 눈높이 */
-  transform: scale(2.6);
+  transform-origin: 50% 34%;     /* 머리통 가운데 */
+  transform: scale(1.5);
 }
 /* 진열대 조각은 조금 덜 당깁니다 — 이름표와 나란히 서는 자리라 */
 .charart.chip img,
-.charart.chip video { transform: scale(2.2); }
+.charart.chip video { transform: scale(1.45); }
 
-/* 카드(132×176)도 얼굴이 45px 이라 얕게 당깁니다 */
+/* 카드(132×176)는 얼굴이 45px 이라 얕게 당깁니다 */
 .charart.card img,
 .charart.card video {
-  transform-origin: 50% 37%;
-  transform: scale(1.55);
+  transform-origin: 50% 34%;
+  transform: scale(1.3);
 }
 
 
@@ -3236,3 +3250,27 @@ body.has-rail .beatskip-hint { left: calc(50% + 116px); }
 
 /* 일주 그림 — 비유와 같은 자리에 섭니다 (report.rarity) */
 .fig.gz b { color: var(--c); }
+
+/* ── 주장 — 고민이 정하는 첫 줄 ──────────────────────────
+ *
+ * ★ 0단에서 **고민이 통째로 빠져 있었습니다** (2026-09-04).
+ *   칼(빈 자리를 세는 세 박자)이 서면 고민으로 갈리는 줄을 안
+ *   쓰게 되어 있었는데, 재 보니 표본 400명 **전원**에게 칼이
+ *   섭니다. 그러니 그 서른 줄은 한 사람에게도 안 나갔습니다.
+ *
+ *   손님이 여섯 칸 중 「일」을 고르든 「사랑」을 고르든 0단이
+ *   글자 그대로 같았습니다. 손님이 짚었습니다 — "잡아 줄 틀이
+ *   없다, 다 똑같아."
+ *
+ * ★ 칼보다 **앞**에 서고, 칼보다 **작게** 섭니다.
+ *   주장이 근거를 이기면 안 됩니다. 이 집은 근거 대는 집이오.
+ */
+.stab p.claim {
+  font-size: var(--fs-6);
+  line-height: 1.7;
+  color: var(--c);
+  margin-bottom: 9px;
+  padding-bottom: 9px;
+  border-bottom: 1px dashed var(--line2);
+}
+@media (max-width: 480px) { .stab p.claim { font-size: var(--fs-5); } }

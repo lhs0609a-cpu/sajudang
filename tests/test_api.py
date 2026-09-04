@@ -613,21 +613,64 @@ def _cut_ids(client, chart_id, lens_id, tier, axis4=None, session=None):
 
 def test_the_axis_slot_is_never_empty(client, chart_id):
     """
-    ★ 이 컷이 넉 자를 안 적은 사람에게는 **아예 안 생겼습니다.**
+    ★ 넉 자 컷이 넉 자를 안 적은 사람에게는 **아예 안 생겼습니다.**
       재보니 45.1%입니다. 그것도 15,900원 이상에서만 열리는 자리라,
-      **값을 치른 사람이 잃고** 있었습니다. 훅 2.5단은 대체 단을 넣어
-      메웠는데 리포트는 그대로였습니다.
+      **값을 치른 사람이 잃고** 있었습니다.
+
+    ★ 그때 메운 방식이 이번에 또 걸렸습니다 (2026-09-04).
+
+      넉 자 컷과 **한 자리를 다투게** 해 두었더니, 이번에는 반대로
+      넉 자를 적은 사람에게서 **고민 컷이 사라졌습니다.** 재 보니
+      유료 본문 스물두 컷 중 고민으로 갈리는 컷이 하나였고, 「일」을
+      고르든 「사랑」을 고르든 글이 99.2% 같았습니다. 손님이
+      짚었습니다 — "잡아 줄 틀이 없다, 다 똑같아."
+
+      둘은 다른 것을 봅니다. 자리를 나눴습니다 —
+        axis     그대가 적은 넉 자와 여덟 글자가 어긋난 데
+        concern  그대가 물으러 온 자리와 글자가 센 자리
     """
     _mark_paid("t-axis", "all")
-    with_a4, _ = _cut_ids(client, chart_id, "pungun", "all", "INFP", "t-axis")
+    with_a4, rep_a = _cut_ids(client, chart_id, "pungun", "all", "INFP", "t-axis")
     without, rep = _cut_ids(client, chart_id, "pungun", "all", None, "t-axis")
 
     assert "axis" in with_a4, "넉 자를 적었는데 대조 컷이 없습니다"
-    assert "axis" in without, "넉 자가 없다고 그 자리가 통째로 비었습니다"
+    # ★ 고민 컷은 **둘 다** 있어야 합니다. 어느 쪽도 빈 자리가 없습니다.
+    assert "concern" in without, "넉 자가 없다고 그 자리가 통째로 비었습니다"
+    assert "concern" in with_a4, "넉 자를 적었다고 고민이 사라졌습니다"
 
-    cut = next(c for c in rep["cuts"] if c["id"] == "axis")
+    cut = next(c for c in rep["cuts"] if c["id"] == "concern")
     assert cut["statement_id"].startswith("rcax:"), cut["statement_id"]
-    assert cut["source"], "대체 컷에도 근거가 붙어야 합니다"
+    assert cut["source"], "고민 컷에도 근거가 붙어야 합니다"
+
+
+def test_the_concern_actually_changes_the_report(client, chart_id):
+    """
+    ★ 손님이 짚은 것 (2026-09-04)
+
+      "지금 일이든 사랑 선택하든 뭐 잡아 줄 틀이 없다, 다 똑같아.
+       이게 맞아?"
+
+      맞지 않았습니다. 화면은 a5 에서 「고른 하나가 뒤의 5마디를 다
+      바꾸오」 「고르신 것이 여덟 글자의 어느 자리를 볼지 정하오」 라
+      적어 두었는데, 실물은 —
+
+        훅 5단     다섯 단 중 **둘**만 갈림
+        유료 본문  스물두 컷 중 **하나**만 갈림 (99.2% 같은 글)
+
+      이 검사가 그 약속을 지킵니다. 고른 것이 글을 안 바꾸면 그건
+      고르게 한 것이 아니라 고르는 시늉을 시킨 것입니다.
+    """
+    _mark_paid("t-con", "all")
+    seen = {}
+    for c in ("work", "love", "money"):
+        body = {"chart_id": chart_id, "lens_id": "pungun",
+                "tier": "all", "concern": c, "session_id": "t-con"}
+        r = client.post("/v1/report", json=body)
+        assert r.status_code == 200, r.text
+        cuts = {x["id"]: x["html"] for x in r.json()["cuts"]}
+        assert "concern" in cuts, "고민 컷이 없소"
+        seen[c] = cuts["concern"]
+    assert len(set(seen.values())) == 3, "고민을 셋 다르게 골랐는데 같은 글이오"
 
 
 def test_the_free_character_never_sells(client, chart_id):
