@@ -71,6 +71,35 @@ ECHO = re.compile(r"\bs\.(name|year|month|day|hour|minute|city|sex|axis4"
                   r"|concern)\b|askWord|clockWord")
 
 
+# ★ 셈할 재료가 없는 자리도 있습니다 (2026-09-04).
+#
+#   a1·a2·a5 는 아직 생년월일을 안 받았으니 **돌려줄 것이 없습니다.**
+#   그렇다고 그냥 받기만 해도 되는 건 아닙니다. 돌려줄 수 없으면
+#   **구체적인 고리**라도 열어야 합니다 —
+#
+#       고리 아님   「무언가 알게 되오」   (막연함 · 안 궁금함)
+#       고리 맞음   「셋만 적으면 여섯이 서오」 (수 · 가깝고 · 다음 자리)
+#
+#   정보 격차 이론(Loewenstein 1994)이 말하는 조건 그대로입니다 —
+#   빈칸이 **구체적**이고 **가까이 있다고 믿을 때** 호기심이 섭니다.
+#
+#   그래서 「받기만 하오」 는 돌려줌도 고리도 **둘 다 없을 때**만
+#   붙입니다. 그리고 아무것도 안 받는 화면(a1 대문)은 애초에 빚이
+#   없으니 나무라지 않습니다.
+LOOP_NUM = re.compile(r"[0-9]|하나|둘|셋|넷|다섯|여섯|일곱|여덟|아홉|열")
+LOOP_NEXT = re.compile(r"다음|이제|적으면|세우면|나오오|서오|드리오|하겠소"
+                       r"|여쭙|보겠소")
+
+
+def loops(text: str) -> int:
+    """이 화면이 연 **구체적인 고리** — 수가 있고 다음을 가리키는 줄."""
+    n = 0
+    for line in re.split(r"(?<=[.!?…])\s+", text):
+        if LOOP_NUM.search(line) and LOOP_NEXT.search(line):
+            n += 1
+    return n
+
+
 def gives(chunk: str) -> list:
     """이 화면이 **셈해서** 돌려주는 자리들."""
     out = []
@@ -141,7 +170,8 @@ def main() -> int:
     print("  내주기와 돌려받기 — 도입부에서 얼마나 오래 주기만 하는가")
     print("=" * 76)
     print()
-    print("     %-5s %-11s %5s %6s %6s" % ("화면", "이름", "내줌", "돌려줌", "빚"))
+    print("     %-5s %-11s %5s %6s %5s %6s"
+          % ("화면", "이름", "내줌", "돌려줌", "고리", "빚"))
 
     debt, first_give, dry, worst_dry = 0, None, 0, 0
     rows = []
@@ -152,16 +182,22 @@ def main() -> int:
         # 셈해서 돌려주는 자리만 셉니다 — 되비추기는 안 셉니다
         got = gives(chunk)
         back = len(got)
+        loop = loops(t)
         debt += give - min(back, give)
         if back and first_give is None:
             first_give = sid
-        dry = 0 if back else dry + 1
+        # 돌려줌도 고리도 없을 때만 마른 것입니다. 받는 것이 없는
+        # 화면(대문)은 애초에 빚이 없으니 세지 않습니다.
+        wet = back or loop or give == 0
+        dry = 0 if wet else dry + 1
         worst_dry = max(worst_dry, dry)
-        rows.append((sid, S.KO.get(sid, "?"), give, back, debt, got))
+        rows.append((sid, S.KO.get(sid, "?"), give, back, loop, debt, got))
 
-    for sid, ko, give, back, d, got in rows:
-        mark = "  ← 주기만 하오" if not back else ""
-        print("     %-5s %-11s %5d %6d %6d%s" % (sid, ko, give, back, d, mark))
+    for sid, ko, give, back, loop, d, got in rows:
+        bad = give and not back and not loop
+        mark = "  ← 받기만 하오" if bad else ""
+        print("     %-5s %-11s %5d %6d %5d %6d%s"
+              % (sid, ko, give, back, loop, d, mark))
         if show and got:
             print("            %s" % " · ".join(sorted(set(got))[:5]))
 

@@ -458,13 +458,31 @@ def count_blade(f) -> str:
     if not empty:
         return ""
     n = len([k for k in order if f.ten_gods.get(k, 0) == 0])
-    lead = ("여덟 글자에 <b>%s</b>이 없소." % empty[0] if n == 1 else
-            "여덟 글자에 <b>%s</b>도 <b>%s</b>도 없소."
-            % (empty[0], empty[1]))
+    # ★ 일간을 **첫 줄 안에** 넣습니다.
+    #
+    #   십신은 일간을 기준으로 셉니다. 그러니 「庚 일간에 정관이 없소」
+    #   가 「여덟 글자에 정관이 없소」 보다 참에 가깝고, 동시에 더
+    #   그 사람의 말입니다.
+    #
+    #   줄을 하나 더 붙이지 않는 것이 중요합니다. 세 박자가 규칙이고,
+    #   넷째 줄은 앞의 셋을 덮습니다. 그래서 **첫 줄 안에** 넣습니다.
+    #   (tests/test_wiring.py — 일간이 다르면 0단도 달라야 합니다)
+    lead = ("<b>%s</b> 일간에 <b>%s</b>이 없소." % (f.day_gan, empty[0])
+            if n == 1 else
+            "<b>%s</b> 일간에 <b>%s</b>도 <b>%s</b>도 없소."
+            % (f.day_gan, empty[0], empty[1]))
     more = ("" if n <= 2 else
             " 열 자리 가운데 <b>%d 자리</b>가 비었소." % n)
+    # ★ 세 박자로 냅니다 — 뼈 때리고, 알아주고, 풀어준다.
+    #
+    #   찌르고 끝내면 손님은 찔린 채로 남습니다. 찔린 사람은 창을 닫지
+    #   값을 치르지 않습니다. 셋째 줄이 **탓을 걷어냅니다** —
+    #   그건 성격이 아니라 자리다.
+    relief = bank().get("RELIEF", {}).get(empty[0], "")
     return ('<p class="blade">%s%s <span class="cnt">세어 보시오.</span></p>'
-            '<p class="blademean">%s</p>' % (lead, more, seats[empty[0]]))
+            '<p class="blademean">%s</p>'
+            '<p class="bladerelief">%s</p>'
+            % (lead, more, seats[empty[0]], relief))
 
 
 def build_hook(f, concern: str, axis4: Optional[str] = None,
@@ -503,6 +521,7 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     #   일간이 다른 사람이 같은 말을 듣고 있었습니다.
     gan_line = _pick("STAB_GAN", f.day_gan)
     head = ('<p class="hi">%s.</p>' % esc_name) if esc_name else ""
+    blade = count_blade(f)
     segs.append(_seg(
         stage="0", label="",
         # 근거를 답니다. 다만 찌르기 **아래**에 답니다 — 위에 놓으면
@@ -513,12 +532,20 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
             % (f.day_gan, josa(element_word(weak), "이", "가"),
                amount_word(f.elements[weak]), top),
             top, "십신"),
-        # ★ 칼이 **맨 앞**입니다. 비유는 그 뒤에 옵니다.
-        #   전에는 「그대는 벼려진 쇠요」 가 먼저 오고 수는 문단 속에
-        #   묻혔습니다. 그러면 손님은 시를 읽고, 세어 보지 않습니다.
-        body='<div class="stab">%s%s<p>%s</p><p class="sub">%s</p>'
-             '<p class="gan">%s</p></div>'
-             % (head, count_blade(f), stab, stab2, gan_line),
+        # ★ 0단은 **세 줄**입니다 — 뼈 때리고, 알아주고, 풀어준다.
+        #
+        #   칼이 선 뒤에도 다섯 줄이 더 붙어 있었습니다. 두 번째 팩폭
+        #   (「계산을 다 끝냈는데 시작을 안 하고 있소」)과 세 번째
+        #   (「그러면서 말은 못 했을 것이오」), 그리고 비유 한 줄.
+        #   팩폭을 셋 겹쳐 놓으면 셋 다 죽습니다 — 손님은 첫 줄을 읽고
+        #   놀랄 겨를에 넷째 줄을 읽습니다.
+        #
+        #   칼이 서면 그 셋으로 끝냅니다. 칼이 없는 명식(열 자리가 다
+        #   찬 사람)에서만 예전 세 줄로 갑니다.
+        body=('<div class="stab">%s%s</div>' % (head, blade)) if blade else
+             ('<div class="stab">%s<p>%s</p><p class="sub">%s</p>'
+              '<p class="gan">%s</p></div>'
+              % (head, stab, stab2, gan_line)),
         question="…맞소?",
         yes="그럴 줄 알았소. 어떻게 아느냐 하면—",
         no="아니라 하시니 그건 접겠소. 헌데 이건 어떻소.",
@@ -606,12 +633,24 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
                 josa(weak, "이", "가"),
                 amount_word(f.elements[weak]), sea)),
             flow, "십신"),
-        body=('<div class="scene">%s<p class="sea">%s</p>'
-              '<p>%s는 늘 이 순서요.</p><div class="seq">%s</div>%s</div>'
-              % (turn_line, sea_line, esc_you,
+        # ★ 2단도 세 박자입니다 — 순서(팩폭) · 겪은 일(공감) · 풀어줌(위로).
+        #
+        #   ① 바넘으로 열지 않습니다. 「겨울에 난 사람은 안으로 여미는 데
+        #      힘이 실리오」 는 그 계절에 난 모두에게 맞는 말이라 아무것도
+        #      금지하지 않습니다. 계절 줄은 **순서 뒤로** 물립니다 —
+        #      거기서는 설명이지 첫인상이 아닙니다.
+        #
+        #   ② 찌르고 끝내지 않습니다. 세 줄이 다 찌르는 말이었습니다.
+        #      마지막에 탓을 걷어내는 한 줄을 답니다.
+        body=('<div class="scene">%s'
+              '<p>%s는 늘 이 순서요.</p><div class="seq">%s</div>%s'
+              '<p class="sea">%s</p><p class="relief">%s</p></div>'
+              % (turn_line, esc_you,
                  "".join('<div><span>%s</span></div>' % s for s in seq),
                  "".join('<p class="%s">%s</p>' % ("hit" if i == 1 else "", l)
-                         for i, l in enumerate(lines)))),
+                         for i, l in enumerate(lines)),
+                 sea_line,
+                 bank().get("SEQ_RELIEF", {}).get(flow, ""))),
         question="…이 순서가 맞소?",
         yes="그럴 줄 알았소. 그럼 이름을 붙여드리리다.",
         no="순서가 틀렸다 하시니, 이름을 붙여 보고 다시 말하시오.",
