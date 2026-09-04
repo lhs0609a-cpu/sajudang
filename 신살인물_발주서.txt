@@ -1,0 +1,480 @@
+==========================================================================
+  신살 인물 발주서 — 13명
+==========================================================================
+
+  ★ 그림 한 장이면 되오. 영상은 안 쓰오 —
+    글 옆에 서 있는 초상이라 여럿이 움직이면 글을 못 읽소.
+
+  ① 제미나이에 아래 ② 프롬프트를 그대로 넣으시오 (3:4 세로)
+  ② 받은 파일을 이 자리에 넣으시오
+       apps/web/public/sinsal/{이름}/figure.png
+     또는 도구로 (✦ 를 지우고 규격까지 맞춰 주오)
+       .\dev.ps1 face --sinsal {이름} "C:\...\받은파일.png"
+
+  차례
+     1  cheoneul   흰 소매의 귀인
+     2  taegeuk    태극을 인 이
+     3  munchang   붓을 든 서생
+     4  geumyeo    가마를 끄는 이
+     5  amrok      그림자 속의 손
+     6  yangin     칼을 쥔 무인
+     7  baekho     흰 범
+     8  wonjin     등을 돌린 그림자
+     9  dohwa      꽃그늘의 사람
+    10  yeokma     말 위의 나그네
+    11  hwagae     일산 아래 홀로
+    12  gwaegang   북두를 인 장수
+    13  gongmang   빈 자리
+
+
+==========================================================================
+  01 / 13   흰 소매의 귀인
+==========================================================================
+  이름   cheoneul
+  폴더   apps/web/public/sinsal/cheoneul/figure.png
+  누구   천을귀인 天乙貴人
+  뜻     흉을 덜어주는 자리
+  규격   3:4 세로 · 그림 한 장 · 영상 안 씀
+
+--------------------------------------------------------------------------
+  프롬프트 · 제미나이
+--------------------------------------------------------------------------
+
+Korean romance-fantasy webtoon illustration style. Refined delicate
+lineart with varied line weight. Luminous, porcelain skin rendering
+with soft blush. Large expressive eyes with detailed iris highlights
+and long lashes. Elegant sharp jawline. Glossy flowing hair rendered
+with individual strand detail and light reflection. Ornate hanbok
+with layered fabric, fine embroidery and trailing silk. Soft rim
+lighting from behind plus gentle key light. Beautiful, idealized,
+graceful. Painted digital finish with subtle glow.
+
+A serene guardian woman in flowing white hanbok, wide sleeves spread
+forward as if shielding someone unseen. Warm gold rim light.
+
+Bust-up from the chest up, centered, subject occupying about 70% of
+frame height. FRONT-FACING — squared to the camera, both eyes fully
+visible and level, gaze straight at the viewer. No head turn, no
+profile, no three-quarter angle.
+
+Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
+no cast shadow, no vignette. No text, letters, numbers, logos or
+watermarks. Aspect ratio 3:4. High detail.
+
+
+==========================================================================
+  02 / 13   태극을 인 이
+==========================================================================
+  이름   taegeuk
+  폴더   apps/web/public/sinsal/taegeuk/figure.png
+  누구   태극귀인 太極貴人
+  뜻     시작과 끝을 관장하는 자리
+  규격   3:4 세로 · 그림 한 장 · 영상 안 씀
+
+--------------------------------------------------------------------------
+  프롬프트 · 제미나이
+--------------------------------------------------------------------------
+
+Korean romance-fantasy webtoon illustration style. Refined delicate
+lineart with varied line weight. Luminous, porcelain skin rendering
+with soft blush. Large expressive eyes with detailed iris highlights
+and long lashes. Elegant sharp jawline. Glossy flowing hair rendered
+with individual strand detail and light reflection. Ornate hanbok
+with layered fabric, fine embroidery and trailing silk. Soft rim
+lighting from behind plus gentle key light. Beautiful, idealized,
+graceful. Painted digital finish with subtle glow.
+
+A calm immortal holding a luminous circular emblem, half light half
+shadow. Teal rim light.
+
+Bust-up from the chest up, centered, subject occupying about 70% of
+frame height. FRONT-FACING — squared to the camera, both eyes fully
+visible and level, gaze straight at the viewer. No head turn, no
+profile, no three-quarter angle.
+
+Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
+no cast shadow, no vignette. No text, letters, numbers, logos or
+watermarks. Aspect ratio 3:4. High detail.
+
+
+==========================================================================
+  03 / 13   붓을 든 서생
+==========================================================================
+  이름   munchang
+  폴더   apps/web/public/sinsal/munchang/figure.png
+  누구   문창귀인 文昌貴人
+  뜻     글과 말이 서는 자리
+  규격   3:4 세로 · 그림 한 장 · 영상 안 씀
+
+--------------------------------------------------------------------------
+  프롬프트 · 제미나이
+--------------------------------------------------------------------------
+
+Korean romance-fantasy webtoon illustration style. Refined delicate
+lineart with varied line weight. Luminous, porcelain skin rendering
+with soft blush. Large expressive eyes with detailed iris highlights
+and long lashes. Elegant sharp jawline. Glossy flowing hair rendered
+with individual strand detail and light reflection. Ornate hanbok
+with layered fabric, fine embroidery and trailing silk. Soft rim
+lighting from behind plus gentle key light. Beautiful, idealized,
+graceful. Painted digital finish with subtle glow.
+
+A refined young scholar holding a writing brush upright, scrolls at his
+side. Lavender rim light.
+
+Bust-up from the chest up, centered, subject occupying about 70% of
+frame height. FRONT-FACING — squared to the camera, both eyes fully
+visible and level, gaze straight at the viewer. No head turn, no
+profile, no three-quarter angle.
+
+Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
+no cast shadow, no vignette. No text, letters, numbers, logos or
+watermarks. Aspect ratio 3:4. High detail.
+
+
+==========================================================================
+  04 / 13   가마를 끄는 이
+==========================================================================
+  이름   geumyeo
+  폴더   apps/web/public/sinsal/geumyeo/figure.png
+  누구   금여 金輿
+  뜻     몸이 편한 자리
+  규격   3:4 세로 · 그림 한 장 · 영상 안 씀
+
+--------------------------------------------------------------------------
+  프롬프트 · 제미나이
+--------------------------------------------------------------------------
+
+Korean romance-fantasy webtoon illustration style. Refined delicate
+lineart with varied line weight. Luminous, porcelain skin rendering
+with soft blush. Large expressive eyes with detailed iris highlights
+and long lashes. Elegant sharp jawline. Glossy flowing hair rendered
+with individual strand detail and light reflection. Ornate hanbok
+with layered fabric, fine embroidery and trailing silk. Soft rim
+lighting from behind plus gentle key light. Beautiful, idealized,
+graceful. Painted digital finish with subtle glow.
+
+An elegant attendant beside an ornate palanquin, one hand resting on its
+pole. Rose rim light.
+
+Bust-up from the chest up, centered, subject occupying about 70% of
+frame height. FRONT-FACING — squared to the camera, both eyes fully
+visible and level, gaze straight at the viewer. No head turn, no
+profile, no three-quarter angle.
+
+Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
+no cast shadow, no vignette. No text, letters, numbers, logos or
+watermarks. Aspect ratio 3:4. High detail.
+
+
+==========================================================================
+  05 / 13   그림자 속의 손
+==========================================================================
+  이름   amrok
+  폴더   apps/web/public/sinsal/amrok/figure.png
+  누구   암록 暗祿
+  뜻     드러나지 않는 도움
+  규격   3:4 세로 · 그림 한 장 · 영상 안 씀
+
+--------------------------------------------------------------------------
+  프롬프트 · 제미나이
+--------------------------------------------------------------------------
+
+Korean romance-fantasy webtoon illustration style. Refined delicate
+lineart with varied line weight. Luminous, porcelain skin rendering
+with soft blush. Large expressive eyes with detailed iris highlights
+and long lashes. Elegant sharp jawline. Glossy flowing hair rendered
+with individual strand detail and light reflection. Ornate hanbok
+with layered fabric, fine embroidery and trailing silk. Soft rim
+lighting from behind plus gentle key light. Beautiful, idealized,
+graceful. Painted digital finish with subtle glow.
+
+A half-hidden figure in shadow, one hand extended forward from behind.
+Face obscured. Slate rim light.
+
+Bust-up from the chest up, centered, subject occupying about 70% of
+frame height. FRONT-FACING — squared to the camera, both eyes fully
+visible and level, gaze straight at the viewer. No head turn, no
+profile, no three-quarter angle.
+
+Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
+no cast shadow, no vignette. No text, letters, numbers, logos or
+watermarks. Aspect ratio 3:4. High detail.
+
+
+==========================================================================
+  06 / 13   칼을 쥔 무인
+==========================================================================
+  이름   yangin
+  폴더   apps/web/public/sinsal/yangin/figure.png
+  누구   양인 羊刃
+  뜻     날이 서는 자리
+  규격   3:4 세로 · 그림 한 장 · 영상 안 씀
+
+--------------------------------------------------------------------------
+  프롬프트 · 제미나이
+--------------------------------------------------------------------------
+
+Korean romance-fantasy webtoon illustration style. Refined delicate
+lineart with varied line weight. Luminous, porcelain skin rendering
+with soft blush. Large expressive eyes with detailed iris highlights
+and long lashes. Elegant sharp jawline. Glossy flowing hair rendered
+with individual strand detail and light reflection. Ornate hanbok
+with layered fabric, fine embroidery and trailing silk. Soft rim
+lighting from behind plus gentle key light. Beautiful, idealized,
+graceful. Painted digital finish with subtle glow.
+
+A poised warrior resting a slender blade point-down, not raised.
+Crimson rim light.
+
+Bust-up from the chest up, centered, subject occupying about 70% of
+frame height. FRONT-FACING — squared to the camera, both eyes fully
+visible and level, gaze straight at the viewer. No head turn, no
+profile, no three-quarter angle.
+
+Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
+no cast shadow, no vignette. No text, letters, numbers, logos or
+watermarks. Aspect ratio 3:4. High detail.
+
+
+==========================================================================
+  07 / 13   흰 범
+==========================================================================
+  이름   baekho
+  폴더   apps/web/public/sinsal/baekho/figure.png
+  누구   백호대살 白虎大殺
+  뜻     피를 보는 자리
+  규격   3:4 세로 · 그림 한 장 · 영상 안 씀
+
+--------------------------------------------------------------------------
+  프롬프트 · 제미나이
+--------------------------------------------------------------------------
+
+Korean romance-fantasy webtoon illustration style. Refined delicate
+lineart with varied line weight. Luminous, porcelain skin rendering
+with soft blush. Large expressive eyes with detailed iris highlights
+and long lashes. Elegant sharp jawline. Glossy flowing hair rendered
+with individual strand detail and light reflection. Ornate hanbok
+with layered fabric, fine embroidery and trailing silk. Soft rim
+lighting from behind plus gentle key light. Beautiful, idealized,
+graceful. Painted digital finish with subtle glow.
+
+A white tiger seated in profile, calm and watchful, NOT snarling.
+No blood, no wounds. Pale silver rim light.
+
+Bust-up from the chest up, centered, subject occupying about 70% of
+frame height. Keep the pose described above — do not turn the subject
+to face the camera.
+
+Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
+no cast shadow, no vignette. No text, letters, numbers, logos or
+watermarks. Aspect ratio 3:4. High detail.
+
+
+==========================================================================
+  08 / 13   등을 돌린 그림자
+==========================================================================
+  이름   wonjin
+  폴더   apps/web/public/sinsal/wonjin/figure.png
+  누구   원진 怨嗔
+  뜻     까닭 없이 껄끄러운 자리
+  규격   3:4 세로 · 그림 한 장 · 영상 안 씀
+
+--------------------------------------------------------------------------
+  프롬프트 · 제미나이
+--------------------------------------------------------------------------
+
+Korean romance-fantasy webtoon illustration style. Refined delicate
+lineart with varied line weight. Luminous, porcelain skin rendering
+with soft blush. Large expressive eyes with detailed iris highlights
+and long lashes. Elegant sharp jawline. Glossy flowing hair rendered
+with individual strand detail and light reflection. Ornate hanbok
+with layered fabric, fine embroidery and trailing silk. Soft rim
+lighting from behind plus gentle key light. Beautiful, idealized,
+graceful. Painted digital finish with subtle glow.
+
+Two figures back to back, slightly misaligned, neither facing the
+viewer. Muted violet-grey.
+
+Bust-up from the chest up, centered, subject occupying about 70% of
+frame height. Keep the pose described above — do not turn the subject
+to face the camera.
+
+Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
+no cast shadow, no vignette. No text, letters, numbers, logos or
+watermarks. Aspect ratio 3:4. High detail.
+
+
+==========================================================================
+  09 / 13   꽃그늘의 사람
+==========================================================================
+  이름   dohwa
+  폴더   apps/web/public/sinsal/dohwa/figure.png
+  누구   도화 桃花
+  뜻     사람이 붙는 자리
+  규격   3:4 세로 · 그림 한 장 · 영상 안 씀
+
+--------------------------------------------------------------------------
+  프롬프트 · 제미나이
+--------------------------------------------------------------------------
+
+Korean romance-fantasy webtoon illustration style. Refined delicate
+lineart with varied line weight. Luminous, porcelain skin rendering
+with soft blush. Large expressive eyes with detailed iris highlights
+and long lashes. Elegant sharp jawline. Glossy flowing hair rendered
+with individual strand detail and light reflection. Ornate hanbok
+with layered fabric, fine embroidery and trailing silk. Soft rim
+lighting from behind plus gentle key light. Beautiful, idealized,
+graceful. Painted digital finish with subtle glow.
+
+A striking person standing under falling blossoms, gaze drawing the eye.
+Fully clothed in layered hanbok, dignified posture.
+
+Bust-up from the chest up, centered, subject occupying about 70% of
+frame height. FRONT-FACING — squared to the camera, both eyes fully
+visible and level, gaze straight at the viewer. No head turn, no
+profile, no three-quarter angle.
+
+Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
+no cast shadow, no vignette. No text, letters, numbers, logos or
+watermarks. Aspect ratio 3:4. High detail.
+
+
+==========================================================================
+  10 / 13   말 위의 나그네
+==========================================================================
+  이름   yeokma
+  폴더   apps/web/public/sinsal/yeokma/figure.png
+  누구   역마 驛馬
+  뜻     움직이는 자리
+  규격   3:4 세로 · 그림 한 장 · 영상 안 씀
+
+--------------------------------------------------------------------------
+  프롬프트 · 제미나이
+--------------------------------------------------------------------------
+
+Korean romance-fantasy webtoon illustration style. Refined delicate
+lineart with varied line weight. Luminous, porcelain skin rendering
+with soft blush. Large expressive eyes with detailed iris highlights
+and long lashes. Elegant sharp jawline. Glossy flowing hair rendered
+with individual strand detail and light reflection. Ornate hanbok
+with layered fabric, fine embroidery and trailing silk. Soft rim
+lighting from behind plus gentle key light. Beautiful, idealized,
+graceful. Painted digital finish with subtle glow.
+
+A traveler on horseback in mid-stride, dust trailing behind.
+Warm sand rim light.
+
+Bust-up from the chest up, centered, subject occupying about 70% of
+frame height. FRONT-FACING — squared to the camera, both eyes fully
+visible and level, gaze straight at the viewer. No head turn, no
+profile, no three-quarter angle.
+
+Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
+no cast shadow, no vignette. No text, letters, numbers, logos or
+watermarks. Aspect ratio 3:4. High detail.
+
+
+==========================================================================
+  11 / 13   일산 아래 홀로
+==========================================================================
+  이름   hwagae
+  폴더   apps/web/public/sinsal/hwagae/figure.png
+  누구   화개 華蓋
+  뜻     혼자 있는 자리
+  규격   3:4 세로 · 그림 한 장 · 영상 안 씀
+
+--------------------------------------------------------------------------
+  프롬프트 · 제미나이
+--------------------------------------------------------------------------
+
+Korean romance-fantasy webtoon illustration style. Refined delicate
+lineart with varied line weight. Luminous, porcelain skin rendering
+with soft blush. Large expressive eyes with detailed iris highlights
+and long lashes. Elegant sharp jawline. Glossy flowing hair rendered
+with individual strand detail and light reflection. Ornate hanbok
+with layered fabric, fine embroidery and trailing silk. Soft rim
+lighting from behind plus gentle key light. Beautiful, idealized,
+graceful. Painted digital finish with subtle glow.
+
+A solitary figure beneath a floral canopy, turned slightly away.
+Lavender rim light.
+
+Bust-up from the chest up, centered, subject occupying about 70% of
+frame height. Keep the pose described above — do not turn the subject
+to face the camera.
+
+Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
+no cast shadow, no vignette. No text, letters, numbers, logos or
+watermarks. Aspect ratio 3:4. High detail.
+
+
+==========================================================================
+  12 / 13   북두를 인 장수
+==========================================================================
+  이름   gwaegang
+  폴더   apps/web/public/sinsal/gwaegang/figure.png
+  누구   괴강 魁罡
+  뜻     꺾이지 않는 일주
+  규격   3:4 세로 · 그림 한 장 · 영상 안 씀
+
+--------------------------------------------------------------------------
+  프롬프트 · 제미나이
+--------------------------------------------------------------------------
+
+Korean romance-fantasy webtoon illustration style. Refined delicate
+lineart with varied line weight. Luminous, porcelain skin rendering
+with soft blush. Large expressive eyes with detailed iris highlights
+and long lashes. Elegant sharp jawline. Glossy flowing hair rendered
+with individual strand detail and light reflection. Ornate hanbok
+with layered fabric, fine embroidery and trailing silk. Soft rim
+lighting from behind plus gentle key light. Beautiful, idealized,
+graceful. Painted digital finish with subtle glow.
+
+A commander with the Big Dipper glowing above the head, steel-grey
+armor. Cool rim light.
+
+Bust-up from the chest up, centered, subject occupying about 70% of
+frame height. FRONT-FACING — squared to the camera, both eyes fully
+visible and level, gaze straight at the viewer. No head turn, no
+profile, no three-quarter angle.
+
+Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
+no cast shadow, no vignette. No text, letters, numbers, logos or
+watermarks. Aspect ratio 3:4. High detail.
+
+
+==========================================================================
+  13 / 13   빈 자리
+==========================================================================
+  이름   gongmang
+  폴더   apps/web/public/sinsal/gongmang/figure.png
+  누구   공망 空亡
+  뜻     비어 있는 자리
+  규격   3:4 세로 · 그림 한 장 · 영상 안 씀
+
+--------------------------------------------------------------------------
+  프롬프트 · 제미나이
+--------------------------------------------------------------------------
+
+Korean romance-fantasy webtoon illustration style. Refined delicate
+lineart with varied line weight. Luminous, porcelain skin rendering
+with soft blush. Large expressive eyes with detailed iris highlights
+and long lashes. Elegant sharp jawline. Glossy flowing hair rendered
+with individual strand detail and light reflection. Ornate hanbok
+with layered fabric, fine embroidery and trailing silk. Soft rim
+lighting from behind plus gentle key light. Beautiful, idealized,
+graceful. Painted digital finish with subtle glow.
+
+An empty seat. No person. A dashed outline where someone would be.
+Nearly monochrome, deep indigo.
+
+Bust-up from the chest up, centered, subject occupying about 70% of
+frame height. FRONT-FACING — squared to the camera, both eyes fully
+visible and level, gaze straight at the viewer. No head turn, no
+profile, no three-quarter angle.
+
+Flat solid pure white (#FFFFFF) background — no gradient, no scenery,
+no cast shadow, no vignette. No text, letters, numbers, logos or
+watermarks. Aspect ratio 3:4. High detail.
+

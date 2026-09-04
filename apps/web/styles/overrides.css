@@ -374,6 +374,15 @@ body:has(.gatehero) .stage { padding-bottom: 0; }
    ★ 이름과 한자만 있고 뜻이 없었습니다 (2026-09-03). 손님은
      「태극귀인 太極貴人 길신」 을 읽고 아무것도 알지 못한 채
      본문으로 들어갔습니다. 뜻 한 줄을 이름 바로 밑에 답니다. */
+/* ★ 「그대에게 붙어 있소」 — 이건 사전이 아니라 그대의 여덟 글자요.
+   어디에서 나왔는지(기둥·글자)까지 대야 근거 대는 집입니다. */
+.ss .ssmine {
+  margin: 6px 0 8px;
+  font-size: var(--fs-1);
+  color: var(--paper);
+}
+.ss .ssmine b { color: var(--c); }
+
 .ss .one {
   font-size: var(--fs-1);
   color: var(--gold);

@@ -506,6 +506,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     T = _sinsal_text()
     if f.sinsal:
         rows = []
+        said_palace: set = set()
         for sv in f.sinsal:
             m = T["meaning"].get(sv["key"], {})
             # ★ 이름과 한자만 있고 **뜻이 없었습니다** (2026-09-03).
@@ -514,23 +515,50 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
             #   본문이 왔습니다. 손님은 「귀인」 도 「길신」 도 「월주」 도
             #   모르는 채 한자 넉 자를 봅니다. `one` 이라는 한 줄 뜻이
             #   `sinsal.json` 에 **이미 들어 있는데 아무도 안 썼습니다.**
+            # ★ 「그대에게 붙어 있소」 를 먼저 말합니다 (2026-09-04).
+            #
+            #   카드가 이름·한자·딱지를 늘어놓고 곧바로 뜻풀이로
+            #   들어갔습니다. 손님이 말했습니다 — "당신에게 태극귀인이
+            #   붙어있오, 이 태극귀인은 뭔가하면 이런식으로 나한테
+            #   붙어있는게 뭔지 알려줘야지. 그냥 뭉뚱그려서 하면 어케."
+            #
+            #   맞는 말입니다. 이건 사전이 아니라 **그대의 여덟 글자에서
+            #   나온 것**입니다. 어디에서 나왔는지(기둥·글자)까지 대야
+            #   근거 대는 집입니다.
+            at = " · ".join(sv["at"])
+            mine_lead = (
+                # ★ 조사는 **이름**을 보고 정합니다.
+                #   `josa("<b>태극귀인</b>", …)` 로 부르면 마지막 글자가
+                #   `>` 라 받침이 없다고 보고 「태극귀인가」 가 됩니다.
+                #   이름으로 먼저 정하고, 그다음에 굵게 감쌉니다.
+                '<p class="ssmine">%s에게 <b>%s</b>%s 붙어 있소 — '
+                '<b>%s</b>의 <b>%s</b>에서 나온 것이오.</p>'
+                % (you, sv["name"], josa(sv["name"], "이", "가")[len(sv["name"]):],
+                   at, sv["target"]))
             one = ('<div class="one">%s</div>' % m["one"]) if m.get("one") else ""
             # ★ 「나한테 어떤 의미인가」 — 궁위가 그 답입니다.
             #   어느 기둥에 들었는지는 적혀 있었는데 그 기둥이 무엇인지는
             #   안 적혀 있었습니다. 년주는 웃대, 월주는 자란 집…
             #   `palace_lead` 도 이미 있었고 년주 하나에만 쓰이고 있었습니다.
+            # ★ 같은 기둥의 풀이를 두 번 하지 않습니다.
+            #
+            #   태극귀인도 문창귀인도 월주에 있으면, 「월주는 부모·형제
+            #   자리이자 자란 집이오…」 가 **글자 그대로 두 번** 나왔습니다.
+            #   두 번째부터는 손님이 읽지 않고, 읽지 않는 글이 쌓이면
+            #   나머지도 안 읽습니다.
             where = next((x for x in sv["at"] if x in T["palace_lead"]), "")
-            mine = ('<p class="mine"><span class="evk">그대에게는</span>%s</p>'
-                    % T["palace_lead"][where]) if where else ""
+            mine = ""
+            if where and where not in said_palace:
+                said_palace.add(where)
+                mine = ('<p class="mine"><span class="evk">그 자리</span>%s</p>'
+                        % T["palace_lead"][where])
             rows.append(
                 '<div class="ss %s"><div class="hd"><b>%s</b>'
                 '<span class="hj">%s</span><span class="tag">%s</span></div>'
-                '%s<div class="at">%s · %s</div>'
-                '<div class="ssfig" data-sinsal="%s"></div>'
+                '%s%s<div class="ssfig" data-sinsal="%s"></div>'
                 '<p>%s</p>%s%s</div>'
                 % ("good" if sv["kind"] == "길신" else "warn",
-                   sv["name"], sv["hanja"], sv["kind"], one,
-                   " · ".join(sv["at"]), sv["target"],
+                   sv["name"], sv["hanja"], sv["kind"], one, mine_lead,
                    # ★ 인물 그림이 들어갈 빈 자리. 화면이 포털로 꽂습니다
                    #   (components/SinsalSlots.tsx). 분석지에는 이미 있는데
                    #   값을 치르고 보는 리포트에만 없었습니다.

@@ -26,6 +26,7 @@
     voice          ★ 말투 감사 — 한 사람 안에서 말투가 갈리는가 (--show)
     say            ★ 말풍선 길이 — 한 번에 쏟는 자리 (--show)
     face <id> <파일>  ★ 초상 한 장 넣기 — ✦ 지우고 규격 맞추고 바탕 빼고
+    figures        ★ 신살 인물 발주서 13명 (--write)
     drama          ★ 연출 점수 — 다음 화가 보고 싶어지는가 (--why)
     flow           전체 플로우 훑기 — 32화면을 실제 브라우저로 열어 확인
     api            API 서버 (http://localhost:8000/docs)
@@ -122,6 +123,7 @@ switch ($Task) {
   "voice"   { Need-Venv; Push-Location $Root; & $Py tools\voice_audit.py @Rest; Pop-Location }
   "say"     { Need-Venv; Push-Location $Root; & $Py tools\say_length.py @Rest; Pop-Location }
   "face"    { Need-Venv; Push-Location $Root; & $Py tools\place_char.py @Rest; Pop-Location }
+  "figures" { Need-Venv; Push-Location $Root; & $Py tools\figure_sheet.py @Rest; Pop-Location }
   "drama"   { Need-Venv; Push-Location $Root; & $Py tools\drama_audit.py @Rest; Pop-Location }
   # 그림을 맡기기 **전에** — 명령어가 그 화면에 맞는가
   "prompts" { Need-Venv; Push-Location $Root; & $Py tools\prompt_audit.py @Rest; Pop-Location }
