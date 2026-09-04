@@ -16,6 +16,8 @@
     fill <파일>     받아적은 기대값을 대조 (--write 로 fixtures 에 써넣음)
     funnel         ★ 퍼널 — 어디서 나가는가 (FUNNEL_KEY 필요)
     admin-pass     주인 자리 아이디·비밀번호 걸기 (해시만 저장)
+    prompts        ★ 명령어 감사 — 그 화면에 맞게 적혀 있는가 (--why)
+    prompt-use     화면별 쓰임 다시 박기 (--write)
     migrate-sqlite 로컬 SQLite 로 마이그레이션 왕복 시험
     screens        화면 연결 그래프 — 고아·막다른·죽은 버튼
     subject        ★ 주어 감사 — 누구 얘긴지 안 적힌 문장 찾기
@@ -121,6 +123,10 @@ switch ($Task) {
   "say"     { Need-Venv; Push-Location $Root; & $Py tools\say_length.py @Rest; Pop-Location }
   "face"    { Need-Venv; Push-Location $Root; & $Py tools\place_char.py @Rest; Pop-Location }
   "drama"   { Need-Venv; Push-Location $Root; & $Py tools\drama_audit.py @Rest; Pop-Location }
+  # 그림을 맡기기 **전에** — 명령어가 그 화면에 맞는가
+  "prompts" { Need-Venv; Push-Location $Root; & $Py tools\prompt_audit.py @Rest; Pop-Location }
+  # 화면을 옮겼으면 쓰임을 다시 박는다
+  "prompt-use" { Need-Venv; Push-Location $Root; & $Py tools\prompt_use.py @Rest; Pop-Location }
   "flow" {
     Need-Venv
     $target = if ($Rest) { $Rest[0] } else { "http://localhost:3000" }

@@ -41,12 +41,37 @@ export interface PromptEntry {
   tint: boolean;
   still: boolean;
   note?: string | null;
+  /*
+   * ★ 이 그림이 **그 화면에서 어떻게 걸리는가** (2026-09-04).
+   *
+   *   원본은 전부 9:16 세로인데 인라인 장면은 4:3 상자로 잘라 씁니다 —
+   *   세로의 42%만 보입니다. 그걸 모르고 그리면 주제가 잘려 나갑니다.
+   *   손으로 안 적습니다: `tools/prompt_use.py` 가 코드에서 읽어
+   *   박습니다. 화면을 옮기면 다시 돌리면 됩니다.
+   */
+  use?: string | null;
 }
 
 interface Bundle {
   ANIMBASE: string;
   TINT: string;
   PIPE: string;
+  /*
+   * ★ 공통 촬영 규칙 — 명령어마다 손으로 적지 않습니다.
+   *
+   *   9:16 원본 · 글자와 워터마크 금지 · 세로 가운데 42% 안에 주제 ·
+   *   가장자리 6% 비우기 · 폰에서 396px 로 읽히는 덩어리.
+   *   쉰여덟 장에 손으로 적으면 한 장은 빠집니다. 한 자리에 두고
+   *   **복사되는 글에 붙여서** 냅니다.
+   */
+  SHOT: string;
+  SHOT_TINT: string;
+  SHOT_LOOP: string;
+  SHOT_FILL: string;
+  /* 초상은 **얼굴로 잘라** 씁니다 — 눈높이 37% 를 붙잡고 2.6배.
+     그 말이 없으면 턱이나 이마에 크롭이 떨어집니다. */
+  SHOT_CHAR: string;
+  SHOT_FIGURE: string;
   scenes: Record<string, PromptEntry>;
   figures: Record<string, PromptEntry>;
   /* 스무 사람의 초상. tools/char_sheet.py --json 이 넣습니다. */
@@ -135,6 +160,30 @@ export default function PromptModal({
    */
   const seasonal = kind === "scene" && !!e?.seasonal;
   const image = seasonal ? (e?.seasons?.[season] ?? e?.image) : e?.image;
+  /*
+   * ★ 복사되는 글에 **공통 규칙을 붙여서** 냅니다.
+   *
+   *   전에는 규칙이 어디에도 없었습니다 — 쉰여덟 장 중 워터마크를
+   *   막는 줄이 **하나도** 없었고, 가장자리를 비우라는 줄은 여섯
+   *   장에만 있었습니다. 그림을 맡기는 사람은 카드 하나를 복사해
+   *   붙일 뿐이니, 규칙은 그 복사되는 글 안에 있어야 합니다.
+   *
+   *   장면마다 다른 몫(무채색·루프 이음새·글 얹히는 자리)은 그
+   *   장면일 때만 붙습니다.
+   */
+  const fullImage = (() => {
+    if (!image || !data) return image;
+    // 장면 · 초상 · 신살 인물은 규격이 다릅니다. 그 몫만 붙입니다.
+    const add = [kind === "char" ? data.SHOT_CHAR
+               : kind === "figure" ? data.SHOT_FIGURE
+               : data.SHOT];
+    if (kind === "scene") {
+      if (e?.tint) add.push(data.SHOT_TINT);
+      if (e?.loop) add.push(data.SHOT_LOOP);
+      if ((e?.use ?? "").includes("통째로 덮고")) add.push(data.SHOT_FILL);
+    }
+    return [image, ...add].join("\n\n");
+  })();
   const dir = kind === "scene" ? `/scene/${id}/`
             : kind === "char" ? `/char/${id}/`
             : `/sinsal/${id}/`;
@@ -212,13 +261,26 @@ export default function PromptModal({
                 </span>
               </div>
             )}
-            {image && (
+            {/*
+              ★ 이 그림이 그 화면에서 어떻게 걸리는지 **먼저** 말합니다.
+                원본은 9:16 인데 인라인은 4:3 으로 잘라 쓰므로 세로의
+                42%만 보입니다. 그리기 전에 알아야 하는 것입니다.
+            */}
+            {e.use && (
+              <div className="hint" style={{ borderColor: "var(--teal)" }}>
+                <b>이 화면에서 이렇게 걸리오</b><br />
+                <span dangerouslySetInnerHTML={{
+                  __html: e.use.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>") }} />
+              </div>
+            )}
+            {fullImage && (
               <Block
                 n="①"
                 label={seasonal
                   ? `시작 이미지 · 제미나이 · ${SEASON_KO[season] ?? season}`
                   : "시작 이미지 · 제미나이"}
-                text={image} />
+                text={fullImage}
+                dir="공통 촬영 규칙이 붙어 있소. 통째로 복사하시오 — 빼면 글자·워터마크가 섞여 나오오." />
             )}
             {/*
               ★ 신살 인물은 **그림 한 장**이면 됩니다 (2026-09-03).

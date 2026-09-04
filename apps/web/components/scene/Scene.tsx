@@ -277,8 +277,19 @@ export default function Scene({ id, className, bleed, figure }: {
         </span>
       )}
       <div
-        /* box 가 있으면 가로 원본이라 높이 대신 비율로 잡습니다 */
-        className={`sceneart ${spec.box ? "boxed" : ""} ${className ?? ""}`}
+        /*
+         * ★ 상자를 **늘 잡습니다** (2026-09-04).
+         *
+         *   전에는 `spec.box` 가 있을 때만 `boxed` 를 걸었는데, **어느
+         *   장면도 box 를 안 적었습니다.** 그래서 아래 `--sr` 은
+         *   계산해 놓고 쓰이지 않았고, 9:16 세로 영상이 인라인에서
+         *   `height:auto` 로 흘러 폭의 178% 높이가 됐습니다 —
+         *   바로 위 주석이 「그래서 고쳤다」고 적어 둔 그 버그입니다.
+         *   파일이 들어온 열 장면에서 실제로 그렇게 나가고 있었습니다.
+         *
+         *   hero·fill 은 제 비율을 CSS 가 잡으므로 건드리지 않습니다.
+         */
+        className={`sceneart boxed ${className ?? ""}`}
         role={pickable ? "button" : undefined}
         tabIndex={pickable ? 0 : undefined}
         title={pickable ? `${spec.name} — 눌러서 제작 프롬프트 보기` : undefined}
