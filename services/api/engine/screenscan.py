@@ -154,6 +154,12 @@ HAS_WORD = re.compile(r"[가-힣0-9]")
 #   있었습니다. 그런데 화면에서 가장 센 문장이 대개 그런 문장입니다 —
 #   수가 박힌 문장이라서요. 값 자리를 ▮ 로 바꾸고 글은 살립니다.
 BRACE = re.compile(r"\{[^{}]*\}")
+# 접힌 것을 여는 손잡이 — 「왜 묻소?」 는 표지판이지 본문이 아닙니다.
+#   본문으로 세면 그 화면의 첫 줄이 표지판이 됩니다.
+SUMMARY = re.compile(r"<summary>.*?</summary>", re.S)
+# 접힌 것의 표지판은 속성으로도 옵니다 — <Fold label="왜 묻소?">
+FOLD_LABEL = re.compile(r'label="[^"]*"')
+
 # 글이 아닌 것 — 태그 사이에 낀 코드 조각
 CODEY = re.compile(r"=>|className|useState|const |return |;|\)\s*\{|\bprops\b")
 
@@ -184,6 +190,7 @@ def _next_named(chunk: str) -> Optional[str]:
 
 def _readable(chunk: str) -> str:
     """코드 조각에서 손님이 읽는 한국어만 긁어낸다."""
+    chunk = FOLD_LABEL.sub(" ", SUMMARY.sub(" ", chunk))
     out = []
     for m in list(TSX_STR.finditer(chunk)) + list(JSX_TEXT.finditer(chunk)):
         t = re.sub(r"\s+", " ", BRACE.sub(" ▮ ", m.group(1))).strip()
@@ -362,11 +369,38 @@ TOPCONST = re.compile(
     re.M | re.S)
 
 
+# 계절판 상수 — 넷 중 **하나만** 화면에 뜹니다
+#
+# ★ 대문(a1)의 지문이 네 벌로 세어지고 있었습니다 (2026-09-04).
+#
+#   `OPENING` 은 `{spring: […], summer: […], autumn: […], winter: […]}`
+#   인데 화면에는 **그날의 계절 한 벌**만 뜹니다. 그런데 자는 넷을 다
+#   읽어, 대문이 지문 열두 줄로 시작하는 것처럼 봤습니다.
+#
+#   그래서 두 가지가 함께 틀렸습니다 —
+#       분량   실제보다 네 배 길게 셈
+#       차례   첫 줄부터 열두 줄이 지문이라, 그 뒤의 약속(8글자·5마디·
+#              0원)이 「앞쪽」 에서 밀려남
+#
+#   손님이 실제로 읽는 것은 한 벌입니다. 한 벌만 셉니다.
+_SEASON_KEY = re.compile(r"\b(spring|summer|autumn|winter)\s*:")
+
+
+def _one_season(body: str) -> str:
+    """계절판이면 한 벌만. 아니면 그대로."""
+    keys = _SEASON_KEY.findall(body)
+    if len(set(keys)) < 3:
+        return body
+    # 여름 한 벌 — prompt_sheet 의 기본 계절과 같게 둡니다
+    m = re.search(r"summer\s*:\s*(\[[^\]]*\]|\{[^{}]*\})", body, re.S)
+    return m.group(1) if m else body
+
+
 def _top_copy(src: str) -> dict:
     """모듈 자리 상수마다 (이름 → 읽는 글)."""
     out = {}
     for m in TOPCONST.finditer(src):
-        got = _readable(m.group(2))
+        got = _readable(_one_season(m.group(2)))
         if got:
             out[m.group(1)] = got
     return out
