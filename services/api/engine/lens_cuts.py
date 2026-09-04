@@ -235,7 +235,15 @@ def _year_ji(f) -> str:
     return f.pillars[0]["gz"][1]
 
 
+# ★ 고민은 **손님이 고른 것**이라 명식에서 못 뽑습니다.
+#
+#   나머지 스물넉 축은 전부 여덟 글자에서 나옵니다. 고민만 밖에서
+#   들어오니, 축을 부를 때 함께 건네야 합니다. `_ASK` 로 표시해 두고
+#   `axis_value` 가 그때 받은 값을 씁니다.
+_ASK = object()
+
 AXES = {
+    "concern": _ASK,
     "deuk": _deuk,
     "johu": _johu,
     "seupjo": _seupjo,
@@ -265,11 +273,18 @@ AXES = {
 }
 
 
-def axis_value(f, axis: str) -> str:
+def axis_value(f, axis: str, concern: Optional[str] = None) -> str:
     try:
-        return AXES[axis](f)
+        fn = AXES[axis]
     except KeyError:
         raise LensCutError("모르는 축: %r" % (axis,))
+    if fn is _ASK:
+        # ★ 밖에서 들어오는 축. 안 왔으면 **지어내지 않습니다** —
+        #   이 집이 시주를 열두 시로 안 채우는 것과 같은 까닭입니다.
+        if not concern:
+            raise LensCutError("고민 축인데 고민이 안 왔소")
+        return concern
+    return fn(f)
 
 
 # ══════════════════════════════════════════════════════════
@@ -456,9 +471,10 @@ def _num(v) -> str:
     return "%d" % round(n)
 
 
-def _pick(spec: dict, f, where: str) -> tuple[str, str]:
+def _pick(spec: dict, f, where: str,
+          concern: Optional[str] = None) -> tuple[str, str]:
     """(열쇠, 문장). 표에 없으면 터뜨린다 — 빈칸을 두지 않는다."""
-    key = axis_value(f, spec["axis"])
+    key = axis_value(f, spec["axis"], concern)
     text = spec["text"]
     if key not in text:
         raise LensCutError("%s · %s 표에 %r 이(가) 없습니다"
@@ -497,9 +513,12 @@ def _words(f) -> dict:
     }
 
 
-def build(f, lens_id: Optional[str]) -> list:
+def build(f, lens_id: Optional[str], concern: Optional[str] = None) -> list:
     """
     이 캐릭터의 관점 컷들. 없으면 빈 목록.
+
+    concern  손님이 고른 고민. 「고민」 축을 쓰는 컷이 이걸 봅니다 —
+             그 사람의 눈 × 손님이 물은 자리.
 
     돌려주는 것: [{"id","title","source","html","min_level","statement_id"}]
     """
@@ -515,13 +534,14 @@ def build(f, lens_id: Optional[str]) -> list:
     # 손님은 녹음인 줄 압니다. 한 장에 한 번만 붙입니다.
     real_seen: set = set()
     for spec in specs:
-        ka, ta = _pick(spec["a"], f, spec["id"])
-        kb, tb = _pick(spec["b"], f, spec["id"])
+        ka, ta = _pick(spec["a"], f, spec["id"], concern)
+        kb, tb = _pick(spec["b"], f, spec["id"], concern)
         # ★ 세 번째 축은 **고른 축**만 씁니다 (일간·주도십신·일지·대운십신).
         #   앞의 두 축은 뜻이 맞는 대신 고르지 않아서, 축 둘로는 본문
         #   최다 점유가 17%까지 올라갔습니다. 근거 줄이 그걸 가리고
         #   있었고, tools/dup_rate.py 가 이제 본문만 따로 잽니다.
-        kc, tc = _pick(spec["c"], f, spec["id"]) if spec.get("c") else ("", "")
+        kc, tc = (_pick(spec["c"], f, spec["id"], concern)
+                  if spec.get("c") else ("", ""))
         # ★ 근거 줄 — 이 컷이 **무슨 글자를 읽고** 한 말인지 그 자리에서 댑니다.
         #   포지션이 "맞히는 집" 이 아니라 "근거 대는 집" 이라, 관점일수록
         #   무엇을 보고 한 말인지가 붙어 있어야 합니다.

@@ -23,6 +23,9 @@ from engine.calendar import build_chart
 from engine.features import build_features
 from engine.report import build_report
 
+# 손님이 고를 수 있는 여섯 칸 (apps/web/lib/store.CONCERNS 와 짝)
+CONCERNS = ("money", "work", "love", "people", "dir", "health")
+
 TAG = re.compile(r"<[^>]+>")
 
 # 값 등급 → 자기 몫 컷이 적어도 몇 개여야 하는가.
@@ -115,14 +118,64 @@ def test_every_person_gets_every_perspective_cut(lens):
     """
     표에 없는 조합이 있으면 여기서 터집니다. 관점 컷은 **비지 않습니다** —
     빈칸을 두느니 터뜨립니다.
+
+    ★ 고민 여섯 칸을 **다** 세워 봅니다 (2026-09-04).
+
+      손님이 짚었습니다 — "캐릭터마다 그 강점대로 분석하는 거 맞아?
+      연애 고민이면 … 캐릭터마다 로직이 완전히 달라야 하는 거 아냐?
+      20명 전부?"
+
+      맞지 않았습니다. 축이 스물넷인데 **고민만 없어서**, 약초의원의
+      「채우는 법」이 돈을 물어도 몸을 물어도 똑같았습니다. 축을
+      놓았으니 이제 열아홉 사람 × 여섯 고민이 다 서야 합니다.
     """
     for f in _people():
-        cuts = lens_cuts_mod.build(f, lens["id"])
-        assert len(cuts) == lens_cuts_mod.owned(lens["id"])
-        for c in cuts:
-            body = TAG.sub("", c["html"]).strip()
-            assert len(body) > 60, (lens["id"], c["id"], body)
-            assert "{" not in body, (lens["id"], c["id"], body)
+        for concern in CONCERNS:
+            cuts = lens_cuts_mod.build(f, lens["id"], concern)
+            assert len(cuts) == lens_cuts_mod.owned(lens["id"])
+            for c in cuts:
+                body = TAG.sub("", c["html"]).strip()
+                assert len(body) > 60, (lens["id"], concern, c["id"], body)
+                assert "{" not in body, (lens["id"], concern, c["id"], body)
+
+
+@pytest.mark.parametrize("lens", [l for l in lens_mod.all_lenses()
+                                  if l.get("released")],
+                         ids=lambda l: l["id"])
+def test_every_person_reads_the_asked_place_their_own_way(lens):
+    """
+    ★ 고민을 고르게 해 놓고 글이 안 바뀌면, 그건 고르게 한 것이 아니라
+      **고르는 시늉을 시킨 것**입니다.
+
+      사람마다 고민 축을 쓰는 컷이 하나 있어야 하고, 여섯 칸이 서로
+      다른 글이라야 합니다.
+    """
+    # ★ 청동자는 **브레이크**요 — 파는 자리가 아니오.
+    #   무거운 리포트 뒤에 강제로 붙는 무료 자리라 관점 컷이 없소
+    #   (값 0 · 자기 몫 0). 여기서만 비켜 갑니다.
+    if lens["id"] == "dongja":
+        pytest.skip("청동자는 브레이크라 관점 컷이 없소")
+    f = next(iter(_people()))
+    got = {}
+    for concern in CONCERNS:
+        cuts = lens_cuts_mod.build(f, lens["id"], concern)
+        ask = [c for c in cuts if c["id"].endswith("_ask")]
+        assert ask, "%s 에 고민으로 읽는 컷이 없소" % lens["id"]
+        got[concern] = ask[0]["html"]
+    assert len(set(got.values())) == len(CONCERNS), (
+        "%s 이 여섯 고민을 %d가지로만 보오"
+        % (lens["id"], len(set(got.values()))))
+
+
+def test_the_concern_axis_is_never_guessed():
+    """
+    ★ 고민은 명식에서 못 뽑습니다 — 손님이 고른 것입니다.
+      안 왔으면 **지어내지 않습니다.** 시주를 열두 시로 안 채우는
+      것과 같은 까닭입니다.
+    """
+    f = next(iter(_people()))
+    with pytest.raises(lens_cuts_mod.LensCutError):
+        lens_cuts_mod.build(f, "yakcho", None)
 
 
 @pytest.mark.parametrize("lens", [l for l in lens_mod.all_lenses()

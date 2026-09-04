@@ -76,14 +76,21 @@ def report_row(name: str, c: Counter, n: int) -> tuple[float, str]:
                    % (name, len(c), effective(c), share))
 
 
-def _every_lens_cut(f):
-    """스무 캐릭터의 관점 컷을 전부. 한 캐릭터만 보면 두어 개만 재게 됩니다."""
+def _every_lens_cut(f, concern):
+    """
+    스무 캐릭터의 관점 컷을 전부. 한 캐릭터만 보면 두어 개만 재게 됩니다.
+
+    ★ 고민을 들고 다닙니다 (2026-09-04). 관점 컷 하나가 **고민 축**을
+      쓰게 됐습니다 — 그 사람의 눈 × 손님이 물은 자리. 고민을 안
+      넘기면 그 컷이 안 서고, 넘겨도 한 칸만 넘기면 여섯 갈래 중
+      하나만 재게 됩니다. 표본이 이미 고민을 골라 오니 그걸 씁니다.
+    """
     from engine import lens as lens_mod
     from engine import lens_cuts as lens_cuts_mod
     for l in lens_mod.all_lenses():
         if not l.get("released"):
             continue
-        for lc in lens_cuts_mod.build(f, l["id"]):
+        for lc in lens_cuts_mod.build(f, l["id"], concern):
             yield lc
 
 
@@ -121,7 +128,7 @@ def main(n: int = 3000) -> int:
                 continue                    # 아래에서 전 캐릭터로 잽니다
             cuts.setdefault(cut["id"], Counter())[strip(cut["html"])] += 1
 
-        for lc in _every_lens_cut(f):
+        for lc in _every_lens_cut(f, concern):
             body = strip(lc["html"])
             lens_cuts_all.setdefault(lc["id"], Counter())[body] += 1
             lens_prose.setdefault(lc["id"], Counter())[

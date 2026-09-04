@@ -765,6 +765,22 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
             body = (lead
                     + '<p class="tale">헌데 %s</p>' % B2["CONCERN_ELSE"][loud]
                     + '<p class="tale">%s</p>' % B2["WHY_TAIL"][loud])
+        # ★ 그 사람의 주도 십신을 **물으신 자리의 말**로 옮깁니다.
+        #
+        #   「상관」 은 명리의 말이지 손님의 말이 아닙니다. 그런데 뱅크에
+        #   이미 십신 × 고민 낱말표가 있습니다 — 상관이 사랑에서는
+        #   「직언」, 일에서는 「전복」, 돈에서는 「개척」으로 나옵니다.
+        #   그걸 안 쓰고 있었습니다.
+        #
+        #   덤으로 가짓수가 예순 갈래 늘어납니다. 이 컷이 스무 명
+        #   전원에게 서게 되면서 최다 점유가 3.0%까지 올랐는데
+        #   (공통 컷 문턱 2.0%), 지어내지 않고 늘리는 자리가 여기입니다.
+        igw = (B2.get("IGKEY", {}).get(top) or {}).get(concern)
+        if igw:
+            body += ('<p class="tale">그대의 주도는 <b>%s</b>이고, 물으신 '
+                     '자리에서 그것은 <b>%s</b>으로 나오오. 잘될 때도 '
+                     '어긋날 때도 그 얼굴로 나오니, 거기부터 보시오.</p>'
+                     % (top, igw))
         body += ('<p class="tale">%s</p>' % B2["MATCH_TAIL"][f.strength])
         body += ('<p class="sm">넉 자를 적으셨으면 이 자리에 '
                  '<b>사주와 검사가 어긋난 데</b>를 놓았을 것이오. '
@@ -788,8 +804,8 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
             #   고민은 **어느 자리를 보고 읽느냐**라, 값을 치른 사람은
             #   누구나 제가 물은 자리로 읽혀야 합니다.
             body, 1,
-            sid="rcax:%s:%s:%d:%s:%s"
-                % (concern, grp, min(asked, 4), loud, f.strength)))
+            sid="rcax:%s:%s:%d:%s:%s:%s"
+                % (concern, grp, min(asked, 4), loud, f.strength, top)))
 
     # ── 9 · 이 캐릭터가 따로 받는 것 ──────────────────────
     #
@@ -807,7 +823,10 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     # ★ 값이 캐릭터마다 다른데 받는 것이 값을 안 따라가고 있었습니다.
     #   1만 명 시험에서 값 ↔ 컷수 상관 −0.419 — 4,900원짜리가
     #   19,900원짜리보다 더 줬습니다. 자기 몫 컷을 여기서 채웁니다.
-    for lc in lens_cuts_mod.build(f, lens_id):
+    # ★ 고민을 함께 넘깁니다 — 그 사람의 눈으로 **손님이 물은 자리**를
+    #   보게 하려고요. 전에는 안 넘겨서, 약초의원의 「채우는 법」이
+    #   돈을 물어도 몸을 물어도 똑같았습니다.
+    for lc in lens_cuts_mod.build(f, lens_id, concern):
         cuts.append(_cut(lc["id"], lc["title"], lc["source"], lc["html"],
                          lc["min_level"], sid=lc["statement_id"]))
 
