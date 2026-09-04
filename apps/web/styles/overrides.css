@@ -2947,3 +2947,53 @@ body.has-rail .beatskip-hint { left: calc(50% + 116px); }
   .fold > summary { display: none; }
   .foldin { border: 0; padding-left: 0; }
 }
+
+/* ══════════════════════════════════════════════════════════
+ * 「누르시오」 — 고를 칸 앞에 서는 한 줄
+ * ══════════════════════════════════════════════════════════
+ *
+ * ★ 손님이 짚은 것 (2026-09-04)
+ *
+ *   "이런 버튼들 클릭하라고 유도해야지. 저게 선택되어 있으니까
+ *   유저는 모르잖아 다음 액션을 뭘 해야할지."
+ *
+ *   칸이 예쁘게 늘어서 있으면 그건 **읽는 것**처럼 보입니다.
+ *   누르는 것이라고 말해 줘야 누릅니다.
+ */
+.pickme {
+  margin: 14px 0 8px;
+  font-size: var(--fs-3);
+  color: var(--paper2);
+  text-align: center;
+}
+.pickme b { color: var(--gold); }
+
+/* 아직 아무것도 안 골랐을 때 — 칸이 조용히 숨을 쉽니다.
+   ★ 동작 줄이기를 켠 사람에게는 멈춰 있습니다. */
+@media (prefers-reduced-motion: no-preference) {
+  .og:not(:has(.op.on)) .op:not(:disabled) {
+    animation: pickbreath 2.6s ease-in-out infinite;
+  }
+  .og:not(:has(.op.on)) .op:nth-child(2n) { animation-delay: .3s; }
+  .og:not(:has(.op.on)) .op:nth-child(3n) { animation-delay: .6s; }
+}
+@keyframes pickbreath {
+  0%, 100% { border-color: var(--line); }
+  50%      { border-color: var(--line2); }
+}
+
+/* 누를 수 있다는 표 — 손가락과 살짝 뜨는 테두리 */
+.op:not(:disabled) { cursor: pointer; }
+.op:not(:disabled):hover,
+.op:not(:disabled):focus-visible {
+  border-color: var(--c);
+  background: var(--bg3);
+}
+.op:not(:disabled):active { transform: translateY(1px); }
+
+/* 못 누르는 버튼은 못 누르게 보여야 합니다 —
+   눌리는 줄 알고 누르면 그게 고장으로 읽힙니다. */
+.btn:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}

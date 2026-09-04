@@ -110,7 +110,14 @@ function PayInner() {
    *   값이 없는 캐릭터(청동자)면 서버가 그 목패를 안 주므로,
    *   목패가 오면 첫 장으로 맞춰 둡니다.
    */
-  const [pick, setPick] = useState<Tier>("one");
+  /*
+   * ★ 목패 하나가 **이미 켜진 채** 서 있었습니다 (2026-09-04).
+   *
+   *   기본값이 "one" 이라 셋 중 하나에 불이 들어와 있었고, 손님은
+   *   고른 적이 없는데 「이걸로 열겠습니다」 를 누를 수 있었습니다.
+   *   값을 치르는 자리에서 **안 고른 것이 골라져 있으면** 안 됩니다.
+   */
+  const [pick, setPick] = useState<Tier | null>(null);
   const [order, setOrder] = useState<Order | null>(null);
   const [busy, setBusy] = useState(false);
   /* 목패 — ★ 값도 분량도 서버가 셉니다. 화면은 받아 적기만 합니다. */
@@ -132,10 +139,16 @@ function PayInner() {
         if (!alive) return;
         const list = r.tiers as TierCard[];
         setTiers(list);
-        // 고른 목패가 이 캐릭터에 없으면(값 없는 캐릭터의 '이 자리 하나')
-        // 첫 장으로 물러섭니다. 없는 것을 고른 채로 두지 않습니다.
-        if (list.length && !list.some((t) => t.id === pick)) {
-          setPick(list[0].id as Tier);
+        // ★ 여기서 **대신 골라 주지 않습니다.**
+        //
+        //   전에는 목패가 오면 첫 장을 켜 놓았습니다. 그러면 손님은
+        //   고른 적이 없는데 하나가 켜져 있고, 「이걸로 열겠습니다」 가
+        //   눌리는 상태가 됩니다. 값을 치르는 자리라 더 그렇습니다.
+        //
+        //   고른 것이 이 캐릭터에 없을 때만 **놓습니다** (값 없는
+        //   캐릭터의 '이 자리 하나'). 켜 주지는 않습니다.
+        if (pick && list.length && !list.some((t) => t.id === pick)) {
+          setPick(null);
         }
       })
       .catch((e) => { if (alive) setErr(e instanceof ApiError ? e.message : "목패를 펴지 못했소."); });
@@ -210,6 +223,9 @@ function PayInner() {
   /* d2 · 주문 만들기 — 금액·상한은 서버가 판정한다 */
   useEffect(() => {
     if (step !== "d2" || !s.chartId || order || tossBack) return;
+    // ★ 안 고르고 d2 로 바로 들어온 자리(주소를 치거나 레일로 뛰거나).
+    //   없는 값으로 주문을 만들지 않고 목패로 돌려보냅니다.
+    if (!pick) { router.replace("/pay?step=d1"); return; }
     let alive = true;
     setErr(null);
     api
@@ -616,6 +632,10 @@ function PayInner() {
         센 것이오 (미리 적어 둔 홍보 문구가 아니오) · 하루 2번 ·
         한 자리 2명
       </span>
+      <p className="pickme">
+        {pick ? <><b>고르셨소.</b> 아래에서 여시오.</>
+              : <><b>목패를 눌러 고르시오.</b> 고르기 전에는 안 열리오.</>}
+      </p>
       {!tiers ? (
         <p className="sm">목패를 편다…</p>
       ) : (
@@ -666,8 +686,9 @@ function PayInner() {
         고르는 것은 <b>어느 목패</b>가 아니라, 그대가 여태 안 물어본
         것 중 <b>무엇을 먼저 물을 것인가</b>요. 나머지는 오늘 안 열리오.
       </ActOut>
-      <button className="btn mt" onClick={() => router.push("/pay?step=d2")}>
-        이걸로 열겠습니다
+      <button className="btn mt" disabled={!pick}
+              onClick={() => router.push("/pay?step=d2")}>
+        {pick ? "이걸로 열겠습니다" : "먼저 목패를 고르시오"}
       </button>
       <button className="btn gh" onClick={() => router.push("/pay?step=d0")}>
         값 없이 볼 수 있는 것부터

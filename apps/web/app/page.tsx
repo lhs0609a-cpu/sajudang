@@ -547,7 +547,10 @@ function EntryInner() {
      *   대면 필드가 요구가 아니라 설명이 됩니다.
      */
     const bad = birthProblem(s.year, s.month, s.day);
-    const filled = s.year !== null && s.month !== null && s.day !== null;
+    // ★ 성별도 **적은 것**에 넣습니다. 안 넣으면 사내가 아무것도
+    //   안 누르고 지나가 대운이 반대로 섭니다 (engine/calendar.forward).
+    const filled = s.year !== null && s.month !== null && s.day !== null
+      && s.sexSet;
     const num = (v: string): number | null => {
       const t = v.replace(/[^0-9]/g, "");
       return t === "" ? null : Number(t);
@@ -650,13 +653,34 @@ function EntryInner() {
           </>
         )}
 
-        <Say who="도령" lens="pungun">남녀에 따라 운이 흐르는 방향이 반대요. 이건 반드시 있어야 하오.</Say>
+        <Say who="도령" lens="pungun">
+          남녀에 따라 운이 흐르는 방향이 반대요. 이건 반드시 있어야 하오.
+          <br />
+          대운 열 칸이 앞으로 도는지 거꾸로 도는지가 여기서 갈리오 —
+          잘못 짚으면 <b>열 칸이 통째로 반대</b>가 되오.
+        </Say>
+        {/*
+          ★ 여기가 **켜진 채로** 서 있었습니다 (2026-09-04).
+
+            기본값이 「여인」이라 두 칸 중 하나가 이미 불이 들어와
+            있었고, 사내는 **아무것도 안 눌러도** 다음으로 갔습니다.
+            그러면 대운이 통째로 반대로 섭니다.
+
+            고른 사실을 따로 적어(sexSet), 고르기 전에는 아무 칸도
+            안 켜고 다음으로도 안 보냅니다.
+        */}
+        <p className="pickme">
+          <b>둘 중 하나를 누르시오.</b> 아직 안 고르셨소.
+        </p>
         <div className="og c2">
           {([["F", "여인"], ["M", "사내"]] as const).map(([v, label]) => (
-            <button key={v} className={`op ${s.sex === v ? "on" : ""}`}
+            <button key={v}
+                    className={`op ${s.sexSet && s.sex === v ? "on" : ""}`}
                     disabled={!!bad}
+                    aria-pressed={s.sexSet && s.sex === v}
                     style={{ textAlign: "center", fontFamily: "var(--serif)", fontSize: 15 }}
-                    onClick={() => s.set({ sex: v, features: null, chartId: null })}>
+                    onClick={() => s.set({ sex: v, sexSet: true,
+                                           features: null, chartId: null })}>
               {label}
             </button>
           ))}
@@ -675,9 +699,15 @@ function EntryInner() {
                 onClick={() => go("a4")}>
           다 적었습니다
         </button>
+        {/* ★ 「날을 다 적어야」 라고만 적혀 있어서, 성별을 안 고른
+            사람은 날짜만 들여다봤습니다. 무엇이 비었는지 말합니다. */}
         {(!filled || bad) && (
           <p className="sm mt" style={{ textAlign: "center" }}>
-            날을 다 적어야 다음으로 가오.
+            {bad ? "적으신 날을 다시 보시오."
+              : s.year === null || s.month === null || s.day === null
+                ? (s.sexSet ? "날을 다 적어야 다음으로 가오."
+                            : "날을 다 적고, 여인·사내 중 하나를 누르시오.")
+                : "여인·사내 중 하나를 누르시오. 그것만 남았소."}
           </p>
         )}
       </Shell>
@@ -825,6 +855,11 @@ function EntryInner() {
           <div className="vague">
             <p className="sm">
               그럼 <b>대강</b>이라도 아시오? 새벽인지 아침인지 한낮인지.
+            </p>
+            <p className="pickme">
+              {pickedHour === null
+                ? <><b>여섯 칸 중 하나를 누르시오.</b></>
+                : <>고르셨소. 아래 <b>다 됐습니다</b> 로 가시오.</>}
             </p>
             <div className="og c2">
               {HOURS.map(([label, range, h], idx) => (
@@ -982,6 +1017,10 @@ function EntryInner() {
           모르겠습니다 · 사주만으로 보겠습니다
         </button>
 
+        <p className="pickme">
+          {s.axis4 ? <><b>{s.axis4}</b> 로 하겠소.</>
+                   : <><b>열여섯 중 하나를 누르시오.</b> 누르면 바로 다음으로 가오.</>}
+        </p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 5, margin: "14px 0" }}>
           {AXIS4.map((t) => (
             <button key={t} className={`op ${s.axis4 === t ? "on" : ""}`}
@@ -1060,10 +1099,24 @@ function EntryInner() {
           </Say>
         </Fold>
         <Narration lines={["", "한참 답이 나오지 않았다.", "하나만 고르라면—"]} />
+        {/*
+          ★ 여섯 칸 중 하나가 **이미 켜진 채**였습니다 (2026-09-04).
+            기본값이 있어야 셈이 도는데, 화면이 그걸 「고른 것」처럼
+            그렸습니다. 손님은 고른 적이 없으니 다음에 뭘 눌러야
+            할지 모릅니다. 누르면 곧바로 다음 자리로 갑니다.
+        */}
+        <p className="pickme">
+          <b>여섯 중 하나를 누르시오.</b> 누르면 곧바로 넘어가오.
+        </p>
         <div className="og c2">
           {CONCERNS.map((c) => (
-            <button key={c.id} className={`op ${s.concern === c.id ? "on" : ""}`}
-                    onClick={() => { s.set({ concern: c.id as Concern }); go("a3"); }}>
+            <button key={c.id}
+                    className={`op ${s.concernSet && s.concern === c.id ? "on" : ""}`}
+                    aria-pressed={s.concernSet && s.concern === c.id}
+                    onClick={() => {
+                      s.set({ concern: c.id as Concern, concernSet: true });
+                      go("a3");
+                    }}>
               <b>{c.label}</b><span>{c.sub}</span>
             </button>
           ))}

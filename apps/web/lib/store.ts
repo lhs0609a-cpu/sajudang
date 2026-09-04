@@ -34,6 +34,21 @@ export interface SessionState {
   axis4: string | null;     // 성향 4글자. 선택.
   concern: Concern;
 
+  /*
+   * 손님이 **실제로 고른** 것인가.
+   *
+   * ★ 값과 고른 사실은 다릅니다. 기본값이 있어야 셈이 도는데,
+   *   화면이 그 기본값을 「고른 것」처럼 그리면 손님은 고른 적이
+   *   없는데 골라져 있는 것을 봅니다 — 다음에 뭘 눌러야 할지
+   *   모르게 됩니다.
+   *
+   * ★ 성별은 특히 그렇습니다. 대운 방향이 여기서 갈리는데
+   *   (engine/calendar.forward), 「여인」이 켜진 채라 사내는
+   *   아무것도 안 누르고 지나갔습니다.
+   */
+  concernSet: boolean;
+  sexSet: boolean;
+
   /* 서버 결과 */
   chartId: string | null;
   /** 희소도 — 센 값. 없으면 화면이 그 자리를 접는다 */
@@ -98,6 +113,34 @@ const initial = {
   city: "서울",
   axis4: null as string | null,
   concern: "love" as Concern,
+  /*
+   * ── 손님이 **실제로 고른** 것인가 ──────────────────────
+   *
+   * ★ 손님이 짚은 것 (2026-09-04)
+   *
+   *   "이런 버튼들 클릭하라고 유도해야지. 저게 선택되어 있으니까
+   *   유저는 모르잖아 다음 액션을 뭘 해야할지."
+   *
+   *   고민 여섯 칸에 「돈」이, 성별 두 칸에 「여인」이 **이미 켜진 채**
+   *   서 있었습니다. 기본값이 있어야 계산이 도니까요. 그런데 화면은
+   *   그걸 「고른 것」처럼 그렸습니다 — 손님은 제가 고른 적 없는데
+   *   골라져 있으니 다음에 뭘 눌러야 할지 모릅니다.
+   *
+   * ★ 성별은 UX 가 아니라 **셈이 틀어지는 자리**입니다
+   *
+   *   대운은 `forward = (양간) == (사내)` 로 방향이 정해집니다
+   *   (engine/calendar.py). 성별이 틀리면 열 칸이 통째로 반대로
+   *   갑니다. 그런데 화면은 「여인」을 켜 둔 채 다음으로 보내고
+   *   있었습니다 — 사내는 아무것도 안 눌러도 지나갑니다.
+   *
+   * ★ 값과 **고른 사실**을 나눕니다
+   *
+   *   값은 그대로 둡니다(레일이 바로 뛰어드는 자리가 있습니다).
+   *   다만 «사람이 골랐는가» 를 따로 적어, 그 전에는 아무 칸도
+   *   안 켜고 다음으로도 안 보냅니다.
+   */
+  concernSet: false,
+  sexSet: false,
   chartId: null,
   rarity: null,
   divergence: null,
@@ -135,6 +178,7 @@ export const useSession = create<SessionState>()(
         sessionId: s.sessionId, name: s.name, year: s.year, month: s.month,
         day: s.day, hour: s.hour, minute: s.minute, hourKnown: s.hourKnown,
         sex: s.sex, city: s.city, axis4: s.axis4, concern: s.concern,
+        concernSet: s.concernSet, sexSet: s.sexSet,
         chartId: s.chartId, cur: s.cur, read: s.read, skipped: s.skipped,
         seals: s.seals, tier: s.tier, paid: s.paid, visits: s.visits,
         admin: s.admin, adminSet: s.adminSet, seasonOverride: s.seasonOverride,
