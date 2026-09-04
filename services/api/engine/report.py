@@ -22,6 +22,7 @@ from . import extras as extras_mod
 from . import guard
 from . import lens as lens_mod
 from . import lens_cuts as lens_cuts_mod
+from . import pattern as _pattern
 from . import rarity as rarity_mod
 from . import why as _why
 from . import bite as _bite
@@ -775,6 +776,23 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         #   덤으로 가짓수가 예순 갈래 늘어납니다. 이 컷이 스무 명
         #   전원에게 서게 되면서 최다 점유가 3.0%까지 올랐는데
         #   (공통 컷 문턱 2.0%), 지어내지 않고 늘리는 자리가 여기입니다.
+        # ★ 짜임을 답니다 (2026-09-04).
+        #
+        #   손님이 짚었소 — "전문성이 있어야지. 전문가 사주 특징 파악해서
+        #   우리 로직에 다 접목해."
+        #
+        #   개수는 누구나 셉니다. 실무가 보는 것은 **개수 사이의 관계**요 —
+        #   「재성 1개」가 아니라 「비겁이 셋인데 재성이 하나」(군겁쟁재),
+        #   「정관 1개」가 아니라 「상관과 정관이 같이 있다」(상관견관).
+        #
+        #   조건이 안 맞으면 **안 냅니다**. 억지로 붙이면 누구에게나 맞는
+        #   말이 되어 바넘 문장이 됩니다 (engine/pattern.py).
+        pats = _pattern.read(f, concern, limit=2)
+        for pt in pats:
+            body += ('<p class="bite"><b>%s</b><i class="gl">(%s)</i> — %s</p>'
+                     '<p class="ev"><span class="evk">이 짜임</span>%s</p>'
+                     % (pt["name"], pt["gloss"], pt["say"], pt["why"]))
+
         igw = (B2.get("IGKEY", {}).get(top) or {}).get(concern)
         if igw:
             body += ('<p class="tale">그대의 주도는 <b>%s</b>이고, 물으신 '
@@ -804,8 +822,9 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
             #   고민은 **어느 자리를 보고 읽느냐**라, 값을 치른 사람은
             #   누구나 제가 물은 자리로 읽혀야 합니다.
             body, 1,
-            sid="rcax:%s:%s:%d:%s:%s:%s"
-                % (concern, grp, min(asked, 4), loud, f.strength, top)))
+            sid="rcax:%s:%s:%d:%s:%s:%s:%s"
+                % (concern, grp, min(asked, 4), loud, f.strength, top,
+                   ",".join(x["key"] for x in pats) or "-")))
 
     # ── 9 · 이 캐릭터가 따로 받는 것 ──────────────────────
     #
@@ -1193,7 +1212,21 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
 
     # 이 캐릭터가 더 받아야 하는 것. 안 받았으면 화면이 물어볼 수 있게
     # 알려 줍니다. **무엇을 받는지만** 내려보내고 문장은 안 보냅니다.
-    need = lens_mod.required_input(lens_id)
+    #
+    # ★ 고민도 묻습니다 (2026-09-04).
+    #
+    #   전에는 **캐릭터만** 물었습니다. 그래서 월하선녀는 돈을 물어도
+    #   상대 사주를 묻고, 백운선사는 사랑을 물어도 아무것도 안 물었습니다.
+    #   손님이 짚었습니다 — "연애 고민이면 누구랑인지 어떻게 만났는지
+    #   그런 거 싹 해서…"
+    #
+    #   다만 무턱대고 묻지 않습니다. 「사랑을 골랐으니 상대 사주를
+    #   내시오」는 묻는 것이 아니라 받아 내는 것입니다. **짜임이
+    #   걸렸을 때만** 묻습니다 (engine/pattern.asks_for) — 그때는
+    #   물을 까닭이 서고 손님도 왜 묻는지 압니다.
+    #
+    #   캐릭터가 받는 것이 먼저입니다. 그 사람을 고른 까닭이 거기 있으니.
+    need = lens_mod.required_input(lens_id) or _pattern.asks_for(f, concern)
     needs_input = None
     if need and need in extras_mod.BUILDERS and not (extras or {}).get(need):
         needs_input = need

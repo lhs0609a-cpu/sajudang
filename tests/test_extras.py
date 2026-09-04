@@ -12,7 +12,8 @@ from __future__ import annotations
 
 import pytest
 
-from engine import extras, guard, lens as lens_mod
+from engine import extras
+from engine import pattern, guard, lens as lens_mod
 from engine.calendar import build_chart
 from engine.features import build_features
 from engine.report import build_report
@@ -70,13 +71,49 @@ def test_every_lens_either_needs_nothing_or_gets_asked(f, lens_id):
     """
     추가 입력이 필요한 캐릭터는 안 받았을 때 **물어볼 수 있어야** 한다.
     컷을 지어내지 않습니다.
+
+    ★ 고민도 묻습니다 (2026-09-04).
+
+      전에는 **캐릭터만** 물었습니다. 그래서 월하선녀는 돈을 물어도
+      상대 사주를 묻고, 백운선사는 사랑을 물어도 아무것도 안 물었습니다.
+      손님이 짚었습니다 — "연애 고민이면 누구랑인지 어떻게 만났는지
+      그런 거 싹 해서…"
+
+      캐릭터가 받는 것이 **먼저**요. 그것이 없을 때만 고민이 묻고,
+      그것도 **짜임이 걸렸을 때만** 묻습니다 (engine/pattern.asks_for).
     """
     rep = build_report(f, "cid", lens_id, "all", "love", "INFP")
     need = lens_mod.required_input(lens_id)
+    got = rep["needs_input"]
     if need in extras.BUILDERS:
-        assert rep["needs_input"] == need
-    else:
-        assert rep["needs_input"] is None
+        assert got == need, "그 사람이 받는 것을 안 묻소"
+    elif got is not None:
+        # 고민이 부른 물음. **빌더가 있는 것**만, 그리고 짜임이 걸렸을 때만.
+        assert got in extras.BUILDERS, got
+        assert got == pattern.asks_for(f, "love"), (
+            "짜임이 안 불렀는데 묻고 있소: %s" % got)
+
+
+def test_the_concern_only_asks_when_a_pattern_calls_for_it():
+    """
+    ★ 「사랑을 골랐으니 상대 사주를 내시오」는 묻는 것이 아니라
+      **받아 내는 것**입니다. 걸린 자리가 있어야 물을 까닭이 서고,
+      손님도 왜 묻는지 압니다.
+    """
+    from engine.calendar import build_chart
+    from engine.features import build_features
+    from datetime import date as _d
+    ff = build_features(build_chart(1993, 11, 25, 15, 55, "M", city="서울"),
+                        as_of=_d.today())
+    for concern in ("money", "work", "love", "people", "dir", "health"):
+        want = pattern.asks_for(ff, concern)
+        if want is None:
+            continue
+        # 물을 때는 **그 짜임이 실제로 걸려** 있어야 합니다.
+        hit = [x for x in pattern.read(ff, concern, limit=99)
+               if x.get("ask") == want]
+        assert hit, (concern, want)
+        assert want in extras.BUILDERS, want
 
 
 @pytest.mark.parametrize("kind,payload", sorted(ALL_PAYLOADS.items()))
