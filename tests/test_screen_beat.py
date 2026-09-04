@@ -64,9 +64,24 @@ def test_slow_reveal_always_has_a_way_out():
 
     # ① 손님이 서두르면 그 자리에서 다 편다
     assert "revealAll" in src, "다 펴는 길이 없다"
-    for ev in ("pointerdown", "keydown", "wheel", "beforeprint"):
+    for ev in ("click", "keydown", "beforeprint"):
         assert '"%s"' % ev in src, "%s 로는 못 건너뛴다" % ev
     assert "beatskip" in css, "다 펴는 표에 CSS 가 없다"
+
+    # ★ 다만 **굴림은 건너뛰기가 아니다** (2026-09-04)
+    #
+    #   전에는 `wheel` 과 `touchmove` 도 다 펴는 손잡이였다. 그런데 이제
+    #   굴림이 **글을 띄우는 손잡이**다. 둘을 같이 걸면 굴리는 순간
+    #   통째로 펴져서, 손님은 늘 다 떠 있는 화면만 본다. 모바일은 더하다 —
+    #   손가락을 대는 순간 `pointerdown` 이 먼저 울려, 굴리려던 사람이
+    #   건너뛰기를 누른 셈이 된다.
+    #
+    #   손님이 말했다 — "사용자가 화면 내리는거에 맞춰서 글을 띄워줘.
+    #   미리 다 띄우면 안돼. 전체적으로 다."
+    for ev in ("wheel", "touchmove", "pointerdown"):
+        assert 'addEventListener("%s"' % ev not in src, (
+            "%s 로 건너뛰고 있다 — 굴림은 글을 띄우는 손잡이지 "
+            "건너뛰는 손잡이가 아니다" % ev)
 
     # ② 눌러도 된다는 걸 알아야 누른다
     assert "beatskip-hint" in src and "beatskip-hint" in css, \
@@ -75,6 +90,31 @@ def test_slow_reveal_always_has_a_way_out():
     # ③ 두 번째 오는 사람에게 같은 뜸은 지연이다
     assert "seenBefore" in src and "sessionStorage" in src, \
         "본 화면을 기억하지 않는다"
+
+
+def test_reveal_follows_the_scroll():
+    """
+    글은 **굴리는 대로** 뜬다 — 미리 띄우는 자리는 없다.
+
+    ★ 전에는 첫 화면 안을 시계로 다 띄웠다. 손 하나 안 대도 몇 초 만에
+      다 떠 버리니, 손님에게는 「미리 다 띄운 것」과 같다.
+    """
+    src = (WEB / "components" / "Shell.tsx").read_text(encoding="utf-8")
+    css = (WEB / "styles" / "overrides.css").read_text(encoding="utf-8")
+
+    assert "IntersectionObserver" in src, "굴림을 안 보고 있다"
+    # 눈에 들어오기 전까지는 안 보이는 표
+    assert "beatwait" in src, "기다리는 자리에 표가 없다"
+
+    # ★ 굴릴 수 없는 화면에는 문턱을 안 건다 — 안 그러면 영영 안 뜬다
+    assert "canScroll" in src, "굴릴 수 없는 화면을 안 가린다"
+
+    # ★ 누르는 것은 굴림에 안 맡긴다 — 대문의 버튼이 안 뜬다
+    assert "eyeUiRef" in src, \
+        "버튼에도 같은 문턱을 걸고 있다 — 굴려야 누를 것이 나타난다"
+
+    # ★ 바닥에서는 남은 것을 낸다 — 더 굴릴 데가 없다는 뜻
+    assert "scrollHeight" in src, "바닥에 닿아도 안 띄운다"
 
     # ④ 안 뜬 것은 눌리지도 않아야 한다 — 안 보이는 버튼이 눌린다
     assert "pointer-events: none" in css.split("@keyframes beatIn")[1][:200], \
