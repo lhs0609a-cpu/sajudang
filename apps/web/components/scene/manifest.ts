@@ -97,7 +97,10 @@ export const SCENES: SceneSpec[] = [
   { id: "altar", name: "명식 받침", preset: "Static", ratio: "9:16", seconds: 5, loop: false, tint: "recolor" },
   { id: "facing", name: "마주앉은 자리", preset: "Static", ratio: "9:16", seconds: 5, loop: true },
   { id: "shelf", name: "진열대", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
-  { id: "hall", name: "스무 자리", preset: "Dolly In", ratio: "16:9", seconds: 4, loop: false },
+  // ★ 16:9 로 적혀 있었는데 들어온 그림은 9:16 입니다 (2026-09-04).
+  //   생성기가 세로로 내주고, 화면은 `box` 로 담아 씁니다. 선언이
+  //   실물과 다르면 감사가 「비율이 틀렸다」고 짚습니다 — 실물을 따릅니다.
+  { id: "hall", name: "스무 자리", preset: "Dolly In", ratio: "9:16", seconds: 5, loop: false },
   { id: "seat", name: "그 사람의 자리", preset: "Static", ratio: "3:4", seconds: 3, loop: true, tint: "recolor" },
   // ★ 16:9 였습니다. 그런데 쓰는 자리 둘(리포트 표지 c1 · 분석지)이
   //   `.sceneart.hero` — aspect-ratio 9/16 + object-fit:cover 라
