@@ -274,6 +274,24 @@ export interface LensPublic {
   released: boolean;
 }
 
+/** 궁금한 네 자리 한 줄. 본문은 안 옵니다 — 앞머리와 **길이**뿐입니다. */
+export interface WantRow {
+  /** 재물 · 사랑 · 운명 · 사람 */
+  want: string;
+  /** 여는 사실. 그 사람의 여덟 글자에서 센 것이라 대 볼 수 있습니다. */
+  fact: string;
+  /** 무엇을 묻는가. */
+  ask: string;
+  /** 답의 앞머리 — 진짜 글입니다. */
+  head: string;
+  /** 가린 글자 수. 글자 자체는 안 옵니다. */
+  mask: number;
+  /** 근거 줄 — 가리지 않습니다. */
+  source: string | null;
+  /** 그 자리 전체 길이. */
+  chars: number;
+}
+
 export interface ReportResponse {
   report_id: string;
   chart_id: string;
@@ -282,6 +300,16 @@ export interface ReportResponse {
   concern: string;
   cuts: ReportCut[];
   locked: LockedCut[];
+  /**
+   * 사람들이 제일 궁금해하는 네 자리 — 재물 · 사랑 · 운명 · 사람.
+   *
+   * ★ 무료 구간이 끝나는 자리는 안 편 것을 **목차로** 부르고 있었습니다 —
+   *   「4 · 지금 어디에」 「5 · 필요한 것」 「6 · 대운 맵」. 손님이 궁금한
+   *   말이 아닙니다. 여는 사실(`fact`)은 그 사람의 여덟 글자에서 **센 것**
+   *   이고, 답은 `head` 까지만 진짜로 오고 나머지는 `mask` **길이만**
+   *   옵니다. 흐린 게 아니라 여기 없습니다.
+   */
+  wants: WantRow[];
   /** 캐릭터의 여는 말·닫는 말. 렌더된 HTML 입니다. */
   opening: string | null;
   closing: string | null;

@@ -13,6 +13,7 @@ from engine import extras as extras_mod
 from engine import lens as lens_mod
 from engine.features import Features
 from engine.omnibus import build_omnibus
+from engine import peek as peek_mod
 from engine.report import build_report
 from routers.chart import load_features
 from schemas.api import ReportRequest, ReportResponse
@@ -131,6 +132,19 @@ def post_report(req: ReportRequest) -> ReportResponse:
     #   페이월에 적힌 이름이 달랐다는 뜻입니다. 이름도 한 벌입니다.
     for cut in data["locked"]:
         cut["need_tier_name"] = payments.TIER_NAME[cut["need_tier"]]
+
+    # ★ 안 편 자리를 **목차로 부르지 않습니다** (2026-09-04).
+    #
+    #   무료 6단 끝에서 「4 · 지금 어디에」 「5 · 필요한 것」 「6 · 대운 맵」
+    #   이라 적고 있었습니다. 그건 이 집이 컷을 세는 말입니다. 손님이
+    #   궁금한 것은 재물 · 사랑 · 운명 · 사람이고, 그 넷은 이미 그 사람의
+    #   여덟 글자 안에 **세어져** 있습니다. 세어 놓고 안 부르고 있었습니다.
+    #
+    #   본문은 여전히 안 내려갑니다 — 앞머리만 가고 나머지는 길이뿐입니다.
+    data["wants"] = peek_mod.build_wants(
+        f, data["locked"],
+        voice=(lens_mod.view(req.lens_id) or {}).get("voice"),
+        you=lens_mod.you_of(req.lens_id, req.name, getattr(f, "sex", None)))
 
     return ReportResponse(**data)
 

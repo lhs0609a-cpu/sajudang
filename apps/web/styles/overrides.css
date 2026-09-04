@@ -3081,6 +3081,14 @@ body.has-rail .beatskip-hint { left: calc(50% + 116px); }
   0%, 100% { background-position: 0% 0; }
   50%      { background-position: 100% 0; }
 }
+/* 궁금한 네 자리(d0) — 물음을 답 앞에 세웁니다.
+   ★ 물음과 앞머리가 한 줄에 붙어 있으면 어디까지가 물음인지 안 보입니다.
+      물음은 금빛, 답은 종이색 — 가린 칸이 어디서 시작하는지 눈에 잡힙니다. */
+.peek .pkask {
+  color: var(--gold); font-family: var(--serif);
+}
+.peek .pkask::after { content: " —"; color: var(--paper3); }
+
 .peek .pkmore {
   margin: 6px 0 0;
   font-family: var(--mono); font-size: var(--fs-1); color: var(--paper3);

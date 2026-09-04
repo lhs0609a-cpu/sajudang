@@ -287,6 +287,19 @@ function PayInner() {
      *   세 컷마다 한 번 가볍게 묻습니다. 응답은 이미 feedback 이 받습니다.
      */
     const cuts = free?.cuts ?? [];
+    /*
+     * ★ 안 편 자리를 **목차로 부르지 않습니다** (2026-09-04).
+     *
+     *   여기 「4 · 지금 어디에」 「5 · 필요한 것」 「6 · 대운 맵」 이라
+     *   적혀 있었습니다. 그건 이 집이 컷을 세는 말입니다. 「대운 맵」이
+     *   무엇인지 모르는 사람에게 그게 남았다고 해 봐야 아무것도 안
+     *   남습니다 — 값을 치를 까닭이 안 생깁니다.
+     *
+     *   손님이 궁금한 것은 **재물 · 사랑 · 운명 · 사람** 넷이고, 그 넷은
+     *   이미 그 사람의 여덟 글자 안에 세어져 있습니다. 세어 놓고 안
+     *   부르고 있었습니다 (engine/peek.build_wants).
+     */
+    const wants = free?.wants ?? [];
     const names = (free?.locked ?? []).map((l) => l.title).slice(0, 3);
     return (
       <Shell screen="d0" title="값 없이 한 겹 더">
@@ -346,10 +359,35 @@ function PayInner() {
                 막연한 미끼는 오히려 안 끌립니다. 제목은 이미 좋습니다.
             */}
             <Say who={charName} lens={s.cur} html={
-              names.length
+              wants.length
                 ? `아직 안 편 자리가 <b>${free.locked.length}</b> 남았소.<br>` +
-                  `「${names.join("」 「")}」${names.length >= 3 ? " …" : ""}`
-                : "여기까지가 값 없이 하는 얘기요."} />
+                  `그 중 넷은 <b>${wants.map((w) => w.want).join(" · ")}</b>이오.`
+                : names.length
+                  ? `아직 안 편 자리가 <b>${free.locked.length}</b> 남았소.<br>` +
+                    `「${names.join("」 「")}」${names.length >= 3 ? " …" : ""}`
+                  : "여기까지가 값 없이 하는 얘기요."} />
+            {/*
+              ★ 여는 줄(fact)은 **센 것**이라 대 볼 수 있고, 답은 앞머리만
+                진짜로 왔습니다. 흐린 칸은 글을 가린 게 아니라 **빈 칸**
+                입니다 — 서버가 안 보냈으니 브라우저를 뒤져도 안 나옵니다.
+                근거 줄은 안 가립니다. 그게 이 집이 값을 받는 방식입니다.
+            */}
+            {wants.map((w, i) => (
+              <div className="peek" key={w.want + i}>
+                <div className="pk">
+                  <b>{w.want}</b>
+                  <span dangerouslySetInnerHTML={{ __html: w.fact }} />
+                </div>
+                <p className="pkbody">
+                  <span className="pkask">{w.ask}</span> {w.head}
+                  <span className="pkmask" aria-label={`가려진 ${w.mask}자`}>
+                    {"▒".repeat(Math.min(22, Math.max(6, Math.round(w.mask / 12))))}
+                  </span>
+                </p>
+                {w.source && <span className="src">근거 · {w.source}</span>}
+                <p className="pkmore">여기서부터 <b>{w.mask}자</b>가 더 있소</p>
+              </div>
+            ))}
             {/*
               ★ 막을 끊는 줄이 없었습니다. 「아직 안 편 자리가 N 남았소」
                 는 수를 대지만 **다음 자리를 이름으로 안 부릅니다.**

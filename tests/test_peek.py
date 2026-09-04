@@ -135,3 +135,90 @@ def test_the_client_type_carries_no_answer():
     assert "mask: number" in block
     for bad in ("answer", "body:", "html:"):
         assert bad not in block, "엿보기 응답에 %s 가 있소" % bad
+
+
+# ── 손님한테 하는 말인가 ─────────────────────────────────
+#
+# ★ 손님이 짚은 것 (2026-09-04)
+#
+#   "이 부분은 당신한테 하는 말이어야지, 뭔 말이야 이게."
+#
+#   엿보기 넉 줄이 이랬습니다 —
+#
+#       풍운도령 「뿌리가 있는가」     나는 뿌리부터 보오. 뿌리가 있
+#       백운선사 「덥고 마른가…」      나는 십신을 세지 않소.
+#       청암거사 「격을 잡는다」       순서가 있소. 격을 먼저 잡고 그
+#       시계장이 「지금 어느 눈금인가」 나는 때를 보는 사람입니다.
+#
+#   넉 줄 전부 **화자가 자기 소개**를 하고 있고, 손님 얘기는 한 줄도
+#   없었습니다. 값을 치를지 정하는 자리에서 스무 사람이 돌아가며 제
+#   보는 법을 설명한 셈입니다.
+#
+#   까닭은 둘이었습니다 —
+#     ① 물음이 컷 **제목**이었습니다. 제목은 그 캐릭터가 제 보는 법에
+#        붙인 이름이라(「격을 잡는다」) 손님에게 하는 물음이 아닙니다.
+#     ② 앞머리가 **맛보기**에서 왔습니다. 맛보기는 컷의 앞 40%인데
+#        관점 컷은 거기가 통째로 여는 말(화자 얘기)입니다.
+
+SELF_TALK = re.compile(r"^(나는|내가|나도|저는|제가)\b")
+
+
+def _you_of(lid):
+    from engine.lens import you_of
+    return you_of(lid, "", "M")
+
+
+def test_the_peek_speaks_to_the_customer_not_about_the_speaker(f):
+    """앞머리가 화자의 자기 소개로 시작하면 안 된다."""
+    bad = [(r["lens_name"], r["head"])
+           for r in build_peek(f, "t", LENSES, "work", "INTJ", limit=6)
+           if SELF_TALK.match(r["head"])]
+    assert not bad, "엿보기가 제 얘기를 하오: %s" % bad
+
+
+def test_every_question_is_asked_of_the_customer(f):
+    """
+    ★ 물음은 **손님을 부르는 말**을 달고 나가야 합니다. 「격을 잡는다」는
+      목차지 물음이 아닙니다.
+    """
+    for lid in LENSES:
+        you = _you_of(lid)
+        for r in build_peek(f, "t", [lid], "work", "INTJ", limit=6):
+            assert you in r["ask"], (
+                "%s 의 물음에 손님이 없소: 「%s」" % (r["lens_name"], r["ask"]))
+
+
+def test_the_question_and_the_answer_call_the_customer_the_same_thing(f):
+    """물음은 「그대」인데 답은 「자네」면 한 상자에 부르는 사람이 둘이다."""
+    for lid in LENSES:
+        you = _you_of(lid)
+        for r in build_peek(f, "t", [lid], "work", "INTJ", limit=6):
+            for other in ("그대", "자네", "당신", "그쪽"):
+                if other == you:
+                    continue
+                assert other not in r["ask"], (
+                    "%s 가 「%s」라 부르오: %s" % (lid, other, r["ask"]))
+
+
+def test_a_particle_never_breaks_away_from_its_word(f):
+    """
+    ★ `<b>상관</b>이` 를 「상관 이」로 내보내면 손님 눈에는 오탈자입니다.
+      태그는 블록만 띄우고 인라인은 붙입니다.
+    """
+    bad = [r["head"] for r in build_peek(f, "t", LENSES, "work", "INTJ")
+           if re.search(r"[가-힣一-龥A-Za-z0-9]\s+[은는이가을를의로]\b", r["head"])]
+    assert not bad, "조사가 낱말에서 떨어졌소: %s" % bad
+
+
+def test_the_source_line_calls_the_customer_by_name_too(f):
+    """
+    ★ 근거의 이치는 「관성은 나를 누르는 자리라」 로 쓰여 있었습니다.
+      명리에서 그 「나」는 일간, 곧 **손님**입니다. 그런데 화면에서는
+      캐릭터가 말하는 상자 안이라 **제 얘기**로 읽혔습니다.
+    """
+    from engine.why import AXIS, GROUP, RULE, TEN_GOD
+    for table in (TEN_GOD, GROUP, RULE, AXIS):
+        for key, val in table.items():
+            line = val[0] if isinstance(val, tuple) else val
+            assert not re.search(r"(^|[^가-힣])(나를|나와|나에게|내가|내 편)", line), (
+                "근거의 이치가 제 얘기를 하오 — %s: %s" % (key, line))

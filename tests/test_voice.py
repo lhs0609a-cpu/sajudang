@@ -198,12 +198,46 @@ def test_the_evidence_line_keeps_its_own_voice(reports):
     """
     ★ 근거는 캐릭터가 바꾸지 않습니다. 여덟 글자는 하나입니다 —
       말하는 순서와 어조만 다릅니다. (seed/lens_view.json 의 머리말)
+
+    ★ 다만 **부르는 말**은 갈아 끼웁니다 (2026-09-04).
+
+      근거의 이치는 「관성은 나를 누르는 자리라」 로 쓰여 있었습니다.
+      명리에서 그 「나」는 일간, 곧 **손님**입니다. 그런데 화면에서는
+      캐릭터가 말하는 상자 안에 그 줄이 앉아, 읽는 사람에게는 **그
+      사람이 제 얘기를 하는 것**으로 읽혔습니다. 손님이 짚었습니다 —
+      "이 부분은 당신한테 하는 말이어야지, 뭔 말이야 이게."
+
+      그래서 이치 줄을 「그대」로 고쳐 쓰고 호칭을 갈아 끼웁니다.
+      **어미는 그대로입니다** — 바뀌는 것은 부르는 말뿐이라, 호칭을
+      도로 「그대」로 돌려놓으면 스무 벌이 글자 그대로 같아야 합니다.
+      이 검사가 그걸 셉니다.
     """
+    # ★ 풍운도령이 부르는 말이 곧 뱅크의 맨꼴입니다 — 「그대」 한 벌.
+    #   그러니 도령의 근거 줄에 호칭만 갈아 끼운 것이 나머지 열아홉과
+    #   **글자 그대로** 같아야 합니다. 되돌려 맞추지 않습니다 — 「그대가」
+    #   가 적혈랑에게서는 「네가」가 되어(어간까지 바뀝니다) 되돌릴 수가
+    #   없습니다. 앞으로 계산해서 맞춥니다.
+    assert lens_mod.you_of("pungun", "", "F") == "그대"
     base = {c["id"]: c["source"] for c in reports["pungun"]["cuts"]}
     for lid, rep in reports.items():
+        you = lens_mod.you_of(lid, "", "F")
         for c in rep["cuts"]:
             if c["id"] in base and not c["id"].startswith("lc_"):
-                assert c["source"] == base[c["id"]], (lid, c["id"])
+                assert c["source"] == V.address(base[c["id"]], you), (lid, c["id"])
+
+
+def test_the_evidence_line_never_says_I(reports):
+    """
+    ★ 근거 줄에서 「나」는 일간(손님)이라는 뜻이었지만, 캐릭터가 말하는
+      상자 안에서는 **화자**로 읽힙니다. 근거는 손님에게 하는 말입니다.
+    """
+    bad = []
+    for lid, rep in reports.items():
+        for c in rep["cuts"]:
+            src = c.get("source") or ""
+            if re.search(r"(^|[^가-힣])(나를|나와|나에게|내가|내 편)", src):
+                bad.append((lid, c["id"], src))
+    assert not bad, "근거가 제 얘기를 하오: %s" % bad[:3]
 
 
 # ══════════════════════════════════════════════════════════

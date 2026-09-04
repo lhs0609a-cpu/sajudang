@@ -132,26 +132,77 @@ TEASER_SHARE = 0.4
 _BAD_TAIL = "은는이가을를의에서도만과와로으며고나지야한할하며되"
 
 
+# 어려운 말 풀이. ★ 맛보기에서는 **걷고 셉니다** (2026-09-04).
+#
+#   「대운 맵」 컷의 맛보기가 이랬습니다 —
+#       대운(십 년마다 읽는 자리가 바뀌는 것)이오.
+#   맛보기는 본문의 40%까지만 냅니다. 그 40%를 **풀이가 다 먹어서**
+#   남는 말이 「대운 이오」 여섯 자였습니다. 풀이를 걷어 내는 자리
+#   (engine/peek)에서는 아예 빈 줄이 되어, 「판이 바뀌는 나이」가
+#   엿보기와 네 자리에서 **통째로 사라졌습니다.**
+#
+#   ★ 그렇다고 풀이를 **빼서** 내면 안 됩니다. 맛보기는 본문에 그대로
+#     있는 말이어야 합니다 (tests/test_api.test_teaser_is_a_real_prefix).
+#     빼고 이으면 값을 치른 뒤 그 문장이 본문에 없습니다.
+#
+#   그래서 걷어서 **세기만** 하고, 낼 때는 있는 그대로 냅니다 —
+#   풀이가 먹은 만큼 자리를 넓혀 줍니다. 넘겨주는 분량은 그대로입니다.
+_GLOSS = _re.compile(r'<i class="gl">.*?</i>', _re.S)
+# 세는 자리에서만 지우는 표. 글자 수는 같게 두어 자리가 안 밀립니다.
+_MARK = chr(0xE000)   # 사(私)용 구역 — 본문에 절대 안 나오는 글자
+
+
+def _marked(html: str) -> str:
+    """풀이 자리를 같은 길이의 표로 바꾼 글. **세는 데만** 씁니다."""
+    def one(m):
+        return _MARK * len(_plain(m.group(0)))
+    return _plain(_GLOSS.sub(one, html or ""))
+
+
+def _bare_len(text: str) -> int:
+    """풀이를 뺀 길이. 넘겨준 분량은 이걸로 셉니다."""
+    return len(text) - text.count(_MARK)
+
+
+def _upto(marked: str, want: int) -> int:
+    """풀이를 안 세고 `want` 자를 담는 자리까지의 **글자 위치**."""
+    i = n = 0
+    while i < len(marked) and n < want:
+        if marked[i] != _MARK:
+            n += 1
+        i += 1
+    # 바로 뒤에 풀이가 붙어 있으면 그것까지 안고 갑니다 —
+    # 반쯤 잘린 풀이를 내보내면 「대운 (십 년마다 바뀌는」 이 됩니다.
+    while i < len(marked) and marked[i] == _MARK:
+        i += 1
+    return i
+
+
 def _teaser(html: str) -> Optional[str]:
     """잠긴 컷의 첫 줄. 본문이 아니라 **맛보기**입니다."""
     text = _plain(html)
-    if len(text) < TEASER_MIN:
+    mark = _marked(html)
+    # 표를 붙이다 길이가 틀어지면(공백이 줄어드는 자리) 세는 것만 물러섭니다.
+    if len(mark) != len(text):
+        mark = text
+    if _bare_len(mark) < TEASER_MIN:
         return None
 
-    limit = min(TEASER_MAX, int(len(text) * TEASER_SHARE))
-    if limit < TEASER_MIN:
+    want = min(TEASER_MAX, int(_bare_len(mark) * TEASER_SHARE))
+    if want < TEASER_MIN:
         return None
+    limit = _upto(mark, want)
 
     # 첫 문장이 한도 안에 끝나면 문장째로 줍니다.
     m = _re.search(r"[.!?…]", text[:limit + 6])
-    if m and m.end() >= TEASER_MIN and m.end() <= limit + 6:
+    if m and _bare_len(mark[:m.end()]) >= TEASER_MIN and m.end() <= limit + 6:
         return text[:m.end()].strip()
 
     head = text[:limit].rstrip()
     # 명사 뒤로 물러섭니다. 조사에서 끊긴 채로 내보내지 않습니다.
-    while len(head) > TEASER_MIN and head[-1] in _BAD_TAIL:
+    while _bare_len(mark[:len(head)]) > TEASER_MIN and head[-1] in _BAD_TAIL:
         head = head[:-1].rstrip()
-    if len(head) < TEASER_MIN:
+    if _bare_len(mark[:len(head)]) < TEASER_MIN:
         head = text[:limit].rstrip()
     return head + " —"
 
@@ -484,7 +535,13 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         _why.line("대운수 %d · %s" % (f.daeun[0]["start_age"],
                                     "순행" if f.forward else "역행"),
                   "대운", ""),
-        ('<p class="tale">대운 (십 년마다 바뀌는 큰 마디) 이오. '
+        # ★ 풀이를 **두 번** 달고 있었습니다 (2026-09-04).
+        #   여기 손으로 「(십 년마다 바뀌는 큰 마디)」 를 달아 두었는데,
+        #   어려운 말 풀이가 「대운」 에 자동으로 또 답니다. 화면에는
+        #   「대운(십 년마다 읽는 자리가 바뀌는 것) (십 년마다 바뀌는
+        #   큰 마디) 이오」 로 나갔습니다. 맛보기 40%를 풀이 둘이
+        #   다 먹어서 「대운 이오」 여섯 자만 남기도 했습니다.
+        ('<p class="tale">대운이오. '
          '한 칸이 십 년이고, 칸은 모두 <b>%d개</b>요.</p>'
          '<p class="tale">%s</p>'
          '<p class="tale">칸 위의 수는 그 칸이 <b>시작되는 나이</b>요. '
@@ -1058,7 +1115,21 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
         c["html"] += voice_mod.speak(
             voice_mod.address(terms_mod.picture_box(seen - before), you),
             tone)
+        # ★ 근거 줄에도 **호칭만** 갈아 끼웁니다 (2026-09-04).
+        #
+        #   근거의 이치는 「관성은 나를 누르는 자리라」 처럼 쓰여 있었습니다.
+        #   명리에서 그 「나」는 일간, 곧 **손님**입니다. 그런데 화면에서는
+        #   백운선사가 말하는 상자 안에 그 줄이 들어가 있어, 읽는 사람에게는
+        #   **선사가 제 얘기를 하는 것**으로 읽혔습니다.
+        #
+        #   그래서 이치 줄을 「그대」로 고쳐 쓰고, 여기서 호칭을 갈아
+        #   끼웁니다. **어미는 안 건드립니다** — 근거는 캐릭터가 바꾸지
+        #   않습니다. 여덟 글자는 하나이고, 바뀌는 것은 부르는 말뿐입니다.
+        if c.get("source"):
+            c["source"] = voice_mod.address(c["source"], you)
     for l in locked:
+        if l.get("source"):
+            l["source"] = voice_mod.address(l["source"], you)
         if l.get("teaser"):
             # 맛보기도 손님이 읽는 글입니다. 같은 층을 태웁니다.
             # ★ seen 을 나눠 쓰지 않습니다 — 페이월은 본문과 따로

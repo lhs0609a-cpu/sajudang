@@ -117,6 +117,11 @@ class ReportResponse(BaseModel):
     concern: str
     cuts: list
     locked: list
+    # ★ 사람들이 제일 궁금해하는 네 자리 — 재물 · 사랑 · 운명 · 사람.
+    #   무료 구간이 끝나는 자리에서 **목차 대신** 이걸 냅니다.
+    #   여는 사실은 그 사람의 여덟 글자에서 센 것이고, 답은 앞머리만
+    #   진짜로 가고 나머지는 **길이만** 갑니다 (engine/peek.build_wants).
+    wants: list = []
     # ★ 캐릭터의 여는 말·닫는 말. 여기 없으면 응답에서 조용히 버려집니다 —
     #   실제로 그렇게 되고 있었고, 스무 명의 목소리 중 처음과 끝이 화면에
     #   닿지 않았습니다. (engine/lens.view 의 open/close)

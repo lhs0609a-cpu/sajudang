@@ -579,3 +579,36 @@ def owned(lens_id: str) -> int:
 
 def all_ids() -> list:
     return [c["id"] for cuts in _table().get("cuts", {}).values() for c in cuts]
+
+
+@lru_cache(maxsize=1)
+def _by_id() -> dict:
+    return {c["id"]: c
+            for cuts in _table().get("cuts", {}).values() for c in cuts}
+
+
+def spec_of(cut_id: str) -> Optional[dict]:
+    """관점 컷의 원본 명세. 모르는 열쇠면 None — 지어내지 않습니다."""
+    return _by_id().get(cut_id)
+
+
+def axis_of(cut_id: str) -> Optional[str]:
+    """
+    이 관점 컷이 **무엇을 재는가** (첫 축).
+
+    ★ 엿보기가 이걸 봅니다. 컷 제목은 이 집이 쓰는 목차 이름이라
+      (「격을 잡는다」) 손님에게 물음이 안 됩니다. 축은 그 컷이 실제로
+      재는 자리이니, 그걸로 손님에게 하는 물음을 고릅니다.
+    """
+    spec = _by_id().get(cut_id) or {}
+    return ((spec.get("a") or {}).get("axis")) or None
+
+
+def lead_of(cut_id: str) -> str:
+    """
+    여는 말 — **캐릭터가 제 보는 법을 말하는 자리**입니다.
+
+    「나는 뿌리부터 보오」 처럼 손님이 아니라 화자 얘기라, 엿보기에서는
+    이만큼을 건너뛰고 손님 얘기부터 냅니다.
+    """
+    return ((_by_id().get(cut_id) or {}).get("lead")) or ""
