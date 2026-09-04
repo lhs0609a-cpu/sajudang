@@ -180,7 +180,7 @@ function SceneFigure({ lens }: { lens?: string }) {
   useEffect(() => {
     if (!l) return;
     let alive = true;
-    fetch(`/char/${l.id}/bust.png`, { method: "HEAD" })
+    fetch(`/char/${l.id}/bust.webp`, { method: "HEAD" })
       .then((r) => { if (alive) setHas(r.ok); })
       .catch(() => {});
     return () => { alive = false; };
@@ -189,7 +189,12 @@ function SceneFigure({ lens }: { lens?: string }) {
   return (
     <span className="scenefig">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`/char/${l.id}/bust.png`} alt={l.name} />
+      {/* ★ 웹피가 없으면 PNG 로 물러섭니다 — 옛 그림이 그대로 삽니다. */}
+      <img src={`/char/${l.id}/bust.webp`} alt={l.name}
+           onError={(e) => {
+             const im = e.currentTarget;
+             if (!im.src.endsWith(".png")) im.src = `/char/${l.id}/bust.png`;
+           }} />
     </span>
   );
 }

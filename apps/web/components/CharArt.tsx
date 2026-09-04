@@ -14,7 +14,7 @@
  *   파일이 있으면 그걸 쓰고, 없으면 자리표시로 버팁니다. 코드를 안 고치고
  *   `/public/char/{id}/` 에 넣기만 하면 그때부터 그게 나옵니다.
  *
- *     public/char/{id}/bust.png     768×1024 투명 PNG · 눈높이 y=380
+ *     public/char/{id}/bust.webp    768×1024 투명 · 눈높이 y=380
  *     public/char/{id}/clip.webm    움직이는 초상 (선택)
  *     public/char/{id}/poster.jpg   clip 의 첫 프레임
  *
@@ -45,10 +45,21 @@ type Size = "chip" | "talk" | "card" | "full";
  */
 export type Mood = "base" | "cut" | "soft";
 
-const FILE: Record<Mood, string> = {
-  base: "bust.png",
-  cut: "bust_cut.png",     // 짚는 얼굴 — 훅 찌르기
-  soft: "bust_soft.png",   // 누그러뜨리는 얼굴 — 만류·마무리
+/*
+ * ★ 초상은 **웹피**로 옵니다 (2026-09-04).
+ *
+ *   PNG 로는 768×1024 한 장이 800KB 였습니다. 스무 명이면 16MB 이고,
+ *   첫 장은 손님이 도령의 첫 마디를 읽기도 전에 받습니다. 팔레트로
+ *   줄이는 길은 재 보고 접었습니다 — 볼의 홍조가 사라지고 이마에 띠가
+ *   생깁니다. 꼴을 바꾸니 80~110KB 로 갑니다 (tools/place_char).
+ *
+ *   ★ PNG 로 물러섭니다. 옛 그림이 그대로 살고, 새로 넣는 것만
+ *     가벼워집니다.
+ */
+const FILE: Record<Mood, string[]> = {
+  base: ["bust.webp", "bust.png"],
+  cut: ["bust_cut.webp", "bust_cut.png"],     // 짚는 얼굴 — 훅 찌르기
+  soft: ["bust_soft.webp", "bust_soft.png"],  // 누그러뜨리는 얼굴 — 만류·마무리
 };
 
 const BOX: Record<Size, { w: number; h: number }> = {
@@ -67,18 +78,27 @@ function useBust(id: string, mood: Mood) {
   const [src, setSrc] = useState<string | null | undefined>(undefined);
   useEffect(() => {
     let alive = true;
-    const want = `/char/${id}/${FILE[mood]}`;
-    const base = `/char/${id}/bust.png`;
     const ok = (u: string) =>
       fetch(u, { method: "HEAD" }).then((r) => r.ok).catch(() => false);
+    const first = async (names: string[]) => {
+      for (const n of names) {
+        const u = `/char/${id}/${n}`;
+        if (await ok(u)) return u;
+      }
+      return null;
+    };
 
     (async () => {
       // 그 표정이 있으면 그걸, 없으면 기본 얼굴로 내려옵니다.
-      if (mood !== "base" && (await ok(want))) {
-        if (alive) setSrc(want);
-        return;
+      if (mood !== "base") {
+        const want = await first(FILE[mood]);
+        if (want) {
+          if (alive) setSrc(want);
+          return;
+        }
       }
-      if (alive) setSrc((await ok(base)) ? base : null);
+      const base = await first(FILE.base);
+      if (alive) setSrc(base);
     })();
     return () => { alive = false; };
   }, [id, mood]);

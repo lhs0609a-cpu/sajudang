@@ -98,7 +98,7 @@ function rows(): Row[] {
   for (const l of LENSES) {
     out.push({
       kind: "char", id: l.id, name: l.name,
-      img: [`/char/${l.id}/bust.png`],
+      img: [`/char/${l.id}/bust.webp`, `/char/${l.id}/bust.png`],
       clip: [`/char/${l.id}/clip.webm`],
       at: "b2 스무 사람 · b3 그 사람", href: "/lobby?tab=b2",
     });

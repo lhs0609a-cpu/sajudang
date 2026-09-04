@@ -28,7 +28,19 @@ MAX_KB = 300
 def busts():
     if not CHAR.is_dir():
         return []
-    return sorted(CHAR.glob("*/bust.png"))
+    # ★ 웹피를 먼저 봅니다 (2026-09-04).
+    #
+    #   PNG 로는 한 장이 800KB 라 300KB 한도를 못 지킵니다. 팔레트로
+    #   줄이면 얼굴이 평평해져서(tools/place_char.slim) 꼴을 바꿨습니다.
+    #   한 사람에 둘이 다 있으면 웹피만 셉니다 — 화면도 그 차례로 찾습니다.
+    out = []
+    for d in sorted(CHAR.glob("*")):
+        for name in ("bust.webp", "bust.png"):
+            p = d / name
+            if p.exists():
+                out.append(p)
+                break
+    return out
 
 
 @pytest.mark.skipif(not busts(), reason="아직 들어온 초상이 없습니다")
