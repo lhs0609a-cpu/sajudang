@@ -43,9 +43,15 @@ sys.path.insert(0, str(ROOT / "services" / "api"))
 from engine import screenscan as S                     # noqa: E402
 
 # 셀 수 있는 것 — 손님이 세어 보고 다르면 우리가 지는 말
+# ★ 한글에는 `\b` 가 안 듣습니다 (2026-09-04).
+#
+#   「표 하나로」 「손이 한 번」 의 수사가 안 잡혔습니다. `\b(하나)\b`
+#   는 뒤에 조사 「로」 가 붙으면 낱말 경계가 아니라고 봅니다 — 한글은
+#   조사가 붙어 다니므로 뒤쪽 경계를 걸면 거의 다 놓칩니다.
+#   앞만 봅니다.
 COUNTABLE = re.compile(
     r"[0-9]|하나도 없|없소|없어요|없습니다|"
-    r"\b(하나|둘|셋|넷|다섯|여섯|일곱|여덟|아홉|열)\b|"
+    r"(?:^|[\s(「『·—-])(하나|둘|셋|넷|다섯|여섯|일곱|여덟|아홉|열|한 번|두 번)|"
     r"몇|살이|년은|자리가")
 
 # ★ 수만 뼈를 때리는 게 아닙니다 (2026-09-04).
@@ -80,7 +86,23 @@ EDGE = 2
 #   연출 점수의 당김이 그걸 보고 「콜드 오픈」 으로 셉니다. 지문을
 #   없애면 당김이 죽습니다. 그러니 지문은 두고, **그 다음 줄**이
 #   뼈를 때리는지를 봅니다.
-HEAD = 3
+#
+#   넷인 까닭 — 이 집의 화면은 차례가 정해져 있습니다.
+#       ① 지문 (장면)      「붓이 저 혼자 떠올랐다.」
+#       ② 지문 (한 줄 더)  「종이는 아직 비어 있다.」
+#       ③ 인사·물음        「처음 뵙겠소. 그대를 뭐라 적으면 되겠소?」
+#       ④ **뼈**           「여태 이런 칸에서 가짜 이름을 적어 본 적이 있소.」
+#   ③ 을 없애면 손님은 왜 묻는지 모른 채 답부터 듣습니다. 그러니
+#   넷째 줄까지가 「처음」 입니다. 다섯째부터는 늦습니다.
+HEAD = 4
+
+
+# 손님이 누르는 말 — 「…하겠습니다」. 화면의 **끝**이 아니라 손잡이입니다.
+#
+# ★ 끝 고리를 재는데 마지막 줄이 늘 버튼이었습니다. 버튼은 이 집의
+#   말이 아니라 손님의 말이고(CLAUDE.md), 막을 끊는 줄은 그 **위**에
+#   있습니다. 버튼을 끝으로 보면 어느 화면이나 「고리가 없다」 가 됩니다.
+BUTTON = re.compile(r"(습니다|겠소|시오)$")
 
 
 def lines(text: str) -> list:
@@ -88,13 +110,33 @@ def lines(text: str) -> list:
     return [x for x in out if len(x) > 4]
 
 
+def body_lines(text: str) -> list:
+    """끝에 붙은 버튼 말을 걷어낸 줄들."""
+    ls = lines(text)
+    while ls and BUTTON.search(ls[-1]) and len(ls[-1]) < 30:
+        ls.pop()
+    return ls
+
+
 def main() -> int:
     show = "--show" in sys.argv
     S._screens.cache_clear()
     rows = S.scan_all()
-    text = {}
+    text, named = {}, {}
     for sid, v in S._screens().items():
         text[sid] = v[0]
+        # ★ 예고는 **선언**으로도 옵니다 (2026-09-04).
+        #
+        #   화면은 「다음 자리 — 「글자가 서다」」 로 그려지는데, 그 글자는
+        #   `ActOut.tsx` 안에 있고 화면 파일에는 `next="글자가 서다"` 라는
+        #   **속성**으로만 있습니다. 속성은 태그 안이라 글 긁는 자에 안
+        #   걸립니다.
+        #
+        #   그래서 「끝이 다음을 안 가리킨다」 로 잡힌 열둘 중 여럿이
+        #   실은 **이름까지 대고 있었습니다.** screenscan 이 이미 읽어
+        #   두었으니(ACT_NEXT) 그 값을 씁니다 — 같은 것을 두 번 읽으면
+        #   두 잣대가 갈립니다.
+        named[sid] = v[2]
     eng = S._engine_text()
     for sid, html in eng.items():
         text[sid] = html + " " + text.get(sid, "")
@@ -110,13 +152,16 @@ def main() -> int:
     bad_head, bad_tail = [], []
     for r in rows:
         sid = r["id"]
-        ls = lines(re.sub(r"<[^>]+>", " ", text.get(sid, "")))
+        plain = re.sub(r"<[^>]+>", " ", text.get(sid, ""))
+        ls = lines(plain)
         if not ls:
             continue
         head = " ".join(ls[:HEAD])
-        tail = " ".join(ls[-EDGE:])
+        # 끝은 **버튼을 걷고** 봅니다
+        tl = body_lines(plain) or ls
+        tail = " ".join(tl[-EDGE:])
         h = bool(COUNTABLE.search(head)) or bool(OBSERVED.search(head))
-        t = bool(HOOK.search(tail))
+        t = bool(HOOK.search(tail)) or bool(named.get(sid))
         if not h:
             bad_head.append((sid, r["title"], head))
         if not t:
@@ -128,6 +173,7 @@ def main() -> int:
                 print("        첫 : %s" % head[:66])
             if not t:
                 print("        끝 : %s" % tail[:66])
+                print("             (다음 자리를 이름으로 안 부르오)")
 
     print()
     print("-" * 76)

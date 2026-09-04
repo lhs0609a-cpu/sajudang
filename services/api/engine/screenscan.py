@@ -154,6 +154,68 @@ HAS_WORD = re.compile(r"[가-힣0-9]")
 #   있었습니다. 그런데 화면에서 가장 센 문장이 대개 그런 문장입니다 —
 #   수가 박힌 문장이라서요. 값 자리를 ▮ 로 바꾸고 글은 살립니다.
 BRACE = re.compile(r"\{[^{}]*\}")
+
+# ★ 겹친 중괄호에서 코드가 새고 있었습니다 (2026-09-04).
+#
+#   `BRACE` 는 겹치지 않은 `{…}` 만 잡습니다. 그런데 화면 글은 이렇게
+#   생긴 자리가 많습니다 —
+#
+#       {s.name ? `${s.name}. 무엇이 걸려서 예까지 왔소?`
+#                : "무엇이 걸려서 예까지 왔소?"}
+#
+#   안쪽 `${…}` 때문에 짝이 안 맞아 통째로 못 걸리고, 그러면 자가
+#   「{s.name ?」 「`$ ▮ .」 같은 **코드 조각을 대사로** 읽습니다.
+#   동시에 진짜 대사(「무엇이 걸려서 예까지 왔소?」)는 그 조각에 묻힙니다.
+#
+#   그래서 짝을 세어 통째로 집고, **그 안의 글만** 건져 냅니다.
+#   두 갈래가 있으면 긴 쪽을 씁니다 — 손님이 이름을 적었을 때가 보통이고,
+#   그쪽이 더 많은 말을 합니다.
+_STR_IN = re.compile(r'"([^"\\]{2,300})"|\'([^\'\\]{2,300})\'|`([^`]{2,300})`',
+                     re.S)
+
+
+def _one_brace(body: str) -> str:
+    """중괄호 한 덩이에서 읽을 글만. 없으면 값 자리표."""
+    best = ""
+    for m in _STR_IN.finditer(body):
+        t = (m.group(1) or m.group(2) or m.group(3) or "")
+        if re.search(r"[가-힣]", t) and len(t) > len(best):
+            best = t
+    if not best:
+        return " ▮ "
+    # 글 안의 값 자리(${…})는 자리표로
+    return " " + re.sub(r"\$\{[^{}]*\}", "▮", best) + " "
+
+
+def mask_braces(chunk: str) -> str:
+    """짝을 세어 `{…}` 를 통째로 집고 안의 글만 남긴다."""
+    out, i, n = [], 0, len(chunk)
+    while i < n:
+        c = chunk[i]
+        if c != "{":
+            out.append(c)
+            i += 1
+            continue
+        depth, j, q = 1, i + 1, ""
+        while j < n and depth:
+            ch = chunk[j]
+            if q:
+                if ch == q and chunk[j - 1] != chr(92):
+                    q = ""
+            elif ch in "\"'`":
+                q = ch
+            elif ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+            j += 1
+        if depth:                      # 짝이 없으면 그냥 둡니다
+            out.append(c)
+            i += 1
+            continue
+        out.append(_one_brace(chunk[i + 1:j - 1]))
+        i = j
+    return "".join(out)
 # 접힌 것을 여는 손잡이 — 「왜 묻소?」 는 표지판이지 본문이 아닙니다.
 #   본문으로 세면 그 화면의 첫 줄이 표지판이 됩니다.
 SUMMARY = re.compile(r"<summary>.*?</summary>", re.S)
@@ -190,10 +252,29 @@ def _next_named(chunk: str) -> Optional[str]:
 
 def _readable(chunk: str) -> str:
     """코드 조각에서 손님이 읽는 한국어만 긁어낸다."""
+    # ★ 덩이 전체에 씌우면 안 됩니다. `{named && (<p>…</p>)}` 처럼
+    #   **JSX 를 감싼 중괄호**까지 통째로 걷혀 글이 사라집니다.
+    #   조각 하나하나에만 씌웁니다 (아래 mask_braces).
     chunk = FOLD_LABEL.sub(" ", SUMMARY.sub(" ", chunk))
+    # ★ **자리 순서대로** 읽습니다 (2026-09-04).
+    #
+    #   전에는 따옴표 글(TSX_STR)을 **먼저 다 긁고** 그다음에 태그 사이
+    #   글(JSX_TEXT)을 긁었습니다. 그러면 화면마다 —
+    #
+    #       나레이션(따옴표 배열) → 전부 앞으로
+    #       대사·문단(태그 사이)  → 전부 뒤로
+    #
+    #   실제 화면은 그 순서가 아닙니다. 그래서 「첫 줄이 무엇인가」 를
+    #   물으면 어느 화면이나 지문이 나왔고, 대사에 박아 둔 수는 스무
+    #   줄째로 밀렸습니다. 콜드 오픈·당김도 같은 자리를 잘못 봤습니다.
+    #
+    #   자리(m.start())로 줄을 세웁니다. 이러면 자가 읽는 차례가 손님이
+    #   읽는 차례와 같아집니다.
     out = []
-    for m in list(TSX_STR.finditer(chunk)) + list(JSX_TEXT.finditer(chunk)):
-        t = re.sub(r"\s+", " ", BRACE.sub(" ▮ ", m.group(1))).strip()
+    found = sorted(list(TSX_STR.finditer(chunk)) + list(JSX_TEXT.finditer(chunk)),
+                   key=lambda m: m.start())
+    for m in found:
+        t = re.sub(r"\s+", " ", mask_braces(m.group(1))).strip()
         if not re.search(r"[가-힣]", t):
             continue
         # 클래스 이름·주소·키는 글이 아닙니다
@@ -211,6 +292,27 @@ def _readable(chunk: str) -> str:
         if t not in seen:
             seen.add(t)
             uniq.append(t)
+    # ★ 굵게 쓴 데서 잘린 한 문장을 도로 잇습니다 (2026-09-04).
+    #
+    #   화면 글은 이렇게 생겼습니다 —
+    #       그대가 태어난 <b>날</b> 하나면 되오.
+    #   태그 사이 글을 긁으면 「그대가 태어난」 「날」 「하나면 되오.」
+    #   세 조각이 됩니다. 브라우저에서는 **한 문장**인데 자는 셋으로
+    #   봅니다. 그러면 —
+    #       첫 줄     「그대가 태어난」 이 첫 줄이 되어 뜻이 없고
+    #       줄길이    한 줄이 세 자짜리로 잡혀 「조각 줄」 로 세어지고
+    #       읽기속도  문단 수가 부풀어 숨 쉴 자리가 있는 것처럼 보입니다
+    #
+    #   문장부호로 끝나지 않은 조각은 다음 것과 잇습니다.
+    joined, buf = [], ""
+    for t in uniq:
+        buf = (buf + " " + t).strip() if buf else t
+        if re.search(r"[.!?…:]$", buf) or len(buf) > 300:
+            joined.append(buf)
+            buf = ""
+    if buf:
+        joined.append(buf)
+    uniq = joined
     # ★ 조각 사이는 **줄바꿈**으로 잇습니다.
     #
     #   여기서 나오는 조각 하나하나가 화면에서는 따로 앉는 덩이입니다
