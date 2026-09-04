@@ -451,7 +451,22 @@ def figure(html: str, cut_id: str, pick: int) -> str:
     # 이미 그림이 있으면 안 답니다 — 한 컷에 둘이면 글이 늘어집니다.
     if _FIG_HAVE.search(re.sub(r"<[^>]+>", " ", html)):
         return html
-    return html + " " + rows[pick % len(rows)]
+    return html + wrap_fig(rows[pick % len(rows)])
+
+
+def wrap_fig(line: str) -> str:
+    """
+    비유를 **제 상자**에 담는다.
+
+    ★ 전에는 맨몸으로 붙였습니다 — `html + " " + 그림`. `</p>` 뒤에
+      붙은 이름 없는 글이라 문단도 상자도 아니어서, 화면에서는 앞
+      문단에 그대로 이어 붙은 한 줄로 보였습니다. 비유는 한 걸음
+      물러서서 다른 목소리로 말하는 자리인데 그게 안 보였습니다.
+
+      덤으로 눈이 쉬는 자리가 하나 생깁니다 — 한 컷이 줄글로만
+      스무 줄 이어지던 자리들이 여기서 갈립니다 (typo._BREAK).
+    """
+    return '<p class="fig">%s</p>' % (line or "").strip()
 
 
 # ── 관점 컷의 그림 ────────────────────────────────────────
@@ -498,4 +513,4 @@ def lc_figure(html: str, nth: int, pick: int) -> str:
     if _FIG_HAVE.search(re.sub(r"<[^>]+>", " ", html)):
         return html
     rows = LC_FIGURE[nth]
-    return html + " " + rows[pick % len(rows)]
+    return html + wrap_fig(rows[pick % len(rows)])

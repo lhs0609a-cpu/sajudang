@@ -39,11 +39,23 @@ from engine import screenscan as S                     # noqa: E402
 FOLD = re.compile(r"<Fold\b.*?</Fold>", re.S)
 
 
-def test_접힌_글은_분량에서_빠진다():
+def test_접힌_글은_읽는_시간에서_빠진다():
+    """
+    ★ 자가 바뀌었습니다 (2026-09-04).
+
+      손님이 정했습니다 — "페이지가 길면 괜찮은데 한 화면에 글자 꽉
+      채우면 안 돼." 그래서 **총 분량에 매기던 점수를 걷어냈습니다.**
+      길이는 죄가 아닙니다. 읽기속도는 이제 「가장 큰 상자가 한 화면을
+      넘는가」를 봅니다 (dramaturgy.FILL_*).
+
+      접힌 글은 여전히 빠집니다 — 다만 점수가 아니라 **읽는 시간**
+      에서요. 그 수는 주인 자리에 그대로 뜹니다. 접힌 글의 강조도
+      안 셉니다 (screenscan.MARK 는 FOLD 를 먼저 걷어냅니다).
+    """
     html = "<p>" + ("가" * 600) + "</p>"
     full = D.score("t", "재보기", html, "input")
     half = D.score("t", "재보기", html, "input", folded=300)
-    assert half["pace"] > full["pace"], "접어도 분량이 그대로요"
+    assert half["secs"] < full["secs"], "접어도 읽는 시간이 그대로요"
     # 다른 축은 그대로 — 접힌 글도 편 사람은 읽습니다
     for k in ("bite", "heart", "figure", "clear"):
         assert half[k] == full[k], "%s 가 접기로 움직이오" % k
@@ -51,12 +63,13 @@ def test_접힌_글은_분량에서_빠진다():
 
 def test_분량_상한이_실제로_문다():
     """
-    ★ 상한이 헐거우면 축이 있으나 마나입니다. 적는 자리에 900자를
-      쏟았는데 만점이 나오면 안 됩니다.
+    ★ 상한이 헐거우면 축이 있으나 마나입니다. 한 상자에 900자를
+      **안 끊고** 쏟았는데 만점이 나오면 안 됩니다 — 그 하나로
+      화면이 한 번 반 넘게 찹니다.
     """
     long_input = "<p>" + ("가" * 900) + "</p>"
     got = D.score("t", "재보기", long_input, "input")
-    assert got["pace"] < 70, "적는 자리에 900자인데 분량이 %d점이오" % got["pace"]
+    assert got["pace"] < 70, "한 상자에 900자인데 %d점이오" % got["pace"]
 
 
 def test_자가_접힌_글을_갈라_센다():

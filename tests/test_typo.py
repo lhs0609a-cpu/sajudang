@@ -115,13 +115,33 @@ def test_the_last_line_of_a_paragraph_may_be_short():
     assert not any("조각 줄" in m for m in got["missing"])
 
 
-def test_pace_reads_the_screen_kind():
-    """입력 화면에 리포트만큼 쏟으면 방해다. 읽는 자리는 길어도 된다."""
-    long_ = "가나다라마바사아자차 " * 120
-    body = "".join("<p>%s</p>" % ("가나다라마바사아자차 " * 4) for _ in range(30))
-    assert D.score("t", "입력", body, kind="input")["pace"] < \
-        D.score("t", "읽기", body, kind="read")["pace"]
-    assert len(long_) > 0
+def test_긴_페이지는_죄가_아니고_꽉_찬_한_화면이_죄다():
+    """
+    ★ 손님이 정한 것 (2026-09-04)
+
+      "페이지가 길면 괜찮은데 한 화면에 글자 꽉 채우면 안 돼."
+
+      전에는 화면 종류마다 **총 읽는 시간 상한**을 두었습니다
+      (input 45초 · read 240초). 그 자는 길이에 벌을 주었습니다.
+      실제로 무엇을 짚었나 보니 —
+
+          c4 페이월  1,377자 · 읽기속도 40점
+                     그런데 가장 큰 상자는 **네 줄**(한 화면의 0.18)
+
+      상자 마흔일곱 개로 잘 나뉘어 있는데 총합이 길다고 벌을 받고
+      있었습니다. 이제는 **가장 큰 상자**만 봅니다.
+    """
+    one = "가나다라마바사아자차 " * 4              # 한 상자 40자 남짓
+    # ① 길다 — 그러나 상자 서른 개로 갈렸다
+    split = "".join('<p class="fig">%s</p>' % one for _ in range(30))
+    # ② 짧다 — 그러나 한 상자에 다 들었다
+    wall = "<p>%s</p>" % ("가나다라마바사아자차 " * 40)
+    assert len(split) > len(wall), "표본이 뒤집혔소"
+    assert D.score("t", "긴 글", split, kind="read")["pace"] == 100
+    assert D.score("t", "벽", wall, kind="read")["pace"] < 60
+    # ★ 화면 종류로 갈리지 않소 — 길이는 어느 자리에서도 죄가 아니오
+    assert D.score("t", "적는 자리", split, kind="input")["pace"] == \
+        D.score("t", "읽는 자리", split, kind="read")["pace"]
 
 
 def test_seconds_is_reported():

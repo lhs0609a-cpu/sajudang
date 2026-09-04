@@ -337,7 +337,12 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
             #   했습니다 (2026-09-03). 손님은 그 칸이 무엇인지 모릅니다.
             #   글자마다 그림이 있으니 그것을 답니다 — 셈은 맞는데
             #   읽을 수가 없던 자리입니다.
-            + (' <span class="gz-pic">%s</span>'
+            # ★ 문단 꼬리에 인라인으로 달려 있었습니다 (2026-09-04).
+            #   그림은 방금 한 말을 **다른 눈으로 다시 보여 주는**
+            #   자리인데, 같은 문단 끝에 이어 붙으니 그냥 문장이 하나
+            #   더 늘어난 것으로 보였습니다. 비유 줄과 같은 자리를
+            #   줍니다 (.fig) — 덤으로 눈이 쉬는 데가 하나 생기오.
+            + ('</p><p class="fig gz">%s'
                % terms_mod.ganji_picture(rr["ilju"]["gz"])),
             R["note"].format(sample=format(rr["sample"], ",")))),
         0, sid="rarity:%s:%s" % (rr["key"], rr["ilju"]["gz"])))
