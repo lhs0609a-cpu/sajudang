@@ -39,7 +39,7 @@ import { api, ApiError } from "@/lib/api";
 import { LENS_BY_ID } from "@/lib/lenses";
 import { CONCERNS, seasonOf, useSession, type Concern } from "@/lib/store";
 import { SEASON_PALETTE } from "@/components/scene/manifest";
-import type { HookSegment } from "@shared/chart";
+import type { Features, HookSegment } from "@shared/chart";
 
 type Step = "a1" | "a2" | "a3" | "a4" | "a4b" | "a5" | "a6" | "a7";
 
@@ -259,6 +259,56 @@ function EntryInner() {
     });
   /* a6 계산 장면이 몇 줄까지 찍혔는가. 0 이면 아직 아무것도 안 찍혔다. */
   const [calcAt, setCalcAt] = useState(0);
+
+  /*
+   * ★ 날을 다 적는 순간 **여섯 글자를 돌려준다** (2026-09-04).
+   *
+   *   재보니 손님은 다섯 화면을 잇달아 지나며 여덟 칸을 내주는데,
+   *   그동안 **자기에 대한 말을 한 마디도 못 듣습니다.** 첫 돌려줌이
+   *   여섯 번째 화면이었습니다 (tools/give_take.py).
+   *
+   *       a1 골목 0 · a2 이름 0 · a5 걸리는 것 0 · a3 날 0 · a4 때 0
+   *
+   *   손님이 말했습니다 — "몰입이 전혀 안되잖아. 밍숭맹숭한 말만 하니까."
+   *   글이 밍숭맹숭한 것이 절반이고, 나머지 절반은 **아무것도 안
+   *   돌려주면서 계속 받기만 한 것**입니다. 그러면 좋은 글도 서식입니다.
+   *
+   *   그런데 해·달·날 셋만 있으면 **여섯 글자가 이미 섭니다.** 시각은
+   *   마지막 두 글자에만 듭니다. 그동안 그걸 a6 까지 감추고 있었습니다.
+   *
+   *   ★ 정보 격차 이론(Loewenstein 1994) — 호기심은 빈칸이 **구체적이고
+   *     가까이 있을 때** 섭니다. 여덟 중 여섯이 서 있고 두 자리가 비어
+   *     있으면, 그 두 자리는 구체적인 빈칸입니다. 아무것도 안 보이면
+   *     빈칸이 아니라 그냥 서식입니다.
+   *
+   *   시주는 안 세웁니다(`hour_known: false`). 지어내지 않는다는 규칙
+   *   그대로이고, **비어 있는 것이 보이는 것**이 여기서는 이득입니다.
+   */
+  const [peek, setPeek] = useState<Features | null>(null);
+  useEffect(() => {
+    if (step !== "a3" && step !== "a4") { setPeek(null); return; }
+    const y = s.year, m = s.month, d = s.day;
+    if (!y || !m || !d || String(y).length !== 4) { setPeek(null); return; }
+    // a4 에서는 적은 시각까지 넣습니다 — 그래야 **여덟 번째 글자**가 섭니다.
+    const withHour = step === "a4" && s.hourKnown && s.hour !== null;
+    let alive = true;
+    const t = setTimeout(async () => {
+      try {
+        const res = await api.chart({
+          year: y, month: m, day: d,
+          hour: withHour ? s.hour : null,
+          minute: withHour ? (s.minute ?? 0) : null,
+          hour_known: !!withHour,
+          sex: s.sex, birth_city: s.city,
+        });
+        if (alive) setPeek(res.features);
+      } catch {
+        if (alive) setPeek(null);      // 못 세우면 조용히 아무것도 안 냅니다
+      }
+    }, 420);
+    return () => { alive = false; clearTimeout(t); };
+  }, [step, s.year, s.month, s.day, s.sex, s.city,
+      s.hour, s.minute, s.hourKnown]);
   const [error, setError] = useState<string | null>(null);
   const [segments, setSegments] = useState<HookSegment[] | null>(null);
   const [hookDone, setHookDone] = useState(false);
@@ -610,6 +660,29 @@ function EntryInner() {
           <p className="sm" style={{ color: "var(--ember)", marginTop: 8 }}>{bad}</p>
         )}
 
+        {/*
+          ★ 여기서 처음으로 **돌려줍니다.**
+            앞의 네 화면은 받기만 했습니다. 여섯 글자를 세워 보이고,
+            빈 두 자리를 빈 채로 둡니다 — 그 두 칸이 다음 화면입니다.
+        */}
+        {peek && !bad && (
+          <div className="peek">
+            <div className="peekgz">
+              {peek.pillars.slice(0, 3).map((p, i) => (
+                <span key={i}>{p.gz}</span>
+              ))}
+              <span className="empty">□□</span>
+            </div>
+            <p className="sm">
+              <b>여섯 글자</b>가 섰소. 그대의 일간은 <b>{peek.day_gan}</b>이오 —
+              여덟 글자 가운데 <b>그대 자신</b>을 가리키는 한 글자요.
+            </p>
+            <p className="sm dim">
+              남은 두 글자는 <b>때</b>가 세우오. 다음 장에서 여쭙겠소.
+            </p>
+          </div>
+        )}
+
         {/* ★ 고을은 접어 둡니다. 대부분은 안 건드립니다. */}
         {/*
           ★ 여기가 가장 약한 화면이었습니다 (열 중 둘).
@@ -923,6 +996,25 @@ function EntryInner() {
             바로 그 글자 둘입니다. 풀지 않으면 왜 분까지 적어야
             하는지가 안 서고, 그러면 대강 칸으로 내려갑니다.
         */}
+        {/*
+          ★ a3 에서 연 고리를 여기서 닫습니다 (2026-09-04).
+
+            a3 이 「남은 두 글자는 때가 세우오」 라 하고 끊었습니다.
+            그 두 글자가 여기서 섭니다 — 손님이 시각을 적는 그 자리에서.
+            열린 고리를 닫아 주지 않으면 그건 연출이 아니라 미끼입니다
+            (Zeigarnik 1927 — 열고 닫는 결이 있어야 지치지 않습니다).
+        */}
+        {peek && peek.hour_known && (
+          <div className="peek done">
+            <div className="peekgz">
+              {peek.pillars.map((p, i) => <span key={i}>{p.gz}</span>)}
+            </div>
+            <p className="sm">
+              <b>여덟 글자</b>가 다 섰소. 이제 바뀌지 않소.
+            </p>
+          </div>
+        )}
+
         <p className="sm mt">
           때를 알면 <b>여덟 글자</b>가 다 서고, 모르면 <b>여섯 글자</b>로
           보오. 여섯으로도 <b>다섯 마디</b>는 그대로 하오.

@@ -2997,3 +2997,30 @@ body.has-rail .beatskip-hint { left: calc(50% + 116px); }
   opacity: .45;
   cursor: not-allowed;
 }
+
+
+/* ══════════════════════════════════════════════════════════
+   a3 — 날을 적자마자 돌려주는 여섯 글자
+   ══════════════════════════════════════════════════════════
+   ★ 앞의 네 화면은 받기만 했습니다. 여기서 처음 돌려줍니다.
+     빈 두 자리는 **빈 채로** 둡니다 — 구체적이고 가까운 빈칸이라야
+     궁금해집니다 (Loewenstein 1994). */
+.peek {
+  margin-top: 14px; padding: 12px 13px;
+  border: 1px solid var(--line); border-radius: 8px;
+  background: var(--bg2);
+}
+.peekgz {
+  display: flex; gap: 8px; justify-content: center;
+  font-family: var(--serif); font-size: var(--fs-5);
+  color: var(--c); letter-spacing: .04em;
+  margin-bottom: 9px;
+}
+.peekgz span { min-width: 0; }
+/* 아직 안 선 두 글자 — 자리를 비워 두고 그 자리가 보이게 */
+.peekgz .empty { color: var(--paper3); opacity: .45; }
+.peek .sm { text-align: center; margin: 3px 0; }
+.peek .dim { color: var(--paper3); }
+/* 여덟이 다 선 자리 — 여기서 고리가 닫힙니다 */
+.peek.done { border-color: var(--c); }
+.peek.done .peekgz { color: var(--c); }
