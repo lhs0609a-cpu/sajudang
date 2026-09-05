@@ -123,6 +123,7 @@ switch ($Task) {
   "voice"   { Need-Venv; Push-Location $Root; & $Py tools\voice_audit.py @Rest; Pop-Location }
   "say"     { Need-Venv; Push-Location $Root; & $Py tools\say_length.py @Rest; Pop-Location }
   "face"    { Need-Venv; Push-Location $Root; & $Py tools\place_char.py @Rest; Pop-Location }
+  "busts"   { Need-Venv; Push-Location $Root; & $Py tools\bust_align.py @Rest; Pop-Location }
   "figures" { Need-Venv; Push-Location $Root; & $Py tools\figure_sheet.py @Rest; Pop-Location }
   "drama"   { Need-Venv; Push-Location $Root; & $Py tools\drama_audit.py @Rest; Pop-Location }
   # 그림을 맡기기 **전에** — 명령어가 그 화면에 맞는가
