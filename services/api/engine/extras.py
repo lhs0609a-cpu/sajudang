@@ -277,8 +277,90 @@ def cards_cut(f, c: dict) -> dict:
 # ══════════════════════════════════════════════════════════
 # 배선
 # ══════════════════════════════════════════════════════════
+# ══════════════════════════════════════════════════════════
+# 만남 — 누구랑, 어떻게 만났는가
+# ══════════════════════════════════════════════════════════
+#
+# ★ 손님이 짚은 것 (2026-09-04)
+#
+#   "연애 고민이면 누구랑 고민인지 어떻게 만났는지 그런 거 싹 해서…"
+#
+# ★ 맞히지 않소 — **맞대 보오**
+#
+#   여덟 글자는 사람을 읽는 것이지 사건을 읽는 것이 아니오. 「어떻게
+#   만났는가」 를 글자에서 뽑을 수는 없소.
+#
+#   그러나 대 볼 수는 있소. 짝을 보는 글자가 **어느 궁에 앉았는지**는
+#   이미 셈이 끝나 있소 (engine/pattern._group_seats). 손님이 적은
+#   결과 글자가 가리키는 결이 **겹치면 겹친다고, 어긋나면 어긋난다고**
+#   말하는 것이오. 이 집이 넉 자에 하는 것과 같은 구조요.
+#
+# ★ 재회는 판정하지 않소
+#
+#   「헤어진 사람」 을 골라도 다시 될지 안 될지·언제인지·기다리라는
+#   말을 하지 않소 (docs/11). 그대 자리만 보오.
+#
+# ★ 자유 입력은 안 받소. 정해진 칸으로만 받소.
+def meet_cut(f, m: dict) -> dict:
+    from . import pattern as _pattern
+    T = text()
+    who = str(m.get("who") or "")
+    how = str(m.get("how") or "")
+    if who not in T["MEET_WHO"]:
+        raise ExtraInputError(
+            "모르는 사이: %r (고를 수 있는 것: %s)"
+            % (who, ", ".join(T["MEET_WHO"])))
+    if how not in T["MEET_HOW"]:
+        raise ExtraInputError(
+            "모르는 만남: %r (고를 수 있는 것: %s)"
+            % (how, ", ".join(T["MEET_HOW"])))
+
+    grp = _pattern.spouse_group(f)
+    seats = _pattern._group_seats(f, grp) if grp else []
+    # 짝 글자가 앉은 자리 — 여럿이면 가장 무거운 자리(월주)부터 보오.
+    order = ["월주", "일주", "년주", "시주"]
+    seat = next((x for x in order if x in seats), "")
+    said = T["MEET_HOW"][how]["seat"]
+
+    if not grp:
+        # 성별을 모르면 짝 글자를 못 정하오. 지어내지 않소.
+        match = '<p class="tale">성별을 안 적으셔서 짝을 보는 글자를 ' \
+                '정하지 못했소. 여기서는 적으신 것만 두고 보겠소.</p>'
+        key = "nosex"
+    elif not seat:
+        match = ('<p class="tale">짝을 보는 <b>%s</b>이 여덟 글자에 '
+                 '안 보이오. 그러니 적으신 결이 <b>글자보다 앞서</b> '
+                 '있는 것이오 — 그대가 만든 자리라는 뜻이오.</p>' % grp)
+        key = "none"
+    elif seat == said:
+        match = '<p class="tale">%s</p>' % T["MEET_SAME"][seat]
+        key = "same:%s" % seat
+    else:
+        match = '<p class="tale">%s</p>' % T["MEET_ELSE"][seat]
+        key = "else:%s>%s" % (seat, said)
+
+    body = ('<p class="tale">%s</p>'
+            '<p class="cnt"><b>적으신 것 — %s · %s</b></p>'
+            '%s'
+            '<p class="sm">여기 적으신 것은 <b>남기지 않소</b>. '
+            '셈하고 버리오.</p>'
+            % (T["MEET_WHO_SAY"][who],
+               T["MEET_WHO"][who]["label"], T["MEET_HOW"][how]["label"],
+               match))
+    return {
+        "id": "meet", "title": "만난 결과 글자",
+        "source": "%s %s · 적은 결 %s%s"
+                  % (grp or "짝 자리", seat or "없음", said,
+                     " · 겹침" if seat == said else ""),
+        "html": guard.enforce(body, {"cut": "meet"}),
+        "min_level": 1,
+        "statement_id": "meet:%s:%s:%s" % (who, how, key),
+    }
+
+
 BUILDERS = {
     "partner": partner_cut,
+    "meet": meet_cut,
     "context": context_cut,
     "blood": blood_cut,
     "image": image_cut,
@@ -310,6 +392,11 @@ def choices() -> dict:
     return {
         "situation": [{"id": k, "label": v["label"]}
                       for k, v in T["SITUATION"].items()],
+        # 만남 — 누구랑 · 어떻게. 자유 입력은 안 받소.
+        "meet_who": [{"id": k, "label": v["label"]}
+                     for k, v in T["MEET_WHO"].items()],
+        "meet_how": [{"id": k, "label": v["label"]}
+                     for k, v in T["MEET_HOW"].items()],
         "stance": [{"id": "push", "label": "밀어붙이는 중"},
                    {"id": "hold", "label": "버티는 중"},
                    {"id": "let", "label": "놓으려는 중"}],

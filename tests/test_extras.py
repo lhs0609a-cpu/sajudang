@@ -10,6 +10,9 @@
 """
 from __future__ import annotations
 
+import json
+import re
+
 import pytest
 
 from engine import extras
@@ -305,3 +308,84 @@ def test_different_partners_give_different_reports(f):
                                "hour": 6, "minute": 30, "sex": "M",
                                "hour_known": True})
     assert a["html"] != b["html"]
+
+
+# ══════════════════════════════════════════════════════════
+# 만남 — 누구랑, 어떻게 만났는가
+# ══════════════════════════════════════════════════════════
+#
+# ★ 손님이 짚은 것 (2026-09-04)
+#
+#   "연애 고민이면 누구랑 고민인지 어떻게 만났는지 그런 거 싹 해서…"
+#
+#   재 보니 그걸 받는 칸이 아예 없었습니다. `partner` 는 상대의
+#   생년월일만 받고, `context` 의 여덟 칸에는 만난 결이 없었습니다.
+#
+# ★ 맞히지 않고 **맞대 봅니다**
+#
+#   여덟 글자로 만난 경위를 뽑을 수는 없습니다. 다만 짝을 보는
+#   글자가 어느 궁에 앉았는지는 이미 셈이 끝나 있어, 적으신 결과
+#   겹치는지 어긋나는지는 볼 수 있습니다 — 넉 자를 대 보는 것과
+#   같은 구조입니다.
+
+MEET = {"who": "now", "how": "work"}
+
+
+def test_만난_결은_정해진_칸으로만_받는다(f):
+    """
+    자유 입력은 개인정보가 섞이고 가드를 우회합니다 (CLAUDE.md).
+    표에 없는 열쇠는 **터뜨립니다** — 빈칸을 두지 않습니다.
+    """
+    extras.meet_cut(f, MEET)          # 표에 있는 것은 서고
+    for bad in ({"who": "그냥 아는 사람", "how": "work"},
+                {"who": "now", "how": "소개팅 앱"},
+                {"who": "now"}, {"how": "work"}, {}):
+        with pytest.raises(extras.ExtraInputError):
+            extras.meet_cut(f, bad)
+
+
+def test_재회는_판정하지_않는다(f):
+    """
+    ★ 재회 상품은 **재회 가능/불가 판정 · 시점 확정 · 기다림 종용**이
+      금지입니다 (CLAUDE.md 절대 규칙 3 · docs/11).
+
+      「헤어진 사람」을 골라도 다시 될지 안 될지를 말하지 않습니다.
+      그대 자리만 봅니다.
+    """
+    cut = extras.meet_cut(f, {"who": "past", "how": "again"})
+    body = re.sub(r"<[^>]+>", "", cut["html"])
+    assert "말하지 않" in body, "재회를 판정하지 않는다고 말해야 하오"
+    for bad in ("다시 만나", "돌아오", "기다리", "재회할", "이어질 것"):
+        assert bad not in body, "재회를 점쳤소: %s" % bad
+    ok, hits = guard.check(body)
+    assert ok, hits
+
+
+def test_적은_것과_글자를_맞대_본다(f):
+    """
+    겹치면 겹친다고, 어긋나면 어긋난다고 말해야 합니다. 무엇을 골라도
+    같은 말이 나오면 그건 대 본 것이 아니라 **적어 둔 것**입니다.
+    """
+    got = {how: extras.meet_cut(f, {"who": "now", "how": how})["html"]
+           for how in ("long", "work", "intro", "chance", "far", "again")}
+    assert len(set(got.values())) >= 2, "무엇을 골라도 같은 말이 나오오"
+    # 근거 줄에 **짝 글자가 앉은 자리**가 적혀 있어야 합니다
+    src = extras.meet_cut(f, MEET)["source"]
+    assert "적은 결" in src, src
+
+
+def test_상대의_이름도_생년월일도_안_받는다():
+    """
+    ★ 여기서 받는 것은 **그대와 그 자리의 결**뿐입니다. 상대의
+      생년월일은 `partner` 가 따로 받고 그것도 저장하지 않습니다.
+    """
+    ch = extras.choices()
+    assert "meet_who" in ch and "meet_how" in ch
+    flat = json.dumps(ch, ensure_ascii=False)
+    for bad in ("year", "생년", "이름", "연락"):
+        assert bad not in flat, bad
+
+
+def test_만난_결도_저장하지_않는다고_적혀_있다(f):
+    body = re.sub(r"<[^>]+>", "", extras.meet_cut(f, MEET)["html"])
+    assert "남기지 않" in body or "버리오" in body

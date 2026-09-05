@@ -26,6 +26,9 @@ type Choices = {
   blood: string[];
   image: Choice[];
   card: Choice[];
+  /* 만남 — 누구랑 · 어떻게. 자유 입력은 안 받습니다. */
+  meet_who: Choice[];
+  meet_how: Choice[];
 };
 
 const TITLE: Record<string, string> = {
@@ -34,6 +37,7 @@ const TITLE: Record<string, string> = {
   cards: "패 셋을 고르시오",
   context: "지금 어떤 자리에 계시오?",
   partner: "상대의 날을 아시오?",
+  meet: "누구 일이오? 어떻게 만나셨소?",
 };
 
 const WHY: Record<string, string> = {
@@ -42,6 +46,14 @@ const WHY: Record<string, string> = {
   cards: "셋을 뽑은 순서까지 봅니다.",
   context: "지금 자리를 알아야 같은 글자도 다르게 읽히오.",
   partner: "상대의 여덟 글자와 맞대 봅니다. 적으신 것은 남기지 않소.",
+  /*
+   * ★ 맞히는 것이 아니라 **대 보는 것**이라고 적습니다.
+   *   여덟 글자로 만난 경위를 뽑을 수는 없습니다. 다만 짝을 보는
+   *   글자가 어느 궁에 앉았는지는 이미 셈이 끝나 있어, 적으신 결과
+   *   겹치는지 어긋나는지를 볼 수 있습니다 — 넉 자를 대 보는 것과
+   *   같은 구조입니다.
+   */
+  meet: "짝 글자가 앉은 자리와 맞대 봅니다. 적으신 것은 남기지 않소.",
 };
 
 export default function ExtraAsk({
@@ -56,6 +68,8 @@ export default function ExtraAsk({
   const [picks, setPicks] = useState<string[]>([]);
   const [stance, setStance] = useState<string | null>(null);
   const [months, setMonths] = useState("");
+  const [who, setWho] = useState<string | null>(null);
+  const [how, setHow] = useState<string | null>(null);
   const [p, setP] = useState({ year: "", month: "", day: "", sex: "F" });
 
   const [chErr, setChErr] = useState(false);
@@ -96,7 +110,46 @@ export default function ExtraAsk({
   let ready = false;
   let build: () => Record<string, unknown> = () => ({});
 
-  if (need === "blood") {
+  if (need === "meet") {
+    /*
+     * ★ 정해진 칸으로만 받습니다.
+     *   자유 입력은 개인정보가 섞이고 가드를 우회합니다 (CLAUDE.md).
+     *   그래서 「누구랑」 넷 · 「어떻게」 여섯 중에서 고릅니다.
+     *
+     * ★ 상대의 이름도 생년월일도 안 받습니다. 여기서 받는 것은
+     *   **그대와 그 자리의 결**뿐입니다.
+     */
+    ready = !!who && !!how;
+    build = () => ({ meet: { who, how } });
+    body = (
+      <>
+        <p className="pickme">누구 일인지 하나 고르시오.</p>
+        <div className="og c2">
+          {ch.meet_who.map((x) => (
+            <button key={x.id} className={`op ${who === x.id ? "on" : ""}`}
+                    onClick={() => setWho(x.id)}>{x.label}</button>
+          ))}
+        </div>
+        <p className="pickme mt">어떻게 만난 자리요?</p>
+        <div className="og c2">
+          {ch.meet_how.map((x) => (
+            <button key={x.id} className={`op ${how === x.id ? "on" : ""}`}
+                    onClick={() => setHow(x.id)}>{x.label}</button>
+          ))}
+        </div>
+        {/*
+          ★ 재회는 판정하지 않습니다 (docs/11). 고르기 전에 미리
+            말해 둡니다 — 기대를 심어 놓고 안 주는 것이 더 나쁩니다.
+        */}
+        {who === "past" && (
+          <p className="sm mt">
+            다시 될지 안 될지는 <b>말하지 않소</b>. 그건 이 집이 안 하는
+            일이오. 그대에게 무엇이 남았는지만 보오.
+          </p>
+        )}
+      </>
+    );
+  } else if (need === "blood") {
     ready = !!pick;
     build = () => ({ blood: { type: pick } });
     body = (

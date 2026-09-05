@@ -849,7 +849,16 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         cuts.append(_cut(lc["id"], lc["title"], lc["source"], lc["html"],
                          lc["min_level"], sid=lc["statement_id"]))
 
-    need = lens_mod.required_input(lens_id) if lens_id else None
+    # ★ 묻는 자리와 받는 자리가 **갈려** 있었습니다 (2026-09-04).
+    #
+    #   `needs_input` 은 고민이 부른 물음까지 내는데, 여기서는 캐릭터
+    #   몫만 보고 있었습니다. 그래서 손님이 「만난 결」을 적어 보내도
+    #   컷이 안 섰습니다 — 물어 놓고 안 받은 셈입니다.
+    #
+    #   한 자리에서 정하고 둘이 같이 씁니다. 캐릭터가 받는 것이
+    #   먼저요 — 그 사람을 고른 까닭이 거기 있으니.
+    need = ((lens_mod.required_input(lens_id) if lens_id else None)
+            or _pattern.asks_for(f, concern))
     extra_error = None
     try:
         extra = extras_mod.build(f, need, extras)
@@ -1226,7 +1235,9 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
     #   물을 까닭이 서고 손님도 왜 묻는지 압니다.
     #
     #   캐릭터가 받는 것이 먼저입니다. 그 사람을 고른 까닭이 거기 있으니.
-    need = lens_mod.required_input(lens_id) or _pattern.asks_for(f, concern)
+    #   `_all_cuts` 안에서 정한 것과 **같은 규칙**으로 정합니다.
+    #   둘이 갈리면 물어 놓고 안 받거나, 안 물어 놓고 받습니다.
+    need = (lens_mod.required_input(lens_id) or _pattern.asks_for(f, concern))
     needs_input = None
     if need and need in extras_mod.BUILDERS and not (extras or {}).get(need):
         needs_input = need

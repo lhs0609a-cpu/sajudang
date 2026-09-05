@@ -262,7 +262,7 @@ def _pats() -> list:
         % (spouse_group(f), _count(f, spouse_group(f)),
            " · ".join(_group_seats(f, spouse_group(f)))),
         say=lambda f: _SEAT_SAY[_group_seats(f, spouse_group(f))[0]],
-        ask="partner")
+        ask="meet")
 
     add(key="spouse_hidden", name="배우자성이 숨음",
         gloss="짝 글자가 지지에만 있음",
@@ -275,7 +275,7 @@ def _pats() -> list:
         say="짝을 보는 글자가 <b>겉으로 안 드러나오</b>. 가까이 있어도 "
             "<b>늦게 알아보는</b> 결이라, 지나고 나서 «그때 그 사람이었구나» "
             "하는 자리가 있소.",
-        ask="partner")
+        ask="meet")
 
     add(key="spouse_open", name="배우자성이 드러남",
         gloss="짝 글자가 천간에 있음",
@@ -287,7 +287,7 @@ def _pats() -> list:
         % (spouse_group(f), _count(f, spouse_group(f))),
         say="짝을 보는 글자가 <b>겉에 드러나 있소</b>. 인연이 <b>보이는 자리에서</b> "
             "오는 결이라, 숨겨 두고 만나는 일이 잘 안 되오. 주변이 먼저 아오.",
-        ask="partner")
+        ask="meet")
 
     add(key="ilji_chung", name="일지 충(沖)",
         gloss="발밑 자리가 부딪힘",
