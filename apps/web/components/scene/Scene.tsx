@@ -268,6 +268,27 @@ export default function Scene({ id, className, bleed, figure }: {
   const hasClip = chosen === undefined ? null : chosen !== null;
   const [open, setOpen] = useState(false);
 
+  /*
+   * ★ 세로 영상은 **상자에 안 담습니다** (2026-09-06).
+   *
+   *   손님이 짚었습니다 — "이거는 좀 넓게해야해 길게 영상을 풀화면으로
+   *   볼 수 있도록".
+   *
+   *   `overrides.css` 는 이미 「장면은 화면의 3분의 2」라고 적고
+   *   `height: clamp(…, 66vh, …)` 를 잡아 두었습니다. 그런데 그 줄이
+   *   **한 번도 안 먹었습니다** — 여기서 `boxed` 를 늘 걸었고, `boxed`
+   *   가 `height: auto` 로 도로 눕혀 4:3 상자를 씌웠기 때문입니다.
+   *   그래서 9:16 원본이 세로의 **42%만** 보였습니다. 적어 둔 뜻과
+   *   실제로 나가는 화면이 갈라져 있던 자리입니다.
+   *
+   *   세로 원본에는 상자를 안 씌웁니다. 가로 원본(16:9 · 1:1 · 3:4)과
+   *   manifest 가 상자를 적어 둔 장면은 그대로 상자로 갑니다 — 가로
+   *   그림을 세로로 세우면 좌우가 통째로 잘립니다.
+   */
+  const shownBox = spec?.box
+    ?? (spec?.ratio === "9:16" ? null
+      : spec?.ratio === "1:1" ? "1:1" : "4:3");
+
   if (!spec) return null;
 
   const body = hasClip ? (
@@ -301,32 +322,29 @@ export default function Scene({ id, className, bleed, figure }: {
       )}
       <div
         /*
-         * ★ 상자를 **늘 잡습니다** (2026-09-04).
+         * 상자(boxed) — 가로 원본에만.
          *
-         *   전에는 `spec.box` 가 있을 때만 `boxed` 를 걸었는데, **어느
-         *   장면도 box 를 안 적었습니다.** 그래서 아래 `--sr` 은
-         *   계산해 놓고 쓰이지 않았고, 9:16 세로 영상이 인라인에서
-         *   `height:auto` 로 흘러 폭의 178% 높이가 됐습니다 —
-         *   바로 위 주석이 「그래서 고쳤다」고 적어 둔 그 버그입니다.
-         *   파일이 들어온 열 장면에서 실제로 그렇게 나가고 있었습니다.
+         *   9:16 원본은 `tall` 로 가고, 높이는 CSS 가 화면에 맞춰
+         *   잡습니다(`.sceneart.tall`). 세로 그림을 세로로 보여 주는
+         *   것이라 잘리는 데가 거의 없습니다.
+         *
+         *   가로 원본(16:9 · 1:1 · 3:4)은 상자로 갑니다 — 그걸 세로로
+         *   세우면 좌우가 통째로 잘려 그림이 사라집니다. 9-04 에
+         *   「늘 잡는다」고 바꿨던 것이 세로까지 같이 눕힌 자리였습니다.
          *
          *   hero·fill 은 제 비율을 CSS 가 잡으므로 건드리지 않습니다.
          */
-        className={`sceneart boxed ${className ?? ""}`}
+        className={`sceneart ${shownBox ? "boxed" : "tall"} ${className ?? ""}`}
         role={pickable ? "button" : undefined}
         tabIndex={pickable ? 0 : undefined}
         title={pickable ? `${spec.name} — 눌러서 제작 프롬프트 보기` : undefined}
         /*
          * ★ 상자 비율(--sr)과 초점(--sf).
-         *   들어오는 영상은 전부 9:16 인데 글 위 장면은 16:9 띠로
-         *   보여 줍니다. 상자를 잡고 object-fit:cover 로 채웁니다 —
-         *   안 그러면 세로 영상이 폭의 178% 높이로 흘러 아래 버튼이
-         *   화면 밖으로 밀립니다.
+         *   가로 원본을 담는 상자입니다. 세로 원본에는 안 답니다 —
+         *   `.sceneart.tall` 이 높이로 잡습니다.
          */
         style={{
-          ["--sr" as string]:
-            (spec.box ?? (spec.ratio === "1:1" ? "1:1" : "4:3"))
-              .replace(":", " / "),
+          ...(shownBox ? { ["--sr" as string]: shownBox.replace(":", " / ") } : {}),
           ...(spec.focus ? { ["--sf" as string]: spec.focus } : {}),
           ...(pickable ? {} : { cursor: "inherit" }),
         } as React.CSSProperties}
