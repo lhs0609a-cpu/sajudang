@@ -299,12 +299,24 @@ def test_locked_cut_never_carries_the_body(client, chart_id):
         assert "html" not in l, l
 
 
-def test_teaser_is_a_real_prefix_of_the_cut(client, chart_id):
+def test_teaser_is_real_text_from_the_cut(client, chart_id):
     """
-    맛보기는 **그 컷의 첫 줄**이어야 한다 — 지어낸 문장이면 안 된다.
+    맛보기는 **그 컷에 진짜 있는 글**이어야 한다 — 지어낸 문장이면 안 된다.
 
     본문에 없는 말을 맛보기로 내면 그건 값을 치르기 전에 하는 약속인데,
     치른 뒤에 그 문장이 없습니다.
+
+    ★ 앞머리가 아니어도 됩니다 (2026-09-05).
+
+      관점 컷은 「여는 말 → 센 값 → 고민 → …」 차례로 섭니다. 앞의
+      둘은 **무엇을 물었든 같습니다** — 사랑을 물어도 돈을 물어도
+      「나는 십신을 세지 않소. 여덟 자에 물이 3.」 이었습니다.
+
+      본문은 갈리는데(263 · 266 · 269자) 값을 치를지 정하는 자리에서만
+      다 같아 보였습니다. 그래서 여는 말과 센 값을 건너뛰고 **고민
+      부터** 자릅니다 (report._after_lead).
+
+      지켜야 할 것은 «앞머리인가» 가 아니라 «본문에 진짜 있는가» 입니다.
     """
     from engine.features import Features
     from engine.report import _plain, build_report
@@ -320,8 +332,32 @@ def test_teaser_is_a_real_prefix_of_the_cut(client, chart_id):
             continue
         seen += 1
         head = _plain(_bare(l["teaser"])).rstrip(" —")
-        assert body[l["id"]].startswith(head), l["id"]
+        assert head in body[l["id"]], l["id"]
     assert seen, "맛보기가 한 줄도 안 나왔습니다"
+
+
+def test_the_teaser_shows_what_the_customer_asked(client, chart_id):
+    """
+    ★ 값을 치를지 정하는 자리에서 **고른 것이 보여야** 합니다.
+
+      전에는 관점 컷의 맛보기가 여는 말(화자가 제 보는 법을 말하는
+      자리)만 보여, 여섯 칸에서 무엇을 고르든 한 글자도 안 달랐습니다.
+      본문은 갈리는데 페이월에서만 「다 똑같아」로 보였습니다.
+    """
+    from engine.features import Features
+    from engine.report import _plain, build_report
+    from routers.chart import load_features
+
+    f = Features(**load_features(chart_id))
+    got = {}
+    for concern in ("love", "money", "health", "work"):
+        rep = build_report(f, chart_id, "baegun", "free", concern)
+        for l in rep.get("locked") or []:
+            if l["id"].endswith("_ask") and l.get("teaser"):
+                got[concern] = _plain(_bare(l["teaser"]))
+    assert len(got) == 4, got
+    assert len(set(got.values())) == 4, (
+        "여섯 칸에서 골랐는데 맛보기가 %d가지뿐이오" % len(set(got.values())))
 
 
 def test_teaser_never_gives_away_the_cut(client, chart_id):

@@ -179,9 +179,43 @@ def _upto(marked: str, want: int) -> int:
     return i
 
 
-def _teaser(html: str) -> Optional[str]:
+# 관점 컷에서 **무엇을 물었든 같은** 앞부분 — 여는 말과 센 값
+_LEAD_P = _re.compile(r'^\s*<p class="tale">.*?</p>', _re.S)
+_CNT_P = _re.compile(r'<p class="cnt">.*?</p>', _re.S)
+
+
+def _after_lead(html: str, cut_id: str) -> str:
+    """
+    관점 컷의 **손님 얘기**부터.
+
+    ★ 관점 컷은 이 차례로 섭니다 (engine/lens_cuts.build) —
+
+          여는 말   화자가 제 보는 법을 말하는 자리
+          센 값     「여덟 자에 물이 3」
+          첫 축     ← 여기가 손님 얘기요 (고민 축)
+          둘째·셋째 축
+          읽은 자리
+
+      맛보기는 컷의 앞 40%를 자르니 앞의 둘만 나왔습니다. 그런데
+      그 둘은 **무엇을 물었든 같소** — 사랑을 물어도 돈을 물어도
+      「나는 십신을 세지 않소. 여덟 자에 물이 3.」 이었습니다.
+
+      본문은 갈리는데(263 · 266 · 269자) 값을 치를지 정하는 자리에서만
+      다 같아 보였습니다. 엿보기(engine/peek._about_you)에서 이미
+      고친 자국이 페이월에 남아 있었습니다.
+
+      글은 한 자도 안 지웁니다 — 맛보기가 **어디서 시작하느냐**만
+      정합니다.
+    """
+    if not cut_id.startswith("lc_"):
+        return html
+    got = _CNT_P.sub("", _LEAD_P.sub("", html, count=1))
+    return got if _plain(got) else html
+
+
+def _teaser(html: str, cut_id: str = "") -> Optional[str]:
     """잠긴 컷의 첫 줄. 본문이 아니라 **맛보기**입니다."""
-    text = _plain(html)
+    text = _plain(_after_lead(html, cut_id))
     mark = _marked(html)
     # 표를 붙이다 길이가 틀어지면(공백이 줄어드는 자리) 세는 것만 물러섭니다.
     if len(mark) != len(text):
@@ -1109,7 +1143,7 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
             body_len = len(_plain(c["html"]))
             locked.append({"id": c["id"], "title": c["title"],
                            "source": c["source"],
-                           "teaser": _teaser(c["html"]),
+                           "teaser": _teaser(c["html"], c["id"]),
                            "chars": body_len,
                            "need_tier": "one" if c["min_level"] == 1 else "all"})
 
