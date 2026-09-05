@@ -47,14 +47,14 @@ type Kind = "scene" | "char" | "figure";
  * 리포트 안 장면은 명식이 있어야 열리니 진열대로 보냅니다.
  */
 const WHERE: Record<string, { at: string; href: string }> = {
-  gate:     { at: "a1 골목 — 맨 처음 보는 화면", href: "/" },
-  desk:     { at: "a2 이름을 적다", href: "/" },
-  ink:      { at: "a3 날·고을", href: "/" },
-  room:     { at: "a4 때를 묻다", href: "/" },
-  mirror:   { at: "a4b 성향 4글자", href: "/" },
-  fork:     { at: "a5 걸리는 것", href: "/" },
-  altar:    { at: "a6 글자가 서다", href: "/" },
-  facing:   { at: "a7 도령이 말하다", href: "/" },
+  gate:     { at: "a1 골목 — 맨 처음 보는 화면", href: "/?step=a1" },
+  desk:     { at: "a2 이름을 적다", href: "/?step=a2" },
+  ink:      { at: "a3 날·고을", href: "/?step=a3" },
+  room:     { at: "a4 때를 묻다", href: "/?step=a4" },
+  mirror:   { at: "a4b 성향 4글자", href: "/?step=a4b" },
+  fork:     { at: "a5 걸리는 것", href: "/?step=a5" },
+  altar:    { at: "a6 글자가 서다", href: "/?step=a6" },
+  facing:   { at: "a7 도령이 말하다", href: "/?step=a7" },
   hall:     { at: "b2 스무 사람", href: "/lobby?tab=b2" },
   seat:     { at: "b3 그 사람의 자리", href: "/lobby?tab=b3" },
   shelf:    { at: "b1 진열대", href: "/lobby?tab=b1" },

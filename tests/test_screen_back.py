@@ -36,7 +36,47 @@ def test_entry_flow_walks_back_one_step():
     # 앞으로 가는 자리는 발자국을 남겨야 한다
     raw = re.sub(r"/\*.*?\*/", " ", src, flags=re.S)
     stray = re.findall(r'setStep\("a\w+"\)', raw)
+    # ★ 맨 앞으로 되돌리는 자리는 예외요 (2026-09-05).
+    #
+    #   진입 흐름은 주소가 `/` 하나요. `?step=` 이 사라지면 맨 앞으로
+    #   가야 하는데, 전에는 그걸 안 봐서 `router.push("/")` 를 해도
+    #   훅 5단에 그대로 서 있었소 — 손님이 짚은 자리요.
+    #
+    #   그건 **앞으로 가는 것이 아니라 처음으로 되돌리는 것**이라
+    #   발자국을 남기는 게 아니라 비워야 맞소. 비우는지를 봅니다.
+    stray = [x for x in stray if x != 'setStep("a1")']
     assert not stray, "발자국 없이 넘어가는 자리: %s" % stray
+    reset = re.search(r'setStep\("a1"\);\s*setTrail\(\[\]\);', raw)
+    assert reset, "맨 앞으로 되돌리면서 발자국을 안 비우오"
+
+
+def test_주소가_없으면_맨_앞이다():
+    """
+    ★ 손님이 짚은 것 (2026-09-05)
+      "다음으로 버튼 누르면 맨처음화면으로 가야 하는데 중간지점으로
+       가는 포인터가 있어."
+
+      진입 흐름은 주소가 `/` **하나** 위의 여덟 화면이오. 그러니
+      `/?step=a7` 에서 `/` 로 밀면 **같은 길이라 화면이 다시 안
+      그려지고**, `step` 은 화면이 들고 있는 값이라 아무도 안
+      되돌려서 훅 5단에 그대로 서 있었소.
+
+      주소가 곧 자리라야 하오 — 없으면 맨 앞.
+    """
+    src = (WEB / "app" / "page.tsx").read_text(encoding="utf-8")
+    assert "else if (!asked)" in src, "주소가 없을 때를 안 보오"
+
+    # 갈 데를 또렷이 적었는가 — 그냥 `/` 로 밀면 같은 길이라 안 바뀌오
+    shell = (WEB / "components" / "Shell.tsx").read_text(encoding="utf-8")
+    assert 'router.push("/")' not in shell, "Shell 이 아직 맨 주소로 미오"
+
+    # 자산 판의 포인터도 자리를 또렷이 가리켜야 하오
+    board = (WEB / "components" / "AssetBoard.tsx").read_text(encoding="utf-8")
+    import re as _re
+    a_rows = _re.findall(r'\{ at: "(a\w+)[^"]*", href: "([^"]+)"', board)
+    assert a_rows, "자산 판에서 A 구간을 못 찾았소"
+    bad = [(i, h) for i, h in a_rows if h != "/?step=%s" % i]
+    assert not bad, "가리키는 데가 틀린 포인터: %s" % bad
 
 
 def test_no_error_screen_is_a_dead_end():

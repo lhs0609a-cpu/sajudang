@@ -10,7 +10,8 @@
  *
  * 무채색 클립 + 색 입히기는 docs/10 §4 대상 장면에만 적용합니다.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { playSafely, useSoundOn } from "@/lib/useSound";
 import PromptModal from "./PromptModal";
 import { RATIO_BOX, SCENE_BY_ID, SEASON_PALETTE } from "./manifest";
 import { seasonOf, useSession, type Season } from "@/lib/store";
@@ -138,6 +139,16 @@ function Media({ base, name, loop, tintClass, reduced, decorative }: {
   base: string; name: string; loop: boolean;
   tintClass?: string; reduced: boolean; decorative?: boolean;
 }) {
+  /*
+   * ★ 훅은 갈림보다 **앞**에 옵니다. 아래 `if (reduced)` 뒤에 두면
+   *   그릴 때마다 훅 수가 달라져 리액트가 터집니다.
+   */
+  const snd = useSoundOn();
+  const vref = useRef<HTMLVideoElement | null>(null);
+  useEffect(() => {
+    playSafely(vref.current, snd);
+  }, [snd, base]);
+
   if (reduced) {
     // eslint-disable-next-line @next/next/no-img-element
     return <img className={tintClass} src={`${base}poster.jpg`}
@@ -147,7 +158,14 @@ function Media({ base, name, loop, tintClass, reduced, decorative }: {
     <video
       className={tintClass}
       poster={`${base}poster.jpg`}
-      autoPlay muted playsInline loop={loop}
+      /*
+        ★ 소리는 **스위치를 따릅니다** (2026-09-05).
+          손님이 시킨 것 — "영상 소리는 다 켜고 계속 반복되게."
+          지금 장면 열둘에는 소리 트랙이 없어 켜도 조용하나, 소리가
+          든 파일이 오면 코드를 안 고쳐도 납니다.
+      */
+      ref={vref}
+      autoPlay muted={!snd} playsInline loop={loop}
       key={base}
     >
       <source src={`${base}clip.webm`} type="video/webm" />

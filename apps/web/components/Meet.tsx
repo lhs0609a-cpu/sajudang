@@ -25,7 +25,6 @@
  *   흉내내지 않습니다 (CharArt 와 같은 규칙). 그림이 오는 날
  *   `public/char/{id}/bust.png` 에 넣기만 하면 그때부터 나옵니다.
  */
-import { useState } from "react";
 import CharArt from "@/components/CharArt";
 import { LENS_BY_ID } from "@/lib/lenses";
 import { useSession } from "@/lib/store";
@@ -51,18 +50,10 @@ export default function Meet({ lens, note, nameOnly, greet }: {
 }) {
   const cur = useSession((s) => s.cur);
   /*
-   * ★ 소리 스위치는 여기 삽니다 — 초상 **밖**입니다.
-   *
-   *   `.meetart` 도 `.charart` 도 네 변을 마스크로 녹입니다. 초상이
-   *   네모로 잘려 보이면 스티커가 되기 때문입니다. 그런데 마스크는
-   *   그 안의 것을 다 녹여서, 귀퉁이에 단추를 얹으면 단추도 같이
-   *   사라집니다. 그래서 이름 아래, 마스크가 안 닿는 자리에 둡니다.
-   *
-   *   브라우저가 막기 전에는 **안 보입니다.** 소리는 이미 나고 있고,
-   *   끌 일이 있는 사람만 손을 뻗으면 되니 그때 나옵니다.
+   * ★ 소리 스위치는 **상단바에 한 벌**만 둡니다 (2026-09-05).
+   *   여기 따로 두었더니 자리마다 스위치가 생겼습니다. 손님은
+   *   무엇을 껐는지 모릅니다.
    */
-  const [on, setOn] = useState(true);
-  const [blocked, setBlocked] = useState(false);
   const l = LENS_BY_ID[lens ?? cur];
   if (!l) return null;
 
@@ -70,10 +61,7 @@ export default function Meet({ lens, note, nameOnly, greet }: {
     <div className="meet" style={{ ["--c" as string]: l.color }}>
       {!nameOnly && (
         <div className="meetart">
-          <CharArt lens={l} size="full" greet={greet}
-                   soundOn={on} onSoundBlocked={() => {
-                     setBlocked(true); setOn(false);
-                   }} />
+          <CharArt lens={l} size="full" greet={greet} />
         </div>
       )}
       <div className="meetname">
@@ -81,12 +69,7 @@ export default function Meet({ lens, note, nameOnly, greet }: {
         <i>{l.hanja}</i>
       </div>
       <div className="meetnote">{note ?? l.specialty}</div>
-      {greet && (blocked || on) && (
-        <button type="button" className="sndline"
-                onClick={() => { setBlocked(false); setOn(!on); }}>
-          {on ? "소리를 끄겠습니다" : "소리를 듣겠습니다"}
-        </button>
-      )}
+
     </div>
   );
 }

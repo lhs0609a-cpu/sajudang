@@ -238,7 +238,9 @@ export function TopBar({ title, skipTo, onBack }: {
       {admin && (
         <button className="tb mode" onClick={() => {
           setSession({ admin: false });
-          router.push("/");
+          // ★ 갈 데를 또렷이 적습니다. 그냥 `/` 로 밀면 `?step=a7`
+          //   에서는 같은 길이라 화면이 안 바뀌었습니다 (2026-09-05).
+          router.push("/?step=a1");
         }}>
           회원 화면
         </button>

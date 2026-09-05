@@ -197,9 +197,30 @@ function EntryInner() {
   const asked = params.get("step") as Step | null;
   const [step, setStep] = useState<Step>(
     asked && STEPS.includes(asked) ? asked : "a1");
+  /* 지나온 자리. 주소가 맨 앞으로 돌아가면 이것도 비웁니다. */
+  const [trail, setTrail] = useState<Step[]>([]);
 
+  /*
+   * ★ 주소가 곧 자리요 — **없으면 맨 앞**입니다 (2026-09-05).
+   *
+   *   전에는 `?step=` 이 있을 때만 따라갔습니다. 그래서 `/?step=a7`
+   *   에서 `router.push("/")` 를 하면 — 같은 길이라 화면이 다시
+   *   그려지지 않고, `step` 은 화면이 들고 있는 값이라 아무도 안
+   *   되돌려서 — 훅 5단에 그대로 서 있었습니다.
+   *
+   *   손님이 짚었습니다 — "맨 처음 화면으로 가야 하는데 중간지점으로
+   *   가는 포인터가 있어."
+   *
+   *   여기가 뿌리입니다. 이렇게 두면 어디서 `/` 로 밀든 맨 앞으로
+   *   갑니다.
+   */
   useEffect(() => {
-    if (asked && STEPS.includes(asked)) setStep(asked);
+    if (asked && STEPS.includes(asked)) {
+      setStep(asked);
+    } else if (!asked) {
+      setStep("a1");
+      setTrail([]);
+    }
   }, [asked]);
   /*
    * ★ 지나온 단계를 쌓아 둔다.
@@ -222,7 +243,6 @@ function EntryInner() {
     return nx && typeof nx.start_age === "number" ? nx.start_age : null;
   })();
 
-  const [trail, setTrail] = useState<Step[]>([]);
   const go = (next: Step) => {
     setTrail((t) => [...t, step]);
     setStep(next);

@@ -26,6 +26,7 @@ import { useEffect, useRef, useState } from "react";
 import type { LensInfo } from "@/lib/lenses";
 import { useSession } from "@/lib/store";
 import PromptModal from "@/components/scene/PromptModal";
+import { playSafely, useSoundOn } from "@/lib/useSound";
 
 type Size = "chip" | "talk" | "card" | "full";
 
@@ -154,7 +155,7 @@ function useClip(id: string, on: boolean) {
  *
  *     public/char/{id}/greet.webm   VP9 + Opus
  *     public/char/{id}/greet.mp4    H.264 + AAC (사파리)
- *     public/char/{id}/greet.jpg    첫 프레임
+ *     public/char/{id}/greet.webp   첫 프레임 (누끼 뜬 것)
  */
 function useGreet(id: string, on: boolean) {
   const [ok, setOk] = useState(false);
@@ -172,7 +173,6 @@ function useGreet(id: string, on: boolean) {
 
 export default function CharArt({
   lens, size = "card", className, mood = "base", greet = false,
-  soundOn = true, onSoundBlocked,
 }: {
   lens: LensInfo;
   size?: Size;
@@ -184,19 +184,6 @@ export default function CharArt({
    * 파일이 없으면 도는 초상으로, 그것도 없으면 멈춘 그림으로 갑니다.
    */
   greet?: boolean;
-  /**
-   * 소리를 낼 것인가.
-   *
-   * ★ 스위치를 여기 두지 않는 까닭 — `.charart` 도 `.meetart` 도
-   *   네 변을 **마스크로 녹입니다**. 초상이 네모로 잘려 보이면
-   *   스티커가 되기 때문입니다. 그런데 마스크는 그 안의 것을 다
-   *   녹여서, 귀퉁이에 단추를 얹으면 단추도 같이 사라집니다.
-   *   그래서 스위치는 마스크 **밖**(Meet)에 두고 여기는 상태만
-   *   받습니다.
-   */
-  soundOn?: boolean;
-  /** 브라우저가 소리를 막았을 때. 화면이 켜는 자리를 내라는 뜻입니다. */
-  onSoundBlocked?: () => void;
 }) {
   const bust = useBust(lens.id, mood);
   const wantGreet = greet && mood === "base";
@@ -236,24 +223,18 @@ export default function CharArt({
    *   그리고 켜는 자리를 냅니다. 손님이 안 부른 소리를 억지로
    *   밀어 넣지 않고, 못 듣고 지나치게 두지도 않습니다.
    */
+  /*
+   * ★ 소리는 **상단바의 ♪ 한 벌**을 따릅니다 (2026-09-05).
+   *
+   *   자리마다 스위치를 두면 손님은 무엇을 껐는지 모릅니다.
+   *   막히면 조용히 물러서서 그림만 돕니다 — 화면이 멈추면 안 됩니다.
+   */
   const vref = useRef<HTMLVideoElement | null>(null);
+  const snd = useSoundOn();
   useEffect(() => {
-    const v = vref.current;
-    if (!v || !hello || still) return;
-    if (!soundOn) { v.muted = true; v.play().catch(() => {}); return; }
-    v.muted = false;
-    // 켤 때는 처음부터 — 인사를 반쯤 듣게 두지 않습니다.
-    v.currentTime = 0;
-    v.play().catch(() => {
-      // 브라우저가 막았소. 조용히 물러서고, 켜는 자리를 내라고 이릅니다.
-      v.muted = true;
-      v.play().catch(() => {});
-      onSoundBlocked?.();
-    });
-    // onSoundBlocked 는 화면이 매번 새로 만드는 함수라 여기 넣지 않습니다 —
-    // 넣으면 그릴 때마다 인사가 처음으로 되감깁니다.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hello, still, soundOn]);
+    if (still) return;
+    playSafely(vref.current, snd);
+  }, [snd, still, hello, clip, lens.id]);
 
   return (
     <div
@@ -274,20 +255,24 @@ export default function CharArt({
         <PromptModal kind="char" id={lens.id} onClose={() => setOpen(false)} />
       )}
       {/*
-        ★ 첫 인사는 **한 번만** 돕니다 (loop 없음). 되풀이되면 인사가
-          아니라 태엽입니다. 끝나면 마지막 프레임에 멈춰 섭니다.
+        ★ 인사도 **계속 돕니다** (2026-09-05).
+
+          전에는 한 번만 틀었습니다 — 「되풀이되면 인사가 아니라
+          태엽」이라 적어 두었지요. 손님이 계속 돌라 하셨으니 돕니다.
+          대신 소리는 상단바의 ♪ 한 벌이 쥡니다.
       */}
       {hello && !still ? (
         <video ref={vref} width={w} height={h}
-               poster={`/char/${lens.id}/greet.jpg`}
-               autoPlay playsInline preload="auto" aria-label={lens.name}>
+               poster={`/char/${lens.id}/greet.webp`}
+               autoPlay loop playsInline preload="auto"
+               muted={!snd} aria-label={lens.name}>
           <source src={`/char/${lens.id}/greet.webm`} type="video/webm" />
           {/* 사파리 몫 — VP9 를 못 읽습니다 */}
           <source src={`/char/${lens.id}/greet.mp4`} type="video/mp4" />
         </video>
       ) : clip && !still ? (
-        <video width={w} height={h} poster={bust ?? undefined}
-               autoPlay muted playsInline loop aria-label={lens.name}>
+        <video ref={vref} width={w} height={h} poster={bust ?? undefined}
+               autoPlay muted={!snd} playsInline loop aria-label={lens.name}>
           <source src={`/char/${lens.id}/clip.webm`} type="video/webm" />
           {/* mp4 는 투명이 없어 바탕색이 구워져 있습니다 */}
           <source src={`/char/${lens.id}/clip.mp4`} type="video/mp4" />

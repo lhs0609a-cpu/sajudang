@@ -69,7 +69,7 @@ export interface SceneSpec {
 }
 
 export const SCENES: SceneSpec[] = [
-  { id: "gate", name: "대문 · 사계", preset: "Dolly In", ratio: "9:16", seconds: 5, loop: false, tint: "grade", seasonal: true },
+  { id: "gate", name: "대문 · 사계", preset: "Dolly In", ratio: "9:16", seconds: 5, loop: true, tint: "grade", seasonal: true },
   /*
    * ★ 되살렸습니다 (2026-09-04).
    *
@@ -79,9 +79,9 @@ export const SCENES: SceneSpec[] = [
    *   새어 나오는데 안은 아직 안 보이는 그림이라, 이 화면의 뜻과
    *   같습니다. 명령어는 그때 적어 둔 것이 그대로 있습니다.
    */
-  { id: "door", name: "열리는 문", preset: "Static", ratio: "9:16", seconds: 2, loop: false },
+  { id: "door", name: "열리는 문", preset: "Static", ratio: "9:16", seconds: 2, loop: true },
   { id: "desk", name: "붓·벼루·빈 종이", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
-  { id: "ink", name: "먹이 번지는 종이", preset: "Static", ratio: "9:16", seconds: 5, loop: false },
+  { id: "ink", name: "먹이 번지는 종이", preset: "Static", ratio: "9:16", seconds: 5, loop: true },
   { id: "room", name: "실내·병풍·주렴", preset: "Static", ratio: "9:16", seconds: 5, loop: true },
   /*
    * ★ a4b 「성향 4글자」 몫. 이 화면은 발주서(docs/10)가 쓰인 뒤에
@@ -94,28 +94,28 @@ export const SCENES: SceneSpec[] = [
    */
   { id: "mirror", name: "맞대어 보는 자리", preset: "Static", ratio: "9:16", seconds: 5, loop: true },
   { id: "fork", name: "갈림길", preset: "Static", ratio: "16:9", seconds: 3, loop: true, focus: "50% 55%" },
-  { id: "altar", name: "명식 받침", preset: "Static", ratio: "9:16", seconds: 5, loop: false, tint: "recolor" },
+  { id: "altar", name: "명식 받침", preset: "Static", ratio: "9:16", seconds: 5, loop: true, tint: "recolor" },
   { id: "facing", name: "마주앉은 자리", preset: "Static", ratio: "9:16", seconds: 5, loop: true },
   { id: "shelf", name: "진열대", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
   // ★ 16:9 로 적혀 있었는데 들어온 그림은 9:16 입니다 (2026-09-04).
   //   생성기가 세로로 내주고, 화면은 `box` 로 담아 씁니다. 선언이
   //   실물과 다르면 감사가 「비율이 틀렸다」고 짚습니다 — 실물을 따릅니다.
-  { id: "hall", name: "스무 자리", preset: "Dolly In", ratio: "9:16", seconds: 5, loop: false },
+  { id: "hall", name: "스무 자리", preset: "Dolly In", ratio: "9:16", seconds: 5, loop: true },
   { id: "seat", name: "그 사람의 자리", preset: "Static", ratio: "3:4", seconds: 3, loop: true, tint: "recolor" },
   // ★ 16:9 였습니다. 그런데 쓰는 자리 둘(리포트 표지 c1 · 분석지)이
   //   `.sceneart.hero` — aspect-ratio 9/16 + object-fit:cover 라
   //   **가로의 약 68%가 잘려 나갑니다.** 두루마리는 세로로 펼쳐지는
   //   물건이니 9:16 이 맞습니다. 아직 안 만든 에셋이라 지금이 고칠 때입니다.
-  { id: "scroll", name: "펼쳐지는 두루마리", preset: "Static", ratio: "9:16", seconds: 3, loop: false },
-  { id: "fold", name: "반쯤 접힌 두루마리", preset: "Static", ratio: "16:9", seconds: 2, loop: false },
-  { id: "untie", name: "붉은 끈·개봉", preset: "Static", ratio: "1:1", seconds: 2, loop: false },
-  { id: "handle", name: "문고리·그림자", preset: "Dolly In", ratio: "9:16", seconds: 3, loop: false },
-  { id: "roadmap", name: "대운 길", preset: "Dolly Right", ratio: "16:9", seconds: 4, loop: false, tint: "recolor" },
+  { id: "scroll", name: "펼쳐지는 두루마리", preset: "Static", ratio: "9:16", seconds: 3, loop: true },
+  { id: "fold", name: "반쯤 접힌 두루마리", preset: "Static", ratio: "16:9", seconds: 2, loop: true },
+  { id: "untie", name: "붉은 끈·개봉", preset: "Static", ratio: "1:1", seconds: 2, loop: true },
+  { id: "handle", name: "문고리·그림자", preset: "Dolly In", ratio: "9:16", seconds: 3, loop: true },
+  { id: "roadmap", name: "대운 길", preset: "Dolly Right", ratio: "16:9", seconds: 4, loop: true, tint: "recolor" },
   { id: "cardbg", name: "공유 카드 문양", preset: "Static", ratio: "1:1", seconds: 3, loop: true, tint: "recolor" },
   { id: "tray", name: "목패 늘어놓은 상", preset: "Static", ratio: "16:9", seconds: 2, loop: true },
-  { id: "coin", name: "엽전", preset: "Static", ratio: "1:1", seconds: 2, loop: false },
+  { id: "coin", name: "엽전", preset: "Static", ratio: "1:1", seconds: 2, loop: true },
   { id: "tea", name: "다과상", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
-  { id: "sealbook", name: "인장첩", preset: "Static", ratio: "3:4", seconds: 2, loop: false },
+  { id: "sealbook", name: "인장첩", preset: "Static", ratio: "3:4", seconds: 2, loop: true },
   // ★ 16:9 로 적혀 있었지만 실제로 들어온 그림은 9:16 입니다
   //   (2026-09-01 부터 원본이 전부 세로). 적힌 값을 그림에 맞춥니다.
   //

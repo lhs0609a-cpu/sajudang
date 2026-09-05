@@ -42,6 +42,27 @@ let cur = "";                 // 지금 도는 배경음 이름
 const missing = new Set<string>();   // 없는 것으로 확인된 파일
 const listeners = new Set<(s: State) => void>();
 
+/**
+ * 영상이 소리를 낼 것인가.
+ *
+ * ★ 영상은 배경음과 **따로** 봅니다 (2026-09-05).
+ *   배경음은 깔리는 것이라 기본 꺼짐이 맞지만, 영상 소리는 그 장면이
+ *   내는 소리라 켜져 있는 것이 맞습니다. 손님이 ♪ 로 끄면 같이
+ *   꺼집니다 — 끈 사람에게 소리를 내지 않습니다.
+ *
+ * ★ 못 켜도 그림은 돕니다. 브라우저가 막으면 조용히 물러섭니다.
+ */
+export function videoSoundOn(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    // 끈 적이 없으면 켭니다 — 배경음과 달리 기본이 켜짐입니다.
+    return localStorage.getItem(KEY) !== "off";
+  } catch {
+    return false;
+  }
+}
+
+
 export function soundState(): State {
   if (typeof window === "undefined") return "off";
   try {
