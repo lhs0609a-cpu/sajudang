@@ -60,6 +60,7 @@
 | `docs/15_공유_유입_설계.md` | 분석지·공유·유입 화면 손댈 때 |
 | `docs/16_신살인물_에셋발주서.md` | 신살 인물·에셋 |
 | `docs/17_배포_운영_설계.md` | **배포·환경변수·CORS·상태 저장** |
+| `docs/20_고민축_설계.md` | **고민(돈·몸·일·사랑·사람·방향) 손댈 때 필수** — 무엇을 세는가 |
 | `reference/sajudang.html` | 애매할 때 정답. 동작하는 참조 구현체 |
 
 ---
@@ -119,6 +120,11 @@ venv 는 `%USERPROFILE%\.venvs\sajudang` — 저장소가 구글 드라이브에
                  ★ OWN_FLOOR — 값 등급이 요구하는 관점 컷 수. 표는 여기 한 벌
   extras.py      ★ 추가 입력 — 상대 사주 · 현재 상황 · 혈액형 · 그림 · 패
                  저장하지 않습니다. 얼굴 사진은 여기 없습니다(생체인식정보)
+  pattern.py     ★ 짜임 — 개수가 아니라 **개수 사이의 관계** (군겁쟁재 · 상관견관)
+                 조건이 안 맞으면 안 낸다. 고민마다 보는 짜임이 다르다
+  topic.py       ★ 고민축 — 물으신 자리에서 **무엇을 세는가** (docs/20)
+                 저울(scale) · 때(turn) · 얼굴(face) · 물음(ask)
+                 고민은 낱말이 아니라 **축**을 바꾼다. 표는 seed/topic.json
   relay.py       릴레이 규칙 20개 평가 · ★ 재순위 · ★ 브레이크 하한 강제
   report.py      리포트 컷 · tier 잠금
   daily.py       오늘의 일진
@@ -137,7 +143,7 @@ venv 는 `%USERPROFILE%\.venvs\sajudang` — 저장소가 구글 드라이브에
   lib/       api.ts  store.ts(zustand)  lenses.ts
   components/ Shell  Chart  HookSegments  Narration  scene/(24종)
   styles/    tokens.css  reference.css
-/seed/           bank.json  lenses.json  relay_rules.json  guard.json
+/seed/           bank.json  lenses.json  relay_rules.json  guard.json  topic.json
                  lens_view.json  lens_cuts.json  extras.json  sinsal.json
 /tests/          fixtures/charts.json  ← 회귀 테스트 고정 케이스
 ```
@@ -234,6 +240,7 @@ false 면 브레이크가 풀린 채로 도는 것입니다. 상세는 docs/17.
 | 결제 (T5-1) | 토스 SDK 연동 완료(v2 standard · 결제창 → successUrl → 승인). **PG 키 없어 실거래만 미검증.** 키 없으면 503 |
 | 계측 | **완료** — `/v1/events` · `/v1/funnel` · 화면별 도달·훅 단별 응답률. 개인정보 컬럼 없음 |
 | 리텐션 (T5-2) | **완료** — 5층 트리거 · 하루 1건 · 회고 루프 (발송 채널 미연결) |
+| 고민축 (2026-09-06) | **완료** — 여섯 칸이 낱말이 아니라 **셈**으로 갈립니다. 저울·짜임·때·얼굴·물음 (docs/20). 짜임 20 → 37개(돈 4 → 11). 새 공통 컷 최다 점유 0.13~1.00% |
 
 ### ★ 다음 할 일
 
@@ -304,6 +311,13 @@ false 면 브레이크가 풀린 채로 도는 것입니다. 상세는 docs/17.
 
 ## 검사 명령
 
+★ **파이썬이 없는 기계에서는** 밀기만 해도 같은 관문이 돕니다 —
+  `.github/workflows/engine-check.yml` (GitHub Actions · Python 3.11).
+  테스트 전량 · 교차검증 · 분포 · 중복률 · 주어 감사 + 화면 타입체크.
+  배포도 로컬 파이썬이 필요 없습니다 (`fly deploy --remote-only`).
+  다만 `plan` `fill`(만세력 앱 대조)처럼 **사람이 받아적는** 도구는
+  손으로 돌려야 합니다.
+
 ```powershell
 .\dev.ps1 engine-check     # 테스트 + 교차검증 + 분포 + 중복률  ← 관문
 .\dev.ps1 crosscheck       # sxtwl 없는 독립 계산과 대조
@@ -364,6 +378,16 @@ tools/population.py        도구들이 같은 인구를 보게 하는 자리
   청구됩니다 (`payments.price_of(tier, lens_id)`). 캐릭터 값이 곧
   「이 자리 하나」 값입니다. 카드는 4,900원인데 결제가 19,900원이던
   자리가 있었습니다
+- **고민을 낱말로만 가르기** — 여섯 칸이 갈리는 것은 낱말이 아니라
+  **세는 값**입니다. 2026-09-05 에 낱말을 갈라 놓고도 손님이 「돈을
+  물었는데 돈 얘기가 없다」 고 한 까닭이 그것입니다 — 돈을 골라도
+  재성을 「개수 하나」로만 보고 갈래·투출·궁위·재고·공망을 한 줄도 안
+  셌습니다. 고민이 바뀌면 **보는 축**이 바뀝니다 (`engine/topic.py` · docs/20)
+- **공통 컷을 축 둘로 만들기** — 문턱은 최다 점유 2%입니다. 축 둘이면
+  가짓수가 그 곱에서 멈춰 「때」가 1.92%, 「얼굴」이 3.12%였습니다.
+  셋째 축은 **세는 값**으로 답니다 — 몇 살에 들어와 몇 해 남았는가,
+  그 축이 무슨 십신을 세어 나왔는가. 가짓수를 늘리려 문장을 늘리지
+  마세요. 근거를 대면 가짓수는 따라옵니다
 - **틀릴 수 없는 말만 쓰기** — 바넘 문장은 아무 결과도 금지하지 않아
   어떤 관찰에서도 살아남습니다. 그래서 '맞다' 는 나와도 '소름 돋는다' 는
   안 나옵니다. **나이·연도·센 수**를 박으세요. 다만 그 해에 무슨 일이

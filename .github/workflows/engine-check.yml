@@ -1,0 +1,100 @@
+# 관문 — 미는 자리마다 `.\dev.ps1 engine-check` 와 **같은 것**을 돌린다.
+#
+# ★ 왜 생겼나 (2026-09-06)
+#
+#   손님이 물었소 — "파이썬이 꼭 필요해?"
+#
+#   서비스는 아니오. 배포는 Fly 가 원격에서 python:3.11-slim 으로
+#   빌드하고(fly deploy --remote-only), 프론트는 파이썬과 무관하오.
+#   파이썬이 필요한 자리는 **검사와 도구**뿐이오.
+#
+#   그런데 그 검사가 기계마다 안 도는 자리가 있었소 —
+#   sxtwl 은 3.12+ 휠이 없어서 3.11 이 아니면 MSVC 로 직접 컴파일해야
+#   하고, 그게 없는 기계에서는 엔진을 **한 줄도 못 돌립니다.**
+#   실제로 이 기계가 그랬습니다(2026-09-06). 그러면 고친 사람이
+#   「돌려는 봤소?」 에 답을 못 하오.
+#
+#   그래서 관문을 여기 둡니다. 새 기계·새 클론·다른 사람 손에서도
+#   같은 것이 돌아가오. 로컬에 아무것도 안 깔아도 되오.
+#
+# ★ 여기가 dev.ps1 을 대신하지는 않소
+#
+#   `plan` `fill`(만세력 앱 대조) 처럼 **사람이 받아적는** 도구는
+#   손으로 돌려야 하오. 그건 계산이 아니라 확인이오.
+name: engine-check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:        # 손으로도 돌릴 수 있게
+
+jobs:
+  engine:
+    name: 엔진 — 테스트 · 교차검증 · 분포 · 중복률 · 주어
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      # ★ 3.11 고정. sxtwl 은 3.12+ 휠이 없소 (requirements.txt 머리말).
+      #   리눅스에는 manylinux 휠이 있어 컴파일 없이 깔리오.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: 의존성
+        run: |
+          python -m pip install --upgrade pip
+          # 검사와 도구까지 도는 벌 — Pillow 가 여기 있습니다.
+          # 배포 이미지는 requirements.txt 만 봅니다 (Dockerfile).
+          pip install -r requirements-dev.txt
+          # 절기와 표준시가 실제로 서는지 먼저 봅니다 — 여기서 막히면
+          # 아래 검사들의 실패는 전부 이 한 줄의 그림자입니다.
+          python -c "import sxtwl, zoneinfo; zoneinfo.ZoneInfo('Asia/Seoul'); print('sxtwl + tzdata OK')"
+
+      # 아래 다섯은 dev.ps1 의 engine-check 와 **같은 차례**입니다.
+      # 하나라도 어긋나면 여기서 멈춥니다.
+      - name: 테스트 전량
+        run: python -m pytest tests -q
+
+      - name: 교차검증 — sxtwl 없는 독립 계산과 대조
+        run: python tools/crosscheck.py 300
+
+      - name: 분포 (3,000명)
+        run: python tools/distribution.py
+
+      - name: 중복률 — 훅과 컷의 최다 점유
+        run: python tools/dup_rate.py
+
+      - name: 주어 감사 — 누구 얘긴지 안 적힌 문장
+        run: python tools/subject_audit.py
+
+  web:
+    name: 화면 — 타입체크
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # ★ `npm ci` 가 아니라 `npm install` 이오 —
+      #   이 저장소는 package-lock.json 을 커밋하지 않소 (.gitignore).
+      #
+      # ★ 루트가 아니라 **apps/web 안에서** 도오.
+      #   개발도 그 꼴로 돌기 때문이오 — `.\dev.ps1 web-pull` 은 apps/web
+      #   과 packages/shared-types 만 로컬로 옮기고 거기서 npm install 을
+      #   합니다(저장소가 구글 드라이브라 node_modules 를 여기 못 풉니다).
+      #   `@shared/*` 는 워크스페이스가 아니라 tsconfig 의 경로라 이걸로
+      #   충분하오. 검사는 **사람이 실제로 도는 자리**와 같아야 하오.
+      - name: 의존성
+        working-directory: apps/web
+        run: npm install
+
+      - name: 타입체크
+        working-directory: apps/web
+        run: npm run typecheck

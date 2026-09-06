@@ -33,36 +33,59 @@ no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
 --- ①-짚는 표정 · bust_cut.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are fixed directly on the viewer,
-narrowed very slightly, pupils sharp. The mouth is a straight line,
-no smile. One brow a fraction lower than the other. He has just
-said something true that the viewer did not want said. Not angry,
-not cruel — certain.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The eyes narrow a fraction and hold, pupils sharp. The mouth stays a
+straight line. One brow a hair lower than the other. He has said the
+true thing first and is waiting.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/pungun/bust_cut.png
 
 --- ①-누그러뜨리는 표정 · bust_soft.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are lowered a little and softened,
-the outer corners easing down. The faintest warmth at the mouth,
-not quite a smile. The head tilts a few degrees toward the viewer.
-He is letting the viewer off. Kind, unhurried, a little tired.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The gaze drops a few degrees and the cold goes out of it. The chin tucks
+slightly. No smile — he is simply not pressing any further.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/pungun/bust_soft.png
 
---- ② 모션 (선택 · clip.webm) ---
-Static camera. The character blinks once, slowly. Hair and sleeve
-edges drift as if in still air. The eyes stay on the viewer.
-Nothing else moves — no head turn, no expression change.
+--- ② 모션 · 도는 초상 (clip.webm · 3s · 이음새 있음) ---
+Static camera. The jade pin in the high-tied hair catches the light once
+as it passes. A single slow blink. The silver trim at the collar
+breathes with a shallow breath. The cool gaze never leaves the viewer.
+
+The head stays exactly where it is and does not turn — the app crops
+this clip to the face, so any drift breaks the crop. No new pose, no
+expression change. Only what is described above moves. Seamlessly
+loopable: the last frame must match the first exactly.
 
 This is a 2D hand-drawn animation, not live action. Preserve the
 illustration style exactly: flat cel shading, uniform lineart, painted
 texture. Do not add photographic realism, skin pores, film grain or 3D
 lighting. Do not redraw or reshape any element. Animate only what is
 described above; everything else stays completely still.
+
+  두는 곳  public/char/pungun/clip.webm · clip.mp4
+
+--- ③ 첫 대면 · 인사 (greet.webm · 2s · 한 번만) ---
+Static camera. His eyes lift to the viewer as if just noticing them, and
+he inclines his head a few degrees — the smallest possible bow — then
+straightens and holds the gaze.
+
+The head stays centred and front-facing throughout — this plays once,
+at the first meeting, and the face is cropped the same way. It ends on
+the same still portrait it began with, so the greeting can hand over to
+the looping clip without a jump.
+
+This is a 2D hand-drawn animation, not live action. Preserve the
+illustration style exactly: flat cel shading, uniform lineart, painted
+texture. Do not add photographic realism, skin pores, film grain or 3D
+lighting. Do not redraw or reshape any element. Animate only what is
+described above; everything else stays completely still.
+
+  두는 곳  public/char/pungun/greet.webm · greet.mp4 · greet.webp
 
 ==========================================================================
   백운선사  白雲禪師   [baegun]
@@ -92,36 +115,59 @@ no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
 --- ①-짚는 표정 · bust_cut.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are fixed directly on the viewer,
-narrowed very slightly, pupils sharp. The mouth is a straight line,
-no smile. One brow a fraction lower than the other. He has just
-said something true that the viewer did not want said. Not angry,
-not cruel — certain.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The eyes open fully and stay open, unblinking, the pale grey-green iris
+very clear. The mouth is level. He is not accusing — he has simply
+stopped softening it.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/baegun/bust_cut.png
 
 --- ①-누그러뜨리는 표정 · bust_soft.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are lowered a little and softened,
-the outer corners easing down. The faintest warmth at the mouth,
-not quite a smile. The head tilts a few degrees toward the viewer.
-He is letting the viewer off. Kind, unhurried, a little tired.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The eyelids lower to half and the outer corners ease. The hand around
+the bead bracelet loosens. A breath goes out.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/baegun/bust_soft.png
 
---- ② 모션 (선택 · clip.webm) ---
-Static camera. The character blinks once, slowly. Hair and sleeve
-edges drift as if in still air. The eyes stay on the viewer.
-Nothing else moves — no head turn, no expression change.
+--- ② 모션 · 도는 초상 (clip.webm · 3s · 이음새 있음) ---
+Static camera. The eyes close and open again very slowly, once. A single
+strand of the silver-white hair lifts and settles. One wooden bead turns
+a half-turn on the wrist.
+
+The head stays exactly where it is and does not turn — the app crops
+this clip to the face, so any drift breaks the crop. No new pose, no
+expression change. Only what is described above moves. Seamlessly
+loopable: the last frame must match the first exactly.
 
 This is a 2D hand-drawn animation, not live action. Preserve the
 illustration style exactly: flat cel shading, uniform lineart, painted
 texture. Do not add photographic realism, skin pores, film grain or 3D
 lighting. Do not redraw or reshape any element. Animate only what is
 described above; everything else stays completely still.
+
+  두는 곳  public/char/baegun/clip.webm · clip.mp4
+
+--- ③ 첫 대면 · 인사 (greet.webm · 2s · 한 번만) ---
+Static camera. The lowered eyes open, find the viewer, and the head bows
+once slowly and comes back up. The bead bracelet swings a little and
+stills.
+
+The head stays centred and front-facing throughout — this plays once,
+at the first meeting, and the face is cropped the same way. It ends on
+the same still portrait it began with, so the greeting can hand over to
+the looping clip without a jump.
+
+This is a 2D hand-drawn animation, not live action. Preserve the
+illustration style exactly: flat cel shading, uniform lineart, painted
+texture. Do not add photographic realism, skin pores, film grain or 3D
+lighting. Do not redraw or reshape any element. Animate only what is
+described above; everything else stays completely still.
+
+  두는 곳  public/char/baegun/greet.webm · greet.mp4 · greet.webp
 
 ==========================================================================
   청암거사  靑巖居士   [cheongam]
@@ -151,36 +197,57 @@ no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
 --- ①-짚는 표정 · bust_cut.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are fixed directly on the viewer,
-narrowed very slightly, pupils sharp. The mouth is a straight line,
-no smile. One brow a fraction lower than the other. He has just
-said something true that the viewer did not want said. Not angry,
-not cruel — certain.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The brows come down a fraction and the jaw sets. The eyes go flat and
+stay on the viewer. He is not going to repeat it.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/cheongam/bust_cut.png
 
 --- ①-누그러뜨리는 표정 · bust_soft.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are lowered a little and softened,
-the outer corners easing down. The faintest warmth at the mouth,
-not quite a smile. The head tilts a few degrees toward the viewer.
-He is letting the viewer off. Kind, unhurried, a little tired.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The set jaw loosens. The eyes stay level but the weight goes out of the
+brow. Something close to, but not, kindness.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/cheongam/bust_soft.png
 
---- ② 모션 (선택 · clip.webm) ---
-Static camera. The character blinks once, slowly. Hair and sleeve
-edges drift as if in still air. The eyes stay on the viewer.
-Nothing else moves — no head turn, no expression change.
+--- ② 모션 · 도는 초상 (clip.webm · 3s · 이음새 있음) ---
+Static camera. One deep breath — the broad shoulders rise a little and
+come down. The creases in the rolled-up sleeve shift with it. The thick
+brows do not move. One slow blink at the end.
+
+The head stays exactly where it is and does not turn — the app crops
+this clip to the face, so any drift breaks the crop. No new pose, no
+expression change. Only what is described above moves. Seamlessly
+loopable: the last frame must match the first exactly.
 
 This is a 2D hand-drawn animation, not live action. Preserve the
 illustration style exactly: flat cel shading, uniform lineart, painted
 texture. Do not add photographic realism, skin pores, film grain or 3D
 lighting. Do not redraw or reshape any element. Animate only what is
 described above; everything else stays completely still.
+
+  두는 곳  public/char/cheongam/clip.webm · clip.mp4
+
+--- ③ 첫 대면 · 인사 (greet.webm · 2s · 한 번만) ---
+Static camera. He looks up from whatever was in his hands, sees the
+viewer, and gives one short nod. The shoulders settle.
+
+The head stays centred and front-facing throughout — this plays once,
+at the first meeting, and the face is cropped the same way. It ends on
+the same still portrait it began with, so the greeting can hand over to
+the looping clip without a jump.
+
+This is a 2D hand-drawn animation, not live action. Preserve the
+illustration style exactly: flat cel shading, uniform lineart, painted
+texture. Do not add photographic realism, skin pores, film grain or 3D
+lighting. Do not redraw or reshape any element. Animate only what is
+described above; everything else stays completely still.
+
+  두는 곳  public/char/cheongam/greet.webm · greet.mp4 · greet.webp
 
 ==========================================================================
   시계장이  時計   [sigye]
@@ -210,36 +277,58 @@ no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
 --- ①-짚는 표정 · bust_cut.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are fixed directly on the viewer,
-narrowed very slightly, pupils sharp. The mouth is a straight line,
-no smile. One brow a fraction lower than the other. He has just
-said something true that the viewer did not want said. Not angry,
-not cruel — certain.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The chin drops a fraction so the eyes come over the top of the
+spectacles and fix on the viewer. The mouth closes flat. He has just put
+a date on it.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/sigye/bust_cut.png
 
 --- ①-누그러뜨리는 표정 · bust_soft.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are lowered a little and softened,
-the outer corners easing down. The faintest warmth at the mouth,
-not quite a smile. The head tilts a few degrees toward the viewer.
-He is letting the viewer off. Kind, unhurried, a little tired.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+He pushes the spectacles back up and the eyes behind them soften. The
+counting chain slows. The mouth eases.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/sigye/bust_soft.png
 
---- ② 모션 (선택 · clip.webm) ---
-Static camera. The character blinks once, slowly. Hair and sleeve
-edges drift as if in still air. The eyes stay on the viewer.
-Nothing else moves — no head turn, no expression change.
+--- ② 모션 · 도는 초상 (clip.webm · 3s · 이음새 있음) ---
+Static camera. The fine chain across the chest swings in a small even
+rhythm, like something counting. Light crosses one lens of the
+brass-rimmed spectacles and passes. One blink, on the beat.
+
+The head stays exactly where it is and does not turn — the app crops
+this clip to the face, so any drift breaks the crop. No new pose, no
+expression change. Only what is described above moves. Seamlessly
+loopable: the last frame must match the first exactly.
 
 This is a 2D hand-drawn animation, not live action. Preserve the
 illustration style exactly: flat cel shading, uniform lineart, painted
 texture. Do not add photographic realism, skin pores, film grain or 3D
 lighting. Do not redraw or reshape any element. Animate only what is
 described above; everything else stays completely still.
+
+  두는 곳  public/char/sigye/clip.webm · clip.mp4
+
+--- ③ 첫 대면 · 인사 (greet.webm · 2s · 한 번만) ---
+Static camera. He glances down at the chain, then up at the viewer, and
+the eyebrows lift in mild recognition — right on time.
+
+The head stays centred and front-facing throughout — this plays once,
+at the first meeting, and the face is cropped the same way. It ends on
+the same still portrait it began with, so the greeting can hand over to
+the looping clip without a jump.
+
+This is a 2D hand-drawn animation, not live action. Preserve the
+illustration style exactly: flat cel shading, uniform lineart, painted
+texture. Do not add photographic realism, skin pores, film grain or 3D
+lighting. Do not redraw or reshape any element. Animate only what is
+described above; everything else stays completely still.
+
+  두는 곳  public/char/sigye/greet.webm · greet.mp4 · greet.webp
 
 ==========================================================================
   은별 무녀  銀星   [eunbyeol]
@@ -269,36 +358,58 @@ no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
 --- ①-짚는 표정 · bust_cut.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are fixed directly on the viewer,
-narrowed very slightly, pupils sharp. The mouth is a straight line,
-no smile. One brow a fraction lower than the other. He has just
-said something true that the viewer did not want said. Not angry,
-not cruel — certain.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The eyes stop moving entirely and rest on the viewer. Nothing in the
+face gives anything away. She has found the place where the answers do
+not agree.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/eunbyeol/bust_cut.png
 
 --- ①-누그러뜨리는 표정 · bust_soft.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are lowered a little and softened,
-the outer corners easing down. The faintest warmth at the mouth,
-not quite a smile. The head tilts a few degrees toward the viewer.
-He is letting the viewer off. Kind, unhurried, a little tired.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The gaze slides a few degrees off the viewer — deliberately, giving them
+room. The severe line of the mouth loosens by almost nothing.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/eunbyeol/bust_soft.png
 
---- ② 모션 (선택 · clip.webm) ---
-Static camera. The character blinks once, slowly. Hair and sleeve
-edges drift as if in still air. The eyes stay on the viewer.
-Nothing else moves — no head turn, no expression change.
+--- ② 모션 · 도는 초상 (clip.webm · 3s · 이음새 있음) ---
+Static camera. A cold light travels along the silver hairpin and goes
+out. The high collar stays perfectly still. She does not blink for a
+long time, then blinks once, late.
+
+The head stays exactly where it is and does not turn — the app crops
+this clip to the face, so any drift breaks the crop. No new pose, no
+expression change. Only what is described above moves. Seamlessly
+loopable: the last frame must match the first exactly.
 
 This is a 2D hand-drawn animation, not live action. Preserve the
 illustration style exactly: flat cel shading, uniform lineart, painted
 texture. Do not add photographic realism, skin pores, film grain or 3D
 lighting. Do not redraw or reshape any element. Animate only what is
 described above; everything else stays completely still.
+
+  두는 곳  public/char/eunbyeol/clip.webm · clip.mp4
+
+--- ③ 첫 대면 · 인사 (greet.webm · 2s · 한 번만) ---
+Static camera. The eyes come up from somewhere off-frame and settle on
+the viewer, unhurried. The head tilts a degree, measuring, then levels.
+
+The head stays centred and front-facing throughout — this plays once,
+at the first meeting, and the face is cropped the same way. It ends on
+the same still portrait it began with, so the greeting can hand over to
+the looping clip without a jump.
+
+This is a 2D hand-drawn animation, not live action. Preserve the
+illustration style exactly: flat cel shading, uniform lineart, painted
+texture. Do not add photographic realism, skin pores, film grain or 3D
+lighting. Do not redraw or reshape any element. Animate only what is
+described above; everything else stays completely still.
+
+  두는 곳  public/char/eunbyeol/greet.webm · greet.mp4 · greet.webp
 
 ==========================================================================
   적혈랑  赤血娘   [jeokhyeol]
@@ -328,36 +439,57 @@ no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
 --- ①-짚는 표정 · bust_cut.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are fixed directly on the viewer,
-narrowed very slightly, pupils sharp. The mouth is a straight line,
-no smile. One brow a fraction lower than the other. He has just
-said something true that the viewer did not want said. Not angry,
-not cruel — certain.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The half-smile goes out completely. The eyes stay exactly where they
+were, and that is worse. She has named the thing the viewer wants.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/jeokhyeol/bust_cut.png
 
 --- ①-누그러뜨리는 표정 · bust_soft.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are lowered a little and softened,
-the outer corners easing down. The faintest warmth at the mouth,
-not quite a smile. The head tilts a few degrees toward the viewer.
-He is letting the viewer off. Kind, unhurried, a little tired.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The smile comes back small and real. The eyes warm and the head tips
+toward the viewer. The teasing stops.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/jeokhyeol/bust_soft.png
 
---- ② 모션 (선택 · clip.webm) ---
-Static camera. The character blinks once, slowly. Hair and sleeve
-edges drift as if in still air. The eyes stay on the viewer.
-Nothing else moves — no head turn, no expression change.
+--- ② 모션 · 도는 초상 (clip.webm · 3s · 이음새 있음) ---
+Static camera. The single long earring turns slowly through a
+half-circle and swings back. The loose crimson collar shifts on the bare
+shoulder. The half-smile deepens a little and returns.
+
+The head stays exactly where it is and does not turn — the app crops
+this clip to the face, so any drift breaks the crop. No new pose, no
+expression change. Only what is described above moves. Seamlessly
+loopable: the last frame must match the first exactly.
 
 This is a 2D hand-drawn animation, not live action. Preserve the
 illustration style exactly: flat cel shading, uniform lineart, painted
 texture. Do not add photographic realism, skin pores, film grain or 3D
 lighting. Do not redraw or reshape any element. Animate only what is
 described above; everything else stays completely still.
+
+  두는 곳  public/char/jeokhyeol/clip.webm · clip.mp4
+
+--- ③ 첫 대면 · 인사 (greet.webm · 2s · 한 번만) ---
+Static camera. She looks up through her lashes, the half-smile arriving
+before the gaze does, and the long earring swings once.
+
+The head stays centred and front-facing throughout — this plays once,
+at the first meeting, and the face is cropped the same way. It ends on
+the same still portrait it began with, so the greeting can hand over to
+the looping clip without a jump.
+
+This is a 2D hand-drawn animation, not live action. Preserve the
+illustration style exactly: flat cel shading, uniform lineart, painted
+texture. Do not add photographic realism, skin pores, film grain or 3D
+lighting. Do not redraw or reshape any element. Animate only what is
+described above; everything else stays completely still.
+
+  두는 곳  public/char/jeokhyeol/greet.webm · greet.mp4 · greet.webp
 
 ==========================================================================
   몽화  夢畵   [monghwa]
@@ -387,36 +519,59 @@ no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
 --- ①-짚는 표정 · bust_cut.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are fixed directly on the viewer,
-narrowed very slightly, pupils sharp. The mouth is a straight line,
-no smile. One brow a fraction lower than the other. He has just
-said something true that the viewer did not want said. Not angry,
-not cruel — certain.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The wandering eyes snap into focus on the viewer, all at once, and stay.
+The drifting cloth goes still. She is looking straight at the thing
+standing behind the question.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/monghwa/bust_cut.png
 
 --- ①-누그러뜨리는 표정 · bust_soft.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are lowered a little and softened,
-the outer corners easing down. The faintest warmth at the mouth,
-not quite a smile. The head tilts a few degrees toward the viewer.
-He is letting the viewer off. Kind, unhurried, a little tired.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The focus dissolves again and the gaze goes soft and far-off. The mouth
+curves very slightly. The cloth begins to drift once more.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/monghwa/bust_soft.png
 
---- ② 모션 (선택 · clip.webm) ---
-Static camera. The character blinks once, slowly. Hair and sleeve
-edges drift as if in still air. The eyes stay on the viewer.
-Nothing else moves — no head turn, no expression change.
+--- ② 모션 · 도는 초상 (clip.webm · 3s · 이음새 있음) ---
+Static camera. The layered pale-lilac gauze and the unbound hair drift
+as if underwater, with no wind in the room. The unfocused gaze does not
+settle. A blink that is almost too slow.
+
+The head stays exactly where it is and does not turn — the app crops
+this clip to the face, so any drift breaks the crop. No new pose, no
+expression change. Only what is described above moves. Seamlessly
+loopable: the last frame must match the first exactly.
 
 This is a 2D hand-drawn animation, not live action. Preserve the
 illustration style exactly: flat cel shading, uniform lineart, painted
 texture. Do not add photographic realism, skin pores, film grain or 3D
 lighting. Do not redraw or reshape any element. Animate only what is
 described above; everything else stays completely still.
+
+  두는 곳  public/char/monghwa/clip.webm · clip.mp4
+
+--- ③ 첫 대면 · 인사 (greet.webm · 2s · 한 번만) ---
+Static camera. The distant eyes drift across the frame and find the
+viewer by accident, and stay — as if she had been expecting them without
+knowing when.
+
+The head stays centred and front-facing throughout — this plays once,
+at the first meeting, and the face is cropped the same way. It ends on
+the same still portrait it began with, so the greeting can hand over to
+the looping clip without a jump.
+
+This is a 2D hand-drawn animation, not live action. Preserve the
+illustration style exactly: flat cel shading, uniform lineart, painted
+texture. Do not add photographic realism, skin pores, film grain or 3D
+lighting. Do not redraw or reshape any element. Animate only what is
+described above; everything else stays completely still.
+
+  두는 곳  public/char/monghwa/greet.webm · greet.mp4 · greet.webp
 
 ==========================================================================
   서역 별지기  西域   [seoyeok]
@@ -446,36 +601,59 @@ no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
 --- ①-짚는 표정 · bust_cut.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are fixed directly on the viewer,
-narrowed very slightly, pupils sharp. The mouth is a straight line,
-no smile. One brow a fraction lower than the other. He has just
-said something true that the viewer did not want said. Not angry,
-not cruel — certain.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The deep-set eyes fix and the head goes very still, the way someone
+holds still to take a sighting. He has placed the viewer on a map they
+did not know existed.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/seoyeok/bust_cut.png
 
 --- ①-누그러뜨리는 표정 · bust_soft.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are lowered a little and softened,
-the outer corners easing down. The faintest warmth at the mouth,
-not quite a smile. The head tilts a few degrees toward the viewer.
-He is letting the viewer off. Kind, unhurried, a little tired.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The shoulders drop out of the travelling posture. The eyes crease at the
+corners — a long way from home and glad of the company.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/seoyeok/bust_soft.png
 
---- ② 모션 (선택 · clip.webm) ---
-Static camera. The character blinks once, slowly. Hair and sleeve
-edges drift as if in still air. The eyes stay on the viewer.
-Nothing else moves — no head turn, no expression change.
+--- ② 모션 · 도는 초상 (clip.webm · 3s · 이음새 있음) ---
+Static camera. The brass astrolabe at the belt turns a slow half-turn on
+its ring and a thin line of light runs around its rim. The travelling
+coat's collar lifts once. One blink.
+
+The head stays exactly where it is and does not turn — the app crops
+this clip to the face, so any drift breaks the crop. No new pose, no
+expression change. Only what is described above moves. Seamlessly
+loopable: the last frame must match the first exactly.
 
 This is a 2D hand-drawn animation, not live action. Preserve the
 illustration style exactly: flat cel shading, uniform lineart, painted
 texture. Do not add photographic realism, skin pores, film grain or 3D
 lighting. Do not redraw or reshape any element. Animate only what is
 described above; everything else stays completely still.
+
+  두는 곳  public/char/seoyeok/clip.webm · clip.mp4
+
+--- ③ 첫 대면 · 인사 (greet.webm · 2s · 한 번만) ---
+Static camera. He looks up from the astrolabe, and the sun-darkened face
+opens into recognition. One hand steadies the instrument as he turns his
+attention over.
+
+The head stays centred and front-facing throughout — this plays once,
+at the first meeting, and the face is cropped the same way. It ends on
+the same still portrait it began with, so the greeting can hand over to
+the looping clip without a jump.
+
+This is a 2D hand-drawn animation, not live action. Preserve the
+illustration style exactly: flat cel shading, uniform lineart, painted
+texture. Do not add photographic realism, skin pores, film grain or 3D
+lighting. Do not redraw or reshape any element. Animate only what is
+described above; everything else stays completely still.
+
+  두는 곳  public/char/seoyeok/greet.webm · greet.mp4 · greet.webp
 
 ==========================================================================
   패선생  牌先生   [paeseon]
@@ -505,36 +683,58 @@ no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
 --- ①-짚는 표정 · bust_cut.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are fixed directly on the viewer,
-narrowed very slightly, pupils sharp. The mouth is a straight line,
-no smile. One brow a fraction lower than the other. He has just
-said something true that the viewer did not want said. Not angry,
-not cruel — certain.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The lazy grin drops off in one frame. The card stops moving. The eyes,
+suddenly not amused at all, hold the viewer. He has turned up the one he
+was not joking about.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/paeseon/bust_cut.png
 
 --- ①-누그러뜨리는 표정 · bust_soft.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are lowered a little and softened,
-the outer corners easing down. The faintest warmth at the mouth,
-not quite a smile. The head tilts a few degrees toward the viewer.
-He is letting the viewer off. Kind, unhurried, a little tired.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The grin comes back crooked and easy, and he tucks the card away out of
+frame. The raised brow lowers. Nothing to see here.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/paeseon/bust_soft.png
 
---- ② 모션 (선택 · clip.webm) ---
-Static camera. The character blinks once, slowly. Hair and sleeve
-edges drift as if in still air. The eyes stay on the viewer.
-Nothing else moves — no head turn, no expression change.
+--- ② 모션 · 도는 초상 (clip.webm · 3s · 이음새 있음) ---
+Static camera. The card held between two fingers flips over once and
+comes back, face hidden both times. The raised brow stays raised. The
+plum robe's open collar shifts.
+
+The head stays exactly where it is and does not turn — the app crops
+this clip to the face, so any drift breaks the crop. No new pose, no
+expression change. Only what is described above moves. Seamlessly
+loopable: the last frame must match the first exactly.
 
 This is a 2D hand-drawn animation, not live action. Preserve the
 illustration style exactly: flat cel shading, uniform lineart, painted
 texture. Do not add photographic realism, skin pores, film grain or 3D
 lighting. Do not redraw or reshape any element. Animate only what is
 described above; everything else stays completely still.
+
+  두는 곳  public/char/paeseon/clip.webm · clip.mp4
+
+--- ③ 첫 대면 · 인사 (greet.webm · 2s · 한 번만) ---
+Static camera. He fans the card into view between two fingers, gives the
+viewer a lazy sideways look, and the grin arrives.
+
+The head stays centred and front-facing throughout — this plays once,
+at the first meeting, and the face is cropped the same way. It ends on
+the same still portrait it began with, so the greeting can hand over to
+the looping clip without a jump.
+
+This is a 2D hand-drawn animation, not live action. Preserve the
+illustration style exactly: flat cel shading, uniform lineart, painted
+texture. Do not add photographic realism, skin pores, film grain or 3D
+lighting. Do not redraw or reshape any element. Animate only what is
+described above; everything else stays completely still.
+
+  두는 곳  public/char/paeseon/greet.webm · greet.mp4 · greet.webp
 
 ==========================================================================
   면상선생  面相先生   [myeonsang]
@@ -564,36 +764,58 @@ no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
 --- ①-짚는 표정 · bust_cut.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are fixed directly on the viewer,
-narrowed very slightly, pupils sharp. The mouth is a straight line,
-no smile. One brow a fraction lower than the other. He has just
-said something true that the viewer did not want said. Not angry,
-not cruel — certain.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The reading stops. The eyes lock centre and the thin lips press. He has
+seen the thing the viewer arranges his face to hide.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/myeonsang/bust_cut.png
 
 --- ①-누그러뜨리는 표정 · bust_soft.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are lowered a little and softened,
-the outer corners easing down. The faintest warmth at the mouth,
-not quite a smile. The head tilts a few degrees toward the viewer.
-He is letting the viewer off. Kind, unhurried, a little tired.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The eyes let go and drop politely to the viewer's collar instead of his
+face. The hands unfold slightly. He gives the face back.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/myeonsang/bust_soft.png
 
---- ② 모션 (선택 · clip.webm) ---
-Static camera. The character blinks once, slowly. Hair and sleeve
-edges drift as if in still air. The eyes stay on the viewer.
-Nothing else moves — no head turn, no expression change.
+--- ② 모션 · 도는 초상 (clip.webm · 3s · 이음새 있음) ---
+Static camera. The narrow eyes travel a short way across the viewer's
+face — left, right, back to centre — reading it. The folded hands do not
+move at all. One blink, precise.
+
+The head stays exactly where it is and does not turn — the app crops
+this clip to the face, so any drift breaks the crop. No new pose, no
+expression change. Only what is described above moves. Seamlessly
+loopable: the last frame must match the first exactly.
 
 This is a 2D hand-drawn animation, not live action. Preserve the
 illustration style exactly: flat cel shading, uniform lineart, painted
 texture. Do not add photographic realism, skin pores, film grain or 3D
 lighting. Do not redraw or reshape any element. Animate only what is
 described above; everything else stays completely still.
+
+  두는 곳  public/char/myeonsang/clip.webm · clip.mp4
+
+--- ③ 첫 대면 · 인사 (greet.webm · 2s · 한 번만) ---
+Static camera. The narrow eyes come up and take the viewer in with one
+quick sweep, then settle and hold. The folded hands tighten once in
+greeting.
+
+The head stays centred and front-facing throughout — this plays once,
+at the first meeting, and the face is cropped the same way. It ends on
+the same still portrait it began with, so the greeting can hand over to
+the looping clip without a jump.
+
+This is a 2D hand-drawn animation, not live action. Preserve the
+illustration style exactly: flat cel shading, uniform lineart, painted
+texture. Do not add photographic realism, skin pores, film grain or 3D
+lighting. Do not redraw or reshape any element. Animate only what is
+described above; everything else stays completely still.
+
+  두는 곳  public/char/myeonsang/greet.webm · greet.mp4 · greet.webp
 
 ==========================================================================
   월하선녀  月下仙女   [wolha]
@@ -623,36 +845,58 @@ no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
 --- ①-짚는 표정 · bust_cut.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are fixed directly on the viewer,
-narrowed very slightly, pupils sharp. The mouth is a straight line,
-no smile. One brow a fraction lower than the other. He has just
-said something true that the viewer did not want said. Not angry,
-not cruel — certain.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The smile stays but stops being kind. The thread pulls taut between the
+fingers. The eyes hold the viewer without blinking — she can see both
+ends of it.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/wolha/bust_cut.png
 
 --- ①-누그러뜨리는 표정 · bust_soft.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are lowered a little and softened,
-the outer corners easing down. The faintest warmth at the mouth,
-not quite a smile. The head tilts a few degrees toward the viewer.
-He is letting the viewer off. Kind, unhurried, a little tired.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The thread goes slack. The eyes lower and warm, and the smile becomes an
+ordinary one. She lets the viewer keep the hope.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/wolha/bust_soft.png
 
---- ② 모션 (선택 · clip.webm) ---
-Static camera. The character blinks once, slowly. Hair and sleeve
-edges drift as if in still air. The eyes stay on the viewer.
-Nothing else moves — no head turn, no expression change.
+--- ② 모션 · 도는 초상 (clip.webm · 3s · 이음새 있음) ---
+Static camera. The red thread wound around the fingers loosens by one
+turn and winds back. The moonlit pale hanbok glows a little brighter and
+dims. The knowing smile holds. One soft blink.
+
+The head stays exactly where it is and does not turn — the app crops
+this clip to the face, so any drift breaks the crop. No new pose, no
+expression change. Only what is described above moves. Seamlessly
+loopable: the last frame must match the first exactly.
 
 This is a 2D hand-drawn animation, not live action. Preserve the
 illustration style exactly: flat cel shading, uniform lineart, painted
 texture. Do not add photographic realism, skin pores, film grain or 3D
 lighting. Do not redraw or reshape any element. Animate only what is
 described above; everything else stays completely still.
+
+  두는 곳  public/char/wolha/clip.webm · clip.mp4
+
+--- ③ 첫 대면 · 인사 (greet.webm · 2s · 한 번만) ---
+Static camera. She lifts her hands into view, the red thread already
+wound around them, and smiles as if the viewer were expected.
+
+The head stays centred and front-facing throughout — this plays once,
+at the first meeting, and the face is cropped the same way. It ends on
+the same still portrait it began with, so the greeting can hand over to
+the looping clip without a jump.
+
+This is a 2D hand-drawn animation, not live action. Preserve the
+illustration style exactly: flat cel shading, uniform lineart, painted
+texture. Do not add photographic realism, skin pores, film grain or 3D
+lighting. Do not redraw or reshape any element. Animate only what is
+described above; everything else stays completely still.
+
+  두는 곳  public/char/wolha/greet.webm · greet.mp4 · greet.webp
 
 ==========================================================================
   홍매파  紅媒婆   [hongmae]
@@ -682,36 +926,57 @@ no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
 --- ①-짚는 표정 · bust_cut.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are fixed directly on the viewer,
-narrowed very slightly, pupils sharp. The mouth is a straight line,
-no smile. One brow a fraction lower than the other. He has just
-said something true that the viewer did not want said. Not angry,
-not cruel — certain.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The chin comes up a fraction. The eyes go hard and stay on the viewer.
+She has said out loud what everyone else was too polite to.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/hongmae/bust_cut.png
 
 --- ①-누그러뜨리는 표정 · bust_soft.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are lowered a little and softened,
-the outer corners easing down. The faintest warmth at the mouth,
-not quite a smile. The head tilts a few degrees toward the viewer.
-He is letting the viewer off. Kind, unhurried, a little tired.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The arms loosen out of the fold. The mouth curves — big, unembarrassed
+warmth. She is on the viewer's side and always was.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/hongmae/bust_soft.png
 
---- ② 모션 (선택 · clip.webm) ---
-Static camera. The character blinks once, slowly. Hair and sleeve
-edges drift as if in still air. The eyes stay on the viewer.
-Nothing else moves — no head turn, no expression change.
+--- ② 모션 · 도는 초상 (clip.webm · 3s · 이음새 있음) ---
+Static camera. One breath moves the folded arms. Light runs along the
+gold hairpin. The bold gaze does not waver and does not blink until the
+very end, once.
+
+The head stays exactly where it is and does not turn — the app crops
+this clip to the face, so any drift breaks the crop. No new pose, no
+expression change. Only what is described above moves. Seamlessly
+loopable: the last frame must match the first exactly.
 
 This is a 2D hand-drawn animation, not live action. Preserve the
 illustration style exactly: flat cel shading, uniform lineart, painted
 texture. Do not add photographic realism, skin pores, film grain or 3D
 lighting. Do not redraw or reshape any element. Animate only what is
 described above; everything else stays completely still.
+
+  두는 곳  public/char/hongmae/clip.webm · clip.mp4
+
+--- ③ 첫 대면 · 인사 (greet.webm · 2s · 한 번만) ---
+Static camera. She looks the viewer over head to foot in one sweep,
+decides in her favour, and the arms come uncrossed.
+
+The head stays centred and front-facing throughout — this plays once,
+at the first meeting, and the face is cropped the same way. It ends on
+the same still portrait it began with, so the greeting can hand over to
+the looping clip without a jump.
+
+This is a 2D hand-drawn animation, not live action. Preserve the
+illustration style exactly: flat cel shading, uniform lineart, painted
+texture. Do not add photographic realism, skin pores, film grain or 3D
+lighting. Do not redraw or reshape any element. Animate only what is
+described above; everything else stays completely still.
+
+  두는 곳  public/char/hongmae/greet.webm · greet.mp4 · greet.webp
 
 ==========================================================================
   연담  戀曇   [yeondam]
@@ -741,36 +1006,59 @@ no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
 --- ①-짚는 표정 · bust_cut.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are fixed directly on the viewer,
-narrowed very slightly, pupils sharp. The mouth is a straight line,
-no smile. One brow a fraction lower than the other. He has just
-said something true that the viewer did not want said. Not angry,
-not cruel — certain.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The downcast eye comes up and stays up, level with the viewer for once.
+The sadness is still there but it is not looking away. He has said the
+part about waiting.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/yeondam/bust_cut.png
 
 --- ①-누그러뜨리는 표정 · bust_soft.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are lowered a little and softened,
-the outer corners easing down. The faintest warmth at the mouth,
-not quite a smile. The head tilts a few degrees toward the viewer.
-He is letting the viewer off. Kind, unhurried, a little tired.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The eye drops again and the mouth softens. The hair falls back across
+it. He is giving the viewer somewhere to look that is not him.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/yeondam/bust_soft.png
 
---- ② 모션 (선택 · clip.webm) ---
-Static camera. The character blinks once, slowly. Hair and sleeve
-edges drift as if in still air. The eyes stay on the viewer.
-Nothing else moves — no head turn, no expression change.
+--- ② 모션 · 도는 초상 (clip.webm · 3s · 이음새 있음) ---
+Static camera. The hair falling over one eye stirs and settles. The
+visible eye lowers, then lifts again. The muted robe hangs loose at the
+shoulder. Very little else moves.
+
+The head stays exactly where it is and does not turn — the app crops
+this clip to the face, so any drift breaks the crop. No new pose, no
+expression change. Only what is described above moves. Seamlessly
+loopable: the last frame must match the first exactly.
 
 This is a 2D hand-drawn animation, not live action. Preserve the
 illustration style exactly: flat cel shading, uniform lineart, painted
 texture. Do not add photographic realism, skin pores, film grain or 3D
 lighting. Do not redraw or reshape any element. Animate only what is
 described above; everything else stays completely still.
+
+  두는 곳  public/char/yeondam/clip.webm · clip.mp4
+
+--- ③ 첫 대면 · 인사 (greet.webm · 2s · 한 번만) ---
+Static camera. The lowered head comes up slowly, the hair sliding off
+the covered eye, and both eyes find the viewer before the hair falls
+back.
+
+The head stays centred and front-facing throughout — this plays once,
+at the first meeting, and the face is cropped the same way. It ends on
+the same still portrait it began with, so the greeting can hand over to
+the looping clip without a jump.
+
+This is a 2D hand-drawn animation, not live action. Preserve the
+illustration style exactly: flat cel shading, uniform lineart, painted
+texture. Do not add photographic realism, skin pores, film grain or 3D
+lighting. Do not redraw or reshape any element. Animate only what is
+described above; everything else stays completely still.
+
+  두는 곳  public/char/yeondam/greet.webm · greet.mp4 · greet.webp
 
 ==========================================================================
   화경  和鏡   [hwagyeong]
@@ -800,36 +1088,59 @@ no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
 --- ①-짚는 표정 · bust_cut.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are fixed directly on the viewer,
-narrowed very slightly, pupils sharp. The mouth is a straight line,
-no smile. One brow a fraction lower than the other. He has just
-said something true that the viewer did not want said. Not angry,
-not cruel — certain.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The eyes stay open and absolutely still. The brush case comes up an
+inch, still closed. She has ruled, and she is not going to soften the
+ruling.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/hwagyeong/bust_cut.png
 
 --- ①-누그러뜨리는 표정 · bust_soft.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are lowered a little and softened,
-the outer corners easing down. The faintest warmth at the mouth,
-not quite a smile. The head tilts a few degrees toward the viewer.
-He is letting the viewer off. Kind, unhurried, a little tired.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The unblinking gaze finally blinks. The brush case lowers. The severity
+stays in the posture but leaves the eyes.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/hwagyeong/bust_soft.png
 
---- ② 모션 (선택 · clip.webm) ---
-Static camera. The character blinks once, slowly. Hair and sleeve
-edges drift as if in still air. The eyes stay on the viewer.
-Nothing else moves — no head turn, no expression change.
+--- ② 모션 · 도는 초상 (clip.webm · 3s · 이음새 있음) ---
+Static camera. Nothing moves for a long moment. Then the hand around the
+closed brush case tightens once and lets go. The level gaze does not
+blink at all.
+
+The head stays exactly where it is and does not turn — the app crops
+this clip to the face, so any drift breaks the crop. No new pose, no
+expression change. Only what is described above moves. Seamlessly
+loopable: the last frame must match the first exactly.
 
 This is a 2D hand-drawn animation, not live action. Preserve the
 illustration style exactly: flat cel shading, uniform lineart, painted
 texture. Do not add photographic realism, skin pores, film grain or 3D
 lighting. Do not redraw or reshape any element. Animate only what is
 described above; everything else stays completely still.
+
+  두는 곳  public/char/hwagyeong/clip.webm · clip.mp4
+
+--- ③ 첫 대면 · 인사 (greet.webm · 2s · 한 번만) ---
+Static camera. She raises her eyes from the closed brush case to the
+viewer, unhurried and without welcome or hostility, and holds them
+there.
+
+The head stays centred and front-facing throughout — this plays once,
+at the first meeting, and the face is cropped the same way. It ends on
+the same still portrait it began with, so the greeting can hand over to
+the looping clip without a jump.
+
+This is a 2D hand-drawn animation, not live action. Preserve the
+illustration style exactly: flat cel shading, uniform lineart, painted
+texture. Do not add photographic realism, skin pores, film grain or 3D
+lighting. Do not redraw or reshape any element. Animate only what is
+described above; everything else stays completely still.
+
+  두는 곳  public/char/hwagyeong/greet.webm · greet.mp4 · greet.webp
 
 ==========================================================================
   상단 행수  商團行首   [haengsu]
@@ -859,36 +1170,57 @@ no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
 --- ①-짚는 표정 · bust_cut.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are fixed directly on the viewer,
-narrowed very slightly, pupils sharp. The mouth is a straight line,
-no smile. One brow a fraction lower than the other. He has just
-said something true that the viewer did not want said. Not angry,
-not cruel — certain.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The polite smile stays exactly as it was, which is the point. The eyes
+go direct and cool. He has just said the number out loud.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/haengsu/bust_cut.png
 
 --- ①-누그러뜨리는 표정 · bust_soft.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are lowered a little and softened,
-the outer corners easing down. The faintest warmth at the mouth,
-not quite a smile. The head tilts a few degrees toward the viewer.
-He is letting the viewer off. Kind, unhurried, a little tired.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The smile loosens into a real one and the eyes crease. The ledger arm
+relaxes. This part is not being charged for.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/haengsu/bust_soft.png
 
---- ② 모션 (선택 · clip.webm) ---
-Static camera. The character blinks once, slowly. Hair and sleeve
-edges drift as if in still air. The eyes stay on the viewer.
-Nothing else moves — no head turn, no expression change.
+--- ② 모션 · 도는 초상 (clip.webm · 3s · 이음새 있음) ---
+Static camera. He shifts the ledger under his arm to a better grip. The
+muted gold silk catches light along one fold. The polite smile does not
+change. One measured blink.
+
+The head stays exactly where it is and does not turn — the app crops
+this clip to the face, so any drift breaks the crop. No new pose, no
+expression change. Only what is described above moves. Seamlessly
+loopable: the last frame must match the first exactly.
 
 This is a 2D hand-drawn animation, not live action. Preserve the
 illustration style exactly: flat cel shading, uniform lineart, painted
 texture. Do not add photographic realism, skin pores, film grain or 3D
 lighting. Do not redraw or reshape any element. Animate only what is
 described above; everything else stays completely still.
+
+  두는 곳  public/char/haengsu/clip.webm · clip.mp4
+
+--- ③ 첫 대면 · 인사 (greet.webm · 2s · 한 번만) ---
+Static camera. He tucks the ledger firmly under one arm, turns his full
+attention to the viewer, and the polite smile arrives on cue.
+
+The head stays centred and front-facing throughout — this plays once,
+at the first meeting, and the face is cropped the same way. It ends on
+the same still portrait it began with, so the greeting can hand over to
+the looping clip without a jump.
+
+This is a 2D hand-drawn animation, not live action. Preserve the
+illustration style exactly: flat cel shading, uniform lineart, painted
+texture. Do not add photographic realism, skin pores, film grain or 3D
+lighting. Do not redraw or reshape any element. Animate only what is
+described above; everything else stays completely still.
+
+  두는 곳  public/char/haengsu/greet.webm · greet.mp4 · greet.webp
 
 ==========================================================================
   훈장  訓長   [hunjang]
@@ -918,36 +1250,57 @@ no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
 --- ①-짚는 표정 · bust_cut.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are fixed directly on the viewer,
-narrowed very slightly, pupils sharp. The mouth is a straight line,
-no smile. One brow a fraction lower than the other. He has just
-said something true that the viewer did not want said. Not angry,
-not cruel — certain.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The eyes come up over the glasses and stop there. The rod stops. He has
+found where the work was not done.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/hunjang/bust_cut.png
 
 --- ①-누그러뜨리는 표정 · bust_soft.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are lowered a little and softened,
-the outer corners easing down. The faintest warmth at the mouth,
-not quite a smile. The head tilts a few degrees toward the viewer.
-He is letting the viewer off. Kind, unhurried, a little tired.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+He takes the glasses off entirely, and without them the eyes are much
+older and much kinder. The rod leans away.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/hunjang/bust_soft.png
 
---- ② 모션 (선택 · clip.webm) ---
-Static camera. The character blinks once, slowly. Hair and sleeve
-edges drift as if in still air. The eyes stay on the viewer.
-Nothing else moves — no head turn, no expression change.
+--- ② 모션 · 도는 초상 (clip.webm · 3s · 이음새 있음) ---
+Static camera. The upright bamboo rod taps down once, soundlessly, and
+rests. The eyes come up over the reading glasses low on the nose and go
+back down. The grey temples do not move.
+
+The head stays exactly where it is and does not turn — the app crops
+this clip to the face, so any drift breaks the crop. No new pose, no
+expression change. Only what is described above moves. Seamlessly
+loopable: the last frame must match the first exactly.
 
 This is a 2D hand-drawn animation, not live action. Preserve the
 illustration style exactly: flat cel shading, uniform lineart, painted
 texture. Do not add photographic realism, skin pores, film grain or 3D
 lighting. Do not redraw or reshape any element. Animate only what is
 described above; everything else stays completely still.
+
+  두는 곳  public/char/hunjang/clip.webm · clip.mp4
+
+--- ③ 첫 대면 · 인사 (greet.webm · 2s · 한 번만) ---
+Static camera. The eyes lift over the reading glasses, take the measure
+of the viewer, and the rod comes upright — class is in.
+
+The head stays centred and front-facing throughout — this plays once,
+at the first meeting, and the face is cropped the same way. It ends on
+the same still portrait it began with, so the greeting can hand over to
+the looping clip without a jump.
+
+This is a 2D hand-drawn animation, not live action. Preserve the
+illustration style exactly: flat cel shading, uniform lineart, painted
+texture. Do not add photographic realism, skin pores, film grain or 3D
+lighting. Do not redraw or reshape any element. Animate only what is
+described above; everything else stays completely still.
+
+  두는 곳  public/char/hunjang/greet.webm · greet.mp4 · greet.webp
 
 ==========================================================================
   약초의원  藥草醫員   [yakcho]
@@ -977,36 +1330,58 @@ no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
 --- ①-짚는 표정 · bust_cut.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are fixed directly on the viewer,
-narrowed very slightly, pupils sharp. The mouth is a straight line,
-no smile. One brow a fraction lower than the other. He has just
-said something true that the viewer did not want said. Not angry,
-not cruel — certain.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The warmth stays but the eyes stop being gentle. The head does not tilt.
+He has told the viewer the thing about his body that he has been
+ignoring.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/yakcho/bust_cut.png
 
 --- ①-누그러뜨리는 표정 · bust_soft.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are lowered a little and softened,
-the outer corners easing down. The faintest warmth at the mouth,
-not quite a smile. The head tilts a few degrees toward the viewer.
-He is letting the viewer off. Kind, unhurried, a little tired.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The eyes crease and the tiredness shows. He looks at the viewer the way
+you look at someone who has been carrying it a long time.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/yakcho/bust_soft.png
 
---- ② 모션 (선택 · clip.webm) ---
-Static camera. The character blinks once, slowly. Hair and sleeve
-edges drift as if in still air. The eyes stay on the viewer.
-Nothing else moves — no head turn, no expression change.
+--- ② 모션 · 도는 초상 (clip.webm · 3s · 이음새 있음) ---
+Static camera. The dried herbs tucked at the sash stir and settle. The
+sleeves stay tied back for work. The tired kind eyes blink once, softly,
+and stay warm.
+
+The head stays exactly where it is and does not turn — the app crops
+this clip to the face, so any drift breaks the crop. No new pose, no
+expression change. Only what is described above moves. Seamlessly
+loopable: the last frame must match the first exactly.
 
 This is a 2D hand-drawn animation, not live action. Preserve the
 illustration style exactly: flat cel shading, uniform lineart, painted
 texture. Do not add photographic realism, skin pores, film grain or 3D
 lighting. Do not redraw or reshape any element. Animate only what is
 described above; everything else stays completely still.
+
+  두는 곳  public/char/yakcho/clip.webm · clip.mp4
+
+--- ③ 첫 대면 · 인사 (greet.webm · 2s · 한 번만) ---
+Static camera. He finishes tying back a sleeve, looks up, and the tired
+eyes warm as though the viewer were the first good thing all day.
+
+The head stays centred and front-facing throughout — this plays once,
+at the first meeting, and the face is cropped the same way. It ends on
+the same still portrait it began with, so the greeting can hand over to
+the looping clip without a jump.
+
+This is a 2D hand-drawn animation, not live action. Preserve the
+illustration style exactly: flat cel shading, uniform lineart, painted
+texture. Do not add photographic realism, skin pores, film grain or 3D
+lighting. Do not redraw or reshape any element. Animate only what is
+described above; everything else stays completely still.
+
+  두는 곳  public/char/yakcho/greet.webm · greet.mp4 · greet.webp
 
 ==========================================================================
   일관  日官   [ilgwan]
@@ -1036,36 +1411,58 @@ no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
 --- ①-짚는 표정 · bust_cut.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are fixed directly on the viewer,
-narrowed very slightly, pupils sharp. The mouth is a straight line,
-no smile. One brow a fraction lower than the other. He has just
-said something true that the viewer did not want said. Not angry,
-not cruel — certain.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The eyes come off the middle distance and land on the viewer for the
+first time. The flat expression does not change. That he bothered to
+look is the whole point.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/ilgwan/bust_cut.png
 
 --- ①-누그러뜨리는 표정 · bust_soft.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are lowered a little and softened,
-the outer corners easing down. The faintest warmth at the mouth,
-not quite a smile. The head tilts a few degrees toward the viewer.
-He is letting the viewer off. Kind, unhurried, a little tired.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The gaze drifts back past the viewer's shoulder where it was before. The
+mouth stays flat. It is as close to reassurance as he gets.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/ilgwan/bust_soft.png
 
---- ② 모션 (선택 · clip.webm) ---
-Static camera. The character blinks once, slowly. Hair and sleeve
-edges drift as if in still air. The eyes stay on the viewer.
-Nothing else moves — no head turn, no expression change.
+--- ② 모션 · 도는 초상 (clip.webm · 3s · 이음새 있음) ---
+Static camera. The shadow on the small sun dial at the belt moves one
+mark and stops. The gaze stays fixed slightly past the viewer's
+shoulder. One blink, entirely unbothered.
+
+The head stays exactly where it is and does not turn — the app crops
+this clip to the face, so any drift breaks the crop. No new pose, no
+expression change. Only what is described above moves. Seamlessly
+loopable: the last frame must match the first exactly.
 
 This is a 2D hand-drawn animation, not live action. Preserve the
 illustration style exactly: flat cel shading, uniform lineart, painted
 texture. Do not add photographic realism, skin pores, film grain or 3D
 lighting. Do not redraw or reshape any element. Animate only what is
 described above; everything else stays completely still.
+
+  두는 곳  public/char/ilgwan/clip.webm · clip.mp4
+
+--- ③ 첫 대면 · 인사 (greet.webm · 2s · 한 번만) ---
+Static camera. The eyes arrive on the viewer a beat later than expected,
+as if he had checked the dial first and found the time acceptable.
+
+The head stays centred and front-facing throughout — this plays once,
+at the first meeting, and the face is cropped the same way. It ends on
+the same still portrait it began with, so the greeting can hand over to
+the looping clip without a jump.
+
+This is a 2D hand-drawn animation, not live action. Preserve the
+illustration style exactly: flat cel shading, uniform lineart, painted
+texture. Do not add photographic realism, skin pores, film grain or 3D
+lighting. Do not redraw or reshape any element. Animate only what is
+described above; everything else stays completely still.
+
+  두는 곳  public/char/ilgwan/greet.webm · greet.mp4 · greet.webp
 
 ==========================================================================
   삼거리 노파  三巨里   [nopa]
@@ -1095,36 +1492,59 @@ no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
 --- ①-짚는 표정 · bust_cut.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are fixed directly on the viewer,
-narrowed very slightly, pupils sharp. The mouth is a straight line,
-no smile. One brow a fraction lower than the other. He has just
-said something true that the viewer did not want said. Not angry,
-not cruel — certain.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The pipe comes off the shoulder an inch. The lined face sets and the
+clear eyes pin the viewer. She has seen this crossroads before and knows
+which way they will go.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/nopa/bust_cut.png
 
 --- ①-누그러뜨리는 표정 · bust_soft.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are lowered a little and softened,
-the outer corners easing down. The faintest warmth at the mouth,
-not quite a smile. The head tilts a few degrees toward the viewer.
-He is letting the viewer off. Kind, unhurried, a little tired.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The pipe goes back on the shoulder. The lines around the eyes deepen
+into something like amusement. She has decided not to say the rest of
+it.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/nopa/bust_soft.png
 
---- ② 모션 (선택 · clip.webm) ---
-Static camera. The character blinks once, slowly. Hair and sleeve
-edges drift as if in still air. The eyes stay on the viewer.
-Nothing else moves — no head turn, no expression change.
+--- ② 모션 · 도는 초상 (clip.webm · 3s · 이음새 있음) ---
+Static camera. A thin line of smoke rises slowly from the bowl of the
+long pipe resting on the shoulder and curls out of frame. The white knot
+of hair does not move. The fierce clear eyes stay open.
+
+The head stays exactly where it is and does not turn — the app crops
+this clip to the face, so any drift breaks the crop. No new pose, no
+expression change. Only what is described above moves. Seamlessly
+loopable: the last frame must match the first exactly.
 
 This is a 2D hand-drawn animation, not live action. Preserve the
 illustration style exactly: flat cel shading, uniform lineart, painted
 texture. Do not add photographic realism, skin pores, film grain or 3D
 lighting. Do not redraw or reshape any element. Animate only what is
 described above; everything else stays completely still.
+
+  두는 곳  public/char/nopa/clip.webm · clip.mp4
+
+--- ③ 첫 대면 · 인사 (greet.webm · 2s · 한 번만) ---
+Static camera. She takes the pipe off her shoulder, looks the viewer up
+and down once, and puts it back — approved.
+
+The head stays centred and front-facing throughout — this plays once,
+at the first meeting, and the face is cropped the same way. It ends on
+the same still portrait it began with, so the greeting can hand over to
+the looping clip without a jump.
+
+This is a 2D hand-drawn animation, not live action. Preserve the
+illustration style exactly: flat cel shading, uniform lineart, painted
+texture. Do not add photographic realism, skin pores, film grain or 3D
+lighting. Do not redraw or reshape any element. Animate only what is
+described above; everything else stays completely still.
+
+  두는 곳  public/char/nopa/greet.webm · greet.mp4 · greet.webp
 
 ==========================================================================
   청동자  靑童子   [dongja]
@@ -1154,34 +1574,55 @@ no cast shadow, no vignette. No text, letters, numbers, logos or
 watermarks. Aspect ratio 3:4. High detail.
 
 --- ①-짚는 표정 · bust_cut.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are fixed directly on the viewer,
-narrowed very slightly, pupils sharp. The mouth is a straight line,
-no smile. One brow a fraction lower than the other. He has just
-said something true that the viewer did not want said. Not angry,
-not cruel — certain.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The smile drops and the boy's face goes suddenly serious, eyes wide and
+direct. He has said something far too true for his age and knows it.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/dongja/bust_cut.png
 
 --- ①-누그러뜨리는 표정 · bust_soft.png ---
-Same character, same hair, same clothing, same lighting — only the
-expression changes. Now the eyes are lowered a little and softened,
-the outer corners easing down. The faintest warmth at the mouth,
-not quite a smile. The head tilts a few degrees toward the viewer.
-He is letting the viewer off. Kind, unhurried, a little tired.
+Same character, same hair, same clothing, same lighting, same
+front-facing pose — only the expression changes.
+The grin comes back all at once, bright and easy, and he ducks his chin.
+Whatever it was, it is over now.
 
   나머지는 위 ① 과 똑같이. 배경도 흰색, 3:4.
   두는 곳  public/char/dongja/bust_soft.png
 
---- ② 모션 (선택 · clip.webm) ---
-Static camera. The character blinks once, slowly. Hair and sleeve
-edges drift as if in still air. The eyes stay on the viewer.
-Nothing else moves — no head turn, no expression change.
+--- ② 모션 · 도는 초상 (clip.webm · 3s · 이음새 있음) ---
+Static camera. He pushes one too-long sleeve back up his forearm and it
+slides straight back down over his hand. The tousled hair bounces. The
+open smile widens a little. Two quick blinks.
+
+The head stays exactly where it is and does not turn — the app crops
+this clip to the face, so any drift breaks the crop. No new pose, no
+expression change. Only what is described above moves. Seamlessly
+loopable: the last frame must match the first exactly.
 
 This is a 2D hand-drawn animation, not live action. Preserve the
 illustration style exactly: flat cel shading, uniform lineart, painted
 texture. Do not add photographic realism, skin pores, film grain or 3D
 lighting. Do not redraw or reshape any element. Animate only what is
 described above; everything else stays completely still.
+
+  두는 곳  public/char/dongja/clip.webm · clip.mp4
+
+--- ③ 첫 대면 · 인사 (greet.webm · 2s · 한 번만) ---
+Static camera. He looks up, breaks into a wide grin, and waves one
+too-long sleeve at the viewer — the hand lost somewhere inside it.
+
+The head stays centred and front-facing throughout — this plays once,
+at the first meeting, and the face is cropped the same way. It ends on
+the same still portrait it began with, so the greeting can hand over to
+the looping clip without a jump.
+
+This is a 2D hand-drawn animation, not live action. Preserve the
+illustration style exactly: flat cel shading, uniform lineart, painted
+texture. Do not add photographic realism, skin pores, film grain or 3D
+lighting. Do not redraw or reshape any element. Animate only what is
+described above; everything else stays completely still.
+
+  두는 곳  public/char/dongja/greet.webm · greet.mp4 · greet.webp
 

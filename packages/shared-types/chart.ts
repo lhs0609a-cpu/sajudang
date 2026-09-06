@@ -316,6 +316,21 @@ export interface ReportResponse {
   /** 이 캐릭터가 더 받아야 하는 추가 입력. 없으면 null.
    *  partner / context / blood / image / cards */
   needs_input: string | null;
+  /**
+   * 물으신 자리가 묻는 것 — 캐릭터 몫과 **다른 자리**입니다.
+   *
+   * ★ 문장 원문은 안 내려옵니다. 물음과 고를 것만 옵니다.
+   *   답은 `extras.topic = {choice, choice2?}` 로 실어 보내고,
+   *   서버는 계산하고 버립니다. (engine/topic.py · docs/20)
+   */
+  asks: {
+    id: string;
+    title: string;
+    q: string;
+    options: { id: string; label: string }[];
+    q2?: string;
+    options2?: { id: string; label: string }[];
+  } | null;
   /** 받은 추가 입력이 틀렸을 때 그 사유. 그 컷만 빠지고 리포트는 나옵니다. */
   extra_error: string | null;
   /**

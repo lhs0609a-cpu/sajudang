@@ -44,13 +44,25 @@ WIDTH = 396
 SRC_RATIO = 9 / 16          # 들어오는 영상은 전부 세로 9:16
 
 
-def _box_of(class_attr: str, spec_box: str | None) -> tuple[str, str]:
-    """이 자리에서 어떤 상자로 보여 주는가 → (자리 이름, 상자 비율)."""
+def _box_of(class_attr: str, spec: dict) -> tuple[str, str]:
+    """
+    이 자리에서 어떤 상자로 보여 주는가 → (자리 이름, 상자 비율).
+
+    ★ 코드를 따라갑니다 (2026-09-06). `Scene.tsx` 는 2026-09-06 부터
+      **세로 원본에 상자를 안 씌웁니다** — 9:16 은 `tall` 로 가서 화면
+      높이의 3분의 2를 그대로 씁니다. 그런데 이 자는 인라인이면 무조건
+      4:3 이라 적고 있어서, 세로 장면 열여섯 자리에 「세로의 42%만
+      보이오」라는 **틀린 말**을 박고 있었습니다. 그리는 사람은 그 말을
+      믿고 주제를 가운데로 몰아 넣습니다.
+    """
     if "fill" in class_attr:
         return "fill", "부모 전체"
     if "hero" in class_attr:
         return "hero", "9:16"
-    return "inline", spec_box or "4:3"
+    box = spec.get("box") or (
+        "9:16" if spec.get("ratio") == "9:16"
+        else "1:1" if spec.get("ratio") == "1:1" else "4:3")
+    return "inline", box
 
 
 def _visible_pct(box: str) -> int | None:
@@ -111,7 +123,7 @@ def line_for(sid: str, uses: list, spec: dict) -> str:
     parts = []
     seen = set()
     for rel, rest in uses:
-        where, box = _box_of(rest, spec.get("box"))
+        where, box = _box_of(rest, spec)
         key = (rel, where, box)
         if key in seen:
             continue
@@ -126,6 +138,10 @@ def line_for(sid: str, uses: list, spec: dict) -> str:
             parts.append(
                 "%s — 머리그림. 9:16 그대로 보이나 화면 높이의 58%% 에서 "
                 "아래가 잘리오." % ko)
+        elif box == "9:16":
+            parts.append(
+                "%s — 글 위에 **세로 그대로** 섭니다. 화면 높이의 3분의 2를 "
+                "쓰고 잘리는 데가 거의 없으니, 위아래 끝까지 그리시오." % ko)
         else:
             parts.append(
                 "%s — 글 위 띠. **%s 상자로 잘라 씁니다 — 세로의 %d%% 만 "
@@ -170,7 +186,9 @@ def main() -> int:
 
     if a.write and changed:
         PROMPTS.write_text(
-            json.dumps(data, ensure_ascii=False, indent=1) + "\n",
+            # 들여쓰기는 2 칸 — char_sheet 도 그렇게 씁니다. 한 칸으로
+            # 쓰면 두 도구가 번갈아 돌 때마다 파일 전체가 diff 로 뜹니다.
+            json.dumps(data, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8")
         print("\n%d 곳에 써넣었소 — %s" % (len(changed), PROMPTS.name))
     elif not a.write:

@@ -29,6 +29,7 @@ from . import bite as _bite
 from . import flavor as _flavor
 from . import sinsal as sinsal_mod
 from . import terms as terms_mod
+from . import topic as topic_mod
 from . import voice as voice_mod
 from .bank import (amount_adj, amount_word, count_word,
                    element_word, josa)
@@ -821,11 +822,13 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         #
         #   조건이 안 맞으면 **안 냅니다**. 억지로 붙이면 누구에게나 맞는
         #   말이 되어 바넘 문장이 됩니다 (engine/pattern.py).
-        pats = _pattern.read(f, concern, limit=2)
-        for pt in pats:
-            body += ('<p class="bite"><b>%s</b><i class="gl">(%s)</i> — %s</p>'
-                     '<p class="ev"><span class="evk">이 짜임</span>%s</p>'
-                     % (pt["name"], pt["gloss"], pt["say"], pt["why"]))
+        # ★ 짜임은 **제 컷으로 나갔습니다** (2026-09-06).
+        #
+        #   여기 두 개를 얹어 두니, 물은 자리를 정하는 틀과 그 자리에
+        #   걸린 관계가 한 상자에 섞였습니다. 그리고 둘이 상한을
+        #   나눠 쓰니 짜임이 늘 둘에서 끊겼습니다.
+        #   틀은 여기, 관계는 `concern_pattern` 으로 나눕니다.
+        pats = _pattern.read(f, concern, limit=3)
 
         igw = (B2.get("IGKEY", {}).get(top) or {}).get(concern)
         if igw:
@@ -856,9 +859,99 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
             #   고민은 **어느 자리를 보고 읽느냐**라, 값을 치른 사람은
             #   누구나 제가 물은 자리로 읽혀야 합니다.
             body, 1,
-            sid="rcax:%s:%s:%d:%s:%s:%s:%s"
-                % (concern, grp, min(asked, 4), loud, f.strength, top,
-                   ",".join(x["key"] for x in pats) or "-")))
+            sid="rcax:%s:%s:%d:%s:%s:%s"
+                % (concern, grp, min(asked, 4), loud, f.strength, top)))
+
+        # ── 7-3 · 물은 자리의 저울 ────────────────────────
+        #
+        # ★ 손님이 짚었소 (2026-09-06) — "돈에 대해 물었는데 돈 관련
+        #   이야기는 전혀 구현이 안 되어 있어."
+        #
+        #   맞습니다. 여기까지는 **낱말**만 고민으로 갈렸습니다. 돈을
+        #   물어도 재성을 「개수 하나」로만 보고, 갈래(정재·편재)도
+        #   투출도 궁위도 재고도 공망도 한 줄 안 세고 있었습니다.
+        #   실무가 돈에서 세는 것이 바로 그것들입니다 (docs/20 §1-1).
+        #
+        # ★ 저울은 다섯 칸을 넘기지 않습니다. 넘기면 그건 저울이
+        #   아니라 명세서요 — 손님은 읽는 게 아니라 훑습니다.
+        rows = topic_mod.scale(f, concern)
+        if rows:
+            sbody = ('<p class="tale">%s 물으신 자리는 <b>%s</b>이오. '
+                     '여기서는 <b>이것들</b>을 세오.</p>' % (you, word))
+            for r in rows:
+                sbody += ('<p class="bite"><b>%s</b> — %s</p>'
+                          '<p class="ev"><span class="evk">센 것</span>%s</p>'
+                          % (r["label"], r["say"], r["ev"]))
+            sbody += ('<p class="sm">여기 적힌 수는 그대가 만세력을 펴고 '
+                      '<b>직접 세면 같은 수</b>가 나오는 것들이오. '
+                      '다르면 우리가 진 것이오.</p>')
+            cuts.append(_cut(
+                "concern_scale", "%s — 세어 본 것" % word,
+                _why.line("%s → %s · %s %s"
+                          % (word, grp, josa(grp, "이", "가"),
+                             count_word(asked)), grp, "십신"),
+                sbody, 1, sid=topic_mod.scale_sid(concern, rows)))
+
+        # ── 7-4 · 그 자리에 걸린 짜임 ─────────────────────
+        #
+        # ★ 개수는 누구나 셉니다. 실무가 보는 것은 **개수 사이의
+        #   관계**요 — 「재성 1개」가 아니라 「비겁이 셋인데 재성이
+        #   하나」(군겁쟁재). 조건이 안 맞으면 안 냅니다.
+        if pats:
+            # ★ 몇 중 몇이 걸렸는지를 **셉니다** (2026-09-06).
+            #
+            #   처음에는 짜임 이름만 늘어놓았습니다. 재보니 이 컷의
+            #   최다 점유가 2.50%로 공통 컷 문턱(2%)을 넘었습니다 —
+            #   같은 고민에서 같은 짜임 셋이 자주 겹치기 때문입니다.
+            #   축을 억지로 늘리는 대신 **세어서** 답니다. 손님이
+            #   틀렸는지 맞았는지 댈 수 있는 수라야 근거입니다.
+            hit_all = _pattern.read(f, concern, limit=99)
+            of_all = sum(1 for p in _pattern.all_patterns()
+                         if concern in p["at"])
+            pbody = ('<p class="tale">여기까지가 <b>센 것</b>이오. 이제 그 수들 '
+                     '<b>사이</b>를 보오 — 옛사람이 이름을 붙여 둔 짜임이오.</p>'
+                     '<p class="cnt"><b>%s 자리에서 보는 짜임 %d가지 중 '
+                     '%s이 걸렸소.</b> 무거운 것부터 내오.</p>'
+                     # ★ 열을 넘는 수는 말로 안 됩니다 — count_word 는
+                     #   여섯부터 「여섯 넘게」 라, 「짜임 여섯 넘게 중」
+                     #   이 됐습니다. 세는 수는 그대로 적습니다.
+                     % (word, of_all, count_word(len(hit_all))))
+            for pt in pats:
+                pbody += ('<p class="bite"><b>%s</b><i class="gl">(%s)</i> — %s</p>'
+                          '<p class="ev"><span class="evk">이 짜임</span>%s</p>'
+                          % (pt["name"], pt["gloss"], pt["say"], pt["why"]))
+            pbody += ('<p class="tale">%s</p>'
+                      % topic_mod.pattern_tail(concern, f.strength))
+            pbody += ('<p class="sm">조건이 안 맞는 짜임은 <b>안 냈소</b>. '
+                      '아무 이름이나 붙이면 누구에게나 맞는 말이 되오.</p>')
+            cuts.append(_cut(
+                "concern_pattern", "%s에 걸린 짜임" % word,
+                _why.line("%s · 짜임 %s"
+                          % (word, " · ".join(x["name"] for x in pats)),
+                          grp, "십신"),
+                pbody, 1,
+                sid="pat:%s:%s" % (concern,
+                                   ",".join(x["key"] for x in pats))))
+
+        # ── 7-5 · 그 자리가 도는 때 ───────────────────────
+        #
+        # ★ 달력이지 예언이 아닙니다. 나이와 해를 박되 **그 해에 무슨
+        #   일이 생긴다고는 말하지 않습니다** — 바뀌는 때만 셉니다.
+        tn = topic_mod.turn(f, concern)
+        if tn:
+            cuts.append(_cut("concern_turn", "%s의 때" % word,
+                             tn["ev"], tn["say"], 1, sid=tn["sid"]))
+
+        # ── 7-6 · 넉 자가 이 자리에서 내는 얼굴 ───────────
+        #
+        # ★ 넉 자를 성격 프로필로 두껍게 만들려고 받는 것이 아닙니다.
+        #   넉 자는 그대가 **스스로 고른 답**이고 여덟 글자는 **고를 수
+        #   없었던 것**이라, 어긋난 자리가 곧 애쓰는 자리요.
+        #   그 어긋남을 **물으신 자리의 말**로 옮깁니다 (docs/20 §7).
+        fc = topic_mod.face(f, concern, axis4)
+        if fc:
+            cuts.append(_cut("concern_face", "넉 자가 %s에서 내는 얼굴" % word,
+                             fc["ev"], fc["say"], 1, sid=fc["sid"]))
 
     # ── 9 · 이 캐릭터가 따로 받는 것 ──────────────────────
     #
@@ -902,6 +995,21 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         cuts.append(_cut(extra["id"], extra["title"], extra["source"],
                          extra["html"], extra["min_level"],
                          sid=extra["statement_id"]))
+
+    # ── 9a-2 · 고민이 묻는 것 ─────────────────────────────
+    #
+    # ★ 캐릭터가 받는 것과 **다른 자리**입니다. 캐릭터 몫은 그 사람을
+    #   고른 까닭이고, 이건 **물으신 자리**가 묻는 것이오 — 돈을
+    #   물었으면 돈이 어디서 오고 어디서 새는지.
+    #
+    # ★ 여기서 터져도 리포트를 죽이지 않습니다. 그 컷만 접습니다.
+    try:
+        tk = topic_mod.ask_cut(f, concern, (extras or {}).get("topic"))
+    except topic_mod.TopicInputError as e:
+        tk, extra_error = None, extra_error or str(e)
+    if tk:
+        cuts.append(_cut(tk["id"], tk["title"], tk["source"], tk["html"],
+                         tk["min_level"], sid=tk["statement_id"]))
 
     # ── 9b · 이번 주 한 가지 ──────────────────────────────
     #
@@ -1276,6 +1384,15 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
     if need and need in extras_mod.BUILDERS and not (extras or {}).get(need):
         needs_input = need
 
+    # ★ 고민이 묻는 것은 **따로** 냅니다 (2026-09-06).
+    #
+    #   `needs_input` 은 캐릭터 몫이라 한 자리뿐입니다. 고민의 물음을
+    #   거기 얹으면 둘 중 하나가 밀려납니다 — 그러면 또 「물어 놓고 안
+    #   받는」 자리가 생깁니다. 자리를 나눕니다.
+    asks = None
+    if not (extras or {}).get("topic"):
+        asks = topic_mod.ask_spec(concern)
+
     return {
         "report_id": report_id(chart_id, lens_id, tier, concern),
         "chart_id": chart_id,
@@ -1283,6 +1400,8 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
         "tier": tier,
         "concern": concern,
         "needs_input": needs_input,
+        # 물으신 자리가 묻는 것. 이미 답했으면 None.
+        "asks": asks,
         # 이 자리에서 값을 권해도 되는가. 값이 없는 캐릭터(브레이크)는 거짓.
         "sells": sells,
         # 추가 입력이 틀렸을 때. 그 컷만 접고 나머지는 그대로 내려갑니다.

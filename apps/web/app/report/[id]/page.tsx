@@ -12,6 +12,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
 import Scene from "@/components/scene/Scene";
 import ExtraAsk from "@/components/ExtraAsk";
+import TopicAsk from "@/components/TopicAsk";
 import Reveal from "@/components/Reveal";
 import SinsalSlots from "@/components/SinsalSlots";
 import Thinking from "@/components/Thinking";
@@ -585,9 +586,6 @@ function ReportInner() {
             <p className="sm">— {rep.lens.name}</p>
           </div>
         </div>
-        <p className="sm mt">
-          중앙 문양은 에셋이 들어오면 교체됩니다. (docs/10 §5 — 정지 PNG 필수)
-        </p>
         <ActOut kind="남긴 물음" next="남기다">
           이 카드에는 <b>여덟 글자와 읽은 자리</b>만 담기오.
           생년월일시도 고을도 안 담기오.<br />
@@ -705,7 +703,10 @@ function ReportInner() {
           훅에서 이미 단계 감각을 만들어 놨으니 결이 맞습니다.
       */}
       <ScrollProgress />
-      <Scene id="oldpaper" />
+      {/* ★ 낡은 종이(oldpaper)를 깔고 있었습니다 (2026-09-06). 아래 글은
+          「두루마리 끈을 풀었다 · 종이가 무릎까지」인데 영상에는 두루마리도
+          끈도 무릎도 없었습니다 — 손님이 짚은 자리입니다. */}
+      <Scene id="unbind" />
       {/* ★ 여는 줄이 없었습니다. 두루마리가 대뜸 펴지고 글이 시작돼,
           스물두 컷짜리 본문의 첫 줄이 설명이 됐습니다. 손이 먼저
           움직이고 글은 그 뒤에 옵니다. */}
@@ -723,7 +724,31 @@ function ReportInner() {
           key={lensId + ":" + rep.needs_input}
           need={rep.needs_input}
           busy={asking}
-          onSubmit={(x) => { setAsking(true); setExtras(x); }}
+          onSubmit={(x) => {
+            setAsking(true);
+            /* ★ 고민 물음에 답한 것을 지우지 않습니다. 갈아 끼우면
+               방금 선 컷이 다시 접힙니다. */
+            setExtras((prev) => ({ ...(prev || {}), ...x }));
+          }}
+        />
+      )}
+
+      {/* ★ 물으신 자리가 묻는 것. 캐릭터 몫과 **다른 자리**입니다 —
+          저건 그 사람을 고른 까닭이고, 이건 여섯 칸에서 고른 자리가
+          묻는 것이오. 답하면 컷이 하나 더 섭니다. (docs/20 §4-5)
+          ★ 고민이 바뀌면 고른 것도 새로 받습니다 — 돈에서 고른
+          「월급」이 몸 물음에 실려 가면 안 됩니다. */}
+      {rep.asks && !rep.extra_error && (
+        <TopicAsk
+          key={rep.concern + ":" + rep.asks.id}
+          spec={rep.asks}
+          busy={asking}
+          onSubmit={(x) => {
+            setAsking(true);
+            /* ★ 캐릭터 몫을 지우지 않습니다. 갈아 끼우면 방금 적은
+               상대 사주가 사라져 그 컷이 같이 접힙니다. */
+            setExtras((prev) => ({ ...(prev || {}), ...x }));
+          }}
         />
       )}
 

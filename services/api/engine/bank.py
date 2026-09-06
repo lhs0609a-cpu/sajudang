@@ -787,6 +787,21 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     if at:
         post += " " + at
 
+    # ★ 값을 치르기 전에도 **고민을 세고 있다는 것**이 보여야 하오
+    #   (2026-09-06 · docs/20 §8).
+    #
+    #   손님이 짚었소 — "돈에 대해 물었는데 돈 관련 이야기는 전혀
+    #   구현이 안 되어 있어." 무료 구간에서 고민은 **낱말로만** 갈리고
+    #   있었소. 낱말은 갈려도 손님이 «저 집이 내 돈을 봤다» 고 느낄
+    #   자리가 없었소.
+    #
+    #   그래서 저울의 **첫 칸 하나**를 여기서 냅니다. 맛보기가 아니라
+    #   셈이오 — 손님이 만세력을 펴고 맞는지 틀리는지 댈 수 있소.
+    #   나머지 칸과 때·얼굴은 값을 치른 자리에 있소.
+    from . import topic as _topic
+    rows = _topic.scale(f, concern)
+    counted = rows[0] if rows else None
+
     segs.append(_seg(
         stage="3", label="3 · 이름",
         source=_why.line(
@@ -795,12 +810,18 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
                amount_word(f.elements[weak]), flow),
             "용신", "용신"),
         body=('<div class="nameB"><p class="pre">오래 느꼈는데 말로는 못 했던 것.<br>'
-              '그건 이름이 있소.</p><p class="word">%s</p><p class="post">%s</p></div>'
-              % (word, post)),
+              '그건 이름이 있소.</p><p class="word">%s</p><p class="post">%s</p>'
+              '%s</div>'
+              % (word, post,
+                 ('<p class="cnt">셈은 값을 치르기 전에도 하오. %s</p>'
+                  '<p class="ev"><span class="evk">센 것</span>%s</p>'
+                  % (counted["say"], counted["ev"])) if counted else "")),
         question="이제 알겠소?",
         yes="알면 됐소. 아는 것과 고치는 것은 또 다른 얘기지만.",
         no="지금 아니라 하셔도 이름은 남소. 다음에 걸릴 때 떠오르오.",
-        sid="name:%s:%s:%s:%s" % (weak, flow, strength, concern)))
+        sid="name:%s:%s:%s:%s:%s"
+            % (weak, flow, strength, concern,
+               ("%s=%s" % (counted["k"], counted["case"])) if counted else "-")))
 
     # ★ 훅에서도 어려운 말을 **한 벌에 한 번** 풉니다.
     #   0단이 손님이 이 집에서 처음 읽는 글입니다. 거기서 「편관」이

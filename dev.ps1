@@ -107,7 +107,10 @@ switch ($Task) {
     }
     uv python install 3.11
     uv venv $VenvDir --python 3.11
-    uv pip install --python $Py -r "$Root\requirements.txt"
+    # ★ 검사와 도구까지 도는 벌로 깝니다 (requirements-dev.txt).
+    #   Pillow 가 빠져 있어 새 기계에서 관문이 두 건 넘어졌습니다.
+    #   배포 이미지는 여전히 requirements.txt 만 봅니다 (Dockerfile).
+    uv pip install --python $Py -r "$Root\requirements-dev.txt"
     & $Py -c "import sxtwl, zoneinfo; zoneinfo.ZoneInfo('Asia/Seoul'); print('OK: sxtwl + tzdata')"
   }
 

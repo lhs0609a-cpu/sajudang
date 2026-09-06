@@ -53,7 +53,7 @@
       ],
       "hint": "<b>재방문 보상 화면입니다.</b> 두 번째 방문부터 도령이 차를 내어줍니다.<br>\n \"다음에 오면 차를 내어드리겠소\" — 이 약속이 재방문 이유가 됩니다.",
       "image": "Korean romance-fantasy webtoon style. A low lacquered tea table set\nfor one guest: a celadon teacup with pale tea and thin steam rising, a\nsmall plate of traditional Korean confections (약과, 한과) arranged\nneatly, and a single flower resting in a shallow dish. A small black\ncat sits at the edge of the table, watching. Warm lantern light from\nabove, a faint rose-coloured luminous ring floating behind. Motes of\ngold drift through the air. Deep plum-violet shadows. Inviting,\ngentle, no people, no text. Aspect ratio 9:16.",
-      "motion": "Static camera. Thin steam curls upward from the teacup. The black cat\nat the table's edge blinks slowly and its tail sways. The rose-coloured\nring behind drifts. Golden motes rise. Warm and still. Seamlessly\nloopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
+      "motion": "Static camera. Thin steam curls upward from the teacup. The black cat\nat the table's edge blinks slowly and its tail sways. The rose-coloured\nring behind drifts. Golden motes rise. Warm and still. Seamlessly\nloopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 3s · seamless loop)",
       "preset": "Static",
       "ratio": "16:9",
       "duration": "3s",
@@ -73,7 +73,7 @@
       ],
       "hint": "<b>수집 장치.</b> 사람을 만날 때마다 인장을 하나씩 받습니다.<br>\n 스무 개를 다 모으면 <b>한정 카드</b>를 줍니다.<br>\n 여성 이용자층에서 수집 요소는 재결제 동인이 큽니다.",
       "image": "Korean romance-fantasy webtoon style. An open collector's booklet\n(인장첩) of pale hanji paper lying flat, ruled into a grid of twenty\nsmall squares. Four squares bear glowing coloured seal-stamps in\ndifferent hues; the rest are empty and faintly outlined, waiting.\nWarm lantern light from above, gold motes drifting. Deep plum-violet\nbackground. Precious, collectible, no people, no legible text.\nAspect ratio 9:16.",
-      "motion": "Static camera, top-down on the open booklet. A red seal stamp presses\ndown into one empty square with a small bounce and settles. A faint\nring of light spreads from it. The other squares stay still.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 2s)",
+      "motion": "Static camera, top-down on the open booklet. A red seal stamp presses\ndown into one empty square with a small bounce and settles. A faint\nring of light spreads from it. The other squares stay still.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 2s)",
       "preset": "Static",
       "ratio": "3:4",
       "duration": "2s",
@@ -84,24 +84,24 @@
       "use": "인장첩 — 글 위 띠. **4:3 상자로 잘라 씁니다 — 세로의 42% 만 보이오.** 주제를 세로 한가운데에 두시오."
     },
     "door": {
-      "title": "열리는 문",
+      "title": "접힌 자리 · 얹은 손",
       "seasonal": false,
       "seasons": null,
       "spec": [
         "9:16",
-        "전환"
+        "엿보기"
       ],
       "hint": null,
-      "image": "Korean romance-fantasy webtoon style. A traditional Korean wooden\nlattice door (살문) swinging inward, warm amber light spilling out\nthrough the widening gap into a dark exterior. Paper panes glowing\nfrom within. Viewed straight on, symmetrical. No people, no text.\nAspect ratio 9:16.",
-      "motion": "Static camera. The left panel of the wooden lattice door swings\ninward. Warm amber light widens through the growing gap and spills\nacross the threshold. Dust drifts through the light.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 2s)",
+      "image": "Korean romance-fantasy webtoon style, vertical composition. A hanji\nscroll lying folded over on itself on a dark wooden floor, the crease\nrunning straight across the middle. Warm amber light leaks out along\nthe seam of the folded place, but the lower half stays creased shut\nin deep shadow, unread. A man's hand and forearm enter from the right\nin a dark indigo sleeve with silver trim, laid flat and perfectly\nstill on the fold — resting on it, not opening it. Deep plum\ninterior, gold motes drifting in the escaping light. Held breath, not\nyet. Only the hand and sleeve — no face, no head, no body above the\nelbow. No legible writing, no text, no letters of any script, no\nnumbers. Aspect ratio 9:16.",
+      "motion": "Static camera. The hand comes to rest on the folded place and stops\nthere. The light along the seam brightens once, as if the fold were\nabout to give, then steadies without opening. The lower half stays in\nshadow. Motes drift up through the escaping light. Nothing else\nmoves. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 3s · seamless loop)",
       "preset": "Static",
       "ratio": "9:16",
-      "duration": "2s",
+      "duration": "3s",
       "loop": false,
       "tint": false,
       "still": false,
       "note": null,
-      "use": "값을 치르다 — 글 위 띠. **4:3 상자로 잘라 씁니다 — 세로의 42% 만 보이오.** 주제를 세로 한가운데에 두시오."
+      "use": "값을 치르다 — 글 위에 **세로 그대로** 섭니다. 화면 높이의 3분의 2를 쓰고 잘리는 데가 거의 없으니, 위아래 끝까지 그리시오."
     },
     "desk": {
       "title": "붓 · 벼루 · 빈 종이",
@@ -113,7 +113,7 @@
       ],
       "hint": null,
       "image": "Korean romance-fantasy webtoon style. A low writing desk in a dim\nmystical study at night. A sheet of hanji paper lies flat, an inkstone\nholds ink so dark it mirrors starlight, and a calligraphy brush hovers\njust above the paper, floating unsupported with a faint golden aura at\nits tip. Two or three sheets of paper drift weightlessly in the air.\nA faint luminous constellation ring glows behind the desk. Golden\nmotes of light rise slowly through a soft shaft of light from above.\nDeep plum-violet shadows. No hands, no people, no text.\nAspect ratio 9:16.",
-      "motion": "Static camera. The floating brush bobs gently in the air, ink glinting\nat its tip. Two sheets of paper drift slowly. The constellation ring\nbehind rotates. Golden motes rise through the light. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
+      "motion": "Static camera. The floating brush bobs gently in the air, ink glinting\nat its tip. Two sheets of paper drift slowly. The constellation ring\nbehind rotates. Golden motes rise through the light. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 3s · seamless loop)",
       "preset": "Static",
       "ratio": "16:9",
       "duration": "3s",
@@ -133,7 +133,7 @@
       ],
       "hint": null,
       "image": "Korean romance-fantasy webtoon style. The interior of a mystical\nfortune-teller's room at night. A folding screen along the back wall\npainted with faint luminous constellations. Beaded curtains hang at\nboth edges of frame, catching amber, rose and violet light. Three\nornate paper lanterns hang at different heights. Two floor cushions\nface each other; between them a small incense burner sends thin\nthreads of smoke curling upward. A pale glowing ring of light floats\nin the air above. Golden motes drift through a soft shaft of light.\nDeep plum-violet shadows. Empty, no people, no text.\nAspect ratio 9:16.",
-      "motion": "Static camera. The three hanging lanterns flicker at slightly\ndifferent rhythms. The beaded curtains at both edges sway faintly. Thin\nthreads of incense smoke curl upward from the burner. The constellation\nring drifts. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 4s · seamless loop)",
+      "motion": "Static camera. The three hanging lanterns flicker at slightly\ndifferent rhythms. The beaded curtains at both edges sway faintly. Thin\nthreads of incense smoke curl upward from the burner. The constellation\nring drifts. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 4s · seamless loop)",
       "preset": "Static",
       "ratio": "9:16",
       "duration": "5s",
@@ -141,7 +141,7 @@
       "tint": false,
       "still": false,
       "note": null,
-      "use": "들어오다 — 글 위 띠. **4:3 상자로 잘라 씁니다 — 세로의 42% 만 보이오.** 주제를 세로 한가운데에 두시오."
+      "use": "들어오다 — 글 위에 **세로 그대로** 섭니다. 화면 높이의 3분의 2를 쓰고 잘리는 데가 거의 없으니, 위아래 끝까지 그리시오."
     },
     "shelf": {
       "title": "진열대 · 걸린 목패",
@@ -153,7 +153,7 @@
       ],
       "hint": null,
       "image": "Korean romance-fantasy webtoon style. A row of six narrow wooden\nplaques hanging from a beam by thin cords at different heights, each\ncarved with a single Chinese character that glows warm amber from\nwithin, as if lit from inside the wood. Each plaque casts a soft pool\nof light beneath it. Golden motes of light drift slowly upward through\nthe air. The background falls into deep plum-violet darkness.\nMysterious, inviting, like an offering hall. No people. Aspect ratio 9:16.",
-      "motion": "Static camera. The six hanging wooden plaques sway very slightly on\ntheir cords at different rhythms, the carved characters glowing warm\nfrom within. The pools of light beneath them shift. Golden motes drift\nupward. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
+      "motion": "Static camera. The five hanging wooden plaques sway very slightly on\ntheir cords at different rhythms, the carved characters glowing warm\nfrom within. The pools of light beneath them shift. Golden motes drift\nupward. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 3s · seamless loop)",
       "preset": "Static",
       "ratio": "16:9",
       "duration": "3s",
@@ -181,7 +181,7 @@
       "tint": false,
       "still": false,
       "note": null,
-      "use": "둘러보다 — 글 위 띠. **4:3 상자로 잘라 씁니다 — 세로의 42% 만 보이오.** 주제를 세로 한가운데에 두시오.",
+      "use": "둘러보다 — 글 위에 **세로 그대로** 섭니다. 화면 높이의 3분의 2를 쓰고 잘리는 데가 거의 없으니, 위아래 끝까지 그리시오.",
       "revised": "2026-09-04"
     },
     "scroll": {
@@ -193,8 +193,8 @@
         "전환"
       ],
       "hint": null,
-      "image": "Korean romance-fantasy webtoon style. A long paper scroll unrolling\nbetween two dark wooden rods. Above the paper, glowing golden Chinese\ncharacters float free of the page, drifting slowly upward as if\nlifting off the surface. The hanji paper catches warm light. Motes of\ngold drift through a soft shaft of light from above. Deep plum-violet\nbackground. Magical, weightless. No hands, no people. Aspect ratio 9:16.",
-      "motion": "Static camera. The scroll unrolls smoothly to the right between the\ntwo rods. As the paper opens, glowing golden characters lift free of the\nsurface and drift slowly upward. Motes rise through the light.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s)",
+      "image": "Korean romance-fantasy webtoon style. A long paper scroll unrolled\nflat across a low dark table between two dark wooden rods, the fresh\nink on it still wet and glistening where the light crosses it. Above\nthe paper, glowing golden Chinese characters float free of the page,\ndrifting slowly upward as if lifting off the surface. The hanji paper\ncatches warm light. Motes of gold drift through a soft shaft of light\nfrom above. Deep plum-violet background. Magical, weightless, just\nfinished. No hands, no people. Aspect ratio 9:16.",
+      "motion": "Static camera. The scroll unrolls smoothly to the right along the\ntable between the two rods. As the paper opens, glowing golden\ncharacters lift free of the surface and drift slowly upward. The wet\nink glistens as the light moves across it. Motes rise through the\nlight. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 3s · seamless loop)",
       "preset": "Static",
       "ratio": "9:16",
       "duration": "3s",
@@ -214,7 +214,7 @@
       ],
       "hint": null,
       "image": "Korean romance-fantasy webtoon style. A paper scroll folded halfway\nclosed, the upper half lit and readable-looking, the lower half creased\nover and falling into deep shadow. Warm amber light on the exposed\nportion only. No legible text, no hands. Aspect ratio 9:16.",
-      "motion": "Static camera. The scroll folds halfway closed in one smooth motion,\nthe lower half creasing over and falling into shadow. The exposed upper\nhalf stays lit.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 2s)",
+      "motion": "Static camera. The scroll folds halfway closed in one smooth motion,\nthe lower half creasing over and falling into shadow. The exposed upper\nhalf stays lit.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 2s)",
       "preset": "Static",
       "ratio": "16:9",
       "duration": "2s",
@@ -234,7 +234,7 @@
       ],
       "hint": null,
       "image": "Korean romance-fantasy webtoon style. A lacquered scroll case bound\nwith a red silk cord, the cord untying itself as golden light bursts\nout from the opening seam. Small golden blossoms of light scatter\noutward from the opening. A luminous ring rotates slowly behind.\nCentered, high contrast, deep plum-violet background. Joyful,\nrewarding, ceremonial. No hands, no text. Aspect ratio 9:16.",
-      "motion": "Static camera. The red silk cord unties itself and slips away from\nthe scroll case. Golden light bursts out from the opening seam and small\ngolden blossoms of light scatter outward, then settle. The ring behind\npulses once.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 1:1 · 2s)",
+      "motion": "Static camera. The red silk cord unties itself and slips away from\nthe scroll case. Golden light bursts out from the opening seam and small\ngolden blossoms of light scatter outward, then settle. The ring behind\npulses once.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 2s)",
       "preset": "Static",
       "ratio": "1:1",
       "duration": "2s",
@@ -242,7 +242,7 @@
       "tint": false,
       "still": false,
       "note": null,
-      "use": "값을 치르다 — 글 위 띠. **4:3 상자로 잘라 씁니다 — 세로의 42% 만 보이오.** 주제를 세로 한가운데에 두시오."
+      "use": "값을 치르다 — 글 위 띠. **1:1 상자로 잘라 씁니다 — 세로의 56% 만 보이오.** 주제를 세로 한가운데에 두시오."
     },
     "ink": {
       "title": "먹이 번지는 종이",
@@ -253,8 +253,8 @@
         "소품"
       ],
       "hint": null,
-      "image": "Korean romance-fantasy webtoon style. Close on a sheet of pale hanji\npaper with faint vertical column lines. A single drop of black ink has\nlanded at the center and is blooming outward in soft irregular rings.\nWarm amber light from one side, deep plum shadow. No hands, no text.\nAspect ratio 9:16.",
-      "motion": "Static camera, macro. A single drop of black ink falls onto the hanji\npaper and blooms outward in two soft irregular rings, then settles.\nOne motion only, then stillness.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 2s)",
+      "image": "Korean romance-fantasy webtoon style. Close on a sheet of pale hanji\npaper with faint vertical column lines. The tip of a calligraphy\nbrush, floating unsupported with a faint golden aura, has just\ntouched down at the centre and lifted away; a single drop of black\nink has landed there and is blooming outward in soft irregular rings.\nWarm amber light from one side, deep plum shadow. No hands, no\npeople, no text. Aspect ratio 9:16.",
+      "motion": "Static camera, macro. The floating brush tip dips, touches the hanji\npaper at the centre and lifts away again. A single drop of black ink\nfalls from it and blooms outward in two soft irregular rings, then\nsettles. One motion only, then stillness.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 2s)",
       "preset": "Static",
       "ratio": "9:16",
       "duration": "5s",
@@ -262,7 +262,7 @@
       "tint": false,
       "still": false,
       "note": "투표 반응(먹 번짐)과 <b>같은 클립</b>을 씁니다. 한 번 만들면 두 곳에서 쓰입니다.",
-      "use": "들어오다 — 글 위 띠. **4:3 상자로 잘라 씁니다 — 세로의 42% 만 보이오.** 주제를 세로 한가운데에 두시오."
+      "use": "들어오다 — 글 위에 **세로 그대로** 섭니다. 화면 높이의 3분의 2를 쓰고 잘리는 데가 거의 없으니, 위아래 끝까지 그리시오."
     },
     "fork": {
       "title": "갈림길",
@@ -274,7 +274,7 @@
       ],
       "hint": null,
       "image": "Korean romance-fantasy webtoon style. A path splitting into three\ndirections across a misty moonlit plain. Above each branch hovers a\nsmall floating lantern-flame in a different colour — violet, amber,\nrose — marking the way. Small wooden signposts stand blank beneath\nthem. Fireflies drift low over the grass. A pale moon above. Deep\nplum-violet tones, dreamlike and inviting. No people, no legible text.\nAspect ratio 9:16.",
-      "motion": "Static camera. The three floating lantern-flames above the signposts\nbob gently at different rhythms — the center one brightest. Fireflies\ndrift low across the misty plain. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
+      "motion": "Static camera. The three floating lantern-flames above the signposts\nbob gently at different rhythms — the center one brightest. Fireflies\ndrift low across the misty plain. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 3s · seamless loop)",
       "preset": "Static",
       "ratio": "16:9",
       "duration": "3s",
@@ -293,8 +293,8 @@
         "명식"
       ],
       "hint": null,
-      "image": "Korean romance-fantasy webtoon style. A ceremonial altar in a dark\nmystical chamber. Four blank wooden plaques hover in the air above a\nlow carved altar table, suspended and slowly floating, each faintly\nglowing. Two concentric luminous rings — one gold, one violet —\nrotate slowly behind them, marked with twelve radial ticks like a\ncelestial dial. A shaft of warm light falls from above. Golden motes\nof light rise through the beam. The altar's surface has four empty\ncarved slots waiting. Deep plum-violet shadows, mist along the floor.\nAwe-inspiring, sacred, no people, no text. Aspect ratio 9:16.",
-      "motion": "Static camera. Four blank wooden plaques rise slowly from the altar\nand settle hovering in the air, one after another from left to right.\nTwo concentric luminous rings rotate slowly behind them. Golden motes\ndrift upward through the shaft of light. At the end the third plaque\nglows brighter than the others.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 4s)",
+      "image": "Korean romance-fantasy webtoon style. A ceremonial altar in a dark\nmystical chamber. A sheet of hanji paper lies opened flat across the\nlow carved altar table, faint vertical column lines and no legible\nwriting. A calligraphy brush hovers just above the paper, floating\nunsupported, a faint golden aura at its wet tip. Four blank wooden\nplaques hover in the air above the paper, suspended and slowly\nfloating, each faintly glowing. Two concentric luminous rings — one\ngold, one violet — rotate slowly behind them, marked with faint\nticks. Gold motes rise through a soft shaft of light. DESATURATED,\nnear-greyscale, so the colour can be laid on later. No hands, no\npeople, no text. Aspect ratio 9:16.",
+      "motion": "Static camera. The opened sheet of hanji paper settles flat on the\naltar and the floating brush moves across it, its tip trailing a thin\nthread of light. Four blank wooden plaques rise slowly from the altar\nand settle hovering in the air, one after another from left to right.\nTwo concentric luminous rings rotate slowly behind them. Golden motes\ndrift upward. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 5s · seamless loop)",
       "preset": "Static",
       "ratio": "9:16",
       "duration": "5s",
@@ -302,7 +302,7 @@
       "tint": true,
       "still": false,
       "note": "<b>카메라를 반드시 고정하세요.</b> 프리셋에서 Static 선택.<br>\n  카메라가 움직이면 목패의 한자가 흔들려 계산 신뢰가 깎입니다.",
-      "use": "들어오다 — 글 위 띠. **4:3 상자로 잘라 씁니다 — 세로의 42% 만 보이오.** 주제를 세로 한가운데에 두시오."
+      "use": "들어오다 — 글 위에 **세로 그대로** 섭니다. 화면 높이의 3분의 2를 쓰고 잘리는 데가 거의 없으니, 위아래 끝까지 그리시오."
     },
     "facing": {
       "title": "마주앉은 자리",
@@ -313,8 +313,8 @@
         "훅"
       ],
       "hint": null,
-      "image": "Korean romance-fantasy webtoon style. Two floor cushions facing each\nother across a dark wooden floor in a mystical room. Between them,\nfour small glowing plaques float in mid-air at chest height, casting\na soft pool of light on the floor beneath. Beaded curtains frame both\nedges of the composition. A constellation-painted folding screen\nbehind. One cushion is lit warm amber as if just occupied; the other\nwaits in shadow. Golden motes drift through the air. Deep plum-violet\ntones. No people, no text. Aspect ratio 9:16.",
-      "motion": "Static camera. The four glowing plaques hovering between the two\ncushions bob gently at different rhythms. The pool of light beneath them\nshifts. The beaded curtains sway. Motes drift. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
+      "image": "Korean romance-fantasy webtoon style. Two floor cushions facing each\nother across a dark wooden floor in a mystical room. On the floor\nbetween them lies a single sheet of hanji paper, opened flat, faint\nvertical column lines and no legible writing. Four small glowing\nplaques float in mid-air above the paper at chest height, casting a\nsoft pool of light down onto it. Beaded curtains frame both edges of\nthe composition. Deep plum interior, gold motes drifting. The near\ncushion is empty and turned toward the viewer — a place kept open. No\nhands, no people, no text. Aspect ratio 9:16.",
+      "motion": "Static camera. The four glowing plaques hovering above the opened\nsheet bob gently at different rhythms, and the pool of light they\ncast shifts across the paper as if it were being read. The paper's\nfar corner lifts and settles. The beaded curtains sway. Motes drift.\nSeamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 5s · seamless loop)",
       "preset": "Static",
       "ratio": "9:16",
       "duration": "5s",
@@ -322,10 +322,10 @@
       "tint": false,
       "still": false,
       "note": null,
-      "use": "들어오다 — 글 위 띠. **4:3 상자로 잘라 씁니다 — 세로의 42% 만 보이오.** 주제를 세로 한가운데에 두시오."
+      "use": "들어오다 — 글 위에 **세로 그대로** 섭니다. 화면 높이의 3분의 2를 쓰고 잘리는 데가 거의 없으니, 위아래 끝까지 그리시오."
     },
     "seat": {
-      "title": "그 사람의 자리",
+      "title": "그 사람의 자리 · 앉은 뒷모습",
       "seasonal": false,
       "seasons": null,
       "spec": [
@@ -333,8 +333,8 @@
         "캐릭터 배경"
       ],
       "hint": null,
-      "image": "Korean romance-fantasy webtoon style. A single empty floor cushion\nlit by a shaft of warm light from above, in an otherwise dark\nmystical chamber. A faint luminous circular sigil hovers in the air\nbehind it. Beaded curtains hang at both edges of frame. Motes of\ncoloured light drift slowly upward around the cushion. The floor\nmirrors the glow faintly. Intimate, expectant, sacred. No people,\nno text. Aspect ratio 9:16.",
-      "motion": "Static camera. The luminous circular sigil behind the empty cushion\nrotates slowly. The shaft of light pulses gently. Coloured motes drift\nupward. The beaded curtains at the edges sway faintly. Seamlessly\nloopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s · seamless loop)",
+      "image": "Korean romance-fantasy webtoon style. A single floor cushion lit by a\nshaft of warm light from above in an otherwise dark mystical chamber,\nwith a seated figure on it in hanbok, turned three-quarters away and\nlooking off to the side — the face is not visible, only the back and\nthe line of one shoulder. A plain silhouette with no distinguishing\nfeatures: this one clip is recoloured for twenty different\nfortune-tellers. A faint luminous circular sigil hovers in the air\nbehind. Beaded curtains hang at both edges of the frame. Motes of\nlight drift slowly upward around the cushion. Deep plum background.\nDESATURATED, near-greyscale, so the colour can be laid on later. No\ntext, no letters of any script. Aspect ratio 9:16.",
+      "motion": "Static camera. The seated figure breathes slowly and does not turn.\nThe luminous circular sigil behind rotates. The shaft of light pulses\ngently. Motes drift upward. The beaded curtains at the edges sway\nfaintly. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 3s · seamless loop)",
       "preset": "Static",
       "ratio": "3:4",
       "duration": "3s",
@@ -345,7 +345,7 @@
       "use": "둘러보다 — 글 위 띠. **4:3 상자로 잘라 씁니다 — 세로의 42% 만 보이오.** 주제를 세로 한가운데에 두시오."
     },
     "roadmap": {
-      "title": "대운 길 · 이정표",
+      "title": "대운 길 · 상 위에 편 긴 종이",
       "seasonal": false,
       "seasons": null,
       "spec": [
@@ -353,8 +353,8 @@
         "대운 맵"
       ],
       "hint": "가로 패럴랙스로 길을 따라 이동하는 느낌을 냅니다.",
-      "image": "Korean romance-fantasy webtoon style. A long winding path receding from\nlower-left into the upper-right distance, marked by six small stone\nmarkers. The near half glows warm amber; small floating lantern-flames\nhover above the far markers, waiting. Flowering shrubs bloom beside the\npath. A black cat sits on one of the distant markers. Fireflies and\npetals drift through the misty air. Full moon above. Contemplative,\nbeautiful, no people, no text. Aspect ratio 9:16.",
-      "motion": "Slow dolly right along the winding path, travelling from the near\nstone markers toward the distant ones. Ink washes bloom outward as the\ncamera passes. The floating lantern-flames above the far markers sway.\nFireflies drift low. The cat sitting on a marker turns its head as the\ncamera passes.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Dolly Right · 16:9 · 4s)",
+      "image": "Korean romance-fantasy webtoon style. A long sheet of hanji paper\nunrolled the whole length of a low dark table, running from the lower\nleft of the frame into the upper right distance. Drawn on the paper\nin ink is a winding path, ruled across by evenly spaced lines that\ndivide it into decades, with six small stone markers drawn beside it\n— one at each division. The near half of the drawn path glows warm\namber; small floating lantern-flames hover above the far markers,\nwaiting. Flowering shrubs are drawn beside the path and a black cat\nsits at the table's near corner. Deep plum background, gold motes.\nDESATURATED, near-greyscale, so the colour can be laid on later. No\nhands, no people, no legible writing, no text, no numbers. Aspect\nratio 9:16.",
+      "motion": "Slow dolly right along the unrolled paper, travelling from the near\nstone markers toward the distant ones. Ink washes bloom outward along\nthe drawn path as the camera passes, and the ruled decade lines slide\nby one after another. The floating lantern-flames above the far\nmarkers sway. The cat's tail flicks once. Fireflies drift low over\nthe paper.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Dolly Right · 9:16 · 4s · seamless loop)",
       "preset": "Dolly Right",
       "ratio": "16:9",
       "duration": "4s",
@@ -374,15 +374,15 @@
       ],
       "hint": "중앙을 <b>반드시 비워두세요.</b> 캐릭터와 이름은 앱에서 얹습니다.<br>\n 이 카드가 SNS에 퍼지는 <b>바이럴 자산</b>입니다.",
       "image": "Korean romance-fantasy webtoon style. An ornate decorative card frame in\nluminous line-work: a double border with five-petal flower motifs at the\nfour corners, and a slowly rotating celestial ring at the center marked\nwith twelve radial ticks. A halo of eight small blossoms encircles the\nring. Soft radial glow behind. Rendered in thin gold and rose lines on a\ndeep plum-black ground. Completely empty at the center for a character\nillustration. Elegant, precious, keepsake-like. No text. Aspect ratio 9:16.",
-      "motion": "Static camera, centered. The celestial ring rotates slowly. The halo\nbehind pulses once, softly. Motes of light drift upward around the empty\ncenter. The decorative border stays perfectly still. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 1:1 · 3s · seamless loop)",
+      "motion": "Static camera, centered. The celestial ring rotates slowly. The halo\nbehind pulses once, softly. Motes of light drift upward around the empty\ncenter. The decorative border stays perfectly still. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 3s · seamless loop)",
       "preset": "Static",
-      "ratio": "1:1",
+      "ratio": "9:16",
       "duration": "3s",
       "loop": true,
       "tint": true,
       "still": true,
       "note": "<b>정지 PNG 를 반드시 함께 만드세요.</b><br>\n  SNS 공유 시 캡처가 되어야 하는데 영상은 저장이 안 됩니다.<br>\n  · 화면에서는 webm 루프<br>\n  · \"이미지로 저장\" 누르면 <b>PNG 버전</b>으로 교체 후 html2canvas",
-      "use": "읽다 — 글 위 띠. **4:3 상자로 잘라 씁니다 — 세로의 42% 만 보이오.** 주제를 세로 한가운데에 두시오."
+      "use": "읽다 — 글 위에 **세로 그대로** 섭니다. 화면 높이의 3분의 2를 쓰고 잘리는 데가 거의 없으니, 위아래 끝까지 그리시오."
     },
     "tray": {
       "title": "목패를 늘어놓은 상",
@@ -393,8 +393,8 @@
         "상품 선택"
       ],
       "hint": null,
-      "image": "Korean romance-fantasy webtoon style. Four small wooden plaques laid on\na shallow lacquered tray on a low table, seen from a slight angle. The\nleftmost tilts forward and glows warmly from within. A single fresh\nblossom rests at the tray's corner. A soft shaft of light from above,\ngold motes drifting. Deep plum shadows. No legible text, no hands.\nAspect ratio 9:16.",
-      "motion": "Static camera. The four wooden plaques on the tray bob very gently at\ndifferent rhythms, the leftmost glowing brightest. The blossom at the\ntray's corner trembles slightly. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 2s · seamless loop)",
+      "image": "Korean romance-fantasy webtoon style. Three small wooden plaques laid\nin a row on a shallow lacquered tray on a low table, seen from a\nslight angle. The leftmost tilts forward and glows warmly from\nwithin. A man's hand and forearm in a dark indigo sleeve with silver\ntrim is withdrawing toward the right edge of the frame, fingers just\nleaving the last plaque — the choosing is being handed over. A single\nfresh blossom rests at the tray's corner. A soft shaft of light from\nabove, gold motes drifting, deep plum background. Only the hand and\nsleeve — no face, no head, no body above the elbow. No text, no\nletters of any script, no numbers. Aspect ratio 9:16.",
+      "motion": "Static camera. The hand sets the last of the three plaques down,\nlifts away and withdraws out of frame to the right. The three plaques\nsettle and bob very gently at different rhythms, the leftmost glowing\nbrightest. The blossom at the tray's corner trembles. The hand does\nnot come back. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 2s · seamless loop)",
       "preset": "Static",
       "ratio": "16:9",
       "duration": "2s",
@@ -405,7 +405,7 @@
       "use": "값을 치르다 — 글 위 띠. **4:3 상자로 잘라 씁니다 — 세로의 42% 만 보이오.** 주제를 세로 한가운데에 두시오."
     },
     "banner": {
-      "title": "등불 배너",
+      "title": "오늘 자 종이 · 등불",
       "seasonal": false,
       "seasons": null,
       "spec": [
@@ -413,8 +413,8 @@
         "오늘의 운세"
       ],
       "hint": null,
-      "image": "Korean romance-fantasy webtoon style. A single ornate Korean paper\nlantern hanging in the upper-left of a wide frame, glowing rose and\namber, with a flowering vine trailing beside it. A black cat sits below\nit, tail curled. Warm light fades across empty dark plum space to the\nright. Fireflies and gold motes drift through the glow. Mostly empty\ncomposition with room for text on the right. No people, no text.\nAspect ratio 9:16.",
-      "motion": "Static camera. The hanging lantern sways gently and its light shifts\nslowly across the dark space. The flowering vine trembles. The cat's\ntail flicks once. Fireflies and motes drift through the glow. Very\nsubtle. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
+      "image": "Korean romance-fantasy webtoon style. A low lacquered table across\nthe lower half of the frame with a single fresh sheet of pale hanji\npaper newly laid on it, faint vertical column lines and no legible\nwriting, one edge still lifting as if just set down. The rest of the\ntable is bare and swept — yesterday's sheet has been cleared away. A\nsingle ornate Korean paper lantern hangs above at the upper left,\nglowing rose and amber, with a flowering vine trailing beside it. A\nblack cat sits at the table's edge, tail curled. Warm light fades\nacross dark plum space to the right. Fireflies and gold motes drift\nthrough the glow. No hands, no people, no text. Aspect ratio 9:16.",
+      "motion": "Static camera. The corner of the fresh sheet on the table lifts and\nsettles once. The hanging lantern sways gently and its light shifts\nslowly across the swept table. The flowering vine trembles. The cat's\ntail flicks once. Fireflies and motes drift through the glow. Very\nsubtle. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 3s · seamless loop)",
       "preset": "Static",
       "ratio": "16:9",
       "duration": "3s",
@@ -425,7 +425,7 @@
       "use": "오늘 — 글 위 띠. **4:3 상자로 잘라 씁니다 — 세로의 42% 만 보이오.** 주제를 세로 한가운데에 두시오."
     },
     "oldpaper": {
-      "title": "오래된 종이 · 회고",
+      "title": "오래된 종이 · 한 겹 더",
       "seasonal": false,
       "seasons": null,
       "spec": [
@@ -433,8 +433,8 @@
         "회고 루프"
       ],
       "hint": null,
-      "image": "Korean romance-fantasy webtoon style. An aged sheet of hanji paper\nlying at a slight angle, corners softly curled. A small pressed flower\nrests in the upper right corner, and a red seal-stamp is impressed at\nthe lower left. Faint vertical column lines, no legible writing. Warm\nlight falls across it from above, gold motes drifting. Deep plum\nbackground. Nostalgic, treasured. No hands, no text. Aspect ratio 9:16.",
-      "motion": "Static camera. The curled corners of the aged paper lift and settle\nvery slightly, as if in a faint draught. The pressed flower trembles.\nMotes drift through the warm light. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
+      "image": "Korean romance-fantasy webtoon style, vertical composition. A small\nstack of aged hanji sheets lying at a slight angle on a dark wooden\nsurface, corners softly curled. A man's hand and forearm enter from\nthe upper right in a dark indigo sleeve with silver trim, lifting the\ntopmost leaf and turning it over to reveal another aged sheet\nbeneath. A small pressed flower rests at the lower right of the stack\nand a red seal-stamp is impressed at the lower left, both left\nuncovered by the turning leaf. Faint vertical column lines, no\nlegible writing. Warm light falls across the stack from above, gold\nmotes drifting. Deep plum background. Nostalgic, unhurried, no price\nspoken yet. Only the hand and sleeve — no face, no head, no body\nabove the elbow. No text, no letters of any script, no numbers.\nAspect ratio 9:16.",
+      "motion": "Static camera. The hand lifts the topmost aged leaf, turns it over\nonto the stack and withdraws slowly out of frame to the upper right.\nThe turned leaf settles; the sheet revealed beneath lies still. The\npressed flower trembles and the curled corners lift very slightly, as\nif in a faint draught. Motes drift through the warm light. Then\nstillness. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 3s · seamless loop)",
       "preset": "Static",
       "ratio": "9:16",
       "duration": "3s",
@@ -442,10 +442,10 @@
       "tint": false,
       "still": false,
       "note": null,
-      "use": "값을 치르다 — 글 위 띠. **4:3 상자로 잘라 씁니다 — 세로의 42% 만 보이오.** 주제를 세로 한가운데에 두시오. / 읽다 — 글 위 띠. **4:3 상자로 잘라 씁니다 — 세로의 42% 만 보이오.** 주제를 세로 한가운데에 두시오. / 초점은 50% 70% 로 잡혀 있소 (가운데가 답이 아닌 장면)."
+      "use": "값을 치르다 — 글 위에 **세로 그대로** 섭니다. 화면 높이의 3분의 2를 쓰고 잘리는 데가 거의 없으니, 위아래 끝까지 그리시오. / 읽다 — 글 위에 **세로 그대로** 섭니다. 화면 높이의 3분의 2를 쓰고 잘리는 데가 거의 없으니, 위아래 끝까지 그리시오. / 초점은 50% 70% 로 잡혀 있소 (가운데가 답이 아닌 장면)."
     },
     "wall": {
-      "title": "후기 벽 · 붙은 종이쪽",
+      "title": "후기 벽 · 인장 찍힌 종이쪽",
       "seasonal": false,
       "seasons": null,
       "spec": [
@@ -453,8 +453,8 @@
         "후기"
       ],
       "hint": null,
-      "image": "Korean romance-fantasy webtoon style. A wooden-panelled wall covered\nwith small square notes of pale hanji paper, each pinned with a tiny\npressed flower instead of a pin, hanging at slightly different angles\nand lifting faintly as if in a breeze. A flowering vine runs along the\ntop of the wall. A black cat dozes at the base. Warm amber light from\nabove, gold motes drifting. Lived-in, affectionate, accumulated over\ntime. No people, no legible text. Aspect ratio 9:16.",
-      "motion": "Static camera. The pinned paper notes lift and settle at different\nrhythms as if in a light breeze. The flowering vine above sways. The\nblack cat at the base blinks slowly. Motes drift. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 16:9 · 3s · seamless loop)",
+      "image": "Korean romance-fantasy webtoon style. A wooden-panelled wall covered\nwith small square notes of pale hanji paper hanging in even rows,\neach stamped with a small red seal in one corner and pinned with a\ntiny pressed flower instead of a pin, hanging at slightly different\nangles and lifting faintly as if in a breeze. One square in the\nmiddle row is empty — a bare space with no note on it, waiting. A\nflowering vine runs along the top of the wall. A black cat sits at\nthe base of the wall, tail curled, looking up. Warm lantern light\nfrom the left, deep plum shadow to the right, gold motes drifting. No\nhands, no people, no legible writing, no text. Aspect ratio 9:16.",
+      "motion": "Static camera. The pinned paper notes lift and settle at different\nrhythms as if in a light breeze, the red seals catching the light one\nafter another. The one empty square stays bare and still. The\nflowering vine above sways. The black cat at the base blinks slowly.\nMotes drift. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 3s · seamless loop)",
       "preset": "Static",
       "ratio": "16:9",
       "duration": "3s",
@@ -465,7 +465,7 @@
       "use": "인장첩 — 글 위 띠. **4:3 상자로 잘라 씁니다 — 세로의 42% 만 보이오.** 주제를 세로 한가운데에 두시오. / 읽다 — 글 위 띠. **4:3 상자로 잘라 씁니다 — 세로의 42% 만 보이오.** 주제를 세로 한가운데에 두시오."
     },
     "coin": {
-      "title": "엽전 · 값을 치르다",
+      "title": "셈한 종이 · 목패 · 엽전",
       "seasonal": false,
       "seasons": null,
       "spec": [
@@ -473,8 +473,8 @@
         "결제"
       ],
       "hint": null,
-      "image": "Korean romance-fantasy webtoon style. A small pile of traditional\nKorean brass coins with square center holes, resting on a dark wooden\nsurface, catching warm amber light from above. Shallow depth, deep plum\nbackground. No hands, no text. Aspect ratio 9:16.",
-      "motion": "Static camera. One brass coin slides off the top of the small pile and\nsettles beside it with a soft rock. The glow behind pulses once.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 1:1 · 2s)",
+      "image": "Korean romance-fantasy webtoon style. A low dark wooden table seen\nfrom a slight angle. On it lies a small sheet of hanji paper ruled\ninto faint columns — the reckoning, no legible writing — and beside\nit stands a single small wooden plaque propped upright, glowing\nwarmly from within: the price. A small pile of traditional Korean\nbrass coins with square centre holes rests at the near edge, catching\nwarm amber light from above. Shallow depth, deep plum background. No\nhands, no people, no text, no letters of any script, no numbers.\nAspect ratio 9:16.",
+      "motion": "Static camera. One brass coin slides off the top of the small pile\nand settles beside it with a soft rock. The upright plaque brightens\nonce from within and the corner of the reckoning sheet lifts and\nsettles. The glow behind pulses once.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 2s)",
       "preset": "Static",
       "ratio": "1:1",
       "duration": "2s",
@@ -482,7 +482,7 @@
       "tint": false,
       "still": false,
       "note": null,
-      "use": "값을 치르다 — 글 위 띠. **4:3 상자로 잘라 씁니다 — 세로의 42% 만 보이오.** 주제를 세로 한가운데에 두시오."
+      "use": "값을 치르다 — 글 위 띠. **1:1 상자로 잘라 씁니다 — 세로의 56% 만 보이오.** 주제를 세로 한가운데에 두시오."
     },
     "handle": {
       "title": "문고리 · 안쪽 그림자",
@@ -502,7 +502,7 @@
       "tint": false,
       "still": false,
       "note": "<b>두 번째 결제가 갈리는 3초입니다.</b> 1차 출시에 이거 하나는 반드시.",
-      "use": "이어지다 — 글 위 띠. **4:3 상자로 잘라 씁니다 — 세로의 42% 만 보이오.** 주제를 세로 한가운데에 두시오."
+      "use": "이어지다 — 글 위에 **세로 그대로** 섭니다. 화면 높이의 3분의 2를 쓰고 잘리는 데가 거의 없으니, 위아래 끝까지 그리시오."
     },
     "mirror": {
       "title": "맞대어 보는 자리",
@@ -515,10 +515,30 @@
       "hint": "a4b 성향 4글자. 화면의 글은 「그가 종이 한 장을 더 꺼냈다」다. 그러니 손이 종이를 꺼내는 순간이라야 한다. ★ 얼굴은 넣지 마라 — 도령 얼굴은 초상으로 따로 나온다. 배경에 또 그리면 같은 사람이 둘이 된다. 손목까지만. ★ 글자도 넣지 마라 — 어느 나라 글자를 넣어도 틀린다.",
       "image": "Korean romance-fantasy webtoon style, vertical composition.\nA low lacquered table seen from above at a steep angle. A man's hand\nand forearm enter from the upper right in a dark indigo sleeve with\nsilver trim, drawing a single pale paper slip out from under a small\nstack and laying it down. On the table to the left, four small blank\nwooden tablets already stand in a row, warm amber glow. The paper slip\nhe is placing joins three others lying flat on the right, cool blue\nglow. Between the two rows a faint vertical seam of light runs down\nthe table where the two glows meet and do not quite align.\nDark plum interior, drifting dust motes, a single hanging lantern out\nof focus above. Only the hand and sleeve — no face, no head, no body\nabove the elbow. No text, no letters of any script, no numbers.\nAspect ratio 9:16.",
       "motion": "Static camera. The hand finishes laying the paper slip down and\nwithdraws slowly out of frame to the upper right. Then stillness: the\ntwo rows breathe very slightly out of phase — the amber row brightens\nas the blue row dims, then reverses. The seam of light between them\nflickers once, softly, where they misalign. Dust motes drift upward.\nThe hand does not come back.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
-      "use": "들어오다 — 글 위 띠. **4:3 상자로 잘라 씁니다 — 세로의 42% 만 보이오.** 주제를 세로 한가운데에 두시오.",
+      "use": "들어오다 — 글 위에 **세로 그대로** 섭니다. 화면 높이의 3분의 2를 쓰고 잘리는 데가 거의 없으니, 위아래 끝까지 그리시오.",
       "ratio": "9:16",
       "duration": "5s",
       "preset": "Static"
+    },
+    "unbind": {
+      "title": "끈을 풀다 · 무릎 위 두루마리",
+      "seasonal": false,
+      "seasons": null,
+      "spec": [
+        "9:16",
+        "본문 여는 자리"
+      ],
+      "hint": null,
+      "image": "Korean romance-fantasy webtoon style, vertical composition. A man\nkneeling on a dark wooden floor, seen from just above his own knees:\nhis hands and forearms in a dark indigo sleeve with silver trim have\njust pulled a red silk cord loose from a rolled hanji scroll lying\nacross his lap. The freed cord falls away to one side in a loose\ncurve. The scroll has begun to open — pale hanji paper spills down\nover his knees toward the bottom of the frame, faint vertical column\nlines, no legible writing. A low lacquered table and one hanging\nlantern out of focus behind. Deep plum interior, warm amber light\nfrom above, gold motes drifting. Quiet, unhurried, the moment before\nreading. Only the hands, forearms and knees — no face, no head, no\nbody above the elbow. No text, no letters of any script, no numbers.\nAspect ratio 9:16.",
+      "motion": "Static camera. The loosened red silk cord slips off the scroll and\nfalls away to one side. The paper unrolls down over the knees toward\nthe bottom of the frame and settles, its lower edge swaying once. The\nhands withdraw slowly out of frame to the left. Then stillness — gold\nmotes drift up through the warm light and the loose cord trembles\nonce more. The hands do not come back. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 3s · seamless loop)",
+      "preset": "Static",
+      "ratio": "9:16",
+      "duration": "3s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "note": null,
+      "use": "읽다 — 글 위에 **세로 그대로** 섭니다. 화면 높이의 3분의 2를 쓰고 잘리는 데가 거의 없으니, 위아래 끝까지 그리시오."
     }
   },
   "figures": {
@@ -804,17 +824,18 @@
       "still": false,
       "revised": "2026-09-03",
       "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\na composed young nobleman with cool distant eyes and a straight mouth, black hair tied high with a jade pin, deep indigo scholar's robe with silver trim. Key light subtly tinted #E5B87A.\n\nBust-up from the chest up, centered, subject occupying about 72% of\nframe height. FRONT-FACING PORTRAIT — head and shoulders squared to\nthe camera, both eyes fully visible and level, gaze straight at the\nviewer. Symmetrical. No head turn, no profile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-      "motion": "Static camera. The character blinks once, slowly. Hair and sleeve\nedges drift as if in still air. The eyes stay on the viewer.\nNothing else moves — no head turn, no expression change.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "motion": "Static camera. The jade pin in the high-tied hair catches the light once\nas it passes. A single slow blink. The silver trim at the collar\nbreathes with a shallow breath. The cool gaze never leaves the viewer.\n\nThe head stays exactly where it is and does not turn — the app crops\nthis clip to the face, so any drift breaks the crop. No new pose, no\nexpression change. Only what is described above moves. Seamlessly\nloopable: the last frame must match the first exactly.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "greet": "Static camera. His eyes lift to the viewer as if just noticing them, and\nhe inclines his head a few degrees — the smallest possible bow — then\nstraightens and holds the gaze.\n\nThe head stays centred and front-facing throughout — this plays once,\nat the first meeting, and the face is cropped the same way. It ends on\nthe same still portrait it began with, so the greeting can hand over to\nthe looping clip without a jump.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
       "moods": {
         "cut": {
           "file": "bust_cut.png",
           "ko": "짚는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are fixed directly on the viewer,\nnarrowed very slightly, pupils sharp. The mouth is a straight line,\nno smile. One brow a fraction lower than the other. He has just\nsaid something true that the viewer did not want said. Not angry,\nnot cruel — certain."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe eyes narrow a fraction and hold, pupils sharp. The mouth stays a\nstraight line. One brow a hair lower than the other. He has said the\ntrue thing first and is waiting."
         },
         "soft": {
           "file": "bust_soft.png",
           "ko": "누그러뜨리는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are lowered a little and softened,\nthe outer corners easing down. The faintest warmth at the mouth,\nnot quite a smile. The head tilts a few degrees toward the viewer.\nHe is letting the viewer off. Kind, unhurried, a little tired."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe gaze drops a few degrees and the cold goes out of it. The chin tucks\nslightly. No smile — he is simply not pressing any further."
         }
       }
     },
@@ -838,17 +859,18 @@
       "still": false,
       "revised": "2026-09-03",
       "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\na serene young monk with long silver-white hair loose over one shoulder, pale grey-green eyes, plain undyed hemp robe, a single wooden bead bracelet. Key light subtly tinted #BFD3D6.\n\nBust-up from the chest up, centered, subject occupying about 72% of\nframe height. FRONT-FACING PORTRAIT — head and shoulders squared to\nthe camera, both eyes fully visible and level, gaze straight at the\nviewer. Symmetrical. No head turn, no profile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-      "motion": "Static camera. The character blinks once, slowly. Hair and sleeve\nedges drift as if in still air. The eyes stay on the viewer.\nNothing else moves — no head turn, no expression change.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "motion": "Static camera. The eyes close and open again very slowly, once. A single\nstrand of the silver-white hair lifts and settles. One wooden bead turns\na half-turn on the wrist.\n\nThe head stays exactly where it is and does not turn — the app crops\nthis clip to the face, so any drift breaks the crop. No new pose, no\nexpression change. Only what is described above moves. Seamlessly\nloopable: the last frame must match the first exactly.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "greet": "Static camera. The lowered eyes open, find the viewer, and the head bows\nonce slowly and comes back up. The bead bracelet swings a little and\nstills.\n\nThe head stays centred and front-facing throughout — this plays once,\nat the first meeting, and the face is cropped the same way. It ends on\nthe same still portrait it began with, so the greeting can hand over to\nthe looping clip without a jump.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
       "moods": {
         "cut": {
           "file": "bust_cut.png",
           "ko": "짚는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are fixed directly on the viewer,\nnarrowed very slightly, pupils sharp. The mouth is a straight line,\nno smile. One brow a fraction lower than the other. He has just\nsaid something true that the viewer did not want said. Not angry,\nnot cruel — certain."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe eyes open fully and stay open, unblinking, the pale grey-green iris\nvery clear. The mouth is level. He is not accusing — he has simply\nstopped softening it."
         },
         "soft": {
           "file": "bust_soft.png",
           "ko": "누그러뜨리는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are lowered a little and softened,\nthe outer corners easing down. The faintest warmth at the mouth,\nnot quite a smile. The head tilts a few degrees toward the viewer.\nHe is letting the viewer off. Kind, unhurried, a little tired."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe eyelids lower to half and the outer corners ease. The hand around\nthe bead bracelet loosens. A breath goes out."
         }
       }
     },
@@ -872,17 +894,18 @@
       "still": false,
       "revised": "2026-09-03",
       "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\na rugged man with an unkempt topknot, a thin old scar across one brow, open collar, dark hemp robe. Key light subtly tinted #8FA6B8.\n\nBust-up from the chest up, centered, subject occupying about 72% of\nframe height. FRONT-FACING PORTRAIT — head and shoulders squared to\nthe camera, both eyes fully visible and level, gaze straight at the\nviewer. Symmetrical. No head turn, no profile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-      "motion": "Static camera. The character blinks once, slowly. Hair and sleeve\nedges drift as if in still air. The eyes stay on the viewer.\nNothing else moves — no head turn, no expression change.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "motion": "Static camera. One deep breath — the broad shoulders rise a little and\ncome down. The creases in the rolled-up sleeve shift with it. The thick\nbrows do not move. One slow blink at the end.\n\nThe head stays exactly where it is and does not turn — the app crops\nthis clip to the face, so any drift breaks the crop. No new pose, no\nexpression change. Only what is described above moves. Seamlessly\nloopable: the last frame must match the first exactly.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "greet": "Static camera. He looks up from whatever was in his hands, sees the\nviewer, and gives one short nod. The shoulders settle.\n\nThe head stays centred and front-facing throughout — this plays once,\nat the first meeting, and the face is cropped the same way. It ends on\nthe same still portrait it began with, so the greeting can hand over to\nthe looping clip without a jump.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
       "moods": {
         "cut": {
           "file": "bust_cut.png",
           "ko": "짚는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are fixed directly on the viewer,\nnarrowed very slightly, pupils sharp. The mouth is a straight line,\nno smile. One brow a fraction lower than the other. He has just\nsaid something true that the viewer did not want said. Not angry,\nnot cruel — certain."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe brows come down a fraction and the jaw sets. The eyes go flat and\nstay on the viewer. He is not going to repeat it."
         },
         "soft": {
           "file": "bust_soft.png",
           "ko": "누그러뜨리는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are lowered a little and softened,\nthe outer corners easing down. The faintest warmth at the mouth,\nnot quite a smile. The head tilts a few degrees toward the viewer.\nHe is letting the viewer off. Kind, unhurried, a little tired."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe set jaw loosens. The eyes stay level but the weight goes out of the\nbrow. Something close to, but not, kindness."
         }
       }
     },
@@ -906,17 +929,18 @@
       "still": false,
       "revised": "2026-09-03",
       "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\na slender young man wearing round brass-rimmed spectacles, neat side-parted hair, a fine chain across his chest, pale grey robe with many small pockets. Key light subtly tinted #C4B8A0.\n\nBust-up from the chest up, centered, subject occupying about 72% of\nframe height. FRONT-FACING PORTRAIT — head and shoulders squared to\nthe camera, both eyes fully visible and level, gaze straight at the\nviewer. Symmetrical. No head turn, no profile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-      "motion": "Static camera. The character blinks once, slowly. Hair and sleeve\nedges drift as if in still air. The eyes stay on the viewer.\nNothing else moves — no head turn, no expression change.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "motion": "Static camera. The fine chain across the chest swings in a small even\nrhythm, like something counting. Light crosses one lens of the\nbrass-rimmed spectacles and passes. One blink, on the beat.\n\nThe head stays exactly where it is and does not turn — the app crops\nthis clip to the face, so any drift breaks the crop. No new pose, no\nexpression change. Only what is described above moves. Seamlessly\nloopable: the last frame must match the first exactly.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "greet": "Static camera. He glances down at the chain, then up at the viewer, and\nthe eyebrows lift in mild recognition — right on time.\n\nThe head stays centred and front-facing throughout — this plays once,\nat the first meeting, and the face is cropped the same way. It ends on\nthe same still portrait it began with, so the greeting can hand over to\nthe looping clip without a jump.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
       "moods": {
         "cut": {
           "file": "bust_cut.png",
           "ko": "짚는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are fixed directly on the viewer,\nnarrowed very slightly, pupils sharp. The mouth is a straight line,\nno smile. One brow a fraction lower than the other. He has just\nsaid something true that the viewer did not want said. Not angry,\nnot cruel — certain."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe chin drops a fraction so the eyes come over the top of the\nspectacles and fix on the viewer. The mouth closes flat. He has just put\na date on it."
         },
         "soft": {
           "file": "bust_soft.png",
           "ko": "누그러뜨리는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are lowered a little and softened,\nthe outer corners easing down. The faintest warmth at the mouth,\nnot quite a smile. The head tilts a few degrees toward the viewer.\nHe is letting the viewer off. Kind, unhurried, a little tired."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nHe pushes the spectacles back up and the eyes behind them soften. The\ncounting chain slows. The mouth eases."
         }
       }
     },
@@ -940,17 +964,18 @@
       "still": false,
       "revised": "2026-09-03",
       "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\na woman with an unreadable calm face, hair pulled back severely, silver hairpin, high-collared dark hanbok, eyes catching a faint cold light. Key light subtly tinted #DCD6E2.\n\nBust-up from the chest up, centered, subject occupying about 72% of\nframe height. FRONT-FACING PORTRAIT — head and shoulders squared to\nthe camera, both eyes fully visible and level, gaze straight at the\nviewer. Symmetrical. No head turn, no profile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-      "motion": "Static camera. The character blinks once, slowly. Hair and sleeve\nedges drift as if in still air. The eyes stay on the viewer.\nNothing else moves — no head turn, no expression change.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "motion": "Static camera. A cold light travels along the silver hairpin and goes\nout. The high collar stays perfectly still. She does not blink for a\nlong time, then blinks once, late.\n\nThe head stays exactly where it is and does not turn — the app crops\nthis clip to the face, so any drift breaks the crop. No new pose, no\nexpression change. Only what is described above moves. Seamlessly\nloopable: the last frame must match the first exactly.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "greet": "Static camera. The eyes come up from somewhere off-frame and settle on\nthe viewer, unhurried. The head tilts a degree, measuring, then levels.\n\nThe head stays centred and front-facing throughout — this plays once,\nat the first meeting, and the face is cropped the same way. It ends on\nthe same still portrait it began with, so the greeting can hand over to\nthe looping clip without a jump.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
       "moods": {
         "cut": {
           "file": "bust_cut.png",
           "ko": "짚는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are fixed directly on the viewer,\nnarrowed very slightly, pupils sharp. The mouth is a straight line,\nno smile. One brow a fraction lower than the other. He has just\nsaid something true that the viewer did not want said. Not angry,\nnot cruel — certain."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe eyes stop moving entirely and rest on the viewer. Nothing in the\nface gives anything away. She has found the place where the answers do\nnot agree."
         },
         "soft": {
           "file": "bust_soft.png",
           "ko": "누그러뜨리는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are lowered a little and softened,\nthe outer corners easing down. The faintest warmth at the mouth,\nnot quite a smile. The head tilts a few degrees toward the viewer.\nHe is letting the viewer off. Kind, unhurried, a little tired."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe gaze slides a few degrees off the viewer — deliberately, giving them\nroom. The severe line of the mouth loosens by almost nothing."
         }
       }
     },
@@ -974,17 +999,18 @@
       "still": false,
       "revised": "2026-09-03",
       "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\na striking woman with a knowing half-smile, loose crimson hanbok slipping off one shoulder, dark red lips, a single long earring, hair falling free. Key light subtly tinted #C9707A.\n\nBust-up from the chest up, centered, subject occupying about 72% of\nframe height. FRONT-FACING PORTRAIT — head and shoulders squared to\nthe camera, both eyes fully visible and level, gaze straight at the\nviewer. Symmetrical. No head turn, no profile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-      "motion": "Static camera. The character blinks once, slowly. Hair and sleeve\nedges drift as if in still air. The eyes stay on the viewer.\nNothing else moves — no head turn, no expression change.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "motion": "Static camera. The single long earring turns slowly through a\nhalf-circle and swings back. The loose crimson collar shifts on the bare\nshoulder. The half-smile deepens a little and returns.\n\nThe head stays exactly where it is and does not turn — the app crops\nthis clip to the face, so any drift breaks the crop. No new pose, no\nexpression change. Only what is described above moves. Seamlessly\nloopable: the last frame must match the first exactly.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "greet": "Static camera. She looks up through her lashes, the half-smile arriving\nbefore the gaze does, and the long earring swings once.\n\nThe head stays centred and front-facing throughout — this plays once,\nat the first meeting, and the face is cropped the same way. It ends on\nthe same still portrait it began with, so the greeting can hand over to\nthe looping clip without a jump.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
       "moods": {
         "cut": {
           "file": "bust_cut.png",
           "ko": "짚는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are fixed directly on the viewer,\nnarrowed very slightly, pupils sharp. The mouth is a straight line,\nno smile. One brow a fraction lower than the other. He has just\nsaid something true that the viewer did not want said. Not angry,\nnot cruel — certain."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe half-smile goes out completely. The eyes stay exactly where they\nwere, and that is worse. She has named the thing the viewer wants."
         },
         "soft": {
           "file": "bust_soft.png",
           "ko": "누그러뜨리는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are lowered a little and softened,\nthe outer corners easing down. The faintest warmth at the mouth,\nnot quite a smile. The head tilts a few degrees toward the viewer.\nHe is letting the viewer off. Kind, unhurried, a little tired."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe smile comes back small and real. The eyes warm and the head tips\ntoward the viewer. The teasing stops."
         }
       }
     },
@@ -1008,17 +1034,18 @@
       "still": false,
       "revised": "2026-09-03",
       "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\na pale otherworldly young woman with long unbound black hair, distant unfocused gaze, layered gauzy pale-lilac hanbok that seems to drift. Key light subtly tinted #D98BA5.\n\nBust-up from the chest up, centered, subject occupying about 72% of\nframe height. FRONT-FACING PORTRAIT — head and shoulders squared to\nthe camera, both eyes fully visible and level, gaze straight at the\nviewer. Symmetrical. No head turn, no profile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-      "motion": "Static camera. The character blinks once, slowly. Hair and sleeve\nedges drift as if in still air. The eyes stay on the viewer.\nNothing else moves — no head turn, no expression change.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "motion": "Static camera. The layered pale-lilac gauze and the unbound hair drift\nas if underwater, with no wind in the room. The unfocused gaze does not\nsettle. A blink that is almost too slow.\n\nThe head stays exactly where it is and does not turn — the app crops\nthis clip to the face, so any drift breaks the crop. No new pose, no\nexpression change. Only what is described above moves. Seamlessly\nloopable: the last frame must match the first exactly.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "greet": "Static camera. The distant eyes drift across the frame and find the\nviewer by accident, and stay — as if she had been expecting them without\nknowing when.\n\nThe head stays centred and front-facing throughout — this plays once,\nat the first meeting, and the face is cropped the same way. It ends on\nthe same still portrait it began with, so the greeting can hand over to\nthe looping clip without a jump.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
       "moods": {
         "cut": {
           "file": "bust_cut.png",
           "ko": "짚는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are fixed directly on the viewer,\nnarrowed very slightly, pupils sharp. The mouth is a straight line,\nno smile. One brow a fraction lower than the other. He has just\nsaid something true that the viewer did not want said. Not angry,\nnot cruel — certain."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe wandering eyes snap into focus on the viewer, all at once, and stay.\nThe drifting cloth goes still. She is looking straight at the thing\nstanding behind the question."
         },
         "soft": {
           "file": "bust_soft.png",
           "ko": "누그러뜨리는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are lowered a little and softened,\nthe outer corners easing down. The faintest warmth at the mouth,\nnot quite a smile. The head tilts a few degrees toward the viewer.\nHe is letting the viewer off. Kind, unhurried, a little tired."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe focus dissolves again and the gaze goes soft and far-off. The mouth\ncurves very slightly. The cloth begins to drift once more."
         }
       }
     },
@@ -1042,17 +1069,18 @@
       "still": false,
       "revised": "2026-09-03",
       "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\na young man of foreign features — deeper set eyes, higher nose bridge, sun-darkened skin — dark travelling coat over hanbok, small brass astrolabe hanging at his belt. Key light subtly tinted #7FA0C4.\n\nBust-up from the chest up, centered, subject occupying about 72% of\nframe height. FRONT-FACING PORTRAIT — head and shoulders squared to\nthe camera, both eyes fully visible and level, gaze straight at the\nviewer. Symmetrical. No head turn, no profile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-      "motion": "Static camera. The character blinks once, slowly. Hair and sleeve\nedges drift as if in still air. The eyes stay on the viewer.\nNothing else moves — no head turn, no expression change.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "motion": "Static camera. The brass astrolabe at the belt turns a slow half-turn on\nits ring and a thin line of light runs around its rim. The travelling\ncoat's collar lifts once. One blink.\n\nThe head stays exactly where it is and does not turn — the app crops\nthis clip to the face, so any drift breaks the crop. No new pose, no\nexpression change. Only what is described above moves. Seamlessly\nloopable: the last frame must match the first exactly.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "greet": "Static camera. He looks up from the astrolabe, and the sun-darkened face\nopens into recognition. One hand steadies the instrument as he turns his\nattention over.\n\nThe head stays centred and front-facing throughout — this plays once,\nat the first meeting, and the face is cropped the same way. It ends on\nthe same still portrait it began with, so the greeting can hand over to\nthe looping clip without a jump.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
       "moods": {
         "cut": {
           "file": "bust_cut.png",
           "ko": "짚는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are fixed directly on the viewer,\nnarrowed very slightly, pupils sharp. The mouth is a straight line,\nno smile. One brow a fraction lower than the other. He has just\nsaid something true that the viewer did not want said. Not angry,\nnot cruel — certain."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe deep-set eyes fix and the head goes very still, the way someone\nholds still to take a sighting. He has placed the viewer on a map they\ndid not know existed."
         },
         "soft": {
           "file": "bust_soft.png",
           "ko": "누그러뜨리는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are lowered a little and softened,\nthe outer corners easing down. The faintest warmth at the mouth,\nnot quite a smile. The head tilts a few degrees toward the viewer.\nHe is letting the viewer off. Kind, unhurried, a little tired."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe shoulders drop out of the travelling posture. The eyes crease at the\ncorners — a long way from home and glad of the company."
         }
       }
     },
@@ -1076,17 +1104,18 @@
       "still": false,
       "revised": "2026-09-03",
       "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\na handsome man with a lazy amused grin, one brow raised, hair carelessly tied, loose plum robe open at the throat, a card held between two fingers. Key light subtly tinted #D4C29A.\n\nBust-up from the chest up, centered, subject occupying about 72% of\nframe height. FRONT-FACING PORTRAIT — head and shoulders squared to\nthe camera, both eyes fully visible and level, gaze straight at the\nviewer. Symmetrical. No head turn, no profile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-      "motion": "Static camera. The character blinks once, slowly. Hair and sleeve\nedges drift as if in still air. The eyes stay on the viewer.\nNothing else moves — no head turn, no expression change.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "motion": "Static camera. The card held between two fingers flips over once and\ncomes back, face hidden both times. The raised brow stays raised. The\nplum robe's open collar shifts.\n\nThe head stays exactly where it is and does not turn — the app crops\nthis clip to the face, so any drift breaks the crop. No new pose, no\nexpression change. Only what is described above moves. Seamlessly\nloopable: the last frame must match the first exactly.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "greet": "Static camera. He fans the card into view between two fingers, gives the\nviewer a lazy sideways look, and the grin arrives.\n\nThe head stays centred and front-facing throughout — this plays once,\nat the first meeting, and the face is cropped the same way. It ends on\nthe same still portrait it began with, so the greeting can hand over to\nthe looping clip without a jump.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
       "moods": {
         "cut": {
           "file": "bust_cut.png",
           "ko": "짚는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are fixed directly on the viewer,\nnarrowed very slightly, pupils sharp. The mouth is a straight line,\nno smile. One brow a fraction lower than the other. He has just\nsaid something true that the viewer did not want said. Not angry,\nnot cruel — certain."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe lazy grin drops off in one frame. The card stops moving. The eyes,\nsuddenly not amused at all, hold the viewer. He has turned up the one he\nwas not joking about."
         },
         "soft": {
           "file": "bust_soft.png",
           "ko": "누그러뜨리는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are lowered a little and softened,\nthe outer corners easing down. The faintest warmth at the mouth,\nnot quite a smile. The head tilts a few degrees toward the viewer.\nHe is letting the viewer off. Kind, unhurried, a little tired."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe grin comes back crooked and easy, and he tucks the card away out of\nframe. The raised brow lowers. Nothing to see here."
         }
       }
     },
@@ -1110,17 +1139,18 @@
       "still": false,
       "revised": "2026-09-03",
       "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\na sharp-featured man with narrow observing eyes that seem to measure the viewer, thin lips, dark high-collared robe, hands folded. Key light subtly tinted #C9A87F.\n\nBust-up from the chest up, centered, subject occupying about 72% of\nframe height. FRONT-FACING PORTRAIT — head and shoulders squared to\nthe camera, both eyes fully visible and level, gaze straight at the\nviewer. Symmetrical. No head turn, no profile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-      "motion": "Static camera. The character blinks once, slowly. Hair and sleeve\nedges drift as if in still air. The eyes stay on the viewer.\nNothing else moves — no head turn, no expression change.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "motion": "Static camera. The narrow eyes travel a short way across the viewer's\nface — left, right, back to centre — reading it. The folded hands do not\nmove at all. One blink, precise.\n\nThe head stays exactly where it is and does not turn — the app crops\nthis clip to the face, so any drift breaks the crop. No new pose, no\nexpression change. Only what is described above moves. Seamlessly\nloopable: the last frame must match the first exactly.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "greet": "Static camera. The narrow eyes come up and take the viewer in with one\nquick sweep, then settle and hold. The folded hands tighten once in\ngreeting.\n\nThe head stays centred and front-facing throughout — this plays once,\nat the first meeting, and the face is cropped the same way. It ends on\nthe same still portrait it began with, so the greeting can hand over to\nthe looping clip without a jump.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
       "moods": {
         "cut": {
           "file": "bust_cut.png",
           "ko": "짚는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are fixed directly on the viewer,\nnarrowed very slightly, pupils sharp. The mouth is a straight line,\nno smile. One brow a fraction lower than the other. He has just\nsaid something true that the viewer did not want said. Not angry,\nnot cruel — certain."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe reading stops. The eyes lock centre and the thin lips press. He has\nseen the thing the viewer arranges his face to hide."
         },
         "soft": {
           "file": "bust_soft.png",
           "ko": "누그러뜨리는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are lowered a little and softened,\nthe outer corners easing down. The faintest warmth at the mouth,\nnot quite a smile. The head tilts a few degrees toward the viewer.\nHe is letting the viewer off. Kind, unhurried, a little tired."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe eyes let go and drop politely to the viewer's collar instead of his\nface. The hands unfold slightly. He gives the face back."
         }
       }
     },
@@ -1144,17 +1174,18 @@
       "still": false,
       "revised": "2026-09-03",
       "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\na gentle woman with a soft knowing smile, moonlit pale hanbok, a length of red thread wound loosely around her fingers, hair in a low braid. Key light subtly tinted #A896D4.\n\nBust-up from the chest up, centered, subject occupying about 72% of\nframe height. FRONT-FACING PORTRAIT — head and shoulders squared to\nthe camera, both eyes fully visible and level, gaze straight at the\nviewer. Symmetrical. No head turn, no profile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-      "motion": "Static camera. The character blinks once, slowly. Hair and sleeve\nedges drift as if in still air. The eyes stay on the viewer.\nNothing else moves — no head turn, no expression change.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "motion": "Static camera. The red thread wound around the fingers loosens by one\nturn and winds back. The moonlit pale hanbok glows a little brighter and\ndims. The knowing smile holds. One soft blink.\n\nThe head stays exactly where it is and does not turn — the app crops\nthis clip to the face, so any drift breaks the crop. No new pose, no\nexpression change. Only what is described above moves. Seamlessly\nloopable: the last frame must match the first exactly.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "greet": "Static camera. She lifts her hands into view, the red thread already\nwound around them, and smiles as if the viewer were expected.\n\nThe head stays centred and front-facing throughout — this plays once,\nat the first meeting, and the face is cropped the same way. It ends on\nthe same still portrait it began with, so the greeting can hand over to\nthe looping clip without a jump.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
       "moods": {
         "cut": {
           "file": "bust_cut.png",
           "ko": "짚는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are fixed directly on the viewer,\nnarrowed very slightly, pupils sharp. The mouth is a straight line,\nno smile. One brow a fraction lower than the other. He has just\nsaid something true that the viewer did not want said. Not angry,\nnot cruel — certain."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe smile stays but stops being kind. The thread pulls taut between the\nfingers. The eyes hold the viewer without blinking — she can see both\nends of it."
         },
         "soft": {
           "file": "bust_soft.png",
           "ko": "누그러뜨리는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are lowered a little and softened,\nthe outer corners easing down. The faintest warmth at the mouth,\nnot quite a smile. The head tilts a few degrees toward the viewer.\nHe is letting the viewer off. Kind, unhurried, a little tired."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe thread goes slack. The eyes lower and warm, and the smile becomes an\nordinary one. She lets the viewer keep the hope."
         }
       }
     },
@@ -1178,17 +1209,18 @@
       "still": false,
       "revised": "2026-09-03",
       "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\na magnificent woman in her thirties, bold direct gaze, richly embroidered deep-red hanbok, gold hairpin, arms crossed, utterly unbothered. Key light subtly tinted #D98BA5.\n\nBust-up from the chest up, centered, subject occupying about 72% of\nframe height. FRONT-FACING PORTRAIT — head and shoulders squared to\nthe camera, both eyes fully visible and level, gaze straight at the\nviewer. Symmetrical. No head turn, no profile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-      "motion": "Static camera. The character blinks once, slowly. Hair and sleeve\nedges drift as if in still air. The eyes stay on the viewer.\nNothing else moves — no head turn, no expression change.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "motion": "Static camera. One breath moves the folded arms. Light runs along the\ngold hairpin. The bold gaze does not waver and does not blink until the\nvery end, once.\n\nThe head stays exactly where it is and does not turn — the app crops\nthis clip to the face, so any drift breaks the crop. No new pose, no\nexpression change. Only what is described above moves. Seamlessly\nloopable: the last frame must match the first exactly.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "greet": "Static camera. She looks the viewer over head to foot in one sweep,\ndecides in her favour, and the arms come uncrossed.\n\nThe head stays centred and front-facing throughout — this plays once,\nat the first meeting, and the face is cropped the same way. It ends on\nthe same still portrait it began with, so the greeting can hand over to\nthe looping clip without a jump.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
       "moods": {
         "cut": {
           "file": "bust_cut.png",
           "ko": "짚는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are fixed directly on the viewer,\nnarrowed very slightly, pupils sharp. The mouth is a straight line,\nno smile. One brow a fraction lower than the other. He has just\nsaid something true that the viewer did not want said. Not angry,\nnot cruel — certain."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe chin comes up a fraction. The eyes go hard and stay on the viewer.\nShe has said out loud what everyone else was too polite to."
         },
         "soft": {
           "file": "bust_soft.png",
           "ko": "누그러뜨리는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are lowered a little and softened,\nthe outer corners easing down. The faintest warmth at the mouth,\nnot quite a smile. The head tilts a few degrees toward the viewer.\nHe is letting the viewer off. Kind, unhurried, a little tired."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe arms loosen out of the fold. The mouth curves — big, unembarrassed\nwarmth. She is on the viewer's side and always was."
         }
       }
     },
@@ -1212,17 +1244,18 @@
       "still": false,
       "revised": "2026-09-03",
       "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\na quiet young man with sad downcast eyes, faint shadows beneath them, dark muted robe worn a little loose, hair falling over one eye. Key light subtly tinted #E5A0B8.\n\nBust-up from the chest up, centered, subject occupying about 72% of\nframe height. FRONT-FACING PORTRAIT — head and shoulders squared to\nthe camera, both eyes fully visible and level, gaze straight at the\nviewer. Symmetrical. No head turn, no profile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-      "motion": "Static camera. The character blinks once, slowly. Hair and sleeve\nedges drift as if in still air. The eyes stay on the viewer.\nNothing else moves — no head turn, no expression change.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "motion": "Static camera. The hair falling over one eye stirs and settles. The\nvisible eye lowers, then lifts again. The muted robe hangs loose at the\nshoulder. Very little else moves.\n\nThe head stays exactly where it is and does not turn — the app crops\nthis clip to the face, so any drift breaks the crop. No new pose, no\nexpression change. Only what is described above moves. Seamlessly\nloopable: the last frame must match the first exactly.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "greet": "Static camera. The lowered head comes up slowly, the hair sliding off\nthe covered eye, and both eyes find the viewer before the hair falls\nback.\n\nThe head stays centred and front-facing throughout — this plays once,\nat the first meeting, and the face is cropped the same way. It ends on\nthe same still portrait it began with, so the greeting can hand over to\nthe looping clip without a jump.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
       "moods": {
         "cut": {
           "file": "bust_cut.png",
           "ko": "짚는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are fixed directly on the viewer,\nnarrowed very slightly, pupils sharp. The mouth is a straight line,\nno smile. One brow a fraction lower than the other. He has just\nsaid something true that the viewer did not want said. Not angry,\nnot cruel — certain."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe downcast eye comes up and stays up, level with the viewer for once.\nThe sadness is still there but it is not looking away. He has said the\npart about waiting."
         },
         "soft": {
           "file": "bust_soft.png",
           "ko": "누그러뜨리는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are lowered a little and softened,\nthe outer corners easing down. The faintest warmth at the mouth,\nnot quite a smile. The head tilts a few degrees toward the viewer.\nHe is letting the viewer off. Kind, unhurried, a little tired."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe eye drops again and the mouth softens. The hair falls back across\nit. He is giving the viewer somewhere to look that is not him."
         }
       }
     },
@@ -1246,17 +1279,18 @@
       "still": false,
       "revised": "2026-09-03",
       "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\na stern androgynous figure with a level unblinking gaze, black official's robe, hair severely bound, holding a closed brush case like a verdict. Key light subtly tinted #DCC0D0.\n\nBust-up from the chest up, centered, subject occupying about 72% of\nframe height. FRONT-FACING PORTRAIT — head and shoulders squared to\nthe camera, both eyes fully visible and level, gaze straight at the\nviewer. Symmetrical. No head turn, no profile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-      "motion": "Static camera. The character blinks once, slowly. Hair and sleeve\nedges drift as if in still air. The eyes stay on the viewer.\nNothing else moves — no head turn, no expression change.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "motion": "Static camera. Nothing moves for a long moment. Then the hand around the\nclosed brush case tightens once and lets go. The level gaze does not\nblink at all.\n\nThe head stays exactly where it is and does not turn — the app crops\nthis clip to the face, so any drift breaks the crop. No new pose, no\nexpression change. Only what is described above moves. Seamlessly\nloopable: the last frame must match the first exactly.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "greet": "Static camera. She raises her eyes from the closed brush case to the\nviewer, unhurried and without welcome or hostility, and holds them\nthere.\n\nThe head stays centred and front-facing throughout — this plays once,\nat the first meeting, and the face is cropped the same way. It ends on\nthe same still portrait it began with, so the greeting can hand over to\nthe looping clip without a jump.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
       "moods": {
         "cut": {
           "file": "bust_cut.png",
           "ko": "짚는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are fixed directly on the viewer,\nnarrowed very slightly, pupils sharp. The mouth is a straight line,\nno smile. One brow a fraction lower than the other. He has just\nsaid something true that the viewer did not want said. Not angry,\nnot cruel — certain."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe eyes stay open and absolutely still. The brush case comes up an\ninch, still closed. She has ruled, and she is not going to soften the\nruling."
         },
         "soft": {
           "file": "bust_soft.png",
           "ko": "누그러뜨리는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are lowered a little and softened,\nthe outer corners easing down. The faintest warmth at the mouth,\nnot quite a smile. The head tilts a few degrees toward the viewer.\nHe is letting the viewer off. Kind, unhurried, a little tired."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe unblinking gaze finally blinks. The brush case lowers. The severity\nstays in the posture but leaves the eyes."
         }
       }
     },
@@ -1280,17 +1314,18 @@
       "still": false,
       "revised": "2026-09-03",
       "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nan elegant young merchant prince, fine silk robe in muted gold, immaculate topknot, an abacus-like ledger tucked under one arm, faint polite smile. Key light subtly tinted #C4A87F.\n\nBust-up from the chest up, centered, subject occupying about 72% of\nframe height. FRONT-FACING PORTRAIT — head and shoulders squared to\nthe camera, both eyes fully visible and level, gaze straight at the\nviewer. Symmetrical. No head turn, no profile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-      "motion": "Static camera. The character blinks once, slowly. Hair and sleeve\nedges drift as if in still air. The eyes stay on the viewer.\nNothing else moves — no head turn, no expression change.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "motion": "Static camera. He shifts the ledger under his arm to a better grip. The\nmuted gold silk catches light along one fold. The polite smile does not\nchange. One measured blink.\n\nThe head stays exactly where it is and does not turn — the app crops\nthis clip to the face, so any drift breaks the crop. No new pose, no\nexpression change. Only what is described above moves. Seamlessly\nloopable: the last frame must match the first exactly.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "greet": "Static camera. He tucks the ledger firmly under one arm, turns his full\nattention to the viewer, and the polite smile arrives on cue.\n\nThe head stays centred and front-facing throughout — this plays once,\nat the first meeting, and the face is cropped the same way. It ends on\nthe same still portrait it began with, so the greeting can hand over to\nthe looping clip without a jump.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
       "moods": {
         "cut": {
           "file": "bust_cut.png",
           "ko": "짚는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are fixed directly on the viewer,\nnarrowed very slightly, pupils sharp. The mouth is a straight line,\nno smile. One brow a fraction lower than the other. He has just\nsaid something true that the viewer did not want said. Not angry,\nnot cruel — certain."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe polite smile stays exactly as it was, which is the point. The eyes\ngo direct and cool. He has just said the number out loud."
         },
         "soft": {
           "file": "bust_soft.png",
           "ko": "누그러뜨리는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are lowered a little and softened,\nthe outer corners easing down. The faintest warmth at the mouth,\nnot quite a smile. The head tilts a few degrees toward the viewer.\nHe is letting the viewer off. Kind, unhurried, a little tired."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe smile loosens into a real one and the eyes crease. The ledger arm\nrelaxes. This part is not being charged for."
         }
       }
     },
@@ -1314,17 +1349,18 @@
       "still": false,
       "revised": "2026-09-03",
       "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\na stern older scholar with grey at the temples, small reading glasses low on the nose, dark scholar's robe, a bamboo cane rod held upright. Key light subtly tinted #A9B3C4.\n\nBust-up from the chest up, centered, subject occupying about 72% of\nframe height. FRONT-FACING PORTRAIT — head and shoulders squared to\nthe camera, both eyes fully visible and level, gaze straight at the\nviewer. Symmetrical. No head turn, no profile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-      "motion": "Static camera. The character blinks once, slowly. Hair and sleeve\nedges drift as if in still air. The eyes stay on the viewer.\nNothing else moves — no head turn, no expression change.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "motion": "Static camera. The upright bamboo rod taps down once, soundlessly, and\nrests. The eyes come up over the reading glasses low on the nose and go\nback down. The grey temples do not move.\n\nThe head stays exactly where it is and does not turn — the app crops\nthis clip to the face, so any drift breaks the crop. No new pose, no\nexpression change. Only what is described above moves. Seamlessly\nloopable: the last frame must match the first exactly.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "greet": "Static camera. The eyes lift over the reading glasses, take the measure\nof the viewer, and the rod comes upright — class is in.\n\nThe head stays centred and front-facing throughout — this plays once,\nat the first meeting, and the face is cropped the same way. It ends on\nthe same still portrait it began with, so the greeting can hand over to\nthe looping clip without a jump.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
       "moods": {
         "cut": {
           "file": "bust_cut.png",
           "ko": "짚는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are fixed directly on the viewer,\nnarrowed very slightly, pupils sharp. The mouth is a straight line,\nno smile. One brow a fraction lower than the other. He has just\nsaid something true that the viewer did not want said. Not angry,\nnot cruel — certain."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe eyes come up over the glasses and stop there. The rod stops. He has\nfound where the work was not done."
         },
         "soft": {
           "file": "bust_soft.png",
           "ko": "누그러뜨리는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are lowered a little and softened,\nthe outer corners easing down. The faintest warmth at the mouth,\nnot quite a smile. The head tilts a few degrees toward the viewer.\nHe is letting the viewer off. Kind, unhurried, a little tired."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nHe takes the glasses off entirely, and without them the eyes are much\nolder and much kinder. The rod leans away."
         }
       }
     },
@@ -1348,17 +1384,18 @@
       "still": false,
       "revised": "2026-09-03",
       "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\na warm woman in her thirties with kind tired eyes, sleeves tied back for work, soft moss-green hanbok, dried herbs tucked at her sash. Key light subtly tinted #7FB08A.\n\nBust-up from the chest up, centered, subject occupying about 72% of\nframe height. FRONT-FACING PORTRAIT — head and shoulders squared to\nthe camera, both eyes fully visible and level, gaze straight at the\nviewer. Symmetrical. No head turn, no profile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-      "motion": "Static camera. The character blinks once, slowly. Hair and sleeve\nedges drift as if in still air. The eyes stay on the viewer.\nNothing else moves — no head turn, no expression change.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "motion": "Static camera. The dried herbs tucked at the sash stir and settle. The\nsleeves stay tied back for work. The tired kind eyes blink once, softly,\nand stay warm.\n\nThe head stays exactly where it is and does not turn — the app crops\nthis clip to the face, so any drift breaks the crop. No new pose, no\nexpression change. Only what is described above moves. Seamlessly\nloopable: the last frame must match the first exactly.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "greet": "Static camera. He finishes tying back a sleeve, looks up, and the tired\neyes warm as though the viewer were the first good thing all day.\n\nThe head stays centred and front-facing throughout — this plays once,\nat the first meeting, and the face is cropped the same way. It ends on\nthe same still portrait it began with, so the greeting can hand over to\nthe looping clip without a jump.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
       "moods": {
         "cut": {
           "file": "bust_cut.png",
           "ko": "짚는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are fixed directly on the viewer,\nnarrowed very slightly, pupils sharp. The mouth is a straight line,\nno smile. One brow a fraction lower than the other. He has just\nsaid something true that the viewer did not want said. Not angry,\nnot cruel — certain."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe warmth stays but the eyes stop being gentle. The head does not tilt.\nHe has told the viewer the thing about his body that he has been\nignoring."
         },
         "soft": {
           "file": "bust_soft.png",
           "ko": "누그러뜨리는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are lowered a little and softened,\nthe outer corners easing down. The faintest warmth at the mouth,\nnot quite a smile. The head tilts a few degrees toward the viewer.\nHe is letting the viewer off. Kind, unhurried, a little tired."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe eyes crease and the tiredness shows. He looks at the viewer the way\nyou look at someone who has been carrying it a long time."
         }
       }
     },
@@ -1382,17 +1419,18 @@
       "still": false,
       "revised": "2026-09-03",
       "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\na beautiful man with a flat uninterested expression, looking slightly past the viewer, pale blue-grey robe, a small sun dial hanging from his belt. Key light subtly tinted #7FC4BC.\n\nBust-up from the chest up, centered, subject occupying about 72% of\nframe height. FRONT-FACING PORTRAIT — head and shoulders squared to\nthe camera, both eyes fully visible and level, gaze straight at the\nviewer. Symmetrical. No head turn, no profile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-      "motion": "Static camera. The character blinks once, slowly. Hair and sleeve\nedges drift as if in still air. The eyes stay on the viewer.\nNothing else moves — no head turn, no expression change.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "motion": "Static camera. The shadow on the small sun dial at the belt moves one\nmark and stops. The gaze stays fixed slightly past the viewer's\nshoulder. One blink, entirely unbothered.\n\nThe head stays exactly where it is and does not turn — the app crops\nthis clip to the face, so any drift breaks the crop. No new pose, no\nexpression change. Only what is described above moves. Seamlessly\nloopable: the last frame must match the first exactly.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "greet": "Static camera. The eyes arrive on the viewer a beat later than expected,\nas if he had checked the dial first and found the time acceptable.\n\nThe head stays centred and front-facing throughout — this plays once,\nat the first meeting, and the face is cropped the same way. It ends on\nthe same still portrait it began with, so the greeting can hand over to\nthe looping clip without a jump.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
       "moods": {
         "cut": {
           "file": "bust_cut.png",
           "ko": "짚는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are fixed directly on the viewer,\nnarrowed very slightly, pupils sharp. The mouth is a straight line,\nno smile. One brow a fraction lower than the other. He has just\nsaid something true that the viewer did not want said. Not angry,\nnot cruel — certain."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe eyes come off the middle distance and land on the viewer for the\nfirst time. The flat expression does not change. That he bothered to\nlook is the whole point."
         },
         "soft": {
           "file": "bust_soft.png",
           "ko": "누그러뜨리는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are lowered a little and softened,\nthe outer corners easing down. The faintest warmth at the mouth,\nnot quite a smile. The head tilts a few degrees toward the viewer.\nHe is letting the viewer off. Kind, unhurried, a little tired."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe gaze drifts back past the viewer's shoulder where it was before. The\nmouth stays flat. It is as close to reassurance as he gets."
         }
       }
     },
@@ -1416,17 +1454,18 @@
       "still": false,
       "revised": "2026-09-03",
       "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\na formidable old woman with a lined face and fierce clear eyes, white hair in a tight knot, patched dark hanbok, a long smoking pipe resting on her shoulder. Key light subtly tinted #B5ABBE.\n\nBust-up from the chest up, centered, subject occupying about 72% of\nframe height. FRONT-FACING PORTRAIT — head and shoulders squared to\nthe camera, both eyes fully visible and level, gaze straight at the\nviewer. Symmetrical. No head turn, no profile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-      "motion": "Static camera. The character blinks once, slowly. Hair and sleeve\nedges drift as if in still air. The eyes stay on the viewer.\nNothing else moves — no head turn, no expression change.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "motion": "Static camera. A thin line of smoke rises slowly from the bowl of the\nlong pipe resting on the shoulder and curls out of frame. The white knot\nof hair does not move. The fierce clear eyes stay open.\n\nThe head stays exactly where it is and does not turn — the app crops\nthis clip to the face, so any drift breaks the crop. No new pose, no\nexpression change. Only what is described above moves. Seamlessly\nloopable: the last frame must match the first exactly.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "greet": "Static camera. She takes the pipe off her shoulder, looks the viewer up\nand down once, and puts it back — approved.\n\nThe head stays centred and front-facing throughout — this plays once,\nat the first meeting, and the face is cropped the same way. It ends on\nthe same still portrait it began with, so the greeting can hand over to\nthe looping clip without a jump.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
       "moods": {
         "cut": {
           "file": "bust_cut.png",
           "ko": "짚는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are fixed directly on the viewer,\nnarrowed very slightly, pupils sharp. The mouth is a straight line,\nno smile. One brow a fraction lower than the other. He has just\nsaid something true that the viewer did not want said. Not angry,\nnot cruel — certain."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe pipe comes off the shoulder an inch. The lined face sets and the\nclear eyes pin the viewer. She has seen this crossroads before and knows\nwhich way they will go."
         },
         "soft": {
           "file": "bust_soft.png",
           "ko": "누그러뜨리는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are lowered a little and softened,\nthe outer corners easing down. The faintest warmth at the mouth,\nnot quite a smile. The head tilts a few degrees toward the viewer.\nHe is letting the viewer off. Kind, unhurried, a little tired."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe pipe goes back on the shoulder. The lines around the eyes deepen\ninto something like amusement. She has decided not to say the rest of\nit."
         }
       }
     },
@@ -1450,22 +1489,23 @@
       "still": false,
       "revised": "2026-09-03",
       "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\na bright clear-eyed boy of about fourteen, tousled hair, an open easy smile, simple pale-blue hanbok, sleeves too long for his arms. Key light subtly tinted #7FC4BC.\n\nBust-up from the chest up, centered, subject occupying about 72% of\nframe height. FRONT-FACING PORTRAIT — head and shoulders squared to\nthe camera, both eyes fully visible and level, gaze straight at the\nviewer. Symmetrical. No head turn, no profile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
-      "motion": "Static camera. The character blinks once, slowly. Hair and sleeve\nedges drift as if in still air. The eyes stay on the viewer.\nNothing else moves — no head turn, no expression change.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "motion": "Static camera. He pushes one too-long sleeve back up his forearm and it\nslides straight back down over his hand. The tousled hair bounces. The\nopen smile widens a little. Two quick blinks.\n\nThe head stays exactly where it is and does not turn — the app crops\nthis clip to the face, so any drift breaks the crop. No new pose, no\nexpression change. Only what is described above moves. Seamlessly\nloopable: the last frame must match the first exactly.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
+      "greet": "Static camera. He looks up, breaks into a wide grin, and waves one\ntoo-long sleeve at the viewer — the hand lost somewhere inside it.\n\nThe head stays centred and front-facing throughout — this plays once,\nat the first meeting, and the face is cropped the same way. It ends on\nthe same still portrait it began with, so the greeting can hand over to\nthe looping clip without a jump.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
       "moods": {
         "cut": {
           "file": "bust_cut.png",
           "ko": "짚는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are fixed directly on the viewer,\nnarrowed very slightly, pupils sharp. The mouth is a straight line,\nno smile. One brow a fraction lower than the other. He has just\nsaid something true that the viewer did not want said. Not angry,\nnot cruel — certain."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe smile drops and the boy's face goes suddenly serious, eyes wide and\ndirect. He has said something far too true for his age and knows it."
         },
         "soft": {
           "file": "bust_soft.png",
           "ko": "누그러뜨리는",
-          "image": "Same character, same hair, same clothing, same lighting — only the\nexpression changes. Now the eyes are lowered a little and softened,\nthe outer corners easing down. The faintest warmth at the mouth,\nnot quite a smile. The head tilts a few degrees toward the viewer.\nHe is letting the viewer off. Kind, unhurried, a little tired."
+          "image": "Same character, same hair, same clothing, same lighting, same\nfront-facing pose — only the expression changes.\nThe grin comes back all at once, bright and easy, and he ducks his chin.\nWhatever it was, it is over now."
         }
       }
     }
   },
-  "SHOT": "PRODUCTION RULES — append to every image prompt.\n\nAspect ratio 9:16 vertical. This is the master; the app crops it.\nAbsolutely no text, no letters, no numerals, no signboards, no captions,\nno logo, no watermark, no signature anywhere in the frame. The app lays\nits own Korean text over this image, and any baked-in lettering collides\nwith it.\nKeep the subject inside the middle 42% of the height. The top 29% and the\nbottom 29% are cropped away on most screens.\nLeave the outer 6% of every edge quiet — no faces, no hands, no focal\ndetail there. The app fades the edges out.\nComposition should read at 396px wide on a phone: few large shapes, high\ncontrast, no fine filigree that turns to mush when scaled down.\nNight interior palette of this house: plum-violet black ground, warm amber\nlantern light, muted paper cream. No neon, no pure white, no pure black.",
+  "SHOT": "PRODUCTION RULES — append to every image prompt.\n\nAspect ratio 9:16 vertical. This is the master; the app crops it.\nAbsolutely no text, no letters, no numerals, no signboards, no captions,\nno logo, no watermark, no signature anywhere in the frame. The app lays\nits own Korean text over this image, and any baked-in lettering collides\nwith it.\nHow much of this master is actually shown depends on the scene. Most\nscenes now stand full height — the app shows the 9:16 frame as it is, so\ndraw all the way to the top and bottom edges. Some scenes are cropped\ninto a box instead (1:1, 4:3, 3:4 or 16:9); for those only about 42% of\nthe height survives, roughly 29% cut from the top and 29% from the\nbottom, so the subject has to sit in the middle. The usage line on this\ncard says which of the two this scene is. Read it before composing.\nLeave the outer 6% of every edge quiet — no faces, no hands, no focal\ndetail there. The app fades the edges out.\nComposition should read at 396px wide on a phone: few large shapes, high\ncontrast, no fine filigree that turns to mush when scaled down.\nNight interior palette of this house: plum-violet black ground, warm amber\nlantern light, muted paper cream. No neon, no pure white, no pure black.",
   "SHOT_TINT": "This clip gets tinted in the app with the customer's element colour.\nRender it DESATURATED — near greyscale with only a faint warm bias.\nNo strong hue anywhere, or the tint fights the original colour.",
   "SHOT_LOOP": "This clip loops forever. The last frame must match the first frame\nexactly — same camera position, same light, same particle placement —\nso the seam is invisible. No motion that cannot return to its start.",
   "SHOT_FILL": "Korean text is laid over the centre of this frame. Keep the vertical\nmiddle third calm and low-contrast — no faces, no bright highlights,\nno busy detail there. Weight the interest to the top and bottom.",

@@ -143,5 +143,12 @@ def test_inline_scenes_are_boxed():
     """
     src = (WEB / "components" / "scene" / "Scene.tsx").read_text(
         encoding="utf-8")
-    assert 'className={`sceneart boxed' in src, \
-        "인라인 장면이 상자 없이 흐르오"
+    # ★ 세로 원본은 상자가 아니라 **높이**로 잡습니다 (2026-09-06).
+    #   그날 코드가 바뀌었는데 이 검사는 옛 글자를 그대로 견주어
+    #   그때부터 계속 빨간불이었습니다. 보려는 것은 「인라인이
+    #   height:auto 로 흐르지 않는가」이지 그 줄의 생김새가 아닙니다.
+    assert 'sceneart ${shownBox ? "boxed" : "tall"}' in src, \
+        "인라인 장면이 상자도 높이도 없이 흐르오"
+    assert ".sceneart.tall" in (
+        WEB / "styles" / "overrides.css").read_text(encoding="utf-8"), \
+        "세로 장면의 높이를 잡는 CSS 가 없소"

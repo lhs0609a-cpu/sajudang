@@ -79,7 +79,11 @@ export const SCENES: SceneSpec[] = [
    *   새어 나오는데 안은 아직 안 보이는 그림이라, 이 화면의 뜻과
    *   같습니다. 명령어는 그때 적어 둔 것이 그대로 있습니다.
    */
-  { id: "door", name: "열리는 문", preset: "Static", ratio: "9:16", seconds: 2, loop: true },
+  // ★ 「열리는 문」이었습니다 (2026-09-06). d1b 의 글은 「도령이 접힌
+  //   자리에 손을 얹었다. 아직 펴지는 않았다.」인데 그림은 문이 열리고
+  //   있었습니다 — 손도 없고 접힌 데도 없습니다. 글을 따라 그림을
+  //   고쳤습니다. 폴더 이름(door)은 그대로 둡니다.
+  { id: "door", name: "접힌 자리 · 얹은 손", preset: "Static", ratio: "9:16", seconds: 3, loop: true },
   { id: "desk", name: "붓·벼루·빈 종이", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
   { id: "ink", name: "먹이 번지는 종이", preset: "Static", ratio: "9:16", seconds: 5, loop: true },
   { id: "room", name: "실내·병풍·주렴", preset: "Static", ratio: "9:16", seconds: 5, loop: true },
@@ -101,7 +105,7 @@ export const SCENES: SceneSpec[] = [
   //   생성기가 세로로 내주고, 화면은 `box` 로 담아 씁니다. 선언이
   //   실물과 다르면 감사가 「비율이 틀렸다」고 짚습니다 — 실물을 따릅니다.
   { id: "hall", name: "스무 자리", preset: "Dolly In", ratio: "9:16", seconds: 5, loop: true },
-  { id: "seat", name: "그 사람의 자리", preset: "Static", ratio: "3:4", seconds: 3, loop: true, tint: "recolor" },
+  { id: "seat", name: "그 사람의 자리 · 앉은 뒷모습", preset: "Static", ratio: "3:4", seconds: 3, loop: true, tint: "recolor" },
   // ★ 16:9 였습니다. 그런데 쓰는 자리 둘(리포트 표지 c1 · 분석지)이
   //   `.sceneart.hero` — aspect-ratio 9/16 + object-fit:cover 라
   //   **가로의 약 68%가 잘려 나갑니다.** 두루마리는 세로로 펼쳐지는
@@ -109,9 +113,19 @@ export const SCENES: SceneSpec[] = [
   { id: "scroll", name: "펼쳐지는 두루마리", preset: "Static", ratio: "9:16", seconds: 3, loop: true },
   { id: "fold", name: "반쯤 접힌 두루마리", preset: "Static", ratio: "16:9", seconds: 2, loop: true },
   { id: "untie", name: "붉은 끈·개봉", preset: "Static", ratio: "1:1", seconds: 2, loop: true },
+  // ★ c2 본문의 여는 줄은 「도령이 두루마리 끈을 풀었다. 종이가
+  //   무릎까지 흘러내렸다.」인데 낡은 종이(oldpaper)를 깔고 있었습니다.
+  //   두루마리도 끈도 무릎도 없는 그림이었습니다. 본문은 값을 치른
+  //   사람이 가장 오래 보는 화면이라 제 장면을 줍니다.
+  { id: "unbind", name: "끈을 풀다", preset: "Static", ratio: "9:16", seconds: 3, loop: true },
   { id: "handle", name: "문고리·그림자", preset: "Dolly In", ratio: "9:16", seconds: 3, loop: true },
   { id: "roadmap", name: "대운 길", preset: "Dolly Right", ratio: "16:9", seconds: 4, loop: true, tint: "recolor" },
-  { id: "cardbg", name: "공유 카드 문양", preset: "Static", ratio: "1:1", seconds: 3, loop: true, tint: "recolor" },
+  // ★ 1:1 이었습니다 (2026-09-06). 들어온 그림은 테두리까지 그린
+  //   **세로 카드 한 장**이라 1:1 상자에서 위아래 44%가 잘려 네 귀의
+  //   꽃무늬가 사라졌습니다. 상자를 9:16 으로 잡아 통째로 보이게
+  //   합니다 — `box` 를 적으면 `.tall` 의 가장자리 페이드를 안 탑니다.
+  //   카드 테두리는 흐려지면 안 됩니다.
+  { id: "cardbg", name: "공유 카드 문양", preset: "Static", ratio: "9:16", seconds: 3, loop: true, tint: "recolor", box: "9:16" },
   { id: "tray", name: "목패 늘어놓은 상", preset: "Static", ratio: "16:9", seconds: 2, loop: true },
   { id: "coin", name: "엽전", preset: "Static", ratio: "1:1", seconds: 2, loop: true },
   { id: "tea", name: "다과상", preset: "Static", ratio: "16:9", seconds: 3, loop: true },

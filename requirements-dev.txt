@@ -1,0 +1,19 @@
+# 만드는 자리에서만 쓰는 것 — **배포 이미지에는 안 들어갑니다.**
+#
+# ★ 왜 갈라 두는가 (2026-09-06)
+#
+#   새 기계에 venv 를 만들고 관문을 돌렸더니 `test_bust_assets` 두 건이
+#   `No module named 'PIL'` 로 넘어졌습니다. Pillow 는 초상·장면 에셋을
+#   다루는 도구(tools/make_bust.py · bust_matte.py · loop_seam.py …)와
+#   그 검사만 씁니다. 서버 코드에는 한 줄도 없습니다.
+#
+#   그렇다고 requirements.txt 에 넣으면 **배포 이미지가 무거워집니다** —
+#   Fly 가 그 파일로 이미지를 만듭니다(Dockerfile). 그래서 갈라 둡니다:
+#     · requirements.txt      서버가 도는 데 필요한 것
+#     · requirements-dev.txt  검사와 도구가 도는 데 필요한 것
+#
+#   `.\dev.ps1 setup` 과 CI 는 이 파일을 봅니다.
+-r requirements.txt
+
+# 초상·장면 에셋 — 규격·투명도·루프 이음새를 재고 굽는 자리
+Pillow>=10.0

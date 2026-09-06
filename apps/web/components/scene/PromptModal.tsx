@@ -216,9 +216,25 @@ export default function PromptModal({
                 프롬프트를 지우지는 않습니다 — 나중에 쓸 수 있게 묶음에
                 그대로 두고, **주문서에서만 감춥니다.**
             */}
+            {/*
+              ★ 표정 둘 — 같은 사람, 눈과 입만 바꾼 것.
+                훅 0단은 아픈 데를 짚는 자리이고 만류 문구는 달래는
+                자리인데, 얼굴 한 장으로 둘 다 하면 둘 다 힘을 잃습니다.
+            */}
+            {kind === "char" && e.moods && Object.entries(e.moods).map(
+              ([k, m]) => (
+                <Block key={k} n="①" label={`표정 · ${m.ko} 얼굴 · 제미나이`}
+                       text={m.image}
+                       dir={`위 ① 과 같은 사람이오. 머리·옷·빛은 그대로 두고 눈과 입만 바꾸시오. ${m.file} 로 두시오.`} />
+              ))}
             {e.motion && kind !== "figure" && (
               <Block n="②" label="모션 · 힉스필드" text={e.motion}
                      dir="영상 앵커가 붙어 있소. 통째로 복사하시오 — 빼면 3초 안에 얼굴이 사진처럼 변하오." />
+            )}
+            {/* ★ 첫 대면 인사 — 코드에는 자리가 있는데 명령어가 없었습니다. */}
+            {kind === "char" && e.greet && (
+              <Block n="③" label="첫 대면 인사 · 힉스필드" text={e.greet}
+                     dir="한 번만 도오. 끝이 ① 그림과 같아야 도는 초상으로 넘어갈 때 안 튀오. greet.webm · greet.mp4 · greet.webp 로 두시오." />
             )}
             {e.tint && data && (
               <Block n="③" label="착색 · CSS" text={data.TINT} />

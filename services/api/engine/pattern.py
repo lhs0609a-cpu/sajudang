@@ -40,7 +40,8 @@ from __future__ import annotations
 
 from typing import Optional
 
-from .constants import HIDDEN
+from . import topic as _topic
+from .constants import GENERATED_BY, HIDDEN, ten_god as ten_god_of
 
 # 고민 → 이 자리를 보는 짜임을 고를 때 쓰는 열쇠
 CONCERNS = ("money", "work", "love", "people", "dir", "health")
@@ -172,6 +173,71 @@ def _pats() -> list:
             "기회가 와도 감당이 안 되는 자리요. 벌리는 것보다 <b>지키는 것</b>이 "
             "먼저요.")
 
+    # ★ 여기부터 2026-09-06 에 늘린 자리입니다 (docs/20 §4-2).
+    #   돈을 물었을 때 실무가 보는 것은 「재성 몇 개」가 아니라
+    #   갈래·투출·궁위·재고·공망이고, 그걸 한 줄도 안 세고 있었습니다.
+    #   흔한 짜임(식상생재·재생관)은 **뒤로** 물렸습니다 — 앞자리는
+    #   상한 셋뿐이라, 누구에게나 걸리는 것이 먼저 오면 드문 자리가
+    #   영영 안 나옵니다.
+    add(key="sinwang_jaewang", name="신왕재왕(身旺財旺)",
+        gloss="드는 힘과 쥘 것이 같이 선 자리",
+        at=("money",),
+        test=lambda f: f.strength == "신강" and f.jae >= 2,
+        why=lambda f: "%s · 재성 %d" % (f.strength, f.jae),
+        say="드는 힘도 쥘 것도 <b>같이 있소</b>. 벌린 판을 그대가 감당하는 "
+            "짜임이라, 크게 벌였을 때 무너진 적이 적을 것이오. "
+            "다만 <b>멈출 자리</b>는 아무도 안 정해 주오.")
+
+    add(key="jae_gongmang", name="재성 공망(空亡)",
+        gloss="쥐는 글자가 비었다고 보던 자리에 앉음",
+        at=("money",),
+        test=lambda f: f.jae >= 1 and _topic.gongmang_hit(f, "재성"),
+        why=lambda f: "재성이 앉은 자리가 공망 %s" % f.gongmang,
+        say="쥐는 글자가 <b>비어 있다고 보던 자리</b>에 걸렸소. 옛사람은 "
+            "여기를 <b>공들인 만큼 손에 안 남는 자리</b>로 읽었소 — 없다는 "
+            "뜻이 아니라 <b>쥐는 방식이 달라야 한다</b>는 뜻이오.",
+        ask="context")
+
+    add(key="tamjae", name="탐재괴인(貪財壞印)",
+        gloss="벌리려다 받치는 것을 깎는 자리",
+        at=("money", "health"),
+        test=lambda f: f.jae >= 2 and f.inn >= 1 and f.strength == "신약",
+        why=lambda f: "재성 %d · 인성 %d · %s" % (f.jae, f.inn, f.strength),
+        say="쥐려는 힘이 <b>받쳐 주던 것을 깎소</b>. 벌이를 늘리려고 "
+            "배우던 것·쉬던 것·기대던 데를 먼저 접었을 것이오. "
+            "그 자리가 곧 그대를 세워 주던 자리요.")
+
+    add(key="sisang_pyeonjae", name="시상편재(時上偏財)",
+        gloss="늦자리에 큰 재물이 앉음",
+        at=("money",),
+        test=lambda f: f.hour_known and len(f.pillars) >= 4
+        and ten_god_of(f.pillars[3]["gan"], f.day_gan) == "편재",
+        why=lambda f: "시간 %s · 편재" % f.pillars[3]["gan"],
+        say="<b>시주 천간에 편재</b>가 앉았소. 옛 책이 크게 치던 자리요 — "
+            "늦게 벌리는 판이 크고, <b>이른 나이의 벌이는 늘 성에 안 "
+            "찼을</b> 것이오.")
+
+    add(key="jaego", name="재고(財庫)",
+        gloss="쥔 것을 갈무리하는 자리",
+        at=("money",),
+        test=lambda f: any(p["ji"] == _topic.GO_JI[
+            _topic.el_of_group(f.day_gan, "재성")] for p in f.pillars),
+        why=lambda f: "재성 %s의 고지 %s"
+        % (_topic.el_of_group(f.day_gan, "재성"),
+           _topic.GO_JI[_topic.el_of_group(f.day_gan, "재성")]),
+        say="쥔 것을 <b>갈무리하는 자리</b>가 있소. 버는 재주와 쌓는 "
+            "재주는 다른데, 그대에게는 쌓는 쪽 자리가 있소. "
+            "다만 <b>열어야 쓰는</b> 창고요 — 넣기만 하다 못 쓴 돈이 있을 것이오.")
+
+    add(key="jae_hidden", name="재성 암장(暗藏)",
+        gloss="쥐는 글자가 지지 속에만 있음",
+        at=("money",),
+        test=lambda f: f.jae >= 1 and not group_tuchul(f, "재성"),
+        why=lambda f: "재성 %d · 천간에 안 드러남" % f.jae,
+        say="쥐는 글자가 <b>겉으로 안 드러나오</b>. 남 눈에는 잘 버는 "
+            "듯 보이는데 그대 손에는 안 잡히거나, 통장에는 있는데 "
+            "쓸 수가 없는 자리요.")
+
     add(key="siksang_jae", name="식상생재(食傷生財)",
         gloss="만들어서 파는 흐름",
         at=("money", "work"),
@@ -188,6 +254,15 @@ def _pats() -> list:
         say="쥐는 자리가 <b>겉에 안 보이오</b>. 없다고 못 버는 것이 아니라, "
             "돈이 <b>손에 잡히는 꼴로 안 오오</b> — 값이 아니라 이름·자리·"
             "기회로 오는 사람이 많소.")
+
+    add(key="jae_saeng_gwan", name="재생관(財生官)",
+        gloss="쥔 것이 자리로 바뀌는 길",
+        at=("money", "work"),
+        test=lambda f: f.jae >= 1 and f.gwan >= 1,
+        why=lambda f: "재성 %d → 관성 %d" % (f.jae, f.gwan),
+        say="쥔 것이 <b>자리로 바뀌는 길</b>이 나 있소. 돈만 좇는 사람이 "
+            "아니라 <b>돈이 이름으로 남아야</b> 성에 차는 사람이오. "
+            "그래서 값을 늦게 부르다 손해 본 자리가 있소.")
 
     # ── 일 ────────────────────────────────────────────────
     add(key="sanggwan_gwan", name="상관견관(傷官見官)",
@@ -289,6 +364,19 @@ def _pats() -> list:
             "오는 결이라, 숨겨 두고 만나는 일이 잘 안 되오. 주변이 먼저 아오.",
         ask="meet")
 
+    add(key="spouse_gongmang", name="배우자성 공망(空亡)",
+        gloss="짝 글자가 비었다고 보던 자리에 앉음",
+        at=("love",),
+        test=lambda f: bool(spouse_group(f))
+        and _count(f, spouse_group(f)) >= 1
+        and _topic.gongmang_hit(f, spouse_group(f)),
+        why=lambda f: "%s이 앉은 자리가 공망 %s" % (spouse_group(f), f.gongmang),
+        say="짝을 보는 글자가 <b>비어 있다고 보던 자리</b>에 걸렸소. "
+            "옛사람은 여기를 <b>공들인 만큼 손에 안 남는 자리</b>로 "
+            "읽었소 — 사람이 없다는 뜻이 아니라 <b>기대를 거는 방식이 "
+            "달라야 한다</b>는 뜻이오.",
+        ask="partner")
+
     add(key="ilji_chung", name="일지 충(沖)",
         gloss="발밑 자리가 부딪힘",
         at=("love", "people", "health"),
@@ -368,6 +456,43 @@ def _pats() -> list:
             "<b>물러나 깊이 들어갈 때</b> 나오는 것이 큰 결이오.")
 
     # ── 몸 ────────────────────────────────────────────────
+    #
+    # ★ 여기서는 **병을 말하지 않습니다.** 옛 표가 오행을 어느 장부에
+    #   붙여 읽었는지는 사실이라 전하되, 「어디가 나쁘오」는 진단이라
+    #   금지입니다 (docs/11 · guard). 짜임이 말하는 것은 «어디서 힘이
+    #   새고 어디서 부딪히는가» 까지요.
+    add(key="gorip", name="고립(孤立)",
+        gloss="하나뿐인데 받쳐 줄 것이 없는 자리",
+        at=("health",),
+        test=lambda f: any(_topic.isolated(f, e)
+                           for e in ("목", "화", "토", "금", "수")),
+        why=lambda f: " · ".join(
+            "%s 하나 · 낳아 줄 %s 없음" % (e, GENERATED_BY[e])
+            for e in ("목", "화", "토", "금", "수") if _topic.isolated(f, e)),
+        say="개수로는 있는데 <b>받쳐 줄 것이 없는</b> 기운이 있소. "
+            "하나뿐인 데다 낳아 주는 자리가 비어, <b>쓰면 그대로 "
+            "바닥나오</b>. 그 자리를 쓸 때마다 남보다 두 배로 드오.",
+        ask="context")
+
+    add(key="dosik", name="도식(倒食)",
+        gloss="받는 자리가 내놓는 자리를 엎는 짜임",
+        at=("health", "work"),
+        test=lambda f: f.ten_gods.get("편인", 0) >= 1
+        and f.ten_gods.get("식신", 0) >= 1,
+        why=lambda f: "편인 %d · 식신 %d" % (f.ten_gods.get("편인", 0),
+                                            f.ten_gods.get("식신", 0)),
+        say="받는 자리와 내놓는 자리가 <b>한 몸에서 맞물려</b> 있소. "
+            "옛사람은 여기를 <b>먹고 자는 결이 흐트러지는 자리</b>로 "
+            "읽었소 — 생각이 많아지면 끼니와 잠이 먼저 밀리오.")
+
+    add(key="sik_many", name="식상 과다",
+        gloss="내놓는 자리가 넘침",
+        at=("health", "people"),
+        test=lambda f: f.sik >= 3,
+        why=lambda f: "식상 %d" % f.sik,
+        say="내놓는 자리가 <b>넘치오</b>. 쓸 때 다 쓰고 잠으로 갚는 "
+            "결인데, <b>갚아지던 나이가 지나가고</b> 있소.")
+
     add(key="pyeongo", name="편고(偏枯)",
         gloss="한쪽으로 몰리고 한쪽이 빈 자리",
         at=("health",),

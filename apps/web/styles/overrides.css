@@ -3328,3 +3328,24 @@ body.has-rail .beatskip-hint { left: calc(50% + 116px); }
   border-bottom: 1px dashed var(--line2);
 }
 @media (max-width: 480px) { .stab p.claim { font-size: var(--fs-5); } }
+
+/* ══════════ c5 공유 카드 ══════════
+ *
+ * ★ `.card` 와 `.cardin` 은 이름만 있고 **CSS 가 한 줄도 없었습니다**
+ *   (2026-09-06). 그래서 문양이 위에, 글이 그 아래에 따로 놓여 카드가
+ *   아니라 그림 한 장에 캡션이 붙은 꼴이었습니다. 카드는 글이 문양
+ *   **안에** 앉아야 카드입니다 — 받는 사람이 보는 것은 이 한 장입니다.
+ *
+ *   가운데 원 안쪽이 폭의 약 55% 라, 글은 그 안에 들어와야 합니다.
+ */
+.card { position: relative; }
+.card .sceneart { margin: 0; }
+.cardin {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 4px; text-align: center;
+  padding: 0 24%;
+  pointer-events: none;               /* 눌리는 것은 뒤의 그림입니다 */
+}
+.cardin p { margin: 0; }
