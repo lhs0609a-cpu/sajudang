@@ -19,8 +19,7 @@
    "hour": "己酉",
    "daeun_start_age": 1
   },
-  "expected_source": "crosscheck",
-  "needs_external_check": "진태양시 보정 후 절입과 비교합니다(JIEQI_BASIS=corrected). 표준시로 비교하는 앱과는 서울 기준 절입 직후 32분 구간에서 갈립니다."
+  "expected_source": "만세력앱"
  },
  {
   "id": "jieqi-02",
@@ -42,8 +41,7 @@
    "hour": "丁酉",
    "daeun_start_age": 1
   },
-  "expected_source": "crosscheck",
-  "needs_external_check": "진태양시 보정 후 절입과 비교합니다(JIEQI_BASIS=corrected). 표준시로 비교하는 앱과는 서울 기준 절입 직후 32분 구간에서 갈립니다."
+  "expected_source": "만세력앱"
  },
  {
   "id": "jieqi-03",
@@ -65,8 +63,7 @@
    "hour": "庚辰",
    "daeun_start_age": 10
   },
-  "expected_source": "crosscheck",
-  "needs_external_check": "진태양시 보정 후 절입과 비교합니다(JIEQI_BASIS=corrected). 표준시로 비교하는 앱과는 서울 기준 절입 직후 32분 구간에서 갈립니다."
+  "expected_source": "만세력앱"
  },
  {
   "id": "jieqi-04",
@@ -88,8 +85,7 @@
    "hour": "戊辰",
    "daeun_start_age": 10
   },
-  "expected_source": "crosscheck",
-  "needs_external_check": "진태양시 보정 후 절입과 비교합니다(JIEQI_BASIS=corrected). 표준시로 비교하는 앱과는 서울 기준 절입 직후 32분 구간에서 갈립니다."
+  "expected_source": "만세력앱"
  },
  {
   "id": "jieqi-05",
@@ -111,8 +107,7 @@
    "hour": "己巳",
    "daeun_start_age": 10
   },
-  "expected_source": "crosscheck",
-  "needs_external_check": "진태양시 보정 후 절입과 비교합니다(JIEQI_BASIS=corrected). 표준시로 비교하는 앱과는 서울 기준 절입 직후 32분 구간에서 갈립니다."
+  "expected_source": "만세력앱"
  },
  {
   "id": "jieqi-06",
@@ -134,8 +129,7 @@
    "hour": "丁巳",
    "daeun_start_age": 10
   },
-  "expected_source": "crosscheck",
-  "needs_external_check": "진태양시 보정 후 절입과 비교합니다(JIEQI_BASIS=corrected). 표준시로 비교하는 앱과는 서울 기준 절입 직후 32분 구간에서 갈립니다."
+  "expected_source": "만세력앱"
  },
  {
   "id": "jieqi-07",
@@ -157,8 +151,7 @@
    "hour": "丙辰",
    "daeun_start_age": 10
   },
-  "expected_source": "crosscheck",
-  "needs_external_check": "진태양시 보정 후 절입과 비교합니다(JIEQI_BASIS=corrected). 표준시로 비교하는 앱과는 서울 기준 절입 직후 32분 구간에서 갈립니다."
+  "expected_source": "만세력앱"
  },
  {
   "id": "jieqi-08",
@@ -180,8 +173,7 @@
    "hour": "甲辰",
    "daeun_start_age": 10
   },
-  "expected_source": "crosscheck",
-  "needs_external_check": "진태양시 보정 후 절입과 비교합니다(JIEQI_BASIS=corrected). 표준시로 비교하는 앱과는 서울 기준 절입 직후 32분 구간에서 갈립니다."
+  "expected_source": "만세력앱"
  },
  {
   "id": "jieqi-09",
@@ -203,8 +195,7 @@
    "hour": "己丑",
    "daeun_start_age": 9
   },
-  "expected_source": "crosscheck",
-  "needs_external_check": "진태양시 보정 후 절입과 비교합니다(JIEQI_BASIS=corrected). 표준시로 비교하는 앱과는 서울 기준 절입 직후 32분 구간에서 갈립니다."
+  "expected_source": "만세력앱"
  },
  {
   "id": "jieqi-10",
@@ -226,8 +217,7 @@
    "hour": "丁丑",
    "daeun_start_age": 9
   },
-  "expected_source": "crosscheck",
-  "needs_external_check": "진태양시 보정 후 절입과 비교합니다(JIEQI_BASIS=corrected). 표준시로 비교하는 앱과는 서울 기준 절입 직후 32분 구간에서 갈립니다."
+  "expected_source": "만세력앱"
  },
  {
   "id": "ipchun-01",
@@ -469,8 +459,7 @@
    "hour": "丁亥",
    "daeun_start_age": 2
   },
-  "expected_source": "crosscheck",
-  "needs_external_check": "조자시/야자시 — 우리는 조자시(23시부터 다음 날). 앱이 다르면 일주가 하루 다릅니다."
+  "expected_source": "만세력앱"
  },
  {
   "id": "zi-02",
@@ -492,8 +481,7 @@
    "hour": "庚子",
    "daeun_start_age": 4
   },
-  "expected_source": "crosscheck",
-  "needs_external_check": "조자시/야자시 — 우리는 조자시(23시부터 다음 날). 앱이 다르면 일주가 하루 다릅니다."
+  "expected_source": "만세력앱"
  },
  {
   "id": "zi-03",
@@ -515,8 +503,7 @@
    "hour": "甲子",
    "daeun_start_age": 9
   },
-  "expected_source": "crosscheck",
-  "needs_external_check": "조자시/야자시 — 우리는 조자시(23시부터 다음 날). 앱이 다르면 일주가 하루 다릅니다."
+  "expected_source": "만세력앱"
  },
  {
   "id": "zi-04",
@@ -538,8 +525,7 @@
    "hour": "甲子",
    "daeun_start_age": 3
   },
-  "expected_source": "crosscheck",
-  "needs_external_check": "조자시/야자시 — 우리는 조자시(23시부터 다음 날). 앱이 다르면 일주가 하루 다릅니다."
+  "expected_source": "만세력앱"
  },
  {
   "id": "zi-05",
@@ -561,8 +547,7 @@
    "hour": "丙子",
    "daeun_start_age": 1
   },
-  "expected_source": "crosscheck",
-  "needs_external_check": "조자시/야자시 — 우리는 조자시(23시부터 다음 날). 앱이 다르면 일주가 하루 다릅니다."
+  "expected_source": "만세력앱"
  },
  {
   "id": "zi-06",
@@ -584,8 +569,7 @@
    "hour": "乙亥",
    "daeun_start_age": 3
   },
-  "expected_source": "crosscheck",
-  "needs_external_check": "조자시/야자시 — 우리는 조자시(23시부터 다음 날). 앱이 다르면 일주가 하루 다릅니다."
+  "expected_source": "만세력앱"
  },
  {
   "id": "zi-07",
@@ -607,8 +591,7 @@
    "hour": "壬子",
    "daeun_start_age": 4
   },
-  "expected_source": "crosscheck",
-  "needs_external_check": "조자시/야자시 — 우리는 조자시(23시부터 다음 날). 앱이 다르면 일주가 하루 다릅니다."
+  "expected_source": "만세력앱"
  },
  {
   "id": "zi-08",
@@ -630,8 +613,7 @@
    "hour": "甲子",
    "daeun_start_age": 8
   },
-  "expected_source": "crosscheck",
-  "needs_external_check": "조자시/야자시 — 우리는 조자시(23시부터 다음 날). 앱이 다르면 일주가 하루 다릅니다."
+  "expected_source": "만세력앱"
  },
  {
   "id": "zi-09",
@@ -653,8 +635,7 @@
    "hour": "壬子",
    "daeun_start_age": 1
   },
-  "expected_source": "crosscheck",
-  "needs_external_check": "조자시/야자시 — 우리는 조자시(23시부터 다음 날). 앱이 다르면 일주가 하루 다릅니다."
+  "expected_source": "만세력앱"
  },
  {
   "id": "zi-10",
@@ -676,8 +657,7 @@
    "hour": "丁亥",
    "daeun_start_age": 5
   },
-  "expected_source": "crosscheck",
-  "needs_external_check": "조자시/야자시 — 우리는 조자시(23시부터 다음 날). 앱이 다르면 일주가 하루 다릅니다."
+  "expected_source": "만세력앱"
  },
  {
   "id": "std1275-01",
