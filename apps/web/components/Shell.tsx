@@ -286,6 +286,30 @@ export default function Shell({
   legal?: boolean;         // h1 · d2 · r1
   children: React.ReactNode;
 }) {
+  /*
+   * ★ 화면이 바뀌면 **맨 위부터** 보여 줍니다 (2026-09-07).
+   *
+   *   손님이 짚었습니다 — "「이 이름으로 하겠습니다」 하면 다음
+   *   페이지가 중간부터 떠. 모든 버튼은 다음 단계 첫 화면부터
+   *   떠야 해."
+   *
+   *   한 주소 위에 여러 화면이 있는 자리가 여섯입니다 (a·b·c·d·r·약관).
+   *   거기서는 주소가 안 바뀌니 브라우저가 스크롤을 안 되돌립니다.
+   *   긴 화면을 끝까지 내려 버튼을 누르면 다음 화면이 그 높이에서
+   *   시작했습니다.
+   *
+   *   낱개로 안 고칩니다 — 여섯 파일에 흩어져 있고 버튼은 계속
+   *   늘어납니다. 모든 화면이 여기를 지나고, 여기는 그 화면의
+   *   **이름**을 들고 있으니 한 자리에서 잡습니다.
+   *
+   *   부드럽게 안 올립니다. 긴 리포트를 천천히 거슬러 오르면
+   *   어지럽습니다 — 그냥 맨 위에서 시작합니다.
+   */
+  useEffect(() => {
+    if (!screen) return;
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, [screen]);
+
   const features = useSession((s) => s.features);
   const cur = useSession((s) => s.cur);
   const admin = useSession((s) => s.admin);

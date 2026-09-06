@@ -45,7 +45,17 @@ export default function LegalPage() {
           <button
             key={t}
             className={"op" + (tab === t ? " on" : "")}
-            onClick={() => setTab(t)}
+            onClick={() => {
+              setTab(t);
+              /*
+               * ★ 여기만 제 손으로 올립니다 (2026-09-07).
+               *   `Shell` 은 화면 **이름**이 바뀔 때 올려 주는데,
+               *   약관은 연출 자가 세는 화면이 아니라 이름이 없소.
+               *   세 칸이 길어서 아래까지 읽고 다른 칸을 누르면
+               *   그 높이에서 시작했소.
+               */
+              window.scrollTo({ top: 0, behavior: "auto" });
+            }}
           >
             {t}
           </button>

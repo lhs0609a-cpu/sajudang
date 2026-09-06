@@ -296,6 +296,13 @@ function EntryInner() {
      *   여러 번 걸려 손님이 밖으로 못 나갑니다. 되돌아가는 길은
      *   trail 이 따로 들고 있습니다.
      */
+    /*
+     * ★ `scroll: false` 는 그대로 둡니다.
+     *
+     *   여기서 next 로 올리면 주소가 바뀔 때마다 브라우저가 한 번,
+     *   Shell 이 또 한 번 올려 두 번 뜁니다. 맨 위로 올리는 일은
+     *   `Shell` 한 자리가 맡습니다 (화면 이름이 바뀔 때).
+     */
     router.replace("/?step=" + next, { scroll: false });
   };
   const back = trail.length
