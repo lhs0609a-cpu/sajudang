@@ -145,6 +145,12 @@
   z-index: 2;
   padding: 0 22px 34px;
 }
+/*
+ * 굴려 내린 뒤 — 대문은 배경으로 물러섭니다.
+ * 손잡이가 아닌데 손잡이 꼴이면 그것도 어긋난 레이블입니다
+ * (누르는 자리는 page.tsx 의 `gateRead` 가 뗍니다).
+ */
+.gatehero.read { cursor: default; }
 /* 그림 위에 놓이므로 한 겹 더 어둡게 깔아 준다 */
 .gatehero .nr .l, .gatehero .say {
   text-shadow: 0 1px 12px rgba(8, 6, 13, .9), 0 0 3px rgba(8, 6, 13, .8);

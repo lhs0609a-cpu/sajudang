@@ -229,6 +229,37 @@ function EntryInner() {
       setTrail([]);
     }
   }, [asked]);
+
+  /*
+   * ★ 굴려 내린 뒤에는 대문이 클릭을 안 먹습니다 (2026-09-06).
+   *
+   *   대문은 그림 아무 데나 눌러도 다음으로 갑니다. 좋은 일인데,
+   *   넓은 화면에서는 대문이 `position: fixed` 로 창에 **계속 남습니다.**
+   *   그래서 아래 여섯 문답을 읽으러 굴려 내린 사람이 문답 상자
+   *   바깥(좌우 여백)을 누르면 읽던 자리가 통째로 사라지고 이름 칸이
+   *   떴습니다. 손님은 「나중에」를 눌렀는데 영구 제외였던 자리와
+   *   같은 병입니다 — **레이블과 결과가 어긋납니다.**
+   *
+   *   반 창을 넘게 내렸으면 손님은 읽으러 내려온 것입니다. 그때는
+   *   대문이 배경으로 물러섭니다. 「내 운명을 확인하겠습니다」 는
+   *   제 손잡이가 따로 있어 그대로 듣습니다.
+   *
+   *   ★ 문턱을 **반 창**으로 잡은 까닭 — 문답은 한 창 아래에
+   *     앉습니다(overrides.css `.gatedoubt`). 반 창까지는 아직 대문만
+   *     보이는 자리라 눌러서 넘어가는 것이 맞습니다.
+   */
+  const [gateRead, setGateRead] = useState(false);
+  useEffect(() => {
+    if (step !== "a1") { setGateRead(false); return; }
+    const on = () => setGateRead(window.scrollY > window.innerHeight * 0.5);
+    on();
+    window.addEventListener("scroll", on, { passive: true });
+    window.addEventListener("resize", on);
+    return () => {
+      window.removeEventListener("scroll", on);
+      window.removeEventListener("resize", on);
+    };
+  }, [step]);
   /*
    * ★ 지나온 단계를 쌓아 둔다.
    *
@@ -485,7 +516,8 @@ function EntryInner() {
      */
     return (
       <Shell screen="a1" bare>
-        <div className="gatehero" onClick={() => go("a2")}>
+        <div className={`gatehero${gateRead ? " read" : ""}`}
+             onClick={gateRead ? undefined : () => go("a2")}>
           <Scene id="gate" className="fill" bleed />
           <div className="gatecopy">
             <Narration lines={OPENING[season]} />
