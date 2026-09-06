@@ -139,3 +139,26 @@ def test_해요체가_네요_한_결로만_나가지_않는다(spoken):
         assert neyo / len(ends) < 0.5, (
             "%s — 해요체 %d줄 중 「네요」 가 %d줄"
             % (lid, len(ends), neyo))
+
+
+def test_는지로_끝나는_문장을_반말로_세지_않는다():
+    """
+    ★ 월하선녀의 한 줄이 반말로 잡혀 있었습니다 —
+          …정해져 있어요 — 오래 알던 데서 오는지, 낯선 데서 오는지.
+
+      원문은 하오체로 바르게 쓰였고 `speak` 도 제 일을 했습니다. 다만
+      문장이 「오는지」 로 끝나서 끝의 「지」 를 반말 종결로 센 것입니다.
+      -는지/-ㄴ지/-은지 는 **의문형 명사절**이라 종결어미가 아니고,
+      다섯 말투 어디서나 그 꼴 그대로 씁니다.
+
+    ★ 그렇다고 「지」 를 통째로 빼면 진짜 반말을 놓칩니다. 둘 다 봅니다.
+    """
+    import sys
+    from pathlib import Path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
+    import voice_audit as va
+
+    for ok in ("오래 알던 데서 오는지", "무엇을 보는지", "어디로 가는지"):
+        assert va.ending_of(ok) != "banmal", ok
+    for real in ("밥은 먹었지", "그렇지", "같이 가지"):
+        assert va.ending_of(real) == "banmal", real
