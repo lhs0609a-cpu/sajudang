@@ -35,11 +35,11 @@ export default function DailyPage() {
   useEffect(() => {
     if (!s.chartId) return;
     let alive = true;
-    api.daily(s.chartId)
+    api.daily(s.chartId, s.concern)
       .then((d) => alive && setData(d))
       .catch(() => alive && setErr("일진을 셈하지 못했소."));
     return () => { alive = false; };
-  }, [s.chartId]);
+  }, [s.chartId, s.concern]);
 
   if (!s.chartId) {
     return (

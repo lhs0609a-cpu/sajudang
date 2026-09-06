@@ -183,11 +183,26 @@ def _reason(template: str, f, vals: dict, cond: dict) -> str:
         return template
 
 
-def evaluate(f, read: Optional[list] = None, skipped: Optional[list] = None
-             ) -> list:
+def evaluate(f, read: Optional[list] = None, skipped: Optional[list] = None,
+             concern: Optional[str] = None,
+             ignore_concern_gate: bool = False) -> list:
     """
     조건을 만족하는 렌즈를 priority 내림차순으로. 읽은/거절한 것은 뺀다.
     거절한 캐릭터는 **다시 권하지 않는다**.
+
+    ★ `when_concern` 이 달린 규칙 (2026-09-06)
+
+      재보니 돈을 물은 사람의 **32%**, 몸을 물은 사람의 **35%** 에게만
+      그 자리를 보는 캐릭터가 후보에 올랐습니다. 후보에 없으면 재순위로는
+      못 올립니다 — 순서를 아무리 잘 매겨도 없는 사람은 안 나옵니다.
+      그래서 «그 고민을 물었을 때만 서는» 규칙을 둡니다.
+
+      조건은 여전히 **명식**입니다. 「돈을 물었으니 장사꾼」 은 근거가
+      아니라 장사입니다. 「돈을 물었고, 나눌 입이 여럿이오」 라야 근거요.
+
+    ignore_concern_gate : 도달률을 재는 자리(tools/relay_reach.py)에서만
+      참입니다. 게이트를 무시하고 **조건만** 보아 인구 비율을 냅니다 —
+      그러지 않으면 이 규칙들이 도달률 0으로 잡혀 재순위에서 늘 이깁니다.
     """
     read = set(read or [])
     skipped = set(skipped or [])
@@ -196,6 +211,9 @@ def evaluate(f, read: Optional[list] = None, skipped: Optional[list] = None
     out = []
     for r in rules():
         if r["lens_id"] in read or r["lens_id"] in skipped:
+            continue
+        gate = r.get("when_concern")
+        if gate and not ignore_concern_gate and gate != concern:
             continue
         cond = r["condition"]
         field = cond["field"]
@@ -246,6 +264,19 @@ def evaluate(f, read: Optional[list] = None, skipped: Optional[list] = None
 
 DEFAULT_LAMBDA = 0.5
 DEFAULT_COMPLEMENT_W = 0.15
+# ★ 물으신 자리를 실제로 보는 사람인가 (2026-09-06)
+#
+#   손님이 짚었소 — "지금 어떤 고민이냐에 따라 전부 다 달라지고
+#   캐릭터마다도 전문성을 다 넣은 거 맞아?"
+#
+#   재보니 릴레이가 **고민을 한 줄도 안 보고** 있었습니다. 이 집의
+#   뼈대가 릴레이인데, 돈을 물은 사람에게 다음 사람을 고를 때 그
+#   물음이 아무 무게도 없었습니다.
+#
+#   그래서 항을 하나 더합니다. 다만 **작게** 둡니다 —
+#   λ(쏠림 깎기)가 0.5, 보완이 0.15이니 그 사이입니다. 크게 두면
+#   고민마다 같은 두어 사람만 나와, 쏠림을 푼 자리가 도로 막힙니다.
+DEFAULT_CONCERN_W = 0.25
 
 
 def _tuning() -> dict:
@@ -254,16 +285,43 @@ def _tuning() -> dict:
         "exposure_lambda": float(d.get("exposure_lambda", DEFAULT_LAMBDA)),
         "complement_weight": float(
             d.get("complement_weight", DEFAULT_COMPLEMENT_W)),
+        "concern_weight": float(d.get("concern_weight", DEFAULT_CONCERN_W)),
     }
 
 
-def rerank(items: list, last_lens: Optional[str] = None) -> list:
+def covers(lens_id: str, concern: Optional[str]) -> bool:
+    """
+    이 사람이 **물으신 자리를 실제로 보는가.**
+
+    ★ 지어내지 않습니다. 캐릭터마다 `seed/lenses.json` 의 `concerns` 에
+      못박혀 있고, 그건 그 사람의 전문(specialty·topics)에서 나옵니다.
+      비워 둔 사람도 있습니다 — 청동자는 값이 없는 브레이크라 어느
+      자리도 «제 자리»라 하지 않습니다.
+    """
+    if not concern:
+        return False
+    try:
+        got = lens_mod.get(lens_id) or {}
+    except lens_mod.LensError:
+        return False
+    return concern in (got.get("concerns") or ())
+
+
+def rerank(items: list, last_lens: Optional[str] = None,
+           concern: Optional[str] = None) -> list:
     """
     evaluate() 결과를 재순위한다. 목록의 내용은 바꾸지 않고 **순서만** 바꾼다.
     각 항목에 `score` 를 적어 둔다 — 왜 그 순서인지 나중에 볼 수 있게.
+
+        점수 = priority/100 − λ×도달률 + w×보완도 + c×물은자리
+
+    ★ 마지막 항이 2026-09-06 에 붙었습니다. 고민은 손님이 여섯 칸에서
+      **직접 고른 것**이라, 다음 사람을 고를 때 그게 아무 무게도 없으면
+      그 고름은 리포트 안에서만 살고 연쇄에서는 죽습니다.
     """
     t = _tuning()
-    lam, w = t["exposure_lambda"], t["complement_weight"]
+    lam, w, cw = (t["exposure_lambda"], t["complement_weight"],
+                  t["concern_weight"])
     by_rule = {r["id"]: r for r in rules()}
 
     out = []
@@ -271,9 +329,12 @@ def rerank(items: list, last_lens: Optional[str] = None) -> list:
         it = dict(it)
         reach = float(by_rule.get(it["rule_id"], {}).get("reach") or 0.0)
         comp = lens_mod.complement(last_lens, it["lens_id"]) if last_lens else 0.0
+        fit = 1.0 if covers(it["lens_id"], concern) else 0.0
         it["reach"] = reach
         it["complement"] = round(comp, 3)
-        it["score"] = round(it["priority"] / 100.0 - lam * reach + w * comp, 4)
+        it["concern_fit"] = fit
+        it["score"] = round(it["priority"] / 100.0 - lam * reach + w * comp
+                            + cw * fit, 4)
         out.append(it)
     # 점수 내림차순. 같으면 priority — 결과가 흔들리지 않게 두 번째 키를 둔다.
     out.sort(key=lambda x: (-x["score"], -x["priority"], x["lens_id"]))
@@ -295,7 +356,8 @@ def _public_item(it: dict) -> dict:
 
 def recommend(f, read: Optional[list] = None, skipped: Optional[list] = None,
               session_relay_count: int = 0,
-              last_lens: Optional[str] = None) -> dict:
+              last_lens: Optional[str] = None,
+              concern: Optional[str] = None) -> dict:
     """
     릴레이 추천 결과.
 
@@ -305,7 +367,7 @@ def recommend(f, read: Optional[list] = None, skipped: Optional[list] = None,
     breaks = BREAKS()
     blocked = session_relay_count >= breaks["per_session_relay"]
 
-    ranked = rerank(evaluate(f, read, skipped), last_lens)
+    ranked = rerank(evaluate(f, read, skipped, concern), last_lens, concern)
     top = ranked[:TOP_N]
 
     # ── 아무 규칙도 안 걸린 사람 ──────────────────────────
@@ -340,6 +402,16 @@ def recommend(f, read: Optional[list] = None, skipped: Optional[list] = None,
     if target and target not in (read or []) and target not in (skipped or []):
         forced = [target]
         top = [t for t in top if t["lens_id"] != target]
+
+    # ★ 왜 이 사람인지 **한 마디**를 답니다.
+    #
+    #   점수·규칙·도달률은 우리 분기표라 안 냅니다(PUBLIC_FIELDS). 다만
+    #   「그대가 고른 자리를 이 사람이 본다」는 것은 손님의 말이라 냅니다 —
+    #   그게 없으면 고민을 반영해도 손님은 반영된 줄 모릅니다.
+    fit_say = _rules_file().get("concern_say", {}).get(concern or "", "")
+    for t in top:
+        if fit_say and t.get("concern_fit"):
+            t["reason"] = "%s · %s" % (t.get("reason") or "", fit_say)
 
     return {
         "recommend": [] if blocked else [_public_item(t) for t in top],

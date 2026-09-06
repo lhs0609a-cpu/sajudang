@@ -26,7 +26,8 @@ def post_relay(req: RelayRequest) -> RelayResponse:
     try:
         out = relay_engine.recommend(
             f, read=req.read, skipped=req.skipped,
-            session_relay_count=used, last_lens=req.last_lens)
+            session_relay_count=used, last_lens=req.last_lens,
+            concern=req.concern)
     except relay_engine.RelayRuleError as e:
         raise HTTPException(status_code=500, detail=str(e))
     return RelayResponse(**out)

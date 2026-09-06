@@ -66,7 +66,21 @@ def _pictures(body: list, notes: list, f) -> str:
     return terms_mod.picture_box(used)
 
 
-def build_daily(f, on: date | None = None) -> dict:
+def build_daily(f, on: date | None = None,
+                concern: str | None = None) -> dict:
+    """
+    오늘의 일진.
+
+    ★ `concern` 이 2026-09-06 에 붙었습니다.
+
+      손님이 물었소 — "지금 어떤 고민이냐에 따라 전부 다 달라지느냐."
+      재보니 일진은 고민을 **한 줄도** 안 보고 있었습니다. 돈을 물은
+      사람에게도 오늘이 그냥 「오늘」이었습니다.
+
+      점수와 셈은 **안 건드립니다** — 오늘의 간지와 그대 여덟 글자가
+      맞물린 자리는 무엇을 물었든 같습니다. 바뀌는 것은 «그 맞물림을
+      어느 자리에서 읽느냐» 한 줄입니다.
+    """
     on = on or date.today()
     gan, ji = day_ganji(on)
     el = ELEMENT_OF_GAN[gan]
@@ -133,6 +147,17 @@ def build_daily(f, on: date | None = None) -> dict:
             B["DAILY_TONE"][f.strength], B["DAILY_SEASON"][season],
             B["DAILY_CARE"][f.yongsin]]
 
+    # ★ 물으신 자리에서 오늘을 읽는 한 줄.
+    #
+    #   축을 하나 더 곱하는 자리이기도 합니다 — 관계(5) × 고민(6).
+    #   다만 **점수는 안 바꿉니다.** 오늘 간지와 여덟 글자가 맞물린
+    #   수는 무엇을 물었든 같습니다. 바뀌는 것은 읽는 자리뿐이오.
+    ask_line = ""
+    if concern:
+        ask_line = (B.get("DAILY_ASK", {}).get(concern, {}) or {}).get(rel, "")
+        if ask_line:
+            body.append(ask_line)
+
     return {
         "date": on.isoformat(),
         "gz": gan + ji,
@@ -153,7 +178,10 @@ def build_daily(f, on: date | None = None) -> dict:
         # 이 화면에서 나온 어려운 말의 **그림 한 줄**. 리포트 컷이
         # 하는 것과 같은 상자입니다 — 모르는 말을 만난 그 자리에 둡니다.
         "terms_html": _pictures(body, notes, f),
-        "statement_id": "daily:%s:%s:%s:%s:%s" % (rel, f.day_gan, f.strength,
-                                                  season, f.yongsin),
+        # 물으신 자리. 안 물었으면 None — 지어내지 않습니다.
+        "concern": concern,
+        "statement_id": "daily:%s:%s:%s:%s:%s:%s"
+                        % (rel, f.day_gan, f.strength, season, f.yongsin,
+                           concern or "-"),
         "free": True,
     }

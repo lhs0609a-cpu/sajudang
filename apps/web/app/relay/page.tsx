@@ -42,10 +42,12 @@ export default function RelayPage() {
       .relay({
         chart_id: chartId, session_id: sessionId,
         read, skipped, last_lens: cur,
+        /* 고른 자리를 같이 넘깁니다 — 다음 사람을 고르는 무게가 됩니다. */
+        concern: s.concern,
       })
       .then(setData)
       .catch(() => setErr("이을 자리를 찾지 못했소."));
-  }, [chartId, sessionId, read, skipped, cur]);
+  }, [chartId, sessionId, read, skipped, cur, s.concern]);
 
   useEffect(() => { load(); }, [load]);
 

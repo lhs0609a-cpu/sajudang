@@ -243,6 +243,149 @@
    },
    "reason": "곁에 선 길신이 하나도 없어요",
    "reach": 0.117
+  },
+  {
+   "id": "r_haengsu_money",
+   "lens_id": "haengsu",
+   "priority": 74,
+   "when_concern": "money",
+   "condition": {
+    "field": "bi",
+    "op": ">=",
+    "value": 2
+   },
+   "reason": "돈을 물으셨는데 나눌 입이 여럿이오 — 비겁이 {bi}",
+   "reach": 0.407
+  },
+  {
+   "id": "r_ilgwan_money",
+   "lens_id": "ilgwan",
+   "priority": 70,
+   "when_concern": "money",
+   "condition": {
+    "field": "jae",
+    "op": "==",
+    "value": 0
+   },
+   "reason": "돈을 물으셨는데 쥐는 글자가 여덟 자리에 없소",
+   "reach": 0.243
+  },
+  {
+   "id": "r_yakcho_health",
+   "lens_id": "yakcho",
+   "priority": 80,
+   "when_concern": "health",
+   "condition": {
+    "field": "zero_els",
+    "op": ">=",
+    "value": 1
+   },
+   "reason": "몸을 물으셨는데 {weak_iga} 여덟 자리에 하나도 없소",
+   "reach": 0.213
+  },
+  {
+   "id": "r_baegun_health",
+   "lens_id": "baegun",
+   "priority": 76,
+   "when_concern": "health",
+   "condition": {
+    "field": "temp_gap",
+    "op": ">=",
+    "value": 1.0
+   },
+   "reason": "몸을 물으셨는데 덥고 참이 크게 기울었소",
+   "reach": 0.58
+  },
+  {
+   "id": "r_wolha_love",
+   "lens_id": "wolha",
+   "priority": 72,
+   "when_concern": "love",
+   "condition": {
+    "field": "ilji_hap",
+    "op": ">=",
+    "value": 1
+   },
+   "reason": "사랑을 물으셨는데 발밑 자리가 붙소 — {day_ji_iga} 합이오",
+   "reach": 0.225
+  },
+  {
+   "id": "r_hwagyeong_people",
+   "lens_id": "hwagyeong",
+   "priority": 72,
+   "when_concern": "people",
+   "condition": {
+    "field": "ilji_chung",
+    "op": "==",
+    "value": true
+   },
+   "reason": "사람을 물으셨는데 발밑 자리가 부딪히오 — {day_ji_iga} 충이오",
+   "reach": 0.206
+  },
+  {
+   "id": "r_nopa_dir",
+   "lens_id": "nopa",
+   "priority": 64,
+   "when_concern": "dir",
+   "condition": {
+    "field": "gwan",
+    "op": "==",
+    "value": 0
+   },
+   "reason": "갈 곳을 물으셨는데 눌러 모양을 잡아 주는 자리가 없소",
+   "reach": 0.228
+  },
+  {
+   "id": "r_cheongam_work",
+   "lens_id": "cheongam",
+   "priority": 72,
+   "when_concern": "work",
+   "condition": {
+    "field": "deuk_both",
+    "op": "==",
+    "value": true
+   },
+   "reason": "일을 물으셨는데 월령과 일지를 둘 다 얻었소",
+   "reach": 0.178
+  },
+  {
+   "id": "r_sigye_money",
+   "lens_id": "sigye",
+   "priority": 68,
+   "when_concern": "money",
+   "condition": {
+    "field": "daeun_years_left",
+    "op": "<=",
+    "value": 3
+   },
+   "reason": "돈을 물으셨는데 판이 바뀔 때가 가까이 있소",
+   "reach": 0.308
+  },
+  {
+   "id": "r_hunjang_money",
+   "lens_id": "hunjang",
+   "priority": 66,
+   "when_concern": "money",
+   "condition": {
+    "field": "inn",
+    "op": ">=",
+    "value": 2
+   },
+   "reason": "돈을 물으셨는데 받는 자리가 두터우오 — 인성이 {inn}",
+   "reach": 0.385
+  },
+  {
+   "id": "r_myeonsang_health",
+   "lens_id": "myeonsang",
+   "priority": 74,
+   "when_concern": "health",
+   "condition": {
+    "field": "sinsal_bad",
+    "op": ">=",
+    "value": 1
+   },
+   "reason": "몸을 물으셨는데 이름 붙은 자리가 여럿이오",
+   "reach": 0.413
   }
  ],
  "forced": {
@@ -278,5 +421,14 @@
   "sample": 6000,
   "hour_unknown_share": 0.15,
   "source": "가정값 (DB 없음)"
+ },
+ "concern_weight": 0.2,
+ "concern_say": {
+  "money": "그대가 물으신 자리가 이 사람 자리요",
+  "work": "그대가 물으신 자리가 이 사람 자리요",
+  "love": "그대가 물으신 자리가 이 사람 자리요",
+  "people": "그대가 물으신 자리가 이 사람 자리요",
+  "dir": "그대가 물으신 자리가 이 사람 자리요",
+  "health": "그대가 물으신 자리가 이 사람 자리요"
  }
 }

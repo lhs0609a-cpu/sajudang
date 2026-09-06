@@ -42,7 +42,9 @@ N = 6000
 def measure(n: int = N) -> dict:
     hit = Counter()
     for f in POP.sample(n):
-        for it in RL.evaluate(f):
+        # 고민 게이트가 달린 규칙도 **조건만** 보아 인구 비율을 냅니다.
+        #   안 그러면 도달률 0 으로 잡혀 재순위에서 늘 이깁니다.
+        for it in RL.evaluate(f, ignore_concern_gate=True):
             hit[it["rule_id"]] += 1
     return {k: round(v / n, 3) for k, v in hit.items()}
 

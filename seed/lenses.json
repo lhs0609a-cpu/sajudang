@@ -14,7 +14,10 @@
   "released": true,
   "input": null,
   "specialty": "왜 하필 지금",
-  "topics": "지금 걸린 일 · 되풀이되는 문제"
+  "topics": "지금 걸린 일 · 되풀이되는 문제",
+  "concerns": [
+   "work"
+  ]
  },
  {
   "id": "baegun",
@@ -31,7 +34,11 @@
   "released": true,
   "input": null,
   "specialty": "모자란 것 채우기",
-  "topics": "뭘 해야 할지 · 채울 것 하나"
+  "topics": "뭘 해야 할지 · 채울 것 하나",
+  "concerns": [
+   "dir",
+   "health"
+  ]
  },
  {
   "id": "cheongam",
@@ -48,7 +55,10 @@
   "released": true,
   "input": null,
   "specialty": "타고난 그릇",
-  "topics": "진로 · 적성 · 타고난 쪽"
+  "topics": "진로 · 적성 · 타고난 쪽",
+  "concerns": [
+   "work"
+  ]
  },
  {
   "id": "sigye",
@@ -65,7 +75,10 @@
   "released": true,
   "input": null,
   "specialty": "때와 시기",
-  "topics": "언제 움직일까 · 이직 시기"
+  "topics": "언제 움직일까 · 이직 시기",
+  "concerns": [
+   "work"
+  ]
  },
  {
   "id": "eunbyeol",
@@ -82,7 +95,10 @@
   "released": true,
   "input": "axis4",
   "specialty": "성향과 어긋난 자리",
-  "topics": "성격 · 넉 자와 어긋난 나"
+  "topics": "성격 · 넉 자와 어긋난 나",
+  "concerns": [
+   "people"
+  ]
  },
  {
   "id": "jeokhyeol",
@@ -99,7 +115,11 @@
   "released": true,
   "input": "blood",
   "specialty": "끌림과 욕망",
-  "topics": "끌림 · 궁합 · 밀당"
+  "topics": "끌림 · 궁합 · 밀당",
+  "concerns": [
+   "love",
+   "people"
+  ]
  },
  {
   "id": "monghwa",
@@ -116,7 +136,10 @@
   "released": true,
   "input": "image",
   "specialty": "신살과 자리",
-  "topics": "신살 · 꿈 · 이름 붙은 자리"
+  "topics": "신살 · 꿈 · 이름 붙은 자리",
+  "concerns": [
+   "people"
+  ]
  },
  {
   "id": "seoyeok",
@@ -133,7 +156,10 @@
   "released": true,
   "input": "birthplace",
   "specialty": "태어난 고을과 별",
-  "topics": "해외 · 이주 · 별자리 대조"
+  "topics": "해외 · 이주 · 별자리 대조",
+  "concerns": [
+   "dir"
+  ]
  },
  {
   "id": "paeseon",
@@ -150,7 +176,10 @@
   "released": true,
   "input": "cards",
   "specialty": "패로 보는 빈자리",
-  "topics": "오늘 운 · 한 장 뽑기"
+  "topics": "오늘 운 · 한 장 뽑기",
+  "concerns": [
+   "dir"
+  ]
  },
  {
   "id": "myeonsang",
@@ -167,7 +196,11 @@
   "released": true,
   "input": "photo",
   "specialty": "기색과 자리",
-  "topics": "관상 · 지금의 기색"
+  "topics": "관상 · 지금의 기색",
+  "concerns": [
+   "health",
+   "people"
+  ]
  },
  {
   "id": "wolha",
@@ -184,7 +217,10 @@
   "released": true,
   "input": "partner",
   "specialty": "인연 맺기",
-  "topics": "사랑 · 인연 · 만남"
+  "topics": "사랑 · 인연 · 만남",
+  "concerns": [
+   "love"
+  ]
  },
  {
   "id": "hongmae",
@@ -201,7 +237,10 @@
   "released": true,
   "input": "partner",
   "specialty": "혼인과 중매",
-  "topics": "결혼 · 혼인 시기 · 궁합"
+  "topics": "결혼 · 혼인 시기 · 궁합",
+  "concerns": [
+   "love"
+  ]
  },
  {
   "id": "yeondam",
@@ -218,7 +257,10 @@
   "released": true,
   "input": "partner",
   "specialty": "재회",
-  "topics": "재회 · 이별 · 옛사람"
+  "topics": "재회 · 이별 · 옛사람",
+  "concerns": [
+   "love"
+  ]
  },
  {
   "id": "hwagyeong",
@@ -235,7 +277,11 @@
   "released": true,
   "input": "partner",
   "specialty": "다툼과 시비",
-  "topics": "다툼 · 시비 · 관계 정리"
+  "topics": "다툼 · 시비 · 관계 정리",
+  "concerns": [
+   "people",
+   "love"
+  ]
  },
  {
   "id": "haengsu",
@@ -252,7 +298,11 @@
   "released": true,
   "input": "context",
   "specialty": "돈과 장사",
-  "topics": "돈 · 장사 · 벌이"
+  "topics": "돈 · 장사 · 벌이",
+  "concerns": [
+   "money",
+   "work"
+  ]
  },
  {
   "id": "hunjang",
@@ -269,7 +319,10 @@
   "released": true,
   "input": "context",
   "specialty": "공부와 시험",
-  "topics": "시험 · 공부 · 자격증"
+  "topics": "시험 · 공부 · 자격증",
+  "concerns": [
+   "work"
+  ]
  },
  {
   "id": "yakcho",
@@ -286,7 +339,10 @@
   "released": true,
   "input": "context",
   "specialty": "몸과 건강",
-  "topics": "몸 · 피로 · 잠"
+  "topics": "몸 · 피로 · 잠",
+  "concerns": [
+   "health"
+  ]
  },
  {
   "id": "ilgwan",
@@ -303,7 +359,11 @@
   "released": true,
   "input": "context",
   "specialty": "날 잡기",
-  "topics": "날 잡기 · 이사 날 · 개업 날"
+  "topics": "날 잡기 · 이사 날 · 개업 날",
+  "concerns": [
+   "dir",
+   "money"
+  ]
  },
  {
   "id": "nopa",
@@ -320,7 +380,10 @@
   "released": true,
   "input": null,
   "specialty": "갈림길",
-  "topics": "갈 곳 · 그만둘까 · 갈림길"
+  "topics": "갈 곳 · 그만둘까 · 갈림길",
+  "concerns": [
+   "dir"
+  ]
  },
  {
   "id": "dongja",
@@ -337,6 +400,7 @@
   "released": true,
   "input": null,
   "specialty": "첫 자리",
-  "topics": "처음 오신 분 · 가볍게 한 잔"
+  "topics": "처음 오신 분 · 가볍게 한 잔",
+  "concerns": []
  }
 ]

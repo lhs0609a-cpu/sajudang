@@ -147,6 +147,13 @@ export const api = {
   relay: (req: {
     chart_id: string; session_id: string;
     read?: string[]; skipped?: string[]; last_lens?: string | null;
+    /**
+     * 손님이 여섯 칸에서 고른 자리.
+     *
+     * ★ 안 실으면 릴레이가 고민을 못 봅니다. 그러면 고른 뜻이 리포트
+     *   안에서만 살고, 다음 사람을 고르는 자리에서는 죽습니다.
+     */
+    concern?: string | null;
   }) => post<RelayResponse>("/v1/relay", req),
 
   /** 실제로 다음 캐릭터로 넘어갈 때. 세션 브레이크 카운터를 올린다. */
@@ -289,8 +296,16 @@ export const api = {
     post<{ ok: boolean; tier: string; lens_id: string | null;
            expires_at: string | null; say: string }>("/v1/pay/restore", req),
 
-  daily: (chartId: string) =>
-    call<DailyResponse>(`/v1/daily?chart_id=${encodeURIComponent(chartId)}`),
+  /**
+   * 오늘의 일진.
+   *
+   * ★ 고른 자리를 같이 넘깁니다 — **점수는 안 바뀌고** 오늘을 어느
+   *   자리에서 읽을지 한 줄이 붙습니다 (engine/daily.py).
+   */
+  daily: (chartId: string, concern?: string | null) =>
+    call<DailyResponse>(
+      `/v1/daily?chart_id=${encodeURIComponent(chartId)}`
+      + (concern ? `&concern=${encodeURIComponent(concern)}` : "")),
 };
 
 export type { Features };

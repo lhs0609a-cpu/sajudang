@@ -148,6 +148,10 @@ class RelayRequest(BaseModel):
     read: list = Field(default_factory=list)
     skipped: list = Field(default_factory=list)
     last_lens: Optional[str] = None
+    # ★ 손님이 여섯 칸에서 고른 자리. 다음 사람을 고를 때 무게가 됩니다 —
+    #   안 실으면 릴레이가 고민을 못 보고, 고른 뜻이 리포트 안에서만
+    #   삽니다. 없으면 전처럼 명식만 보고 고릅니다.
+    concern: Optional[Concern] = None
 
 
 class RelayResponse(BaseModel):
@@ -203,5 +207,8 @@ class DailyResponse(BaseModel):
     # 일진은 값 없이 매일 오는 자리라, 처음 오는 사람이 어려운 말을
     # 여기서 처음 만납니다. 리포트 컷이 하는 것과 같은 상자입니다.
     terms_html: str = ""
+    # 물으신 자리. 안 물었으면 None — 점수는 안 바뀌고 **읽는 자리**만
+    # 바뀝니다 (engine/daily.py).
+    concern: Optional[str] = None
     statement_id: str
     free: bool
