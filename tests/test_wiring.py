@@ -338,3 +338,39 @@ def test_dev_ps1_has_no_control_characters():
         .read_text(encoding="utf-8-sig")
     bad = sorted({c for c in src if ord(c) < 32 and c not in "\t\r\n"})
     assert not bad, "dev.ps1 에 제어문자가 있다: %r" % bad
+
+
+def test_한_사람이_두_번_서지_않는다():
+    """
+    ★ 게이트 규칙을 더하면서 **같은 캐릭터에 규칙이 둘** 걸리는 자리가
+      생겼습니다. 약초의원이 「빈 기운이 있소」와 「몸을 물으셨는데 빈
+      기운이 있소」에 둘 다 걸리면, 셋을 권하는 자리에 같은 사람이
+      두 번 섭니다. 배포본에서 실제로 그렇게 나왔습니다 (6%).
+    """
+    import random
+    from engine import relay as relay_mod
+    from engine.calendar import build_chart as _bc
+    from engine.features import build_features as _bf
+
+    rng = random.Random(20260906)
+    for _ in range(40):
+        f = _bf(_bc(rng.randint(1960, 2006), rng.randint(1, 12),
+                    rng.randint(1, 28), rng.randint(0, 23), 0,
+                    rng.choice("MF"), True))
+        for c in (None, "money", "work", "love", "people", "dir", "health"):
+            got = [x["lens_id"]
+                   for x in relay_mod.recommend(f, concern=c)["recommend"]]
+            assert len(got) == len(set(got)), (c, got)
+
+
+def test_릴레이가_분기표를_안_낸다():
+    """`concern_fit` 도 우리 셈이오. 근거는 내되 점수는 감춥니다."""
+    from engine import relay as relay_mod
+    from engine.calendar import build_chart as _bc
+    from engine.features import build_features as _bf
+
+    f = _bf(_bc(1988, 7, 12, 9, 30, "M", True, "서울"))
+    for item in relay_mod.recommend(f, concern="money")["recommend"]:
+        for leaked in ("rule_id", "priority", "score", "reach",
+                       "concern_fit", "complement"):
+            assert leaked not in item, leaked

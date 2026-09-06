@@ -338,7 +338,24 @@ def rerank(items: list, last_lens: Optional[str] = None,
         out.append(it)
     # 점수 내림차순. 같으면 priority — 결과가 흔들리지 않게 두 번째 키를 둔다.
     out.sort(key=lambda x: (-x["score"], -x["priority"], x["lens_id"]))
-    return out
+
+    # ★ 한 사람이 두 번 서지 않게 (2026-09-06)
+    #
+    #   게이트 규칙을 더하면서 **같은 캐릭터에 규칙이 둘** 걸리는 자리가
+    #   생겼습니다. 약초의원이 「빈 기운이 있소」와 「몸을 물으셨는데 빈
+    #   기운이 있소」에 둘 다 걸리면, 셋을 권하는 자리에 같은 사람이 두
+    #   번 섭니다. 배포본에서 실제로 그렇게 나왔습니다 — 재보니 6%입니다.
+    #
+    #   가장 높은 점수 하나만 남깁니다. 이미 정렬돼 있으니 앞의 것이
+    #   그 사람의 가장 좋은 근거입니다.
+    seen: set = set()
+    only = []
+    for it in out:
+        if it["lens_id"] in seen:
+            continue
+        seen.add(it["lens_id"])
+        only.append(it)
+    return only
 
 
 # 화면에 내려보내도 되는 필드. 여기 없는 것은 나가지 않습니다.
