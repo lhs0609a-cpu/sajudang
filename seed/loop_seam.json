@@ -1,0 +1,226 @@
+{
+  "clips": {
+    "char/pungun:clip-side": {
+      "dolly": false,
+      "files": {
+        "mp4": {
+          "bytes": 109818,
+          "sha256": "37c6f957d890d95461cc9091e9796ad2adcd899df28ec37cbe609de6617bc176"
+        },
+        "webm": {
+          "bytes": 109771,
+          "sha256": "618831d009f7d952723d12306d99b503eb0bf572bd774ac7d5e0e8d18b71cf92"
+        }
+      },
+      "fps": 25,
+      "frames": 114,
+      "mode": "xfade",
+      "seam": 0.41
+    },
+    "char/pungun:greet": {
+      "dolly": false,
+      "files": {
+        "mp4": {
+          "bytes": 395278,
+          "sha256": "b2dd52d1b04c179858f96b38813cc757a13ba6a2ab814b8367506426bcfb1640"
+        },
+        "webm": {
+          "bytes": 261145,
+          "sha256": "e8158f57a2e0d208606bfe571300b1eabdc5166e2f97e6cb5e3e14234bd57309"
+        }
+      },
+      "fps": 24,
+      "frames": 121,
+      "mode": "xfade",
+      "seam": 1.32
+    },
+    "scene/altar": {
+      "dolly": false,
+      "files": {
+        "mp4": {
+          "bytes": 465641,
+          "sha256": "400536954562d667813c0bd27e07d843910c12691729672741cc131b6b0c3697"
+        },
+        "webm": {
+          "bytes": 339011,
+          "sha256": "ce98ca005bdf369b950cf8d5833e77b52280581a12e9de989ec5749548a41a3f"
+        }
+      },
+      "fps": 24,
+      "frames": 109,
+      "mode": "xfade",
+      "seam": 1.83
+    },
+    "scene/desk": {
+      "dolly": false,
+      "files": {
+        "mp4": {
+          "bytes": 440469,
+          "sha256": "c4712f219d9d35eef930eae41a03cb37e81a2aec82942eaa90b6683925c04712"
+        },
+        "webm": {
+          "bytes": 340714,
+          "sha256": "fff4c6c448bf9f324d94c25b5af972eaa4acc3ba34e5bab5f0681a28e3cb8ed5"
+        }
+      },
+      "fps": 24,
+      "frames": 109,
+      "mode": "xfade",
+      "seam": 2.55
+    },
+    "scene/facing": {
+      "dolly": false,
+      "files": {
+        "mp4": {
+          "bytes": 537924,
+          "sha256": "c9fa3282193a52446ef792dd4ce232ec5f2f0c25ab5088f96dc352d05c53497b"
+        },
+        "webm": {
+          "bytes": 520869,
+          "sha256": "c374f82d41c2949406418af55d1fd018f4f95e0406cee0ea18b6fe7c86803f22"
+        }
+      },
+      "fps": 24,
+      "frames": 109,
+      "mode": "xfade",
+      "seam": 1.63
+    },
+    "scene/fork": {
+      "dolly": false,
+      "files": {
+        "mp4": {
+          "bytes": 324090,
+          "sha256": "93fe1c961484b3003d6eddc4fc8c7808d7bd2951251bb196ec962b9acfad46fc"
+        },
+        "webm": {
+          "bytes": 141288,
+          "sha256": "0ef6d3de328b6a2dc4eeaa4a4d597359e8a045b91752a77bfe4a37da0bdf0dc9"
+        }
+      },
+      "fps": 24,
+      "frames": 109,
+      "mode": "xfade",
+      "seam": 1.43
+    },
+    "scene/gate": {
+      "dolly": true,
+      "files": {
+        "mp4": {
+          "bytes": 533801,
+          "sha256": "d07f2f4f437699247acaef6703b2a0b38ae7823ce313a358f0d992b135a36423"
+        },
+        "webm": {
+          "bytes": 517117,
+          "sha256": "ba85922245851f2a3092275f9b80b7599adaa02d450e4fc3f4cacd00520f0d07"
+        }
+      },
+      "fps": 24,
+      "frames": 240,
+      "mode": "pingpong",
+      "seam": 2.38
+    },
+    "scene/hall": {
+      "dolly": true,
+      "files": {
+        "mp4": {
+          "bytes": 599327,
+          "sha256": "aecabb0ec63c8b9b3397bf1121ffd7e05008c36c6f94eab3603a7b08bb17dfd4"
+        },
+        "webm": {
+          "bytes": 487639,
+          "sha256": "4643a106e3755d9e3e34ea4ed1a05056c0754b863ac36f1d69a797f05921d71e"
+        }
+      },
+      "fps": 24,
+      "frames": 240,
+      "mode": "pingpong",
+      "seam": 1.53
+    },
+    "scene/ink": {
+      "dolly": false,
+      "files": {
+        "mp4": {
+          "bytes": 240187,
+          "sha256": "ff31c50c2e682fb8acdfe623327b37a5c9535bc5109cd40c90bb5c6957cf616f"
+        },
+        "webm": {
+          "bytes": 126488,
+          "sha256": "c67bf8d1da268ce85c3eae3b4435ba579e4911fa27a39eb744aa176f6813ad9c"
+        }
+      },
+      "fps": 24,
+      "frames": 109,
+      "mode": "xfade",
+      "seam": 2.07
+    },
+    "scene/mirror": {
+      "dolly": false,
+      "files": {
+        "mp4": {
+          "bytes": 292325,
+          "sha256": "2ebc56af7870bb2d763beca92913648805506dd7d4df20451681d3f1cb065397"
+        },
+        "webm": {
+          "bytes": 164224,
+          "sha256": "1b654e9b7d6834ba704d97f04f1aab072eaa273e42e04531c5d0563882f5ce99"
+        }
+      },
+      "fps": 24,
+      "frames": 49,
+      "mode": "xfade",
+      "seam": 2.22
+    },
+    "scene/oldpaper": {
+      "dolly": false,
+      "files": {
+        "mp4": {
+          "bytes": 414878,
+          "sha256": "6a2e7afebc587990c1c9beffaea2d3ec71d9e8bbdb561c16a7e7326118bc5a65"
+        },
+        "webm": {
+          "bytes": 242585,
+          "sha256": "b3904f4eb2e0f4b0af24cb1c429725670b3323369c7dcbc0fb92860f35566d26"
+        }
+      },
+      "fps": 24,
+      "frames": 109,
+      "mode": "xfade",
+      "seam": 1.51
+    },
+    "scene/room": {
+      "dolly": false,
+      "files": {
+        "mp4": {
+          "bytes": 585181,
+          "sha256": "db98e4ed98c16265c71fdb67ef00995dfbd1652146a2ffa84ea8eab616aec270"
+        },
+        "webm": {
+          "bytes": 379051,
+          "sha256": "66da2beb54629dc736491cbd5d4170e68704d5f2ab16635bdcc3d8ea34e473db"
+        }
+      },
+      "fps": 24,
+      "frames": 109,
+      "mode": "xfade",
+      "seam": 0.98
+    },
+    "scene/scroll": {
+      "dolly": false,
+      "files": {
+        "mp4": {
+          "bytes": 394786,
+          "sha256": "62079c6d8280b6e9a5db2b1546c623233f58551a8ad814315b84ed8277d303c3"
+        },
+        "webm": {
+          "bytes": 206407,
+          "sha256": "6b6203e09cb880ae490859247b49efe78edb00f063e0cd4d2c99ea9376bed725"
+        }
+      },
+      "fps": 24,
+      "frames": 109,
+      "mode": "xfade",
+      "seam": 1.54
+    }
+  },
+  "seam_ok": 4.0
+}

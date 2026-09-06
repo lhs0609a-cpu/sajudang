@@ -28,6 +28,7 @@
     face <id> <파일>  ★ 초상 한 장 넣기 — ✦ 지우고 규격 맞추고 바탕 빼고
     figures        ★ 신살 인물 발주서 13명 (--write)
     drama          ★ 연출 점수 — 다음 화가 보고 싶어지는가 (--why)
+    loop           ★ 루프 이음새 — 배경이 다시 돌 때 튀는가 (--fix --all)
     flow           전체 플로우 훑기 — 32화면을 실제 브라우저로 열어 확인
     api            API 서버 (http://localhost:8000/docs)
     infra          postgres + redis 컨테이너
@@ -126,6 +127,8 @@ switch ($Task) {
   "busts"   { Need-Venv; Push-Location $Root; & $Py tools\bust_align.py @Rest; Pop-Location }
   "figures" { Need-Venv; Push-Location $Root; & $Py tools\figure_sheet.py @Rest; Pop-Location }
   "drama"   { Need-Venv; Push-Location $Root; & $Py tools\drama_audit.py @Rest; Pop-Location }
+  # 배경이 다시 돌 때 튀는가 (--fix --all 로 고침). ffmpeg 이 필요합니다.
+  "loop"    { Need-Venv; Push-Location $Root; & $Py tools\loop_seam.py @Rest; Pop-Location }
   # 그림을 맡기기 **전에** — 명령어가 그 화면에 맞는가
   "prompts" { Need-Venv; Push-Location $Root; & $Py tools\prompt_audit.py @Rest; Pop-Location }
   # 화면을 옮겼으면 쓰임을 다시 박는다
