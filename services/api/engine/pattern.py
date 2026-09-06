@@ -294,6 +294,26 @@ def _pats() -> list:
             "오래 못 버티고, <b>제가 정한 규율</b>로만 서는 사람이오. "
             "자유로운 것이 아니라 <b>기댈 틀이 없는</b> 것이오.")
 
+    add(key="sal_in", name="살인상생(殺印相生)",
+        gloss="누르는 힘이 배움으로 돌아드는 자리",
+        at=("work", "health"),
+        test=lambda f: f.ten_gods.get("편관", 0) >= 1 and f.inn >= 1,
+        why=lambda f: "편관 %d · 인성 %d" % (f.ten_gods.get("편관", 0), f.inn),
+        say="몰아붙이는 압이 <b>배움으로 돌아드는</b> 길이 나 있소. 압이 "
+            "그대를 깎지 않고 <b>자격과 이름으로 바뀌는</b> 짜임이라, "
+            "센 자리에서 오래 버틴 값이 남소.")
+
+    add(key="siksin_jesal", name="식신제살(食神制殺)",
+        gloss="내는 힘으로 압을 다스리는 자리",
+        at=("work",),
+        test=lambda f: f.ten_gods.get("식신", 0) >= 1
+        and f.ten_gods.get("편관", 0) >= 1,
+        why=lambda f: "식신 %d · 편관 %d" % (f.ten_gods.get("식신", 0),
+                                            f.ten_gods.get("편관", 0)),
+        say="누르는 압을 <b>만들어 내는 힘으로 눌러 두는</b> 짜임이오. "
+            "시키는 대로만 하면 눌리고, <b>제 손으로 내놓을 때</b> 그 압이 "
+            "연장이 되오.")
+
     add(key="gwan_many", name="관살혼잡(官殺混雜)",
         gloss="누르는 것이 여럿 겹친 자리",
         at=("work", "health"),
@@ -386,6 +406,16 @@ def _pats() -> list:
             "사람 일이 <b>미지근하게 끝나지 않고 한 번에 갈리오</b>.",
         ask="partner")
 
+    add(key="ilji_hyeong", name="일지 형(刑)",
+        gloss="발밑 자리가 걸림",
+        at=("love", "people", "health"),
+        test=lambda f: f.day_ji in _topic.hyeong_at(f),
+        why=lambda f: "형 %s · 일지 %s" % (_topic.hyeong(f), f.day_ji),
+        say="그대 <b>발밑 자리가 형에 걸렸소</b>. 옛 책은 형을 다툼과 "
+            "시비로 읽었소 — 가장 가까운 자리에서 <b>말이 상하는</b> 결이라, "
+            "먼 사람보다 곁의 사람과 더 자주 부딪히오.",
+        ask="partner")
+
     add(key="ilji_hap", name="일지 합(合)",
         gloss="발밑 자리가 붙음",
         at=("love", "people"),
@@ -424,7 +454,7 @@ def _pats() -> list:
 
     add(key="in_many", name="인성 과다",
         gloss="받는 자리가 여럿",
-        at=("people", "work"),
+        at=("people", "work", "dir"),
         test=lambda f: f.inn >= 3,
         why=lambda f: "인성 %d" % f.inn,
         say="받는 자리가 <b>여럿</b>이오. 배우고 기대는 데는 밝은데, "
@@ -446,6 +476,35 @@ def _pats() -> list:
         why=lambda f: "역마 · %s" % " · ".join(_sinsal_at(f, "yeokma")),
         say="<b>움직이는 자리</b>가 있소. 한자리에 붙박여 있으면 도리어 지치고, "
             "<b>옮기고 오갈 때</b> 결이 풀리는 짜임이오.")
+
+    add(key="samhap_guk", name="삼합국(三合局)",
+        gloss="지지 셋이 한 기운으로 뭉침",
+        at=("dir", "people", "work"),
+        test=lambda f: _topic.hap_group(f)[0] == "삼합",
+        why=lambda f: "삼합 · %s 국(局)" % _topic.hap_group(f)[1],
+        say="지지 셋이 <b>한 기운으로 뭉쳤소</b>. 판이 이미 한쪽으로 굳은 "
+            "자리라, 그 쪽으로 갈 때는 남보다 빠르고 <b>반대로 틀 때는 "
+            "힘이 두 배로</b> 드오.")
+
+    add(key="yeokma_jae", name="역마 재성",
+        gloss="움직이는 자리에 재물이 붙음",
+        at=("dir", "money"),
+        test=lambda f: bool(_sinsal_at(f, "yeokma"))
+        and f.ten_gods.get("편재", 0) >= 1,
+        why=lambda f: "역마 %s · 편재 %d"
+        % (" · ".join(_sinsal_at(f, "yeokma")), f.ten_gods.get("편재", 0)),
+        say="움직이는 자리에 <b>크게 오가는 재물</b>이 붙었소. 한자리에 "
+            "앉아 버는 결이 아니라 <b>오가며 버는</b> 결이라, 발이 묶이면 "
+            "벌이도 같이 묶이오.")
+
+    add(key="banghap_guk", name="방합국(方合局)",
+        gloss="지지가 한 계절로 모임",
+        at=("dir", "work"),
+        test=lambda f: _topic.hap_group(f)[0] == "방합",
+        why=lambda f: "방합 · %s" % _topic.hap_group(f)[1],
+        say="지지가 <b>한 계절로 모였소</b>. 같은 결이 두텁게 쌓인 자리라 "
+            "그 쪽 일에서는 남보다 깊이 가되, <b>다른 결을 만나면 크게 "
+            "낯설어</b> 하오.")
 
     add(key="hwagae", name="화개(華蓋)",
         gloss="혼자 파고드는 자리",
@@ -487,7 +546,7 @@ def _pats() -> list:
 
     add(key="sik_many", name="식상 과다",
         gloss="내놓는 자리가 넘침",
-        at=("health", "people"),
+        at=("health", "people", "dir"),
         test=lambda f: f.sik >= 3,
         why=lambda f: "식상 %d" % f.sik,
         say="내놓는 자리가 <b>넘치오</b>. 쓸 때 다 쓰고 잠으로 갚는 "

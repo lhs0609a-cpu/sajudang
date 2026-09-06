@@ -144,6 +144,59 @@ def test_돈_짜임이_넷보다_많다():
     assert len(money) >= 10, "돈에 걸리는 짜임이 %d개뿐이오" % len(money)
 
 
+def test_격은_열_가지_안에서만_선다(people):
+    """
+    격은 **월지에서 무엇으로 서는가**를 한 낱말로 잡는 자리요.
+    비견격·겁재격은 격 이름으로 안 씁니다 — 건록격·양인격으로 부릅니다.
+    """
+    ok = {"건록격", "양인격", "정관격", "편관격", "식신격", "상관격",
+          "정재격", "편재격", "정인격", "편인격"}
+    import random
+    rng = random.Random(20260906)
+    seen = set()
+    for _ in range(60):
+        f = build_features(build_chart(
+            rng.randint(1940, 2010), rng.randint(1, 12), rng.randint(1, 28),
+            rng.randint(0, 23), 0, rng.choice("FM"), True))
+        g = topic_mod.gyeok(f)
+        assert g in ok, "모르는 격: %s" % g
+        seen.add(g)
+    assert len(seen) >= 6, "격이 %d가지밖에 안 나왔소 — 판정이 굳었소" % len(seen)
+
+
+def test_형과_무리는_지지로만_판정한다(people):
+    """형·삼합·방합은 표와 지지를 맞춰 보면 끝이오. 지어내지 않소."""
+    for f in people:
+        hy = topic_mod.hyeong(f)
+        assert hy in ("", "삼형", "상형", "자형", "반형"), hy
+        kind, el = topic_mod.hap_group(f)
+        assert kind in ("", "삼합", "방합", "반합"), kind
+        if kind:
+            assert el in ("목", "화", "토", "금", "수"), el
+        # 걸렸다면 그 지지가 실제로 명식에 있어야 하오
+        jis = [p["ji"] for p in f.pillars]
+        for j in topic_mod.hyeong_at(f):
+            assert j in jis, j
+
+
+def test_나머지_넷도_다섯_칸을_채운다(people):
+    """
+    돈·몸만 깊고 나머지가 얕으면 「다 똑같아」가 다시 돌아오오.
+    """
+    import random
+    rng = random.Random(2026)
+    thin = []
+    for _ in range(40):
+        f = build_features(build_chart(
+            rng.randint(1950, 2008), rng.randint(1, 12), rng.randint(1, 28),
+            rng.randint(0, 23), 0, rng.choice("FM"), True))
+        for c in ("work", "love", "people", "dir"):
+            if len(topic_mod.scale(f, c)) < 4:
+                thin.append((c, len(topic_mod.scale(f, c))))
+    # 성별을 안 적은 사람의 사랑만 예외요 — 지어내지 않고 비웁니다
+    assert not thin, "칸이 넷도 안 되는 자리: %s" % thin[:5]
+
+
 # ══════════════════════════════════════════════════════════
 # ③ 때는 달력이다
 # ══════════════════════════════════════════════════════════

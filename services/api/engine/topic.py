@@ -89,6 +89,148 @@ WHERE = {"목": "동", "화": "남", "토": "가운데", "금": "서", "수": "�
 # 십신 열을 다섯 묶음으로
 GROUP_OF = dict(TEN_GOD_GROUP)
 
+# ══════════════════════════════════════════════════════════
+# 지지끼리의 관계 — 확정표 (2026-09-06)
+# ══════════════════════════════════════════════════════════
+#
+# ★ 왜 늘렸나
+#
+#   손님이 「나머지도 진짜 사주에 맞게 채우라」 하셨소. 일·사랑·사람·
+#   방향을 실무가 볼 때 세는 것은 개수 말고도 **글자끼리 맺는 관계**요 —
+#   형(刑)은 다툼·구설·수술 자리로, 삼합·방합은 판이 한쪽으로 뭉치는
+#   자리로, 천간합은 묶여서 제 노릇을 못 하는 자리로 읽소.
+#
+#   전부 **셀 수 있습니다.** 지지 넷을 놓고 표와 맞춰 보면 끝이오.
+#
+# ★ 유파 선택입니다 — 한 벌만 씁니다
+#
+#   형에는 삼형(寅巳申·丑戌未) · 상형(子卯) · 자형(辰辰·午午·酉酉·亥亥)
+#   까지 넣고, 파(破)·해(害)는 **안 씁니다**. 유파마다 갈리고, 이 집은
+#   못박은 것만 냅니다. 바꾸면 기존 결과가 달라집니다 (docs/20 §6).
+SAMHYEONG = (("寅", "巳", "申"), ("丑", "戌", "未"))   # 삼형 — 셋이 다 있어야
+SANGHYEONG = ("子", "卯")                              # 상형 — 둘
+JAHYEONG = ("辰", "午", "酉", "亥")                     # 자형 — 같은 글자 둘
+
+# 삼합 — 셋이 모이면 그 오행으로 판이 굳소. 가운데(왕지)가 있어야 반합.
+SAMHAP = {("申", "子", "辰"): ("수", "子"), ("寅", "午", "戌"): ("화", "午"),
+          ("巳", "酉", "丑"): ("금", "酉"), ("亥", "卯", "未"): ("목", "卯")}
+# 방합 — 계절이 통째로 모인 것
+BANGHAP = {("寅", "卯", "辰"): "목", ("巳", "午", "未"): "화",
+           ("申", "酉", "戌"): "금", ("亥", "子", "丑"): "수"}
+# 천간합 — 묶이면 제 노릇을 덜 하오
+GAN_HAP = {"甲": "己", "己": "甲", "乙": "庚", "庚": "乙", "丙": "辛",
+           "辛": "丙", "丁": "壬", "壬": "丁", "戊": "癸", "癸": "戊"}
+
+
+def hyeong(f) -> str:
+    """형(刑)이 어떤 꼴로 걸렸는가. 없으면 빈 문자열."""
+    jis = [p["ji"] for p in f.pillars]
+    for trio in SAMHYEONG:
+        if all(j in jis for j in trio):
+            return "삼형"
+    if all(j in jis for j in SANGHYEONG):
+        return "상형"
+    for j in JAHYEONG:
+        if jis.count(j) >= 2:
+            return "자형"
+    # 삼형 중 둘만 — 옛 책은 이것도 형으로 보되 가볍게 읽소
+    for trio in SAMHYEONG:
+        if sum(1 for j in trio if j in jis) >= 2:
+            return "반형"
+    return ""
+
+
+def hyeong_at(f) -> list:
+    """형에 걸린 지지들. 없으면 빈 목록. (일지가 여기 드는지가 중요하오)"""
+    jis = [p["ji"] for p in f.pillars]
+    for trio in SAMHYEONG:
+        if all(j in jis for j in trio):
+            return list(trio)
+    if all(j in jis for j in SANGHYEONG):
+        return list(SANGHYEONG)
+    for j in JAHYEONG:
+        if jis.count(j) >= 2:
+            return [j]
+    for trio in SAMHYEONG:
+        got = [j for j in trio if j in jis]
+        if len(got) >= 2:
+            return got
+    return []
+
+
+def hap_group(f) -> tuple:
+    """
+    지지가 무리를 이뤘는가. (꼴, 오행) — 없으면 ("", "").
+
+    삼합 > 방합 > 반합 차례로 봅니다. 굳은 정도가 그 차례요.
+    """
+    jis = [p["ji"] for p in f.pillars]
+    for trio, (el, king) in SAMHAP.items():
+        if all(j in jis for j in trio):
+            return "삼합", el
+    for trio, el in BANGHAP.items():
+        if all(j in jis for j in trio):
+            return "방합", el
+    for trio, (el, king) in SAMHAP.items():
+        if king in jis and sum(1 for j in trio if j in jis) >= 2:
+            return "반합", el
+    return "", ""
+
+
+def gan_hap_with(f) -> str:
+    """일간이 다른 천간과 합하는가. 그 글자. 없으면 빈 문자열."""
+    mate = GAN_HAP.get(f.day_gan)
+    if not mate:
+        return ""
+    for p in f.pillars:
+        if p.get("label") != "일주" and p["gan"] == mate:
+            return mate
+    return ""
+
+
+def gyeok(f) -> str:
+    """
+    격(格) — **월지에서 무엇으로 서는가.** 십신 이름으로 돌려줍니다.
+
+    ★ 실무의 차례를 그대로 따릅니다 —
+        ① 월지 지장간 중 **천간에 투출한 것**이 있으면 그 십신이 격
+        ② 없으면 월지 **본기**의 십신이 격
+        ③ 월지가 일간의 록(祿)이면 건록격, 겁재 자리면 양인격
+
+      격은 「그 사람이 무엇으로 서는가」를 한 낱말로 잡는 자리라,
+      일·진로를 물을 때 실무가 가장 먼저 봅니다. 다만 성패·구응까지는
+      안 봅니다 — 그건 유파가 갈리고, 이 집은 **셀 수 있는 데까지**만
+      냅니다.
+    """
+    month = None
+    for p in f.pillars:
+        if p.get("label") == "월주":
+            month = p
+    if not month:
+        return ""
+    hidden = [g for g, _ in HIDDEN[month["ji"]]]
+    gans = [p["gan"] for p in f.pillars if p.get("label") != "일주"]
+
+    # ③ 먼저 봅니다 — 록·인 자리는 투출과 상관없이 그 이름으로 서오.
+    bon = ten_god(hidden[0], f.day_gan)
+    if bon == "비견":
+        return "건록격"
+    if bon == "겁재":
+        return "양인격"
+    # ① 투출
+    #
+    # ★ 비견·겁재는 **격 이름으로 안 씁니다.** 그 자리는 위에서 이미
+    #   건록격·양인격으로 부르고, 월지 본기가 아닌 데서 비겁이 튀어
+    #   나왔다고 「비견격」이라 하지는 않습니다. 실제로 그 이름이
+    #   나와 표에서 터진 자리가 있었습니다.
+    for h in hidden:
+        if h in gans:
+            got = ten_god(h, f.day_gan)
+            if got not in ("비견", "겁재"):
+                return got + "격"
+    # ② 본기
+    return bon + "격"
+
 
 @lru_cache(maxsize=1)
 def table() -> dict:
@@ -465,6 +607,11 @@ def _rows_health(f) -> list:
     return rows
 
 
+def g_mix(f, jeong: str, pyeon: str) -> bool:
+    """혼잡 — 같은 묶음 안에 **결이 다른 둘**이 다 있는가."""
+    return f.ten_gods.get(jeong, 0) >= 1 and f.ten_gods.get(pyeon, 0) >= 1
+
+
 def _rows_work(f) -> list:
     g = f.ten_gods
     jg, pg = g["정관"], g["편관"]
@@ -473,6 +620,23 @@ def _rows_work(f) -> list:
             "both" if jg and pg else
             "jeong" if jg else "pyeon")
     rows.append(_row("rule", case, "정관 %d · 편관 %d" % (jg, pg)))
+    # ★ 격(格) — 실무가 일·진로에서 **가장 먼저** 보는 자리요.
+    #   「무엇으로 서는가」를 한 낱말로 잡소 (topic.gyeok).
+    gk = gyeok(f)
+    if gk:
+        month = [p for p in f.pillars if p.get("label") == "월주"]
+        mj = month[0]["ji"] if month else ""
+        rows.append(_row("gyeok", gk,
+                         "월지 %s · 지장간 %d자 · %s"
+                         % (mj or "?", len(HIDDEN[mj]) if mj else 0, gk)))
+    # ★ 자리를 흔드는 것 — 충과 형. 일에서는 «자리가 바뀌는 결»이오.
+    hy = hyeong(f)
+    n_ch = chung_pairs(f)
+    shake = ("형충" if hy and n_ch else "형" if hy else
+             "충" if n_ch else "없음")
+    rows.append(_row("shake", shake,
+                     "지지 충 %d쌍 · 형 %s" % (n_ch, hy or "없음"),
+                     quiet=(shake == "없음"), w={"hy": hy or "없음"}))
     rows.append(_row("lift", f.strength,
                      "%s · 비겁 %d · 관성 %d" % (f.strength, f.bi, f.gwan)))
     if f.gwan:
@@ -510,6 +674,23 @@ def _rows_love(f) -> list:
     rows.append(_row("spouse", case,
                      "%s %d · %s" % (grp, n, "남명" if f.sex == "M" else "여명"),
                      w={"grp": grp}))
+    # ★ 관살혼잡 · 재성혼잡 — 짝을 보는 글자가 **결이 다른 둘**인가.
+    #   개수만 세면 「둘」인데, 실무는 그 둘이 같은 결인지를 보오.
+    jeong, pyeon = (("정재", "편재") if grp == "재성" else ("정관", "편관"))
+    if g_mix(f, jeong, pyeon):
+        rows.append(_row("mix", "혼잡",
+                         "%s %d · %s %d"
+                         % (jeong, f.ten_gods[jeong], pyeon, f.ten_gods[pyeon]),
+                         w={"grp": grp}))
+    # ★ 일간이 다른 천간과 **묶이는가**. 옛 책은 이걸 «정에 매인 자리»로
+    #   읽었소 — 붙으면 제 노릇을 덜 하오.
+    mate = gan_hap_with(f)
+    if mate:
+        rows.append(_row("gan_hap", "있음",
+                         "일간 %s · 합하는 천간 %s %d자리"
+                         % (f.day_gan, mate,
+                            sum(1 for p in f.pillars if p["gan"] == mate)),
+                         w={"mate": mate}))
     if n:
         open_ = group_tuchul(f, grp)
         rows.append(_row("show", "open" if open_ else "hidden",
@@ -522,6 +703,14 @@ def _rows_love(f) -> list:
                              "%s %d · 앉은 자리 %s"
                              % (grp, n, " · ".join(seats)),
                              w={"grp": grp}))
+    # ★ 배우자궁에 **무엇이 앉았는가** — 실무가 사랑에서 가장 먼저 보는
+    #   자리요. 짝을 보는 글자(재성·관성)가 몇인지와 별개로, 발밑 그
+    #   한 글자가 «곁에 두는 사람의 결»을 말하오. 늘 섭니다.
+    seat_god = ten_god(HIDDEN[f.day_ji][0][0], f.day_gan)
+    rows.append(_row("seat_god", seat_god,
+                     "일지 %s · 본기 %s · %s %d"
+                     % (f.day_ji, HIDDEN[f.day_ji][0][0], seat_god,
+                        f.ten_gods.get(seat_god, 0))))
     ilji = ("둘다" if f.ilji_chung and f.ilji_hap else
             "충" if f.ilji_chung else
             "합" if f.ilji_hap else "없음")
@@ -550,6 +739,21 @@ def _rows_people(f) -> list:
     peers = ("넷이상" if f.bi >= 4 else "셋" if f.bi == 3 else
              "둘" if f.bi == 2 else "적음")
     rows.append(_row("peers", peers, "비겁 %d" % f.bi))
+    # ★ 형(刑) — 옛 책이 다툼·구설·시비를 붙여 읽던 자리요.
+    #   사고나 재판을 예고하는 표로 쓰지 않소 (docs/14 §7).
+    hy = hyeong(f)
+    if hy:
+        rows.append(_row("hyeong", hy,
+                         "형 %s · 걸린 지지 %d자리 (%s)"
+                         % (hy, len(hyeong_at(f)), " ".join(hyeong_at(f)))))
+    # ★ 무리 — 지지가 삼합·방합으로 뭉쳤는가. 사람 자리에서는
+    #   «한쪽으로 쏠린 판»이오.
+    kind, el = hap_group(f)
+    if kind:
+        rows.append(_row("group", kind,
+                         "%s · %s 국(局) · %s %d자리"
+                         % (kind, el, el, visible(f, el)),
+                         w={"kind": kind, "gel": el}))
     rows.append(_row("line", "있음" if f.gwan else "없음",
                      "관성 %d" % f.gwan))
     rows.append(_row("mouth", "셋이상" if f.sik >= 3 else
@@ -587,6 +791,17 @@ def _rows_dir(f) -> list:
                         (" · " + " · ".join(_sinsal_at(f, "hwagae")))
                         if has_sinsal(f, "hwagae") else ""),
                      quiet=not has_sinsal(f, "hwagae")))
+    # ★ 무리 — 지지가 한 오행으로 뭉치면 «갈 곳이 이미 정해진» 판이오.
+    kind, el = hap_group(f)
+    if kind:
+        rows.append(_row("group", kind,
+                         "%s · %s 국(局) %d자리 · 도는 쪽 %s"
+                         % (kind, el, visible(f, el), WHERE[el]),
+                         w={"kind": kind, "gel": el, "gwhere": WHERE[el]}))
+    # ★ 힘이 흐르는 쪽. 갈림길에서 «무엇으로 정하는가» 요.
+    rows.append(_row("lean", f.flow,
+                     "가장 센 자리 %s · %s %d자리"
+                     % (f.flow, f.flow_el, visible(f, f.flow_el))))
     rows.append(_row("rule", "없음" if f.gwan == 0 else "있음",
                      "관성 %d" % f.gwan))
     rows.append(_row("where", f.yongsin,
