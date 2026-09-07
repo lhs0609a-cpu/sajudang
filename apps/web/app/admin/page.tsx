@@ -18,7 +18,7 @@
  *   유저 모드로 넘기면 레일이 사라지고 손님이 보는 그대로가 됩니다.
  *   되돌아오는 길은 이 화면 주소를 아는 사람에게만 있습니다.
  */
-import { useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SCREEN_GROUPS, useSession } from "@/lib/store";
@@ -93,6 +93,27 @@ type ScreenScore = {
   total: number;
   actout: string[]; missing: string[];
 };
+/*
+ * 값값 점수 — 치른 값이 아깝지 않은가 (services/api/engine/worth.py).
+ *
+ * ★ 여섯 축을 무게 지어 100점으로 냅니다. 화면은 **숫자를 짓지 않고**
+ *   서버가 준 것을 그대로 그립니다 — 두 군데서 세면 어긋납니다.
+ */
+type WorthPart = { k: string; v: string; s: number };
+type WorthAxis = {
+  key: string; name: string; ask: string; weight: number;
+  score: number; parts?: WorthPart[]; why?: string; source?: string;
+};
+type Worth = {
+  at: string;
+  total: number;
+  /** 돈 번 느낌 · 안 아깝다 · 돈값은 한다 · 아깝다 · 못 판다 */
+  grade: string;
+  say: string;
+  weakest: { key: string; name: string; score: number }[];
+  axes: WorthAxis[];
+};
+
 type Drama = {
   at: string;
   summary: {
@@ -166,6 +187,8 @@ export default function AdminPage() {
   const [logging, setLogging] = useState(false);
   const [data, setData] = useState<Overview | null>(null);
   const [drama, setDrama] = useState<Drama | null>(null);
+  /* 값값 점수 — 치른 값이 아깝지 않은가 (engine/worth.py). */
+  const [worth, setWorth] = useState<Worth | null>(null);
   const [openRow, setOpenRow] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -247,6 +270,18 @@ export default function AdminPage() {
         setDrama(d.ok ? await d.json() : null);
       } catch {
         setDrama(null);
+      }
+      /*
+       * ★ 값값 점수도 같은 자리에서 받습니다.
+       *   "항상 연동해서 점수 보여줘" — 따로 누르게 해 두면 안 누르고,
+       *   안 누르면 없는 것과 같습니다. 실패해도 매출 화면은 안 막습니다.
+       */
+      try {
+        const w = await fetch(BASE + "/v1/admin/worth",
+                              { headers: head(k, t) });
+        setWorth(w.ok ? await w.json() : null);
+      } catch {
+        setWorth(null);
       }
     } catch (e) {
       setErr(e instanceof Error ? e.message : "가져오지 못했습니다.");
@@ -429,6 +464,64 @@ export default function AdminPage() {
           setData(null);
         }}>나가기</button>
       </p>
+
+      {/* ── 값값 ─────────────────────────────────────────
+          ★ 「돈」 위에 둡니다. 매출은 어제 일이고 이건 **지금 파는
+            물건의 상태**라, 주인이 열자마자 봐야 하는 것이 이쪽입니다. */}
+      {worth && (
+        <section>
+          <h2>값값 — 치른 값이 아깝지 않은가</h2>
+          <div className="worthtop">
+            <div className={"worthbig g" + Math.min(4, Math.floor(worth.total / 20))}>
+              <b>{worth.total}</b><span>/ 100</span>
+            </div>
+            <div className="worthsay">
+              <p className="grade">{worth.grade}</p>
+              <p className="sm">{worth.say}</p>
+              {worth.weakest.length > 0 && (
+                <p className="sm">
+                  먼저 볼 자리 —{" "}
+                  {worth.weakest.map((w) => `${w.name}(${w.score})`).join(" · ")}
+                </p>
+              )}
+            </div>
+          </div>
+          <table className="tbl worthtbl">
+            <thead>
+              <tr><th>축</th><th className="n">점</th><th className="n">무게</th>
+                  <th>무엇을 보는가</th></tr>
+            </thead>
+            <tbody>
+              {worth.axes.map((a) => (
+                <Fragment key={a.key}>
+                  <tr className={a.score < 60 ? "weak" : undefined}>
+                    <td><b>{a.name}</b></td>
+                    <td className="n">{a.score}</td>
+                    <td className="n">{a.weight}</td>
+                    <td className="sm">{a.ask}</td>
+                  </tr>
+                  {(a.parts ?? []).map((pt) => (
+                    <tr className="sub" key={a.key + pt.k}>
+                      <td />
+                      <td className="n sm">{pt.s}</td>
+                      <td className="n sm">{pt.v}</td>
+                      <td className="sm">{pt.k}</td>
+                    </tr>
+                  ))}
+                  {a.why && (
+                    <tr className="sub"><td /><td colSpan={3} className="sm">{a.why}</td></tr>
+                  )}
+                </Fragment>
+              ))}
+            </tbody>
+          </table>
+          <p className="sm">
+            표본 여섯 사람 × 고민 여섯을 <b>그 자리에서 진짜로 돌려</b> 잰
+            값이오. 지어낸 숫자가 아니니, 뱅크를 고치면 여기가 바로 움직이오.
+            잰 때 {worth.at.replace("T", " ")}.
+          </p>
+        </section>
+      )}
 
       {/* ── 돈 ───────────────────────────────────────── */}
       <section>

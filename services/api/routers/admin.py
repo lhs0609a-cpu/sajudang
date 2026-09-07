@@ -259,6 +259,35 @@ def screens(x_funnel_key: str | None = Header(default=None),
     }
 
 
+@router.get("/worth")
+def worth(x_funnel_key: str | None = Header(default=None),
+          x_admin_token: str | None = Header(default=None)) -> dict:
+    """
+    **값값 점수** — 치른 값이 아깝지 않은가. 100점 만점.
+
+    ★ 손님이 시킨 것 (2026-09-07)
+
+      "실제 그 돈 써도 돈값한다, 진짜 감동이다, 이거 돈 써도 하나도
+       안 아깝다, 오히려 돈 번 느낌이다 들 정도 퀄리티인지 종합점수
+       파악해서 관리자페이지에 실시간 연동해놓고, 100점만점으로."
+
+    ★ 지어낸 점수가 아닙니다
+
+      연출 점수와 같은 규칙입니다 — 표본 명식을 **진짜로 돌려**
+      리포트를 짓고 그 글을 셉니다. 뱅크를 고치면 숫자가 바로 움직입니다.
+
+    ★ 캐시를 안 겁니다
+
+      고치고 새로 고쳤는데 옛 점수가 나오면 도구를 안 믿게 됩니다.
+      표본 여섯 사람 × 고민 여섯이라 한두 초입니다.
+    """
+    _guard(x_funnel_key, x_admin_token)
+    from engine import worth as worth_mod
+
+    worth_mod.clear()
+    return worth_mod.score()
+
+
 @router.get("/ping")
 def ping(x_funnel_key: str | None = Header(default=None),
          x_admin_token: str | None = Header(default=None)) -> dict:

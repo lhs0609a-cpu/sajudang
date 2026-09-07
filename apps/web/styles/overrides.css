@@ -3427,3 +3427,129 @@ body.has-rail .beatskip-hint { left: calc(50% + 116px); }
   pointer-events: none;               /* 눌리는 것은 뒤의 그림입니다 */
 }
 .cardin p { margin: 0; }
+
+/* ══════════════════════════════════════════════════════════
+ * 훑어읽기 — 강조 넷 (engine/skim.py 와 한 벌)
+ * ══════════════════════════════════════════════════════════
+ *
+ * ★ 손님이 짚었습니다 — "전체 글 다 안 읽을거니까 중요한 워딩
+ *   밑줄치고 강조표시해서, 그것만 읽어도 다 이해되게."
+ *
+ *   19,900원짜리 한 장이 29컷 12,582자입니다. 그런데 이 글에는
+ *   **크기가 하나**뿐이었습니다 — 굵게. 그것도 절반은 낱말에 붙어
+ *   있어 굵은 데만 이어 읽으면 「癸酉 · 일 · 관성 · 戌」 같은
+ *   색인이 나왔습니다. 요약이 아닙니다.
+ *
+ * ★ 넷을 두되 **뜻이 겹치지 않게** 둡니다.
+ *   뜻이 같은 표시가 둘이면 손님은 둘 다 무시합니다.
+ *
+ *       <b>           센 사실        지금 있던 것. 안 건드림
+ *       <mark>        그 컷의 결론    이것만 이으면 요약이 된다
+ *       <u>           손님이 할 것    처방·고를 것
+ *       .nu           나이·해·갯수    틀릴 수 없는 말을 피한 자리
+ *
+ * ★ 톤을 안 깹니다.
+ *   바탕이 자줏빛 검정이라 노란 형광펜은 이 집이 아닙니다. 대신
+ *   **그 캐릭터의 색을 아주 옅게 깐 띠**를 씁니다 — 한지 위에
+ *   색지를 덧댄 자리처럼. 색은 --c 라 사람이 바뀌면 같이 바뀝니다.
+ */
+
+/* ── 형광펜 — 그 컷의 결론 ────────────────────────────── */
+mark {
+  background: color-mix(in srgb, var(--c) 15%, transparent);
+  color: var(--paper);
+  /* 밑에 얇은 금 하나. 배경만으로는 어두운 바탕에서 잘 안 섭니다. */
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--c) 45%, transparent);
+  padding: 1px 3px;
+  margin: 0 -1px;
+  border-radius: 2px;
+  /* 여러 줄로 넘어가도 띠가 이어지게 */
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+/* color-mix 를 모르는 브라우저는 바탕만 보이고 글이 묻힙니다.
+   먼저 안전한 값을 깔고 위에서 덮습니다. */
+@supports not (background: color-mix(in srgb, red 10%, transparent)) {
+  mark { background: rgba(229, 184, 122, .15); box-shadow: none;
+         border-bottom: 1px solid rgba(229, 184, 122, .45); }
+}
+/* 형광펜 안의 굵게는 색을 빼앗지 않습니다 — 띠가 이미 말했습니다. */
+mark b { color: inherit; font-weight: 600; }
+
+/* ── 밑줄 — 손님이 할 것 ──────────────────────────────
+ *
+ * ★ 글자에 붙여 그으면 받침(ㄱ ㅅ ㅆ)이 선에 닿아 지저분합니다.
+ *   한글은 라틴보다 아래로 내려오는 획이 많아 더 띄웁니다.
+ */
+u {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--c) 55%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+  text-decoration-skip-ink: auto;
+}
+@supports not (background: color-mix(in srgb, red 10%, transparent)) {
+  u { text-decoration-color: rgba(229, 184, 122, .55); }
+}
+
+/* ── 수 — 나이 · 해 · 갯수 ────────────────────────────
+ *
+ * ★ 이 집은 「틀릴 수 없는 말」을 안 씁니다. 바넘 문장을 피하려고
+ *   나이·연도·센 수를 일부러 박아 둔 것이라, 그 수가 곧 다른
+ *   점집과 갈리는 자리입니다. 그런데 줄글에 묻혀 있었습니다.
+ *
+ * ★ 배경도 밑줄도 안 씁니다 — 위의 둘과 뜻이 겹칩니다.
+ *   숫자 폭을 고정하고 한 톤 밝게만 합니다.
+ */
+.nu {
+  font-variant-numeric: tabular-nums;
+  color: var(--paper);
+  font-weight: 500;
+  letter-spacing: .01em;
+}
+
+/* ── 인쇄 ──────────────────────────────────────────────
+ *
+ * ★ 인쇄는 흰 종이입니다. 어두운 바탕에서 고른 옅은 띠가 종이에서는
+ *   아예 안 보입니다. 값을 치른 사람이 받는 종이라, 여기서 강조가
+ *   사라지면 훑어읽기가 통째로 없어집니다.
+ */
+@media print {
+  mark { background: #f3e6cd !important; color: #000 !important;
+         box-shadow: none !important; border-bottom: 1px solid #b98f45; }
+  u { text-decoration-color: #8a6a2f; }
+  .nu { color: #000; font-weight: 600; }
+}
+
+/* ══════════════════════════════════════════════════════════
+   값값 점수 — 치른 값이 아깝지 않은가  (/admin)
+   ══════════════════════════════════════════════════════════
+   ★ 손님이 시킨 것 (2026-09-07): "종합점수 파악해서 관리자페이지에
+     실시간 연동해놓고, 100점만점으로."
+   ★ 「돈」 위에 둡니다. 매출은 어제 일이고 이건 지금 파는 물건의
+     상태라, 주인이 열자마자 봐야 하는 것이 이쪽입니다. */
+.worthtop {
+  display: flex; align-items: center; gap: 18px;
+  margin: 6px 0 14px; flex-wrap: wrap;
+}
+.worthbig {
+  display: flex; align-items: baseline; gap: 4px;
+  padding: 10px 18px; border-radius: 12px;
+  border: 1px solid var(--line2); background: var(--bg2);
+  font-family: var(--serif);
+}
+.worthbig b { font-size: 40px; line-height: 1; color: var(--c); }
+.worthbig span { font-size: 13px; color: var(--paper3); }
+/* 점수 띠 — 못 판다 / 아깝다 / 돈값 / 안 아깝다 / 돈 번 느낌 */
+.worthbig.g0 b, .worthbig.g1 b { color: var(--ember); }
+.worthbig.g2 b { color: var(--gold); }
+.worthbig.g3 b, .worthbig.g4 b { color: var(--teal); }
+.worthsay .grade {
+  font-family: var(--serif); font-size: 19px; color: var(--paper);
+  margin: 0 0 3px;
+}
+.worthtbl .sub td { color: var(--paper3); border-top: 0; padding-top: 2px; }
+.worthtbl tr.weak td { background: color-mix(in srgb, var(--ember) 12%, transparent); }
+@media (max-width: 520px) {
+  .worthbig b { font-size: 32px; }
+}
