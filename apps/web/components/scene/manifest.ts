@@ -126,7 +126,14 @@ export const SCENES: SceneSpec[] = [
   //   합니다 — `box` 를 적으면 `.tall` 의 가장자리 페이드를 안 탑니다.
   //   카드 테두리는 흐려지면 안 됩니다.
   { id: "cardbg", name: "공유 카드 문양", preset: "Static", ratio: "9:16", seconds: 3, loop: true, tint: "recolor", box: "9:16" },
-  { id: "tray", name: "목패 늘어놓은 상", preset: "Static", ratio: "16:9", seconds: 2, loop: true },
+  // ★ 16:9 로 적혀 있었는데 들어온 그림은 9:16 입니다 (2026-09-07).
+  //   2026-09-01 부터 원본이 전부 세로라, 적힌 값을 실물에 맞춥니다.
+  //
+  //   focus 를 내린 까닭 — 4:3 상자는 세로의 42%만 보입니다. 가운데로
+  //   두면 **목패 셋이 아래로 잘려** 빈 상만 남습니다. 이 장면에서
+  //   보여야 하는 것은 상이 아니라 그 위에 놓인 목패요. 66% 로 내리면
+  //   상 위쪽 끝부터 꽃까지 다 들어옵니다.
+  { id: "tray", name: "목패 늘어놓은 상", preset: "Static", ratio: "9:16", seconds: 5, loop: true, focus: "50% 66%" },
   { id: "coin", name: "엽전", preset: "Static", ratio: "1:1", seconds: 2, loop: true },
   { id: "tea", name: "다과상", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
   { id: "sealbook", name: "인장첩", preset: "Static", ratio: "3:4", seconds: 2, loop: true },
