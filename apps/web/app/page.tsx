@@ -1655,7 +1655,7 @@ function EntryInner() {
             ★ 「아니오」 가 무엇을 하는지 — 두 번 어긋나면 2단이 축을
               바꿉니다 (`bank.TURN_AT`). 그걸 손에 잡히게 적습니다.
           */}
-          <Say who={lens.name} lens={s.cur}>
+          <Say who={lens.name} lens={lens.id}>
             <b>{CONCERNS.find((c) => c.id === s.concern)?.label ?? "걸리는 것"}</b>
             에 대해서요. 여기서부터 <b>5마디</b>요.<br />
             기둥 4자리를 옮긴 8글자만 보고 하는 말이오 —

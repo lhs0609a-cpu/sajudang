@@ -7,6 +7,7 @@
  *   (CLAUDE.md 절대 규칙 1)
  */
 import { useEffect, useState } from "react";
+import { batchim } from "@/lib/josa";
 import type { Features } from "@shared/chart";
 
 const EL_WORD: Record<string, string> = {
@@ -166,6 +167,20 @@ const HIDDEN: Record<string, string[]> = {
 export function ManseTable({ f }: { f: Features }) {
   const cols = [...f.pillars].reverse();      // 시 · 일 · 월 · 년
   const plain = countPlain(f.pillars);
+  /*
+   * 여덟 글자에는 **없는데** 지장간까지 세면 값이 생기는 기운.
+   * 지장간이 무엇인지 한 줄로 보이는 가장 좋은 예라, 그 사람 것으로
+   * 댑니다. 없으면 `null` — 그때는 예를 안 듭니다.
+   */
+  const hiddenOnly = (() => {
+    const w = f.elements as unknown as Record<string, number>;
+    for (const el of ["수", "금", "토", "화", "목"] as const) {
+      if ((plain[el] ?? 0) === 0 && (w[el] ?? 0) > 0) {
+        return { el, weight: (w[el] ?? 0).toFixed(1) };
+      }
+    }
+    return null;
+  })();
   const day = f.pillars.find((p) => p.label === "일주");
 
   return (
@@ -210,11 +225,24 @@ export function ManseTable({ f }: { f: Features }) {
           </tr>
         </tbody>
       </table>
+      {/*
+        ★ 「나무가 없는데 0.3 이 나오는 까닭」 이라고 **박혀** 있었습니다
+          (2026-09-07). 손님이 짚었습니다 — 그 명식은 나무가 1개고
+          **불이 0개**였습니다. 여덟 글자엔 없는데 지장간에서 값이
+          생기는 기운은 사람마다 다릅니다. 셈에서 찾아 그 이름을 댑니다.
+
+          못 찾으면(그런 기운이 없으면) 그 문장을 아예 안 냅니다 —
+          없는 예를 들면 그게 이 집이 하는 거짓말입니다.
+      */}
       <p className="sm dim">
         아랫줄은 <b>지장간</b> — 지지(아래에 오는 글자) 속에 숨은
         천간(위에 오는 글자)이오. 글자로는 안
-        보이지만 셈에는 듭니다. 나무가 없는데 0.3 이 나오는 까닭이
-        여기 있소.
+        보이지만 셈에는 듭니다.
+        {hiddenOnly && (
+          <> <b>{EL_KO[hiddenOnly.el]}</b>{batchim(EL_KO[hiddenOnly.el]) ? "이" : "가"}{" "}
+          여덟 글자에는 없는데 셈에는 <b>{hiddenOnly.weight}</b>만큼 드는
+          까닭이 여기 있소.</>
+        )}
       </p>
 
       <div className="mcount">
