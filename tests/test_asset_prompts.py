@@ -85,7 +85,8 @@ def test_counts():
     have = set(b["scenes"])
     missing = declared - have
     assert not missing, "프롬프트가 없는 장면: %s" % sorted(missing)
-    assert len(b["figures"]) == 13
+    # 신살 인물 — 홍염을 넣어 열넷 (docs/14 §2 · 2026-09-07)
+    assert len(b["figures"]) == 14
 
 
 @pytest.mark.parametrize("key", sorted(entries()))
@@ -178,7 +179,7 @@ def test_figure_prompts_have_a_checked_in_source():
     assert FIG_SRC.exists(), "seed/figure_prompts.json 이 없습니다"
     src = json.loads(FIG_SRC.read_text(encoding="utf-8"))
     keys = [k for k in src if k != "_"]
-    assert len(keys) == 13
+    assert len(keys) == 14
     built = bundle()["figures"]
     for k in keys:
         assert k in built

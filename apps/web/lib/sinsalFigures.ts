@@ -51,6 +51,13 @@ export const FIGURES: Record<string, SinsalFigure> = {
     color: "#7FC4BC", aura: "wrap", prop: "ring", fx: "spark",
     female: false, human: true,
   },
+  hongyeom: {
+    key: "hongyeom", title: "붉게 물든 이", who: "홍염 紅艶",
+    beside: "사람이 모여드는 자리로 보던 것이오. 눈에 띄는 만큼 " +
+            "말도 따라붙는다 했소.",
+    color: "#D98BA8", aura: "drift", prop: "flower", fx: "petal",
+    female: true, human: true,
+  },
   munchang: {
     key: "munchang", title: "붓을 든 서생", who: "문창귀인 文昌貴人",
     beside: "배운 것이 밖으로 나갈 때 붓을 쥐여 주던 자리라 했소.",

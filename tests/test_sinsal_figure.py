@@ -35,6 +35,8 @@ def figures() -> dict:
 
 
 ALL_KEYS = [
+    # 홍염 — 확정표 docs/14 §2 에 넣으며 함께 (2026-09-07)
+    "hongyeom",
     "cheoneul", "taegeuk", "munchang", "geumyeo", "amrok",
     "yangin", "baekho", "wonjin",
     "dohwa", "yeokma", "hwagae", "gwaegang", "gongmang",

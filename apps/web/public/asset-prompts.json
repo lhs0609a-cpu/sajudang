@@ -801,6 +801,26 @@
       "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nAn empty seat. No person. A dashed outline where someone would be.\nNearly monochrome, deep indigo.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height. FRONT-FACING — squared to the camera, both eyes fully\nvisible and level, gaze straight at the viewer. No head turn, no\nprofile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
       "motion": "the dashed outline fades in and out once. nothing else moves.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)",
       "revised": "2026-09-03"
+    },
+    "hongyeom": {
+      "note": null,
+      "hint": null,
+      "title": "붉게 물든 이",
+      "who": "홍염 紅艶",
+      "preset": "Static",
+      "ratio": "3:4",
+      "duration": "3s",
+      "loop": true,
+      "tint": false,
+      "still": false,
+      "spec": [
+        "3:4",
+        "신살 인물",
+        "Static"
+      ],
+      "image": "Korean romance-fantasy webtoon illustration style. Refined delicate\nlineart with varied line weight. Luminous, porcelain skin rendering\nwith soft blush. Large expressive eyes with detailed iris highlights\nand long lashes. Elegant sharp jawline. Glossy flowing hair rendered\nwith individual strand detail and light reflection. Ornate hanbok\nwith layered fabric, fine embroidery and trailing silk. Soft rim\nlighting from behind plus gentle key light. Beautiful, idealized,\ngraceful. Painted digital finish with subtle glow.\n\nA composed woman with a slow, steady gaze, others' attention settling\non her without her asking. Fully clothed in layered hanbok, a folded\nfan held low in one hand, warm rose rim light.\n\nBust-up from the chest up, centered, subject occupying about 70% of\nframe height. FRONT-FACING — squared to the camera, both eyes fully\nvisible and level, gaze straight at the viewer. No head turn, no\nprofile, no three-quarter angle.\n\nFlat solid pure white (#FFFFFF) background — no gradient, no scenery,\nno cast shadow, no vignette. No text, letters, numbers, logos or\nwatermarks. Aspect ratio 3:4. High detail.",
+      "motion": "blossoms fall past, hair lifts once, blink once\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 3:4 · 3s)",
+      "revised": "2026-09-03"
     }
   },
   "chars": {

@@ -437,14 +437,39 @@ body:has(.gatehero) .stage { padding-bottom: 0; }
    등장 연출. 아래에서 떠오르며 뒤에서 빛이 번진다.
    docs/09 §6 — 움직임은 화면의 20% 이내, 얼굴은 눈 깜빡임 정도만.
    ------------------------------------------------------ */
+/*
+ * ★ 쉬는 자리는 **보이는 자리**요 (2026-09-07).
+ *
+ *   전에는 `opacity: 0` 으로 서서 관찰자가 깨워 주길 기다렸소.
+ *   그 신호가 한 번 어긋나면 **영영 꺼진 채로** 남소 — 신살 인물은
+ *   글 옆에 서 있는 초상이라 이미 화면에 든 채로 그려지는 일이
+ *   흔하오. 손님 화면에서 카드에 한자만 있고 사람이 없던 까닭이오.
+ *
+ *   등장은 «보이는 데서 시작» 하는 것이지 «안 보이는 데서 기다리는»
+ *   것이 아니오. 켜 두고, 들어올 때 한 번 살짝 올라오게만 하오.
+ */
 .sfig {
   display: flex; gap: 14px; align-items: flex-start;
   margin: 16px 0; padding: 14px 0; border-top: 1px solid var(--line);
-  opacity: 0; transform: translateY(14px);
 }
-.sfig.in { animation: sfigIn .82s cubic-bezier(.2,.7,.3,1) forwards; }
-.sfig.still { opacity: 1; transform: none; }
-@keyframes sfigIn { to { opacity: 1; transform: none; } }
+.sfig.in { animation: sfigIn .82s cubic-bezier(.2,.7,.3,1) both; }
+.sfig.still { opacity: 1; transform: none; animation: none; }
+@keyframes sfigIn {
+  from { opacity: .001; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sfig, .sfig.in { animation: none; opacity: 1; transform: none; }
+}
+
+/*
+ * 서버가 내는 빈 자리 — 여기에 인물이 꽂힙니다 (SinsalSlots).
+ *
+ * ★ 치수가 한 줄도 없었소. 인물이 들어와도 카드 안에서 자리를
+ *   못 잡았소. 카드 안이라 위 테두리는 카드가 이미 그었으니 뺍니다.
+ */
+.ssfig { display: block; }
+.ss .ssfig .sfig { border-top: 0; margin: 10px 0 2px; padding-top: 0; }
 
 .sfig-art { position: relative; flex: none; }
 .sfig-art svg, .sfig-art video, .sfig-art img { width: 100%; height: auto; display: block; }

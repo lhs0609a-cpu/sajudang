@@ -222,7 +222,7 @@ const ORDER = [
 /* ── 신살 인물 (docs/16) ── */
 const FIG_ORDER = [
   "cheoneul", "taegeuk", "munchang", "geumyeo", "amrok",
-  "yangin", "baekho", "wonjin", "dohwa", "yeokma",
+  "yangin", "baekho", "wonjin", "dohwa", "hongyeom", "yeokma",
   "hwagae", "gwaegang", "gongmang",
 ];
 const FIGS = JSON.parse(fs.readFileSync(FIGJSON, "utf8")).figures;
