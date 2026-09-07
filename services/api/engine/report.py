@@ -972,9 +972,25 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     # ★ 고민을 함께 넘깁니다 — 그 사람의 눈으로 **손님이 물은 자리**를
     #   보게 하려고요. 전에는 안 넘겨서, 약초의원의 「채우는 법」이
     #   돈을 물어도 몸을 물어도 똑같았습니다.
+    # ★ 그 사람이 **제 자리인지 아닌지**를 말합니다 (2026-09-07).
+    #
+    #   관점 컷은 그 사람의 고정된 눈이라 고민이 바뀌어도 안 갈립니다 —
+    #   그건 버그가 아닙니다. 월하선녀가 돈 얘기를 하면 그건 월하선녀가
+    #   아닙니다. 어긋난 것은 **아닌 것을 아니라고 안 하는** 자리였습니다.
+    #
+    #   첫 관점 컷 **끝에** 한 번만 답니다. 앞에 붙이면 맛보기가 앞머리를
+    #   고르는 셈(`peek._about_you` 가 여는 말 길이만큼 건너뜀)이 어긋나,
+    #   엿보기가 손님이 아니라 화자 얘기로 열립니다.
+    lens_say = topic_mod.lens_line(lens_id, concern)
     for lc in lens_cuts_mod.build(f, lens_id, concern):
-        cuts.append(_cut(lc["id"], lc["title"], lc["source"], lc["html"],
-                         lc["min_level"], sid=lc["statement_id"]))
+        html = lc["html"]
+        sid = lc["statement_id"]
+        if lens_say:
+            html = html + guard.enforce(lens_say, {"cut": lc["id"]})
+            sid = "%s@%s" % (sid, concern)
+            lens_say = ""
+        cuts.append(_cut(lc["id"], lc["title"], lc["source"], html,
+                         lc["min_level"], sid=sid))
 
     # ★ 묻는 자리와 받는 자리가 **갈려** 있었습니다 (2026-09-04).
     #
@@ -1073,6 +1089,27 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         "closing_cut", "덮으며", _why.line("여덟 글자 하나", "명식", ""),
         "".join(close_bits), 0,
         sid="close:%s:%s" % (f.strength, weak)))
+
+    # ── 척추 컷도 물으신 자리를 본다 ─────────────────────
+    #
+    # ★ 손님이 짚은 것 (2026-09-07): "고민이 다른데 왜 정답이 다 똑같아."
+    #
+    #   전용 컷(`concern_*`)은 갈리는데 **척추 열 컷이 안 갈렸습니다.**
+    #   그 열이 분량의 절반이라, 여섯 칸 중 어느 것을 골라도 리포트의
+    #   절반이 글자까지 같았습니다.
+    #
+    # ★ 컷을 새로 만들지 않습니다. 그 컷이 **이미 센 값**을 물으신
+    #   자리의 말로 한 번 더 짚습니다. 그리고 `statement_id` 에 고민을
+    #   답니다 — 문장이 갈렸으면 집계도 갈려야 공감률이 섞이지 않습니다.
+    for c in cuts:
+        line = topic_mod.cut_line(f, c["id"], concern)
+        if not line:
+            continue
+        # ★ 붙이는 글도 가드를 거칩니다. `_cut` 안에서만 거르면 뒤에
+        #   붙는 것이 그냥 새 나갑니다 — 전 응답 검사(guard_middleware)가
+        #   있다 해도 여기서 먼저 막는 것이 맞습니다.
+        c["html"] += guard.enforce(line, {"cut": c["id"], "at": concern})
+        c["statement_id"] = "%s@%s" % (c["statement_id"], concern)
 
     return cuts, extra_error
 
@@ -1323,7 +1360,8 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
         else:
             c["html"] = _flavor.figure(c["html"], c["id"], fig_pick)
         c["html"] = terms_mod.gloss(
-            voice_mod.speak(voice_mod.address(c["html"], you), tone), seen)
+            voice_mod.speak(voice_mod.address(c["html"], you), tone), seen,
+            concern, f.sex)
         # ★ 비유 상자도 **그 사람 목소리로** 말해야 합니다.
         #
         #   처음엔 말투를 갈아 끼운 **뒤에** 붙였습니다. 그랬더니
@@ -1337,7 +1375,8 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
         c["html"] = _flavor.side(c["html"], lens_id, c["id"], you)
         c["html"] = _flavor.ask(c["html"], lens_id, asked)
         c["html"] += voice_mod.speak(
-            voice_mod.address(terms_mod.picture_box(seen - before), you),
+            voice_mod.address(
+                terms_mod.picture_box(seen - before, concern, f.sex), you),
             tone)
         # ★ 근거 줄에도 **호칭만** 갈아 끼웁니다 (2026-09-04).
         #

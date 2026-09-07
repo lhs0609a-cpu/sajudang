@@ -300,3 +300,62 @@
   }
 }
 .printfoot { display: none; }
+
+/* ══════════════════════════════════════════════════════════
+   아래로 — 더 있다는 표시  (components/ScrollHint.tsx)
+   ══════════════════════════════════════════════════════════
+   ★ 손님이 짚은 것 (2026-09-07)
+     "화면 내리면 글자 뜨는건 좋은데, 아래로 이런 표시가 항상 떠야
+      사람들이 내릴거 아냐."
+     한 컷씩 뜨는 연출이 손님을 기다리는데, 내릴 까닭을 화면이 말한
+     적이 없었습니다. 다 읽은 손님에겐 거기가 끝으로 보입니다.
+   ★ 본문을 가리지 않게 가운데 아래에 작게 둡니다. 손가락이 닿는
+     자리가 아니므로 `pointer-events: none` 입니다. */
+.sdown {
+  position: fixed;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%) translateY(6px);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 7px 13px 6px;
+  border: 1px solid var(--line2);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg2) 88%, transparent);
+  backdrop-filter: blur(6px);
+  color: var(--paper2);
+  font-size: var(--fs-2);
+  letter-spacing: .04em;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .28s ease, transform .28s ease, visibility .28s;
+}
+.sdown.on { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+
+/* 아래를 가리키는 빗금 — 글꼴에 없는 글자를 쓰지 않습니다 */
+.sdown .a {
+  width: 8px; height: 8px;
+  border-right: 1.5px solid var(--c);
+  border-bottom: 1.5px solid var(--c);
+  transform: rotate(45deg);
+  margin-top: -1px;
+  animation: sdown-nod 1.5s ease-in-out infinite;
+}
+@keyframes sdown-nod {
+  0%, 100% { transform: rotate(45deg) translate(0, 0); opacity: .55; }
+  50%      { transform: rotate(45deg) translate(2px, 2px); opacity: 1; }
+}
+
+/* ★ 움직임이 싫은 손님에게는 까딱임만 멈춥니다.
+     표시는 남깁니다 — 길 안내가 싫은 것은 아닙니다. */
+@media (prefers-reduced-motion: reduce) {
+  .sdown .a { animation: none; opacity: .9; }
+  .sdown { transition: opacity .01s; }
+}
+
+/* 종이에는 아래가 없습니다 */
+@media print { .sdown { display: none !important; } }

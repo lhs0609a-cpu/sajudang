@@ -443,17 +443,63 @@ TURN_AT = 2
 # ★ 그래서 첫 줄은 **손님이 세어 볼 수 있는 수**입니다.
 #   가장 센 것은 **0인 자리**입니다 — 여덟 글자에 아예 없는 십신.
 #   없는 것은 있는 것보다 세기 쉽고, 없이 살아온 자국은 본인이 압니다.
-def count_blade(f) -> str:
+# 십신을 보는 차례. **미리 정해 두고 바꾸지 않습니다.**
+BLADE_ORDER = ("정관", "정재", "정인", "편관", "편재", "편인",
+               "식신", "상관", "비견", "겁재")
+
+# ★ 물으신 자리가 **먼저 오는** 차례 (2026-09-07).
+#
+#   손님이 짚은 것: "사랑에 대해서는 전혀 말하지 않아."
+#
+#   훅의 첫 줄이 십신을 고정 차례로만 훑어서, 사랑을 물은 사내가
+#   첫 문장에서 「정재(쌓는 재물)도 없소」를 받고 있었습니다.
+#   물은 자리가 아니라 표 순서가 말하고 있었던 것입니다.
+#
+#   ★ 이건 **골라 담기가 아닙니다.** 여러 자리를 재서 가장 아픈 것을
+#     고르면 누구나 아파집니다(희소도에서 겪은 자리). 여기서는 고민마다
+#     **앞자리를 미리 정해 두고** 그 칸을 그대로 냅니다. 0이 아니면
+#     그냥 다음으로 넘어갑니다 — 없는 것을 지어내지 않습니다.
+#
+#   배우자를 보는 글자는 남명이 재성, 여명이 관성입니다
+#   (engine/pattern.spouse_group · 『자평진전』 계열).
+BLADE_LEAD = {
+    "love":  {"M": ("정재", "편재"), "F": ("정관", "편관")},
+    "money": {"M": ("정재", "편재"), "F": ("정재", "편재")},
+    "work":  {"M": ("정관", "편관"), "F": ("정관", "편관")},
+    "people": {"M": ("비견", "겁재"), "F": ("비견", "겁재")},
+}
+
+
+def blade_order(concern: Optional[str], sex: str) -> tuple:
+    """이 고민에서 십신을 보는 차례. 앞자리만 옮기고 나머지는 그대로."""
+    lead = (BLADE_LEAD.get(concern or "", {}) or {}).get(sex or "", ())
+    return tuple(lead) + tuple(k for k in BLADE_ORDER if k not in lead)
+
+
+def count_blade(f, concern: Optional[str] = None) -> str:
     """
     손님이 세어 볼 수 있는 첫 줄. 없으면 빈 문자열.
 
-    ★ 골라 담지 않습니다. 0인 자리를 **십신 차례대로** 봐서 먼저 오는
+    ★ 골라 담지 않습니다. 0인 자리를 **정해 둔 차례대로** 봐서 먼저 오는
       것을 냅니다 — 여러 자리를 재서 가장 아픈 것만 고르면 누구나
       아파집니다 (희소도에서 겪은 것과 같은 자리입니다).
+
+    concern 을 넘기면 **물으신 자리가 앞에 오는** 차례를 씁니다.
     """
-    seats = bank().get("EMPTY_SEAT", {})
-    order = ("정관", "정재", "정인", "편관", "편재", "편인",
-             "식신", "상관", "비견", "겁재")
+    B = bank()
+    seats = dict(B.get("EMPTY_SEAT", {}))
+    relief_tbl = dict(B.get("RELIEF", {}))
+    # ★ 사랑을 물었고 그 글자가 **배우자성**이면 짝으로 풀어 냅니다.
+    #   남명은 재성, 여명은 관성입니다. 남명의 정관이 0인 것은 짝이
+    #   아니라 규율 얘기라, 성별에 맞는 두 자리에만 갈아 끼웁니다.
+    if concern == "love":
+        mate = ("정재", "편재") if f.sex == "M" else ("정관", "편관")
+        for k in mate:
+            if B.get("EMPTY_SEAT_LOVE", {}).get(k):
+                seats[k] = B["EMPTY_SEAT_LOVE"][k]
+            if B.get("RELIEF_LOVE", {}).get(k):
+                relief_tbl[k] = B["RELIEF_LOVE"][k]
+    order = blade_order(concern, f.sex)
     empty = [k for k in order if f.ten_gods.get(k, 0) == 0 and k in seats]
     if not empty:
         return ""
@@ -478,7 +524,7 @@ def count_blade(f) -> str:
     #   찌르고 끝내면 손님은 찔린 채로 남습니다. 찔린 사람은 창을 닫지
     #   값을 치르지 않습니다. 셋째 줄이 **탓을 걷어냅니다** —
     #   그건 성격이 아니라 자리다.
-    relief = bank().get("RELIEF", {}).get(empty[0], "")
+    relief = relief_tbl.get(empty[0], "")
     return ('<p class="blade">%s%s <span class="cnt">세어 보시오.</span></p>'
             '<p class="blademean">%s</p>'
             '<p class="bladerelief">%s</p>'
@@ -521,7 +567,7 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     #   일간이 다른 사람이 같은 말을 듣고 있었습니다.
     gan_line = _pick("STAB_GAN", f.day_gan)
     head = ('<p class="hi">%s.</p>' % esc_name) if esc_name else ""
-    blade = count_blade(f)
+    blade = count_blade(f, concern)
     segs.append(_seg(
         stage="0", label="",
         # 근거를 답니다. 다만 찌르기 **아래**에 답니다 — 위에 놓으면
@@ -642,6 +688,13 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     else:
         turn_line = ""
 
+    # ★ 저울 칸을 한 번만 세어 두 단이 나눠 씁니다.
+    #   2단은 **둘째 칸**, 3단(훅의 끝)은 **첫 칸**. 같은 칸이 두 번
+    #   나오면 손님은 그 순간 이게 녹음인 줄 압니다.
+    from . import topic as _topic
+    _rows = _topic.scale(f, concern)
+    seq_row = _rows[1] if len(_rows) > 1 else None
+
     segs.append(_seg(
         stage="2", label="2 · 순서",
         source=_why.line(
@@ -667,23 +720,34 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
         #
         #   ② 찌르고 끝내지 않습니다. 세 줄이 다 찌르는 말이었습니다.
         #      마지막에 탓을 걷어내는 한 줄을 답니다.
+        #   ③ 그리고 그 순서를 **물으신 자리에서** 셉니다 (2026-09-07).
+        #
+        #      손님이 짚은 것: "사랑에 대해서는 전혀 말하지 않아."
+        #      재보니 이 단 192자에 사랑 낱말이 **0회**였습니다. 순서는
+        #      십신이 짓는 것이라 고민이 낱말 하나만 바꾸고 있었습니다.
+        #      저울의 **둘째 칸**을 답니다 — 첫 칸은 3단(끝)의 몫이라
+        #      겹치지 않고, 여기서는 순서가 어디서 나오는지를 셉니다.
         body=('<div class="scene">%s'
               '<p>%s는 늘 이 순서요.</p><div class="seq">%s</div>%s'
-              '<p class="sea">%s</p><p class="relief">%s</p></div>'
+              '<p class="sea">%s</p><p class="relief">%s</p>%s</div>'
               % (turn_line, esc_you,
                  "".join('<div><span>%s</span></div>' % s for s in seq),
                  "".join('<p class="%s">%s</p>' % ("hit" if i == 1 else "", l)
                          for i, l in enumerate(lines)),
                  sea_line,
-                 bank().get("SEQ_RELIEF", {}).get(flow, ""))),
+                 bank().get("SEQ_RELIEF", {}).get(flow, ""),
+                 ('<p class="cnt">%s</p>'
+                  '<p class="ev"><span class="evk">센 것</span>%s</p>'
+                  % (seq_row["say"], seq_row["ev"])) if seq_row else "")),
         question="…이 순서가 맞소?",
         yes="그럴 줄 알았소. 그럼 이름을 붙여드리리다.",
         no="순서가 틀렸다 하시니, 이름을 붙여 보고 다시 말하시오.",
         # ★ 튼 단은 **다른 문장으로 집계**됩니다. 그래야 어긋난 축을
         #   버리는 신호로 쓸 수 있습니다 (docs/18 · /v1/funnel).
-        sid="seq%s:%s:%s:%s:%s:%s:%s"
+        sid="seq%s:%s:%s:%s:%s:%s:%s:%s"
             % ("@turn" if turned else "",
-               top, concern, flow, weak, strength, sea)))
+               top, concern, flow, weak, strength, sea,
+               ("%s=%s" % (seq_row["k"], seq_row["case"])) if seq_row else "-")))
 
     # ── 2.5단 · 겹친 자리와 어긋난 자리 ──────────────────
     #
@@ -703,12 +767,28 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
             yes = ("그럴 것이오. 그 사이가 그대를 가장 지치게 하오." if cmp["deep"]
                    else "그 한두 자리가 늘 걸리는 자리요.")
             no = "그럼 아직 안 부딪힌 것이오. 어긋난 자리는 늦게 값을 물리오."
+        # ★ 넉 자를 **물으신 자리에서** 읽습니다 (2026-09-07).
+        #
+        #   손님이 짚은 것: "사랑에 대한건데 사랑에 대해서는 전혀 말하지
+        #   않아." 재보니 이 단이 다섯 중 가장 긴데(230~424자) 고민
+        #   낱말이 **0회**였습니다. 성격만 보고 물으신 자리를 안 봤습니다.
+        #
+        #   네 축을 다 내지는 않습니다 — 그건 값을 치른 자리
+        #   (`concern_face`)입니다. **어긋난 축 하나**만 그 자리의 말로
+        #   옮깁니다. 저울을 첫 칸만 내는 것과 같은 셈법입니다.
+        from . import topic as _topic
+        fl = _topic.face_line(f, concern, axis4)
         segs.append(_seg(
             stage="2.5", label=label,
             source="사주 %s ↔ 입력 %s" % (axis_string(f), _html.escape(axis4.upper())),
-            body=axis_block(cmp, strength),
+            body=(axis_block(cmp, strength)
+                  + ('<div class="cax"><p class="cnt">물으신 자리에서는 '
+                     '이렇게 나오오.</p>%s'
+                     '<p class="ev"><span class="evk">센 것</span>%s</p></div>'
+                     % (fl["say"], fl["ev"]) if fl else "")),
             question=q, yes=yes, no=no,
-            sid=axis_sid(cmp, strength)))
+            sid="%s:%s" % (axis_sid(cmp, strength),
+                           fl["sid"] if fl else "-")))
     else:
         # ── 2.5단 대체 · 물은 자리와 글자가 센 자리 ──────────
         #
@@ -798,9 +878,7 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     #   그래서 저울의 **첫 칸 하나**를 여기서 냅니다. 맛보기가 아니라
     #   셈이오 — 손님이 만세력을 펴고 맞는지 틀리는지 댈 수 있소.
     #   나머지 칸과 때·얼굴은 값을 치른 자리에 있소.
-    from . import topic as _topic
-    rows = _topic.scale(f, concern)
-    counted = rows[0] if rows else None
+    counted = _rows[0] if _rows else None
 
     segs.append(_seg(
         stage="3", label="3 · 이름",
@@ -832,8 +910,11 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     seen: set = set()
     for s in segs:
         before = set(seen)
-        s["html"] = terms.gloss(s["html"], seen)
-        s["html"] += terms.picture_box(seen - before)
+        # ★ 물으신 자리를 함께 넘깁니다 (2026-09-07).
+        #   사랑을 물은 사내에게 재성은 짝 보는 글자인데 「쌓는 재물」로
+        #   풀려 나갔습니다. 괄호와 비유가 **같은 층**이라야 합니다.
+        s["html"] = terms.gloss(s["html"], seen, concern, f.sex)
+        s["html"] += terms.picture_box(seen - before, concern, f.sex)
 
     # ★ 뱅크에 박아 둔 「그대」를 그 캐릭터의 호칭으로 바꿉니다.
     #

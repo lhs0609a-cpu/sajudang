@@ -73,7 +73,11 @@ def test_hook_with_matching_axis4_still_speaks(f):
     segs = bank.build_hook(f, "love", same)
     seg = next(s for s in segs if s["stage"] == "2.5")
     assert "겹" in seg["html"]
-    assert seg["statement_id"] == "axis:4:%s:-:%s" % (same, f.strength)
+    # ★ 2.5단이 **물으신 자리의 얼굴** 한 줄을 더 답니다 (2026-09-07).
+    #   그래서 열쇠 뒤에 `faceline:<고민>:<축>` 이 붙습니다 — 같은 넉 자라도
+    #   무엇을 물었는지에 따라 다른 문장이 나가므로 집계가 갈려야 합니다.
+    assert seg["statement_id"].startswith("axis:4:%s:-:%s" % (same, f.strength))
+    assert ":faceline:love:" in seg["statement_id"], seg["statement_id"]
 
 
 def test_deep_reading_only_for_three_or_more_gaps(f):

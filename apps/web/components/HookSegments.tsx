@@ -16,6 +16,20 @@ import { speakRemote } from "@/lib/sound";
 import { track } from "@/lib/track";
 import type { HookSegment } from "@shared/chart";
 
+/*
+ * 노출 수를 화면에 낼 **바닥값** (2026-09-07).
+ *
+ * ★ 손님 화면에 「이 문장을 1명이 받아 갔소」가 나갔습니다. 그 자리는
+ *   사회적 증거로 두었는데, 1명은 증거가 아니라 **반대 증거**로 읽힙니다
+ *   — "아무도 안 봤다". 같은 화면에서 어떤 단은 1명, 어떤 단은 12명이라
+ *   그 차이도 그대로 드러났습니다.
+ *
+ * ★ 서버는 그대로 정직하게 셉니다(`repo.exposure`). 감추는 것은
+ *   **그리는 자리**뿐이고, 지어내는 숫자는 없습니다. 공감률을 100건
+ *   전까지 안 그리는 것과 같은 까닭입니다.
+ */
+const MIN_SEEN_TO_DRAW = 30;
+
 function Agreement({ statementId }: { statementId: string }) {
   const [data, setData] = useState<
     { shown: boolean; rate?: number; total?: number; seen?: number } | null>(null);
@@ -34,7 +48,7 @@ function Agreement({ statementId }: { statementId: string }) {
   //   않고 낼 수 있습니다 — 정확도 주장이 아니라 사실 진술입니다.
   //   0이면 아무것도 안 그립니다.
   if (!data.shown || data.rate == null) {
-    if (!data.seen) return null;
+    if (!data.seen || data.seen < MIN_SEEN_TO_DRAW) return null;
     return (
       <div className="agr seen">
         <span className="dot" />

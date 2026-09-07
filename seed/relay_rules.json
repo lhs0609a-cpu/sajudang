@@ -386,6 +386,204 @@
    },
    "reason": "몸을 물으셨는데 이름 붙은 자리가 여럿이오",
    "reach": 0.413
+  },
+  {
+   "id": "r_yeondam_love",
+   "lens_id": "yeondam",
+   "priority": 71,
+   "when_concern": "love",
+   "condition": {
+    "field": "ilji_chung",
+    "op": "==",
+    "value": true
+   },
+   "reason": "사랑을 물으셨소. 곁자리가 한 번 갈리는 배치요 — {day_ji_iga} 부딪히오",
+   "reach": 0.206
+  },
+  {
+   "id": "r_hongmae_love",
+   "lens_id": "hongmae",
+   "priority": 70,
+   "when_concern": "love",
+   "condition": {
+    "field": "gwan_and_jae",
+    "op": ">=",
+    "value": 1
+   },
+   "reason": "사랑을 물으셨소. 짝을 보는 글자와 틀을 잡는 글자가 함께 있소",
+   "reach": 0.567
+  },
+  {
+   "id": "r_jeokhyeol_love",
+   "lens_id": "jeokhyeol",
+   "priority": 63,
+   "when_concern": "love",
+   "condition": {
+    "field": "flow",
+    "op": "==",
+    "value": "식상"
+   },
+   "reason": "사랑을 물으셨소. 힘이 내놓는 쪽으로 도오 — 먼저 표가 나는 결이오",
+   "reach": 0.223
+  },
+  {
+   "id": "r_monghwa_people",
+   "lens_id": "monghwa",
+   "priority": 71,
+   "when_concern": "people",
+   "condition": {
+    "field": "sinsal_bad",
+    "op": ">=",
+    "value": 1
+   },
+   "reason": "사람을 물으셨소. 이름 붙은 살이 그대 자리에 앉았소",
+   "reach": 0.413
+  },
+  {
+   "id": "r_eunbyeol_people",
+   "lens_id": "eunbyeol",
+   "priority": 70,
+   "when_concern": "people",
+   "condition": {
+    "field": "strength",
+    "op": "==",
+    "value": "신약"
+   },
+   "reason": "사람을 물으셨소. 그대는 제 힘을 남에게 먼저 내주는 쪽이오",
+   "reach": 0.108
+  },
+  {
+   "id": "r_myeonsang_people",
+   "lens_id": "myeonsang",
+   "priority": 64,
+   "when_concern": "people",
+   "condition": {
+    "field": "helper_pillars",
+    "op": ">=",
+    "value": 2
+   },
+   "reason": "사람을 물으셨소. 그대를 돕는 자리가 여러 기둥에 걸쳐 있소",
+   "reach": 0.558
+  },
+  {
+   "id": "r_pungun_work",
+   "lens_id": "pungun",
+   "priority": 73,
+   "when_concern": "work",
+   "condition": {
+    "field": "top_ten_god",
+    "op": "in",
+    "value": [
+     "상관",
+     "편관"
+    ]
+   },
+   "reason": "일을 물으셨소. 밀고 부딪히는 자리가 그대를 이끄오 — {top_ten_god}이오",
+   "reach": 0.198
+  },
+  {
+   "id": "r_sigye_work",
+   "lens_id": "sigye",
+   "priority": 71,
+   "when_concern": "work",
+   "condition": {
+    "field": "daeun_years_left",
+    "op": "<=",
+    "value": 3
+   },
+   "reason": "일을 물으셨소. 판이 바뀌는 어름에 서 계시오",
+   "reach": 0.308
+  },
+  {
+   "id": "r_hunjang_work",
+   "lens_id": "hunjang",
+   "priority": 65,
+   "when_concern": "work",
+   "condition": {
+    "field": "inn",
+    "op": ">=",
+    "value": 2
+   },
+   "reason": "일을 물으셨소. 배우고 기대는 자리가 여럿이오",
+   "reach": 0.385
+  },
+  {
+   "id": "r_baegun_dir",
+   "lens_id": "baegun",
+   "priority": 63,
+   "when_concern": "dir",
+   "condition": {
+    "field": "temp_gap",
+    "op": ">=",
+    "value": 2.0
+   },
+   "reason": "갈 곳을 물으셨소. 차고 더운 것이 크게 갈리오",
+   "reach": 0.255
+  },
+  {
+   "id": "r_seoyeok_dir",
+   "lens_id": "seoyeok",
+   "priority": 62,
+   "when_concern": "dir",
+   "condition": {
+    "field": "hour_known",
+    "op": "==",
+    "value": false
+   },
+   "reason": "갈 곳을 물으셨는데 시주가 없소. 땅의 셈이 모자라니 하늘로도 대 보겠소",
+   "reach": 0.144
+  },
+  {
+   "id": "r_paeseon_dir",
+   "lens_id": "paeseon",
+   "priority": 56,
+   "when_concern": "dir",
+   "condition": {
+    "field": "top_ten_god_tied",
+    "op": "==",
+    "value": true
+   },
+   "reason": "갈 곳을 물으셨소. 주도하는 자리가 둘로 갈려 한쪽이라 못 박기 어렵소",
+   "reach": 0.433
+  },
+  {
+   "id": "r_haengsu_money2",
+   "lens_id": "haengsu",
+   "priority": 73,
+   "when_concern": "money",
+   "condition": {
+    "field": "sik",
+    "op": ">=",
+    "value": 2
+   },
+   "reason": "돈을 물으셨소. 만들어 내는 자리가 여럿이오 — 값을 붙이는 데까지 가는지 보오",
+   "reach": 0.399
+  },
+  {
+   "id": "r_ilgwan_money2",
+   "lens_id": "ilgwan",
+   "priority": 69,
+   "when_concern": "money",
+   "condition": {
+    "field": "sinsal_good",
+    "op": ">=",
+    "value": 2
+   },
+   "reason": "돈을 물으셨소. 길신이 여러 자리에 앉았소 — 날을 고를 여지가 있소",
+   "reach": 0.614
+  },
+  {
+   "id": "r_yakcho_health2",
+   "lens_id": "yakcho",
+   "priority": 79,
+   "when_concern": "health",
+   "condition": {
+    "field": "strength",
+    "op": "==",
+    "value": "신약"
+   },
+   "reason": "몸을 물으셨소. 그대는 기운이 넉넉지 않은 쪽이오",
+   "reach": 0.108
   }
  ],
  "forced": {
@@ -422,7 +620,7 @@
   "hour_unknown_share": 0.15,
   "source": "가정값 (DB 없음)"
  },
- "concern_weight": 0.2,
+ "concern_weight": 0.45,
  "concern_say": {
   "money": "그대가 물으신 자리가 이 사람 자리요",
   "work": "그대가 물으신 자리가 이 사람 자리요",

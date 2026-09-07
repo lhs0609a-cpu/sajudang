@@ -14,6 +14,7 @@ import Scene from "@/components/scene/Scene";
 import ExtraAsk from "@/components/ExtraAsk";
 import TopicAsk from "@/components/TopicAsk";
 import Reveal from "@/components/Reveal";
+import ScrollHint from "@/components/ScrollHint";
 import SinsalSlots from "@/components/SinsalSlots";
 import Thinking from "@/components/Thinking";
 import ActOut from "@/components/ActOut";
@@ -850,6 +851,11 @@ function ReportInner() {
         고리에는 <b>생년월일시와 고을이 담기지 않소</b> — 여덟 글자와 읽은
         자리만 가오. 90일이 지나면 스스로 닫히오.
       </p>
+
+      {/* ★ 아래로 — 더 있다는 표시 (2026-09-07).
+          컷이 한 개씩 뜨는데 **내릴 까닭을 화면이 말한 적이 없었습니다.**
+          한 컷을 다 읽은 손님에게는 거기가 끝으로 보입니다. */}
+      <ScrollHint />
     </Shell>
   );
 }

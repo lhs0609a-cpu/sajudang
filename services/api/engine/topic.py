@@ -1101,6 +1101,113 @@ def face(f, concern: str, axis4: Optional[str] = None) -> Optional[dict]:
     }
 
 
+def cut_line(f, cut_id: str, concern: Optional[str]) -> str:
+    """
+    **공통 척추 컷**이 물으신 자리에서 내는 한 줄.
+
+    ★ 손님이 짚은 것 (2026-09-07)
+
+      "고민이 다른데 왜 정답이 다 똑같아."
+
+      전용 컷(`concern_scale` `concern_turn` `concern_face`)은 갈리는데
+      **척추 열 컷이 안 갈렸습니다** — 없는 것 · 희소도 · 지금 어디에 ·
+      필요한 것 · 대운 맵 · 신살 · 귀인 · 조상 · 이번 주 · 마감.
+      그 열이 리포트 분량의 절반이라, 손님에게는 「다 똑같다」로 읽힙니다.
+
+    ★ 컷을 새로 만들지 않습니다. 그 컷이 **이미 센 값**을 물으신 자리의
+      말로 한 번 더 짚습니다 — 뜬 말 뒤에 살림의 말을 붙이는
+      `real.py` 와 같은 자리입니다.
+
+    ★ 모르면 빈 문자열입니다. 지어내지 않습니다.
+    """
+    if not concern:
+        return ""
+    tpl = (table().get("CUT_AT", {}).get(cut_id, {}) or {}).get(concern)
+    if not tpl:
+        return ""
+    from .bank import concern_group
+    w = dict(_words(f))
+    w["grp"] = concern_group(concern, f.sex) or ""
+    return '<p class="tale">%s</p>' % _fmt(tpl, w)
+
+
+def lens_line(lens_id: Optional[str], concern: Optional[str]) -> str:
+    """
+    **이 사람이 그 자리를 보는가** — 관점 컷 앞에 한 번 답니다.
+
+    ★ 손님이 짚은 것 (2026-09-07)
+
+      "캐릭터도 그 캐릭 전문성에 맞게끔 상담해야하고."
+
+      관점 컷은 그 사람의 고정된 눈이라 고민이 바뀌어도 안 갈립니다.
+      그건 버그가 아니오 — 월하선녀가 돈 얘기를 하면 그건 월하선녀가
+      아닙니다. 어긋난 것은 **그 사람이 제 자리인지 아닌지를 말하지
+      않는다**는 것이었습니다.
+
+      그래서 두 줄만 둡니다 —
+        · 제 자리면  「사랑이라면 내 자리예요. 저는 곁자리부터 봐요」
+        · 아니면     「물으신 건 제 자리가 아니에요. 저는 곁자리만 봐요」
+
+      아닌 것을 아니라고 말하는 것이 이 집의 방식입니다. 감추면
+      손님은 「왜 몸 보는 사람이 사랑을 말하지」 하고 멈춥니다.
+    """
+    if not lens_id:
+        return ""
+    t = table()
+    on = (t.get("LENS_ON", {}).get(lens_id, {}) or {}).get(concern or "")
+    say = on or t.get("LENS_OFF", {}).get(lens_id, "")
+    if not say:
+        return ""
+    return '<p class="tale %s">%s</p>' % ("hit" if on else "sm", say)
+
+
+def face_line(f, concern: str, axis4: Optional[str] = None) -> Optional[dict]:
+    """
+    훅 2.5단에 붙는 **한 줄.** 넉 자가 물으신 자리에서 내는 얼굴.
+
+    ★ 왜 한 줄인가 (2026-09-07)
+
+      손님이 짚었소 — "사랑에 대한건데 사랑에 대해서는 전혀 말하지
+      않아." 재보니 훅 2.5단이 230~424자로 다섯 단 중 가장 긴데
+      **고민 낱말이 0회**였소. 넉 자 대조는 성격만 보고 물으신 자리를
+      안 봤소.
+
+    ★ 네 축을 다 내지는 않소. 그건 값을 치른 자리(`concern_face`)요.
+      **어긋난 축이 있으면 그 첫 축**, 없으면 첫 축 하나만 냅니다 —
+      저울을 첫 칸만 내는 것(`free_line`)과 같은 셈법이오.
+    """
+    from .bank import AXES, saju_axis
+    axes = table()["AXIS_OF"].get(concern)
+    if not axes:
+        return None
+    idx = dict(AXES)
+    mine_all = saju_axis(f)
+    said = (axis4 or "").upper()
+    usable = len(said) == 4
+
+    same_rows, gap_rows = [], []
+    for key in axes:
+        mine = mine_all[key]
+        ch = said[idx[key]] if usable else ""
+        if not ch or ch not in key:
+            ch = mine
+        (same_rows if ch == mine else gap_rows).append((key, ch, mine))
+    row = (gap_rows or same_rows or [None])[0]
+    if not row:
+        return None
+    key, ch, mine = row
+
+    if ch == mine:
+        say = ('<p class="hit"><b>%s</b> %s</p>'
+               % (ch, _pick("AXIS_FACE", ch, concern)))
+        sid = "faceline:%s:%s" % (concern, ch)
+    else:
+        say = ('<p class="hit"><b>%s → %s</b> %s</p>'
+               % (mine, ch, _pick("AXIS_GAP", "%s→%s" % (mine, ch), concern)))
+        sid = "faceline:%s:%s→%s" % (concern, mine, ch)
+    return {"say": say, "ev": _axis_counted(f, key), "sid": sid}
+
+
 # ══════════════════════════════════════════════════════════
 # 물음 — 더 물어야 할 것 하나
 # ══════════════════════════════════════════════════════════

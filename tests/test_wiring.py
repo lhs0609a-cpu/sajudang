@@ -13,6 +13,7 @@ import pytest
 
 import store
 from engine import bank
+from engine import topic
 from engine.calendar import build_chart
 from engine.constants import ELEMENT_OF_GAN, HIDDEN, ten_god
 from engine.features import build_features
@@ -175,18 +176,32 @@ def _sentences(f, concern="love"):
 def _hook_key(f, concern="love"):
     grp = bank.concern_group(concern, f.sex)
     asked = getattr(f, bank.GROUP_TOTAL[grp])
+    # ★ 열쇠가 넓어졌습니다 (2026-09-07).
+    #
+    #   훅이 물으신 자리를 **세기** 시작했습니다 — 2단은 저울 둘째 칸,
+    #   2.5단은 넉 자가 그 자리에서 내는 얼굴, 3단은 저울 첫 칸.
+    #   저울은 일지·궁위·투출·합충까지 보므로 아홉 값으로는 더 이상
+    #   문장이 정해지지 않습니다. 그 값들을 열쇠에 함께 넣습니다.
+    rows = topic.scale(f, concern)
+    fl = topic.face_line(f, concern, None)
     return (tuple(getattr(f, x) for x in HOOK_KEYS)
-            + (bank.born_season(f), grp, min(asked, 4)))
+            + (bank.born_season(f), grp, min(asked, 4),
+               topic.scale_sid(concern, rows), fl["sid"] if fl else "-"))
 
 
-def test_bank_sentence_choice_is_fully_determined_by_nine_values():
+def test_bank_sentence_choice_is_fully_determined_by_its_axes():
     """
-    **어떤 문장이 뽑히는가** 는 이 아홉 값으로 완전히 결정된다.
+    **어떤 문장이 뽑히는가** 는 이 값들로 완전히 결정된다.
         고민 · 약오행 · 주도십신 · 신강약 · 흐름 · 일간 · 태어난 계절
-        · 성별 · 물은 자리의 개수
+        · 성별 · 물은 자리의 개수 · **저울 칸** · **넉 자 얼굴**
 
-    일지·대운·용신·신살은 아직 문장 '선택' 에 관여하지 않는다.
-    축을 더 넣어 개인화를 깊게 하면 이 테스트가 깨진다 — 깨지는 게 진전이다.
+    ★ 이 테스트는 전에 「아홉 값」이었고, 그 문서에 이렇게 적혀
+      있었습니다 — *"축을 더 넣어 개인화를 깊게 하면 이 테스트가
+      깨진다. 깨지는 게 진전이다."* 2026-09-07 에 깨졌고, 그래서
+      열쇠를 넓혔습니다.
+
+    ★ 여전히 잡는 것: 같은 값인데 문장이 갈리는 자리. 열쇠에 없는
+      무엇이 몰래 문장을 고르고 있으면 여기서 터집니다.
     """
     seen = {}
     for c, f in people(400):
