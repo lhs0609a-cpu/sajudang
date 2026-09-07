@@ -4,6 +4,7 @@ import hashlib
 from fastapi import APIRouter, HTTPException
 
 import store
+from version import ENGINE_VER
 from engine.calendar import build_chart
 from engine.features import build_features
 from engine.solar_terms import SolarTermError
@@ -15,6 +16,11 @@ router = APIRouter(prefix="/v1", tags=["chart"])
 # 쓰므로 한 사람의 여정보다는 넉넉히 길어야 합니다. 90일이면 회고 루프와
 # 공유 링크(90일)까지 덮습니다.
 CHART_TTL = 90 * 24 * 3600
+
+
+def _k_ver(key: str) -> str:
+    """이 명식을 **어느 판으로** 세웠는가."""
+    return "chartver:%s" % key
 
 
 def chart_key(req: ChartRequest) -> str:
@@ -173,6 +179,19 @@ def _rarity(feat: dict) -> dict | None:
 def post_chart(req: ChartRequest) -> ChartResponse:
     key = chart_key(req)
     cached = store.get_json(store.k_chart(key))
+    # ★ 「같은 입력이면 같은 결과」는 **엔진이 안 바뀔 때만** 참이오
+    #   (2026-09-07).
+    #
+    #   이 집은 신살·용신·대운 정책을 고치는 집이오. 그런데 열쇠에
+    #   판이 없어서, 고쳐도 **이미 계산된 손님에게는 90일 동안 옛
+    #   명식이 나갔소.** 홍염을 넣고 배포한 뒤 실제로 그랬소 —
+    #   처음 오는 사람에게는 뜨고, 전에 온 사람에게는 안 떴소.
+    #
+    #   판이 다르면 캐시를 안 쓰고 다시 세우오. 열쇠(chart_id)는
+    #   그대로 두오 — 바꾸면 이미 치른 주문과 리포트가 딴 명식을
+    #   가리키오.
+    if cached is not None and store.get_json(_k_ver(key)) != ENGINE_VER:
+        cached = None
     if cached is not None:
         return ChartResponse(chart_id=key, features=cached, cached=True,
                              rarity=_rarity(cached),
@@ -194,6 +213,8 @@ def post_chart(req: ChartRequest) -> ChartResponse:
     # 저장소가 줄어들 힘이 하나도 없습니다. 만료돼도 다음 요청에 다시
     # 만들어지므로 사용자에게는 아무 차이가 없습니다.
     store.set_json(store.k_chart(key), features, ttl=CHART_TTL)
+    # 어느 판으로 세웠는지 함께 찍습니다 — 명식과 같은 만기로.
+    store.set_json(_k_ver(key), ENGINE_VER, ttl=CHART_TTL)
     return ChartResponse(chart_id=key, features=features, cached=False,
                          rarity=_rarity(features),
                          divergence=_divergence(req))

@@ -157,7 +157,11 @@ def main() -> int:
             bad.append("%s: %s" % (k, " ".join(v)))
 
     # ── ④ 초상과 신살 인물 ──────────────────────────────
-    print("\n[4] 초상 20인 · 신살 인물 13")
+    #
+    # ★ 수를 손으로 적으면 하나 늘 때마다 어긋납니다. 홍염을 넣으니
+    #   머리글은 「13」인데 아래는 「14개」였습니다 (2026-09-07).
+    print("\n[4] 초상 %d인 · 신살 인물 %d"
+          % (len(d.get("chars", {})), len(d.get("figures", {}))))
     for kind, ko in (("chars", "초상"), ("figures", "신살 인물")):
         rows = d.get(kind, {})
         no_mood = [k for k, v in rows.items()

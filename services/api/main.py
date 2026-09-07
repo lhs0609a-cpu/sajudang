@@ -28,14 +28,16 @@ import store                                         # noqa: E402
 from guard_middleware import GuardMiddleware         # noqa: E402
 from routers import (                                # noqa: E402
     chart, daily, events, feedback, hook, pay, relay, report, share,
-    voice as voice_router, admin as admin_router,
+    subscription, voice as voice_router, admin as admin_router,
 )
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(levelname)-5s [%(name)s] %(message)s")
 
-ENGINE_VER = "0.2.0"     # ★ 만세력을 고치면 올리세요. charts.engine_ver 에 남습니다.
+# 엔진 판은 version.py 한 자리에 삽니다 — 라우터도 봐야 하는데
+# 여기 두면 돌아가는 임포트가 생깁니다.
+from version import ENGINE_VER  # noqa: E402,F401
 
 # 브라우저가 이 API 를 부를 수 있는 출처. 쉼표로 여러 개.
 #   CORS_ORIGINS=https://sajudang-three.vercel.app,http://localhost:3000
@@ -150,8 +152,8 @@ async def _http_error(request: Request, exc: StarletteHTTPException):
                         content={"detail": detail},
                         headers=getattr(exc, "headers", None))
 
-for r in (chart, hook, report, relay, feedback, daily, pay, share, events,
-          voice_router, admin_router):
+for r in (chart, hook, report, relay, feedback, daily, pay, subscription,
+          share, events, voice_router, admin_router):
     app.include_router(r.router)
 
 
