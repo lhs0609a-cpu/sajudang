@@ -20,6 +20,8 @@ from . import bank as bank_mod
 from . import calendar as cal_mod
 from . import extras as extras_mod
 from . import guard
+from . import heart as heart_mod
+from . import depth as depth_mod
 from . import lens as lens_mod
 from . import lens_cuts as lens_cuts_mod
 from . import pattern as _pattern
@@ -28,6 +30,8 @@ from . import why as _why
 from . import bite as _bite
 from . import flavor as _flavor
 from . import sinsal as sinsal_mod
+from . import sinsal_read
+from . import skim as skim_mod
 from . import terms as terms_mod
 from . import topic as topic_mod
 from . import voice as voice_mod
@@ -97,7 +101,18 @@ TIER_LEVEL = {"free": 0, "one": 1, "all": 2, "sub": 1}
 #   문턱만 적습니다. 캐릭터 값은 seed/lenses.json 한 곳에 있고
 #   payments.price_of 가 그걸 청구합니다. 값이 두 벌이 되면 또
 #   어긋납니다 — 그 사고가 실제로 있었습니다.
-PRICE_RUNGS = ((12900, "daeun_map"), (15900, "axis"))
+# ★ 값이 여는 것을 **개수에서 종류로** 바꿨습니다 (2026-09-07).
+#
+#   전에는 19,900원이 9,900원보다 관점 컷을 일곱 더 줬는데, 그 일곱도
+#   같은 꼴의 진단문이었습니다. 손님 눈에는 「더 길다」로 보이지
+#   「더 깊다」로 안 보입니다 — 두 배 값의 근거가 분량뿐이면 그건
+#   값이 아니라 눈금입니다.
+#
+#   그래서 싼 자리에는 **아예 없는 종류**를 답니다 (engine/depth).
+#       hindsight  지나온 자리    틀릴 수 있는 말을 먼저 한다
+#       counter    내가 틀렸다면  제 해석의 반증 조건을 스스로 단다
+PRICE_RUNGS = ((12900, "daeun_map"), (15900, "axis"),
+               (15900, "hindsight"), (19900, "counter"))
 
 
 def rungs_at(price: int) -> set:
@@ -282,7 +297,14 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     ]
     cuts.append(_cut(
         "chart", "명식",
-        _why.line("여덟 글자" if f.hour_known else "여섯 글자",
+        # ★ 근거 줄에 **센 수**를 답니다 (2026-09-07).
+        #   아라비아 숫자가 든 근거 줄이 25%뿐이었습니다
+        #   (engine/worth — 100점 표에서 가장 낮은 칸, 8점).
+        #   세는 값은 이미 다 있었습니다. 대기만 했습니다.
+        _why.line(("여덟 글자" if f.hour_known else "여섯 글자")
+                  + " · 대운수 %d · 진태양시 %+.0f분"
+                  % (f.daeun[0]["start_age"],
+                     (f.correction or {}).get("lon_min") or 0),
                   "월지", "강약"),
         ('<div class="pillars">%s</div><div class="calc">%s</div>%s'
          % ("".join('<div class="p"><span class="lb">%s</span><b>%s</b></div>'
@@ -417,6 +439,37 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
          + _bite.html(concern, top, f.strength, bit)),
         0, sid="why:%s:%s:%s:%s" % (top, concern, f.strength, f.flow)))
 
+    # ── 위로 — 가장 아픈 말 **바로 뒤** ──────────────────
+    #
+    # ★ 손님이 짚었습니다 (2026-09-07) — "희망도 주고 위로도 주고."
+    #
+    #   재보니 19,900원짜리 스물아홉 컷이 **전부 진단**이었습니다.
+    #   앞을 보는 자리는 「이번 주 한 가지」 하나뿐이고, 유일하게
+    #   따뜻한 「누가 돕는가」는 236자로 가장 짧고 스물두 번째에
+    #   묻혀 있었습니다. 손님은 12,000자짜리 진단서를 받습니다.
+    #
+    # ★ 자리가 여기인 까닭
+    #   바로 앞이 이 리포트에서 가장 아픈 말입니다(why · 팩폭).
+    #   아프게 해 놓고 그대로 다음 진단으로 넘어가면 그건 진단서지
+    #   상담이 아닙니다. 아픈 말 다음에 받쳐 주는 자리를 둡니다.
+    #
+    # ★ 위로도 **셈에서** 나옵니다 (engine/heart).
+    #   "괜찮다"가 아니라 "그건 그대 탓이 아니라 구조다"를 세어
+    #   보입니다. 희소도가 흔하면 「혼자가 아니오」, 드물면
+    #   「이해받기 어려웠던 게 당연하오」 — 둘 다 참입니다.
+    cuts.append(_cut(
+        "solace", "그대 탓이 아닌 자리",
+        # ★ 이치 열쇠는 **아는 이름**이라야 붙습니다 (engine/why.rule_of).
+        #   「오행」 은 그 표에 없는 말이라 이치도 출처도 안 붙었습니다 —
+        #   tests/test_evidence 가 24회를 잡았습니다. 신강약으로 답니다.
+        _why.line("%s %d · %s(%d) · 희소도 %s"
+                  % (element_word(f.weak_el), _visible(f, f.weak_el),
+                     f.strength, f.strength_score, rr["words"]),
+                  f.strength, "십신"),
+        heart_mod.solace(f, you, bank_mod.concern_word(concern), rr),
+        0, sid="solace:%s:%s:%s:%s"
+               % (f.weak_el, f.strength, top, rr["band"])))
+
     # ── 4 · 어느 자리에서 ────────────────────────────────
     if f.ilji_chung:
         place = ('일지 <b>%s</b>가 부딪히고 있소. 사람 자리가 조용할 수 없는 배치요.'
@@ -434,8 +487,9 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     # ★ 곱하는 축에 **일간(10)** 을 더했습니다.
     cuts.append(_cut(
         "place", "3 · 어느 자리에서",
-        _why.line("일지 %s%s · %s일간"
-                  % (f.day_ji, " 충" if f.ilji_chung else "", f.day_gan),
+        _why.line("일지 %s%s · %s일간 · 관성 %d · 재성 %d · 식상 %d"
+                  % (f.day_ji, " 충" if f.ilji_chung else "", f.day_gan,
+                     f.gwan, f.jae, f.sik),
                   "일지", "십신"),
         # ★ 셀 수 있는 줄. 이 컷은 일지·일간을 보면서 **개수를 안 냈습니다** —
         #   그래서 틀릴 수가 없었습니다. 관·재·식상을 세어 박습니다.
@@ -533,7 +587,9 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     season = bank_mod.born_season(f)
     cuts.append(_cut(
         "yongsin", "5 · 필요한 것",
-        _why.line("용신 %s · %s생 · %s" % (f.yongsin, season, top),
+        _why.line("용신 %s(%d) · %s생 · %s %d"
+                  % (f.yongsin, _visible(f, f.yongsin), season, top,
+                     f.ten_gods[top]),
                   "용신", "용신"),
         ('<p class="tale">그대에게 필요한 건 <b>%s</b>이오.</p>'
          '<p class="tale">%s</p>'
@@ -605,7 +661,18 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     if f.sinsal:
         rows = []
         said_palace: set = set()
-        for sv in f.sinsal:
+        # ★ 물으신 자리로 **갈라 세웁니다** (2026-09-07).
+        #
+        #   재보니 이 컷이 1,651자로 리포트의 11%인데, 스무 사람에게
+        #   여섯 고민에 **글자 그대로 같은 글**이 나갔습니다 (사람 축
+        #   94% · 고민 축 98% 겹침 — tools/same_audit.py). 한 장에서
+        #   낭비되는 글자가 여기서만 1,550자였습니다.
+        #
+        #   까닭은 순서였습니다. 여덟을 **전부 펴 놓고** 맨 끝에
+        #   「이 가운데 일에서 보던 것은 셋이오」 라 적고 있었습니다.
+        #   먼저 고르고 나서 폅니다 (engine/sinsal_read).
+        on, off = sinsal_read.split(list(f.sinsal), concern)
+        for sv in on:
             m = T["meaning"].get(sv["key"], {})
             # ★ 이름과 한자만 있고 **뜻이 없었습니다** (2026-09-03).
             #
@@ -662,7 +729,18 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
                    #   값을 치르고 보는 리포트에만 없었습니다.
                    sv["key"],
                    m.get("text", ""), mine,
-                   ('<p class="sm">%s</p>' % m["caution"]) if m.get("caution") else ""))
+                   # ★ 궁위에 **나이**를 박고, 대 볼 수 있는 한 줄을 답니다.
+                   #   docs/14 §6 에 나이 구간이 확정돼 있는데 한 번도
+                   #   안 쓰이고 있었습니다. 나이가 박히면 사전이
+                   #   **틀릴 수 있는 말**이 됩니다.
+                   sinsal_read.when_line(sv, f.age)
+                   # ★ 같은 신살도 **앉은 자리의 십신**이 다르면 다른
+                   #   것이오 (docs/14 §6). 이 줄이 없어 남과 62%가
+                   #   겹치고 있었습니다 — 리포트에서 가장 큰 컷인데.
+                   + sinsal_read.whose_line(f, sv)
+                   + sinsal_read.check_line(sv)
+                   + (('<p class="sm">%s</p>' % m["caution"])
+                      if m.get("caution") else "")))
         # ★ 「귀인」 은 terms 표에 두지 않습니다 — 「태극귀인」 안쪽에
         #   걸려 이름이 「태극귀인(옛사람이 좋게 본…)」 이 됩니다.
         #   묶음말은 여기서 한 번에 풉니다.
@@ -671,7 +749,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
                 '<b>귀인</b>이라 이름을 붙였소. 조심해 보던 것은 <b>살</b>, '
                 '어느 쪽도 아닌 것은 <b>특수</b>요. '
                 '복이나 화를 보장하는 표가 아니라 <b>자리를 가리키는 '
-                '표</b>요.</p>') + "".join(rows)
+                '표</b>요.</p>') + "".join(rows) + sinsal_read.folded(off)
     else:
         body = '<p class="tale">%s</p>' % T["none"]["sinsal"]
     cuts.append(_cut(
@@ -680,7 +758,8 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
                   "신살", "신살"),
         body + '<p class="sm">신살 표는 유파마다 다르오. 우리가 쓰는 표를 '
                '문서에 적어 두었소.</p>',
-        0, sid="sinsal:%s" % ",".join(x["key"] for x in f.sinsal)))
+        0, sid="sinsal:%s:%s" % (concern,
+                                 ",".join(x["key"] for x in on))))
 
     # ── 7c · 누가 돕는가 ──────────────────────────────────
     if f.helpers:
@@ -1042,11 +1121,61 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     #   먹었습니다 — 20가지가 상한이라 문장을 더 써도 안 늘어납니다.
     #   셋째는 **고른 축**인 일간(최다 10.7%)이고, 앞의 둘과 서로
     #   무관합니다. (docs/18 §3 이 이미 적어 둔 자리입니다)
+    # ── 깊이 자리 — **비싼 자리만** 여는 다른 종류 ──────
+    #
+    # ★ 손님이 물었습니다 — "비싼 캐릭터들은 더 심층적으로 다각도로
+    #   분석해서 설계해놨어? 그 돈이 전혀 아깝지 않아야 해."
+    #
+    #   아니었습니다. 값이 여는 것이 같은 꼴의 진단문 일곱이었습니다.
+    #   여기 둘은 **싼 자리에 아예 없는 종류**입니다 (PRICE_RUNGS).
+    back = depth_mod.hindsight(f, concern, bank_mod.concern_word(concern))
+    if back:
+        cuts.append(_cut(
+            "hindsight", "지나온 자리",
+            _why.line("대운 %d칸 · %s" % (f.daeun_now,
+                                          f.daeun[f.daeun_now]["gz"]),
+                      "대운", "용신"),
+            back, 2,
+            sid="hindsight:%d:%s:%s" % (f.daeun_now,
+                                        f.daeun[max(f.daeun_now - 1, 0)]["ten_god"],
+                                        concern)))
+    cuts.append(_cut(
+        "counter", "내가 틀렸다면",
+        _why.line("%s 주도 %d · %s(%d) · %s %d"
+                  % (top, f.ten_gods[top], f.strength, f.strength_score,
+                     element_word(f.weak_el), _visible(f, f.weak_el)),
+                  top, "십신"),
+        depth_mod.counter(f, concern, bank_mod.concern_word(concern)), 2,
+        sid="counter:%s:%s:%s:%s" % (top, f.strength, f.weak_el, concern)))
+
+    # ── 희망 — 처방 **앞** ──────────────────────────────
+    #
+    # ★ 「좋아질 것이오」는 못 씁니다. 검증 불가능한 주장이고 시점
+    #   확정 금지에 걸립니다 (docs/11). 대신 **가진 것**을 셉니다 —
+    #   손님이 만세력을 펴고 세어 볼 수 있는 말입니다.
+    #
+    # ★ 자리가 여기인 까닭
+    #   바로 뒤가 처방(week)입니다. 「이걸 하시오」 앞에 「그대가 이미
+    #   쥔 것은 이것이오」가 서야 처방이 숙제가 아니라 쓸 수 있는 힘이
+    #   됩니다. 없는 것만 스물여덟 번 세고 나서 숙제를 주면 그건
+    #   진단서 끝에 붙은 청구서입니다.
+    cuts.append(_cut(
+        "hope", "이미 쥐고 있는 것",
+        _why.line("%s %d · 용신 %s %d · %d살"
+                  % (element_word(f.strong_el), _visible(f, f.strong_el),
+                     element_word(f.yongsin) if f.yongsin else "없음",
+                     _visible(f, f.yongsin) if f.yongsin else 0, int(f.age)),
+                  "용신", "용신"),
+        heart_mod.hope(f, you, bank_mod.concern_word(concern), _visible),
+        1, sid="hope:%s:%s:%s:%d"
+               % (f.strong_el, f.yongsin, top, min(int(f.age) // 10, 9))))
+
     season = bank_mod.born_season(f)
     cuts.append(_cut(
         "week", "이번 주 한 가지",
-        _why.line("%s · %s생 · %s일간"
-                  % (element_word(f.yongsin), season, f.day_gan),
+        _why.line("%s %d · %s생 · %s일간 · %d살"
+                  % (element_word(f.yongsin), _visible(f, f.yongsin),
+                     season, f.day_gan, int(f.age)),
                   "용신", "용신"),
         ('<p class="tale">%s</p><p class="tale">%s</p>'
          '<p class="tale">%s</p>'
@@ -1086,7 +1215,8 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         '그건 글자에 없소.</p>',
     ]
     cuts.append(_cut(
-        "closing_cut", "덮으며", _why.line("여덟 글자 하나", "명식", ""),
+        "closing_cut", "덮으며", _why.line("여덟 글자 · %d살 · 다음 대운 %d살"
+                            % (int(f.age), _close_age(f)), "명식", ""),
         "".join(close_bits), 0,
         sid="close:%s:%s" % (f.strength, weak)))
 
@@ -1112,6 +1242,14 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         c["statement_id"] = "%s@%s" % (c["statement_id"], concern)
 
     return cuts, extra_error
+
+
+def _close_age(f) -> int:
+    """다음 대운이 드는 나이. 없으면 지금 나이 — 지어내지 않습니다."""
+    for d in (f.daeun or []):
+        if int(d.get("start_age", 0)) > int(f.age):
+            return int(d["start_age"])
+    return int(f.age)
 
 
 def _close_turn(f) -> str:
@@ -1199,6 +1337,33 @@ def apply_view(cuts: list, view: dict) -> list:
         #   이것입니다 — 기억은 마지막이 지배하기 때문입니다(peak-end).
         if c["id"] == "closing_cut":
             return (4, 0)
+        # ★ 끝 세 자리를 **감정 곡선**으로 고정합니다 (2026-09-07).
+        #
+        #       희망(hope) → 처방(week) → 마감(closing_cut)
+        #
+        #   「이걸 하시오」 앞에 「그대가 이미 쥔 것은 이것이오」 가
+        #   서야 처방이 숙제가 아니라 쓸 수 있는 힘이 됩니다. 없는
+        #   것만 스물여덟 번 세고 나서 숙제를 주면 그건 진단서 끝에
+        #   붙은 청구서입니다.
+        if c["id"] == "hope":
+            return (3, 5)
+        if c["id"] == "week":
+            return (3, 6)
+        # ★ 위로는 **가장 아픈 말 바로 뒤**입니다.
+        #
+        #   아프게 해 놓고 그대로 다음 진단으로 넘어가면 그건 상담이
+        #   아니라 진단서입니다.
+        #
+        # ★ 자리를 따로 매기지 않고 **`why` 와 같은 값**을 줍니다.
+        #   `_all_cuts` 에서 위로가 아픈 말 바로 뒤에 서 있고 정렬이
+        #   안정 정렬이라, 같은 값이면 그 차례가 그대로 지켜집니다.
+        #
+        #   처음엔 「lead 면 (1,0.5) 아니면 (2,0)」 이라 적었는데,
+        #   `why` 를 뒤로 미뤄 둔 캐릭터(mute)에서는 위로가 아픈 말보다
+        #   **열네 컷 앞에** 서 버렸습니다. 자리를 두 벌로 적으면
+        #   언젠가 갈립니다 — 한 벌만 둡니다.
+        if c["id"] == "solace":
+            return key({"id": "why"})
         if c["id"] == lead:
             return (1, 0)
         # ★ 그 캐릭터만 보는 자리는 앞쪽에 둡니다. 값을 치르고 이 사람을
@@ -1359,6 +1524,11 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
             lc_nth += 1
         else:
             c["html"] = _flavor.figure(c["html"], c["id"], fig_pick)
+        # ★ 밑줄 자리는 **말투 층 앞에서** 잡습니다.
+        #   뱅크의 시키는 말은 「…시오」 한 꼴인데, 말투 층이 그걸
+        #   캐릭터마다 갈아 끼웁니다 — 하게체·반말에서는 서술 어미와
+        #   같은 꼴이 되어 뒤에서는 처방을 못 가립니다.
+        do_spot = skim_mod.find_do(c["html"])
         c["html"] = terms_mod.gloss(
             voice_mod.speak(voice_mod.address(c["html"], you), tone), seen,
             concern, f.sex)
@@ -1378,6 +1548,19 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
             voice_mod.address(
                 terms_mod.picture_box(seen - before, concern, f.sex), you),
             tone)
+        # ★ 훑어읽기 층 — **맨 끝**입니다 (2026-09-07).
+        #
+        #   손님이 짚었습니다 — "전체 글 다 안 읽을거니까 … 그것만
+        #   읽어도 다 이해가 되게끔." 한 장이 29컷 12,582자입니다.
+        #
+        #   말투 층보다 **뒤**라야 합니다. 밑줄은 「…하시오」 같은
+        #   처방 어미를 찾는데, 그 어미는 캐릭터마다 갈립니다
+        #   (하오체 「보시오」 · 해요체 「보세요」). 앞에서 돌면
+        #   갈아 끼우기 전 어미만 보고 절반을 놓칩니다.
+        #
+        #   글자는 하나도 안 바꿉니다. 태그만 답니다 — 그래서
+        #   분량·중복률·주어 감사가 재는 값은 그대로입니다.
+        c["html"] = skim_mod.mark(c["html"], do_spot)
         # ★ 근거 줄에도 **호칭만** 갈아 끼웁니다 (2026-09-04).
         #
         #   근거의 이치는 「관성은 나를 누르는 자리라」 처럼 쓰여 있었습니다.
