@@ -220,6 +220,23 @@
       "frames": 109,
       "mode": "xfade",
       "seam": 1.54
+    },
+    "scene/tray": {
+      "dolly": false,
+      "files": {
+        "mp4": {
+          "bytes": 117750,
+          "sha256": "030240f74b97859214b85594f98a3d86c861b149afb3f9666efb3df283fd8b60"
+        },
+        "webm": {
+          "bytes": 141794,
+          "sha256": "157c09a77f029927b9dc2b6c7165bdc8d0c20e9baa827be3229c534457ca7542"
+        }
+      },
+      "fps": 24,
+      "frames": 121,
+      "mode": "xfade",
+      "seam": 2.96
     }
   },
   "seam_ok": 4.0

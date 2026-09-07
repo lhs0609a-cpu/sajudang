@@ -394,15 +394,15 @@
       ],
       "hint": null,
       "image": "Korean romance-fantasy webtoon style. Three small wooden plaques laid\nin a row on a shallow lacquered tray on a low table, seen from a\nslight angle. The leftmost tilts forward and glows warmly from\nwithin. A man's hand and forearm in a dark indigo sleeve with silver\ntrim is withdrawing toward the right edge of the frame, fingers just\nleaving the last plaque — the choosing is being handed over. A single\nfresh blossom rests at the tray's corner. A soft shaft of light from\nabove, gold motes drifting, deep plum background. Only the hand and\nsleeve — no face, no head, no body above the elbow. No text, no\nletters of any script, no numbers. Aspect ratio 9:16.",
-      "motion": "Static camera. The hand sets the last of the three plaques down,\nlifts away and withdraws out of frame to the right. The three plaques\nsettle and bob very gently at different rhythms, the leftmost glowing\nbrightest. The blossom at the tray's corner trembles. The hand does\nnot come back. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 2s · seamless loop)",
+      "motion": "Static camera. The hand sets the last of the three plaques down,\nlifts away and withdraws out of frame to the right. The three plaques\nsettle and bob very gently at different rhythms, the leftmost glowing\nbrightest. The blossom at the tray's corner trembles. The hand does\nnot come back. Seamlessly loopable.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.\n\n(Preset: Static · 9:16 · 5s · seamless loop)",
       "preset": "Static",
-      "ratio": "16:9",
-      "duration": "2s",
+      "ratio": "9:16",
+      "duration": "5s",
       "loop": true,
       "tint": false,
       "still": false,
       "note": null,
-      "use": "값을 치르다 — 글 위 띠. **4:3 상자로 잘라 씁니다 — 세로의 42% 만 보이오.** 주제를 세로 한가운데에 두시오."
+      "use": "값을 치르다 — 글 위에 **세로 그대로** 섭니다. 화면 높이의 3분의 2를 쓰고 잘리는 데가 거의 없으니, 위아래 끝까지 그리시오. / 초점은 50% 66% 로 잡혀 있소 (가운데가 답이 아닌 장면)."
     },
     "banner": {
       "title": "오늘 자 종이 · 등불",

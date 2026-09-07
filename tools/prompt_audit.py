@@ -37,6 +37,20 @@ ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "apps" / "web"
 PROMPTS = WEB / "public" / "asset-prompts.json"
 MANIFEST = WEB / "components" / "scene" / "manifest.ts"
+
+
+def josa(word: str, with_batchim: str, without: str) -> str:
+    """
+    받침을 보고 조사를 고른다.
+
+    ★ 「비율 가 갈렸소」 가 나가던 자리요 (2026-09-07). 엔진에는
+      `bank.josa` 가 있지만 이 도구는 엔진을 안 씁니다 — 두 줄이면
+      되는 것에 의존을 만들지 않습니다.
+    """
+    for ch in reversed(word):
+        if "가" <= ch <= "힣":
+            return word + (with_batchim if (ord(ch) - 0xAC00) % 28 else without)
+    return word + without
 # ★ 규칙을 붙이는 자리가 옮겨 갔습니다 (2026-09-04).
 #
 #   전에는 `PromptModal` 안에서 규칙을 붙였습니다. 그런데 에셋 현황판이
@@ -114,7 +128,8 @@ def main() -> int:
             av, bv = spec.get(key), p.get(pk)
             if av and bv and av != bv:
                 rows.append("%-9s %s  manifest=%s  명령어=%s" % (sid, ko, av, bv))
-                bad.append("%s %s 가 갈렸소" % (sid, ko))
+                # ★ 조사는 받침을 보고 답니다 — 「비율 가」 가 나가던 자리요.
+                bad.append("%s %s 갈렸소" % (sid, josa(ko, "이", "가")))
         sec, dur = spec.get("seconds"), (p.get("duration") or "").rstrip("s")
         if sec and dur and str(sec) != dur:
             rows.append("%-9s 길이  manifest=%ss  명령어=%s" % (sid, sec, dur))
