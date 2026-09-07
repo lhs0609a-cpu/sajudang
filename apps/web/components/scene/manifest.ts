@@ -25,6 +25,29 @@ export type Ratio = "9:16" | "16:9" | "3:4" | "1:1";
  */
 export type TintMode = "recolor" | "grade";
 
+/**
+ * 이 장면이 내는 **소리의 결**. 파일은 `/audio/bgm/{결}.mp3`.
+ *
+ * ★ 왜 장면마다가 아니라 자리마다인가 (2026-09-07)
+ *
+ *   장면은 스물여섯인데 결은 여섯입니다. 소리는 그림과 달라서, 같은
+ *   방에서 찍은 다른 컷은 **같은 방 소리**가 나야 맞습니다. 컷마다
+ *   소리를 갈면 손님은 한 화면에서 다음 화면으로 넘어갈 때마다 방을
+ *   옮겨 다니는 것처럼 듣습니다 — 그건 장면이 아니라 효과음입니다.
+ *
+ *   결은 `tools/make_ambience.py` 가 짓습니다. 돌 때 안 끊기도록
+ *   **주기가 딱 맞게** 짓고, 화면은 그걸 샘플 단위로 돌립니다
+ *   (`lib/sound.ts`).
+ *
+ *     hall     대청 — 넓은 나무 방, 먼 삐걱임
+ *     study    서재 — 종이 바스락, 붓, 아주 가까운 방
+ *     outside  바깥 — 바람이 불었다 잦아들고, 먼 풀벌레
+ *     altar    제단 — 낮은 울림과 이따금 종
+ *     tray     상   — 사기 달그락, 물, 가까운 방
+ *     card     문양 — 결만 남은 반짝임 (거의 무음)
+ */
+export type Bed = "hall" | "study" | "outside" | "altar" | "tray" | "card";
+
 export interface SceneSpec {
   id: string;
   name: string;
@@ -32,6 +55,11 @@ export interface SceneSpec {
   ratio: Ratio;
   seconds: number;
   loop: boolean;
+  /**
+   * 이 장면이 내는 소리. **빠뜨리면 그 화면만 조용합니다** —
+   * `tests/test_ambience.py` 가 빈 자리를 잡습니다.
+   */
+  bed: Bed;
   /** 일간 색을 입히는 장면. 방식은 TintMode 주석 참고. (docs/10 §4) */
   tint?: TintMode;
   /** 계절에 따라 하늘·꽃이 바뀌는 장면 */
@@ -69,7 +97,7 @@ export interface SceneSpec {
 }
 
 export const SCENES: SceneSpec[] = [
-  { id: "gate", name: "대문 · 사계", preset: "Dolly In", ratio: "9:16", seconds: 5, loop: true, tint: "grade", seasonal: true },
+  { id: "gate", name: "대문 · 사계", preset: "Dolly In", ratio: "9:16", seconds: 5, bed: "outside", loop: true, tint: "grade", seasonal: true },
   /*
    * ★ 되살렸습니다 (2026-09-04).
    *
@@ -83,10 +111,10 @@ export const SCENES: SceneSpec[] = [
   //   자리에 손을 얹었다. 아직 펴지는 않았다.」인데 그림은 문이 열리고
   //   있었습니다 — 손도 없고 접힌 데도 없습니다. 글을 따라 그림을
   //   고쳤습니다. 폴더 이름(door)은 그대로 둡니다.
-  { id: "door", name: "접힌 자리 · 얹은 손", preset: "Static", ratio: "9:16", seconds: 3, loop: true },
-  { id: "desk", name: "붓·벼루·빈 종이", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
-  { id: "ink", name: "먹이 번지는 종이", preset: "Static", ratio: "9:16", seconds: 5, loop: true },
-  { id: "room", name: "실내·병풍·주렴", preset: "Static", ratio: "9:16", seconds: 5, loop: true },
+  { id: "door", name: "접힌 자리 · 얹은 손", preset: "Static", ratio: "9:16", seconds: 3, bed: "study", loop: true },
+  { id: "desk", name: "붓·벼루·빈 종이", preset: "Static", ratio: "16:9", seconds: 3, bed: "study", loop: true },
+  { id: "ink", name: "먹이 번지는 종이", preset: "Static", ratio: "9:16", seconds: 5, bed: "study", loop: true },
+  { id: "room", name: "실내·병풍·주렴", preset: "Static", ratio: "9:16", seconds: 5, bed: "hall", loop: true },
   /*
    * ★ a4b 「성향 4글자」 몫. 이 화면은 발주서(docs/10)가 쓰인 뒤에
    *   붙어서 제 장면이 없었고, a3 의 「먹이 번지는 종이」를 그대로
@@ -96,36 +124,36 @@ export const SCENES: SceneSpec[] = [
    *   이 화면이 하는 일은 **넉 자와 여덟 글자를 맞대 보는 것**입니다.
    *   (셈에는 안 들어가고 어긋난 자리를 찾는 데만 씁니다)
    */
-  { id: "mirror", name: "맞대어 보는 자리", preset: "Static", ratio: "9:16", seconds: 5, loop: true },
-  { id: "fork", name: "갈림길", preset: "Static", ratio: "16:9", seconds: 3, loop: true, focus: "50% 55%" },
-  { id: "altar", name: "명식 받침", preset: "Static", ratio: "9:16", seconds: 5, loop: true, tint: "recolor" },
-  { id: "facing", name: "마주앉은 자리", preset: "Static", ratio: "9:16", seconds: 5, loop: true },
-  { id: "shelf", name: "진열대", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
+  { id: "mirror", name: "맞대어 보는 자리", preset: "Static", ratio: "9:16", seconds: 5, bed: "study", loop: true },
+  { id: "fork", name: "갈림길", preset: "Static", ratio: "16:9", seconds: 3, bed: "outside", loop: true, focus: "50% 55%" },
+  { id: "altar", name: "명식 받침", preset: "Static", ratio: "9:16", seconds: 5, bed: "altar", loop: true, tint: "recolor" },
+  { id: "facing", name: "마주앉은 자리", preset: "Static", ratio: "9:16", seconds: 5, bed: "hall", loop: true },
+  { id: "shelf", name: "진열대", preset: "Static", ratio: "16:9", seconds: 3, bed: "hall", loop: true },
   // ★ 16:9 로 적혀 있었는데 들어온 그림은 9:16 입니다 (2026-09-04).
   //   생성기가 세로로 내주고, 화면은 `box` 로 담아 씁니다. 선언이
   //   실물과 다르면 감사가 「비율이 틀렸다」고 짚습니다 — 실물을 따릅니다.
-  { id: "hall", name: "스무 자리", preset: "Dolly In", ratio: "9:16", seconds: 5, loop: true },
-  { id: "seat", name: "그 사람의 자리 · 앉은 뒷모습", preset: "Static", ratio: "3:4", seconds: 3, loop: true, tint: "recolor" },
+  { id: "hall", name: "스무 자리", preset: "Dolly In", ratio: "9:16", seconds: 5, bed: "hall", loop: true },
+  { id: "seat", name: "그 사람의 자리 · 앉은 뒷모습", preset: "Static", ratio: "3:4", seconds: 3, bed: "hall", loop: true, tint: "recolor" },
   // ★ 16:9 였습니다. 그런데 쓰는 자리 둘(리포트 표지 c1 · 분석지)이
   //   `.sceneart.hero` — aspect-ratio 9/16 + object-fit:cover 라
   //   **가로의 약 68%가 잘려 나갑니다.** 두루마리는 세로로 펼쳐지는
   //   물건이니 9:16 이 맞습니다. 아직 안 만든 에셋이라 지금이 고칠 때입니다.
-  { id: "scroll", name: "펼쳐지는 두루마리", preset: "Static", ratio: "9:16", seconds: 3, loop: true },
-  { id: "fold", name: "반쯤 접힌 두루마리", preset: "Static", ratio: "16:9", seconds: 2, loop: true },
-  { id: "untie", name: "붉은 끈·개봉", preset: "Static", ratio: "1:1", seconds: 2, loop: true },
+  { id: "scroll", name: "펼쳐지는 두루마리", preset: "Static", ratio: "9:16", seconds: 3, bed: "study", loop: true },
+  { id: "fold", name: "반쯤 접힌 두루마리", preset: "Static", ratio: "16:9", seconds: 2, bed: "study", loop: true },
+  { id: "untie", name: "붉은 끈·개봉", preset: "Static", ratio: "1:1", seconds: 2, bed: "study", loop: true },
   // ★ c2 본문의 여는 줄은 「도령이 두루마리 끈을 풀었다. 종이가
   //   무릎까지 흘러내렸다.」인데 낡은 종이(oldpaper)를 깔고 있었습니다.
   //   두루마리도 끈도 무릎도 없는 그림이었습니다. 본문은 값을 치른
   //   사람이 가장 오래 보는 화면이라 제 장면을 줍니다.
-  { id: "unbind", name: "끈을 풀다", preset: "Static", ratio: "9:16", seconds: 3, loop: true },
-  { id: "handle", name: "문고리·그림자", preset: "Dolly In", ratio: "9:16", seconds: 3, loop: true },
-  { id: "roadmap", name: "대운 길", preset: "Dolly Right", ratio: "16:9", seconds: 4, loop: true, tint: "recolor" },
+  { id: "unbind", name: "끈을 풀다", preset: "Static", ratio: "9:16", seconds: 3, bed: "study", loop: true },
+  { id: "handle", name: "문고리·그림자", preset: "Dolly In", ratio: "9:16", seconds: 3, bed: "outside", loop: true },
+  { id: "roadmap", name: "대운 길", preset: "Dolly Right", ratio: "16:9", seconds: 4, bed: "outside", loop: true, tint: "recolor" },
   // ★ 1:1 이었습니다 (2026-09-06). 들어온 그림은 테두리까지 그린
   //   **세로 카드 한 장**이라 1:1 상자에서 위아래 44%가 잘려 네 귀의
   //   꽃무늬가 사라졌습니다. 상자를 9:16 으로 잡아 통째로 보이게
   //   합니다 — `box` 를 적으면 `.tall` 의 가장자리 페이드를 안 탑니다.
   //   카드 테두리는 흐려지면 안 됩니다.
-  { id: "cardbg", name: "공유 카드 문양", preset: "Static", ratio: "9:16", seconds: 3, loop: true, tint: "recolor", box: "9:16" },
+  { id: "cardbg", name: "공유 카드 문양", preset: "Static", ratio: "9:16", seconds: 3, bed: "card", loop: true, tint: "recolor", box: "9:16" },
   // ★ 16:9 로 적혀 있었는데 들어온 그림은 9:16 입니다 (2026-09-07).
   //   2026-09-01 부터 원본이 전부 세로라, 적힌 값을 실물에 맞춥니다.
   //
@@ -133,10 +161,10 @@ export const SCENES: SceneSpec[] = [
   //   두면 **목패 셋이 아래로 잘려** 빈 상만 남습니다. 이 장면에서
   //   보여야 하는 것은 상이 아니라 그 위에 놓인 목패요. 66% 로 내리면
   //   상 위쪽 끝부터 꽃까지 다 들어옵니다.
-  { id: "tray", name: "목패 늘어놓은 상", preset: "Static", ratio: "9:16", seconds: 5, loop: true, focus: "50% 66%" },
-  { id: "coin", name: "엽전", preset: "Static", ratio: "1:1", seconds: 2, loop: true },
-  { id: "tea", name: "다과상", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
-  { id: "sealbook", name: "인장첩", preset: "Static", ratio: "3:4", seconds: 2, loop: true },
+  { id: "tray", name: "목패 늘어놓은 상", preset: "Static", ratio: "9:16", seconds: 5, bed: "tray", loop: true, focus: "50% 66%" },
+  { id: "coin", name: "엽전", preset: "Static", ratio: "1:1", seconds: 2, bed: "tray", loop: true },
+  { id: "tea", name: "다과상", preset: "Static", ratio: "16:9", seconds: 3, bed: "tray", loop: true },
+  { id: "sealbook", name: "인장첩", preset: "Static", ratio: "3:4", seconds: 2, bed: "study", loop: true },
   // ★ 16:9 로 적혀 있었지만 실제로 들어온 그림은 9:16 입니다
   //   (2026-09-01 부터 원본이 전부 세로). 적힌 값을 그림에 맞춥니다.
   //
@@ -144,9 +172,9 @@ export const SCENES: SceneSpec[] = [
   //   가운데로 두면 **인장과 눌린 꽃이 둘 다 잘려 나가고** 줄만 그은
   //   빈 종이가 남습니다. 70% 로 내리면 인장·꽃·종이 아래 끝이 다
   //   들어옵니다. 인장은 이 집의 표라 잘리면 안 됩니다.
-  { id: "oldpaper", name: "오래된 종이", preset: "Static", ratio: "9:16", seconds: 3, loop: true, focus: "50% 70%" },
-  { id: "wall", name: "후기 벽", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
-  { id: "banner", name: "등불 배너", preset: "Static", ratio: "16:9", seconds: 3, loop: true },
+  { id: "oldpaper", name: "오래된 종이", preset: "Static", ratio: "9:16", seconds: 3, bed: "study", loop: true, focus: "50% 70%" },
+  { id: "wall", name: "후기 벽", preset: "Static", ratio: "16:9", seconds: 3, bed: "hall", loop: true },
+  { id: "banner", name: "등불 배너", preset: "Static", ratio: "16:9", seconds: 3, bed: "hall", loop: true },
 ];
 
 export const SCENE_BY_ID: Record<string, SceneSpec> =

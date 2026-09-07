@@ -129,7 +129,6 @@ function holdOf(el: HTMLElement): number {
 import { useSession } from "@/lib/store";
 import { LENS_BY_ID } from "@/lib/lenses";
 import { api, apiMisconfigured } from "@/lib/api";
-import { playBgm } from "@/lib/sound";
 import SoundToggle from "@/components/SoundToggle";
 import DevRail from "@/components/DevRail";
 
@@ -639,14 +638,18 @@ export default function Shell({
   }, [pacing]);
 
   /*
-   * 배경음.
+   * 배경음은 **여기서 안 겁니다** (2026-09-07).
    *
-   * ★ 화면마다 새로 걸지 않습니다. 옮길 때마다 처음부터 다시 나면
-   *   그게 더 거슬립니다. 같은 이름이면 lib/sound 가 손을 안 댑니다.
+   *   전에는 이 자리에서 `playBgm("hall")` 을 한 번 못 박았습니다.
+   *   그래서 장면이 스물여섯인데 어디를 지나든 대청 소리였습니다 —
+   *   서재에서도 바깥에서도 제단에서도요.
+   *
+   *   이제 소리는 **보이는 장면**이 가져갑니다 (`lib/ambience.ts`).
+   *   장면이 제 결을 들고 있으니(`manifest.bed`) 화면이 늘어도 여기를
+   *   고칠 일이 없습니다. 같은 방이면 안 끊깁니다.
    *
    * ★ 소리가 꺼져 있으면 아무 일도 안 합니다. 켜는 순간 이어집니다.
    */
-  useEffect(() => { playBgm("hall"); }, []);
 
   // 계산 서버가 안 붙은 배포본이면 조용히 실패하지 않고 알린다
   const [noApi, setNoApi] = useState(false);
@@ -667,6 +670,23 @@ export default function Shell({
         style={themeColor ? ({ ["--c" as string]: themeColor }) : undefined}
       >
         {!bare && <TopBar title={title ?? ""} skipTo={skipTo} onBack={onBack} />}
+        {/*
+          ★ 대문에도 **끌 데**는 둡니다 (2026-09-07).
+
+            상단바는 대문(a1)에서만 숨깁니다 — 첫 3초를 파는 자리라
+            띠가 시선을 나눕니다. 그런데 소리가 기본 켜짐이 되면서,
+            **소리가 처음 나는 화면에 끌 단추가 없어졌습니다.**
+            브라우저가 첫 손짓을 기다리므로 그 손짓은 십중팔구 대문의
+            「다음으로」이고, 소리는 거기서 납니다.
+
+            띠는 그대로 숨기고 ♪ 하나만 구석에 둡니다. 회사에서 연
+            사람이 그 자리에서 끌 수 있어야 합니다.
+        */}
+        {bare && (
+          <div className="top bareSnd">
+            <SoundToggle />
+          </div>
+        )}
         {noApi && (
           <div className="warn" style={{ margin: "12px 16px 0" }}>
             <p>계산 서버가 아직 붙지 않았소.</p>

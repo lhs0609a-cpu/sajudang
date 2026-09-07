@@ -1,0 +1,48 @@
+{
+  "beds": {
+    "hall": {
+      "seconds": 24.0,
+      "wrap": 0.1091,
+      "inside": 0.2244,
+      "bytes": 288749,
+      "sha256": "b81f70a6aeb4edde0c4ec405488055ea94e67b90fb509f2ad24d9121235dbca1"
+    },
+    "study": {
+      "seconds": 24.0,
+      "wrap": 0.0624,
+      "inside": 1.7557,
+      "bytes": 288749,
+      "sha256": "759b24bd8fb28b937d3798c61a6d40b3f72775d42d210f39b5344e85313b154d"
+    },
+    "outside": {
+      "seconds": 24.0,
+      "wrap": 0.0405,
+      "inside": 0.18,
+      "bytes": 288749,
+      "sha256": "5d4007c95f9aef8902d26913f82d9cf285d1d22de22860522e93330a1c96feb9"
+    },
+    "altar": {
+      "seconds": 24.0,
+      "wrap": 0.0694,
+      "inside": 0.1481,
+      "bytes": 288749,
+      "sha256": "c9e7775f28c56e1221c596e6e504daadb7ba25e463983b549661d9b2f1d57c8c"
+    },
+    "tray": {
+      "seconds": 24.0,
+      "wrap": 0.0545,
+      "inside": 0.8722,
+      "bytes": 288749,
+      "sha256": "ace4e1457a56ce5b678bbb5258136695545655986ee56a1afeb85f5363a321c7"
+    },
+    "card": {
+      "seconds": 24.0,
+      "wrap": 0.543,
+      "inside": 0.6499,
+      "bytes": 288749,
+      "sha256": "1c97317806d84c18c58335f5f6260178dd766083f8adca50204d58e45d83c4a9"
+    }
+  },
+  "seconds": 24.0,
+  "rate": 44100
+}

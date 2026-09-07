@@ -11,6 +11,7 @@
  * 무채색 클립 + 색 입히기는 docs/10 §4 대상 장면에만 적용합니다.
  */
 import { useEffect, useRef, useState } from "react";
+import { useAmbience } from "@/lib/ambience";
 import { playSafely, useSoundOn } from "@/lib/useSound";
 import PromptModal from "./PromptModal";
 import { RATIO_BOX, SCENE_BY_ID, SEASON_PALETTE } from "./manifest";
@@ -267,6 +268,20 @@ export default function Scene({ id, className, bleed, figure }: {
   const base = chosen ?? `/scene/${id}/`;
   const hasClip = chosen === undefined ? null : chosen !== null;
   const [open, setOpen] = useState(false);
+  const artRef = useRef<HTMLDivElement | null>(null);
+
+  /*
+   * 이 장면이 보이는 동안 이 방의 소리가 납니다.
+   *
+   * ★ 「보이는 동안」이 핵심입니다. 한 페이지에 장면이 여덟까지
+   *   얹히는데(app/page.tsx · 리포트) 얹힐 때 걸면 여덟이 동시에
+   *   걸어 마지막 것이 이깁니다. 손님이 보고 있는 장면이 이겨야
+   *   합니다 — 까닭은 `lib/ambience.ts` 에 적었습니다.
+   *
+   * ★ `spec` 이 없어도 부릅니다 — 훅은 이른 return 앞에 와야 합니다
+   *   (이 파일이 위에서 이미 겪은 자리입니다).
+   */
+  useAmbience(spec?.bed, artRef);
 
   /*
    * ★ 세로 영상은 **상자에 안 담습니다** (2026-09-06).
@@ -334,6 +349,7 @@ export default function Scene({ id, className, bleed, figure }: {
          *
          *   hero·fill 은 제 비율을 CSS 가 잡으므로 건드리지 않습니다.
          */
+        ref={artRef}
         className={`sceneart ${shownBox ? "boxed" : "tall"} ${className ?? ""}`}
         role={pickable ? "button" : undefined}
         tabIndex={pickable ? 0 : undefined}

@@ -1830,6 +1830,38 @@ body.has-rail .beatskip-hint { left: calc(50% + 116px); }
 }
 
 /*
+ * 대문(a1)의 ♪ — 띠 없이 구석에만.
+ *
+ * ★ 왜 대문에도 두나 (2026-09-07)
+ *
+ *   상단바는 대문에서만 숨깁니다. 첫 3초를 파는 자리라 띠가 시선을
+ *   나눕니다. 그런데 소리가 기본 켜짐이 되면서 **소리가 처음 나는
+ *   화면에 끌 단추가 없어졌습니다** — 브라우저가 첫 손짓을 기다리니
+ *   그 손짓은 십중팔구 대문의 「다음으로」이고, 소리는 거기서 납니다.
+ *
+ *   그래서 띠는 그대로 숨기고 단추 하나만 띄웁니다. 그림 위에 뜨므로
+ *   바탕을 깔아 글자가 안 묻히게 합니다.
+ */
+.top.bareSnd {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 40;
+  display: block;
+  width: auto;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: none;
+}
+.top.bareSnd .tb.snd {
+  background: color-mix(in srgb, var(--bg1) 72%, transparent);
+  backdrop-filter: blur(3px);
+}
+@media print { .top.bareSnd { display: none; } }
+
+/*
  * ★ 리포트 본문의 과부 줄은 손으로 못 고칩니다.
  *
  *   본문은 조각을 **조합해서** 만듭니다 (훅 5단 · 관점 컷). 게다가
