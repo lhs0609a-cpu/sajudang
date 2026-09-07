@@ -116,7 +116,12 @@ def partner_cut(f, p: dict) -> dict:
         % (f.day_gan, pf.day_gan, tg,
            T["PARTNER_TEN_GOD"][tg],
            T["PARTNER_JI"][ji],
-           T["PARTNER_FILL"][fill].format(el_word=element_word(fill_el)),
+           # ★ 조사는 **받침을 보고** 답니다 (2026-09-07).
+           #   맨 format 이라 「불를」 「흙가」 가 나가던 자리요.
+           T["PARTNER_FILL"][fill].format(
+               el_word=element_word(fill_el),
+               el_eul=josa(element_word(fill_el), "을", "를"),
+               el_iga=josa(element_word(fill_el), "이", "가")),
            T["PARTNER_CLOSE"]))
     return {
         "id": "partner", "title": "상대와의 배치",

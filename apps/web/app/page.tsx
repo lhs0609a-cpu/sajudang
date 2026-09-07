@@ -38,6 +38,7 @@ import ActOut from "@/components/ActOut";
 import { api, ApiError } from "@/lib/api";
 import { LENS_BY_ID } from "@/lib/lenses";
 import { CONCERNS, seasonOf, useSession, type Concern } from "@/lib/store";
+import { iga } from "@/lib/josa";
 import { SEASON_PALETTE } from "@/components/scene/manifest";
 import type { Features, HookSegment } from "@shared/chart";
 
@@ -766,7 +767,7 @@ function EntryInner() {
             뒤이은 수고를 자기 결정과 맞추려 합니다. */}
         <Say who="도령" lens="pungun">
           {askWord
-            ? `${askWord}이 걸려 오셨다 했지 — 숫자 3개면 여덟 글자 중 여섯이 서오.`
+            ? `${iga(askWord)} 걸려 오셨다 했지 — 숫자 3개면 여덟 글자 중 여섯이 서오.`
             : "태어난 날을 대시오 — 숫자 3개면 여덟 글자 중 여섯이 서오."}
           <br />
           {/*
@@ -1668,7 +1669,7 @@ function EntryInner() {
       )}
       {hookDone && (
         <div className="blk in">
-          <Narration lines={[`${lens.name}가 종이를 덮었다.`]} />
+          <Narration lines={[`${iga(lens.name)} 종이를 덮었다.`]} />
           {/*
             ★ 마감이 자기 빈약함을 자백하고 있었습니다.
               "여기까지가 여덟 글자 중 셋으로 본 것이다" — 정보 격차를 여는
@@ -1677,10 +1678,10 @@ function EntryInner() {
               덜어낸 것이 아니라 **남은 것**으로 말합니다.
           */}
           <p style={{ fontFamily: "var(--serif)", fontSize: 18, lineHeight: 1.78, color: "var(--c)" }}>
-            여기까지는 그대가 어떤 사람인가였소.
+            여기까지는 그대가 <b>어떤 사람인지</b>를 본 것이오.
           </p>
           <p className="tx mt">
-            남은 자리에는 왜 하필 지금과 언제 바뀌는가가 있소.
+            남은 자리에는 <b>왜 하필 지금인지</b>와 <b>언제 바뀌는지</b>가 있소.
           </p>
 
           {/*
@@ -1721,7 +1722,7 @@ function EntryInner() {
           <button className="btn gh" onClick={() => router.push("/pay?step=d1")}>
             어디까지 볼지 고르겠습니다
           </button>
-          <p className="sm mt" style={{ textAlign: "center" }}>값은 아직 묻지 않았다</p>
+          <p className="sm mt" style={{ textAlign: "center" }}>여기까지 받은 값은 없다</p>
         </div>
       )}
     </Shell>

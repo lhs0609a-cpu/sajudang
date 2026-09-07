@@ -18,6 +18,7 @@ import Reveal from "@/components/Reveal";
 import ActOut from "@/components/ActOut";
 import { Narration, Say } from "@/components/Narration";
 import { api, ApiError } from "@/lib/api";
+import { io } from "@/lib/josa";
 import { LENS_BY_ID, youOf } from "@/lib/lenses";
 import { useSession, type Tier } from "@/lib/store";
 import { track, useScreen } from "@/lib/track";
@@ -307,7 +308,7 @@ function PayInner() {
         {/* ★ 여는 줄이 없어 첫 줄이 곧바로 해석이었습니다. 값을 안
             받는 구간이라는 것도 글에 안 적혀 있었습니다. */}
         <Narration lines={["도령이 종이를 한 겹 더 넘겼다.",
-                           "값 이야기는 아직 나오지 않았다."]} />
+                           "여기서는 아직 아무것도 받지 않는다."]} />
         {err && <Say who={charName} lens={s.cur}>{err}</Say>}
         {/*
           ★ 한 컷씩 뜹니다 (2026-09-02). 여기가 손님이 "압도당한다" 고
@@ -361,7 +362,7 @@ function PayInner() {
             <Say who={charName} lens={s.cur} html={
               wants.length
                 ? `아직 안 편 자리가 <b>${free.locked.length}</b> 남았소.<br>` +
-                  `그 중 넷은 ${wants.map((w) => w.want).join(" · ")}이오.`
+                  `그 중 넷은 ${io(wants.map((w) => w.want).join(" · "))}.`
                 : names.length
                   ? `아직 안 편 자리가 <b>${free.locked.length}</b> 남았소.<br>` +
                     `「${names.join("」 「")}」${names.length >= 3 ? " …" : ""}`
@@ -875,7 +876,7 @@ function PayInner() {
       */}
       <button className="btn mt" disabled={!pick}
               onClick={() => router.push("/pay?step=d1b")}>
-        {pick ? "무엇이 열리는지 보겠습니다" : "먼저 목패를 고르시오"}
+        {pick ? "무엇이 열리는지 보겠습니다" : "목패를 먼저 고르십시오"}
       </button>
       <button className="btn gh" onClick={() => router.push("/pay?step=d0")}>
         값 없이 볼 수 있는 것부터

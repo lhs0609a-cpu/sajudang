@@ -21,6 +21,7 @@
     migrate-sqlite 로컬 SQLite 로 마이그레이션 왕복 시험
     screens        화면 연결 그래프 — 고아·막다른·죽은 버튼
     subject        ★ 주어 감사 — 누구 얘긴지 안 적힌 문장 찾기
+    text           ★ 글 감사 — 조사·보이지 않는 글자·낮추는 말
     hours          ★ 때 칸 감사 — 네 시간 칸이 시주를 얼마나 틀리나
     buttons        ★ 버튼 말투 — 손님이 누르는 것은 손님의 말인가
     voice          ★ 말투 감사 — 한 사람 안에서 말투가 갈리는가 (--show)
@@ -122,6 +123,7 @@ switch ($Task) {
   "crosscheck" { Need-Venv; Push-Location $Root; & $Py tools\crosscheck.py @Rest; Pop-Location }
   "screens" { Need-Venv; Push-Location $Root; & $Py tools\screen_graph.py; Pop-Location }
   "subject" { Need-Venv; Push-Location $Root; & $Py tools\subject_audit.py @Rest; Pop-Location }
+  "text"    { Need-Venv; Push-Location $Root; & $Py tools\text_audit.py @Rest; Pop-Location }
   "hours"   { Need-Venv; Push-Location $Root; & $Py tools\hour_bucket_audit.py; Pop-Location }
   "buttons" { Need-Venv; Push-Location $Root; & $Py tools\button_voice_audit.py @Rest; Pop-Location }
   "voice"   { Need-Venv; Push-Location $Root; & $Py tools\voice_audit.py @Rest; Pop-Location }
@@ -151,6 +153,7 @@ switch ($Task) {
     & $Py tools\distribution.py;       if ($LASTEXITCODE) { Pop-Location; exit 1 }
     & $Py tools\dup_rate.py;           if ($LASTEXITCODE) { Pop-Location; exit 1 }
     & $Py tools\subject_audit.py;      if ($LASTEXITCODE) { Pop-Location; exit 1 }
+    & $Py tools\text_audit.py;         if ($LASTEXITCODE) { Pop-Location; exit 1 }
     Pop-Location
     Write-Host "engine-check 통과" -ForegroundColor Green
     Write-Host "※ 회귀 50건은 독립 계산(crosscheck)으로 채워 잠갔습니다." -ForegroundColor Yellow

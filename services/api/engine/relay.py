@@ -169,6 +169,13 @@ def _reason(template: str, f, vals: dict, cond: dict) -> str:
         "bi": f.bi, "inn": f.inn,
         "strength": f.strength, "strength_score": f.strength_score,
         "flow": f.flow, "top_ten_god": f.top_ten_god,
+        # ★ 조사가 붙은 이름 (2026-09-07).
+        #   `_reason` 은 맨 `str.format` 이라 받침을 안 봅니다. 근거 줄에
+        #   「편재이오」 가 나가던 자리요 — 조사는 여기서 미리 답니다.
+        #   (`tools/josa_audit.py` 가 이 꼴을 셉니다)
+        "top_io": josa(f.top_ten_god, "이오", "요"),
+        "top_iga": josa(f.top_ten_god, "이", "가"),
+        "flow_iga": josa(f.flow, "이", "가"),
         "daeun_ten_god": f.daeun_ten_god,
         "daeun_gz": vals["_daeun_gz"], "day_ji": vals["_day_ji"],
         "season": vals["season"], "temp_gap": vals["temp_gap"],
