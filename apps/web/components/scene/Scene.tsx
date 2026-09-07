@@ -362,7 +362,8 @@ export default function Scene({ id, className, bleed, figure }: {
           <span className="slot">{hasClip ? "프롬프트" : `IMG · ${id}`}</span>
         )}
       </div>
-      {open && (
+      {/* 여는 손잡이만 막지 않고 창에도 빗장을 겁니다 (2026-09-07) */}
+      {admin && open && (
         <PromptModal kind="scene" id={id} onClose={() => setOpen(false)} />
       )}
     </>

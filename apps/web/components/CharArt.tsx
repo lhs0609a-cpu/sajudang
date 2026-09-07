@@ -251,7 +251,8 @@ export default function CharArt({
       } : undefined}
     >
       {admin && <span className="slot">프롬프트</span>}
-      {open && (
+      {/* 여는 손잡이만 막지 않고 창에도 빗장을 겁니다 (2026-09-07) */}
+      {admin && open && (
         <PromptModal kind="char" id={lens.id} onClose={() => setOpen(false)} />
       )}
       {/*

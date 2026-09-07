@@ -18,6 +18,7 @@
  */
 import { useEffect, useRef, useState } from "react";
 import PromptModal from "./PromptModal";
+import { useSession } from "@/lib/store";
 import { figureOf, type Fx, type Prop, type SinsalFigure } from "@/lib/sinsalFigures";
 
 function useReducedMotion() {
@@ -300,6 +301,16 @@ export default function SinsalFigure({
   const hasFigure = useFigure(sinsalKey);
   const { ref, seen } = useAppear<HTMLDivElement>();
   const [open, setOpen] = useState(false);
+  /*
+   * ★ 제작 명령어는 **주인만** 봅니다 (2026-09-07).
+   *
+   *   장면과 캐릭터는 진작 막아 두었는데 여기만 안 막혀 있었습니다.
+   *   손님이 카드를 누르면 영어 제작 명령어가 그대로 떴습니다 —
+   *   사주를 보러 온 사람에게 집의 작업 지시서가 열리는 셈입니다.
+   *
+   *   손님에게는 **누를 수 있다는 표도 안 냅니다.**
+   */
+  const admin = useSession((st) => st.admin);
 
   if (!f) return null;
   const uid = "sf-" + sinsalKey;
@@ -318,14 +329,14 @@ export default function SinsalFigure({
     >
       <div
         className="sfig-art"
-        style={{ width: size, cursor: "pointer" }}
-        role="button"
-        tabIndex={0}
-        title={`${f.title} — 눌러서 제작 프롬프트 보기`}
-        onClick={() => setOpen(true)}
-        onKeyDown={(ev) => {
+        style={{ width: size, cursor: admin ? "pointer" : undefined }}
+        role={admin ? "button" : undefined}
+        tabIndex={admin ? 0 : undefined}
+        title={admin ? `${f.title} — 눌러서 제작 프롬프트 보기` : undefined}
+        onClick={admin ? () => setOpen(true) : undefined}
+        onKeyDown={admin ? (ev) => {
           if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); setOpen(true); }
-        }}
+        } : undefined}
       >
         <span className="halo" />
         {hasFigure ? (
@@ -352,9 +363,13 @@ export default function SinsalFigure({
             <Silhouette f={f} uid={uid} />
           </svg>
         )}
-        <span className="slot">{(hasFigure || hasClip) ? "프롬프트" : `IMG · ${sinsalKey}`}</span>
+        {admin && (
+          <span className="slot">
+            {(hasFigure || hasClip) ? "프롬프트" : `IMG · ${sinsalKey}`}
+          </span>
+        )}
       </div>
-      {open && (
+      {admin && open && (
         <PromptModal kind="figure" id={sinsalKey} onClose={() => setOpen(false)} />
       )}
 
