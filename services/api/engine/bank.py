@@ -116,6 +116,22 @@ def count_word(n: int) -> str:
     return words[n] if 0 <= n < len(words) else "여섯 넘게"
 
 
+def count_phrase(n: int) -> str:
+    """
+    개수를 **세는 꼴**로 끝맺는다. `count_word` 는 「하나」로 끝나서
+    문장에 넣으면 「하나요」가 되는데, 그 꼴은 세는 말로 안 읽힙니다 —
+    검사도 그렇게 봅니다 (tests/test_falsifiable 의 NUM 은 「하나뿐」
+    「둘이오」 「하나도 없」 처럼 **세는 자리**가 붙은 것만 셉니다).
+
+        0 → 하나도 없소   1 → 하나뿐이오   2 → 둘이오
+    """
+    if n <= 0:
+        return "하나도 없소"
+    if n == 1:
+        return "하나뿐이오"
+    return count_word(n) + "이오"
+
+
 def josa(word: str, with_batchim: str, without: str) -> str:
     """`josa("나무", "이", "가")` → "나무가"."""
     return word + (with_batchim if has_batchim(word) else without)

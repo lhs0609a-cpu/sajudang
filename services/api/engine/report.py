@@ -658,6 +658,9 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
 
     # ── 7b · 이름 붙은 자리 (신살) ─────────────────────────
     T = _sinsal_text()
+    # ★ 신살이 하나도 없는 명식이 있습니다. 아래 statement_id 가 고른
+    #   목록(on)을 쓰는데, 그때 이 이름이 아예 안 생겨 터졌습니다.
+    on: list = []
     if f.sinsal:
         rows = []
         said_palace: set = set()
