@@ -32,6 +32,7 @@ export default function SummaryPage() {
   const s = useSession();
   const [sm, setSm] = useState<Summary | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
   const [share, setShare] = useState<{
     path: string; includes: string[]; excludes: string[]; expires_days: number;
   } | null>(null);
@@ -51,7 +52,7 @@ export default function SummaryPage() {
         if (alive) setErr(e instanceof ApiError ? e.message : "분석지를 펴지 못했소.");
       });
     return () => { alive = false; };
-  }, [s.chartId, s.concern, s.axis4, s.cur, s.name]);
+  }, [s.chartId, s.concern, s.axis4, s.cur, s.name, retry]);
 
   if (!s.chartId) {
     return (
@@ -61,7 +62,7 @@ export default function SummaryPage() {
       </Shell>
     );
   }
-  if (err) return <Shell screen="c7" title="분석지"><Say who="도령" lens="pungun">{err}</Say></Shell>;
+  if (err) return <Shell screen="c7" title="분석지"><Say who="도령" lens="pungun">{err}</Say><button className="btn" onClick={() => {setErr(null);setRetry(n => n + 1);}}>분석지 다시 불러오기</button></Shell>;
   if (!sm) return <Shell screen="c7" title="분석지"><Narration lines={["종이를 편다."]} /></Shell>;
 
   const shareUrl = share
@@ -88,8 +89,8 @@ export default function SummaryPage() {
       <Say who="도령" lens="pungun">
         이건 그대가 들고 나가는 한 장이오.
         <br />
-        여기 적힌 건 기둥 4자리에서 나온 8글자와, 그 여덟에서
-        뽑은 세 줄이오.
+        여기 적힌 건 {s.hourKnown ? "기둥 4자리의 8글자" : "시주를 제외한 기둥 3자리의 6글자"}와,
+        그 명식에서 읽은 세 줄이오.
           <br />
         칸마다 <b>근거 줄</b>을 달아 두었소 — 무엇을 보고 한 말인지
         적어 두지 않으면 그건 점이 아니라 말장난이라서요. 흐린

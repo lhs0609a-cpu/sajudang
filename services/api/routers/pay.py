@@ -172,6 +172,7 @@ def get_tiers(req: TiersRequest) -> dict:
         rep = build_report(f, req.chart_id, req.lens_id, tier, req.concern,
                            req.axis4)
         cuts, chars = _measure(rep)
+        needs_extra_input = bool(rep.get("needs_input"))
         lenses = 1
         # 열리는 자리의 이름. 목패에 적으면 손님이 무엇을 사는지 압니다.
         opens = [c["title"] for c in rep["cuts"] if c["id"] not in free_ids]
@@ -185,6 +186,7 @@ def get_tiers(req: TiersRequest) -> dict:
                 c, ch = _measure(r)
                 cuts += c
                 chars += ch
+                needs_extra_input = needs_extra_input or bool(r.get("needs_input"))
             lenses = len(released)
 
         out.append({
@@ -207,6 +209,7 @@ def get_tiers(req: TiersRequest) -> dict:
             "lenses": lenses,
             "locked": len(rep["locked"]) if tier == "one" else 0,
             "opens": opens,
+            "needs_extra_input": needs_extra_input,
         })
     return {"tiers": out, "lens_id": req.lens_id,
             "refund_notice": payments.REFUND_NOTICE,
@@ -491,7 +494,7 @@ def restore(req: RestoreRequest) -> dict:
     orders = store.get_json(okey) or []
     if req.order_id not in orders:
         orders.append(req.order_id)
-        store.set_json(okey, orders, ttl=365 * DAY)
+        store.set_json(okey, orders)
 
     # 인장도 같이 되돌려 줍니다.
     if order.get("lens_id"):
@@ -516,6 +519,8 @@ def refund(req: RefundRequest) -> dict:
         raise HTTPException(status_code=403, detail="이 주문의 구매자만 환불을 요청할 수 있습니다.")
     try:
         with store.payment_lease(initial["session_id"]) as check:
+            if (store.get_json("order:" + req.order_id) or {}).get("session_id") != initial["session_id"]:
+                raise HTTPException(status_code=409, detail="다른 기기에서 구매를 복원했습니다. 내역을 새로 확인한 뒤 다시 요청해 주세요.")
             return _refund_locked(req, check)
     except store.LeaseBusy as e:
         raise HTTPException(status_code=409, detail=str(e))
@@ -525,9 +530,12 @@ def _refund_locked(req: RefundRequest, check) -> dict:
     order = store.get_json("order:" + req.order_id)
     if not order:
         raise HTTPException(status_code=404, detail="모르는 주문이오.")
+    if order.get("reissued_from"):
+        raise HTTPException(status_code=409, detail="추가 결제 없이 재발행된 리포트입니다. 원래 주문의 환불 내역을 확인해 주세요.")
     if order["status"] == "refunded":
         _stop_refunded_subscription(order, req.order_id)
-        return {"ok": True, "already": True, "status": "refunded"}
+        issued = _reissue_refunded(order, req.order_id, req.session_id)
+        return {"ok": True, "already": True, "status": "refunded", "reissue": bool(issued), "reissue_order_id": issued}
     if order["status"] != "paid":
         raise HTTPException(status_code=409, detail="결제된 주문이 아니오.")
 
@@ -556,8 +564,29 @@ def _refund_locked(req: RefundRequest, check) -> dict:
     # 환불된 주문도 지우지 않습니다 — 무엇을 돌려줬는지 남아야 합니다.
     store.set_json("order:" + req.order_id, order)
     _stop_refunded_subscription(order, req.order_id)
+    issued = _reissue_refunded(order, req.order_id, req.session_id)
     return {"ok": True, "status": "refunded",
-            "reissue": bool(req.calc_error)}
+            "reissue": bool(issued), "reissue_order_id": issued}
+
+
+def _reissue_refunded(order: dict, order_id: str, session_id: str) -> str | None:
+    """Idempotent complimentary access; never registers or renews a card."""
+    if not order.get("calc_error_verified"):
+        return None
+    oid = order_id + ".reissue"
+    if not store.get_json("order:" + oid):
+        row = {k: order[k] for k in ("tier", "lens_id", "chart_id", "expires_at") if k in order}
+        row.update(session_id=order["session_id"], status="paid", amount=0,
+                   reissued_from=order_id, paid_at=datetime.now(timezone.utc).isoformat(),
+                   opened_at=None)
+        store.set_json("order:" + oid, row)
+    for sid in {session_id, order["session_id"]}:
+        key = "orders:" + sid
+        orders = store.get_json(key) or []
+        if oid not in orders:
+            orders.append(oid)
+        store.set_json(key, orders)
+    return oid
 
 
 def _stop_refunded_subscription(order: dict, order_id: str) -> None:
@@ -579,7 +608,7 @@ def history(session_id: str) -> dict:
         if not order: continue
         review = store.get_json("refund-review:" + oid) or {}
         rows.append({"order_id":oid, **{k:order.get(k) for k in
-            ("amount","tier","lens_id","status","paid_at","opened_at","refunded_at")},
+            ("amount","tier","lens_id","status","paid_at","opened_at","refunded_at","reissued_from")},
             "review_status": review.get("status"), "review_note": review.get("note")})
     return {"orders":rows}
 

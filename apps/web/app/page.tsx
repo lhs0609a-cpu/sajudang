@@ -337,6 +337,7 @@ function EntryInner() {
    */
   /* 「모르겠다」를 눌렀는가. 그때만 대강 칸이 나옵니다. */
   const [error, setError] = useState<string | null>(null);
+  const [hookRetry, setHookRetry] = useState(0);
   const [segments, setSegments] = useState<HookSegment[] | null>(null);
   const [hookDone, setHookDone] = useState(false);
   /* 「아니오」가 몇 번 나왔는가 · 이미 방향을 틀었는가 */
@@ -390,7 +391,9 @@ function EntryInner() {
       // 서버가 거절한 이유를 이 집의 말로 옮깁니다. 영어 원문이 뜨면
       // 그 순간 몰입이 깨지고, 무엇을 고쳐야 하는지도 모릅니다.
       const raw = e instanceof ApiError ? e.message : "";
-      setError(birthMessageFrom(raw) ?? "명식을 세우지 못했소. 적은 것을 한 번 보시오.");
+      setError(e instanceof ApiError && e.status < 500
+        ? (birthMessageFrom(raw) ?? raw)
+        : "계산 서버에 연결하지 못했어요. 입력은 그대로 남아 있으니 잠시 후 다시 계산해 주세요.");
     } finally {
       setBusy(false);
     }
@@ -428,7 +431,7 @@ function EntryInner() {
       .then((r) => alive && setSegments(r.segments))
       .catch((e) => alive && setError(e instanceof ApiError ? e.message : "훅을 만들지 못했소."));
     return () => { alive = false; };
-  }, [step, s.chartId, s.concern, s.axis4, s.name, s.cur, segments, misses]);
+  }, [step, s.chartId, s.concern, s.axis4, s.name, s.cur, segments, misses, hookRetry]);
 
   /*
    * ★ 「아니오」가 쌓이면 도령이 방향을 틉니다.
@@ -680,7 +683,7 @@ function EntryInner() {
           <Say who={lens.name} lens={lens.id}>
             <b>{CONCERNS.find((c) => c.id === s.concern)?.label ?? "걸리는 것"}</b>
             에 대해서요. 여기서부터 <b>5마디</b>요.<br />
-            기둥 4자리를 옮긴 8글자만 보고 하는 말이오 —
+            {s.hourKnown ? "기둥 4자리의 8글자" : "시주를 제외한 기둥 3자리의 6글자"}를 보고 하는 해석이오 —
             이름도 사연도 안 들었소.<br />
             한 마디가 끝날 때마다 맞는지 물어보겠소. 맥을 짚듯
             자리를 옮겨 가며 짚는 셈이오.<br />
@@ -689,7 +692,7 @@ function EntryInner() {
           </Say>
         </div>
       )}
-      {error && <Say who="도령" lens="pungun">{error}</Say>}
+      {error && <><Say who="도령" lens="pungun">{error}</Say><button className="btn" onClick={() => {setError(null); setHookRetry(n => n + 1);}}>무료 해석 다시 불러오기</button></>}
       {segments && s.chartId && (
         <HookSegments
           segments={segments}

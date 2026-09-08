@@ -91,6 +91,7 @@ export interface TierCard {
   lenses: number;
   locked: number;
   opens: string[];
+  needs_extra_input?: boolean;
 }
 
 /** 값을 치른 직후 **실제로** 열린 것. 명식 캐시가 없으면 counted=false. */
@@ -109,12 +110,40 @@ export class ApiError extends Error {
   }
 }
 
-async function call<T>(path: string, init?: RequestInit): Promise<T> {
+const rebuilding = new Map<string, Promise<void>>();
+async function rebuildSavedChart(chartId: string): Promise<void> {
+  if (rebuilding.has(chartId)) return rebuilding.get(chartId)!;
+  const task = (async () => {
+    let saved;
+    try { saved = JSON.parse(localStorage.getItem("sajudang-session") || "null")?.state; } catch {}
+    if (!saved || saved.chartId !== chartId || !saved.year || !saved.month || !saved.day) {
+      throw new ApiError(409, "명식을 다시 입력해 주세요. 구매 내역은 내 첩에서 그대로 확인할 수 있습니다.");
+    }
+    const result = await call<ChartResponse>("/v1/chart", {method:"POST", body:JSON.stringify({
+      year:saved.year, month:saved.month, day:saved.day, hour:saved.hourKnown ? saved.hour : null,
+      minute:saved.hourKnown ? saved.minute : null, hour_known:saved.hourKnown, sex:saved.sex, birth_city:saved.city,
+    })}, false);
+    if (result.chart_id !== chartId) throw new ApiError(409, "입력 정보가 변경됐습니다. 처음 화면에서 명식을 다시 확인해 주세요. 구매 내역은 유지됩니다.");
+  })();
+  rebuilding.set(chartId, task);
+  try { await task; } finally { rebuilding.delete(chartId); }
+}
+
+async function call<T>(path: string, init?: RequestInit, recover = true): Promise<T> {
   const res = await fetch(BASE + path, {
     ...init,
     headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
   });
   if (!res.ok) {
+    const url = new URL(BASE + path);
+    if (recover && typeof window !== "undefined" && res.headers.get("X-Chart-Rebuild") === "1" &&
+        /^\/v1\/(chart\/|report$|hook$|summary$|daily$|omnibus$|pay\/(tiers|peek)$)/.test(url.pathname)) {
+      let body: {chart_id?:string} = {};
+      try { body = JSON.parse(typeof init?.body === "string" ? init.body : "{}"); } catch {}
+      const chartId = body.chart_id || url.searchParams.get("chart_id") ||
+        (url.pathname.startsWith("/v1/chart/") ? decodeURIComponent(url.pathname.slice(10)) : null);
+      if (chartId) { await rebuildSavedChart(chartId); return call<T>(path, init, false); }
+    }
     let detail = res.statusText;
     try {
       const body = await res.json();

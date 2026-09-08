@@ -26,9 +26,11 @@ export default function DailyPage() {
   const s = useSession();
   const [data, setData] = useState<DailyResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
 
   useEffect(() => {
-    s.set({ visits: s.visits + 1 });
+    const day = new Intl.DateTimeFormat('en-CA', {timeZone:'Asia/Seoul', year:'numeric', month:'2-digit', day:'2-digit'}).format(new Date());
+    s.set({ visits: s.visitDate === day ? s.visits + 1 : 1, visitDate: day });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -39,7 +41,7 @@ export default function DailyPage() {
       .then((d) => alive && setData(d))
       .catch(() => alive && setErr("일진을 셈하지 못했소."));
     return () => { alive = false; };
-  }, [s.chartId, s.concern]);
+  }, [s.chartId, s.concern, retry]);
 
   if (!s.chartId) {
     return (
@@ -63,7 +65,7 @@ export default function DailyPage() {
           다른지**를 그림으로 한 줄 답니다.
       */}
       <Say who="도령" lens="pungun">
-        여덟 글자는 그대로 두고, 오늘 자 두 글자만 그 위에 얹는 것이오.
+        입력한 명식은 그대로 두고, 오늘 자 두 글자만 그 위에 얹는 것이오.
         <br />
         <b>여태 「오늘 왜 이렇게 안 풀리지」 싶은 날이 있었소.</b>
         {" "}그런 날 대개는 참고 넘겼을 것이오. 그 날짜를 여기 대 보면
@@ -80,10 +82,10 @@ export default function DailyPage() {
       */}
       <p className="lede8">
         일진 (그날에 새로 서는 두 글자) 이오. 날마다 <b>두 글자가 다</b>
-        바뀌고, <b>예순 날</b>만에 같은 짝이 돌아오오. 그 둘이 그대 여덟
-        글자와 어디서 맞물리는지 보오.
+        바뀌고, <b>예순 날</b>만에 같은 짝이 돌아오오. 그 둘이 그대의
+        명식과 어디서 맞물리는지 보오.
       </p>
-      {err && <Say who="도령" lens="pungun">{err}</Say>}
+      {err && <><Say who="도령" lens="pungun">{err}</Say><button className="btn" onClick={() => {setErr(null);setRetry(n => n + 1);}}>일진 다시 불러오기</button></>}
 
       {/* 하루 3회 접속 시 만류 — 늘리지 마세요 */}
       {s.visits >= VISIT_WARN_AT && (

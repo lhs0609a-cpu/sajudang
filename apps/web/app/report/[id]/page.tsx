@@ -38,7 +38,7 @@ const TABS: Tab[] = ["c1", "c2", "c3", "c4", "c5", "c6"];
  *   (engine/report.py 의 컷 순서와 같습니다)
  */
 const OPENING_BEATS = [
-  "여덟 글자를 다시 펴는 중",
+  "입력한 명식을 다시 펴는 중",
   "월지와 일지를 견주는 중",
   "대운을 십 년 단위로 세는 중",
   "이 사람 눈으로 다시 읽는 중",
@@ -86,6 +86,7 @@ function ReportInner() {
   useEffect(() => { if (asked && TABS.includes(asked)) setTab(asked); }, [asked]);
   const [rep, setRep] = useState<ReportResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
   const [rating, setRating] = useState(0);
   /* 뜸이 끝났는가. 서버가 빨라도 이 장면을 지우지 않습니다 (a6 과 같은 결). */
   const [opened, setOpened] = useState(false);
@@ -230,7 +231,7 @@ function ReportInner() {
         setErr(e instanceof ApiError ? e.message : "리포트를 펴지 못했소.");
       });
     return () => { alive = false; };
-  }, [s.chartId, lensId, s.tier, s.concern, s.axis4, s.sessionId, extras]);
+  }, [s.chartId, lensId, s.tier, s.concern, s.axis4, s.sessionId, extras, retry]);
 
   /*
    * 뜸은 **글이 도착한 뒤부터** 셉니다. 도착 전부터 세면 느린 날에는
@@ -260,7 +261,7 @@ function ReportInner() {
       <Shell title="읽다">
         <Say who={lens?.name ?? "도령"} lens={lensId}>{err}</Say>
         <button className="btn mt" onClick={() => {
-          setErr(null); setExtras(null); setRep(null);
+          setErr(null); setRep(null); setRetry(n => n + 1);
         }}>
           다시 펴 보겠습니다
         </button>
@@ -336,7 +337,7 @@ function ReportInner() {
           </p>
           <p className="sm">{rep.lens.hanja} · {rep.lens.group}</p>
           <p className="sm mt">
-            {s.name ? `${s.name}의 ` : ""}여덟 글자를 {rep.lens.name}의 눈으로 본 것
+            {s.name ? `${s.name}의 ` : ""}명식을 {rep.lens.name}의 눈으로 본 것
           </p>
           <p className="sm">
             읽는 자리 {rep.cuts.length}컷
@@ -344,7 +345,7 @@ function ReportInner() {
           </p>
         </div>
         <span className="src">
-          근거 · 여덟 글자 하나 · {rep.lens.name}의 눈 하나 · 읽는 자리
+          근거 · 입력한 명식 · {rep.lens.name}의 관점 · 읽는 자리
           {" "}{rep.cuts.length}컷
         </span>
         <p className="sm">
@@ -364,19 +365,16 @@ function ReportInner() {
             8글자, 이 사람이 먼저 보는 자리, 그리고 읽는 법.
         */}
         <Say who={rep.lens.name} lens={lensId}>
-          {you}가 적어 낸 건 태어난 해·달·날·시 4자리요. 그걸 옮기니
-          8글자가 되었소. 여기 적힌 건 전부 그 여덟에서 나온 것이라,
-          없는 말은 한 줄도 안 얹었고 앞으로도 안 얹소.
+          {you}의 입력으로 {s.hourKnown ? "기둥 4자리의 8글자" : "시주를 제외한 기둥 3자리의 6글자"}를 세웠소.
+          계산된 배치와 그 배치를 읽는 해석을 구분해 보시오.
           <br />
-          <b>여태 사주를 본 적이 없지는 않을 것이오.</b>
-          {" "}보고 나서도 안 믿긴 채로 덮어 둔 일이 있었소. 맞는
-          말 같기는 한데 누구한테나 맞는 말 같아서, 물어보려다 참고
-          혼자 접어 둔 것이오.
+          <b>실제 경험과 다른 문장은 받아들이지 않아도 좋소.</b>
+          {" "}명식만으로 그대가 겪은 일을 알 수는 없소.
           <br /> 그래서 이 집은 칸마다 <b>근거 줄</b>을
           답니다 — 대 보시오. 못 대는 줄이 있으면 그건 내 잘못이오.
           <br />
           내가 먼저 보는 자리는 「{rep.lens.specialty ?? rep.lens.name}」이오.
-          나머지 19명은 같은 8글자를 놓고 다른 데를 먼저 짚소.
+          나머지 19명은 같은 명식을 놓고 다른 데를 먼저 짚소.
           두루마리처럼 위에서 아래로 한 컷씩 뜨니, 훑지 말고
           한 칸씩 보시오.
         </Say>

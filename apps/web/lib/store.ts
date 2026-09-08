@@ -66,6 +66,7 @@ export interface SessionState {
   paid: boolean;
   relayUsed: number;
   visits: number;
+  visitDate: string | null;
 
   /* ── 관리자 레일 ──
      ?admin=1 로 켜고 ?admin=0 으로 끕니다. 전체 화면을 오가며
@@ -153,6 +154,7 @@ const initial = {
   paid: false,
   relayUsed: 0,
   visits: 0,
+  visitDate: null as string | null,
   admin: false,          // 첫 그림(SSR)에는 레일이 없다 — 켜는 것은 DevRail 이 한다
   adminSet: false,
   seasonOverride: null as Season | null,
@@ -180,7 +182,7 @@ export const useSession = create<SessionState>()(
         sex: s.sex, city: s.city, axis4: s.axis4, concern: s.concern,
         concernSet: s.concernSet, sexSet: s.sexSet,
         chartId: s.chartId, cur: s.cur, read: s.read, skipped: s.skipped,
-        seals: s.seals, tier: s.tier, paid: s.paid, visits: s.visits,
+        seals: s.seals, tier: s.tier, paid: s.paid, visits: s.visits, visitDate: s.visitDate,
         admin: s.admin, adminSet: s.adminSet, seasonOverride: s.seasonOverride,
         ilganOverride: s.ilganOverride,
       }),

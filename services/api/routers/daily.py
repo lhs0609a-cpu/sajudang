@@ -4,6 +4,7 @@ from datetime import date, datetime, timedelta
 from fastapi import APIRouter
 
 import store
+from service_clock import KST, today as korea_today
 from engine.daily import build_daily
 from engine.features import Features
 from routers.chart import load_features
@@ -13,8 +14,8 @@ router = APIRouter(prefix="/v1", tags=["daily"])
 
 
 def _seconds_to_midnight() -> int:
-    now = datetime.now()
-    nxt = datetime.combine(now.date() + timedelta(days=1), datetime.min.time())
+    now = datetime.now(KST)
+    nxt = datetime.combine(now.date() + timedelta(days=1), datetime.min.time(), tzinfo=KST)
     return max(60, int((nxt - now).total_seconds()))
 
 
@@ -28,7 +29,7 @@ def get_daily(chart_id: str, concern: str | None = None) -> DailyResponse:
       물었든 같습니다. 캐시 열쇠에 넣어야 돈으로 읽은 것이 몸으로
       읽은 것을 덮지 않습니다.
     """
-    today = date.today()
+    today = korea_today()
     key = "daily:%s:%s:%s" % (chart_id, today.isoformat(), concern or "-")
     cached = store.get_json(key)
     if cached is not None:

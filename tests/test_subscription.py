@@ -57,6 +57,7 @@ def _sub(sub_mod, payments, **over):
         "chart_id": None, "concern": "love", "orders": ["sjd_sub_x"],
     }
     s.update(over)
+    sub_mod._save(s)  # renew must re-read a persisted subscription, like the scheduler.
     return s
 
 

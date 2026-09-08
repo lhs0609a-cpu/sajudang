@@ -4,6 +4,7 @@ import hashlib
 from fastapi import APIRouter, HTTPException
 
 import store
+from service_clock import today
 from version import ENGINE_VER
 from engine.calendar import build_chart
 from engine.features import build_features
@@ -36,7 +37,12 @@ def load_features(chart_id: str) -> dict:
     if f is None:
         raise HTTPException(
             status_code=404,
-            detail="모르는 chart_id 요. /v1/chart 로 명식부터 세우시오.")
+            detail="저장된 명식을 다시 계산해야 합니다. 입력 정보와 구매 내역은 유지됩니다.",
+            headers={"X-Chart-Rebuild": "1"})
+    if (store.get_json(_k_ver(chart_id)) != ENGINE_VER or
+            store.get_json("chartdate:" + chart_id) != today().isoformat()):
+        raise HTTPException(status_code=409, detail="오늘 기준으로 명식을 갱신해야 합니다.",
+                            headers={"X-Chart-Rebuild": "1"})
     return f
 
 
@@ -74,16 +80,10 @@ def _divergence(req: "ChartRequest") -> dict | None:
     from engine import calendar as cal
 
     def build(**over):
-        old = {k: getattr(cal, k) for k in over}
-        for k, v in over.items():
-            setattr(cal, k, v)
-        try:
-            return cal.build_chart(
-                req.year, req.month, req.day, req.hour, req.minute,
-                req.sex, hour_known=req.hour_known, city=req.birth_city)
-        finally:
-            for k, v in old.items():
-                setattr(cal, k, v)
+        return cal.build_chart(
+            req.year, req.month, req.day, req.hour, req.minute,
+            req.sex, hour_known=req.hour_known, city=req.birth_city,
+            **{k.lower(): v for k, v in over.items()})
 
     try:
         base = build()
@@ -177,6 +177,21 @@ def _rarity(feat: dict) -> dict | None:
 
 @router.post("/chart", response_model=ChartResponse)
 def post_chart(req: ChartRequest) -> ChartResponse:
+    from datetime import date
+    from engine.calendar import CITY_LON, check_birth_date
+    try:
+        check_birth_date(req.year, req.month, req.day)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    born = date(req.year, req.month, req.day)
+    now = today()
+    if born > now:
+        raise HTTPException(status_code=400, detail="생년월일이 오늘보다 뒤입니다. 태어난 날짜를 확인해 주세요.")
+    age = now.year - born.year - ((now.month, now.day) < (born.month, born.day))
+    if age < 14:
+        raise HTTPException(status_code=400, detail="만 14세 이상만 이용할 수 있습니다.")
+    if req.birth_city not in CITY_LON:
+        raise HTTPException(status_code=400, detail="현재 지원하는 국내 출생 도시를 선택해 주세요. 해외 출생은 아직 지원하지 않습니다.")
     key = chart_key(req)
     cached = store.get_json(store.k_chart(key))
     # ★ 「같은 입력이면 같은 결과」는 **엔진이 안 바뀔 때만** 참이오
@@ -190,7 +205,8 @@ def post_chart(req: ChartRequest) -> ChartResponse:
     #   판이 다르면 캐시를 안 쓰고 다시 세우오. 열쇠(chart_id)는
     #   그대로 두오 — 바꾸면 이미 치른 주문과 리포트가 딴 명식을
     #   가리키오.
-    if cached is not None and store.get_json(_k_ver(key)) != ENGINE_VER:
+    if cached is not None and (store.get_json(_k_ver(key)) != ENGINE_VER or
+                              store.get_json("chartdate:" + key) != now.isoformat()):
         cached = None
     if cached is not None:
         return ChartResponse(chart_id=key, features=cached, cached=True,
@@ -207,7 +223,7 @@ def post_chart(req: ChartRequest) -> ChartResponse:
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    features = build_features(chart).to_dict()
+    features = build_features(chart, as_of=now).to_dict()
     # 같은 입력이면 같은 결과라 캐시합니다. 다만 **무기한은 아닙니다** —
     # 다시 세우는 데 0.2ms 밖에 안 드는데 한 벌이 5KB 라, 만기를 안 주면
     # 저장소가 줄어들 힘이 하나도 없습니다. 만료돼도 다음 요청에 다시
@@ -215,6 +231,7 @@ def post_chart(req: ChartRequest) -> ChartResponse:
     store.set_json(store.k_chart(key), features, ttl=CHART_TTL)
     # 어느 판으로 세웠는지 함께 찍습니다 — 명식과 같은 만기로.
     store.set_json(_k_ver(key), ENGINE_VER, ttl=CHART_TTL)
+    store.set_json("chartdate:" + key, now.isoformat(), ttl=CHART_TTL)
     return ChartResponse(chart_id=key, features=features, cached=False,
                          rarity=_rarity(features),
                          divergence=_divergence(req))

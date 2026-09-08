@@ -118,6 +118,7 @@ function PayInner() {
 
   const [free, setFree] = useState<ReportResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
   /*
    * ★ 기본 선택이 「스무 사람 전부」였습니다.
    *   세 목패의 힘은 가운데가 팔리는 데서 나오는데, 그때 가운데는
@@ -189,7 +190,7 @@ function PayInner() {
       })
       .catch((e) => { if (alive) setErr(e instanceof ApiError ? e.message : "목패를 펴지 못했소."); });
     return () => { alive = false; };
-  }, [step, s.chartId, s.cur, s.concern, s.axis4, tiers]);
+  }, [step, s.chartId, s.cur, s.concern, s.axis4, tiers, retry]);
 
   /* d1b · 엿보기 — 고른 목패가 여는 자리들 */
   useEffect(() => {
@@ -224,7 +225,7 @@ function PayInner() {
         if (alive) setErr(e instanceof ApiError ? e.message : "펴지 못했소.");
       });
     return () => { alive = false; };
-  }, [step, s.chartId, s.cur, s.concern, s.axis4, free]);
+  }, [step, s.chartId, s.cur, s.concern, s.axis4, free, retry]);
 
   /*
    * 결제창에서 돌아왔다 — 토스가 ?toss=ok&paymentKey=… 로 되돌려 보냅니다.
@@ -401,7 +402,7 @@ function PayInner() {
             받는 구간이라는 것도 글에 안 적혀 있었습니다. */}
         <Narration lines={["도령이 종이를 한 겹 더 넘겼다.",
                            "여기서는 아직 아무것도 받지 않는다."]} />
-        {err && <Say who={charName} lens={s.cur}>{err}</Say>}
+        {err && <><Say who={charName} lens={s.cur}>{err}</Say><button className="btn" onClick={() => {setErr(null);setRetry(n => n + 1);}}>무료 해석 다시 불러오기</button></>}
         {free?.editorial && <ReadingGuide guide={free.editorial} />}
         {/*
           ★ 한 컷씩 뜹니다 (2026-09-02). 여기가 손님이 "압도당한다" 고
@@ -547,7 +548,7 @@ function PayInner() {
           <p className="conversion-lead">{charName}의 관점에서 추가로 열리는 내용을 확인하세요. 상품을 선택하면 아래에 결제 금액과 조건이 표시돼요.</p>
         </div>
         {!s.chartId && <div className="conversion-status"><p>먼저 태어난 정보로 무료 해석을 확인해 주세요.</p><button className="btn" onClick={() => router.push("/?step=a5")}>무료 해석 시작하기</button></div>}
-        {err && <div className="warn" role="alert"><p>{err}</p><button className="btn gh" onClick={() => router.push("/me")}>결제 내역·구독 확인</button>
+        {err && <div className="warn" role="alert"><p>{err}</p>{!tiers && <button className="btn" onClick={() => {setErr(null);setRetry(n => n + 1);}}>상품 다시 불러오기</button>}<button className="btn gh" onClick={() => router.push("/me")}>결제 내역·구독 확인</button>
           {(tossBack || subBack) && <button className="btn gh" onClick={() => router.replace("/pay?step=d1")}>상품으로 돌아가기</button>}</div>}
         {s.chartId && !tiers && !err && <p role="status">이 명식에서 열리는 내용을 확인하고 있어요…</p>}
         {tiers && <>
@@ -559,6 +560,8 @@ function PayInner() {
         {tier && <div className="conversion-checkout" aria-live="polite">
           <div className="conversion-card">
             <h2>{tier.id === "one" ? `${charName} 해석` : tier.name}</h2>
+            {tier.needs_extra_input && <p className="conversion-note">일부 해석은 상대 정보나 현재 상황을 추가로 입력하면 열립니다. 입력은 선택이며, 입력하지 않은 정보에 대한 해석은 제공되지 않습니다.</p>}
+            {tier.id === "all" && <p className="conversion-note">이미 읽은 내용도 포함됩니다. 전체 상품은 다른 인물의 관점을 함께 읽는 방식이며, 모든 인물에서 한 명 상품보다 본문이 길어지는 것은 아닙니다.</p>}
             {peek && peek.length > 0 && <details className="conversion-details"><summary>추가 해석 미리보기</summary>
               {peek.map((r, i) => <div key={r.lens_id+i}><h3>{r.ask}</h3><p>{r.head}</p>{r.source && <p className="conversion-note">해석 근거 · {r.source}</p>}</div>)}
             </details>}

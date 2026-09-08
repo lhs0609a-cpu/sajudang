@@ -321,7 +321,7 @@ def _write_order(sub: dict, order_id: str, pg_tid: Optional[str],
     orders = store.get_json(okey) or []
     if order_id not in orders:
         orders.append(order_id)
-        store.set_json(okey, orders, ttl=730 * DAY)
+        store.set_json(okey, orders)
 
 
 # ══════════════════════════════════════════════════════════
@@ -398,6 +398,31 @@ class RestoreRequest(BaseModel):
 
 @router.post("/restore")
 def restore(req: RestoreRequest) -> dict:
+    from contextlib import ExitStack
+    initial = store.get_json("order:" + req.order_id)
+    if not initial:
+        raise HTTPException(status_code=404, detail="그런 주문번호가 없소.")
+    owner = initial.get("session_id")
+    if not owner:
+        raise HTTPException(status_code=409, detail="구매 내역의 소유자를 확인해야 합니다.")
+    try:
+        with ExitStack() as stack:
+            checks = [stack.enter_context(store.payment_lease(sid))
+                      for sid in sorted({owner, req.session_id})]
+            current = store.get_json("order:" + req.order_id) or {}
+            if current.get("session_id") != owner:
+                raise HTTPException(status_code=409, detail="다른 기기에서 복원 중입니다. 다시 시도해 주세요.")
+            existing = _load(req.session_id)
+            if owner != req.session_id and active(existing):
+                raise HTTPException(status_code=409, detail="이 기기에 이미 이용 중인 구독이 있습니다. 내역을 먼저 확인해 주세요.")
+            for check in checks:
+                check()
+            return _restore_locked(req)
+    except store.LeaseBusy:
+        raise HTTPException(status_code=409, detail="구매 내역을 처리 중입니다. 잠시 후 다시 복원해 주세요.")
+
+
+def _restore_locked(req: RestoreRequest) -> dict:
     """
     기기를 바꿨을 때.
 
@@ -436,9 +461,13 @@ def restore(req: RestoreRequest) -> dict:
     okey = "orders:" + req.session_id
     orders = store.get_json(okey) or []
     for oid in sub.get("orders", []):
+        moved = store.get_json("order:" + oid)
+        if moved:
+            moved["session_id"] = req.session_id
+            store.set_json("order:" + oid, moved)
         if oid not in orders:
             orders.append(oid)
-    store.set_json(okey, orders, ttl=730 * DAY)
+    store.set_json(okey, orders)
 
     return {"ok": True, "sub": _view(sub),
             "say": "찾았소. 다음 달부터는 이 자리로 오오."}
@@ -471,8 +500,9 @@ def renew(sub: dict, now: Optional[datetime] = None) -> dict:
     try:
         with store.payment_lease(sub["session_id"]) as check:
             latest = store.get_json("sub:" + sub["user_key"])
-            if latest:
-                sub.update(latest)
+            if not latest:
+                return {"ok": True, "already": True, "reason": "이동하거나 종료된 구독입니다."}
+            sub.update(latest)
             if not due(sub, now):
                 return {"ok": True, "already": True, "period_end": sub.get("period_end")}
             return _renew_locked(sub, now, check)

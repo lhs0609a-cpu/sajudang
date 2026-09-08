@@ -40,14 +40,16 @@ function MeInner() {
   const [sub, setSub] = useState<SubView | null>(null);
   const [subBusy, setSubBusy] = useState(false);
   const [subSay, setSubSay] = useState<string | null>(null);
+  const [subError, setSubError] = useState(false);
+  const [subRetry, setSubRetry] = useState(0);
   useEffect(() => {
     if (!s.sessionId) return;
     let alive = true;
     api.subStatus(s.sessionId)
-      .then((r) => { if (alive) setSub(r); })
-      .catch(() => { /* 카드를 안 걸었으면 조용히 없는 것입니다 */ });
+      .then((r) => { if (alive) {setSub(r);setSubError(false);} })
+      .catch(() => { if (alive) setSubError(true); });
     return () => { alive = false; };
-  }, [s.sessionId]);
+  }, [s.sessionId, subRetry]);
 
   if (tab === "r1") {
     /*
@@ -144,6 +146,7 @@ function MeInner() {
   return (
     <Shell screen="f2" title="인장첩">
       <RefundHistory sessionId={s.sessionId} />
+      {subError && <div className="conversion-card" role="alert"><p>구독 상태를 확인하지 못했어요. 구독이 없거나 해지됐다는 뜻은 아닙니다.</p><button className="btn gh" onClick={() => {setSubError(false);setSubRetry(n => n + 1);}}>구독 상태 다시 확인하기</button></div>}
       <Scene id="sealbook" />
       <Narration lines={["첩을 폈다.", "찍힌 인장은 " + s.seals.length + "개."]} />
       {/*
@@ -165,14 +168,13 @@ function MeInner() {
         <b>빈 칸을 보고 채우고 싶어지셨소.</b> 스무 칸이 그려져
         있으면 사람은 다 채우려 드오. 그건 이 첩이 그렇게 생겨서지
         그대에게 스물이 필요해서가 아니오.
-        {" "}여태 그런 칸을 채우다 지친 적이 있었을 것이오.
+        {" "}부담스럽다면 이미 읽은 자리 하나만 다시 보아도 좋소.
         <br />
         칸 1개로 끝나도 되오. 두 칸이 붙어 있다고 둘째를 들어야 하는
         건 아니오 — 한 자리에 2명까지만 잇는 것도 그 때문이오.
           <br />
-        {" "}20개를 다 채우려다 도중에 지치고 그만둔 사람이,
-        1개만 제대로 읽고 간 사람보다 남은 게 적었소. 서둘러 모으다
-        정작 읽기를 미룬 것이오.
+        {" "}한 개를 읽고 오늘 해볼 행동을 하나 골라도 충분하오.
+        나머지 칸은 필요할 때 열어 보시오.
       </Say>
       <p className="tx">
         찬 칸이 <b>{s.seals.length}개</b>, 빈 칸이{" "}

@@ -69,6 +69,8 @@ def decide_refund(req: RefundDecision, x_funnel_key: str | None = Header(default
         raise HTTPException(status_code=404,detail="환불 확인 요청을 찾을 수 없습니다.")
     try:
         with store.payment_lease(order["session_id"]) as check:
+            if (store.get_json("order:"+req.order_id) or {}).get("session_id") != order["session_id"]:
+                raise HTTPException(status_code=409, detail="구매자가 다른 기기로 복원했습니다. 내역을 새로 확인해 주세요.")
             review=store.get_json("refund-review:"+req.order_id)
             if review.get("status") != "pending":
                 return {"ok":True,"already":True,"status":review["status"]}
