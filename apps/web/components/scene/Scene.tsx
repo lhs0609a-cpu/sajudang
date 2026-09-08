@@ -136,9 +136,10 @@ function Placeholder({ id, season }: { id: string; season: Season }) {
  * 장면 하나를 그리는 미디어 한 겹. 같은 에셋을 두 번 쓸 때(가운데 + 흘림)
  * 이 함수를 두 번 부릅니다. 브라우저는 같은 URL 을 한 번만 받아 옵니다.
  */
-function Media({ base, name, loop, tintClass, reduced, decorative }: {
+function Media({ base, name, loop, tintClass, reduced, decorative, onPlaying, onFailure }: {
   base: string; name: string; loop: boolean;
   tintClass?: string; reduced: boolean; decorative?: boolean;
+  onPlaying?: () => void; onFailure?: () => void;
 }) {
   /*
    * ★ 훅은 갈림보다 **앞**에 옵니다. 아래 `if (reduced)` 뒤에 두면
@@ -146,11 +147,13 @@ function Media({ base, name, loop, tintClass, reduced, decorative }: {
    */
   const snd = useSoundOn();
   const vref = useRef<HTMLVideoElement | null>(null);
+  const [failedBase, setFailedBase] = useState<string | null>(null);
+  const fail = () => { setFailedBase(base); onFailure?.(); };
   useEffect(() => {
     playSafely(vref.current, snd);
   }, [snd, base]);
 
-  if (reduced) {
+  if (reduced || failedBase === base) {
     // eslint-disable-next-line @next/next/no-img-element
     return <img className={tintClass} src={`${base}poster.jpg`}
                 alt={decorative ? "" : name} />;
@@ -159,6 +162,8 @@ function Media({ base, name, loop, tintClass, reduced, decorative }: {
     <video
       className={tintClass}
       poster={`${base}poster.jpg`}
+      onPlaying={onPlaying}
+      onError={fail}
       /*
         ★ 소리는 **스위치를 따릅니다** (2026-09-05).
           손님이 시킨 것 — "영상 소리는 다 켜고 계속 반복되게."
@@ -170,7 +175,7 @@ function Media({ base, name, loop, tintClass, reduced, decorative }: {
       key={base}
     >
       <source src={`${base}clip.webm`} type="video/webm" />
-      <source src={`${base}clip.mp4`} type="video/mp4" />
+      <source src={`${base}clip.mp4`} type="video/mp4" onError={fail} />
     </video>
   );
 }
@@ -266,6 +271,9 @@ export default function Scene({ id, className, bleed, figure }: {
   /* 구워진 것을 쓰면 PNG 를 또 얹지 않습니다 — 사람이 둘이 됩니다 */
   const baked = !!(figure && figLens && chosen === `/scene/${id}/${figLens}/`);
   const base = chosen ?? `/scene/${id}/`;
+  const [playingBase, setPlayingBase] = useState<string | null>(null);
+  // 새 컬러 포스터는 색을 보존하고, 영상 재생 중에는 기존 보정을 쓴다.
+  const mediaTint = !reduced && playingBase === base ? spec?.tint : "grade";
   const hasClip = chosen === undefined ? null : chosen !== null;
   const [open, setOpen] = useState(false);
   const artRef = useRef<HTMLDivElement | null>(null);
@@ -308,7 +316,8 @@ export default function Scene({ id, className, bleed, figure }: {
 
   const body = hasClip ? (
     <Media base={base} name={spec.name} loop={spec.loop} reduced={reduced}
-           tintClass={spec.tint ? `scene-video ${spec.tint}` : undefined} />
+           onPlaying={() => setPlayingBase(base)} onFailure={() => setPlayingBase(null)}
+           tintClass={spec.tint ? `scene-video ${mediaTint}` : undefined} />
   ) : (
     <Placeholder id={id} season={season} />
   );
@@ -373,7 +382,7 @@ export default function Scene({ id, className, bleed, figure }: {
       >
         {body}
         {figure && !baked && <SceneFigure lens={figLens} />}
-        {hasClip && spec.tint && <span className={`scene-tint ${spec.tint}`} />}
+        {hasClip && spec.tint && <span className={`scene-tint ${mediaTint}`} />}
         {pickable && (
           <span className="slot">{hasClip ? "프롬프트" : `IMG · ${id}`}</span>
         )}
