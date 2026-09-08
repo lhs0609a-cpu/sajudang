@@ -321,9 +321,9 @@ def _seg(stage, label, source, body, question, yes, no, sid,
         "source_below": bool(source_below),
         "html": guard.enforce(body, {"stage": stage, "statement_id": sid}),
         "question": question,
-        "yes": yes,
-        "no": no,
-        "statement_id": sid,
+        "yes": "맞는 경험이 있다면 그 장면을 기준으로 다음 해석을 비교해 보시오.",
+        "no": "맞지 않는 해석으로 남기겠소. 그대의 경험을 이 문장에 맞출 필요는 없소.",
+        "statement_id": sid + ":copy2",
     }
 
 
@@ -654,9 +654,9 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
             % (josa(top, "이", "가"), count_word(f.ten_gods[top]), strength),
             strength if strength in ("신강", "신약", "중화") else top,
             "강약" if strength in ("신강", "신약", "중화") else "십신"),
-        body=('<p class="neg">사람들이 %s를 두고 <span class="strk">%s</span>고 하오. '
-              '아니오.<br><span class="strk d2">%s</span>는 말도 틀렸소.<br><br>'
-              '<b>%s는 사람일 뿐이오.</b></p>')
+        body=('<p class="neg">명식만으로 %s를 <span class="strk">%s</span>고 정할 수 없소. '
+              '<span class="strk d2">%s</span>는 평가도 마찬가지요.<br><br>'
+              '전통 해석에서는 <b>%s는 모습</b>으로 읽기도 하오. 실제 경험과 비교해 보시오.</p>')
              % (esc_you, m1, m2, truth),
         question="이 말은 어떻소?",
         yes="그럴 줄 알았소. 그럼 순서를 짚어드리리다.",

@@ -19,7 +19,7 @@ def post_hook(req: HookRequest) -> HookResponse:
     #   안 튼 훅을 덮어써서, 다음 손님이 남의 응답으로 고쳐진 훅을
     #   받습니다.
     key = store.k_hook(req.chart_id, req.concern, req.axis4 or "",
-                       req.lens_id or "", "%s#%d" % (req.name, req.misses))
+                       req.lens_id or "", "%s#%d#copy2" % (req.name, req.misses))
     cached = store.get_json(key)
     if cached is not None:
         return HookResponse(chart_id=req.chart_id, segments=cached, cached=True)
