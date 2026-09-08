@@ -951,9 +951,10 @@ def turn(f, concern: str) -> Optional[dict]:
         #   why.AXIS 에 있소. why.line 으로 부르면 이치도 출처도 안
         #   붙어 관측만 남소 (tests/test_evidence 가 잡소).
         "ev": _why.axis_line(
-            "지금 대운 %s(%s) · 다음 %s 대운 %s"
-            % (f.daeun[f.daeun_now]["gz"], f.daeun_ten_god, grp,
-               ("%d세" % int(hit["start_age"])) if hit else "여덟 칸에 없음"),
+            "지금 %d살 · 대운 %s(%s) · %d살부터 · 다음 %s 대운 %s"
+            % (int(f.age), f.daeun[f.daeun_now]["gz"], f.daeun_ten_god,
+               int(f.daeun[f.daeun_now]["start_age"]), grp,
+               ("%d살" % int(hit["start_age"])) if hit else "여덟 칸에 없음"),
             "daeun_ten_god"),
         "sid": "turn:%s:%s:%s" % (concern, now_grp,
                                   "hit" if hit else "none"),
@@ -1040,6 +1041,13 @@ def _axis_counted(f, key: str) -> str:
     if key == "EI" and f.strength in ("신강", "신약"):
         out += (" 그대는 <b>%s</b>이라 밖으로 도는 쪽을 <b>두 자리</b> %s 보오."
                 % (f.strength, "더 얹어" if f.strength == "신강" else "덜어"))
+    # ★ 근거 줄에 **아라비아 숫자**를 남깁니다 (2026-09-07).
+    #
+    #   여기까지는 한글 수사(「셋이오」)로만 적었습니다. 사람이 읽기에는
+    #   그게 맞는데, 근거 줄은 **셈을 보이는 자리**라 손님이 만세력을
+    #   펴고 대 볼 수 있어야 합니다. 재보니 근거 줄에 숫자가 든 컷이
+    #   25%뿐이었습니다 (engine/worth 에서 가장 낮은 칸).
+    out += " (%d : %d)" % (hi, lo)
     return out
 
 
@@ -1090,10 +1098,11 @@ def face(f, concern: str, axis4: Optional[str] = None) -> Optional[dict]:
 
     return {
         "say": "".join(body),
+        # ★ 근거 줄에 센 수를 답니다 — 축 몇을 보고 몇이 어긋났는지.
         "ev": _why.axis_line(
-            "%s · 여덟 글자에서 뽑은 넉 자 %s"
+            "%s · 여덟 글자에서 뽑은 넉 자 %s · 본 축 %d · 어긋난 자리 %d"
             % (("적으신 넉 자 %s" % said) if usable else "넉 자를 안 적으셨소",
-               "".join(a[k] for k, _ in AXES)),
+               "".join(a[k] for k, _ in AXES), len(rows), len(gaps)),
             "concern"),
         "sid": "face:%s:%s:%s" % (concern, "".join(letters),
                                   ",".join(gaps) or "-"),

@@ -11,6 +11,7 @@ import Scene from "@/components/scene/Scene";
 import ActOut from "@/components/ActOut";
 import { Narration, Say } from "@/components/Narration";
 import { api, ApiError } from "@/lib/api";
+import type { SubView } from "@/lib/api";
 import { LENSES } from "@/lib/lenses";
 import { useSession } from "@/lib/store";
 import { useScreen } from "@/lib/track";
@@ -27,6 +28,25 @@ function MeInner() {
   const [oid, setOid] = useState("");
   const [finding, setFinding] = useState(false);
   const [say, setSay] = useState<string | null>(null);
+
+  /*
+   * 걸어 둔 카드 — 「한 달 듣기」.
+   *
+   * ★ 그만두는 길은 **시작한 길만큼 쉬워야** 합니다 (docs/11 §5).
+   *   전화도 메일도 아니고 버튼 하나입니다. 그리고 자리를 감추지
+   *   않습니다 — 찾기 어렵게 두면 안 둔 것과 같습니다.
+   */
+  const [sub, setSub] = useState<SubView | null>(null);
+  const [subBusy, setSubBusy] = useState(false);
+  const [subSay, setSubSay] = useState<string | null>(null);
+  useEffect(() => {
+    if (!s.sessionId) return;
+    let alive = true;
+    api.subStatus(s.sessionId)
+      .then((r) => { if (alive) setSub(r); })
+      .catch(() => { /* 카드를 안 걸었으면 조용히 없는 것입니다 */ });
+    return () => { alive = false; };
+  }, [s.sessionId]);
 
   if (tab === "r1") {
     /*
@@ -177,11 +197,92 @@ function MeInner() {
         })}
       </div>
       {/*
+        ══════════════════════════════════════════════════════
+        걸어 둔 카드 — 「한 달 듣기」
+        ══════════════════════════════════════════════════════
+
+        ★ 그만두는 자리를 **감추지 않습니다.**
+          정기결제에서 가장 흔한 어긋남이 이것입니다 — 거는 것은 버튼
+          하나인데 그만두는 것은 메일이나 전화입니다. 그건 브레이크를
+          없앤 것과 같습니다. 여기서는 거는 자리와 그만두는 자리가
+          똑같이 버튼 하나입니다 (docs/11 §5).
+
+        ★ 그만둬도 **이미 치른 달은 끝까지** 봅니다. 남은 날을 뺏는
+          해지는 값을 치른 사람에게서 도로 가져가는 것입니다.
+      */}
+      {sub?.has && (
+        <div className="ask mt">
+          <div className="lab">달마다 듣고 계시오</div>
+          <p className="sm">
+            {sub.price.toLocaleString()}원 / 달
+            {sub.card && <> · 카드 끝자리 <b>{sub.card}</b></>}
+            {sub.months && sub.months > 1 && <> · {sub.months}달째</>}
+          </p>
+          {sub.ending ? (
+            <>
+              <p className="sm">
+                그만두기를 눌러 두셨소. 더 안 빠져나가오 —{" "}
+                <b>{(sub.period_end ?? "").slice(0, 10)}</b>까지는 그대로
+                보시오.
+              </p>
+              <button className="btn mt" disabled={subBusy}
+                      onClick={async () => {
+                        setSubBusy(true); setSubSay(null);
+                        try {
+                          const r = await api.subResume({ session_id: s.sessionId });
+                          setSub(r.sub); setSubSay(r.say);
+                        } catch (e) {
+                          setSubSay(e instanceof ApiError ? e.message : "무르지 못했소.");
+                        } finally { setSubBusy(false); }
+                      }}>
+                {subBusy ? "무르는 중입니다" : "계속 듣겠습니다"}
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="sm">
+                다음은 <b>{(sub.next_charge ?? "").slice(0, 10)}</b>이오.
+                그 뒤로도 서른 날마다요.
+              </p>
+              {/*
+                ★ 그만두기가 유령 버튼이 아닙니다. 누르면 그 자리에서
+                  끝납니다 — 「나중에」처럼 레이블과 결과가 어긋나지
+                  않게, 무슨 일이 일어나는지 버튼 위에 적어 둡니다.
+              */}
+              <button className="btn gh mt" disabled={subBusy}
+                      onClick={async () => {
+                        setSubBusy(true); setSubSay(null);
+                        try {
+                          const r = await api.subCancel({ session_id: s.sessionId });
+                          setSub(r.sub); setSubSay(r.say);
+                        } catch (e) {
+                          setSubSay(e instanceof ApiError ? e.message : "그만두지 못했소.");
+                        } finally { setSubBusy(false); }
+                      }}>
+                {subBusy ? "그만두는 중입니다" : "그만두겠습니다"}
+              </button>
+            </>
+          )}
+          {sub.fails ? (
+            <p className="sm">
+              카드에서 값이 안 걷혔소 ({sub.fails}번). 사흘은 그대로
+              열어 두오 — 그 안에 카드를 다시 걸어 주시오.
+            </p>
+          ) : null}
+          {subSay && <p className="sm mt">{subSay}</p>}
+        </div>
+      )}
+
+      {/*
         ★ 산 것을 되찾을 길이 없었습니다.
           로그인이 없어 자격이 이 브라우저의 난수(session_id)에 매여
           있습니다. 데이터를 지우거나 기기를 바꾸면 치른 값을 통째로
-          잃었습니다 — 24,900원짜리를요. 주문번호는 결제 영수증과 승인
+          잃었습니다 — 99,000원짜리를요. 주문번호는 결제 영수증과 승인
           문자에 남으니, 그걸로 되찾습니다.
+
+        ★ 달삯은 되찾을 때 **주인도 함께 옮깁니다.** 안 옮기면 다음
+          달 청구가 옛 브라우저로 가서, 돈은 나가는데 여기서는 안
+          열립니다.
       */}
       <div className="ask mt">
         <div className="lab">치른 것을 못 찾겠습니다?</div>
@@ -204,6 +305,23 @@ function MeInner() {
                     }
                     s.set({ tier: r.tier as typeof s.tier, paid: true });
                     setSay(r.say);
+                    /*
+                     * ★ 달삯이면 **주인까지** 옮깁니다.
+                     *   주문만 옮기면 이 기기에서 보이기는 하는데 다음
+                     *   달 청구는 옛 브라우저로 갑니다. 돈은 나가고
+                     *   자격은 안 오는 자리가 됩니다.
+                     */
+                    if (r.tier === "sub") {
+                      try {
+                        const sr = await api.subRestore({
+                          session_id: s.sessionId, order_id: oid });
+                        setSub(sr.sub);
+                        setSay(sr.say);
+                      } catch {
+                        setSay("치른 것은 찾았소만, 걸어 두신 카드는 못 찾았소. "
+                               + "다음 달은 다시 걸어 주시오.");
+                      }
+                    }
                   } catch (e) {
                     setSay(e instanceof ApiError ? e.message : "찾지 못했소.");
                   } finally {

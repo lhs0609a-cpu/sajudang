@@ -66,10 +66,11 @@ def test_actout_belongs_to_its_own_screen():
     S._screens.cache_clear()
     pairs = S._screens()
     src = (WEB / "app" / "page.tsx").read_text(encoding="utf-8")
-    # a7 의 액트아웃은 「없는 것부터」 를 이름으로 부른다
-    assert 'next="없는 것부터"' in src
-    assert pairs["a7"][2] == "없는 것부터", "a7 이 제 예고를 못 든다"
-    assert pairs["a6"][2] != "없는 것부터", "a6 가 a7 의 예고를 훔쳤다"
+    # The new result finishes with a concrete free-content CTA.
+    next_step = "무료 해석과 오늘의 행동"
+    assert next_step in src
+    assert next_step in pairs["a7"][0], "a7 이 제 다음 행동을 못 든다"
+    assert next_step not in pairs["a6"][0], "a6 가 a7 의 예고를 훔쳤다"
 
 
 def test_ruler_reads_the_declaration_not_the_wording():

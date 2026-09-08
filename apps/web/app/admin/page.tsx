@@ -470,14 +470,15 @@ export default function AdminPage() {
             물건의 상태**라, 주인이 열자마자 봐야 하는 것이 이쪽입니다. */}
       {worth && (
         <section>
-          <h2>값값 — 치른 값이 아깝지 않은가</h2>
+          <h2>자동 문장 검사 · v1</h2>
+          <p className="sm">문장 중복·출처 표기·분량을 검사하는 내부 지표입니다. 실제 고객 만족도, 사주 정확도, 결제율을 뜻하지 않습니다.</p>
           <div className="worthtop">
             <div className={"worthbig g" + Math.min(4, Math.floor(worth.total / 20))}>
               <b>{worth.total}</b><span>/ 100</span>
             </div>
             <div className="worthsay">
-              <p className="grade">{worth.grade}</p>
-              <p className="sm">{worth.say}</p>
+              <p className="grade">내부 검사 {worth.total}점</p>
+              <p className="sm">점수보다 조건에 맞는 해석과 실제 사용자 평가를 함께 확인하세요.</p>
               {worth.weakest.length > 0 && (
                 <p className="sm">
                   먼저 볼 자리 —{" "}
@@ -806,7 +807,8 @@ export default function AdminPage() {
 
       {/* ── 어디서 나가는가 ──────────────────────────── */}
       <section>
-        <h2>어디서 나가는가</h2>
+        <h2>어디서 나가는가 · 진입 동선 v2</h2>
+        <p className="sm">최근 30일 개편 첫 화면 진입 브라우저를 기준으로, 7일 안의 순차 이동과 서버 승인을 셉니다. 실제 사람 수와 다르며, 관찰 기간이 끝나지 않은 방문이 포함됩니다. 직접 진입·이전 동선은 제외합니다.</p>
         {steps.length === 0 ? (
           <p className="sm">
             아직 쌓인 게 없소. 계측은 `/v1/events` 로 들어옵니다.

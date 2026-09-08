@@ -1,0 +1,14 @@
+.env*
+output/
+services/
+seed/
+tests/
+tools/
+docs/
+reference/
+assets/
+var/
+사주당_개발문서/
+성신당 캐릭터 및 이미지/
+*.html
+*.txt

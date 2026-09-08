@@ -26,6 +26,7 @@ from . import lens as lens_mod
 from . import lens_cuts as lens_cuts_mod
 from . import pattern as _pattern
 from . import rarity as rarity_mod
+from . import real as _real
 from . import why as _why
 from . import bite as _bite
 from . import flavor as _flavor
@@ -275,6 +276,38 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     """돌려주는 것: (컷 목록, 추가 입력이 틀렸으면 그 사유)"""
     B = bank_mod.bank()
     top, weak, strong = f.top_ten_god, f.weak_el, f.strong_el
+    # ★ 살림의 말 — **공통 컷에도** 답니다 (2026-09-07).
+    #
+    #   `engine/real.py` 는 뜬 말 뒤에 손에 잡히는 한 줄을 붙이려고
+    #   만든 표인데, **관점 컷에만** 걸려 있었습니다. 그런데 그 표의
+    #   축(weak_el · yongsin · top_ten_god · daeun_ten_god …)은 공통
+    #   컷이 다 가진 것들입니다.
+    #
+    #   재보니 「손에 잡히는 줄」이 35% 였습니다 (engine/worth). 뜬 말은
+    #   1%밖에 안 되는데 손에 안 잡히는 까닭이 이것입니다 — 표는 있는데
+    #   절반의 컷에 안 걸려 있었습니다.
+    #
+    #   한 장에 한 번만 붙습니다. 관점 컷과 **같은 자리를 나눠 씁니다** —
+    #   따로 세면 같은 줄이 두 번 나옵니다.
+    real_seen: set = set()
+
+    def _live(axis: str, key) -> str:
+        """이 축의 살림의 말 한 줄. 이미 썼거나 표에 없으면 빈 글."""
+        return _real.add(axis, key, real_seen) if key else ""
+
+    def _live_has(axis: str, key) -> bool:
+        """붙일 것이 남아 있는가. **세지 않고** 봅니다 —
+        `_live` 는 부르는 순간 세어 버려서, 조건문에서 부르면
+        본문에는 빈 글이 갑니다."""
+        return bool(key) and bool(_real.of(axis, key))             and ("%s:%s" % (axis, key)) not in real_seen
+
+    # ★ 관점 컷을 **먼저** 짓습니다.
+    #
+    #   살림의 말은 한 장에 한 번이라, 먼저 부르는 쪽이 가져갑니다.
+    #   관점 컷은 값을 치르고 이 사람을 고른 까닭이라 그 자리가
+    #   먼저입니다 — 공통 컷은 남는 것을 씁니다. 붙는 자리(append)는
+    #   아래 그대로이니 순서는 안 바뀝니다.
+    lc_built = lens_cuts_mod.build(f, lens_id, concern, real_seen)
     lack = B["LACK"][weak]
     patt = B["PATT"][top]
     daeun = f.daeun[f.daeun_now]
@@ -328,9 +361,10 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         # ★ 원점수(`불 0.3`)를 그대로 내면 그건 근거가 아니라 계기판입니다.
         #   손님은 0.3 이 큰지 작은지 모릅니다. 사람 말로 냅니다.
         _why.line(
-            "%s %s%s" % (element_word(weak), amount_word(f.elements[weak]),
-                         " (동률 %d)" % len(f.weak_els)
-                         if len(f.weak_els) > 1 else ""),
+            "%s %s · 겉으로 %d자%s"
+            % (element_word(weak), amount_word(f.elements[weak]),
+               _visible(f, weak),
+               " · 동률 %d" % len(f.weak_els) if len(f.weak_els) > 1 else ""),
             "용신", "용신"),
         # ★ 세는 수를 **되돌려** 놓습니다.
         #
@@ -466,7 +500,9 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
                   % (element_word(f.weak_el), _visible(f, f.weak_el),
                      f.strength, f.strength_score, rr["words"]),
                   f.strength, "십신"),
-        heart_mod.solace(f, you, bank_mod.concern_word(concern), rr),
+        heart_mod.solace(f, you, bank_mod.concern_word(concern), rr)
+        + ('<p class="tale">%s</p>' % _live("weak_el", f.weak_el).strip()
+           if _live_has("weak_el", f.weak_el) else ""),
         0, sid="solace:%s:%s:%s:%s"
                % (f.weak_el, f.strength, top, rr["band"])))
 
@@ -563,9 +599,10 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
 
     cuts.append(_cut(
         "daeun_now", "4 · 지금 어디에",
-        _why.line("대운 %s · %s%s · 세운 %s%s" % (
+        _why.line("대운 %s · %s%s · %d살부터 · 세운 %s%s" % (
             daeun["gz"], f.daeun_ten_god,
-            "" if f.daeun_started else " · 진입 전", sun_g, sun_j),
+            "" if f.daeun_started else " · 진입 전",
+            int(daeun["start_age"]), sun_g, sun_j),
             "대운", ""),
         (lead + '<p class="tale">이 구간의 성격은 <b>%s</b>. %s</p>%s%s'
          % (f.daeun_ten_god,
@@ -574,7 +611,12 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
             when, sewoon)
          # 지금 판의 어디쯤인가. 고민·없는 기운과 **무관한 축**이라
          # 한 장 안에서 서로 다른 데를 때립니다.
-         + _bite.phase_html(f.age, f.daeun[0]["start_age"], bit)),
+         + _bite.phase_html(f.age, f.daeun[0]["start_age"], bit)
+         # ★ 살림의 말 — 뜬 말 뒤에 손에 잡히는 한 줄 (engine/real).
+         #   표는 있었는데 **관점 컷에만** 걸려 있었습니다.
+         + ('<p class="tale">%s</p>' % _live("daeun_ten_god",
+                                              f.daeun_ten_god).strip()
+            if _live_has("daeun_ten_god", f.daeun_ten_god) else "")),
         1, sid="daeun:%s:%s" % (f.daeun_ten_god, sun_tg)))
 
     # ── 6 · 필요한 것 (용신 + 다과상) ────────────────────
@@ -658,9 +700,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
 
     # ── 7b · 이름 붙은 자리 (신살) ─────────────────────────
     T = _sinsal_text()
-    # ★ 신살이 하나도 없는 명식이 있습니다. 아래 statement_id 가 고른
-    #   목록(on)을 쓰는데, 그때 이 이름이 아예 안 생겨 터졌습니다.
-    on: list = []
+    on: list = []  # 신살이 없는 명식에서도 statement_id 조합이 가능해야 한다.
     if f.sinsal:
         rows = []
         said_palace: set = set()
@@ -754,6 +794,10 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
                 '복이나 화를 보장하는 표가 아니라 <b>자리를 가리키는 '
                 '표</b>요.</p>') + "".join(rows) + sinsal_read.folded(off)
     else:
+        # ★ 신살이 하나도 없는 명식도 있습니다. 그때는 갈라 세울 것도
+        #   없으니 빈 목록을 둡니다 — 아래 열쇠(sid)가 이걸 봅니다.
+        #   안 두면 「이름 붙은 자리가 없소」 인 사람에게서 터집니다.
+        on = []
         body = '<p class="tale">%s</p>' % T["none"]["sinsal"]
     cuts.append(_cut(
         "sinsal", "이름 붙은 자리",
@@ -834,8 +878,10 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
                 '다시 재면 달라지기도 하오 — 그건 그 검사의 성질이오.</p>')
         cuts.append(_cut(
             "axis", "7 · 겹친 자리와 어긋난 자리",
-            _why.line("사주 %s ↔ 입력 %s"
-                      % (bank_mod.axis_string(f), axis4.upper()),
+            _why.line("사주 %s ↔ 입력 %s · 겹친 자리 %d / 4"
+                      % (bank_mod.axis_string(f), axis4.upper(),
+                         sum(1 for a, b in zip(bank_mod.axis_string(f),
+                                               axis4.upper()) if a == b)),
                       "대조", ""),
             ('<p class="tale">여덟 글자에서 나온 넉 자는 <b>%s</b>. '
              '그대가 적은 건 <b>%s</b>.</p>%s%s'
@@ -927,9 +973,9 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
             "concern", "7 · 물은 자리와 센 자리",
             # 훅 2.5단과 **같은 말꼴**로 냅니다 — 「관성 3」이 아니라
             # 「관성이 셋」. 표가 아니라 말이라야 근거로 읽힙니다.
-            _why.line("%s → %s %s · 가장 센 자리 %s · %s"
+            _why.line("%s → %s %s(%d) · 가장 센 자리 %s · %s"
                       % (word, josa(grp, "이", "가"), count_word(asked),
-                         loud, f.strength), grp, "십신"),
+                         asked, loud, f.strength), grp, "십신"),
             # ★ 값 사다리의 칸이 아니라 **읽는 틀**입니다.
             #
             #   전에는 2층(24,900원)이었고, 그것도 넉 자를 안 적은
@@ -969,9 +1015,10 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
                       '다르면 우리가 진 것이오.</p>')
             cuts.append(_cut(
                 "concern_scale", "%s — 세어 본 것" % word,
-                _why.line("%s → %s · %s %s"
+                _why.line("%s → %s · %s %s(%d) · 잰 칸 %d"
                           % (word, grp, josa(grp, "이", "가"),
-                             count_word(asked)), grp, "십신"),
+                             count_word(asked), asked, len(rows)),
+                          grp, "십신"),
                 sbody, 1, sid=topic_mod.scale_sid(concern, rows)))
 
         # ── 7-4 · 그 자리에 걸린 짜임 ─────────────────────
@@ -1008,8 +1055,9 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
                       '아무 이름이나 붙이면 누구에게나 맞는 말이 되오.</p>')
             cuts.append(_cut(
                 "concern_pattern", "%s에 걸린 짜임" % word,
-                _why.line("%s · 짜임 %s"
-                          % (word, " · ".join(x["name"] for x in pats)),
+                _why.line("%s · 짜임 %d가지 — %s"
+                          % (word, len(pats),
+                             " · ".join(x["name"] for x in pats)),
                           grp, "십신"),
                 pbody, 1,
                 sid="pat:%s:%s" % (concern,
@@ -1064,7 +1112,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     #   고르는 셈(`peek._about_you` 가 여는 말 길이만큼 건너뜀)이 어긋나,
     #   엿보기가 손님이 아니라 화자 얘기로 열립니다.
     lens_say = topic_mod.lens_line(lens_id, concern)
-    for lc in lens_cuts_mod.build(f, lens_id, concern):
+    for lc in lc_built:
         html = lc["html"]
         sid = lc["statement_id"]
         if lens_say:
@@ -1169,7 +1217,9 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
                      element_word(f.yongsin) if f.yongsin else "없음",
                      _visible(f, f.yongsin) if f.yongsin else 0, int(f.age)),
                   "용신", "용신"),
-        heart_mod.hope(f, you, bank_mod.concern_word(concern), _visible),
+        heart_mod.hope(f, you, bank_mod.concern_word(concern), _visible)
+        + ('<p class="tale">%s</p>' % _live("strong_el", f.strong_el).strip()
+           if _live_has("strong_el", f.strong_el) else ""),
         1, sid="hope:%s:%s:%s:%d"
                % (f.strong_el, f.yongsin, top, min(int(f.age) // 10, 9))))
 
@@ -1618,7 +1668,9 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
     if not (extras or {}).get("topic"):
         asks = topic_mod.ask_spec(concern)
 
+    from engine.practice import build as build_practice
     return {
+        "practice": build_practice(concern),
         "report_id": report_id(chart_id, lens_id, tier, concern),
         "chart_id": chart_id,
         "lens": lens_mod.public(lens_id),

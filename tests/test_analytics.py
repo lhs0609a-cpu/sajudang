@@ -110,12 +110,15 @@ def test_recording_never_raises(an, monkeypatch, tmp_path):
 # ══════════════════════════════════════════════════════════
 def _walk(an, sid, upto):
     order = [sc for sc, _ in an.FUNNEL]
-    an.record([{"name": "screen", "screen": sc, "sid": sid}
-               for sc in order[:upto]])
+    an.record([{"name": "flow_started", "screen": "a1", "sid": sid, "n": 2}])
+    for sc in order[1:upto]:
+        name = "payment_approved" if sc == "d3" else "chart_completed" if sc == "a6" else "screen"
+        an.record([{"name": name, "screen": sc, "sid": sid}], server=sc == "d3")
 
 
 def test_funnel_counts_people_not_visits(an):
     """새로고침 100번이 숫자를 부풀리면 안 된다."""
+    an.record([{"name": "flow_started", "screen": "a1", "sid": "sess0000000000a1", "n": 2}])
     for _ in range(100):
         an.record([{"name": "screen", "screen": "a1", "sid": "sess0000000000a1"}])
     f = an.funnel()
@@ -142,7 +145,66 @@ def test_funnel_is_empty_without_data(an):
     assert all(s["sessions"] == 0 for s in f["steps"])
 
 
+def test_browser_cannot_forge_server_approval(an):
+    assert an.record([{"name":"payment_approved","screen":"d3","sid":"s"*20}]) == 0
+    assert an.record([{"name":"payment_approved","screen":"d3","sid":"s"*20}],server=True) == 1
+
+
+def test_direct_or_out_of_order_visits_do_not_complete_funnel(an):
+    sid="s"*20
+    an.record([{"name":"flow_started","screen":"a1","sid":sid,"n":2},
+               {"name":"screen","screen":"d1","sid":sid},
+               {"name":"screen","screen":"a3","sid":sid},
+               {"name":"screen","screen":"a5","sid":sid}])
+    f=an.funnel()
+    stages={x["screen"]:x for x in f["steps"]}
+    assert stages["a5"]["sessions"] == 1
+    assert stages["a3"]["sessions"] == stages["d1"]["sessions"] == 0
+    assert f["screen_totals"]["d1"] == 1
+
+
+def test_completion_screen_is_not_a_paid_conversion(an):
+    sid="s"*20
+    _walk(an,sid,len(an.FUNNEL)-1)
+    an.record([{"name":"screen","screen":"d3","sid":sid}])
+    assert an.funnel()["steps"][-1]["sessions"] == 0
+    an.record([{"name":"payment_approved","screen":"d3","sid":sid}],server=True)
+    assert an.funnel()["steps"][-1]["sessions"] == 1
+
+
+def test_repeat_hook_answers_cannot_inflate_rates(an):
+    sid="s"*20
+    an.record([{"name":"flow_started","screen":"a1","sid":sid,"n":2}])
+    for _ in range(5):
+        an.record([{"name":"hook_shown","screen":"a7","sid":sid,"stage":0},
+                   {"name":"hook_answer","screen":"a7","sid":sid,"stage":0,"yes":1}])
+    assert an.funnel()["hook"][0]["answered"] == 1
+
+
+def test_payment_after_seven_days_is_outside_conversion_window(an):
+    from datetime import datetime,timezone,timedelta
+    sid="s"*20
+    _walk(an,sid,len(an.FUNNEL)-1)
+    rows=[json.loads(x) for x in an.EVENT_LOG_PATH.read_text(encoding="utf-8").splitlines()]
+    for row in rows:
+        row["at"]=(datetime.now(timezone.utc)-timedelta(days=8)).isoformat()
+    an.EVENT_LOG_PATH.write_text("\n".join(json.dumps(r) for r in rows)+"\n",encoding="utf-8")
+    an.record([{"name":"payment_approved","screen":"d3","sid":sid}],server=True)
+    assert an.funnel()["steps"][-1]["sessions"] == 0
+
+
+def test_old_visitor_does_not_become_a_new_cohort_after_thirty_days(an):
+    from datetime import datetime,timezone,timedelta
+    old={"name":"flow_started","screen":"a1","sid":"s"*20,"n":2,
+         "at":(datetime.now(timezone.utc)-timedelta(days=31)).isoformat()}
+    an.EVENT_LOG_PATH.write_text(json.dumps(old)+"\n",encoding="utf-8")
+    _walk(an,"s"*20,len(an.FUNNEL))
+    assert an.funnel()["sessions"] == 0
+
+
 def test_hook_stage_rates(an):
+    for suffix in ("a1", "a2", "a3"):
+        an.record([{"name": "flow_started", "screen": "a1", "sid": "sess0000000000"+suffix, "n": 2}])
     an.record([
         {"name": "hook_shown", "screen": "a7", "sid": "sess0000000000a1", "stage": 0},
         {"name": "hook_answer", "screen": "a7", "sid": "sess0000000000a1", "stage": 0, "yes": 1},
@@ -161,7 +223,7 @@ def test_funnel_order_matches_the_real_flow():
     """차례가 실제 화면 순서와 어긋나면 '어디서 새는지' 가 거짓이 된다."""
     import analytics
     assert [s for s, _ in analytics.FUNNEL] == [
-        "a1", "a2", "a3", "a4", "a5", "a6", "a7", "d0", "d1", "d2", "d3"]
+        "a1", "a5", "a3", "a4", "a6", "a7", "d0", "d1", "d3"]
     assert set(s for s, _ in analytics.FUNNEL) <= analytics.SCREENS
 
 

@@ -10,6 +10,9 @@ alembic>=1.13
 psycopg2-binary>=2.9
 redis>=5.0
 httpx>=0.27
+# 자동결제 카드 열쇠(빌링키)를 봉해서 저장합니다 (payments.seal).
+# ★ 라이브 키로 도는데 이게 없으면 구독을 아예 안 엽니다.
+cryptography>=42.0
 python-dotenv>=1.0
 pytest>=8.0
 pytest-asyncio>=0.24

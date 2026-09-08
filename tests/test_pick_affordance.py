@@ -69,9 +69,11 @@ def test_every_choice_says_press_me():
     칸이 예쁘게 늘어서 있으면 **읽는 것**처럼 보인다. 누르는 것이라고
     말해 줘야 누른다.
     """
-    for rel, n in (("app/page.tsx", 4), ("app/pay/page.tsx", 1)):
-        got = _src(rel).count("pickme")
-        assert got >= n, "%s 에 「누르시오」 줄이 모자라오 (%d/%d)" % (rel, got, n)
+    entry = _src("app/page.tsx")
+    for prompt in ("하나를 골라주세요", "하나를 선택해 주세요", "성향 4글자 선택"):
+        assert prompt in entry
+    assert "aria-pressed" in entry
+    assert "aria-pressed" in _src("app/pay/page.tsx")
 
 
 def test_the_gate_says_what_is_missing():
@@ -80,7 +82,7 @@ def test_the_gate_says_what_is_missing():
     날짜만 들여다본다. 무엇이 비었는지 말해야 한다.
     """
     src = _src("app/page.tsx")
-    assert "여인·사내 중 하나를 누르시오" in src, \
+    assert "여성·남성 중 하나를 선택해 주세요" in src, \
         "성별이 비었을 때 그 말을 안 하오"
 
 

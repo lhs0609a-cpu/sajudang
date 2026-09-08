@@ -13,6 +13,8 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
+import PracticeCard from "@/components/PracticeCard";
+import CompanionCat from "@/components/CompanionCat";
 import Scene from "@/components/scene/Scene";
 import Reveal from "@/components/Reveal";
 import ActOut from "@/components/ActOut";
@@ -21,8 +23,8 @@ import { api, ApiError } from "@/lib/api";
 import { io } from "@/lib/josa";
 import { LENS_BY_ID, youOf } from "@/lib/lenses";
 import { useSession, type Tier } from "@/lib/store";
-import { track, useScreen } from "@/lib/track";
-import { openCheckout } from "@/lib/toss";
+import { track, useScreen, analyticsId } from "@/lib/track";
+import { openCheckout, registerCard } from "@/lib/toss";
 import { SELLABLE } from "@/lib/biz";
 import { thinkOf } from "@/lib/think";
 import SinsalSlots from "@/components/SinsalSlots";
@@ -30,7 +32,10 @@ import type { ReportResponse } from "@shared/chart";
 
 /* 목패의 모양은 lib/api.ts 한 곳에만 적습니다 — 여기 또 적으면
    서버가 필드를 늘려도 이 화면만 모릅니다. */
-import type { Granted, TierCard } from "@/lib/api";
+import type { Granted, TierCard, SubView } from "@/lib/api";
+
+/** 카드를 걸기 전에 서버가 내려보내는 것 — 손님 열쇠와 고지 문구. */
+type SubOffer = Awaited<ReturnType<typeof api.subPrepare>>;
 
 /** 엿보기 한 줄 — 답은 안 옵니다. 앞머리와 가린 글자 수만. */
 interface PeekRow {
@@ -68,9 +73,9 @@ function Beat({ cut, chartId, lensId, concern, charName }: {
 }) {
   const [said, setSaid] = useState<string | null>(null);
   const answer = async (yes: boolean | null) => {
-    setSaid(yes === null ? "그럼 그냥 마저 보시오."
-      : yes ? "그럴 게요. 아래를 마저 보시오."
-            : "그럼 그 자리는 접어 두겠소.");
+    setSaid(yes === null ? "아직 모르셔도 괜찮아요. 이어서 읽어보세요."
+      : yes ? "경험과 가까운 장면이군요. 다음 내용도 살펴보세요."
+            : "맞지 않는 해석일 수 있어요. 이 장면은 건너뛰어도 괜찮아요.");
     track("free_beat", "d0", { yes: yes === null ? 2 : yes ? 1 : 0 });
     if (!cut.statement_id) return;
     try {
@@ -88,7 +93,7 @@ function Beat({ cut, chartId, lensId, concern, charName }: {
   }
   return (
     <div className="beat">
-      <span className="q">…짚이오?</span>
+      <span className="q">이 장면이 내 경험과 가까운가요?</span>
       <div className="vt">
         <button onClick={() => answer(true)}>그렇습니다</button>
         <button onClick={() => answer(false)}>아닙니다</button>
@@ -142,13 +147,25 @@ function PayInner() {
    */
   const [peek, setPeek] = useState<PeekRow[] | null>(null);
   const [hidden, setHidden] = useState(0);
+  /*
+   * 걸어 둔 카드 — 「한 달 듣기」.
+   *
+   * ★ 값을 치르는 자리가 셋인데 **사는 길이 둘**입니다. 「이 자리
+   *   하나」와 「스무 사람 전부」는 결제창에서 한 번 긁고 끝이고,
+   *   달삯은 카드를 걸어 두고 달마다 나갑니다. 그 차이를 화면이
+   *   말해야 합니다 — 안 말하면 손님은 한 번 치른 줄로 압니다.
+   */
+  const [sub, setSub] = useState<SubView | null>(null);
 
   useScreen(step);
+  useEffect(() => {
+    setTiers(null); setPick(null); setOrder(null); setFree(null); setPeek(null); setOffer(null);
+  }, [s.chartId, s.cur, s.concern, s.axis4]);
 
   /* 목패 셋 — 서버가 센 값과 분량 */
   useEffect(() => {
     if (!s.chartId || tiers) return;
-    if (step !== "d1" && step !== "d2") return;
+    if (!["d1", "d1b", "d2"].includes(step)) return;
     let alive = true;
     api
       .payTiers({ chart_id: s.chartId, lens_id: s.cur,
@@ -175,7 +192,7 @@ function PayInner() {
 
   /* d1b · 엿보기 — 고른 목패가 여는 자리들 */
   useEffect(() => {
-    if (step !== "d1b" || !s.chartId || !pick) return;
+    if (!["d1", "d1b", "d2"].includes(step) || !s.chartId || !pick) return;
     let alive = true;
     api
       .payPeek({ chart_id: s.chartId, lens_id: s.cur, tier: pick,
@@ -221,7 +238,7 @@ function PayInner() {
     const orderId = params.get("order") ?? params.get("orderId");
     const paymentKey = params.get("paymentKey");
     if (!orderId || !paymentKey) {
-      setErr("결제 정보가 모자라오. 값은 빠져나가지 않았소.");
+      setErr("결제 정보를 확인할 수 없어요. 결제 내역에서 상태를 먼저 확인해 주세요.");
       setSettling(false);
       return;
     }
@@ -253,21 +270,73 @@ function PayInner() {
   useEffect(() => {
     if (tossBack !== "fail") return;
     track("pay_fail", "d2");
-    setErr(params.get("message") ?? "결제가 중단되었소. 값은 빠져나가지 않았소.");
+    setErr("결제창이 닫혔어요. 결제 내역을 확인한 뒤 다시 진행해 주세요.");
   }, [tossBack, params]);
+
+  /*
+   * 카드 등록에서 돌아왔다 — 「한 달 듣기」.
+   *
+   * ★ 결제창과 **다른 길**입니다. 토스가 돌려보내는 것은 paymentKey 가
+   *   아니라 `authKey` 이고, 이 시점에는 **아직 아무 돈도 안 빠져나갔습니다.**
+   *   서버가 authKey 를 빌링키로 바꾸고, 그 열쇠로 첫 달을 긁습니다.
+   *   그러니 여기서 "치렀다" 고 화면을 넘기면 안 됩니다 — 서버 대답을
+   *   받고 넘깁니다.
+   */
+  const subBack = params.get("sub");
+  const [carding, setCarding] = useState(subBack === "ok");
+  useEffect(() => {
+    if (subBack !== "ok") return;
+    const customerKey = params.get("customerKey");
+    const authKey = params.get("authKey");
+    if (!customerKey || !authKey) {
+      setErr("카드 등록 정보를 확인할 수 없어요. 내 첩에서 구독 상태를 확인해 주세요.");
+      setCarding(false);
+      return;
+    }
+    let alive = true;
+    api
+      .subRegister({
+        session_id: s.sessionId, customer_key: customerKey,
+        auth_key: authKey, chart_id: s.chartId, concern: s.concern, analytics_sid: analyticsId(),
+      })
+      .then((r) => {
+        if (!alive) return;
+        setSub(r.sub);
+        s.set({ tier: "sub" as Tier, paid: true });
+        track("pay_done", "d2");
+        router.replace("/pay?step=d3&sub=done");
+      })
+      .catch((e) => {
+        if (!alive) return;
+        track("pay_fail", "d2");
+        setErr(e instanceof ApiError ? e.message : "카드를 걸지 못했소.");
+        setCarding(false);
+      });
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subBack]);
+
+  useEffect(() => {
+    if (subBack !== "fail") return;
+    track("pay_fail", "d2");
+    setErr("카드 등록이 중단되었어요. 내 첩에서 구독 상태를 확인해 주세요.");
+  }, [subBack, params]);
 
   /* d2 · 주문 만들기 — 금액·상한은 서버가 판정한다 */
   useEffect(() => {
-    if (step !== "d2" || !s.chartId || order || tossBack) return;
+    if (!["d1", "d1b", "d2"].includes(step) || !s.chartId || order || tossBack || subBack) return;
     // ★ 안 고르고 d2 로 바로 들어온 자리(주소를 치거나 레일로 뛰거나).
     //   없는 값으로 주문을 만들지 않고 목패로 돌려보냅니다.
-    if (!pick) { router.replace("/pay?step=d1"); return; }
+    if (!pick) return;
+    // ★ 달삯은 주문이 아닙니다 — 카드를 걸어 두는 일이라 길이 다릅니다.
+    //   서버도 이 길로 오면 409 로 돌려보냅니다 (pay.prepare).
+    if (pick === "sub") return;
     let alive = true;
     setErr(null);
     api
       .payPrepare({
         session_id: s.sessionId, chart_id: s.chartId,
-        lens_id: s.cur, tier: pick, concern: s.concern,
+        lens_id: s.cur, tier: pick, concern: s.concern, analytics_sid: analyticsId(),
       })
       .then((o) => { if (alive) setOrder(o); })
       .catch((e) => {
@@ -275,6 +344,28 @@ function PayInner() {
       });
     return () => { alive = false; };
   }, [step, s.chartId, s.sessionId, s.cur, s.concern, pick, order]);
+
+  /*
+   * d2 · 달삯 — 손님 열쇠와 **고지 문구**를 받아 온다.
+   *
+   * ★ 고지가 서버에서 오는 까닭: 값·주기·다음 날은 서버가 정합니다.
+   *   화면이 제 손으로 "매달 9,900원" 이라 적어 두면 값을 고쳤을 때
+   *   그 줄만 옛말로 남습니다 — 목패 이름이 두 벌이라 어긋났던 자리와
+   *   같은 종류의 사고입니다.
+   */
+  const [offer, setOffer] = useState<SubOffer | null>(null);
+  useEffect(() => {
+    if (!["d1", "d1b", "d2"].includes(step) || pick !== "sub" || offer || subBack) return;
+    let alive = true;
+    setErr(null);
+    api
+      .subPrepare({ session_id: s.sessionId })
+      .then((o) => { if (alive) setOffer(o); })
+      .catch((e) => {
+        if (alive) setErr(e instanceof ApiError ? e.message : "카드 자리를 열지 못했소.");
+      });
+    return () => { alive = false; };
+  }, [step, pick, s.sessionId, offer, subBack]);
 
   if (step === "d0") {
     /*
@@ -359,6 +450,7 @@ function PayInner() {
                 이 명식에서 지금 잠긴 자리를 **이름으로 부릅니다.**
                 막연한 미끼는 오히려 안 끌립니다. 제목은 이미 좋습니다.
             */}
+            {free.practice && <PracticeCard key={free.practice.id} practice={free.practice} />}
             <Say who={charName} lens={s.cur} html={
               wants.length
                 ? `아직 안 편 자리가 <b>${free.locked.length}</b> 남았소.<br>` +
@@ -394,18 +486,13 @@ function PayInner() {
                 는 수를 대지만 **다음 자리를 이름으로 안 부릅니다.**
                 여기 적는 건 전부 이미 참인 것입니다.
             */}
-            <ActOut kind="딜레마" next="어디까지 볼지">
-              여기까지가 값 없이 하는 몫이오. 다음 장은 값을 묻소.
-              <br />
-              값 없이 여는 6단은 같은 여덟 글자를 겉에서 훑은 것이고,
-              접힌 데는 그 속을 갈라 본 것이오 — 겉껍질을 보고 열매를
-              말한 것과, 쪼개어 씨를 세어 본 것처럼 다르오.
-              <br />
-              <b>오늘 안 열어도 되오.</b> 이 집은 하루에 2번까지만 받소.
-            </ActOut>
-            <button className="btn mt" onClick={() => router.push("/pay?step=d1")}>
-              어디까지 볼지 고르겠습니다
-            </button>
+            {(lens?.price ?? 0) > 0 && <ActOut kind="딜레마" next="어디까지 볼지">
+              여기까지는 무료로 읽을 수 있어요. 더 살펴보고 싶다면 추가로 열리는 내용과 가격을 확인해 주세요.
+              <br />오늘은 여기까지 읽고, 내게 도움이 된 문장을 가져가셔도 좋아요.
+            </ActOut>}
+            {(lens?.price ?? 0) > 0 && <button className="btn mt" onClick={() => router.push("/pay?step=d1")}>
+              추가 해석과 가격 보기
+            </button>}
             {/*
               ★ 이 버튼은 그대로 둡니다 — 브레이크는 매출보다 앞섭니다.
                 다만 목적지가 /lobby 라 **아무것도 안 남기고** 나갔습니다.
@@ -421,274 +508,107 @@ function PayInner() {
     );
   }
 
-  /* d2 · 결제 */
-  /* ── d1b · 엿보기 ─────────────────────────────────── */
-  if (step === "d1b") {
-    const tier = tiers?.find((t) => t.id === pick);
-    return (
-      <Shell screen="d1b" title="무엇이 열리는가" onBack={() => router.push("/pay?step=d1")}>
-        {/* ★ 접힌 두루마리(fold)는 페이월(c4)이 씁니다. 잇달아 나오는
-            두 화면이 같은 그림이면 손님은 화면이 안 넘어간 줄 압니다
-            (tests/test_scene_not_shared.py). 「열리는 문」을 되살렸습니다 —
-            문이 열리며 빛이 새는데 안은 아직 안 보이는 그림이오. */}
-        <Scene id="door" />
-        <Narration lines={["도령이 접힌 자리에 손을 얹었다.",
-                           "아직 펴지는 않았다."]} />
-        <Say who={charName} lens={s.cur}>
-          {you}가 고른 것은 「{tier?.name ?? "그 목패"}」요. 여기 적힌
-          물음은 그대의 8글자에서 나온 것이오 — 아무에게나 하는 말이
-          아니오.
-          <br />
-          앞머리만 보이고 나머지는 안 보내오. 흐려 놓은 게
-          아니라 <b>여기 없소</b> — 브라우저를 뒤져도 안 나오오.
-          그게 이 집이 값을 받는 방식이오.
-          <br />
-          근거는 안 가리오. 무엇을 보고 한 말인지는 값을 치르기
-          전에도 보이오. 대 보고 아니다 싶으면 돌아가시오.
-          <br />
-          <b>여기서 창을 닫고 며칠 생각난 적이 있었소.</b> 값이
-          아까워서가 아니라, 뭐라 적혀 있었을까가 남아서요.
-          <br />
-          참고 미뤄 두면 그 자리가 더 커지오. 그 마음을 알고 하는
-          말이니 오늘 안 여셔도 되오.
-          <br />
-          이 집은 하루에 2번까지만 받고, 한 자리에 2명까지만 붙이오.
-          내일도 같은 자리에 있소.
-          <br />
-          아래 흐린 칸은 글을 가린 게 아니라 <b>빈 칸</b>이오.
-          자물쇠 안쪽이 안 보이는 것처럼, 열기 전에는 여기 아무것도
-          없소. 물음 6개에 근거 6줄은 지금 다 보이오.
-        </Say>
-
-        {err && <Say who="도령" lens="pungun">{err}</Say>}
-        {!peek && !err && <p className="sm">접힌 자리를 세는 중이오…</p>}
-
-        {peek && peek.map((r, i) => (
-          <div className="peek" key={r.lens_id + i}>
-            <div className="pk">
-              <b>{r.lens_name}</b>
-              <span>{r.ask}</span>
-            </div>
-            {/*
-              ★ 가린 칸은 **글자가 아니라 길이**입니다.
-                서버가 안 보낸 것을 화면이 그릴 수는 없습니다.
-                남은 글자 수만큼 칸을 그립니다.
-            */}
-            <p className="pkbody">
-              {r.head}
-              <span className="pkmask" aria-label={`가려진 ${r.mask}자`}>
-                {"▒".repeat(Math.min(22, Math.max(6, Math.round(r.mask / 12))))}
-              </span>
-            </p>
-            <span className="src">근거 · {r.source}</span>
-            <p className="pkmore">
-              여기서부터 <b>{r.mask}자</b>가 더 있소 ·
-              {" "}약 {Math.max(1, Math.round(r.chars / 550))}분치
-            </p>
-          </div>
-        ))}
-
-        {peek && peek.length > 0 && (
-          <ActOut kind="끊긴 동작" next="값을 치르다">
-            지금 안 보이는 글자가 <b>{hidden.toLocaleString()}자</b>요.
-            <br />
-            <b>물음은 그대 것이고, 답은 아직 내 쪽에 있소.</b>
-          </ActOut>
-        )}
-
-        <button className="btn mt" onClick={() => router.push("/pay?step=d2")}>
-          값을 치르고 펴겠습니다
-        </button>
-        {/* ★ 물러설 길은 늘 둡니다. 브레이크는 매출보다 앞섭니다. */}
-        <button className="btn gh" onClick={() => router.push("/pay?step=d1")}>
-          다른 목패를 보겠습니다
-        </button>
-        <button className="btn gh" onClick={() => router.push("/lobby")}>
-          오늘은 여기까지 하겠습니다
-        </button>
+  if (["d1", "d1b", "d2"].includes(step)) {
+    if (lens?.price === 0 && !tossBack && !subBack) return (
+      <Shell screen="d0" title="무료로 읽는 자리">
+        <CompanionCat message="이 인물의 해석은 무료로 읽을 수 있어요." />
+        <button className="btn" onClick={() => router.push("/report/" + s.cur + "?tab=c2")}>무료 해석 읽기</button>
       </Shell>
     );
-  }
-
-  if (step === "d2") {
     const tier = tiers?.find((t) => t.id === pick);
-
-    /* 결제창에서 막 돌아왔다 — 승인이 끝날 때까지 아무것도 누르지 못하게 */
-    if (settling) {
-      return (
-        <Shell screen="d2" title="값을 치르다" legal>
-          <Scene id="coin" />
-          <Narration lines={["값이 건너가는 중이오.", "잠시만 기다리시오."]} />
-          <p className="sm mt" style={{ textAlign: "center" }}>
-            창을 닫지 마시오.
-          </p>
-        </Shell>
-      );
-    }
-
+    const selectTier = (t: TierCard) => {
+      if (pick === t.id) return;
+      setPick(t.id as Tier); setOrder(null); setOffer(null); setPeek(null); setErr(null);
+      track("tier_pick", "d1");
+    };
+    const product = (t: TierCard) => (
+      <button key={t.id} className="conversion-product" aria-pressed={pick === t.id}
+        onClick={() => selectTier(t)}>
+        <strong>{pick === t.id ? "✓ " : ""}{t.id === "one" ? `${charName} 해석` : t.name}</strong>
+        <strong className="conversion-price">{t.price.toLocaleString()}원</strong>
+        <span>{t.per_month ? `${t.days ?? 30}일마다 자동 결제` : "한 번 결제 · 영구 열람"}</span>
+        <span>{t.lenses > 1 ? `${t.lenses}명의 관점` : "이 인물의 관점"} · {t.note}</span>
+        {t.opens.length > 0 && <span>추가로 열리는 내용: {t.opens.slice(0,3).join(" · ")}</span>}
+      </button>
+    );
+    if (settling || carding) return (
+      <Shell screen="d2" title="결제 결과 확인" legal>
+        <div className="conversion-card" role="status"><h2>결제 결과를 확인하고 있어요.</h2>
+          <p>서버에서 결제와 열람 권한을 확인한 뒤 해석을 열어드릴게요.</p></div>
+      </Shell>
+    );
     return (
-      <Shell screen="d2" title="값을 치르다" legal>
-        <Scene id="coin" />
-        {/*
-          ★ 값부터 들이밀고 있었습니다. 스물일곱 화면에서 **여는 줄이
-            아예 없는** 유일한 자리였는데, 하필 지갑을 여는 자리입니다.
-            무슨 일이 벌어지는지 한 줄 놓고 시작합니다.
-        */}
-        <Narration lines={["도령이 셈한 종이를 상 위에 올려놓았다.",
-                           "값이 적힌 목패가 그 옆에 섰다."]} />
-        {/*
-          ★ 79점이던 자리. 팩폭 46 · 울림 45 — 값과 컷 수만 있고
-            **지갑을 여는 사람 얘기**가 없었습니다. 여기서 파는 말을
-            더하면 안 되니, 물러설 길을 먼저 적습니다.
-        */}
-        <Say who="도령" lens="pungun">
-          여기서 손이 한 번 멈추오. 값이 아까워서가 아니라, 치르고 나서
-          별것 아니면 어쩌나 싶어 망설이는 것이오.
-          <br />
-          <b>여태 그런 자리에서 창을 닫아 본 적이 있었소.</b> 참고
-          닫았는데 며칠 생각났을 것이오 — 아까워서가 아니라 안 본
-          채로 남아서요.
-          <br />
-          그러니 이것만 아시오. 값은 <b>지금 보이는 그대로</b> 청구되오 —
-          목패에 적힌 수가 곧 청구서요. 다른 이름으로 더 붙는 것은
-          1원도 없소.
-          <br />
-          {" "}이 집은 하루에 2번까지만 받고, 한 자리에 2명까지만
-          붙이오. 물러 달라 하시면 물러 드리오 — 저울에 올린 것을
-          도로 내려놓는 것처럼요.
-        </Say>
-
-        {err && (
-          <div className="warn">
-            <p>{err}</p>
-            <button className="btn gh mt" onClick={() => router.push("/lobby")}>
-              진열대로
-            </button>
+      <Shell screen="d1" title="추가 해석과 결제" legal onBack={() => router.push("/pay?step=d0")}>
+        <div className="conversion-intro">
+          <p className="conversion-kicker">내용 · 가격 · 열람 조건</p>
+          <h1 className="conversion-title">지금의 고민을<br />조금 더 깊이 읽어보세요.</h1>
+          <p className="conversion-lead">{charName}의 관점에서 추가로 열리는 내용을 확인하세요. 상품을 선택하면 아래에 결제 금액과 조건이 표시돼요.</p>
+        </div>
+        {!s.chartId && <div className="conversion-status"><p>먼저 태어난 정보로 무료 해석을 확인해 주세요.</p><button className="btn" onClick={() => router.push("/?step=a5")}>무료 해석 시작하기</button></div>}
+        {err && <div className="warn" role="alert"><p>{err}</p><button className="btn gh" onClick={() => router.push("/me")}>결제 내역·구독 확인</button>
+          {(tossBack || subBack) && <button className="btn gh" onClick={() => router.replace("/pay?step=d1")}>상품으로 돌아가기</button>}</div>}
+        {s.chartId && !tiers && !err && <p role="status">이 명식에서 열리는 내용을 확인하고 있어요…</p>}
+        {tiers && <>
+          <div className="conversion-products">{tiers.filter(t => t.id === "one").map(product)}</div>
+          <details className="conversion-details" open={pick === "all" || pick === "sub" || !tiers.some(t => t.id === "one") ? true : undefined}>
+            <summary>다른 열람 방식 보기</summary><div className="conversion-products">{tiers.filter(t => t.id !== "one").map(product)}</div>
+          </details>
+        </>}
+        {tier && <div className="conversion-checkout" aria-live="polite">
+          <div className="conversion-card">
+            <h2>{tier.id === "one" ? `${charName} 해석` : tier.name}</h2>
+            {peek && peek.length > 0 && <details className="conversion-details"><summary>추가 해석 미리보기</summary>
+              {peek.map((r, i) => <div key={r.lens_id+i}><h3>{r.ask}</h3><p>{r.head}</p>{r.source && <p className="conversion-note">해석 근거 · {r.source}</p>}</div>)}
+            </details>}
+            <details className="conversion-details"><summary>전체 분량과 열람 범위</summary>
+              <p className="conversion-note">현재 명식 기준 {tier.cuts}개 내용 · {tier.chars.toLocaleString()}자 · 약 {tier.minutes}분. {tier.lenses}명의 관점으로 읽습니다.</p>
+              {tier.opens.length > 0 && <ul>{tier.opens.map(title => <li key={title}>{title}</li>)}</ul>}
+            </details>
+            {pick !== "sub" && order && <>
+              <p className="conversion-price">{order.amount.toLocaleString()}원 <small>한 번 결제</small></p>
+              <p className="conversion-note">{pick === "all" ? "전체 인물의 해석" : `${charName}의 해석`} · 영구 열람 · 자동 결제 없음</p>
+              <div className="vow">{order.refund_say}</div><p className="conversion-note">{order.refund_notice}</p>
+              <p className="conversion-note">오늘 구매 {order.purchases_today} / {order.per_day_limit}건</p>
+              {order.enabled && order.client_key && SELLABLE ? <button className="btn" disabled={busy} onClick={async () => {
+                setBusy(true); setErr(null); track("pay_start", "d1");
+                try { await openCheckout({ clientKey: order.client_key!, orderId: order.order_id, amount: order.amount, orderName: tier.name, customerKey: s.sessionId }); }
+                catch (e) { track("pay_fail", "d1"); setErr(e instanceof Error ? e.message : "결제창을 열지 못했어요. 다시 시도해 주세요."); }
+                finally { setBusy(false); }
+              }}>{busy ? "결제창 연결 중…" : `${order.amount.toLocaleString()}원 결제하기`}</button>
+              : <p className="conversion-status">잠시 후 결제를 다시 시도해 주세요.</p>}
+            </>}
+            {pick === "sub" && offer && <>
+              <p className="conversion-price">{offer.amount.toLocaleString()}원 <small>{tier.days ?? 30}일마다 자동 결제</small></p>
+              <div className="vow">{offer.terms.map((t,i) => <p key={i}>{t}</p>)}</div>
+              <p className="conversion-note">{offer.refund_notice}</p>
+              {offer.enabled && offer.client_key && SELLABLE ? <button className="btn" disabled={busy} onClick={async () => {
+                setBusy(true); setErr(null); track("pay_start", "d1");
+                try { await registerCard({ clientKey: offer.client_key!, customerKey: offer.customer_key }); }
+                catch (e) { track("pay_fail", "d1"); setErr(e instanceof Error ? e.message : "카드 등록을 연결하지 못했어요."); }
+                finally { setBusy(false); }
+              }}>{busy ? "카드 등록 연결 중…" : `${offer.amount.toLocaleString()}원 정기결제 등록하기`}</button>
+              : <p className="conversion-status">지금 정기결제를 연결할 수 없어요. 잠시 후 다시 시도해 주세요.</p>}
+            </>}
+            {!order && pick !== "sub" && !err && <p role="status">결제 금액과 조건을 확인하고 있어요…</p>}
+            {!offer && pick === "sub" && !err && <p role="status">정기결제 조건을 확인하고 있어요…</p>}
           </div>
-        )}
-
-        {order && (
-          <>
-            <div className="dz">
-              <div className="k">{tier?.name}</div>
-              <p>{order.amount.toLocaleString()}원</p>
-              <p className="sm">{tier?.note}</p>
-              {tier && (
-                <p className="sm">
-                  이 명식으로 열리는 자리 <b>{tier.cuts}컷</b> ·
-                  {" "}{tier.chars.toLocaleString()}자 · 약 {tier.minutes}분
-                  {tier.locked > 0 && ` · 남는 자리 ${tier.locked}컷`}
-                </p>
-              )}
-            </div>
-            {/*
-              ★ 이 수가 어디서 나온 것인지 한 번도 안 밝혔습니다.
-                컷 수는 **서버가 이 명식으로 실제로 뽑아 셉니다**
-                (`POST /v1/pay/tiers`). 미리 적어 둔 홍보 문구였던 적이
-                있어서 — 「18컷」이라 적고 11컷이 나갔습니다 — 어디서 센
-                수인지를 값 옆에 답니다.
-            */}
-            <span className="src">
-              근거 · 컷 수와 글자 수는 이 명식으로 실제로 뽑아 센 것이오
-            </span>
-            <p className="sm">
-              이 값은 <b>이 자리 하나</b> 값이오. 스무 사람을 다 사는 것이
-              아니라 <b>한 사람의 눈</b>을 빌리는 셈이오 — 목패에 적힌 값이
-              그대로 건너가오.
-            </p>
-            <p className="sm">오늘 치른 값 {order.purchases_today} / {order.per_day_limit}건</p>
-
-            {/*
-              ★ 법이 요구하는 고지 안에 **점집이 하지 않는 약속**이 하나
-                들어 있습니다 — "계산 오류가 확인되면 전액 환불 후 재발행".
-                이 집의 포지션을 값으로 증명하는 문장인데 회색 잔글씨에
-                묻혀 아무도 안 읽고 있었습니다. 결제 버튼 바로 위에
-                이 집의 말로 한 번 더 놓습니다.
-            */}
-            <div className="vow">{order.refund_say}</div>
-            <p className="sm">{order.refund_notice}</p>
-
-            {order.enabled ? (
-              <button
-                className="btn mt"
-                disabled={busy}
-                onClick={async () => {
-                  setBusy(true);
-                  setErr(null);
-                  track("pay_start", "d2");
-                  try {
-                    /*
-                     * 토스 결제창을 띄웁니다. 여기서 페이지를 떠났다가
-                     * successUrl 로 돌아오고, 승인은 위의 effect 가 합니다.
-                     *
-                     * customerKey 에 sessionId 를 씁니다 — 익명 난수입니다.
-                     * 이름·생년월일을 넣으면 PG 로 넘어갑니다. 넣지 마세요.
-                     */
-                    if (!order.client_key) {
-                      throw new Error("결제 열쇠가 없소.");
-                    }
-                    /*
-                     * ★ 사업자 표시가 없으면 값을 안 받습니다.
-                     *
-                     *   전자상거래법 제10조는 파는 사람이 누구인지를
-                     *   밝히라 합니다. 표시 없이 돈을 받으면 미신고
-                     *   영업으로 보입니다. 결제 열쇠가 없으면 거절하는
-                     *   것과 **같은 규칙**입니다 — 열린 쪽이 기본이면
-                     *   언젠가 그대로 배포됩니다.
-                     *
-                     *   무료 구간은 그대로 열어 둡니다. 표시 의무는
-                     *   **판매**에 붙는 것이라, 안 파는 동안 서비스를
-                     *   닫을 이유가 없습니다.
-                     */
-                    if (!SELLABLE) {
-                      throw new Error(
-                        "아직 값을 받을 수 없소. 가게 표시가 덜 되었소."
-                      );
-                    }
-                    await openCheckout({
-                      clientKey: order.client_key,
-                      orderId: order.order_id,
-                      amount: order.amount,
-                      orderName: tier?.name ?? "성신당",
-                      customerKey: s.sessionId,
-                    });
-                    // 여기 아래는 보통 안 옵니다 — 결제창이 페이지를 넘깁니다.
-                  } catch (e) {
-                    track("pay_fail", "d2");
-                    setErr(e instanceof Error ? e.message : "결제에 실패했소.");
-                    setBusy(false);
-                  }
-                }}
-              >
-                값을 치르겠습니다
-              </button>
-            ) : (
-              <div className="warn">
-                <p>아직 값을 받을 수 없소.</p>
-                <p className="sm">
-                  결제가 연결되지 않았습니다 (TOSS_CLIENT_KEY 미설정).
-                  연결 전까지 유료 구간은 열리지 않습니다.
-                </p>
-              </div>
-            )}
-            <ActOut kind="끊긴 동작" next="감춰 둔 자리">
-              값이 건너가면 <b>그 자리에서</b> 열리오. 기다릴 것 없소.<br />
-              마음이 바뀌면 <b>7일 안에</b> 도로 무르오 — 안 연 자리는 그대로 돌려주오.
-            </ActOut>
-            <button className="btn gh" onClick={() => router.push("/pay?step=d1")}>
-              다시 고르겠습니다
-            </button>
-          </>
-        )}
+        </div>}
+        <button className="btn gh" onClick={() => router.push("/pay?step=d0")}>무료 해석으로 돌아가기</button>
+        <p className="conversion-note">하루 구매는 2건까지예요. 이미 구매했다면 내 첩에서 결제 내역과 복원 방법을 확인해 주세요.</p>
       </Shell>
     );
   }
 
   /* d3 · 완료 */
   if (step === "d3") {
+    if (!s.paid && !granted && !sub?.has) return <Shell screen="d3" title="결제 내역 확인">
+      <p className="conversion-lead">이 화면만으로는 결제 완료를 확인할 수 없어요. 내 첩에서 결제 내역을 확인해 주세요.</p>
+      <button className="btn" onClick={() => router.push("/me")}>결제 내역 확인</button>
+    </Shell>;
     return (
       <Shell screen="d3" title="열렸소">
         <Scene id="untie" />
+        <CompanionCat state="saved" message="해석이 열렸어요. 내 속도로 천천히 읽어보세요." />
         <Narration lines={["붉은 끈이 풀렸다."]} />
 
         {/*
@@ -705,6 +625,27 @@ function PayInner() {
           <i>印</i>
           <span>{charName}의 인장을 받았소</span>
         </div>
+
+        {/*
+          ★ 달삯은 **다음이 있는** 결제입니다.
+            한 번 치르는 것과 달리, 여기서 말 안 하면 손님은 다음 달에
+            빠져나가는 것을 카드 명세서에서 처음 봅니다. 그건 몰래
+            빼간 것과 같습니다. 언제 · 얼마 · 어디서 그만두는지를
+            **치른 직후에** 한 번 더 적습니다.
+        */}
+        {sub?.has && (
+          <div className="dz">
+            <div className="k">달마다 이어지오</div>
+            <p>
+              {sub.price.toLocaleString()}원 <small>/ 달</small>
+              {sub.card && <small> · 끝자리 {sub.card}</small>}
+            </p>
+            <p className="sm">
+              다음은 {(sub.next_charge ?? "").slice(0, 10)}이오.
+              그만두시려거든 「내 첩」으로 오시오 — 버튼 하나면 되오.
+            </p>
+          </div>
+        )}
 
         {granted?.counted && (
           <div className="dz">
@@ -772,117 +713,7 @@ function PayInner() {
     );
   }
 
-  /* d1 · 어디까지 */
-  return (
-    <Shell screen="d1" title="어디까지 볼지">
-      <Scene id="tray" />
-      <Narration lines={["목패 셋이 상 위에 놓였다.",
-                         "도령이 그 앞에서 손을 뗀다."]} />
-      {/*
-        ★ 이 자리가 스물일곱 중 가장 낮았습니다 (연출 48).
-
-          목패 셋과 버튼만 있었습니다. 값을 견주는 자리인데 **누구
-          얘기인지가 없어서**, 손님은 남의 상 앞에 선 사람이 됩니다.
-          울림이 0 이었던 까닭입니다.
-
-          그래서 목패 앞에 한 마디를 답니다 — 여기까지 온 사람이
-          이미 한 일(무료 6단을 다 본 것)을 짚고, 이 집이 스스로
-          건 브레이크(하루 2번 · 한 자리 2명)를 먼저 말합니다.
-          파는 자리에서 상한을 먼저 말하는 게 이 집의 방식입니다.
-      */}
-      <Say who="도령" lens="pungun">
-        그대는 값 없이 여는 6단을 이미 다 보셨소.
-        <br />
-        거기서 그만두지 못하고 여기까지 오셨을 게요.
-        <br />
-        <b>고르기를 미루는 사람일수록 오래 서 있소.</b>
-        {" "}상 앞에서 망설이는 것은 값이 아까워서가 아니라,
-        고르고 나면 되돌릴 수 없다는 걸 알아서요.
-        <br />
-        이 집은 하루에 2번까지만 받고, 한 자리에 사람을 2명까지만
-        붙이오. 목패는 3장이고 그중 1장만 고르는 것이오.
-          <br /> 팔 수 있는 만큼 파는 집이 아니라 <b>재 놓고 파는
-        집</b>이라 그렇소. 목패는 저울 눈금처럼 칸이 갈려 있소 —
-        칸마다 컷 수와 글자 수를 적어 두었으니 견주어 보시오.
-      </Say>
-      <span className="src">
-        근거 · 목패 3장 · 컷 수와 글자 수는 이 명식으로 실제로 뽑아
-        센 것이오 (미리 적어 둔 홍보 문구가 아니오) · 하루 2번 ·
-        한 자리 2명
-      </span>
-      <p className="pickme">
-        {pick ? <><b>고르셨소.</b> 아래에서 여시오.</>
-              : <><b>목패를 눌러 고르시오.</b> 고르기 전에는 안 열리오.</>}
-      </p>
-      {!tiers ? (
-        <p className="sm">목패를 편다…</p>
-      ) : (
-        <div className="og">
-          {tiers.map((t) => (
-            <button
-              key={t.id}
-              className={"op " + (pick === t.id ? "on" : "")}
-              onClick={() => { setPick(t.id as Tier); setOrder(null); track("tier_pick", "d1"); }}
-            >
-              <b>
-                {t.name} · {t.price.toLocaleString()}원
-              </b>
-              <span>{t.note}</span>
-              {/*
-                ★ 서버가 이 명식으로 세어 준 수. 부풀리지 않습니다.
-
-                  '컷' 은 손님의 말이 아닙니다 — 그게 얼마나 되는지
-                  알려면 글자 수와 읽는 시간이 있어야 합니다. 그리고
-                  `all`·`sub` 은 **스무 사람**을 엽니다. 한 사람 몫만
-                  적어 두면 달삯과 견줄 때 같은 것으로 보였습니다.
-              */}
-              <span>
-                이 명식으로 <b>{t.cuts}컷</b> · {t.chars.toLocaleString()}자 ·
-                {" "}읽는 데 약 {t.minutes}분
-              </span>
-              <span>
-                {t.lenses > 1 ? `${t.lenses}사람이 한꺼번에` : "이 사람 하나"}
-                {" · "}
-                {t.forever ? "한 번 치르면 계속" : `${t.days ?? 30}일 동안`}
-              </span>
-              {/* ★ 열리는 자리의 **이름**. 서버가 이미 주고 있었는데
-                  목패에서 안 쓰이고 있었습니다. 막연한 미끼는 오히려
-                  덜 끌립니다 — 무엇이 열리는지 알아야 값을 견줍니다. */}
-              {t.opens.length > 0 && (
-                <span className="opens">
-                  「{t.opens.slice(0, 3).join("」 「")}」
-                  {t.opens.length > 3 ? ` 외 ${t.opens.length - 3}` : ""}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-      )}
-      <ActOut kind="딜레마" next="값을 치르다">
-        셋을 다 열 수는 없소.
-        <br />
-        고르는 것은 <b>어느 목패</b>가 아니라, 그대가 여태 안 물어본
-        것 중 <b>무엇을 먼저 물을 것인가</b>요. 나머지는 오늘 안 열리오.
-      </ActOut>
-      {/*
-        ★ 고르고 나서 곧바로 결제창으로 보내지 않습니다 (2026-09-04).
-
-          손님이 시킨 것 — "누르면 다음에는 각 캐릭터들이 나와서
-          «당신에게 가장 중요한 건 ~~» 블러 처리하고 … 궁금해서 결제
-          안 하고는 미칠 정도로."
-
-          엿보기 한 자리를 사이에 둡니다. 거기서 보이는 것은 **이미
-          계산된 그 사람의 컷**이고, 답은 서버에 남습니다.
-      */}
-      <button className="btn mt" disabled={!pick}
-              onClick={() => router.push("/pay?step=d1b")}>
-        {pick ? "무엇이 열리는지 보겠습니다" : "목패를 먼저 고르십시오"}
-      </button>
-      <button className="btn gh" onClick={() => router.push("/pay?step=d0")}>
-        값 없이 볼 수 있는 것부터
-      </button>
-    </Shell>
-  );
+  return <Shell screen="d1" title="추가 해석"><button className="btn" onClick={() => router.replace("/pay?step=d1")}>상품 확인하기</button></Shell>;
 }
 
 export default function PayPage() {

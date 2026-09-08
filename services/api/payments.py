@@ -30,6 +30,8 @@ log = logging.getLogger("payments")
 TOSS_CLIENT_KEY = os.getenv("TOSS_CLIENT_KEY", "").strip()
 TOSS_SECRET_KEY = os.getenv("TOSS_SECRET_KEY", "").strip()
 TOSS_BASE = "https://api.tosspayments.com/v1/payments"
+# 자동결제(빌링) — 결제창과 **다른 주소**입니다.
+TOSS_BILLING = "https://api.tosspayments.com/v1/billing"
 
 # ── 키 두 짝이 서로 맞는지 뜰 때 본다 ──────────────────────────
 #
@@ -136,7 +138,30 @@ elif LIVE:
 #   ★ ①은 값을 올리는 결정입니다. 되돌리려면 이 상수 하나만 고치면
 #     됩니다. 다만 되돌릴 때는 `one` 의 최고가도 같이 내려야 합니다 —
 #     tests/test_pay.py 의 지배 검사가 그걸 셉니다.
-TIER_PRICE = {"all": 24900, "sub": 9900}
+#
+# ══════════════════════════════════════════════════════════
+# 2026-09-07 · 세 목패를 다시 세웠습니다
+# ══════════════════════════════════════════════════════════
+#
+#   이 자리 하나   9,900원 바닥 (9,900 · 12,900 · 15,900 · 19,900)
+#   스무 사람 전부  99,000원   ← 9,900 × 20 = 198,000 의 **반값**
+#   한 달 듣기     14,900원/월 자동갱신
+#
+# ★ `all` 을 왜 99,000 으로 두는가
+#   전에는 24,900원이었습니다. 한 사람 값(19,900)보다 5,000원 더 얹으면
+#   스무 사람이 열렸습니다 — 두 번째 캐릭터를 사려는 사람은 무조건
+#   `all` 이 이득이라, 「이 자리 하나」가 **한 번 이상 안 팔리는** 값이었습니다.
+#   이제 「9,900 × 20 에서 반값」입니다. 열 사람 값에 스무 사람이오.
+#
+# ★ `sub` 을 왜 `one` 위에 두는가
+#   달삯이 9,900원이면 「이 자리 하나」와 **글자 그대로 같은 값**입니다.
+#   같은 값에 한 명과 스무 명이 놓이면 한 명은 아무도 안 고릅니다.
+#   달삯은 한 사람 반 값 — 넓이를 사는 값입니다. 깊이(대운 맵 · 성향
+#   대조)는 여전히 안 열립니다. 그게 `one` 과 `all` 의 몫입니다.
+#
+# ★ 되돌리려면 이 두 숫자와 seed/lenses.json 의 캐릭터 값을 **함께**
+#   고치세요. 한쪽만 고치면 tests/test_pay.py 의 지배 검사가 잡습니다.
+TIER_PRICE = {"all": 99000, "sub": 14900}
 FLAT_TIERS = frozenset(TIER_PRICE)
 
 # 티어가 여는 컷 (engine/report.py 의 min_level 과 짝을 맞춘다)
@@ -166,15 +191,36 @@ TIER_NAME = {"one": "이 자리 하나", "all": "스무 사람 전부",
 #   **내용이 아니라 기간**으로 갈라 말합니다. 안 그러면 손님이 같은 것을
 #   두 값에 놓고 고르게 됩니다.
 # ★ 목패는 **실제로 일어나는 일**을 적어야 합니다.
-#   전에는 「달마다 듣기 · 언제든 그만둘 수 있소」였는데, 빌링키도
-#   자동결제도 없습니다. 저절로 다시 빠져나가지 않으니 "그만둘" 것도
-#   없습니다. 그런데 자격은 영원히 열려 있었습니다 — 한 달치 값에
-#   영구 이용권이었습니다. 이제 서른 날이고, 그렇게 적습니다.
+#   한때 「달마다 듣기 · 언제든 그만둘 수 있소」라 적어 놓고 빌링키도
+#   자동결제도 없던 적이 있습니다. 그래서 서른 날짜리로 정직하게
+#   내려 적었습니다. 이제 자동결제를 붙였으니 다시 「달마다」입니다 —
+#   **이번에는 실제로 그렇습니다.** 목패를 고칠 때는 코드가 먼저입니다.
 TIER_NOTE = {
     "one": "이 사람 하나를 끝까지 — 값이 오를수록 깊이 들어가오. 영구",
     "all": "스무 사람을 전부, 끝까지. 한 번 치르고 영구",
-    "sub": "스무 사람을 넓게, 서른 날. 저절로 다시 빠져나가지 않소",
+    "sub": "스무 사람을 넓게. 달마다 이어지고, 언제든 그만둘 수 있소",
 }
+
+# ══════════════════════════════════════════════════════════
+# 정기결제 고지 — 법이 요구하는 것 · docs/11 §5
+# ══════════════════════════════════════════════════════════
+#
+# ★ 자동결제는 **한 번 누르면 계속 빠져나가는** 것입니다. 그래서
+#   누르기 **전에** 네 가지를 다 말해야 합니다 —
+#     얼마를 · 얼마마다 · 언제 처음 다시 · 어떻게 그만두는가
+#   잔글씨에 묻으면 고지한 것이 아닙니다. 등록 버튼 **바로 위**입니다.
+#
+# ★ 그만두는 길은 시작한 길만큼 쉬워야 합니다. 그래서 해지는 화면의
+#   버튼 하나입니다(POST /v1/pay/sub/cancel). 전화도 메일도 아닙니다.
+SUB_TERMS = [
+    "달마다 {price}원이 등록하신 카드에서 빠져나가오.",
+    "다음은 {next}이오. 그 뒤로도 서른 날마다요.",
+    "그만두시면 그날로 더 안 빠져나가오. 이미 치른 달은 끝까지 보시오.",
+    "그만두는 자리는 「내 첩」에 있소. 버튼 하나요.",
+]
+
+SUB_SAY = ("이건 한 번 치르는 값이 아니오. 달마다 이어지오 — "
+           "그만두기 전까지는.")
 
 # ★ `sub` 이 `all` 과 **글자 그대로 같은 목록**이었습니다.
 #   그래서 9,900원/월이 24,900원을 통째로 덮었고, 그것만이 아니라
@@ -298,20 +344,36 @@ def confirm(payment_key: str, order_id: str, amount: int) -> PaymentResult:
     결제 승인. 금액은 **서버가 계산한 값**을 보냅니다.
     클라이언트가 보낸 금액을 그대로 믿지 마세요.
     """
-    res = httpx.post(
-        TOSS_BASE + "/confirm",
-        headers=_auth_header(),
-        json={"paymentKey": payment_key, "orderId": order_id, "amount": amount},
-        timeout=15.0,
-    )
-    data = res.json()
+    headers = _auth_header()
+    # The server creates a random order_id once. Retries reuse its idempotency key.
+    headers["Idempotency-Key"] = "confirm-" + order_id
+    try:
+        res = httpx.post(TOSS_BASE + "/confirm", headers=headers,
+                         json={"paymentKey": payment_key, "orderId": order_id, "amount": amount},
+                         timeout=15.0)
+        data = res.json()
+    except (httpx.RequestError, ValueError):
+        return _confirmed_from_lookup(payment_key, order_id, amount)
     if res.status_code != 200:
-        log.warning("toss confirm 실패 %s %s", res.status_code, data)
+        if res.status_code >= 500 or data.get("code") in {"ALREADY_PROCESSED_PAYMENT", "IDEMPOTENT_REQUEST_PROCESSING"}:
+            return _confirmed_from_lookup(payment_key, order_id, amount)
         raise PaymentError(data.get("message", "결제 승인에 실패했습니다."))
-    return PaymentResult(
-        ok=True, order_id=order_id, amount=amount,
-        pg_tid=data.get("paymentKey"), status=data.get("status", "DONE"),
-        raw=data)
+    return _verified_result(data, payment_key, order_id, amount)
+
+
+def _verified_result(data: dict, payment_key: str, order_id: str, amount: int) -> PaymentResult:
+    if (data.get("orderId") != order_id or data.get("paymentKey") != payment_key
+            or data.get("totalAmount") != amount or data.get("status") not in PAID_STATES):
+        raise PaymentError("결제 승인 상태를 확인 중이에요. 결제 내역을 확인해 주세요.")
+    return PaymentResult(ok=True, order_id=order_id, amount=amount,
+                         pg_tid=payment_key, status=data["status"], raw=data)
+
+
+def _confirmed_from_lookup(payment_key: str, order_id: str, amount: int) -> PaymentResult:
+    try:
+        return _verified_result(lookup_by_order(order_id), payment_key, order_id, amount)
+    except (httpx.RequestError, ValueError, PaymentError):
+        raise PaymentError("결제 확인이 지연되고 있어요. 결제 내역 확인 후 다시 시도해 주세요.")
 
 
 def lookup_by_order(order_id: str) -> dict:
@@ -341,6 +403,151 @@ def lookup_by_order(order_id: str) -> dict:
         log.warning("toss lookup 실패 %s %s", res.status_code, data)
         raise PaymentError(data.get("message") or "결제를 확인하지 못했습니다.")
     return data
+
+
+# ══════════════════════════════════════════════════════════
+# 자동결제 — 빌링키
+# ══════════════════════════════════════════════════════════
+#
+# ★ 결제창과 **다른 물건**입니다.
+#   결제창(payment())은 손님이 한 번 긁는 것이라, 끝나면 우리 손에
+#   아무것도 안 남습니다. 자동결제는 카드를 등록해 **빌링키**를 받아
+#   두고, 그 뒤로는 손님 없이 우리가 긁습니다.
+#
+#     ① 화면: requestBillingAuth({method:'CARD', customerKey, successUrl})
+#     ② 토스가 successUrl 로 customerKey · authKey 를 돌려줌
+#     ③ 서버: authKey → billingKey                (issue_billing_key)
+#     ④ 서버: billingKey 로 달마다 청구            (charge_billing)
+#
+# ★ 빌링키는 **비밀번호가 아니라 열쇠**입니다.
+#   이게 새면 그 카드로 반복해서 긁을 수 있습니다. 시크릿 키와 같은
+#   무게로 다룹니다 —
+#     · 어떤 응답에도 싣지 않습니다 (로그에도, /health 에도)
+#     · 저장할 때 봉합니다 (seal). 열쇠는 SUB_SECRET 환경변수
+#     · 라이브 키로 도는데 SUB_SECRET 이 없으면 **구독을 열지 않습니다**
+#
+# ★ 자동결제는 토스와 **따로 계약**해야 열립니다. 계약이 없으면
+#   ③에서 거절당합니다 — 우리 코드가 아니라 계약 문제입니다.
+SUB_SECRET = os.getenv("SUB_SECRET", "").strip()
+
+
+def _box():
+    """봉하는 상자. 없으면 None."""
+    if not SUB_SECRET:
+        return None
+    try:
+        from cryptography.fernet import Fernet
+    except ImportError:
+        return None
+    import hashlib
+    key = base64.urlsafe_b64encode(
+        hashlib.sha256(SUB_SECRET.encode()).digest())
+    return Fernet(key)
+
+
+def sealing_problem() -> Optional[str]:
+    """봉할 수 없으면 까닭. 봉할 수 있으면 None.
+
+    ★ 라이브에서만 막습니다. 시험 키로 도는 개발·테스트에서는
+      봉하지 않고 지나가되, 뜰 때 한 번 경고합니다. 라이브에서
+      맨몸으로 저장하는 것은 카드 열쇠를 평문으로 두는 것입니다.
+    """
+    if _box() is not None:
+        return None
+    if not SUB_SECRET:
+        return ("SUB_SECRET 이 없습니다. 카드 열쇠를 봉하지 못해 "
+                "구독을 열 수 없습니다.")
+    return ("cryptography 가 설치돼 있지 않습니다. 카드 열쇠를 봉하지 "
+            "못해 구독을 열 수 없습니다.")
+
+
+def subscriptions_problem() -> Optional[str]:
+    """구독을 열 수 있는가. 못 열면 손님에게 보일 까닭."""
+    if DISABLED_REASON:
+        return DISABLED_REASON
+    if LIVE:
+        return sealing_problem()
+    return None
+
+
+SUBSCRIPTIONS_ENABLED = subscriptions_problem() is None
+
+if LIVE and sealing_problem():
+    log.error("구독을 켜지 않았습니다 — %s", sealing_problem())
+elif not LIVE and sealing_problem():
+    log.warning("카드 열쇠를 봉하지 않고 저장합니다 (시험 키). "
+                "라이브 전에 SUB_SECRET 을 넣으세요.")
+
+
+def seal(text: str) -> str:
+    """저장할 꼴로. 봉했으면 'v1:' 이 붙습니다."""
+    box = _box()
+    if box is None:
+        return text
+    return "v1:" + box.encrypt(text.encode()).decode()
+
+
+def unseal(blob: str) -> str:
+    """저장된 것을 다시 씁니다. 못 열면 PaymentError."""
+    if not blob.startswith("v1:"):
+        return blob                       # 봉하기 전에 저장된 것
+    box = _box()
+    if box is None:
+        raise PaymentError("봉한 카드 열쇠를 열 수 없습니다 — "
+                           "SUB_SECRET 이 그때와 다릅니다.")
+    try:
+        return box.decrypt(blob[3:].encode()).decode()
+    except Exception:
+        raise PaymentError("봉한 카드 열쇠를 열 수 없습니다 — "
+                           "SUB_SECRET 이 그때와 다릅니다.")
+
+
+def issue_billing_key(auth_key: str, customer_key: str) -> dict:
+    """
+    카드 등록 → 빌링키.
+
+    돌려주는 것에 `billingKey` 와 카드 뒷자리가 들어 있습니다.
+    **빌링키는 이 함수 밖으로 그대로 나가면 안 됩니다** — 봉해서
+    저장하고, 화면에는 카드 뒷자리만 보냅니다.
+    """
+    res = httpx.post(
+        TOSS_BILLING + "/authorizations/issue",
+        headers=_auth_header(),
+        json={"authKey": auth_key, "customerKey": customer_key},
+        timeout=15.0)
+    data = res.json() if res.content else {}
+    if res.status_code != 200 or not data.get("billingKey"):
+        # ★ 본문을 그대로 로그에 붓지 않습니다 — 실패 응답에도 카드
+        #   정보가 섞여 옵니다. 코드와 메시지만 남깁니다.
+        log.warning("빌링키 발급 실패 %s %s", res.status_code,
+                    data.get("code"))
+        raise PaymentError(
+            data.get("message") or "카드를 등록하지 못했습니다.")
+    return data
+
+
+def charge_billing(billing_key: str, customer_key: str, amount: int,
+                   order_id: str, order_name: str) -> PaymentResult:
+    """
+    등록된 카드로 청구. 손님은 이 자리에 없습니다.
+
+    ★ 금액은 **서버가 정한 값**입니다. 어디서도 받아오지 않습니다.
+    """
+    res = httpx.post(
+        "%s/%s" % (TOSS_BILLING, billing_key),
+        headers=_auth_header(),
+        json={"customerKey": customer_key, "amount": amount,
+              "orderId": order_id, "orderName": order_name},
+        timeout=20.0)
+    data = res.json() if res.content else {}
+    if res.status_code != 200:
+        log.warning("자동결제 실패 %s %s %s", order_id, res.status_code,
+                    data.get("code"))
+        raise PaymentError(data.get("message") or "자동결제에 실패했습니다.")
+    return PaymentResult(
+        ok=True, order_id=order_id, amount=amount,
+        pg_tid=data.get("paymentKey"), status=data.get("status", "DONE"),
+        raw=data)
 
 
 # 토스가 알려 주는 결제 상태 (docs.tosspayments.com/reference)

@@ -23,6 +23,7 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
 import payments
+import analytics
 import store
 from engine.relay import BREAKS
 from schemas.api import Tier
@@ -35,16 +36,16 @@ DAY = 86400
 
 # 「한 달 듣기」가 며칠인가.
 #
-# ★ 이 값을 「달마다」로 팔면서 **끝나지 않았습니다.**
-#   빌링키도 자동결제도 없습니다. 9,900원을 한 번 받고 끝인데
+# ★ 이 값을 「달마다」로 팔면서 **끝나지 않던** 때가 있었습니다.
+#   빌링키도 자동결제도 없이 9,900원을 한 번 받고 끝인데
 #   entitled_tier 는 그 주문을 보고 **영원히** 스무 사람을 열어 줬습니다.
 #   한 달치 값에 영구 이용권을 준 셈입니다.
 #
-# ★ 자동결제를 붙이지 않았습니다.
-#   정기결제는 빌링키 발급·PG 심사·해지 화면이 따로 붙는 일입니다.
-#   그전까지는 **한 번 치르고 서른 날**로 정직하게 팝니다 —
-#   저절로 다시 빠져나가지 않습니다. 목패도 그렇게 적습니다.
-SUB_DAYS = 30
+# ★ 이제 자동결제가 붙었습니다 (routers/subscription.py).
+#   주기는 **한 벌만** 둡니다 — 여기서 다시 적으면 서른 날과 스무아흐레가
+#   갈립니다. 달삯을 사는 길도 여기가 아닙니다: 결제창이 아니라
+#   카드 등록이라 `/v1/pay/sub/*` 로 갑니다.
+from routers.subscription import PERIOD_DAYS as SUB_DAYS  # noqa: E402
 
 
 def _user_key(session_id: str) -> str:
@@ -60,6 +61,7 @@ def _purchases_today(session_id: str) -> int:
 
 
 class PrepareRequest(BaseModel):
+    analytics_sid: Optional[str] = Field(default=None, pattern=r"^[A-Za-z0-9_-]{16,64}$")
     session_id: str
     chart_id: str
     lens_id: str
@@ -155,9 +157,12 @@ def get_tiers(req: TiersRequest) -> dict:
 
     f = Features(**load_features(req.chart_id))
     released = [l["id"] for l in lens_mod.released()]
+    free_ids = {c["id"] for c in build_report(
+        f, req.chart_id, req.lens_id, "free", req.concern, req.axis4)["cuts"]}
 
     out = []
-    for tier in ("one", "all", "sub"):
+    sells = int(lens_mod.get(req.lens_id).get("price") or 0) > 0
+    for tier in (("one", "all", "sub") if sells else ()):
         try:
             price = payments.price_of(tier, req.lens_id)
         except payments.PaymentError:
@@ -168,7 +173,7 @@ def get_tiers(req: TiersRequest) -> dict:
         cuts, chars = _measure(rep)
         lenses = 1
         # 열리는 자리의 이름. 목패에 적으면 손님이 무엇을 사는지 압니다.
-        opens = [c["title"] for c in rep["locked"]]
+        opens = [c["title"] for c in rep["cuts"] if c["id"] not in free_ids]
 
         if tier in ("all", "sub"):
             # 스무 사람 전부를 실제로 세어 합칩니다.
@@ -180,18 +185,20 @@ def get_tiers(req: TiersRequest) -> dict:
                 cuts += c
                 chars += ch
             lenses = len(released)
-            opens = []
 
         out.append({
             "id": tier,
             "name": TIER_NAME[tier],
             "price": price,
-            # ★ 「달마다」가 아닙니다 — 빌링키도 자동결제도 없습니다.
-            #   한 번 치르고 서른 날입니다. 저절로 다시 안 빠져나갑니다.
-            "per_month": False,
+            # ★ 이제 「달마다」입니다 — 자동결제를 붙였습니다
+            #   (routers/subscription.py). 목패가 실제로 일어나는 일을
+            #   적어야 하므로, 여기 참·거짓이 그 자리와 한 벌입니다.
+            "per_month": tier == "sub",
             "days": SUB_DAYS if tier == "sub" else None,
             "forever": tier in ("one", "all"),
             "note": TIER_NOTE[tier],
+            # 달삯은 사는 길이 다릅니다 — 결제창이 아니라 카드 등록입니다.
+            "flow": "billing" if tier == "sub" else "payment",
             # ★ 센 것을 그대로. 사람마다 다릅니다.
             "cuts": cuts,
             "chars": chars,
@@ -207,6 +214,17 @@ def get_tiers(req: TiersRequest) -> dict:
 
 @router.post("/prepare", response_model=PrepareResponse)
 def prepare(req: PrepareRequest) -> PrepareResponse:
+    # ★ 달삯은 이 길로 못 갑니다.
+    #   여기는 결제창(한 번 긁기)의 자리입니다. 달삯을 여기로 받으면
+    #   14,900원을 **한 번만** 받고 자격은 서른 날 뒤 조용히 끊깁니다 —
+    #   손님은 「달마다」라 적힌 목패를 보고 눌렀는데요. 카드 등록으로
+    #   보냅니다.
+    if req.tier == "sub":
+        raise HTTPException(
+            status_code=409,
+            detail="달삯은 카드를 걸어 두고 듣는 자리요. 그 길로 가시오.",
+            headers={"X-Next": "/v1/pay/sub/prepare"})
+
     limit = BREAKS()["per_day_purchase"]
     used = _purchases_today(req.session_id)
     if used >= limit:
@@ -225,6 +243,7 @@ def prepare(req: PrepareRequest) -> PrepareResponse:
         "session_id": req.session_id, "chart_id": req.chart_id,
         "lens_id": req.lens_id, "tier": req.tier, "concern": req.concern,
         "amount": amount, "status": "pending", "payment_key": None,
+        "analytics_sid": req.analytics_sid,
         # ★ 만든 때를 적습니다. 안 적으면 「값만 매기고 안 치른 주문」이
         #   언제 것인지 몰라, 주인 화면이 방금 것과 사흘 묵은 것을
         #   같은 줄에 놓습니다 (routers/admin._trouble).
@@ -240,74 +259,75 @@ def prepare(req: PrepareRequest) -> PrepareResponse:
         purchases_today=used, per_day_limit=limit)
 
 
+def _paid_response(order: dict, already: bool = False) -> dict:
+    return {"ok": True, "already": already, "tier": order["tier"],
+            "unlocked": order.get("unlocked", []), "seal": order.get("lens_id"),
+            "refund_notice": payments.REFUND_NOTICE, "granted": _granted(order)}
+
+
+def _settle_paid(order_id: str, order: dict, payment_key: str, check) -> dict:
+    """Recoverable settlement journal. Indexes are sets; counter has a receipt."""
+    check()
+    now = datetime.now(timezone.utc)
+    order.update(status="settling", payment_key=payment_key,
+                 unlocked=payments.unlocks_for(order["tier"], order.get("lens_id")),
+                 paid_at=order.get("paid_at") or now.isoformat())
+    order["expires_at"] = ((now + timedelta(days=SUB_DAYS)).isoformat()
+                            if order["tier"] == "sub" else None)
+    store.set_json("order:" + order_id, order)
+    sid = order["session_id"]
+    okey = "orders:" + sid
+    orders = store.get_json(okey) or []
+    if order_id not in orders:
+        store.set_json(okey, [*orders, order_id])
+    seals_key = "seals:" + _user_key(sid)
+    seals = store.get_json(seals_key) or []
+    if order.get("lens_id") and order["lens_id"] not in seals:
+        store.set_json(seals_key, [*seals, order["lens_id"]])
+    paid_day = datetime.fromisoformat(order["paid_at"]).astimezone().date().isoformat()
+    store.increment_once("purchase-counted:" + order_id,
+                         store.k_purchase_day(_user_key(sid), paid_day), DAY)
+    check()
+    order["status"] = "paid"
+    store.set_json("order:" + order_id, order)
+    if order.get("analytics_sid"):
+        analytics.record([{"name": "payment_approved", "screen": "d3",
+                           "sid": order["analytics_sid"], "n": order["amount"]}], server=True)
+    return order
+
+
 @router.post("/confirm")
 def confirm(req: ConfirmRequest) -> dict:
-    order = store.get_json("order:" + req.order_id)
-    if not order:
+    initial = store.get_json("order:" + req.order_id)
+    if not initial:
         raise HTTPException(status_code=404, detail="모르는 주문이오.")
-    if order["status"] == "paid":
-        return {"ok": True, "already": True, "unlocked": order.get("unlocked", [])}
-
-    limit = BREAKS()["per_day_purchase"]
-    if _purchases_today(req.session_id) >= limit:
-        raise HTTPException(status_code=429,
-                            detail="하루에 %d건까지만 받소." % limit)
-
+    if initial.get("session_id") != req.session_id:
+        raise HTTPException(status_code=403, detail="이 주문을 확인할 권한이 없어요.")
     try:
-        # 금액은 주문에 적힌 서버 계산값을 쓴다
-        result = payments.confirm(req.payment_key, req.order_id, order["amount"])
-    except payments.PaymentsDisabled as e:
-        raise HTTPException(status_code=503, detail=str(e))
-    except payments.PaymentError as e:
-        raise HTTPException(status_code=402, detail=str(e))
-
-    unlocked = payments.unlocks_for(order["tier"], order.get("lens_id"))
-
-    # ★ 산 때와 끝나는 때를 적습니다.
-    #
-    #   전에는 주문을 `ttl=30*DAY` 로 저장했습니다. entitled_tier 가 그
-    #   주문을 읽어 자격을 보는데, 서른 날이 지나면 주문이 사라지고
-    #   자격이 조용히 free 로 떨어졌습니다 — **영구라고 판 것을 값을
-    #   치른 사람이 잃었습니다.** 목패에는 "영구" 라 적혀 있었습니다.
-    #
-    #   이제 치른 주문은 **지우지 않습니다**(ttl 없음). 끝나는 때는
-    #   기록으로 판정합니다 — 사라져서 끝나는 것이 아니라, 적힌 날에
-    #   끝납니다. 그래야 무엇이 언제 끝나는지 손님에게 말할 수 있습니다.
-    now = datetime.now(timezone.utc)
-    ends = (now + timedelta(days=SUB_DAYS)) if order["tier"] == "sub" else None
-    order.update(status="paid", payment_key=result.pg_tid, unlocked=unlocked,
-                 paid_at=now.isoformat(),
-                 expires_at=ends.isoformat() if ends else None)
-    store.set_json("order:" + req.order_id, order)
-
-    # 하루 결제 카운터 · 인장
-    store.incr(store.k_purchase_day(_user_key(req.session_id), _today()), ttl=DAY)
-
-    # 이 세션이 치른 주문 목록. 스무 사람 종합이 이걸 보고 자격을 봅니다.
-    # 클라이언트가 보낸 tier 를 믿으면 요청 한 줄로 8만 자가 빠져나갑니다.
-    okey = "orders:" + req.session_id
-    orders = store.get_json(okey) or []
-    if req.order_id not in orders:
-        orders.append(req.order_id)
-        store.set_json(okey, orders, ttl=365 * DAY)
-
-    seals_key = "seals:" + _user_key(req.session_id)
-    seals = store.get_json(seals_key) or []
-    if order["lens_id"] not in seals:
-        seals.append(order["lens_id"])
-        store.set_json(seals_key, seals)
-
-    # ★ 값을 치른 직후에 **무엇을 얻었는지**를 세어 함께 보냅니다.
-    #
-    #   완료 화면이 "붉은 끈이 풀렸다 / 이제 나머지를 보시오" 한 줄이었습니다.
-    #   사람은 경험의 정점과 **끝**으로 전체를 기억합니다. 재구매·후기·추천이
-    #   갈리는 자리인데 방금 무엇을 얻었는지가 화면에 없었습니다.
-    #   화면이 제 손으로 세지 않게, 여기서 세어 내려보냅니다.
-    got = _granted(order)
-
-    return {"ok": True, "tier": order["tier"], "unlocked": unlocked,
-            "seal": order["lens_id"], "refund_notice": payments.REFUND_NOTICE,
-            "granted": got}
+        with store.payment_lease(req.session_id) as check:
+            order = store.get_json("order:" + req.order_id)
+            if order["status"] == "paid":
+                already = True
+            else:
+                already = False
+                if order["status"] not in ("pending", "settling"):
+                    raise HTTPException(status_code=409, detail="취소되거나 종료된 주문은 다시 승인할 수 없어요.")
+                limit = BREAKS()["per_day_purchase"]
+                # A persisted settlement has already charged; finish its grant even at the limit.
+                if order["status"] != "settling" and _purchases_today(req.session_id) >= limit:
+                    raise HTTPException(status_code=429, detail="하루에 %d건까지만 받소." % limit)
+                try:
+                    result = payments.confirm(req.payment_key, req.order_id, order["amount"])
+                except payments.PaymentsDisabled as e:
+                    raise HTTPException(status_code=503, detail=str(e))
+                except payments.PaymentError as e:
+                    raise HTTPException(status_code=402, detail=str(e))
+                if result.status not in payments.PAID_STATES or result.amount != order["amount"] or result.order_id != req.order_id:
+                    raise HTTPException(status_code=409, detail="승인 결과를 확인 중이에요. 결제 내역을 확인해 주세요.")
+                order = _settle_paid(req.order_id, order, result.pg_tid, check)
+    except store.LeaseBusy as e:
+        raise HTTPException(status_code=409, detail=str(e))
+    return _paid_response(order, already)
 
 
 def _granted(order: dict) -> dict:
@@ -414,35 +434,25 @@ async def webhook(request: Request) -> dict:
         # 우리 쪽 사정이면 다시 받아 볼 값이 있습니다.
         raise HTTPException(status_code=503, detail="확인하지 못했소.")
 
-    status = real.get("status")
-    if status in payments.DEAD_STATES or (
-            status == "PARTIAL_CANCELED" and not real.get("balanceAmount")):
-        # 취소·만료 — 자격을 거둡니다. 기록은 남깁니다.
-        order.update(status="canceled", unlocked=[], pg_status=status)
-        store.set_json("order:" + str(order_id), order)
-        return {"ok": True, "applied": "canceled"}
-
-    if status in payments.PAID_STATES and order.get("status") != "paid":
-        # 가상계좌 입금처럼 나중에 완결되는 건. 금액도 토스 것을 씁니다.
-        now = datetime.now(timezone.utc)
-        ends = (now + timedelta(days=SUB_DAYS)) if order["tier"] == "sub" else None
-        order.update(
-            status="paid", pg_status=status,
-            payment_key=real.get("paymentKey") or order.get("payment_key"),
-            amount=int(real.get("totalAmount") or order.get("amount") or 0),
-            unlocked=payments.unlocks_for(order["tier"], order.get("lens_id")),
-            paid_at=now.isoformat(),
-            expires_at=ends.isoformat() if ends else None)
-        store.set_json("order:" + str(order_id), order)
-
-        okey = "orders:" + str(order.get("session_id") or "")
-        orders = store.get_json(okey) or []
-        if str(order_id) not in orders:
-            orders.append(str(order_id))
-            store.set_json(okey, orders, ttl=365 * DAY)
-        return {"ok": True, "applied": "paid"}
-
-    return {"ok": True, "applied": "none", "status": status}
+    try:
+        with store.payment_lease(order["session_id"]) as check:
+            order = store.get_json("order:" + str(order_id))
+            status = real.get("status")
+            if real.get("orderId") not in (None, str(order_id)):
+                raise HTTPException(status_code=409, detail="주문 확인 결과가 일치하지 않아요.")
+            if status in payments.DEAD_STATES or (status == "PARTIAL_CANCELED" and not real.get("balanceAmount")):
+                check()
+                order.update(status="canceled", unlocked=[], pg_status=status)
+                store.set_json("order:" + str(order_id), order)
+                return {"ok": True, "applied": "canceled"}
+            if status in payments.PAID_STATES and order.get("status") in ("pending", "settling"):
+                if int(real.get("totalAmount") or 0) != order["amount"]:
+                    raise HTTPException(status_code=409, detail="주문 금액과 승인 금액이 달라요.")
+                _settle_paid(str(order_id), order, real.get("paymentKey"), check)
+                return {"ok": True, "applied": "paid"}
+            return {"ok": True, "applied": "none", "status": status}
+    except store.LeaseBusy as e:
+        raise HTTPException(status_code=503, detail=str(e))
 
 
 # ══════════════════════════════════════════════════════════
@@ -530,7 +540,7 @@ def get_order(order_id: str) -> dict:
     if not order:
         raise HTTPException(status_code=404, detail="모르는 주문이오.")
     # 내부 키는 내려보내지 않는다
-    return {k: v for k, v in order.items() if k != "payment_key"}
+    return {k: v for k, v in order.items() if k in {"amount", "tier", "status", "paid_at", "expires_at", "lens_id"}}
 
 
 # ══════════════════════════════════════════════════════════

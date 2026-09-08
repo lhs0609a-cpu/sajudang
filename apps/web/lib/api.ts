@@ -31,6 +31,34 @@ export function apiMisconfigured(): boolean {
  * 어긋납니다 — "평생운 18컷 · 25페이지" 라 적혀 있었고 실제로는
  * 11컷이었습니다.
  */
+/**
+ * 걸어 둔 카드가 지금 어떤 상태인가.
+ *
+ * ★ 여기에 빌링키는 없습니다. 있어서도 안 됩니다 — 그건 그 카드로
+ *   반복해서 긁을 수 있는 열쇠라 서버 밖으로 안 나갑니다. 화면이 받는
+ *   것은 **카드 뒷자리 넉 자**뿐입니다.
+ */
+export interface SubView {
+  has: boolean;
+  active: boolean;
+  status?: string;
+  price: number;
+  /** 카드 뒷자리 넉 자. 없으면 null. */
+  card?: string | null;
+  card_name?: string | null;
+  period_end?: string | null;
+  /** 다음에 빠져나갈 날. 그만두기를 눌렀으면 null. */
+  next_charge?: string | null;
+  /** 그만두기를 눌렀는가. 눌렀어도 치른 달은 끝까지 봅니다. */
+  ending?: boolean;
+  months?: number;
+  fails?: number;
+  last_error?: string | null;
+  days_left?: number;
+  enabled: boolean;
+  reason?: string | null;
+}
+
 export interface TierCard {
   id: string;
   name: string;
@@ -38,11 +66,16 @@ export interface TierCard {
   /**
    * 달마다 자동으로 빠져나가는가.
    *
-   * ★ 지금은 **항상 거짓**입니다. 빌링키도 자동결제도 없습니다.
-   *   「한 달 듣기」는 한 번 치르고 `days` 일입니다 — 저절로 다시
-   *   빠져나가지 않습니다. 자동결제를 붙이는 날 이 자리를 다시 보세요.
+   * ★ 「한 달 듣기」만 참입니다. 한때 자동결제 없이 「달마다」라 적어
+   *   놓았던 자리라, 이 값과 실제 동작이 어긋나지 않게 조심하세요 —
+   *   서버(`routers/pay.get_tiers`)가 정합니다. 화면이 적지 않습니다.
    */
   per_month: boolean;
+  /**
+   * 사는 길. `payment` 은 결제창(한 번 긁기), `billing` 은 카드 등록입니다.
+   * 길이 다르므로 버튼이 부르는 자리도 다릅니다.
+   */
+  flow?: "payment" | "billing";
   /** 며칠짜리인가. 영구면 null. */
   days: number | null;
   /** 한 번 치르면 계속인가. all·one 이 참입니다. */
@@ -255,7 +288,7 @@ export const api = {
 
   payPrepare: (req: {
     session_id: string; chart_id: string; lens_id: string;
-    tier: string; concern?: string;
+    tier: string; concern?: string; analytics_sid?: string | null;
   }) => post<{
     order_id: string; amount: number; tier: string;
     client_key: string | null; enabled: boolean; refund_notice: string;
@@ -295,6 +328,50 @@ export const api = {
   payRestore: (req: { session_id: string; order_id: string }) =>
     post<{ ok: boolean; tier: string; lens_id: string | null;
            expires_at: string | null; say: string }>("/v1/pay/restore", req),
+
+  /* ══════════════════════════════════════════════════════
+   * 한 달 듣기 — 자동결제
+   * ══════════════════════════════════════════════════════
+   *
+   * ★ 사는 길이 다릅니다. 「이 자리 하나」와 「스무 사람 전부」는
+   *   결제창에서 한 번 긁고 끝이지만, 달삯은 **카드를 걸어 두는**
+   *   일입니다. 그래서 주문이 아니라 손님 열쇠를 받아 갑니다.
+   *
+   *     ① subPrepare   customerKey · 고지 문구를 받는다
+   *     ② requestBillingAuth  카드 등록 창 (lib/toss.registerCard)
+   *     ③ subRegister  authKey → 빌링키 + 첫 달 청구
+   *
+   * ★ 빌링키는 화면에 **한 번도 오지 않습니다.** 카드 뒷자리만 옵니다.
+   */
+  subPrepare: (req: { session_id: string }) =>
+    post<{
+      customer_key: string; client_key: string | null; enabled: boolean;
+      amount: number; order_name: string;
+      /** 카드를 걸기 전에 다 말해야 하는 것 — 값·주기·다음 날·그만두는 길 */
+      terms: string[]; say: string; refund_notice: string;
+      purchases_today: number; per_day_limit: number;
+    }>("/v1/pay/sub/prepare", req),
+
+  subRegister: (req: {
+    session_id: string; customer_key: string; auth_key: string;
+    chart_id?: string | null; concern?: string; analytics_sid?: string | null;
+  }) => post<{ ok: boolean; order_id: string; sub: SubView; say: string }>(
+    "/v1/pay/sub/register", req),
+
+  subStatus: (sessionId: string) =>
+    call<SubView>(
+      `/v1/pay/sub?session_id=${encodeURIComponent(sessionId)}`),
+
+  /** 그만두기. **시작한 길만큼 쉬워야 합니다** — 버튼 하나입니다. */
+  subCancel: (req: { session_id: string }) =>
+    post<{ ok: boolean; sub: SubView; say: string }>("/v1/pay/sub/cancel", req),
+
+  subResume: (req: { session_id: string }) =>
+    post<{ ok: boolean; sub: SubView; say: string }>("/v1/pay/sub/resume", req),
+
+  /** 기기를 바꿨을 때. 다음 달 청구가 옛 브라우저로 가지 않게 주인도 옮깁니다. */
+  subRestore: (req: { session_id: string; order_id: string }) =>
+    post<{ ok: boolean; sub: SubView; say: string }>("/v1/pay/sub/restore", req),
 
   /**
    * 오늘의 일진.

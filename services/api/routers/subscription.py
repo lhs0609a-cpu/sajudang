@@ -30,7 +30,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 import payments
 import store
@@ -190,6 +190,7 @@ def prepare(req: PrepareRequest) -> dict:
 # ② 등록 끝 — 빌링키를 받고 첫 달을 긁는다
 # ══════════════════════════════════════════════════════════
 class RegisterRequest(BaseModel):
+    analytics_sid: Optional[str] = Field(default=None, pattern=r"^[A-Za-z0-9_-]{16,64}$")
     session_id: str
     customer_key: str
     auth_key: str
@@ -199,6 +200,18 @@ class RegisterRequest(BaseModel):
 
 @router.post("/register")
 def register(req: RegisterRequest) -> dict:
+    try:
+        with store.payment_lease(req.session_id) as check:
+            existing = _load(req.session_id)
+            if active(existing):
+                return {"ok": True, "already": True, "order_id": (existing.get("orders") or [""])[-1],
+                        "sub": _view(existing), "say": "이미 이용 중인 구독이에요."}
+            return _register_locked(req, check)
+    except store.LeaseBusy as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
+
+def _register_locked(req: RegisterRequest, check) -> dict:
     problem = payments.subscriptions_problem()
     if problem:
         raise HTTPException(status_code=503, detail=problem)
@@ -261,9 +274,14 @@ def register(req: RegisterRequest) -> dict:
         "concern": req.concern,
         "orders": [order_id],
     }
+    check()
+    sub["analytics_sid"] = req.analytics_sid
     _save(sub)
     _write_order(sub, order_id, result.pg_tid, now, ends, first=True)
-    store.incr(daykey, ttl=DAY)
+    store.increment_once("purchase-counted:" + order_id, daykey, DAY)
+    if req.analytics_sid:
+        import analytics
+        analytics.record([{ "name": "payment_approved", "screen": "d3", "sid": req.analytics_sid, "n": amount }], server=True)
 
     return {"ok": True, "order_id": order_id,
             "sub": _view(sub),

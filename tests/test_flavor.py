@@ -87,9 +87,16 @@ def test_말버릇이_드물다():
 
 
 def test_곁말이_스무_명_다_있다():
+    """
+    ★ 자리 수를 여기 또 적지 않습니다.
+      「3」 이라 박아 두었더니 위로 자리를 더한 날 스무 명이 통째로
+      붉어졌습니다. 자리는 `flavor.SIDE_AT` 이 한 벌로 들고 있으니
+      그걸 봅니다 — 표가 두 벌이 되면 언젠가 갈립니다.
+    """
+    want = len(flavor.SIDE_AT)
     ids = [l["id"] for l in lens_mod.released()]
-    miss = [i for i in ids if len(flavor.SIDE.get(i, ())) != 3]
-    assert not miss, "곁말이 없는 캐릭터: %s" % miss
+    miss = [i for i in ids if len(flavor.SIDE.get(i, ())) != want]
+    assert not miss, "곁말이 %d줄이 아닌 캐릭터: %s" % (want, miss)
 
 
 def test_살림의_말_표에_빠진_축값이_없다():

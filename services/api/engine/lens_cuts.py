@@ -62,8 +62,14 @@ class LensCutError(KeyError):
 #
 #   여섯 등급을 다 채웠습니다. 값을 바꾸거나 캐릭터를 늘리면
 #   `.\dev.ps1 ladder` 가 모자란 등급을 캐릭터마다 세어 줍니다.
-OWN_FLOOR = ((19900, 8), (15900, 6), (12900, 4), (9900, 3),
-             (6900, 2), (4900, 1), (0, 0))
+#
+# ★ 바닥값이 9,900원이 되면서 아래 두 칸이 죽었습니다 (2026-09-07).
+#   4,900·6,900·8,900 에 서 있던 일곱 사람이 전부 9,900 으로 올라왔습니다.
+#   안 쓰는 칸을 표에 남겨 두면, 다음에 값을 손보는 사람이 그 칸에
+#   캐릭터를 다시 세워도 아무 검사도 안 붉어집니다 — 사다리에 없는
+#   디딤판이 생깁니다. 그래서 걷어냅니다. 되돌리려면 두 줄을 다시
+#   넣고 seed/lenses.json 의 값을 함께 내리세요.
+OWN_FLOOR = ((19900, 8), (15900, 6), (12900, 4), (9900, 3), (0, 0))
 
 # 목표. 지금은 바닥과 같습니다 — 벌어지면 도구가 남은 몫을 셉니다.
 OWN_TARGET = OWN_FLOOR
@@ -513,7 +519,8 @@ def _words(f) -> dict:
     }
 
 
-def build(f, lens_id: Optional[str], concern: Optional[str] = None) -> list:
+def build(f, lens_id: Optional[str], concern: Optional[str] = None,
+          real_seen: Optional[set] = None) -> list:
     """
     이 캐릭터의 관점 컷들. 없으면 빈 목록.
 
@@ -532,7 +539,11 @@ def build(f, lens_id: Optional[str], concern: Optional[str] = None) -> list:
     out = []
     # 같은 축이 컷 두셋에 걸립니다. 매번 같은 줄을 붙이면
     # 손님은 녹음인 줄 압니다. 한 장에 한 번만 붙입니다.
-    real_seen: set = set()
+    # ★ 살림의 말은 **한 장에 한 번**입니다. 공통 컷도 이제 이걸
+    #   쓰므로(engine/report), 리포트가 세는 자리를 함께 씁니다 —
+    #   따로 세면 같은 줄이 공통 컷과 관점 컷에 두 번 나옵니다.
+    if real_seen is None:
+        real_seen = set()
     for spec in specs:
         ka, ta = _pick(spec["a"], f, spec["id"], concern)
         kb, tb = _pick(spec["b"], f, spec["id"], concern)
@@ -570,7 +581,22 @@ def build(f, lens_id: Optional[str], concern: Optional[str] = None) -> list:
         #   근거가 됩니다.
         real_a = _real.add(spec["a"]["axis"], ka, real_seen)
         real_b = _real.add(spec["b"]["axis"], kb, real_seen)
-        body = ('<p class="tale">%s</p>%s<p class="tale">%s%s</p>'
+        # ★ a축 문단에 `key` 를 답니다 (2026-09-07).
+        #
+        #   이 문단은 **셈 → 뜻 → 결론** 순으로 쓰여 있습니다 —
+        #       "월령은 얻었으나 일지는 못 얻었소.        (셈)
+        #        철은 내 편인데 발밑이 비었소.            (뜻)
+        #        밖에서는 잘 풀리는데 가까운 데서 걸리오." (결론)
+        #   그러니 이 문단의 **마지막 문장이 곧 이 컷의 결론**입니다.
+        #   구조로 그런 것이라 짐작이 아닙니다.
+        #
+        #   훑어읽기 층(engine/skim)이 이 표를 보고 형광펜을 칠합니다.
+        #   재보니 a축 796줄 중 문장 통째로 굵게 한 것이 3.8%뿐이라,
+        #   표시가 없으면 관점 컷 열이 훑어읽기에 한 줄도 못 냅니다 —
+        #   19,900원이 여는 것이 바로 그 열입니다.
+        #
+        #   보이는 것은 안 바뀝니다. class 하나가 늘 뿐입니다.
+        body = ('<p class="tale">%s</p>%s<p class="tale key">%s%s</p>'
                 '<p class="tale">%s%s%s</p>%s'
                 % (_fmt(spec["lead"], w), cnt_html,
                    _fmt(ta, w), real_a,
@@ -582,8 +608,25 @@ def build(f, lens_id: Optional[str], concern: Optional[str] = None) -> list:
             # ★ 근거에 **그 축이 무엇을 재는 자리인지**를 붙입니다.
             #   전에는 읽은 것만 나열해서 「그래서 뭐」 가 됐습니다
             #   (tools/evidence_audit.py — 이치 0%).
+            # ★ 근거 줄에 **센 수**를 답니다 (2026-09-07).
+            #
+            #   재보니 근거 줄에 아라비아 숫자가 든 컷이 **25%**
+            #   뿐이었습니다 (engine/worth — 100점 만점 표에서 가장
+            #   낮은 칸, 8점). 이 집이 스스로 「나이·연도·센 수를
+            #   박으라」 고 적어 놓고 근거 줄은 글자만 대고 있었습니다 —
+            #   「통근 일지만 · 상관」 은 틀릴 수가 없습니다.
+            #
+            #   셀 것은 이미 세어 두었습니다(`cnt`). 본문에만 쓰던
+            #   그 수를 근거 줄에도 답니다. 표를 새로 만들지 않습니다.
             "source": _why.axis_line(
-                _fmt(spec["source"], dict(w, a=ka, b=kb)),
+                _fmt(spec["source"], dict(w, a=ka, b=kb))
+                # ★ 센 것 안의 줄표는 가운뎃점으로 바꿉니다.
+                #    이 관측과 이치를 **줄표**로 가르는데,
+                #   센 것에도 줄표가 있어 한 줄에 둘이 나왔습니다 —
+                #   「…쇠가 3 — 월지와 일지가…」 어디까지가 관측인지
+                #   안 보입니다.
+                + ((" · " + cnt.rstrip(".").replace(" — ", " · "))
+                   if cnt else ""),
                 axes[0] if axes else ""),
             "html": guard.enforce(body, {"cut": spec["id"]}),
             "min_level": int(spec.get("min_level", 1)),

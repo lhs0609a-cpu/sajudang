@@ -36,3 +36,5 @@ voice_lines.json
 #   제미나이·힉스필드 원본 159MB. 화면에 나가는 것은 잘라 내어
 #   apps/web/public 에 넣은 것들이고, 원본은 손님 컴퓨터에 둡니다.
 성신당 캐릭터 및 이미지/
+.vercel
+.env*

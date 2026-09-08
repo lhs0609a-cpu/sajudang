@@ -87,5 +87,7 @@ def test_소리는_도령_자리에만_난다():
     뒤에 또 나면 인사가 아니라 배경음입니다.
     """
     got = re.findall(r"<Meet\b[^>]*\bgreet\b[^>]*/>", _page())
-    assert len(got) == 1, "첫 인사가 %d 자리에 있소" % len(got)
-    assert 'lens="%s"' % GUIDE in got[0], got[0]
+    # 새 입력 동선은 자동 인사 소리 없이 시작한다. 추후 넣어도 한 번만.
+    assert len(got) <= 1, "첫 인사가 %d 자리에 있소" % len(got)
+    for greet in got:
+        assert 'lens="%s"' % GUIDE in greet, greet

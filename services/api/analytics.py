@@ -29,7 +29,7 @@ import logging
 import os
 import re
 from collections import Counter, defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Iterable, Optional
 
@@ -49,12 +49,15 @@ SCREENS = {
     # 진입
     "a1", "a2", "a3", "a4", "a4b", "a5", "a6", "a7",
     # 진열대 · 리포트 · 결제
-    "b1", "b2", "b3", "c1", "c7", "d0", "d1", "d2", "d3",
+    "b1", "b2", "b3", "c1", "c7", "d0", "d1", "d1b", "d2", "d3",
     # 그 밖
     "daily", "me", "relay", "share", "s1", "s2",
 }
 
+SERVER_EVENTS = {"payment_approved", "payment_refunded"}
+
 EVENTS = {
+    "flow_started", "practice_saved", "chart_completed",
     "screen",          # 화면에 닿았다
     "hook_shown",      # 훅 한 단이 열렸다
     "hook_answer",     # 훅 한 단에 답했다
@@ -82,9 +85,9 @@ SESSION_RE = re.compile(r"^[A-Za-z0-9_-]{16,64}$")
 NUM_KEYS = {"stage", "ms", "n", "yes"}
 
 
-def _clean(ev: dict) -> Optional[dict]:
+def _clean(ev: dict, *, server: bool = False) -> Optional[dict]:
     name = str(ev.get("name") or "")
-    if name not in EVENTS:
+    if name not in EVENTS and not (server and name in SERVER_EVENTS):
         return None
     screen = str(ev.get("screen") or "")
     if screen not in SCREENS:
@@ -110,11 +113,11 @@ def _clean(ev: dict) -> Optional[dict]:
     return out
 
 
-def record(events: Iterable[dict]) -> int:
+def record(events: Iterable[dict], *, server: bool = False) -> int:
     """받아 적는다. 어떤 이유로든 실패해도 예외를 밖으로 내지 않는다."""
     rows = []
     for ev in list(events)[:MAX_BATCH]:
-        c = _clean(ev)
+        c = _clean(ev, server=server)
         if c:
             rows.append(c)
     if not rows:
@@ -149,17 +152,9 @@ def record(events: Iterable[dict]) -> int:
 
 # 사람이 지나가는 차례. 이 순서로 세어야 "어디서 새는지" 가 보입니다.
 FUNNEL = [
-    ("a1", "골목 — 첫 화면"),
-    ("a2", "이름을 적다"),
-    ("a3", "생년월일"),
-    ("a4", "때"),
-    ("a5", "고민 고르기"),
-    ("a6", "여덟 글자가 서다"),
-    ("a7", "도령이 말하다 (훅)"),
-    ("d0", "값 없이 한 겹 더"),
-    ("d1", "어디까지 볼지"),
-    ("d2", "값을 치르다"),
-    ("d3", "받았다"),
+    ("a1", "첫 화면"), ("a5", "고민 선택"), ("a3", "생년월일"),
+    ("a4", "태어난 시간"), ("a6", "계산 완료"), ("a7", "무료 핵심 해석"),
+    ("d0", "무료 상세 해석"), ("d1", "상품·결제"), ("d3", "서버 결제 승인"),
 ]
 
 
@@ -170,7 +165,7 @@ def _rows() -> list[dict]:
         with db.session() as s:
             return [
                 {"name": e.name, "screen": e.screen, "sid": e.sid,
-                 "stage": e.stage, "yes": e.yes}
+                 "stage": e.stage, "yes": e.yes, "n": e.n, "at": e.at.isoformat()}
                 for e in s.execute(select(models.Event)).scalars()
             ]
     if not EVENT_LOG_PATH.exists():
@@ -202,61 +197,86 @@ def clear() -> int:
 
 
 def funnel() -> dict:
-    """
-    화면별 도달 **사람 수**(세션 수). 방문 수가 아니라 사람 수라야
-    "새로고침 100번" 이 숫자를 부풀리지 않습니다.
+    """Version 2 entry cohorts, ordered steps, seven-day conversion window.
+
+    Browser identifiers are not unique people. Direct/legacy paths remain in
+    screen totals, but cannot manufacture completion of skipped entry steps.
     """
     rows = _rows()
-    seen: dict[str, set] = defaultdict(set)
+    now = datetime.now(timezone.utc)
+    cutoff = now - timedelta(days=30)
+    timed = []
+    first_exposure = {}
     for r in rows:
-        if r.get("name") == "screen":
-            seen[r["screen"]].add(r["sid"])
-
-    steps, prev = [], None
-    for sid_, label in FUNNEL:
-        n = len(seen.get(sid_, ()))
-        steps.append({
-            "screen": sid_, "label": label, "sessions": n,
-            "from_prev": None if prev in (None, 0) else round(100.0 * n / prev, 1),
-            "lost": None if prev is None else max(prev - n, 0),
-        })
-        prev = n
-
-    first = steps[0]["sessions"] if steps else 0
-    for st in steps:
-        st["from_top"] = round(100.0 * st["sessions"] / first, 1) if first else None
-
-    # 훅 단별 — 초반이 어디서 끊기는가
-    shown = Counter()
-    answered = Counter()
-    yes = Counter()
-    for r in rows:
-        stg = r.get("stage")
-        if stg is None:
+        try:
+            at = datetime.fromisoformat(str(r.get("at", "")).replace("Z", "+00:00"))
+            if at.tzinfo is None:
+                at = at.replace(tzinfo=timezone.utc)
+        except (ValueError, TypeError):
             continue
-        if r.get("name") == "hook_shown":
-            shown[stg] += 1
-        elif r.get("name") == "hook_answer":
-            answered[stg] += 1
-            if r.get("yes"):
-                yes[stg] += 1
-
+        if (at <= now and r.get("name") == "flow_started" and r.get("n") == 2
+                and r.get("screen") == "a1" and r.get("sid")):
+            sid = r["sid"]
+            first_exposure[sid] = min(at, first_exposure.get(sid, at))
+        if cutoff <= at <= now:
+            timed.append((at, r))
+    timed.sort(key=lambda item: item[0])
+    cohorts, progress = {}, {}
+    seen = defaultdict(set)
+    reached = [set() for _ in FUNNEL]
+    shown, answered, yes = defaultdict(set), defaultdict(set), defaultdict(set)
+    for at, r in timed:
+        sid = r.get("sid")
+        if not sid:
+            continue
+        name, screen = r.get("name"), r.get("screen")
+        if name == "screen":
+            seen[screen].add(sid)
+        if (name == "flow_started" and screen == "a1" and r.get("n") == 2
+                and sid not in cohorts and first_exposure.get(sid) == at):
+            cohorts[sid] = at
+            progress[sid] = 1
+            reached[0].add(sid)
+        if sid not in cohorts or at - cohorts[sid] > timedelta(days=7):
+            continue
+        index = progress[sid]
+        if index < len(FUNNEL):
+            expected = FUNNEL[index][0]
+            matches = (name == "payment_approved" if expected == "d3"
+                       else name == "chart_completed" if expected == "a6"
+                       else name == "screen" and screen == expected)
+            if matches:
+                reached[index].add(sid)
+                progress[sid] += 1
+        stage = r.get("stage")
+        if stage is not None:
+            if name == "hook_shown":
+                shown[stage].add(sid)
+            elif name == "hook_answer" and sid in shown[stage] and sid not in answered[stage]:
+                answered[stage].add(sid)
+                if r.get("yes") == 1:
+                    yes[stage].add(sid)
+    steps, prev = [], None
+    first = len(reached[0])
+    for (screen, label), visitors in zip(FUNNEL, reached):
+        n = len(visitors)
+        steps.append({"screen": screen, "label": label, "sessions": n,
+                      "from_prev": round(100*n/prev,1) if prev else None,
+                      "lost": prev-n if prev is not None else None,
+                      "from_top": round(100*n/first,1) if first else None})
+        prev = n
     hook = []
-    for stg in sorted(set(shown) | set(answered)):
-        sh, an = shown[stg], answered[stg]
-        hook.append({
-            "stage": stg, "shown": sh, "answered": an,
-            "answer_rate": round(100.0 * an / sh, 1) if sh else None,
-            "yes_rate": round(100.0 * yes[stg] / an, 1) if an else None,
-        })
-
-    return {
-        "total_events": len(rows),
-        "sessions": len({r["sid"] for r in rows if r.get("sid")}),
-        "steps": steps,
-        "hook": hook,
-        "counts": dict(Counter(r.get("name") for r in rows)),
-    }
+    for stage in sorted(set(shown) | set(answered)):
+        sh, an = len(shown[stage]), len(answered[stage])
+        hook.append({"stage": stage, "shown": sh, "answered": an,
+                     "answer_rate": round(100*an/sh,1) if sh else None,
+                     "yes_rate": round(100*len(yes[stage])/an,1) if an else None})
+    return {"total_events": len(rows), "sessions": first, "steps": steps, "hook": hook,
+            "counts": dict(Counter(r.get("name") for _, r in timed)),
+            "screen_totals": {key: len(value) for key,value in seen.items()},
+            "version": 2, "cohort_days": 30, "conversion_days": 7,
+            "unit": "anonymous_browser", "approval_source": "server",
+            "immature_sessions": sum(now-at < timedelta(days=7) for at in cohorts.values())}
 
 
 def count(name: str) -> int:

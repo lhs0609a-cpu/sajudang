@@ -10,9 +10,8 @@
  *      ?admin=0   끔 (레일 머리의 [숨기기] 와 같습니다)
  *
  *   기본값은 빌드가 정합니다 — NEXT_PUBLIC_ADMIN_DEFAULT.
- *   출시 전에는 켜짐이라 새 브라우저·시크릿창에서도 바로 보입니다.
- *   출시할 때 그 값을 0 으로 두면 기본 꺼짐이 되고, 그때부터는
- *   ?admin=1 을 아는 사람만 봅니다.
+ *   기본은 꺼짐입니다. 검토용 빌드에서만 값을 1로 명시하거나
+ *   ?admin=1로 켭니다. 사용자가 직접 정한 선택은 유지합니다.
  *   docs/08 §5 — 좌측 개발 레일은 프로덕션 화면이 아닙니다.
  *
  * ★ 여기서 하는 일은 전부 **화면 확인용**입니다.
@@ -45,7 +44,7 @@ const SEASONS: { k: Season; label: string }[] = [
  * 출시 전 기본 켜짐. 출시할 때 Vercel 환경변수에 0 을 넣으면 꺼집니다.
  * 값을 안 주면 켜짐입니다 — 아직 출시 전이기 때문입니다.
  */
-const ADMIN_DEFAULT = process.env.NEXT_PUBLIC_ADMIN_DEFAULT !== "0";
+const ADMIN_DEFAULT = process.env.NEXT_PUBLIC_ADMIN_DEFAULT === "1";
 
 const EL = { 목: "나무", 화: "불", 토: "흙", 금: "쇠", 수: "물" } as Record<string, string>;
 
@@ -224,7 +223,7 @@ export default function DevRail() {
     const v = params.get("admin");
     if (v === "1") { s.set({ admin: true, adminSet: true }); return; }
     if (v === "0") { s.set({ admin: false, adminSet: true }); return; }
-    if (!s.adminSet && ADMIN_DEFAULT && !s.admin) s.set({ admin: true });
+    if (!s.adminSet && s.admin !== ADMIN_DEFAULT) s.set({ admin: ADMIN_DEFAULT });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params, s.adminSet]);
 

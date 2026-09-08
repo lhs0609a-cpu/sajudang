@@ -86,7 +86,7 @@ def test_the_eight_characters_are_explained_once():
       첫 화면에서 한 번은 말해 줘야 뒤가 읽힙니다.
     """
     entry = (WEB / "app" / "page.tsx").read_text("utf-8")
-    assert "여덟 글자가 섰다" in entry
+    assert "명식은 태어난 해·달·날·시간" in entry
     assert "두 글자로 옮긴 것" in entry, "여덟 글자가 무엇인지 안 밝힙니다"
 
 

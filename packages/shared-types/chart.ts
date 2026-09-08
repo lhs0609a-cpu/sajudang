@@ -293,6 +293,7 @@ export interface WantRow {
 }
 
 export interface ReportResponse {
+  practice?: { id: string; version: number; source_kind: string; source: string; title: string; scene: string; action: string } | null;
   report_id: string;
   chart_id: string;
   lens: LensPublic;

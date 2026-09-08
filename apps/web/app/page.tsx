@@ -24,8 +24,9 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
+import CompanionCat from "@/components/CompanionCat";
 import Fold from "@/components/Fold";
-import { useScreen } from "@/lib/track";
+import { track, useScreen } from "@/lib/track";
 import { birthMessageFrom, birthProblem } from "@/lib/birth";
 import { needsGuardian } from "@/lib/biz";
 import Scene from "@/components/scene/Scene";
@@ -178,7 +179,7 @@ const CITIES = CITY_GROUPS.flatMap(([, cs]) => cs);
  * 화면 순서. ★ 고민(a5)이 이름(a2) 바로 뒤로 올라왔습니다.
  *   id 는 그대로 둡니다 — 계측 화이트리스트와 docs/08 이 이 이름을 씁니다.
  */
-const ORDER: Step[] = ["a1", "a2", "a5", "a3", "a4", "a4b", "a6", "a7"];
+const ORDER: Step[] = ["a1", "a5", "a3", "a4", "a6", "a7", "a2", "a4b"];
 const STEPS: Step[] = ORDER;
 
 /*
@@ -191,10 +192,9 @@ const STEPS: Step[] = ORDER;
  * ★ a6·a7 은 진행을 안 그립니다. 결과가 보상인 구간에서 막대는 남은
  *   보상이 아니라 **남은 노동**을 강조합니다.
  */
-const PROGRESS_TOTAL = ORDER.length;
+const PROGRESS_TOTAL = 3;
 function progressAt(step: Step): number | null {
-  if (step === "a6" || step === "a7") return null;
-  return ORDER.indexOf(step) + 1;
+  return ({ a5: 1, a3: 2, a4: 3 } as Partial<Record<Step, number>>)[step] ?? null;
 }
 
 function EntryInner() {
@@ -310,6 +310,7 @@ function EntryInner() {
     ? () => {
         setTrail((t) => t.slice(0, -1));
         setStep(trail[trail.length - 1]);
+        router.replace("/?step=" + trail[trail.length - 1], { scroll: false });
       }
     : undefined;
   const [busy, setBusy] = useState(false);
@@ -333,69 +334,6 @@ function EntryInner() {
    *   무릅쓰는지 그 자리에 적습니다.
    */
   /* 「모르겠다」를 눌렀는가. 그때만 대강 칸이 나옵니다. */
-  const [vague, setVague] = useState(false);
-  /*
-   * 어느 칸을 골랐는가. **s.hour 로 되찾으면 안 됩니다** — 시를 고치는
-   * 순간 어느 칸에도 안 맞아 칸 표시가 사라집니다.
-   */
-  const [pickedHour, setPickedHour] = useState<number | null>(
-    // 되돌아온 손님이면 전에 고른 칸을 되살립니다. 처음 한 번만 봅니다.
-    () => {
-      const i = HOURS.findIndex(([, , h]) => h === useSession.getState().hour);
-      return i >= 0 && useSession.getState().hourKnown ? i : null;
-    });
-  /* a6 계산 장면이 몇 줄까지 찍혔는가. 0 이면 아직 아무것도 안 찍혔다. */
-  const [calcAt, setCalcAt] = useState(0);
-
-  /*
-   * ★ 날을 다 적는 순간 **여섯 글자를 돌려준다** (2026-09-04).
-   *
-   *   재보니 손님은 다섯 화면을 잇달아 지나며 여덟 칸을 내주는데,
-   *   그동안 **자기에 대한 말을 한 마디도 못 듣습니다.** 첫 돌려줌이
-   *   여섯 번째 화면이었습니다 (tools/give_take.py).
-   *
-   *       a1 골목 0 · a2 이름 0 · a5 걸리는 것 0 · a3 날 0 · a4 때 0
-   *
-   *   손님이 말했습니다 — "몰입이 전혀 안되잖아. 밍숭맹숭한 말만 하니까."
-   *   글이 밍숭맹숭한 것이 절반이고, 나머지 절반은 **아무것도 안
-   *   돌려주면서 계속 받기만 한 것**입니다. 그러면 좋은 글도 서식입니다.
-   *
-   *   그런데 해·달·날 셋만 있으면 **여섯 글자가 이미 섭니다.** 시각은
-   *   마지막 두 글자에만 듭니다. 그동안 그걸 a6 까지 감추고 있었습니다.
-   *
-   *   ★ 정보 격차 이론(Loewenstein 1994) — 호기심은 빈칸이 **구체적이고
-   *     가까이 있을 때** 섭니다. 여덟 중 여섯이 서 있고 두 자리가 비어
-   *     있으면, 그 두 자리는 구체적인 빈칸입니다. 아무것도 안 보이면
-   *     빈칸이 아니라 그냥 서식입니다.
-   *
-   *   시주는 안 세웁니다(`hour_known: false`). 지어내지 않는다는 규칙
-   *   그대로이고, **비어 있는 것이 보이는 것**이 여기서는 이득입니다.
-   */
-  const [peek, setPeek] = useState<Features | null>(null);
-  useEffect(() => {
-    if (step !== "a3" && step !== "a4") { setPeek(null); return; }
-    const y = s.year, m = s.month, d = s.day;
-    if (!y || !m || !d || String(y).length !== 4) { setPeek(null); return; }
-    // a4 에서는 적은 시각까지 넣습니다 — 그래야 **여덟 번째 글자**가 섭니다.
-    const withHour = step === "a4" && s.hourKnown && s.hour !== null;
-    let alive = true;
-    const t = setTimeout(async () => {
-      try {
-        const res = await api.chart({
-          year: y, month: m, day: d,
-          hour: withHour ? s.hour : null,
-          minute: withHour ? (s.minute ?? 0) : null,
-          hour_known: !!withHour,
-          sex: s.sex, birth_city: s.city,
-        });
-        if (alive) setPeek(res.features);
-      } catch {
-        if (alive) setPeek(null);      // 못 세우면 조용히 아무것도 안 냅니다
-      }
-    }, 420);
-    return () => { alive = false; clearTimeout(t); };
-  }, [step, s.year, s.month, s.day, s.sex, s.city,
-      s.hour, s.minute, s.hourKnown]);
   const [error, setError] = useState<string | null>(null);
   const [segments, setSegments] = useState<HookSegment[] | null>(null);
   const [hookDone, setHookDone] = useState(false);
@@ -471,10 +409,10 @@ function EntryInner() {
    * 비용이 아니라 값입니다. 건너뛰는 길은 따로 냈습니다.
    */
   useEffect(() => {
-    if (step !== "a6" || !s.features || calcAt >= 6) return;
-    const t = setTimeout(() => setCalcAt((n) => n + 1), calcAt === 0 ? 240 : 420);
-    return () => clearTimeout(t);
-  }, [step, s.features, calcAt]);
+    if (step === "a6" && s.features) {
+      track("chart_completed", "a6");
+    }
+  }, [step, s.features]);
 
   /* ── a7 · 훅 5단 ─────────────────────────────────────── */
   useEffect(() => {
@@ -515,1094 +453,175 @@ function EntryInner() {
 
   /* ══════════════════════════════════════════════════════ */
   if (step === "a1") {
-    /*
-     * 대문은 프레임을 다 덮습니다. 그림이 배경이고 글이 그 위에 얹힙니다.
-     * .gatehero 가 위치·키를 잡고 Scene 의 .fill 이 그 안을 채웁니다.
-     *
-     * ★ 비트를 셋에서 하나로 줄이고, 그 자리에 **얻는 것에 대한 약속**을
-     *   놓았습니다. 버튼도 "…" 이 아니라 무슨 일이 일어나는지 말합니다.
-     */
     return (
       <Shell screen="a1" bare>
-        <div className={`gatehero${gateRead ? " read" : ""}`}
-             onClick={gateRead ? undefined : () => go("a2")}>
+        <div className={`gatehero${gateRead ? " read" : ""}`}>
           <Scene id="gate" className="fill" bleed />
           <div className="gatecopy">
-            <Narration lines={OPENING[season]} />
-            {/*
-              ★ 이번에는 **지웠습니다** (2026-09-06).
-
-                9-04 에 같은 지적을 받고 강조만 걷었습니다 — 「글은 한
-                자도 안 지웠다」고 적어 두었지요. 손님이 같은 말을 다시
-                했습니다: "첫화면 너무 글이 많아 심플하고 간결하면서
-                임팩트있게".
-
-                같은 지적이 두 번 오면 진단이 틀린 것입니다. 굵기를
-                걷어도 **읽어야 할 덩이는 다섯 그대로**였습니다. 대문에
-                선 사람은 읽으러 온 게 아니라 **들어갈지 말지 정하러**
-                왔습니다. 그 판단에 필요한 것은 셋뿐입니다 —
-
-                    무엇을 주나   여덟 글자 · 다섯 마디
-                    얼마인가      0원
-                    왜 나인가     「왜 하필 오늘이오?」
-
-                252자 → 133자. 지운 것은 **같은 말을 두 번 세던 자리**와
-                뒤 화면이 어차피 다시 하는 말입니다 —
-
-                  「시는 몰라도 6글자로 보오」   a4 가 「모르오」 칸에서
-                                                 제자리에 다시 합니다
-                  「왜 하필 지금 …그 자리부터    바로 아래 남긴 물음이
-                    짚소」                        같은 말입니다
-                  「들어오는 사람은 하나같이…」  물음표 하나면 섭니다
-                  「그건 대문에서 답할 말이…」   답을 안 한다는 사실을
-                                                 굳이 적을 필요가 없습니다
-
-                ★ 센 줄은 안 건드렸습니다. 당김(왜 하필 오늘) · 팩폭
-                  (여태 미뤄 두고) · 수(여덟 · 다섯 · 0원)가 그대로
-                  있습니다. 짧아진 만큼 그 셋이 더 크게 섭니다.
-            */}
-            <p className="promise">
-              태어난 날 하나면 되오.<br />
-              여덟 글자를 세우고 다섯 마디를 하리다 — 값은 <b>0원</b>.
-            </p>
-            {/*
-              막을 끊는 한 줄 — 묻고 답하지 않습니다.
-
-              ★ 여기 있던 굵은 표시를 뗐습니다. 글이 133자로 줄면서
-                강조 둘이 **200자당 3.0**이 됐습니다 — 「다 굵으면
-                아무것도 안 굵다」는 자리에 다시 들어섭니다
-                (dramaturgy.MARK_OK 2.5). 짧아지면 강조도 같이
-                줄어야 위계가 섭니다.
-
-                이 줄은 표시가 없어도 이미 큽니다 — 금빛 세로선에
-                큰 활자에 제 상자를 쓰고 있습니다. 남은 표시 하나는
-                흐린 약속 줄의 「0원」입니다. 거기가 표시 없이는
-                안 보이는 자리라서요.
-            */}
-            <ActOut kind="남긴 물음" next="이름을 적다">
-              「어제도 있던 일인데, 왜 하필 오늘이오?」<br />
-              여태 미뤄 두고 오늘 여기까지 오신 것이오.
-            </ActOut>
-            <button className="btn mt" onClick={() => go("a2")}>
-              내 운명을 확인하겠습니다
-            </button>
-            <p className="sm mt" style={{ color: "var(--paper3)" }}>
-              {SEASON_PALETTE[season].ko}
-            </p>
+            <p className="conversion-kicker">성신당 星辰堂 · 사주로 읽는 나의 반복 패턴</p>
+            <h1 className="conversion-title">왜 나는 비슷한 일에서<br />자꾸 마음이 걸릴까.</h1>
+            <p className="conversion-lead">태어난 정보와 지금의 고민을 바탕으로,<br />반복되는 패턴과 오늘 해볼 행동을 읽어보세요.</p>
+            <CompanionCat state="welcome" />
+            <button className="btn mt" onClick={() => go("a5")}>내 고민으로 무료 해석 보기</button>
+            <p className="conversion-note">첫 해석 무료 · 태어난 시간은 몰라도 돼요</p>
+            <p className="conversion-note">전통 사주를 바탕으로 한 자기 이해 콘텐츠예요.</p>
           </div>
         </div>
-
-        {/* ★ 의심 풀기를 여기로 가져왔습니다.
-            전에는 공유 링크로 온 사람만 봤습니다. 검색·광고로 직접 들어온
-            사람은 이 여섯 문답을 한 번도 못 만난 채 의심을 안고 일곱
-            화면을 지났습니다. 클릭을 막지 않게 접어 둡니다. */}
-        <div className="gatedoubt">
-          <Doubts compact first={null} />
-        </div>
+        <div className="gatedoubt"><Doubts compact first={null} /></div>
       </Shell>
     );
   }
 
   if (step === "a2") {
-    const named = s.name.trim().length > 0;
-    return (
-      <Shell screen="a2" title="이름을 적다" onBack={back}>
-        <Progress step={progressAt("a2")!} total={PROGRESS_TOTAL} />
-        <Scene id="desk" />
-        {/* ★ 그림에는 붓이 **떠 있습니다** — 잡은 손이 없습니다.
-            「붓을 들었다」 고 적으면 손님이 둘 중 무엇을 믿을지 몰라
-            합니다. 그림이 더 좋으니 글을 맞춥니다. */}
-        <Narration lines={["붓이 저 혼자 떠올랐다.", "종이는 아직 비어 있다."]} />
-
-        {/*
-          ★ 첫 등장은 여기입니다.
-
-            전에는 큰 초상이 a4 에 있었습니다. 그런데 도령이 **처음
-            말하는 자리는 a2** 입니다 — 세 화면을 말만 듣다가 네 번째에
-            얼굴을 보는 셈이었습니다.
-
-            사람은 처음 본 얼굴로 그 뒤의 목소리를 듣습니다. 얼굴이
-            늦게 나오면 앞의 세 마디는 **누가 하는 말인지 모르는 채**
-            지나갑니다.
-
-            들어올 때 한 번 떠오르게 합니다(meet-in). 동작 줄이기를
-            켠 사람에게는 그냥 있습니다.
-        */}
-        {/*
-          도령이 처음 고개를 드는 자리 — 여기서만 소리가 납니다.
-
-          ★ `lens` 를 **못박습니다** (2026-09-05).
-
-            안 주면 `Meet` 이 세션의 `cur` 를 쓰는데, 그건 저장되는
-            값이오. 다시 온 사람에게는 지난번에 읽은 사람이 대문에서
-            맞이했소 — 얼굴은 백운선사인데 바로 아래 대사는 도령이
-            하고 있었소. 한 화면에 두 사람이 선 셈이오.
-
-            손님은 b2 진열대에 가서야 사람을 고르오. 그 전까지는
-            도령의 자리요.
-        */}
-        <Meet lens="pungun" note="처음 뵙겠소" greet />
-        <Say who="도령" lens="pungun">
-          그대를 뭐라 적으면 되겠소?
-          {" "}여태 이런 칸에서 가짜 이름을 적어 본 적이 있소.
-        </Say>
-        <input className="fld ser" placeholder="이름 또는 별명" maxLength={12}
-               value={s.name} onChange={(e) => s.set({ name: e.target.value })} />
-        {/*
-          ★ 여기가 이름의 쓸모를 **부정하는 쪽으로만** 말하고 있었습니다.
-            "본명을 적을 이유는 없다 · 셈에는 쓰이지 않는다" — 사실이지만
-            왜 묻는지는 안 말합니다. 이름은 훅 0단의 **첫 글자**로 박히는
-            자리고, 개인화됐다고 믿을수록 그 문장을 자기 말로 읽습니다.
-            빼앗기지 않게 하려면 무엇에 쓰는지를 말해야 합니다.
-        */}
-        <Narration lines={["", "본명을 적을 이유는 없다.", "셈에는 쓰이지 않는다."]} />
-        {/*
-          ★ 여기가 63점이었습니다.
-
-            「셈에는 안 쓰이오」 한 줄이라 **왜 묻는지**가 반만
-            서 있었습니다. 이름은 훅 0단의 첫 글자로 박히는 자리라,
-            여기서 적고 안 적고가 뒤의 다섯 단을 바꿉니다. 그 말을
-            안 하면 손님은 그냥 개인정보를 내주는 칸으로 봅니다.
-            팩폭 60 · 명확 45 · 비유 0.
-        */}
-        <Say who="도령" lens="pungun">
-          적고 나서 뭐가 어떻게 쓰이나 싶어 찜찜했던 자리였을 게요.
-          <br />
-          셈에는 안 쓰이오. 다만 내가 그대를 부를 때 쓰오.
-        </Say>
-        <Fold label="이름을 왜 묻소?">
-          <Say who="도령" lens="pungun">
-            이름은 12글자까지 받고, 셈에 쓰는 건 태어난 해·달·날·시
-            4자리뿐이오. 이름을 넣든 안 넣든 8글자는 한 글자도
-            안 바뀌오.
-            <br />
-            그래서 여기는 별명이어도 되오 — <b>부르는 데만</b> 쓰니,
-            찻집에서 「손님」 대신 뭐라 불러 드릴까 묻는 것처럼,
-            붓끝이 종이에 닿기 전에 한 번 여쭙는 것이오.
-          </Say>
-        </Fold>
-
-        <button className="btn" onClick={() => go("a5")}>
-          {named ? "이 이름으로 하겠습니다" : "그냥 넘어가겠습니다"}
-        </button>
-        {/*
-          ★ 강조를 열에서 **셋으로** 줄였습니다 (2026-09-04).
-
-            남긴 것은 「그대」(안 적으면 뭐라 부르는가) · 「여기까지
-            값은 안 받소」(문턱) · 「그런데 딱 한 번, 부를 일이
-            생기오」(남긴 물음) 셋뿐입니다. 이 화면이 하는 일이
-            그 셋이고, 나머지는 그 셋을 받치는 말입니다.
-
-            글은 한 자도 안 지웠습니다 — 표시만 걷었습니다.
-        */}
-        {/* 빈 채로 넘어가는 것도 **고른 것**이 되게 합니다. */}
-        {!named && (
-          <p className="sm mt" style={{ textAlign: "center" }}>
-            안 적으시면 그냥 <b>&quot;그대&quot;</b>라 부르겠소.
-          </p>
-        )}
-        {/*
-          ★ 여기는 셈할 재료가 없소 — 아직 날을 안 받았으니.
-            돌려줄 것이 없을 때는 **구체적인 고리**라도 열어야 하오.
-            「무언가 알게 되오」 는 고리가 아니고, 「셋만 적으면 여섯이
-            서오」 는 고리요. 빈칸은 구체적이고 가까울 때만 궁금하오
-            (Loewenstein 1994 · tools/give_take.py).
-        */}
-        <p className="sm mt" style={{ textAlign: "center" }}>
-          다음은 날이오. 해·달·날 셋만 적으면
-          여덟 글자 중 여섯이 그 자리에서 서오.
-        </p>
-        {/*
-          ★ 이름 칸에서 망설이는 사람이 많습니다 — 뭘 하려고 이름을
-            받나 싶어서입니다. 무엇을 받고 무엇을 안 받는지, 그리고
-            여기까지 값이 없다는 것을 한 줄로 말합니다.
-        */}
-        {true && (
-          <p className="sm mt" style={{ textAlign: "center" }}>
-            셈에 쓰는 것은 태어난 날 하나요. 이름은 안 쓰오.
-            <b> 여기까지 값은 안 받소.</b>
-          </p>
-        )}
-        <ActOut kind="끊긴 동작" next="걸리는 것">
-          이름은 셈에 한 글자도 안 들어가오.<br />
-          <b>그런데 딱 한 번, 부를 일이 생기오.</b> 그게 어디겠소?
-        </ActOut>
-      </Shell>
-    );
+    return <Shell screen="a2" title="별칭 · 선택" onBack={back}>
+      <h1 className="conversion-title">어떻게 불러드릴까요?</h1>
+      <p className="conversion-lead">별칭은 해석에서 부르는 말에만 사용해요. 사주 계산에는 쓰지 않으며, 비워두셔도 괜찮아요.</p>
+      <label htmlFor="entry-alias">별칭 (선택, 최대 12글자)</label>
+      <input id="entry-alias" className="fld" maxLength={12} value={s.name} onChange={e => s.set({ name: e.target.value })} />
+      <button className="btn mt" onClick={() => go("a4")}>이 별칭으로 이어가기</button>
+      <button className="btn gh" onClick={() => { s.set({ name: "" }); go("a4"); }}>별칭 없이 이어가기</button>
+    </Shell>;
   }
 
   if (step === "a3") {
-    /*
-     * ★ 여기서 막습니다.
-     *
-     * 예전에는 a3 을 그냥 통과시키고 a6 에서 서버가 거절했습니다. 오타 하나
-     * 낸 사람이 세 화면을 더 지나서야 영어 오류를 보고, 되돌아갈 버튼도
-     * 없었습니다. 틀린 자리에서 바로 말해 줍니다.
-     *
-     * ★ 그리고 이 화면에 필드가 **다섯** 있었습니다 — 년·월·일·고을·성별.
-     *   이 흐름에서 유일하게 다섯이 겹치는 자리입니다. 게다가 성별 버튼이
-     *   누르는 즉시 다음 화면으로 넘어가서, 고을을 잘못 골랐다는 걸 그때
-     *   깨달으면 되돌아갈 길이 뒤로 버튼뿐이었습니다.
-     *
-     *   고을은 **서울로 접어 두고**, 성별에는 확인 버튼을 답니다.
-     *   그리고 이 집이 성별에만 대던 이유를 고을에도 답니다 — 이유를
-     *   대면 필드가 요구가 아니라 설명이 됩니다.
-     */
-    const bad = birthProblem(s.year, s.month, s.day);
-    // ★ 성별도 **적은 것**에 넣습니다. 안 넣으면 사내가 아무것도
-    //   안 누르고 지나가 대운이 반대로 섭니다 (engine/calendar.forward).
-    const filled = s.year !== null && s.month !== null && s.day !== null
-      && s.sexSet;
-    const num = (v: string): number | null => {
-      const t = v.replace(/[^0-9]/g, "");
-      return t === "" ? null : Number(t);
-    };
-    const askWord = CONCERNS.find((c) => c.id === s.concern)?.label ?? "";
-    return (
-      <Shell screen="a3" title="날을 대다" onBack={back}>
-        <Progress step={progressAt("a3")!} total={PROGRESS_TOTAL} />
-        <Scene id="ink" />
-        <Narration lines={["붓끝이 종이에 닿았다.", "먹이 한 방울 번졌다."]} />
-        {/* ★ 앞에서 고른 고민을 되받습니다. 먼저 마음을 정한 사람은
-            뒤이은 수고를 자기 결정과 맞추려 합니다. */}
-        <Say who="도령" lens="pungun">
-          {askWord
-            ? `${iga(askWord)} 걸려 오셨다 했지 — 숫자 3개면 여덟 글자 중 여섯이 서오.`
-            : "태어난 날을 대시오 — 숫자 3개면 여덟 글자 중 여섯이 서오."}
-          <br />
-          {/*
-            ★ 여기가 72점이었습니다. 물음 한 줄과 입력 칸 셋이 전부라,
-              **왜 이걸 묻는지**가 없었습니다. 생년월일은 손님이 가장
-              내주기 싫어하는 값인데 이유를 안 대고 받고 있었습니다.
-          */}
-          그대가 적는 건 숫자 3개요 — 해와 달과 날.
-        </Say>
-        <Fold label="이 숫자가 어디에 쌓이오?">
-          <Say who="도령" lens="pungun">
-            그 3개로 기둥 3자리, 글자 6개가 서오. 나머지 한 자리는
-            다음 장에서 때를 여쭙고 세우오.
-            <br />
-            여태 생년월일을 적다가 그만둔 적이 있었소.
-            {" "}어디에 쌓이는지 안 적혀 있어서요.
-            <br />
-            이 집은 그 숫자로 글자를 세우고 나면 더 쓸 데가 없소 —
-            공유 고리에도 안 담기고, 계측에도 안 실리오. 자를 대고
-            치수만 재는 것처럼, 재고 나면 자는 치웁니다.
-          </Say>
-        </Fold>
-        <div className="f3">
-          <div>
-            <label>년</label>
-            <input className="fld" inputMode="numeric" placeholder="1993" maxLength={4}
-                   value={s.year ?? ""}
-                   onChange={(e) => s.set({ year: num(e.target.value), features: null, chartId: null })} />
-          </div>
-          <div>
-            <label>월</label>
-            <input className="fld" inputMode="numeric" placeholder="5" maxLength={2}
-                   value={s.month ?? ""}
-                   onChange={(e) => s.set({ month: num(e.target.value), features: null, chartId: null })} />
-          </div>
-          <div>
-            <label>일</label>
-            <input className="fld" inputMode="numeric" placeholder="15" maxLength={2}
-                   value={s.day ?? ""}
-                   onChange={(e) => s.set({ day: num(e.target.value), features: null, chartId: null })} />
-          </div>
-        </div>
-        {filled && bad && (
-          <p className="sm" style={{ color: "var(--ember)", marginTop: 8 }}>{bad}</p>
-        )}
-
-        {/*
-          ★ 여기서 처음으로 **돌려줍니다.**
-            앞의 네 화면은 받기만 했습니다. 여섯 글자를 세워 보이고,
-            빈 두 자리를 빈 채로 둡니다 — 그 두 칸이 다음 화면입니다.
-        */}
-        {peek && !bad && (
-          <div className="peek">
-            <div className="peekgz">
-              {peek.pillars.slice(0, 3).map((p, i) => (
-                <span key={i}>{p.gz}</span>
-              ))}
-              <span className="empty">□□</span>
-            </div>
-            <p className="sm">
-              <b>여섯 글자</b>가 섰소. 그대의 일간은 <b>{peek.day_gan}</b>이오 —
-              여덟 글자 가운데 그대 자신을 가리키는 한 글자요.
-            </p>
-            <p className="sm dim">
-              남은 두 글자는 때가 세우오. 다음 장에서 여쭙겠소.
-            </p>
-          </div>
-        )}
-
-        {/* ★ 고을은 접어 둡니다. 대부분은 안 건드립니다. */}
-        {/*
-          ★ 여기가 가장 약한 화면이었습니다 (열 중 둘).
-
-            날을 받는 자리라 붙일 게 없어 보이지만, **이 날 하나로
-            무엇이 서는지**를 말해 주면 손님이 지금 무엇을 하고 있는지
-            압니다. 그냥 칸을 채우는 것과 「내 여덟 글자를 세우는 중」은
-            같은 동작인데 다른 일입니다.
-
-            그리고 값을 안 받는다는 말을 여기서 한 번 더 합니다 —
-            생년월일을 적는 자리가 이 흐름에서 가장 망설이는 데입니다.
-        */}
-        {/* ★ 「여덟 글자가 선다」 는 여기서 아직 참이 아닙니다. 때를
-              안 물었으니 여기서 서는 것은 **여섯**입니다. 셀 수 있는
-              말로 적어야 손님이 다음 화면이 왜 있는지 압니다. */}
-        <p className="sm mt">
-          이 날 하나로 여덟 글자 중 <b>여섯</b>이 서오. 남은 둘은 때를
-          알아야 서오. 절기 (계절이 바뀌는 마디 스물넷) 와 표준시까지
-          셈에 넣소 — <b>여기까지 값은 안 받소.</b>
-        </p>
-
-        {!cityOpen ? (
-          <p className="sm mt">
-            고을은 <b>{s.city}</b>로 두었소.{" "}
-            <button className="lk" onClick={() => setCityOpen(true)}>
-              서울이 아닙니다
-            </button>
-          </p>
-        ) : (
-          <>
-            <label className="sm" style={{ display: "block", marginTop: 12 }}>태어난 고을</label>
-            <select className="fld" value={s.city}
-                    onChange={(e) => s.set({ city: e.target.value, features: null, chartId: null })}>
-              {CITY_GROUPS.map(([g, cs]) => (
-                <optgroup key={g} label={g}>
-                  {cs.map((c) => <option key={c} value={c}>{c}</option>)}
-                </optgroup>
-              ))}
-            </select>
-            <p className="sm">
-              고을마다 해가 가장 높이 뜨는 때가 다르오. 같은 시계를 고을마다
-              다른 자리에 걸어 둔 셈이오 — 서울은 <b>32분</b>을 되돌리오.
-              그만큼 시주 (태어난 시각의 두 글자) 가 갈릴 수 있소.
-              {" "}제 고을이 없거든 가까운 데를 고르시오. <b>30 km</b>면
-              되돌리는 시각이 <b>1분</b> 남짓 달라지오.
-            </p>
-          </>
-        )}
-
-        <Say who="도령" lens="pungun">
-          남녀에 따라 운이 흐르는 방향이 반대요. 이건 반드시 있어야 하오.
-          <br />
-          대운 열 칸이 앞으로 도는지 거꾸로 도는지가 여기서 갈리오 —
-          잘못 짚으면 <b>열 칸이 통째로 반대</b>가 되오.
-        </Say>
-        {/*
-          ★ 여기가 **켜진 채로** 서 있었습니다 (2026-09-04).
-
-            기본값이 「여인」이라 두 칸 중 하나가 이미 불이 들어와
-            있었고, 사내는 **아무것도 안 눌러도** 다음으로 갔습니다.
-            그러면 대운이 통째로 반대로 섭니다.
-
-            고른 사실을 따로 적어(sexSet), 고르기 전에는 아무 칸도
-            안 켜고 다음으로도 안 보냅니다.
-        */}
-        <p className="pickme">
-          <b>둘 중 하나를 누르시오.</b> 아직 안 고르셨소.
-        </p>
-        <div className="og c2">
-          {([["F", "여인"], ["M", "사내"]] as const).map(([v, label]) => (
-            <button key={v}
-                    className={`op ${s.sexSet && s.sex === v ? "on" : ""}`}
-                    disabled={!!bad}
-                    aria-pressed={s.sexSet && s.sex === v}
-                    style={{ textAlign: "center", fontFamily: "var(--serif)", fontSize: 15 }}
-                    onClick={() => s.set({ sex: v, sexSet: true,
-                                           features: null, chartId: null })}>
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {/* ★ 막이 그냥 끝나고 있었습니다. 다음 자리를 이름으로
-            부르지 않아 「다 적었습니다」 가 어디로 가는 문인지
-            몰랐습니다. 예고는 재촉이 아니라 안내입니다. */}
-        <ActOut kind="끊긴 동작" next="때를 묻다">
-          날까지는 섰소. <b>아직 한 자리가 비어 있소.</b>
-          <br />
-          기둥 넷 중 셋이 서고, 마지막 하나는 태어난 때가 정하오.
-        </ActOut>
-        {/* ★ 자동 진행을 없앴습니다. 되돌릴 여지를 줍니다. */}
-        <button className="btn mt" disabled={!filled || !!bad}
-                onClick={() => go("a4")}>
-          다 적었습니다
-        </button>
-        {/* ★ 「날을 다 적어야」 라고만 적혀 있어서, 성별을 안 고른
-            사람은 날짜만 들여다봤습니다. 무엇이 비었는지 말합니다. */}
-        {(!filled || bad) && (
-          <p className="sm mt" style={{ textAlign: "center" }}>
-            {bad ? "적으신 날을 다시 보시오."
-              : s.year === null || s.month === null || s.day === null
-                ? (s.sexSet ? "날을 다 적어야 다음으로 가오."
-                            : "날을 다 적고, 여인·사내 중 하나를 누르시오.")
-                : "여인·사내 중 하나를 누르시오. 그것만 남았소."}
-          </p>
-        )}
-      </Shell>
-    );
+    const filled = s.year !== null && s.month !== null && s.day !== null;
+    const bad = filled ? birthProblem(s.year,s.month,s.day) : null;
+    const minor = filled && !bad && needsGuardian(s.year!,s.month!,s.day!);
+    return <Shell screen="a3" title="태어난 정보" onBack={back}>
+      <Progress step={2} total={PROGRESS_TOTAL} />
+      <div className="conversion-intro"><p className="conversion-kicker">2 / 3 · 태어난 정보</p>
+        <h1 className="conversion-title">해석에 필요한 정보를<br />알려주세요.</h1>
+        <p className="conversion-lead">양력 생년월일을 입력해 주세요. 음력 생일은 양력으로 바꿔 입력해 주세요.</p></div>
+      <div className="f3">
+        {([['year','태어난 해',4,'1993'],['month','월',2,'11'],['day','일',2,'25']] as const).map(([key,label,max,placeholder]) =>
+          <div key={key}><label htmlFor={`birth-${key}`}>{label}</label>
+            <input id={`birth-${key}`} className="fld" inputMode="numeric" maxLength={max} placeholder={placeholder}
+              aria-invalid={!!bad} aria-describedby={bad ? "birth-error" : undefined}
+              value={s[key] ?? ""} onChange={e => {const value=e.target.value.replace(/[^0-9]/g, "").slice(0,max);
+                s.set({ [key]: value === "" ? null : Number(value), features:null, chartId:null }); setError(null); }} />
+          </div>)}
+      </div>
+      {bad && <p className="warn" id="birth-error" role="alert">{bad}</p>}
+      {minor && <p className="warn" role="alert">만 14세 미만은 보호자 동의 절차가 필요해 현재 서비스를 이용할 수 없어요.</p>}
+      <div className="conversion-card"><label htmlFor="birth-city">태어난 지역</label>
+        <select id="birth-city" className="fld" value={s.city} onChange={e => s.set({ city:e.target.value, features:null, chartId:null })}>
+          {CITY_GROUPS.map(([g,cs]) => <optgroup key={g} label={g}>{cs.map(c => <option key={c} value={c}>{c}</option>)}</optgroup>)}
+        </select><p className="conversion-note">현재 {s.city} 기준이에요. 출생지는 태어난 시간의 지역 보정에 사용합니다.</p>
+      </div>
+      <p className="conversion-note">성별은 전통 명리의 대운 방향을 계산하는 데 사용해요.</p>
+      {!s.sexSet && <p className="conversion-note">여성·남성 중 하나를 선택해 주세요.</p>}
+      <div className="og c2">{([['F','여성'],['M','남성']] as const).map(([value,label]) =>
+        <button className={`op ${s.sexSet && s.sex === value ? 'on' : ''}`} key={value} aria-pressed={s.sexSet && s.sex === value}
+          onClick={() => s.set({ sex:value, sexSet:true, features:null, chartId:null })}>{label}</button>)}
+      </div>
+      <button className="btn mt" disabled={!filled || !!bad || !!minor || !s.sexSet} onClick={() => go("a4")}>태어난 시간으로 이어가기</button>
+      <p className="conversion-note">시간을 모르면 다음 화면에서 ‘시간을 몰라요’를 선택할 수 있어요. <a href="/legal">개인정보 처리 안내</a></p>
+    </Shell>;
   }
 
   if (step === "a4") {
-    /*
-     * ★ 여기가 고쳐지지 않던 자리입니다.
-     *
-     *   고른 칸(bucket)을 `s.hour` 로 되찾고 있었습니다. 그런데 손님이
-     *   시를 고치는 순간 그 값이 어느 칸에도 안 맞습니다 — 13에서 한
-     *   글자만 지워도 1이 되고, 1은 칸이 아닙니다. 그러면 `bucket` 이
-     *   undefined 가 되고 **정밀 입력 칸이 통째로 사라집니다.**
-     *   그래서 한 글자도 못 고쳤습니다.
-     *
-     *   고른 칸은 따로 기억합니다. 시를 아무리 고쳐도 칸은 안 없어집니다.
-     */
-    const bucket = pickedHour !== null ? HOURS[pickedHour] : undefined;
     return (
-      <Shell screen="a4" title="때를 묻다" onBack={back}>
-        <Progress step={progressAt("a4")!} total={PROGRESS_TOTAL} />
-        <Scene id="room" figure />
-        <Narration lines={["도령이 고개를 들었다."]} />
-        {/*
-          ★ 첫 대면. 여기가 손님이 그 사람의 얼굴을 처음 보는 자리입니다.
-
-            전에는 일곱 화면을 지나도록 얼굴이 한 번도 안 나왔고, 초상은
-            진열대(b2)에서야 나왔습니다 — 결제 갈림길 **뒤**입니다.
-            얼굴을 보고 값을 치를지 정하는 것이지, 치를 마음을 먹은 뒤에
-            얼굴을 보는 게 아닙니다.
-
-            하필 여기인 까닭은 바로 윗줄에 있습니다 — 「도령이 고개를
-            들었다」. 고개를 드는데 얼굴이 없으면 그 문장이 거짓말입니다.
-        */}
-        {/*
-          ★ 도령을 **장면 안에** 세웠습니다 (위 Scene 의 figure).
-
-            전에는 배경 한 칸, 그 아래 초상 한 칸이었습니다. 두 그림이
-            따로 놓이면 손님에게는 「그림 두 장」이지 그 방에 있는
-            사람이 아닙니다. 여기서는 이름만 답니다.
-        */}
-        {/* 여기도 도령의 자리요 — 세션에서 읽지 않소 (a2 와 같은 까닭) */}
-        <Meet lens="pungun" nameOnly />
-        <Say who="도령" lens="pungun">
-          때는 아시오? 이 두 글자가 여덟 중 마지막이오.
-        </Say>
-        <Narration lines={["", "대부분은 모른다.", "모른다고 해도 그는 개의치 않았다."]} />
-
-        {/*
-          ★ 순서를 뒤집었습니다 (2026-09-02).
-
-            손님이 1993-11-25 **15시 55분**생인데 화면이 13시로 셈해
-            시주가 壬午 로 섰습니다. 만세력은 甲申 이오 — 여덟 글자 중
-            둘이 다르고, 그래서 **불이 하나 생기고 나무가 하나
-            사라졌습니다.**
-
-            까닭은 계산이 아니라 **입력**이었습니다. 네 시간짜리 칸을
-            한 시각으로 뭉개고 있었습니다. 재보니 —
-
-                칸을 고른 사람의 51.7% 가 틀린 시주를 받습니다.
-                다섯 칸은 정확히 절반씩 틀립니다.
-                (tools/hour_bucket_audit.py)
-
-            시·분 칸은 있었습니다. 다만 **칸을 먼저 고른 뒤 작은 링크를
-            눌러야** 열렸고, 칸을 고르는 순간 이미 한복판 시각이
-            적혔습니다. 아는 사람이 두 번 더 눌러야 제 시각을 쓰는
-            구조였습니다 — 그러니 아무도 안 눌렀습니다.
-
-            그래서 시·분을 **먼저, 그냥** 냅니다. 칸은 대강만 아는
-            사람의 길로 내려갑니다.
-        */}
-        {/* ① 시·분 — 기본 길. 적은 그대로 셈합니다 */}
-        <div className="exact first">
-          <p className="sm">
-            태어난 시각을 적으시오. <b>적은 그대로 셈하오</b> —
-            반올림도 어림도 하지 않소.
-          </p>
-          <div className="f3 hm">
-            <div>
-              <label>시 (0–23)</label>
-              <input className="fld" inputMode="numeric" maxLength={2}
-                     placeholder="15"
-                     value={s.hourKnown && s.hour !== null ? s.hour : ""}
-                     onChange={(e) => {
-                       const t = e.target.value.replace(/[^0-9]/g, "").slice(0, 2);
-                       // 손으로 적은 시각은 칸이 아닙니다. 칸 표시를
-                       // 지워야 대강 칸 경고가 따라다니지 않습니다.
-                       setPickedHour(null);
-                       if (t === "") {
-                         s.set({ hourKnown: true, hour: null,
-                                 features: null, chartId: null });
-                         return;
-                       }
-                       // 24 를 치면 23 으로 잡아 둡니다. 지우고 다시
-                       // 칠 수 있어야 하므로 값 자체는 막지 않습니다.
-                       s.set({ hourKnown: true, hour: Math.min(23, Number(t)),
-                               features: null, chartId: null });
-                     }} />
-            </div>
-            <div>
-              <label>분 (0–59)</label>
-              <input className="fld" inputMode="numeric" maxLength={2}
-                     placeholder="55"
-                     value={s.minute ? String(s.minute) : ""}
-                     onChange={(e) => {
-                       const t = e.target.value.replace(/[^0-9]/g, "").slice(0, 2);
-                       setPickedHour(null);
-                       s.set({ minute: t === "" ? 0 : Math.min(59, Number(t)),
-                               features: null, chartId: null });
-                     }} />
-            </div>
-            <div />
-          </div>
-
-          {/*
-            ★ 되읽어 줍니다.
-
-              가장 흔한 실수는 **오후를 12시간 빼고 적는 것**입니다 —
-              오후 3시 55분을 「3」 으로 적으면 새벽 3시가 되고 시주가
-              통째로 달라집니다. 24시간으로 받되, 받은 값을 사람 말로
-              되읽어 주면 손님이 그 자리에서 알아봅니다.
-          */}
-          {s.hourKnown && s.hour !== null && (
-            <p className="echo">
-              {clockWord(s.hour, s.minute ?? 0)}에 나셨소.
-              {s.hour >= 1 && s.hour <= 11 && (
-                <span className="warn2">
-                  {" "}오후였다면 <b>{s.hour + 12}</b>으로 적으시오.
-                </span>
-              )}
-            </p>
-          )}
-
-          <button className="btn mt"
-                  disabled={!s.hourKnown || s.hour === null}
-                  onClick={() => go("a4b")}>
-            이 시각으로 세우겠습니다
-          </button>
+      <Shell screen="a4" title="태어난 시간" onBack={back}>
+        <Progress step={3} total={PROGRESS_TOTAL} />
+        <div className="conversion-intro">
+          <p className="conversion-kicker">3 / 3 · 태어난 시간</p>
+          <h1 className="conversion-title">아는 만큼만<br />알려주셔도 돼요.</h1>
+          <p className="conversion-lead">시간을 알면 시주까지 계산하고, 모르면 시주를 제외한 범위에서 해석해요.</p>
         </div>
-
-        {/* ② 모르겠다 → 대강 칸 */}
-        {!vague ? (
-          <button className="btn gh mt" onClick={() => setVague(true)}>
-            시각은 모르겠습니다
-          </button>
-        ) : (
-          <div className="vague">
-            <p className="sm">
-              그럼 대강이라도 아시오? 새벽인지 아침인지 한낮인지.
-            </p>
-            <p className="pickme">
-              {pickedHour === null
-                ? <><b>여섯 칸 중 하나를 누르시오.</b></>
-                : <>고르셨소. 아래 <b>다 됐습니다</b> 로 가시오.</>}
-            </p>
-            <div className="og c2">
-              {HOURS.map(([label, range, h], idx) => (
-                <button key={label}
-                        className={`op ${pickedHour === idx ? "on" : ""}`}
-                        onClick={() => {
-                          s.set({ hourKnown: true, hour: h, minute: 0,
-                                  features: null, chartId: null });
-                          setPickedHour(idx);
-                        }}>
-                  <b>{label}</b><span>{range}</span>
-                </button>
-              ))}
+        <div className="conversion-time conversion-card">
+          <div className="f3 hm">
+            <div><label htmlFor="birth-hour">시 (0–23)</label>
+              <input id="birth-hour" className="fld" inputMode="numeric" maxLength={2} placeholder="15"
+                value={s.hourKnown && s.hour !== null ? s.hour : ""}
+                onChange={(e) => { const value=e.target.value.replace(/[^0-9]/g, "").slice(0,2);
+                  s.set({ hourKnown: true, hour: value === "" ? null : Math.min(23, Number(value)), features: null, chartId: null }); }} />
             </div>
-
-            {/*
-              고르면 무엇을 무릅쓰는지 그 자리에 적습니다. 감추면
-              손님은 정확히 셈한 줄 압니다.
-            */}
-            {bucket && (
-              <div className="exact bucketwarn">
-                <p className="sm">
-                  {bucket[0]}({bucket[1]}) 은 네 시간이오.
-                  시주는 두 시간마다 바뀌니 이 칸은 두 시주에 걸치오.
-                  {" "}지금은 한복판인{" "}
-                  <b>{String(bucket[2]).padStart(2, "0")}시</b>로 셈하는데,
-                  이 칸에 태어난 사람의 <b>절반</b>은 다른 시주요.
-                  <br />
-                  시각을 아시면 위에 적으시오. 그게 훨씬 낫소.
-                </p>
-                <button className="btn mt" disabled={s.hour === null}
-                        onClick={() => go("a4b")}>
-                  그래도 이 칸으로 세우겠습니다
-                </button>
-              </div>
-            )}
-
-            {/* ③ 그것도 모르겠다 → 세 기둥 */}
-            <button className="btn gh mt"
-                    onClick={() => {
-                      s.set({ hourKnown: false, hour: null,
-                              features: null, chartId: null });
-                      setPickedHour(null);
-                      go("a4b");
-                    }}>
-              그것도 모르겠습니다 · 세 기둥으로 보겠습니다
-            </button>
-          </div>
-        )}
-
-        <ActOut kind="밝힘" next="성향 넉 자">
-          같은 시각에 나도 서울에서는 32분을 되돌려 셈하오.
-          해가 서울 위에 오는 때가 시계보다 그만큼 늦기 때문이오.<br />
-          <b>그 32분에서 시주(時柱)가 갈리는 사람이 있소.</b>
-        </ActOut>
-        {/*
-          ★ 쉬움이 0점이던 자리입니다.
-
-            「시주」를 일곱 번 쓰면서 한 번도 안 풀었습니다. 손님은
-            여덟 글자를 오늘 처음 보는 사람인데, 이 화면이 묻는 것이
-            바로 그 글자 둘입니다. 풀지 않으면 왜 분까지 적어야
-            하는지가 안 서고, 그러면 대강 칸으로 내려갑니다.
-        */}
-        {/*
-          ★ a3 에서 연 고리를 여기서 닫습니다 (2026-09-04).
-
-            a3 이 「남은 두 글자는 때가 세우오」 라 하고 끊었습니다.
-            그 두 글자가 여기서 섭니다 — 손님이 시각을 적는 그 자리에서.
-            열린 고리를 닫아 주지 않으면 그건 연출이 아니라 미끼입니다
-            (Zeigarnik 1927 — 열고 닫는 결이 있어야 지치지 않습니다).
-        */}
-        {peek && peek.hour_known && (
-          <div className="peek done">
-            <div className="peekgz">
-              {peek.pillars.map((p, i) => <span key={i}>{p.gz}</span>)}
+            <div><label htmlFor="birth-minute">분 (0–59)</label>
+              <input id="birth-minute" className="fld" inputMode="numeric" maxLength={2} placeholder="00"
+                value={s.minute ?? ""}
+                onChange={(e) => { const value=e.target.value.replace(/[^0-9]/g, "").slice(0,2);
+                  s.set({ minute: value === "" ? 0 : Math.min(59, Number(value)), features: null, chartId: null }); }} />
             </div>
-            <p className="sm">
-              <b>여덟 글자</b>가 다 섰소. 이제 바뀌지 않소.
-            </p>
           </div>
-        )}
-
-        <p className="sm mt">
-          때를 알면 여덟 글자가 다 서고, 모르면 여섯 글자로
-          보오. 여섯으로도 다섯 마디는 그대로 하오.
-        </p>
-        <Fold label="시주가 무엇이오?">
-          <p className="sm">
-            <b>시주(時柱)</b>란 태어난 때를 두 글자로 옮긴 것이오.
-            기둥 넷 중 마지막 하나요 — 해·달·날이 셋을 세우고, 때가
-            나머지 하나를 세우오. 네 다리 상에서 다리 하나처럼, 없다고
-            못 쓰는 건 아니나 기우뚱하오.
-          </p>
-          <p className="sm">
-            때를 모르면 그 기둥을 안 세우오. 열두 시로 채워 넣는 집도
-            있으나, 그건 없는 걸 지어내는 것이오. 여태 다른 데서
-            「모르면 그냥 12시로 하죠」 소리를 들으셨을 게요 — 그리
-            채워 넣은 여덟 글자는 둘이 틀린 채로 나가오. 없는 다리를
-            나무토막으로 괴어 놓은 것처럼 말이오.
-          </p>
-        </Fold>
+          {s.hourKnown && s.hour !== null && <p className="conversion-note">{clockWord(s.hour, s.minute ?? 0)}에 태어난 것으로 계산해요. 오후 3시는 15로 적어주세요.</p>}
+          <button className="btn mt" disabled={!s.hourKnown || s.hour === null}
+            onClick={() => go("a6")}>이 시간으로 무료 해석 보기</button>
+        </div>
+        <button className="btn gh" onClick={() => {
+          s.set({ hourKnown: false, hour: null, minute: 0, chartId: null, features: null }); go("a6");
+        }}>시간을 몰라요 · 시주 없이 보기</button>
+        <CompanionCat message="모르는 시간을 추측해서 채우지 않아도 괜찮아요." />
+        <details className="conversion-details"><summary>별칭·성향도 추가하고 싶어요</summary>
+          <p className="conversion-note">선택 정보예요. 비워 두어도 무료로 볼 수 있어요.</p>
+          <button className="btn gh" onClick={() => go("a2")}>별칭 입력</button>
+          <button className="btn gh" onClick={() => go("a4b")}>성향 4글자 선택</button>
+        </details>
       </Shell>
     );
   }
 
   if (step === "a4b") {
-    return (
-      <Shell screen="a4b" title="성향 4글자" onBack={back}>
-        <Progress step={progressAt("a4b")!} total={PROGRESS_TOTAL} />
-        <Scene id="mirror" />
-        <Narration lines={["그가 종이 한 장을 더 꺼냈다.",
-                           "이번 것은 그가 적은 게 아니었다."]} />
-        <Say who="도령" lens="pungun" html="혹시 성향 검사를 해본 적 있소? 그 <b>4글자</b>를 여덟 글자에서 나온 <b>4글자</b>와 맞대 보겠소." />
-
-        {/*
-          ★ 무엇을 위해 묻는지를 **먼저** 말합니다.
-            전에는 열여섯 칸을 보여 주고 보상은 말하지 않았습니다. 안 적은
-            사람이 열에 넷이 넘는데(45.5%), 그 사람들은 훅에서 가장
-            "나에 대한 말" 같은 자리를 대체 단으로 받습니다.
-        */}
-        <p className="sm">
-          적으시면 <b>사주와 어긋나는 자리</b>를 한 겹 더 봐 드리오.
-          여덟 글자에서도 넉 자가 나오는데, 그 둘을 맞대 보는 것이오 —
-          거울 두 장을 마주 세우는 셈이오. 겹치는 데는 넘기고
-          <b>어긋난 자리</b>만 짚소.
-        </p>
-        {/*
-          ★ 팩폭 37점 — 「어긋나는 자리」 는 뜬 말입니다. 무엇이
-            어긋나면 살림에서 무엇이 달라지는지를 대야 합니다.
-            아래 넉 줄은 전부 셀 수 있는 것으로 적었습니다.
-        */}
-        <Fold label="어긋난다는 게 무슨 말이오?">
-          <p className="sm">
-            넉 자는 4글자고 여덟 글자에서 나오는 것도 4글자요. 그 8개를
-            한 칸씩 맞대면 겹치는 칸과 어긋난 칸이 나오오.
-            {" "}어긋난 칸이 2개를 넘으면 그 자리를 따로 짚소.
-          </p>
-          <p className="sm">
-            어긋난다는 건 이런 것이오 — 밖에서는 말수가 많은 사람으로
-            통하는데 집에 오면 연락을 안 받고 잠으로 도망가는 것,
-            일은 벌여 놓고 돈 세는 자리에서 손이 굳는 것. 겉옷과 속옷이
-            치수가 2개쯤 어긋난 것처럼, 입고는 다니는데 하루 종일
-            불편한 자리요.
-            <b> 남이 아는 나</b>와 <b>혼자 있을 때의 나</b>가 갈리는 자리요.
-          </p>
-        </Fold>
-        <span className="src">
-          근거 · 넉 자 4글자와 여덟 글자에서 뽑은 4글자를 한 칸씩 맞대오 ·
-          어긋난 칸이 2개를 넘으면 따로 짚소 · 안 적으셔도 5마디는
-          그대로 하오
-        </span>
-        {/*
-          ★ 여기가 팩폭 25점, 스물일곱 화면 중 꼴찌였습니다.
-            「어긋나는 자리를 한 겹 더」 는 무슨 말인지 알 수 없는 말입니다 —
-            어긋나면 **무슨 말을 듣는지**를 한 번도 안 보여 줬습니다.
-            훅이 실제로 내는 말을 한 줄 미리 답니다. 지어낸 예가 아니라
-            `bank` 의 E→I 대체 단이 하는 말과 같은 자리입니다.
-        */}
-        <p className="sm">
-          이를테면 스스로는 <b>안으로 도는 쪽</b>이라 적었는데 글자는
-          드러나는 쪽이면 — <b>사람을 만나고 온 날 지치는 것</b>이
-          성격이 아니라 눌러 온 값일 수 있소. 그런 자리를 짚소.
-        </p>
-        <p className="sm">
-          열에 넷은 안 적고 지나가오. 안 적으셔도 되오 —
-          그때는 걸려 오신 것과 글자를 맞대 보겠소.
-          <b> 여기까지 값은 안 받소.</b>
-        </p>
-
-        {/* ★ "모르오" 를 그리드 **위**로. a4 에서 이미 내린 판단을
-            여기에도 적용합니다 — 훑는 순서상 아래에 두면 가장 늦게 보입니다. */}
-        <button className="btn gh" style={{ marginBottom: 12 }}
-                onClick={() => { s.set({ axis4: null }); go("a6"); }}>
-          모르겠습니다 · 사주만으로 보겠습니다
-        </button>
-
-        <p className="pickme">
-          {s.axis4 ? <><b>{s.axis4}</b> 로 하겠소.</>
-                   : <><b>열여섯 중 하나를 누르시오.</b> 누르면 바로 다음으로 가오.</>}
-        </p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 5, margin: "14px 0" }}>
-          {AXIS4.map((t) => (
-            <button key={t} className={`op ${s.axis4 === t ? "on" : ""}`}
-                    style={{ textAlign: "center", padding: "11px 2px",
-                             fontFamily: "var(--mono)", fontSize: 12, letterSpacing: ".06em" }}
-                    onClick={() => { s.set({ axis4: t }); go("a6"); }}>
-              {t}
-            </button>
-          ))}
-        </div>
-        <Narration lines={["", "네 글자는 셈에 넣지 않는다.",
-          "<em>사주와 어긋나는 자리</em>를 찾는 데만 쓴다."]} />
-        {/* ★ 다음이 무엇인지 한 번도 안 불렀습니다. 넉 자를 고르든 안
-              고르든 다음 자리는 하나입니다 — 글자가 서는 자리. */}
-        <ActOut kind="딜레마" next="글자가 서다">
-          넉 자는 <b>그대가 고른 답</b>이고, 여덟 글자는 <b>고를 수 없었던
-          것</b>이오.<br />
-          둘이 다 있으면 어긋난 칸부터 짚고, 넉 자가 없으면
-          여덟 글자만으로 가오. 어느 쪽이든 다음은 글자가 서는 자리요.
-        </ActOut>
-        <p className="sm mt">본 서비스의 성향 검사는 특정 상표의 검사가 아닙니다.</p>
-      </Shell>
-    );
+    return <Shell screen="a4b" title="성향 4글자 · 선택" onBack={back}>
+      <h1 className="conversion-title">내가 생각하는 성향도<br />비교해볼까요?</h1>
+      <p className="conversion-lead">직접 고른 성향과 전통 사주 해석을 비교하는 선택 항목이에요. 사주 계산값은 바뀌지 않아요.</p>
+      <div className="og c2">{AXIS4.map(t => <button key={t} className={`op ${s.axis4===t ? 'on' : ''}`}
+        aria-pressed={s.axis4===t} onClick={() => s.set({ axis4:t })}>{t}</button>)}</div>
+      <button className="btn mt" disabled={!s.axis4} onClick={() => go("a4")}>선택한 성향으로 이어가기</button>
+      <button className="btn gh" onClick={() => { s.set({ axis4:null }); go("a4"); }}>성향 없이 이어가기</button>
+      <p className="conversion-note">본 서비스의 성향 검사는 특정 상표의 검사가 아닙니다.</p>
+    </Shell>;
   }
 
   if (step === "a5") {
-    /*
-     * ★ 이 화면이 여섯 번째에 있었습니다.
-     *   「무엇이 걸려서 예까지 왔소?」 는 이 흐름 전체에서 가장 좋은 한
-     *   줄인데, 손님은 그 앞에 이름·날짜·고을·성별·시각·넉 자 열여섯
-     *   칸을 지나야 이걸 만났습니다. 그때쯤이면 이미 사무적인 모드입니다.
-     *   이름 바로 뒤로 올렸습니다.
-     */
     return (
-      <Shell screen="a5" title="걸리는 것" onBack={back}>
-        <Progress step={progressAt("a5")!} total={PROGRESS_TOTAL} />
-        <Scene id="fork" />
-        {/*
-          ★ 글이 그림과 어긋나 있었습니다.
-
-            여기 그림은 밤 들판의 갈림길입니다 — 등 셋과 팻말 셋.
-            그런데 글은 「붓을 내려놓고, 그가 물었다」 였습니다. 실내에서
-            붓을 내려놓는 장면인데 화면은 바깥입니다.
-
-            손님은 둘 중 무엇을 믿을지 몰라 합니다. 그림을 다시 뽑는
-            것보다 글을 맞추는 것이 싸고, 여기서는 글이 그림을 받아
-            주는 편이 더 낫습니다 — 갈림길이 이 화면의 뜻입니다.
-        */}
-        <Narration lines={["길이 세 갈래로 갈리는 데서, 그가 물었다."]} />
-        <Say who="도령" lens="pungun">
-          {s.name ? `${s.name}. 무엇이 걸려서 예까지 왔소?` : "무엇이 걸려서 예까지 왔소?"}
-        </Say>
-        {/*
-          ★ 여기가 68점이었습니다. 물음은 이 흐름에서 가장 좋은 한
-            줄인데, **고르고 나면 무엇이 달라지는지**가 없었습니다.
-            그래서 여섯 칸이 설문지처럼 보였습니다.
-        */}
-        <Say who="도령" lens="pungun">
-          칸은 6개고, 여기서 고른 하나가 뒤의 <b>5마디</b>를 다 바꾸오.
-          {" "}같은 8글자를 놓고도 돈이 걸린 사람과 사람이 걸린 사람은
-          짚는 자리가 다르오. 고른 것은 뒤에서 바꿀 수 있소.
-          <br />
-          <b>여태 「뭐가 걸리냐」는 물음에 바로 답해 본 적이 없었을
-          것이오.</b> 하나로 줄이면 나머지가 아닌 게 되어 버려서요.
-          <br />
-          그래도 하나만 고르시오. 6개 중 1개를 고르는 것이 여기서
-          할 일의 전부요.
-          <br />
-          고르기를 미루다 그냥 닫은 사람이 적지 않소. 그 자리에서
-          참고 지나가면 뒤의 5마디가 아무 데도 안 걸리오.
-        </Say>
-        <Fold label="왜 하나만 고르라 하오?">
-          <Say who="도령" lens="pungun">
-            안경알을 한 번에 하나만 끼우는 것처럼, 8글자를 보는 자리도
-            한 번에 하나요. 둘을 겹쳐 끼우면 둘 다 흐려지오.
-          </Say>
-        </Fold>
-        <Narration lines={["", "한참 답이 나오지 않았다.", "하나만 고르라면—"]} />
-        {/*
-          ★ 여섯 칸 중 하나가 **이미 켜진 채**였습니다 (2026-09-04).
-            기본값이 있어야 셈이 도는데, 화면이 그걸 「고른 것」처럼
-            그렸습니다. 손님은 고른 적이 없으니 다음에 뭘 눌러야
-            할지 모릅니다. 누르면 곧바로 다음 자리로 갑니다.
-        */}
-        <p className="pickme">
-          <b>여섯 중 하나를 누르시오.</b> 누르면 곧바로 넘어가오.
-        </p>
+      <Shell screen="a5" title="지금의 고민" onBack={back}>
+        <Progress step={1} total={PROGRESS_TOTAL} />
+        <div className="conversion-intro">
+          <p className="conversion-kicker">1 / 3 · 고민 선택</p>
+          <h1 className="conversion-title">지금 가장 알고 싶은 건<br />무엇인가요?</h1>
+          <p className="conversion-lead">지금 마음에 걸리는 것 하나를 골라주세요. 선택한 고민에 따라 해석에서 살펴볼 자리가 달라져요.</p>
+        </div>
         <div className="og c2">
           {CONCERNS.map((c) => (
-            <button key={c.id}
-                    className={`op ${s.concernSet && s.concern === c.id ? "on" : ""}`}
-                    aria-pressed={s.concernSet && s.concern === c.id}
-                    onClick={() => {
-                      s.set({ concern: c.id as Concern, concernSet: true });
-                      go("a3");
-                    }}>
+            <button key={c.id} className={`op ${s.concernSet && s.concern === c.id ? "on" : ""}`}
+              aria-pressed={s.concernSet && s.concern === c.id}
+              onClick={() => s.set({ concern: c.id as Concern, concernSet: true })}>
               <b>{c.label}</b><span>{c.sub}</span>
             </button>
           ))}
         </div>
-        <p className="sm mt">
-          고르신 것이 여덟 글자의 어느 자리를 볼지 정하오.
-          바꾸시려면 왼쪽 위 ← 로 돌아오면 되오.
-          <b> 여기까지 값은 안 받소.</b>
-        </p>
-        {/* ★ 고른 뒤에 **무엇을 셀지**를 못박습니다 — 여기도 고리요. */}
-        {s.concernSet && (
-          <p className="sm" style={{ textAlign: "center" }}>
-            그 자리는 열 자리 가운데 하나인데, 그중 <b>몇이
-            비었는지</b>는 날을 적으면 그 자리에서 세어 드리오.
-          </p>
-        )}
-        <ActOut kind="뒤집기" next="글자가 서다">
-          미리 말해 두겠소. <b>넉 자와 여덟 글자는 자주 어긋나오.</b><br />
-          어긋난다고 검사가 틀린 것도, 글자가 틀린 것도 아니오 —
-          <b>넉 자는 그대가 스스로 고른 답이고, 여덟 글자는 고를 수
-          없었던 것</b>이오. 그 틈에 할 말이 있소.
-        </ActOut>
+        <CompanionCat state={s.concernSet ? "selected" : "rest"}
+          message={s.concernSet ? "좋아요. 이 고민부터 살펴봐요." : "오늘 마음에 걸린 것부터 살펴봐요."} />
+        <button className="btn mt" disabled={!s.concernSet} onClick={() => go("a3")}>이 고민으로 이어가기</button>
       </Shell>
     );
   }
 
   if (step === "a6") {
-    /*
-     * ★ 이 집이 가진 가장 큰 자산을 안 쓰던 자리입니다.
-     *
-     *   절기를 시각까지 세고, 표준시 변천을 되돌리고, 고을마다 진태양시를
-     *   보정합니다. 그게 이 서비스의 차별점 그 자체인데 — **계산이 끝난
-     *   뒤 정적인 표로 한꺼번에** 나왔습니다. 그 사이 화면은 "도령이
-     *   종이를 폈다. 붓이 움직인다." 두 줄뿐이었습니다.
-     *
-     *   일하는 모습을 보여주면 결과가 같아도 더 값지게 봅니다. 여기는
-     *   그 조건이 갖춰져 있습니다 — **진짜로 계산합니다.**
-     *   그러니 한 줄씩 찍습니다. 서버가 빨리 답해도 이 장면을 지우지
-     *   않습니다. 여기서의 기다림은 비용이 아니라 값입니다.
-     */
-    const c = s.features?.correction;
-    const beats: string[] = c ? [
-      `표준시(그 시절 쓰던 시계 기준)를 되돌린다… ${c.std_label}`,
-      c.dst ? "서머타임 구간이오. 한 시간 되돌린다…"
-            : "서머타임은 해당 없소.",
-      `고을을 본다… ${c.city} ${c.lon_min > 0 ? "+" : ""}${c.lon_min}분`,
-      c.hour_used ? `때를 고친다… ${c.before} → ${c.after}`
-                  : "때를 모르신다 했으니, 시주는 세우지 않소.",
-      `절기(계절이 바뀌는 마디)를 찾는다… ${c.jieqi_name} 절입 ${c.jieqi_at_kst}`,
-      "여덟 글자가 섰다.",
-    ] : [];
-    const done = calcAt >= beats.length;
-
-    return (
-      <Shell screen="a6" title="글자가 서다" onBack={back}>
-        <Scene id="altar" />
-        {busy && <Narration lines={["도령이 종이를 폈다.", "붓이 움직인다."]} />}
-        {error && (
-          <>
-            <Say who="도령" lens="pungun">{error}</Say>
-            {/* ★ 여기가 막다른 길이었습니다.
-                '다시 세운다' 는 같은 값으로 재시도만 해서, 잘못 적은
-                사람은 영영 빠져나올 수 없었습니다. 고치러 갈 길을 냅니다. */}
-            <button className="btn" onClick={() => go("a3")}>
-              날을 고쳐 적겠습니다
-            </button>
-            <button className="btn gh" onClick={() => void buildChart()}>
-              다시 세워 보겠습니다
-            </button>
-          </>
-        )}
-
-        {s.features && !done && (
-          <>
-            <div className="calcrun">
-              {beats.slice(0, calcAt).map((b, i) => (
-                <p key={i} className={i === calcAt - 1 ? "on" : undefined}>{b}</p>
-              ))}
-            </div>
-            <button className="btn gh mt" onClick={() => setCalcAt(beats.length)}>
-              다 됐습니다 · 건너뛰겠습니다
-            </button>
-            {/* 세는 동안 읽을 것을 둡니다 — 기다림이 빈 시간이 되지 않게. */}
-            <Doubts compact first={null} />
-          </>
-        )}
-
-        {s.features && done && (
-          <>
-            <Narration lines={["여덟 글자가 섰다."]} />
-            {/* ★ "여덟 글자가 섰다" 만 있었습니다. 그게 무슨 뜻인지
-                아무 데도 안 적혀 있었습니다. 첫 화면에서 한 번은
-                말해 줘야 뒤가 읽힙니다. */}
-            <p className="lede8">
-              태어난 <b>해 · 달 · 날 · 시</b>를 각각 두 글자로 옮긴 것이오.
-              넷씩 두 줄, 그래서 <b>여덟 글자</b>요. 이 여덟이 이 집이 읽는
-              전부요 — 더도 덜도 없소.
-            </p>
-            {/*
-              ★ 여기가 73점이었습니다. 여덟 글자가 서는 자리인데,
-                **선 것을 보고 있는 사람 얘기**가 없었습니다. 표만
-                뜨고 근거 줄도 없었습니다.
-            */}
-            <span className="src">
-              근거 · 기둥 4자리 · 글자 8개 ·
-              절입(節入, 계절이 바뀌는 마디에 드는 시각)까지 재어 세운
-              것이오 · 때를 모르시면 6글자로 섭니다
-            </span>
-            <Say who="도령" lens="pungun">
-              그대의 8글자가 섰소. 이 여덟은 오늘 바뀌지 않고, 내일도
-              바뀌지 않소.
-              <br />
-              여태 이 글자를 한 번도 제 눈으로 본 적이 없었소.
-              {" "}어디선가 풀이만 듣고 나왔지, 무엇을 보고 한 말인지는
-              못 물어봤을 것이오. 물어보려다 참은 자리요.
-              <br />
-              그래서 표를 먼저 내오. 자를 대기 전에 자를 보여 주는
-              것처럼, 셈에 쓴 것부터 펴 놓소.
-            </Say>
-            <Pillars f={s.features} />
-
-            {/*
-              ★ 다른 만세력과 갈릴 수 있는 자리는 **우리가 먼저** 말합니다.
-
-                손님은 다른 만세력과 대 봅니다. 백 명 중 **스물여덟**이
-                다르게 나옵니다 (tools/divergence.py — 고을 보정 23.7명 ·
-                밤 11시대 4.0명 · 절입 언저리 0.1명).
-
-                ★ 여기 「넷다섯」 이라 적혀 있었습니다. 셋 중 **가장 흔한**
-                  고을 보정을 아예 안 세고 있었기 때문입니다. 그래서
-                  1993-11-25 13:00 서울 손님에게 「갈리는 자리 없음」 으로
-                  잠자코 있었습니다 — 우리는 壬午, 저쪽은 癸未인데요.
-
-                그때 「우리가 맞소」 도 「그쪽이 맞소」 도 답이 아닙니다.
-                갈리는 자리는 **계산이 아니라 선택**이기 때문입니다.
-
-                발견당하면 「틀린 집」이 되고, 먼저 말하면 「아는 집」이
-                됩니다. 같은 사실인데 순서가 다릅니다.
-
-                저쪽 답까지 적습니다 — 감추면 숨긴 것이 됩니다.
-            */}
-            {s.divergence?.cases?.map((c, i) => (
-              <div className="fork8" key={i}>
-                <div className="lab">여기는 집마다 갈리는 자리요</div>
-                <p className="sm">{c.why}. 그래서 <b>{c.moved.join(" · ")}</b>가
-                  달라질 수 있소.</p>
-                <table className="forkt">
-                  <tbody>
-                    <tr className="on">
-                      <td>이 집</td>
-                      <td>{c.ours}</td>
-                      <td className="gz">{c.mine}</td>
-                    </tr>
-                    <tr>
-                      <td>다른 집</td>
-                      <td>{c.theirs}</td>
-                      <td className="gz">{c.alt}</td>
-                    </tr>
-                  </tbody>
-                </table>
-                <p className="sm">
-                  둘 다 명리에서 쓰는 법이오. 어느 쪽이 맞다고는 안 하오 —
-                   이 집은 위엣것으로 봅니다. 다른 만세력과 대 보고
-                  다르거든, 틀린 게 아니라 여기서 갈린 것이오.
-                </p>
-              </div>
-            ))}
-
-            {/*
-              ★ 값 없이 줄 수 있는 것 중 가장 센 한 줄.
-
-                여기까지 손님이 받은 것은 **자기 여덟 글자**뿐입니다.
-                그건 숫자가 아니라 글자라 「그래서 뭐」 로 끝납니다.
-                희소도는 다릅니다 — 「1만 명에 165명」 은 자기 자리를
-                단번에 알려 주고, 그 다음이 궁금해집니다.
-
-                ★ 지어낸 숫자가 아닙니다. 표는 4만 명을 세어 만듭니다
-                  (tools/make_rarity.py). 표가 없거나 낡았으면 서버가
-                  아무것도 안 보내고, 여기는 조용히 접힙니다.
-
-                ★ 「드물다」 고만 말하지 않습니다. 흔하면 흔하다고
-                  합니다 — 골라 담으면 누구나 드물어집니다.
-            */}
-            {s.rarity && (
-              <div className="rare">
-                <div className="lab">이 배치를 가진 사람</div>
-                <p className="rarebig">
-                  <b>{s.rarity.words}</b>
-                  <em>{s.rarity.band}</em>
-                </p>
-                {s.rarity.ilju && (
-                  <p className="sm">
-                    그중 <b>{s.rarity.ilju_gz}</b> 일주(그대를 가리키는
-                    두 글자)는 {s.rarity.ilju}요.
-                  </p>
-                )}
-                <p className="sm rarenote">
-                  사람 4만을 세어 만든 표요. 맞힌다는 말이 아니라
-                  <b> 몇 명인지</b> 센 것이오.
-                </p>
-              </div>
-            )}
-
-            <Summary f={s.features} />
-            <ElementBar f={s.features} />
-
-            {/* ★ 쓰던 만세력과 나란히 놓고 볼 수 있게. 모양이 다르면
-                한 줄씩 눈으로 옮겨 가며 견줘야 하고, 그러다 지칩니다. */}
-            <ManseTable f={s.features} />
-            <CalcPanel f={s.features} />
-            {/*
-              ★ 여기가 「셈이 끝났다」로 끝나고 있었습니다. 셈은 끝났지만
-                **해석은 한 마디도 안 했습니다.** 그걸 말해 줘야 다음이
-                궁금해집니다 — 끝난 일보다 안 끝난 일이 오래 남습니다.
-            */}
-            <ActOut kind="끊긴 동작" next="왜 하필 지금">
-              여덟 글자가 다 섰소. <b>아직 아무 말도 안 했소.</b><br />
-              여기까지는 재는 일이오 — 옷감을 펴 놓고 치수만
-              적은 셈이오. 마름질은 지금부터요.<br />
-              {s.features?.hour_known
-                ? <>때를 아셨으니 <b>여덟</b> 글자가 다 섰소.</>
-                : <>때를 모르신다 하여 <b>시주(時柱, 태어난 시각의 두
-                    글자)</b>는 안 세웠소. <b>여섯</b> 글자로 보겠소.</>}
-            </ActOut>
-            <button className="btn mt" onClick={() => go("a7")}>
-              무슨 말인지 듣겠습니다
-            </button>
-          </>
-        )}
-      </Shell>
-    );
+    return <Shell screen="a6" title="명식 계산" onBack={back}>
+      <Scene id="altar" />
+      {error && <div className="warn" role="alert"><p>{error}</p>
+        <button className="btn gh" onClick={() => go("a3")}>입력 정보 수정하기</button>
+        <button className="btn gh" disabled={busy} onClick={() => void buildChart()}>다시 계산하기</button>
+      </div>}
+      {!s.features && !error && <p className="conversion-lead" role="status">명식을 계산 중이에요.</p>}
+      {s.features && <>
+        <p className="conversion-kicker">명식 계산 완료</p>
+        <h1 className="conversion-title">이제, 지금의 고민과<br />함께 읽어볼게요.</h1>
+        <p className="conversion-note">{s.features.hour_known ? "태어난 시간까지 네 기둥을 계산했어요." : "태어난 시간을 몰라 시주를 제외한 세 기둥으로 읽어요."}</p>
+        <Pillars f={s.features} />
+        <p className="conversion-note">명식은 태어난 해·달·날·시간을 각각 두 글자로 옮긴 것이에요.<br />모르는 시간의 두 글자는 비워 둡니다.</p>
+        <button className="btn mt" onClick={() => go("a7")}>내 고민의 무료 해석 읽기</button>
+        <details className="conversion-details"><summary>계산 근거와 보정 내역 보기</summary>
+          <ManseTable f={s.features} /><CalcPanel f={s.features} />
+          {s.divergence?.cases?.map((c,i) => <div key={i} className="conversion-note">
+            <p>{c.why}</p><p>이 서비스: {c.ours}<br />{c.mine}</p>
+            <p>다른 계산 방식: {c.theirs}<br />{c.alt}</p>
+            <p>이 서비스는 위의 첫 번째 명식으로 해석해요.</p>
+          </div>)}
+        </details>
+      </>}
+    </Shell>;
   }
 
   /* a7 · 훅 5단 — 값은 아직 묻지 않는다 */
@@ -1680,62 +699,12 @@ function EntryInner() {
         />
       )}
       {hookDone && (
-        <div className="blk in">
-          <Narration lines={[`${iga(lens.name)} 종이를 덮었다.`]} />
-          {/*
-            ★ 마감이 자기 빈약함을 자백하고 있었습니다.
-              "여기까지가 여덟 글자 중 셋으로 본 것이다" — 정보 격차를 여는
-              구조는 좋은데, **방금 좋았다고 느낀 손님에게 그건 8분의 3짜리였다고
-              말하는 셈**입니다. 앞을 깎지 않으면서 격차는 그대로 둡니다:
-              덜어낸 것이 아니라 **남은 것**으로 말합니다.
-          */}
-          <p style={{ fontFamily: "var(--serif)", fontSize: 18, lineHeight: 1.78, color: "var(--c)" }}>
-            여기까지는 그대가 <b>어떤 사람인지</b>를 본 것이오.
-          </p>
-          <p className="tx mt">
-            남은 자리에는 <b>왜 하필 지금인지</b>와 <b>언제 바뀌는지</b>가 있소.
-          </p>
-
-          {/*
-            ★ 여기까지 「안 하면 무엇을 잃는가」 가 한 줄도 없었습니다.
-              여덟 화면 전부에서 0 이었습니다 (tools/persuasion_audit.py).
-
-              사람은 얻는 것보다 잃는 것에 두 배쯤 민감합니다. 「남은
-              자리에는 …가 있소」 는 얻는 말이라 안 눌러도 그만입니다.
-
-              ★ 다만 **앞을 깎지 않습니다.** 「셋으로만 본 것」 같은 말은
-                방금 좋았다고 느낀 손님에게 8분의 3짜리였다고 말하는
-                셈입니다. 대신 **그 사람의 실제 수**를 하나 박습니다 —
-                다음 대운이 바뀌는 나이. 지어낸 말이 아니라 셈에서 나온
-                값이고, 그 해에 무슨 일이 난다고는 말하지 않습니다.
-                바뀌는 때만 셉니다.
-          */}
-          {nextTurn && (
-            <p className="tx losing">
-              그대의 다음 고비는 <b>{nextTurn}살</b>이오.
-              지금 나가면 그게 왜 그때인지 모른 채로 지나가오.
-            </p>
-          )}
-          {/*
-            ★ 여기가 당김 0점이던 자리입니다. 손님이 가장 오래 머물고
-              (「그렇소/아니오」를 다섯 번) 결제 갈림길이 바로 뒤인데,
-              다섯 단이 끝나면 그냥 끝났습니다.
-
-              앞을 깎지 않고 **안 한 말**로 끊습니다 — 다섯을 했다는
-              것은 참이고, 이름 붙은 자리를 아직 안 했다는 것도 참입니다.
-          */}
-          <ActOut kind="남긴 물음" next="없는 것부터">
-            다섯 마디를 했소. 다 여덟 글자 겉에서 한 말이오.<br />
-            <b>정작 없는 것은 아직 안 셌소.</b> 그건 어디서 채우겠소?
-          </ActOut>
-          <button className="btn mt" onClick={() => router.push("/pay?step=d0")}>
-            값 없이 내 것을 한 겹 더
-          </button>
-          <button className="btn gh" onClick={() => router.push("/pay?step=d1")}>
-            어디까지 볼지 고르겠습니다
-          </button>
-          <p className="sm mt" style={{ textAlign: "center" }}>여기까지 받은 값은 없다</p>
-        </div>
+        <section className="conversion-card">
+          <h2>내 경험과 가까웠던 장면이 있나요?</h2>
+          <p className="conversion-lead">이어지는 무료 해석에서 근거를 더 살펴보고, 오늘 해볼 행동 하나를 가져가세요.</p>
+          <button className="btn mt" onClick={() => router.push("/pay?step=d0")}>무료 해석과 오늘의 행동 보기</button>
+          <button className="btn gh" onClick={() => router.push("/summary")}>여기까지 본 내용 정리하기</button>
+        </section>
       )}
     </Shell>
   );

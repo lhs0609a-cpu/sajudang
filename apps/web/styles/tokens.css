@@ -6,26 +6,26 @@
  */
 :root {
   /* 배경 — 자줏빛 검정 */
-  --bg: #0c0a12;
-  --bg2: #151220;
-  --bg3: #1d1829;
+  --bg: #100d18;
+  --bg2: #1d1728;
+  --bg3: #241c30;
   --line: #2e2740;
   --line2: #3a3150;
 
   /* 텍스트 */
-  --paper: #f2ece4;
-  --paper2: #b5abbe;
-  --paper3: #726a80;
+  --paper: #f5efe8;
+  --paper2: #b8acc8;
+  --paper3: #a79ab8;
 
   /* 강조 */
-  --gold: #e5b87a;
+  --gold: #e9bd83;
   --rose: #d98ba5;
   --lav: #a896d4;
   --teal: #7fc4bc;
   --ember: #c9707a;
 
   /* 런타임 교체 — 캐릭터/일간 테마색 */
-  --c: #e5b87a;
+  --c: #e9bd83;
 
   /* ══════════════════════════════════════════════════════
    * 글자 눈금 — 모바일에서 읽히는 크기
@@ -72,10 +72,10 @@
    *   얼굴인데 얇게 나오고 있었습니다. Noto Serif KR 은 굵기가
    *   아홉 단이고 한자를 다 갖고 있습니다.
    */
-  --serif: "Nanum Myeongjo", "Noto Serif KR", serif;
-  --hanja: "Noto Serif KR", "Nanum Myeongjo", serif;
+  --serif: "Noto Serif KR", serif;
+  --hanja: "Noto Serif KR", serif;
   --sans: "Noto Sans KR", system-ui, sans-serif;
-  --mono: "IBM Plex Mono", "Noto Sans KR", monospace;
+  --mono: "Noto Sans KR", system-ui, sans-serif;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -84,7 +84,7 @@ body {
   background: #08060d;
   color: var(--paper);
   font-family: var(--sans);
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.85;
   -webkit-font-smoothing: antialiased;
 }
@@ -124,7 +124,7 @@ body {
 /* 일간 10색 (docs/09 §2) */
 [data-ilgan="甲"] { --c: #7fb08a; }
 [data-ilgan="乙"] { --c: #a8c97f; }
-[data-ilgan="丙"] { --c: #e5b87a; }
+[data-ilgan="丙"] { --c: #e9bd83; }
 [data-ilgan="丁"] { --c: #d98ba5; }
 [data-ilgan="戊"] { --c: #c9a87f; }
 [data-ilgan="己"] { --c: #d4c29a; }

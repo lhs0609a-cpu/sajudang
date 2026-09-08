@@ -31,8 +31,22 @@ interface TossPaymentRequest {
   failUrl: string;
   card?: { flowMode?: string; useEscrow?: boolean; useCardPoint?: boolean };
 }
+/**
+ * 카드 등록(자동결제).
+ *
+ * ★ 결제창과 **다른 물건**입니다. 여기서는 돈이 안 빠져나갑니다 —
+ *   카드를 걸어 두기만 하고, 실제 청구는 서버가 빌링키로 합니다.
+ *   그래서 amount 도 orderId 도 안 넘깁니다.
+ */
+interface TossBillingAuthRequest {
+  method: "CARD";
+  successUrl: string;
+  failUrl: string;
+  customerKey: string;
+}
 interface TossPayment {
   requestPayment(req: TossPaymentRequest): Promise<void>;
+  requestBillingAuth(req: TossBillingAuthRequest): Promise<void>;
 }
 interface TossSdk {
   payment(opts: { customerKey: string }): TossPayment;
@@ -84,6 +98,34 @@ export function returnUrls(orderId: string) {
     successUrl: `${base}?step=d2&toss=ok&order=${encodeURIComponent(orderId)}`,
     failUrl: `${base}?step=d2&toss=fail&order=${encodeURIComponent(orderId)}`,
   };
+}
+
+/**
+ * 카드 등록 창을 띄웁니다 — 「한 달 듣기」.
+ *
+ * ★ 여기서 돈이 안 빠져나갑니다. 카드를 거는 것뿐입니다.
+ *   토스가 successUrl 로 `customerKey` 와 `authKey` 를 실어 돌려보내고,
+ *   그 authKey 를 서버가 빌링키로 바꾼 **다음에** 첫 달을 긁습니다.
+ *   그러니 이 함수가 끝났다고 구독이 선 것이 아닙니다.
+ *
+ * ★ customerKey 는 서버가 준 값을 그대로 씁니다.
+ *   화면이 지어내면 서버의 검사(`_customer_key`)에 걸립니다 — 남의
+ *   열쇠로 남의 카드를 긁는 길을 막는 자리라, 그 검사를 무르지 마세요.
+ */
+export async function registerCard(opts: {
+  clientKey: string;
+  customerKey: string;
+}): Promise<void> {
+  const TossPayments = await loadToss();
+  const base = window.location.origin + "/pay";
+  await TossPayments(opts.clientKey)
+    .payment({ customerKey: opts.customerKey })
+    .requestBillingAuth({
+      method: "CARD",
+      customerKey: opts.customerKey,
+      successUrl: `${base}?step=d2&sub=ok`,
+      failUrl: `${base}?step=d2&sub=fail`,
+    });
 }
 
 export async function openCheckout(opts: {

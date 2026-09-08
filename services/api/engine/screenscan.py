@@ -523,7 +523,7 @@ def _top_copy(src: str) -> dict:
 #       그 밖의 축   그대로 셉니다. 편 사람은 읽으니까요.
 #
 #   안 가르면 접어도 점수가 그대로라, 접을 이유가 없어집니다.
-FOLD = re.compile(r"<Fold\b.*?</Fold>", re.S)
+FOLD = re.compile(r"<Fold\b.*?</Fold>|<details\b(?![^>]*\bopen\b).*?</details>", re.S)
 
 # 굵은 글씨 — 「여기부터 보시오」 라고 정해 주는 자리.
 #

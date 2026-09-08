@@ -110,6 +110,7 @@ class ReportRequest(BaseModel):
 
 
 class ReportResponse(BaseModel):
+    practice: Optional[dict] = None
     report_id: str
     chart_id: str
     lens: dict
