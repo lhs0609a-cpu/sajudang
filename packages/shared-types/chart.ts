@@ -293,6 +293,7 @@ export interface WantRow {
 }
 
 export interface ReportResponse {
+  editorial?: { id:string;version:number;title:string;perspective:string;observation:string;question:string;scene:string;action:string;boundary:string;source_kind:string } | null;
   practice?: { id: string; version: number; source_kind: string; source: string; title: string; scene: string; action: string } | null;
   report_id: string;
   chart_id: string;

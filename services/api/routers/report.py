@@ -146,7 +146,36 @@ def post_report(req: ReportRequest) -> ReportResponse:
         voice=(lens_mod.view(req.lens_id) or {}).get("voice"),
         you=lens_mod.you_of(req.lens_id, req.name, getattr(f, "sex", None)))
 
+    if tier != "free" and req.session_id:
+        _mark_opened(req.session_id, tier, req.lens_id)
     return ReportResponse(**data)
+
+
+def _mark_opened(session_id: str, tier: str, lens_id: str | None = None) -> None:
+    """Recheck entitlement under the refund lock before releasing paid content."""
+    def qualifies(order):
+        if not order or order.get("status") != "paid" or _expired(order):
+            return False
+        purchased = order.get("tier")
+        return purchased == "all" or (purchased == tier and
+            (tier != "one" or order.get("lens_id") == lens_id))
+
+    for oid in store.get_json("orders:" + session_id) or []:
+        order = store.get_json("order:" + oid)
+        if not qualifies(order):
+            continue
+        try:
+            with store.payment_lease(order["session_id"]):
+                current = store.get_json("order:" + oid)
+                if not qualifies(current):
+                    continue
+                if not current.get("opened_at"):
+                    current["opened_at"] = datetime.now(timezone.utc).isoformat()
+                    store.set_json("order:" + oid, current)
+                return
+        except store.LeaseBusy:
+            raise HTTPException(status_code=409, detail="결제 내역을 확인 중입니다. 잠시 후 다시 열어 주세요.")
+    raise HTTPException(status_code=402, detail="이 리포트의 구매 내역을 확인해 주세요.")
 
 
 @router.get("/report/choices")
@@ -202,7 +231,8 @@ def post_omnibus(req: OmnibusRequest) -> dict:
     여러 사람을 몰아 듣지 말라**는 것이고, 이건 값을 치르고 한 번에 받아
     두고 천천히 읽는 물건입니다.
     """
-    if not _paid_tier(req.session_id):
+    tier = _paid_tier(req.session_id)
+    if not tier:
         raise HTTPException(
             status_code=402,
             detail="스무 사람을 다 보려면 '여덟 글자 전부' 부터요.")
@@ -210,9 +240,11 @@ def post_omnibus(req: OmnibusRequest) -> dict:
     raw = load_features(req.chart_id)
     f = Features(**raw)
     try:
-        return build_omnibus(f, req.chart_id, req.concern,
+        data = build_omnibus(f, req.chart_id, req.concern,
                              req.axis4, req.display_name, req.extras)
     except extras_mod.ExtraInputError as e:
         raise HTTPException(status_code=422, detail=str(e))
     except (ValueError, KeyError) as e:
         raise HTTPException(status_code=422, detail=str(e))
+    _mark_opened(req.session_id, tier)
+    return data

@@ -27,6 +27,7 @@ import Shell from "@/components/Shell";
 import CompanionCat from "@/components/CompanionCat";
 import Fold from "@/components/Fold";
 import { track, useScreen } from "@/lib/track";
+import { exposeEntry } from "@/lib/experiment";
 import { birthMessageFrom, birthProblem } from "@/lib/birth";
 import { needsGuardian } from "@/lib/biz";
 import Scene from "@/components/scene/Scene";
@@ -198,6 +199,7 @@ function progressAt(step: Step): number | null {
 }
 
 function EntryInner() {
+  const [entryArm, setEntryArm] = useState<number | null>(null);
   const router = useRouter();
   const params = useSearchParams();
   const s = useSession();
@@ -343,6 +345,7 @@ function EntryInner() {
 
   // 화면 이름이 곧 step 입니다. 어디서 나가는지 이걸로 셉니다.
   useScreen(step);
+  useEffect(() => { if (step === "a1") setEntryArm(exposeEntry()); }, [step]);
 
   const season = s.seasonOverride ?? seasonOf();
   const lens = LENS_BY_ID[s.cur] ?? LENS_BY_ID.pungun;
@@ -463,7 +466,7 @@ function EntryInner() {
             <p className="conversion-lead">태어난 정보와 지금의 고민을 바탕으로,<br />반복되는 패턴과 오늘 해볼 행동을 읽어보세요.</p>
             <CompanionCat state="welcome" />
             <button className="btn mt" onClick={() => go("a5")}>내 고민으로 무료 해석 보기</button>
-            <p className="conversion-note">첫 해석 무료 · 태어난 시간은 몰라도 돼요</p>
+            <p className="conversion-note">{entryArm === 1 ? "무료 해석과 오늘 해볼 행동 하나 · 시간은 몰라도 돼요" : "첫 해석 무료 · 태어난 시간은 몰라도 돼요"}</p>
             <p className="conversion-note">전통 사주를 바탕으로 한 자기 이해 콘텐츠예요.</p>
           </div>
         </div>

@@ -38,6 +38,7 @@ logging.basicConfig(
 # 엔진 판은 version.py 한 자리에 삽니다 — 라우터도 봐야 하는데
 # 여기 두면 돌아가는 임포트가 생깁니다.
 from version import ENGINE_VER  # noqa: E402,F401
+from routers import jobs
 
 # 브라우저가 이 API 를 부를 수 있는 출처. 쉼표로 여러 개.
 #   CORS_ORIGINS=https://sajudang-three.vercel.app,http://localhost:3000
@@ -87,6 +88,7 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(title="성신당 API", version=ENGINE_VER, lifespan=lifespan)
+app.include_router(jobs.router)
 
 app.add_middleware(
     CORSMiddleware,

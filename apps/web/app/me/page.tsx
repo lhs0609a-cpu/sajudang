@@ -7,6 +7,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
+import RefundHistory from '@/components/RefundHistory';
 import Scene from "@/components/scene/Scene";
 import ActOut from "@/components/ActOut";
 import { Narration, Say } from "@/components/Narration";
@@ -83,10 +84,9 @@ function MeInner() {
           그대가 여기 선 건 남의 말을 보러 온 것이 아니오. 제 말을
           남길지 말지 재러 온 것이오.
           <br />
-          <b>여태 어디서든 후기 한 줄 안 남기고 나오셨소.</b>
-          {" "}쓸 말이 없어서가 아니라, 적어 놓고 나면 그게 제 말로
-          남는 게 껄끄러워 참은 것이오. 그 마음이 맞소 — 그러니
-          안 남기셔도 되오.
+          <b>도움이 된 말과 맞지 않았던 말을 함께 남겨도 좋소.</b>
+          {" "}별점을 높게 줄 필요도, 억지로 쓸 필요도 없소.
+          직접 읽으며 느낀 것만 적어 주시오.
           <br />
           벽에 붙는 몫은 20명이고, 붙는 것은 그중 그대가 끝까지
           들은 사람뿐이오. 1명만 들었어도 1명이 붙소.
@@ -143,6 +143,7 @@ function MeInner() {
 
   return (
     <Shell screen="f2" title="인장첩">
+      <RefundHistory sessionId={s.sessionId} />
       <Scene id="sealbook" />
       <Narration lines={["첩을 폈다.", "찍힌 인장은 " + s.seals.length + "개."]} />
       {/*

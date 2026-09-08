@@ -106,11 +106,11 @@ def test_refund_blocked_after_opening(client):
         "session_id": "p5", "chart_id": "c", "lens_id": "pungun",
         "tier": "one"}).json()
     o = store.get_json("order:" + order["order_id"])
-    o.update(status="paid", payment_key="pk_test")
+    o.update(status="paid", payment_key="pk_test", opened_at="2026-09-08T00:00:00+00:00")
     store.set_json("order:" + order["order_id"], o)
 
     r = client.post("/v1/pay/refund", json={
-        "order_id": order["order_id"], "reason": "그냥", "opened": True})
+        "session_id":"p5", "order_id": order["order_id"], "reason": "그냥", "opened": False})
     assert r.status_code == 409
     assert "청약철회" in r.json()["detail"]
 
@@ -119,6 +119,36 @@ def test_unknown_order_is_404(client):
     r = client.post("/v1/pay/confirm", json={
         "session_id": "x", "order_id": "nope", "payment_key": "k"})
     assert r.status_code == 404
+
+
+def test_refund_rejects_non_owner_without_provider_call(client,monkeypatch):
+    from routers import pay
+    oid='refund-owner-test'
+    store.set_json('order:'+oid,{'session_id':'owner','status':'paid','payment_key':'pk','amount':9900})
+    monkeypatch.setattr(pay.payments,'cancel',lambda *a: pytest.fail('must not call provider'))
+    r=client.post('/v1/pay/refund',json={'session_id':'stranger','order_id':oid,'reason':'취소 요청'})
+    assert r.status_code==403
+
+
+def test_calculation_error_flag_creates_review_not_automatic_refund(client,monkeypatch):
+    from routers import pay
+    oid='refund-review-test'
+    store.set_json('order:'+oid,{'session_id':'owner','status':'paid','opened_at':'2026-09-08','payment_key':'pk','amount':9900})
+    monkeypatch.setattr(pay.payments,'cancel',lambda *a: pytest.fail('must wait for verified review'))
+    r=client.post('/v1/pay/refund',json={'session_id':'owner','order_id':oid,'reason':'계산 비교 요청','calc_error':True})
+    assert r.status_code==200 and r.json()['status']=='review_requested'
+    assert store.get_json('order:'+oid)['status']=='paid'
+
+
+def test_refund_retry_is_idempotent(client,monkeypatch):
+    from routers import pay
+    oid='refund-repeat-test';calls=[]
+    store.set_json('order:'+oid,{'session_id':'owner','status':'paid','payment_key':'pk','amount':9900})
+    monkeypatch.setattr(pay.payments,'cancel',lambda *a:calls.append(a))
+    req={'session_id':'owner','order_id':oid,'reason':'열람 전 취소'}
+    assert client.post('/v1/pay/refund',json=req).json()['status']=='refunded'
+    assert client.post('/v1/pay/refund',json=req).json()['already']
+    assert len(calls)==1
 
 
 def test_tier_unlocks_match_report_cuts():

@@ -203,12 +203,16 @@ def register(req: RegisterRequest) -> dict:
     try:
         with store.payment_lease(req.session_id) as check:
             existing = _load(req.session_id)
-            if active(existing):
+            if active(existing) and not store.get_json(_registration_key(req)):
                 return {"ok": True, "already": True, "order_id": (existing.get("orders") or [""])[-1],
                         "sub": _view(existing), "say": "이미 이용 중인 구독이에요."}
             return _register_locked(req, check)
     except store.LeaseBusy as e:
         raise HTTPException(status_code=409, detail=str(e))
+
+
+def _registration_key(req: RegisterRequest) -> str:
+    return "registration:" + hashlib.sha256((req.session_id + ":" + req.auth_key).encode()).hexdigest()
 
 
 def _register_locked(req: RegisterRequest, check) -> dict:
@@ -225,34 +229,38 @@ def _register_locked(req: RegisterRequest, check) -> dict:
     limit = BREAKS()["per_day_purchase"]
     daykey = store.k_purchase_day(_user_key(req.session_id),
                                   _now().date().isoformat())
-    if store.get_int(daykey) >= limit:
+    if store.get_int(daykey) >= limit and not (store.get_json(_registration_key(req)) or {}).get("pg_tid"):
         raise HTTPException(status_code=429,
                             detail="하루에 %d건까지만 받소." % limit)
 
-    try:
-        issued = payments.issue_billing_key(req.auth_key, req.customer_key)
-    except payments.PaymentsDisabled as e:
-        raise HTTPException(status_code=503, detail=str(e))
-    except payments.PaymentError as e:
-        raise HTTPException(status_code=402, detail=str(e))
-
-    billing_key = issued["billingKey"]
-    card = issued.get("card") or {}
+    journal_key = _registration_key(req)
+    journal = store.get_json(journal_key)
+    if not journal:
+        try:
+            issued = payments.issue_billing_key(req.auth_key, req.customer_key)
+        except payments.PaymentError as e:
+            raise HTTPException(status_code=402, detail=str(e))
+        journal = {"billing_key":payments.seal(issued["billingKey"]),
+                   "card":issued.get("card") or {},
+                   "order_id":"sjd_sub_" + uuid.uuid4().hex[:24],
+                   "started_at":_now().isoformat()}
+        check(); store.set_json(journal_key,journal,ttl=14*DAY)
+    billing_key = payments.unseal(journal["billing_key"])
+    card = journal["card"]
     amount = payments.TIER_PRICE["sub"]
-    order_id = "sjd_sub_" + uuid.uuid4().hex[:16]
+    order_id = journal["order_id"]
 
     # ★ 카드를 등록했다고 값이 치러진 것이 아닙니다. 여기서 긁습니다.
     #   이 자리가 빠지면 카드만 잡아 두고 자격을 여는 꼴이 됩니다.
-    try:
-        result = payments.charge_billing(
-            billing_key, req.customer_key, amount, order_id,
-            payments.TIER_NAME["sub"])
-    except payments.PaymentError as e:
-        # 열쇠는 발급됐지만 첫 달을 못 긁었습니다. 자격을 열지 않고,
-        # 열쇠도 저장하지 않습니다 — 안 긁힌 카드를 들고 있을 이유가 없습니다.
-        raise HTTPException(status_code=402, detail=str(e))
-
-    now = _now()
+    if not journal.get("pg_tid"):
+        try:
+            result = payments.charge_billing(billing_key, req.customer_key, amount,
+                                            order_id, payments.TIER_NAME["sub"])
+        except payments.PaymentError as e:
+            raise HTTPException(status_code=402, detail=str(e))
+        journal["pg_tid"] = result.pg_tid
+        check(); store.set_json(journal_key,journal,ttl=14*DAY)
+    now = _at(journal["started_at"])
     ends = now + timedelta(days=PERIOD_DAYS)
     sub = {
         "user_key": _user_key(req.session_id),
@@ -277,12 +285,13 @@ def _register_locked(req: RegisterRequest, check) -> dict:
     check()
     sub["analytics_sid"] = req.analytics_sid
     _save(sub)
-    _write_order(sub, order_id, result.pg_tid, now, ends, first=True)
+    _write_order(sub, order_id, journal["pg_tid"], now, ends, first=True)
     store.increment_once("purchase-counted:" + order_id, daykey, DAY)
     if req.analytics_sid:
         import analytics
         analytics.record([{ "name": "payment_approved", "screen": "d3", "sid": req.analytics_sid, "n": amount }], server=True)
 
+    store.delete(journal_key)
     return {"ok": True, "order_id": order_id,
             "sub": _view(sub),
             "say": "카드를 걸어 두었소. 오늘부터 서른 날, 그리고 그 뒤로도."}
@@ -306,6 +315,7 @@ def _write_order(sub: dict, order_id: str, pg_tid: Optional[str],
         "unlocked": payments.unlocks_for("sub"),
         # 몇 번째 달인가. 주인 화면이 첫 달과 갱신을 갈라 봅니다.
         "renewal": not first,
+        "analytics_sid": sub.get("analytics_sid"),
     })
     okey = "orders:" + sub["session_id"]
     orders = store.get_json(okey) or []
@@ -331,6 +341,14 @@ class SessionRequest(BaseModel):
 
 @router.post("/cancel")
 def cancel(req: SessionRequest) -> dict:
+    try:
+        with store.payment_lease(req.session_id):
+            return _cancel_locked(req)
+    except store.LeaseBusy as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
+
+def _cancel_locked(req: SessionRequest) -> dict:
     sub = _load(req.session_id)
     if not sub or sub.get("status") == "dead":
         raise HTTPException(status_code=404, detail="걸어 두신 카드가 없소.")
@@ -353,6 +371,14 @@ def cancel(req: SessionRequest) -> dict:
 
 @router.post("/resume")
 def resume(req: SessionRequest) -> dict:
+    try:
+        with store.payment_lease(req.session_id):
+            return _resume_locked(req)
+    except store.LeaseBusy as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
+
+def _resume_locked(req: SessionRequest) -> dict:
     """그만두기를 무르기. **기간이 살아 있을 때만**입니다 —
     끝난 뒤에는 카드를 다시 걸어야 합니다(열쇠를 버렸으므로)."""
     sub = _load(req.session_id)
@@ -429,6 +455,9 @@ def restore(req: RestoreRequest) -> dict:
 def due(sub: dict, now: Optional[datetime] = None) -> bool:
     """오늘 긁을 때가 되었는가."""
     now = now or _now()
+    last_try = _at(sub.get("last_try"))
+    if sub.get("fails") and last_try and last_try.date() == now.date():
+        return False
     if sub.get("status") == "dead" or sub.get("ending"):
         return False
     if sub.get("fails", 0) >= MAX_FAILS:
@@ -438,46 +467,57 @@ def due(sub: dict, now: Optional[datetime] = None) -> bool:
 
 
 def renew(sub: dict, now: Optional[datetime] = None) -> dict:
-    """
-    한 건 긁는다. 돌려주는 것: {"ok": bool, "reason": str|None}
-
-    ★ 실패해도 바로 안 끊습니다. 사흘은 열어 두고 다시 겁니다
-      (GRACE_DAYS). 네 번 실패하면 그만 긁고 **끊습니다** — 계속
-      긁으면 카드사가 우리를 막습니다.
-    """
     now = now or _now()
     try:
-        key = payments.unseal(sub["billing_key"])
-    except payments.PaymentError as e:
-        sub.update(status="dead", last_error=str(e))
-        _save(sub)
-        return {"ok": False, "reason": str(e)}
+        with store.payment_lease(sub["session_id"]) as check:
+            latest = store.get_json("sub:" + sub["user_key"])
+            if latest:
+                sub.update(latest)
+            if not due(sub, now):
+                return {"ok": True, "already": True, "period_end": sub.get("period_end")}
+            return _renew_locked(sub, now, check)
+    except store.LeaseBusy:
+        return {"ok": False, "reason": "다른 요청에서 결제를 확인 중입니다.", "retry": True}
 
-    order_id = "sjd_sub_" + uuid.uuid4().hex[:16]
-    try:
-        result = payments.charge_billing(
-            key, sub["customer_key"], sub["amount"], order_id,
-            payments.TIER_NAME["sub"])
-    except payments.PaymentError as e:
-        fails = sub.get("fails", 0) + 1
-        sub.update(fails=fails, last_error=str(e),
-                   last_try=now.isoformat())
-        if fails >= MAX_FAILS:
-            sub.update(status="dead", billing_key="")
-        _save(sub)
-        return {"ok": False, "reason": str(e), "fails": fails}
 
-    # ★ 다음 기간은 **끝난 날부터** 셉니다. 오늘부터 세면 갱신이
-    #   늦어질 때마다 손님이 하루씩 손해 봅니다.
-    base = _at(sub.get("period_end")) or now
-    ends = max(base, now - timedelta(days=GRACE_DAYS)) \
-        + timedelta(days=PERIOD_DAYS)
-    sub.update(period_end=ends.isoformat(), months=sub.get("months", 1) + 1,
-               fails=0, last_error=None)
-    sub.setdefault("orders", []).append(order_id)
+def _renew_locked(sub: dict, now: datetime, check) -> dict:
+    period = sub["period_end"]
+    token = hashlib.sha256((sub["customer_key"] + ":" + period).encode()).hexdigest()[:32]
+    order_id = "sjd_renew_" + token
+    journal_key = "renew-journal:" + order_id
+    journal = store.get_json(journal_key)
+    if not journal:
+        base = _at(period) or now
+        ends = max(base, now - timedelta(days=GRACE_DAYS)) + timedelta(days=PERIOD_DAYS)
+        journal = {"state":"pending", "created_at":now.isoformat(),
+                   "ends":ends.isoformat(), "months":sub.get("months",1)+1}
+        store.set_json(journal_key, journal)
+    if journal["state"] != "paid":
+        # Provider idempotency expires after 15 days; never replay an unresolved old charge.
+        if now - _at(journal["created_at"]) > timedelta(days=14):
+            return {"ok":False,"reason":"오래된 결제 결과를 운영자가 확인해야 합니다."}
+        try:
+            result = payments.charge_billing(payments.unseal(sub["billing_key"]),
+                sub["customer_key"], sub["amount"], order_id, payments.TIER_NAME["sub"])
+        except payments.BillingUncertain as e:
+            return {"ok":False,"reason":str(e),"retry":True}
+        except payments.PaymentError as e:
+            sub.update(fails=sub.get("fails",0)+1,last_error=str(e),last_try=now.isoformat())
+            if sub["fails"] >= MAX_FAILS:
+                sub.update(status="dead",billing_key="")
+            check(); _save(sub)
+            return {"ok":False,"reason":str(e),"fails":sub["fails"]}
+        check()
+        journal.update(state="paid",pg_tid=result.pg_tid,paid_at=now.isoformat())
+        store.set_json(journal_key,journal)
+    ends = _at(journal["ends"])
+    check()
+    _write_order(sub,order_id,journal["pg_tid"],_at(journal["paid_at"]),ends,first=False)
+    sub.update(period_end=ends.isoformat(),months=journal["months"],fails=0,last_error=None)
+    if order_id not in sub.setdefault("orders",[]):
+        sub["orders"].append(order_id)
     _save(sub)
-    _write_order(sub, order_id, result.pg_tid, now, ends, first=False)
-    return {"ok": True, "order_id": order_id, "period_end": ends.isoformat()}
+    return {"ok":True,"order_id":order_id,"period_end":ends.isoformat()}
 
 
 def retire(sub: dict) -> None:

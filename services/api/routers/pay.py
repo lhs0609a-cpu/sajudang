@@ -89,6 +89,7 @@ class ConfirmRequest(BaseModel):
 
 
 class RefundRequest(BaseModel):
+    session_id: Optional[str] = None
     order_id: str
     reason: str = Field(min_length=2, max_length=200)
     opened: bool = False          # 열람 후면 청약철회 제한
@@ -507,14 +508,37 @@ def restore(req: RestoreRequest) -> dict:
 
 @router.post("/refund")
 def refund(req: RefundRequest) -> dict:
+    initial = store.get_json("order:" + req.order_id)
+    if not initial:
+        raise HTTPException(status_code=404, detail="모르는 주문이오.")
+    if not req.session_id or (initial.get("session_id") != req.session_id and
+            req.order_id not in (store.get_json("orders:" + req.session_id) or [])):
+        raise HTTPException(status_code=403, detail="이 주문의 구매자만 환불을 요청할 수 있습니다.")
+    try:
+        with store.payment_lease(initial["session_id"]) as check:
+            return _refund_locked(req, check)
+    except store.LeaseBusy as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
+
+def _refund_locked(req: RefundRequest, check) -> dict:
     order = store.get_json("order:" + req.order_id)
     if not order:
         raise HTTPException(status_code=404, detail="모르는 주문이오.")
+    if order["status"] == "refunded":
+        _stop_refunded_subscription(order, req.order_id)
+        return {"ok": True, "already": True, "status": "refunded"}
     if order["status"] != "paid":
         raise HTTPException(status_code=409, detail="결제된 주문이 아니오.")
 
     # docs/11 — 열람 후에는 청약철회 제한. 다만 계산 오류는 언제나 전액 환불.
-    if req.opened and not req.calc_error:
+    if req.calc_error and not order.get("calc_error_verified"):
+        store.set_json("refund-review:" + req.order_id, {
+            "order_id": req.order_id, "reason": req.reason,
+            "session_id": req.session_id, "status": "pending",
+            "requested_at": datetime.now(timezone.utc).isoformat()})
+        return {"ok": True, "status": "review_requested", "say": "계산 오류 확인 요청을 접수했습니다. 확인 후 처리합니다."}
+    if order.get("opened_at") and not order.get("calc_error_verified"):
         raise HTTPException(
             status_code=409,
             detail=("이미 열람하신 리포트는 청약철회가 제한됩니다. "
@@ -527,11 +551,37 @@ def refund(req: RefundRequest) -> dict:
     except payments.PaymentError as e:
         raise HTTPException(status_code=402, detail=str(e))
 
-    order.update(status="refunded", unlocked=[])
+    check()
+    order.update(status="refunded", unlocked=[], refunded_at=datetime.now(timezone.utc).isoformat())
     # 환불된 주문도 지우지 않습니다 — 무엇을 돌려줬는지 남아야 합니다.
     store.set_json("order:" + req.order_id, order)
+    _stop_refunded_subscription(order, req.order_id)
     return {"ok": True, "status": "refunded",
             "reissue": bool(req.calc_error)}
+
+
+def _stop_refunded_subscription(order: dict, order_id: str) -> None:
+    """A refunded current period must not keep charging the registered card."""
+    if order.get("tier") != "sub":
+        return
+    from routers import subscription
+    sub = subscription._load(order["session_id"])
+    if sub and (sub.get("orders") or [None])[-1] == order_id:
+        sub["ending"] = True
+        subscription.retire(sub)
+
+
+@router.get("/history")
+def history(session_id: str) -> dict:
+    rows = []
+    for oid in store.get_json("orders:" + session_id) or []:
+        order = store.get_json("order:" + oid)
+        if not order: continue
+        review = store.get_json("refund-review:" + oid) or {}
+        rows.append({"order_id":oid, **{k:order.get(k) for k in
+            ("amount","tier","lens_id","status","paid_at","opened_at","refunded_at")},
+            "review_status": review.get("status"), "review_note": review.get("note")})
+    return {"orders":rows}
 
 
 @router.get("/order/{order_id}")

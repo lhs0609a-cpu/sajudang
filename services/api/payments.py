@@ -466,7 +466,10 @@ def subscriptions_problem() -> Optional[str]:
     if DISABLED_REASON:
         return DISABLED_REASON
     if LIVE:
-        return sealing_problem()
+        if os.getenv("TOSS_BILLING_APPROVED", "").lower() != "true":
+            return "정기결제는 아직 이용할 수 없습니다."
+        if sealing_problem():
+            return "정기결제 설정을 확인하고 있습니다."
     return None
 
 
@@ -526,28 +529,34 @@ def issue_billing_key(auth_key: str, customer_key: str) -> dict:
     return data
 
 
+class BillingUncertain(PaymentError):
+    """Provider outcome is unknown: retain the order and do not count a decline."""
+
+
 def charge_billing(billing_key: str, customer_key: str, amount: int,
                    order_id: str, order_name: str) -> PaymentResult:
-    """
-    등록된 카드로 청구. 손님은 이 자리에 없습니다.
-
-    ★ 금액은 **서버가 정한 값**입니다. 어디서도 받아오지 않습니다.
-    """
-    res = httpx.post(
-        "%s/%s" % (TOSS_BILLING, billing_key),
-        headers=_auth_header(),
-        json={"customerKey": customer_key, "amount": amount,
-              "orderId": order_id, "orderName": order_name},
-        timeout=20.0)
-    data = res.json() if res.content else {}
-    if res.status_code != 200:
-        log.warning("자동결제 실패 %s %s %s", order_id, res.status_code,
-                    data.get("code"))
-        raise PaymentError(data.get("message") or "자동결제에 실패했습니다.")
-    return PaymentResult(
-        ok=True, order_id=order_id, amount=amount,
-        pg_tid=data.get("paymentKey"), status=data.get("status", "DONE"),
-        raw=data)
+    headers = {**_auth_header(), "Idempotency-Key": "billing-" + order_id}
+    try:
+        res = httpx.post("%s/%s" % (TOSS_BILLING, billing_key), headers=headers,
+            json={"customerKey": customer_key, "amount": amount,
+                  "orderId": order_id, "orderName": order_name}, timeout=20.0)
+        data = res.json() if res.content else {}
+        if res.status_code == 200:
+            if not data.get("paymentKey"):
+                raise BillingUncertain("결제 결과를 확인 중입니다.")
+            return _verified_result(data, data["paymentKey"], order_id, amount)
+        if res.status_code < 500 and data.get("code") not in (
+                "ALREADY_PROCESSED_PAYMENT", "IDEMPOTENT_REQUEST_PROCESSING"):
+            raise PaymentError(data.get("message") or "자동결제가 승인되지 않았습니다.")
+    except (httpx.RequestError, ValueError, BillingUncertain):
+        pass
+    try:
+        data = lookup_by_order(order_id)
+        if not data.get("paymentKey"):
+            raise PaymentError("승인 키가 없습니다.")
+        return _verified_result(data, data["paymentKey"], order_id, amount)
+    except (httpx.RequestError, ValueError, PaymentError) as exc:
+        raise BillingUncertain("자동결제 결과를 확인 중입니다. 같은 주문으로 다시 확인합니다.") from exc
 
 
 # 토스가 알려 주는 결제 상태 (docs.tosspayments.com/reference)
@@ -574,7 +583,7 @@ DEAD_STATES = {"CANCELED", "ABORTED", "EXPIRED"}
 #   `tests/test_admin_sales.py` 가 둘이 다시 안 섞이게 지킵니다.
 ORDER_PENDING = {"pending"}      # 주문만 만들고 아직 안 치른 것
 ORDER_PAID = {"paid"}            # 치른 것
-ORDER_DEAD = {"canceled"}        # 물린 것 (환불 · 취소)
+ORDER_DEAD = {"canceled", "refunded"}  # 취소와 환불을 모두 순매출에서 제외
 
 
 def cancel(payment_key: str, reason: str,
@@ -583,13 +592,31 @@ def cancel(payment_key: str, reason: str,
     body: dict = {"cancelReason": reason}
     if amount is not None:
         body["cancelAmount"] = amount
-    res = httpx.post(
-        "%s/%s/cancel" % (TOSS_BASE, payment_key),
-        headers=_auth_header(), json=body, timeout=15.0)
-    data = res.json()
+    import hashlib
+    request_key = hashlib.sha256((payment_key + ":" + str(amount or "full")).encode()).hexdigest()
+    try:
+        res = httpx.post(
+            "%s/%s/cancel" % (TOSS_BASE, payment_key),
+            headers={**_auth_header(), "Idempotency-Key":"refund-"+request_key},
+            json=body, timeout=15.0)
+        data = res.json()
+    except (httpx.RequestError, ValueError) as e:
+        # The provider may have canceled before the response was lost.
+        try:
+            lookup = httpx.get("%s/%s" % (TOSS_BASE, payment_key),headers=_auth_header(),timeout=10.0)
+            data = lookup.json()
+            if (lookup.status_code == 200 and amount is None and
+                    data.get("paymentKey") == payment_key and data.get("status") == "CANCELED"):
+                return PaymentResult(ok=True,order_id=data.get("orderId",""),amount=data.get("totalAmount",0),
+                    pg_tid=payment_key,status="CANCELED",raw=data)
+        except (httpx.RequestError, ValueError):
+            pass
+        raise PaymentError("환불 결과를 확인 중입니다. 같은 요청으로 다시 확인해 주세요.") from e
     if res.status_code != 200:
         log.warning("toss cancel 실패 %s %s", res.status_code, data)
         raise PaymentError(data.get("message", "환불에 실패했습니다."))
+    if amount is None and data.get("status") != "CANCELED":
+        raise PaymentError("전액 환불 상태를 확인하지 못했습니다.")
     return PaymentResult(
         ok=True, order_id=data.get("orderId", ""),
         amount=amount or data.get("totalAmount", 0),

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import WebVitals from '@/components/WebVitals';
 
 export const metadata: Metadata = {
   title: "성신당 星辰堂",
@@ -63,7 +64,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }
         />
       </head>
-      <body spellCheck={false}>{children}</body>
+      <body spellCheck={false}>{children}<WebVitals /></body>
     </html>
   );
 }

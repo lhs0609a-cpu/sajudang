@@ -25,6 +25,8 @@ const FLUSH_MS = 4000;
 const MAX_QUEUE = 40;
 
 export type EventName =
+  | "experiment_exposed"
+  | "web_lcp" | "web_inp" | "web_cls"
   | "flow_started" | "practice_saved" | "chart_completed"
   | "screen" | "hook_shown" | "hook_answer" | "free_shown" | "free_beat"
   | "tier_view" | "tier_pick" | "pay_start" | "pay_done" | "pay_fail"

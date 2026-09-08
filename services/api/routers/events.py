@@ -73,3 +73,13 @@ def get_funnel(x_funnel_key: str | None = Header(default=None)) -> dict:
     """
     _guard(x_funnel_key)
     return analytics.funnel()
+
+
+@router.get("/experiments")
+def get_experiments(x_funnel_key: str | None = Header(default=None),
+                    x_admin_token: str | None = Header(default=None)) -> dict:
+    from keyguard import require_admin as _admin_guard
+    _admin_guard(x_funnel_key, x_admin_token)
+    import experiments
+    import store
+    return experiments.summary(analytics._rows(), [o for _,o in store.scan("order:") if o])

@@ -71,6 +71,64 @@ def test_the_card_key_is_sealed_before_it_is_stored(env):
     assert payments.unseal(blob) == "bk_live_verysecret"
 
 
+def test_stale_scheduler_copy_cannot_charge_twice(env, monkeypatch):
+    payments, store, mod = env
+    s=_sub(mod,payments,period_end=(datetime.now(timezone.utc)-timedelta(hours=1)).isoformat())
+    stale=dict(s); calls=[]
+    def charge(*args):
+        calls.append(args[3])
+        return payments.PaymentResult(ok=True,order_id=args[3],amount=args[2],pg_tid='pk',status='DONE',raw={})
+    monkeypatch.setattr(payments,'charge_billing',charge)
+    mod._save(s)
+    assert mod.renew(s)['ok']
+    assert mod.renew(stale)['already']
+    assert len(calls)==1
+
+
+def test_renewal_recovers_after_local_write_failure(env,monkeypatch):
+    payments, store, mod=env
+    s=_sub(mod,payments,period_end=(datetime.now(timezone.utc)-timedelta(hours=1)).isoformat())
+    mod._save(s); calls=[]
+    def charge(*args):
+        calls.append(args[3])
+        return payments.PaymentResult(ok=True,order_id=args[3],amount=args[2],pg_tid='pk',status='DONE',raw={})
+    monkeypatch.setattr(payments,'charge_billing',charge)
+    real=mod._write_order
+    monkeypatch.setattr(mod,'_write_order',lambda *a,**k: (_ for _ in ()).throw(RuntimeError('disk')))
+    with pytest.raises(RuntimeError): mod.renew(s)
+    monkeypatch.setattr(mod,'_write_order',real)
+    assert mod.renew(s)['ok']
+    assert len(calls)==1
+
+
+def test_uncertain_billing_does_not_consume_decline_limit(env,monkeypatch):
+    payments, store, mod=env
+    s=_sub(mod,payments,period_end=(datetime.now(timezone.utc)-timedelta(hours=1)).isoformat())
+    monkeypatch.setattr(payments,'charge_billing',lambda *a: (_ for _ in ()).throw(payments.BillingUncertain('timeout')))
+    result=mod.renew(s)
+    assert result['retry'] and s['fails']==0
+
+
+def test_registration_recovers_without_second_charge(env,monkeypatch):
+    payments,store,mod=env
+    sid='registration-recovery-0001'
+    monkeypatch.setattr(payments,'subscriptions_problem',lambda:None)
+    monkeypatch.setattr(payments,'issue_billing_key',lambda *a:{'billingKey':'bk','card':{}})
+    charges=[]
+    def charge(*a):
+        charges.append(a[3])
+        return payments.PaymentResult(ok=True,order_id=a[3],amount=a[2],pg_tid='pk',status='DONE',raw={})
+    monkeypatch.setattr(payments,'charge_billing',charge)
+    real=mod._write_order
+    monkeypatch.setattr(mod,'_write_order',lambda *a,**k:(_ for _ in ()).throw(RuntimeError('disk')))
+    req=mod.RegisterRequest(session_id=sid,auth_key='ak',customer_key=mod._customer_key(sid))
+    with pytest.raises(RuntimeError):mod.register(req)
+    monkeypatch.setattr(mod,'_write_order',real)
+    assert mod.register(req)['ok']
+    assert len(charges)==1
+    assert store.get_json('order:'+charges[0])['status']=='paid'
+
+
 def test_a_different_secret_cannot_open_it(env, monkeypatch):
     payments, _store, _sub_mod = env
     blob = payments.seal("bk_live_verysecret")

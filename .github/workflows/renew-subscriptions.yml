@@ -1,0 +1,29 @@
+name: subscription-renewal
+on:
+  schedule:
+    - cron: '20 18 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: subscription-renewal
+  cancel-in-progress: false
+jobs:
+  renew:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Renew due subscriptions
+        env:
+          RENEW_JOB_KEY: ${{ secrets.RENEW_JOB_KEY }}
+        run: |
+          test -n "$RENEW_JOB_KEY"
+          for attempt in $(seq 1 5); do
+            result=$(curl --fail-with-body --silent --show-error --max-time 100 \
+              -X POST https://sajudang-api.fly.dev/v1/jobs/renew-subscriptions \
+              -H "x-job-key: $RENEW_JOB_KEY")
+            echo "$result"
+            if [ "$(echo "$result" | jq -r .more)" != "true" ]; then exit 0; fi
+          done
+          echo "Renewal batch needs another run" >&2
+          exit 1

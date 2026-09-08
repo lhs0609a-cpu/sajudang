@@ -14,6 +14,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
 import PracticeCard from "@/components/PracticeCard";
+import ReadingGuide from '@/components/ReadingGuide';
 import CompanionCat from "@/components/CompanionCat";
 import Scene from "@/components/scene/Scene";
 import Reveal from "@/components/Reveal";
@@ -401,6 +402,7 @@ function PayInner() {
         <Narration lines={["도령이 종이를 한 겹 더 넘겼다.",
                            "여기서는 아직 아무것도 받지 않는다."]} />
         {err && <Say who={charName} lens={s.cur}>{err}</Say>}
+        {free?.editorial && <ReadingGuide guide={free.editorial} />}
         {/*
           ★ 한 컷씩 뜹니다 (2026-09-02). 여기가 손님이 "압도당한다" 고
             짚은 자리입니다 — 여덟 컷 1,592자가 한 화면에 통째로

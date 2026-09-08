@@ -24,6 +24,8 @@ import { useRouter } from "next/navigation";
 import { SCREEN_GROUPS, useSession } from "@/lib/store";
 import AssetBoard from "@/components/AssetBoard";
 
+import ExperimentPanel from '@/components/ExperimentPanel';
+import RefundReviews from '@/components/RefundReviews';
 const BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 const KEY = "sd.adminkey";
 const TOK = "sd.admintoken";
@@ -806,6 +808,8 @@ export default function AdminPage() {
       </section>
 
       {/* ── 어디서 나가는가 ──────────────────────────── */}
+      <ExperimentPanel accessKey={key} token={token} />
+      <RefundReviews accessKey={key} token={token} />
       <section>
         <h2>어디서 나가는가 · 진입 동선 v2</h2>
         <p className="sm">최근 30일 개편 첫 화면 진입 브라우저를 기준으로, 7일 안의 순차 이동과 서버 승인을 셉니다. 실제 사람 수와 다르며, 관찰 기간이 끝나지 않은 방문이 포함됩니다. 직접 진입·이전 동선은 제외합니다.</p>

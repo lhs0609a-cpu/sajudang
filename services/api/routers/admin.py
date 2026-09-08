@@ -42,6 +42,51 @@ import store
 
 router = APIRouter(prefix="/v1/admin", tags=["admin"])
 
+
+@router.get("/refund-reviews")
+def refund_reviews(x_funnel_key: str | None = Header(default=None),
+                   x_admin_token: str | None = Header(default=None)):
+    _guard(x_funnel_key, x_admin_token)
+    return {"requests":[{**{k:v for k,v in row.items() if k != "session_id"},
+                         "amount": (store.get_json("order:"+row["order_id"]) or {}).get("amount", 0)}
+                        for _,row in store.scan("refund-review:") if row and row.get("status")=="pending"]}
+
+
+class RefundDecision(BaseModel):
+    order_id: str
+    approve: bool
+    note: str = Field(min_length=5,max_length=300)
+
+
+@router.post("/refund-reviews")
+def decide_refund(req: RefundDecision, x_funnel_key: str | None = Header(default=None),
+                  x_admin_token: str | None = Header(default=None)):
+    _guard(x_funnel_key, x_admin_token)
+    from routers.pay import RefundRequest, _refund_locked
+    review=store.get_json("refund-review:"+req.order_id)
+    order=store.get_json("order:"+req.order_id)
+    if not review or not order:
+        raise HTTPException(status_code=404,detail="환불 확인 요청을 찾을 수 없습니다.")
+    try:
+        with store.payment_lease(order["session_id"]) as check:
+            review=store.get_json("refund-review:"+req.order_id)
+            if review.get("status") != "pending":
+                return {"ok":True,"already":True,"status":review["status"]}
+            if req.approve:
+                order=store.get_json("order:"+req.order_id)
+                order["calc_error_verified"]=True
+                store.set_json("order:"+req.order_id,order)
+                result=_refund_locked(RefundRequest(session_id=order["session_id"],order_id=req.order_id,
+                                      reason=req.note,calc_error=True),check)
+            else:
+                result={"ok":True,"status":"declined"}
+            review.update(status="approved" if req.approve else "declined",note=req.note,
+                          decided_at=datetime.now(timezone.utc).isoformat())
+            store.set_json("refund-review:"+req.order_id,review)
+            return result
+    except store.LeaseBusy as e:
+        raise HTTPException(status_code=409,detail=str(e))
+
 # 문지기는 keyguard 한 자리에 있습니다. 퍼널과 **같은 열쇠**를 씁니다 —
 # 둘을 따로 두면 하나만 걸어 두고 다른 하나는 열린 채 배포됩니다.
 
@@ -215,6 +260,11 @@ def overview(x_funnel_key: str | None = Header(default=None),
             "store": store.stats(),
             "payments": payments.ENABLED,
             "payments_live": payments.LIVE,
+            "subscriptions_enabled": payments.subscriptions_problem() is None,
+            "billing_contract_confirmed": os.getenv("TOSS_BILLING_APPROVED", "").lower() == "true",
+            "billing_encryption_ready": payments.sealing_problem() is None,
+            "renewal_job_configured": bool(os.getenv("RENEW_JOB_KEY")),
+            "renewal_job_last_run": store.get_json("job:renewal-status"),
             "voice": voice.enabled(),
             "voice_cached": (len(list(voice.CACHE.glob("*.mp3")))
                              if voice.CACHE.is_dir() else 0),

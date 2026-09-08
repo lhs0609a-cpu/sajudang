@@ -14,6 +14,7 @@ import Scene from "@/components/scene/Scene";
 import ExtraAsk from "@/components/ExtraAsk";
 import TopicAsk from "@/components/TopicAsk";
 import Reveal from "@/components/Reveal";
+import ReadingGuide from '@/components/ReadingGuide';
 import ScrollHint from "@/components/ScrollHint";
 import SinsalSlots from "@/components/SinsalSlots";
 import Thinking from "@/components/Thinking";
@@ -327,6 +328,7 @@ function ReportInner() {
   if (tab === "c1") {
     return (
       <Shell screen="c1" title={`${rep.lens.name} · 표지`}>
+        {rep.editorial && <ReadingGuide guide={rep.editorial} />}
         <Scene id="scroll" className="hero" />
         <div style={{ textAlign: "center" }}>
           <p style={{ fontFamily: "var(--serif)", fontSize: 24, color: lens?.color ?? "var(--c)" }}>

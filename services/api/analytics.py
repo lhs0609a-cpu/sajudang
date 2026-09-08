@@ -57,6 +57,8 @@ SCREENS = {
 SERVER_EVENTS = {"payment_approved", "payment_refunded"}
 
 EVENTS = {
+    "experiment_exposed",
+    "web_lcp", "web_inp", "web_cls",
     "flow_started", "practice_saved", "chart_completed",
     "screen",          # 화면에 닿았다
     "hook_shown",      # 훅 한 단이 열렸다
@@ -110,6 +112,11 @@ def _clean(ev: dict, *, server: bool = False) -> Optional[dict]:
             out[k] = int(v)
         except (TypeError, ValueError):
             continue        # 숫자가 아니면 통째로 버립니다
+    if name == "experiment_exposed":
+        import experiments
+        if screen != "a1" or out.get("n") != experiments.ID:
+            return None
+        out["stage"] = experiments.variant(sid)
     return out
 
 
@@ -165,7 +172,7 @@ def _rows() -> list[dict]:
         with db.session() as s:
             return [
                 {"name": e.name, "screen": e.screen, "sid": e.sid,
-                 "stage": e.stage, "yes": e.yes, "n": e.n, "at": e.at.isoformat()}
+                 "stage": e.stage, "yes": e.yes, "n": e.n, "ms": e.ms, "at": e.at.isoformat()}
                 for e in s.execute(select(models.Event)).scalars()
             ]
     if not EVENT_LOG_PATH.exists():
