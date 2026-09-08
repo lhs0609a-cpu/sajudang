@@ -41,21 +41,41 @@ TOL = 26             # 배경으로 볼 흰색의 너그러움 (0~255)
 FEATHER = 1          # 가장자리 한 겹을 반투명으로 — 톱니를 줄입니다
 
 
-def cut_background(im: Image.Image) -> Image.Image:
+def cut_background(im: Image.Image, colors=None, tol: int = TOL) -> Image.Image:
     """
     네 모서리에서 번져 나가며 배경만 지운다.
 
     ★ 사람 안쪽의 흰색은 바깥과 이어져 있지 않아 안 지워집니다.
       이게 색으로 지우는 것과의 차이입니다.
+
+    ★ colors — 바탕이 흰색 하나가 아닐 때 (2026-09-08)
+
+      신살 인물 몇 장은 바탕이 **격자무늬로 그려져** 왔습니다.
+      투명인 척 그린 것이라 알파는 전부 255이고, 흰 칸과 잿빛 칸이
+      번갈아 있습니다. 흰색만 보면 잿빛 칸이 통째로 남습니다.
+      바탕색을 여럿 받으면 그중 아무 것과 가까워도 바탕으로 봅니다.
+      안 주면 예전과 똑같이 흰색 하나입니다.
+
+    ★ tol — 너그러움을 좁혀야 할 때가 있습니다 (2026-09-08)
+
+      선이 아주 옅게 그려진 장이 있습니다. 26으로 보면 인물 둘레의
+      옅은 빛무리가 바탕으로 잡히고, 그 빛무리를 **다리 삼아** 흰
+      도포 안으로 번져 들어갑니다 — 태극귀인과 문창귀인이 그렇게
+      속옷까지 뚫렸습니다. 좁히면 빛무리에서 걸음이 멈춥니다.
+
+    ★ **줄이기 전에** 부르시오. 먼저 줄이면 선이 물러져, 그 물러진
+      자리를 타고 흰 도포·흰 소매 **안으로 새어 들어갑니다.**
+      2026-09-08 에 열한 장이 그렇게 속옷까지 뚫렸습니다.
     """
     im = im.convert("RGBA")
     w, h = im.size
     px = im.load()
     assert px is not None
+    bgs = list(colors) if colors else [(255, 255, 255)]
 
     def bright(t) -> bool:
-        r, g, b = t[0], t[1], t[2]
-        return (255 - r) <= TOL and (255 - g) <= TOL and (255 - b) <= TOL
+        return any(abs(t[0] - b[0]) <= tol and abs(t[1] - b[1]) <= tol
+                   and abs(t[2] - b[2]) <= tol for b in bgs)
 
     seen = bytearray(w * h)
     q: deque = deque()
