@@ -257,7 +257,7 @@ export default function AdminPage() {
         throw new Error("문이 안 열리오. 다시 들어오시오.");
       }
       if (r.status === 503) throw new Error("주인 문이 아직 안 걸렸소.");
-      if (!r.ok) throw new Error("가져오지 못했습니다 (" + r.status + ")");
+      if (!r.ok) throw new Error("가져오지 못했소 (" + r.status + ")");
       setData(await r.json());
       /*
        * ★ 연출 점수는 **매출과 함께** 받아 옵니다.
@@ -286,8 +286,8 @@ export default function AdminPage() {
         setWorth(null);
       }
     } catch (e) {
-      setErr(e instanceof Error ? e.message : "가져오지 못했습니다.");
-      // ★ 되풀이해 묻다 한 번 실패했다고 표를 지우지 않습니다.
+      setErr(e instanceof Error ? e.message : "가져오지 못했소.");
+      // ★ 되풀이해 묻다 한 번 실패했다고 표를 지우지 않소.
       //   서버를 다시 띄우는 몇 초 동안 화면이 비면, 보던 자리를
       //   잃습니다. 이미 받아 둔 것은 그대로 두고 오류만 적습니다.
       if (!quiet) setData(null);
@@ -349,8 +349,8 @@ export default function AdminPage() {
       <main className="adm">
         <h1>성신당 · 주인 자리</h1>
         <p className="sm">
-          매출과 이탈은 영업 정보라 문을 겁니다. 들어온 표는 이 기기에만
-          남습니다.
+          매출과 이탈은 영업 정보라 문을 거오. 들어온 표는 이 기기에만
+          남소.
         </p>
         {err && <p className="admerr">{err}</p>}
 
@@ -370,7 +370,7 @@ export default function AdminPage() {
                    onKeyDown={(e) => { if (e.key === "Enter") void signIn(); }} />
             <button className="btn mt" disabled={logging || !email || !pw}
                     onClick={() => void signIn()}>
-              {logging ? "여는 중입니다" : "들어가겠습니다"}
+              {logging ? "여는 중이오" : "들어가겠소"}
             </button>
           </>
         )}
@@ -378,10 +378,10 @@ export default function AdminPage() {
         {/*
           ★ 기계 문 — 도구가 쓰는 열쇠. 사람은 안 씁니다.
             아이디 문이 아직 안 걸린 집에서는 이쪽이 유일한 길이라
-            접어 두되 없애지는 않습니다.
+            접어 두되 없애지는 않소.
         */}
         <details className="admalt" open={gate?.login === false}>
-          <summary>열쇠로 열겠습니다 (도구용)</summary>
+          <summary>열쇠로 열겠소 (도구용)</summary>
           <input className="fld mt" type="password" placeholder="FUNNEL_KEY"
                  value={typed} onChange={(e) => setTyped(e.target.value)}
                  onKeyDown={(e) => {
@@ -473,15 +473,15 @@ export default function AdminPage() {
       {worth && (
         <section>
           <h2>자동 문장 검사 · v2</h2>
-          <p className="sm">문장 중복·출처 표기·분량을 검사하는 내부 지표입니다. 실제 고객 만족도, 사주 정확도, 결제율을 뜻하지 않습니다.</p>
-          <p className="sm">문장 표본: 고정 명식 6개 × 고민 6개, 월하 렌즈. 가격·분량 축은 같은 명식의 유료 캐릭터를 비교합니다. 전체 사용자나 모든 해석의 품질을 대표하지 않습니다.</p>
+          <p className="sm">문장 중복·출처 표기·분량을 검사하는 내부 지표이오. 실제 고객 만족도, 사주 정확도, 결제율을 뜻하지 않소.</p>
+          <p className="sm">문장 표본: 고정 명식 6개 × 고민 6개, 월하 렌즈. 가격·분량 축은 같은 명식의 유료 캐릭터를 비교하오. 전체 사용자나 모든 해석의 품질을 대표하지 않소.</p>
           <div className="worthtop">
             <div className={"worthbig g" + Math.min(4, Math.floor(worth.total / 20))}>
               <b>{worth.total}</b><span>/ 100</span>
             </div>
             <div className="worthsay">
               <p className="grade">내부 검사 {worth.total}점</p>
-              <p className="sm">점수보다 조건에 맞는 해석과 실제 사용자 평가를 함께 확인하세요.</p>
+              <p className="sm">점수보다 조건에 맞는 해석과 실제 사용자 평가를 함께 확인하시오.</p>
               {worth.weakest.length > 0 && (
                 <p className="sm">
                   먼저 볼 자리 —{" "}
@@ -675,7 +675,7 @@ export default function AdminPage() {
           /*
             ★ 「못 가져왔소」 한 줄은 **네트워크 실패**로 읽힙니다.
               실제로는 열쇠가 틀렸거나 서버가 그 자를 안 들고 있는
-              것이라, 무엇을 해야 하는지까지 적습니다.
+              것이라, 무엇을 해야 하는지까지 적소.
           */
           <p className="sm">
             점수를 못 가져왔소. 열쇠가 맞는지 보시고, 그래도 안 오면
@@ -699,11 +699,11 @@ export default function AdminPage() {
               <b>이 서버에서는 연출 점수를 못 재오.</b>
             </p>
             <p className="sm">
-              점수는 화면 글을 <b>소스째 읽어서</b> 셉니다. 배포
+              점수는 화면 글을 <b>소스째 읽어서</b> 세오. 배포
               이미지에는 <code>apps/web</code> 이 안 들어가서, 스물일곱
               화면 중 엔진이 짓는 {drama.summary.screens}개만 잡히오.
               반쪽으로 낸 숫자는 멀쩡한 점수처럼 보여 더 나쁘니
-              안 냅니다.
+              안 내오.
             </p>
             <p className="sm">
               로컬에서 보시오 — <code>.\dev.ps1 api</code> 로 띄우고
@@ -716,7 +716,7 @@ export default function AdminPage() {
             {/*
               ★ 배포본은 소스가 없어 **찍어 둔 글**(seed/screen_text.json)
                 로 잽니다. 숫자는 같되 낡을 수 있으니, 언제 찍은 것인지를
-                숫자 위에 적습니다. 그래야 「고쳤는데 안 움직인다」 를
+                숫자 위에 적소. 그래야 「고쳤는데 안 움직인다」 를
                 버그가 아니라 「다시 찍어야 한다」 로 읽습니다.
             */}
             {drama.summary.source === "snapshot" && (
@@ -743,9 +743,9 @@ export default function AdminPage() {
             </div>
             {(drama.summary.pull ?? 100) < 60 && (
               <p className="admbad">
-                <b>당김이 {drama.summary.pull}점.</b> 미드는 막마다 끊습니다 —
+                <b>당김이 {drama.summary.pull}점.</b> 미드는 막마다 끊소 —
                 밝힘 · 뒤집기 · 딜레마 · 끊긴 동작 · 남긴 물음 중 하나로.
-                끝이 그냥 끝나는 화면은 다음으로 안 데려갑니다.
+                끝이 그냥 끝나는 화면은 다음으로 안 데려가오.
               </p>
             )}
             {/*
@@ -813,10 +813,10 @@ export default function AdminPage() {
       <RefundReviews accessKey={key} token={token} />
       <section>
         <h2>어디서 나가는가 · 진입 동선 v2</h2>
-        <p className="sm">최근 30일 개편 첫 화면 진입 브라우저를 기준으로, 7일 안의 순차 이동과 서버 승인을 셉니다. 실제 사람 수와 다르며, 관찰 기간이 끝나지 않은 방문이 포함됩니다. 직접 진입·이전 동선은 제외합니다.</p>
+        <p className="sm">최근 30일 개편 첫 화면 진입 브라우저를 기준으로, 7일 안의 순차 이동과 서버 승인을 세오. 실제 사람 수와 다르며, 관찰 기간이 끝나지 않은 방문이 포함되오. 직접 진입·이전 동선은 제외하오.</p>
         {steps.length === 0 ? (
           <p className="sm">
-            아직 쌓인 게 없소. 계측은 `/v1/events` 로 들어옵니다.
+            아직 쌓인 게 없소. 계측은 `/v1/events` 로 들어오오.
           </p>
         ) : (
           <>
@@ -871,7 +871,7 @@ export default function AdminPage() {
       <section>
         <h2>화면 훑기 · {flat.length}개</h2>
         <p className="sm">
-          누르면 그 화면으로 갑니다. 화면 안에서는 상단 레일의
+          누르면 그 화면으로 가오. 화면 안에서는 상단 레일의
           <b> ← 이전 / 다음 → </b>으로 순서대로 넘길 수 있소.
         </p>
         {SCREEN_GROUPS.map((g) => (

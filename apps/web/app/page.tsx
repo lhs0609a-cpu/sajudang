@@ -75,7 +75,7 @@ const OPENING: Record<string, string[]> = {
 /*
  * 대문에 적는 약속.
  *
- * ★ 여기가 만 명이 들어오는 문인데 심리 장치가 하나뿐이었습니다
+ * ★ 여기가 만 명이 들어오는 문인데 심리 장치가 하나뿐이었소
  *   (tools/persuasion_audit.py). 그렇다고 많이 붙이면 대문이
  *   시끄러워집니다 — 첫 화면에서 설득하려 들면 광고로 읽힙니다.
  *   **셋만** 정확히 넣습니다.
@@ -130,7 +130,7 @@ const HOURS: [string, string, number][] = [
  *
  * ★ 왜 되읽나
  *
- *   가장 흔한 실수는 **오후를 12시간 빼고 적는 것**입니다. 오후 3시
+ *   가장 흔한 실수는 **오후를 12시간 빼고 적는 것**이오. 오후 3시
  *   55분생이 「3」 을 적으면 새벽 3시가 되고, 시주가 甲申 에서 甲寅 으로
  *   통째로 달라집니다. 여덟 글자 중 둘이 틀리는 것이라 리포트 전체가
  *   다른 사람 것이 됩니다.
@@ -154,7 +154,7 @@ const AXIS4 = [
 ];
 
 /*
- * 태어난 고을 — ★ 고을 열일곱은 **경도표**지 행정구역이 아닙니다 (2026-09-04).
+ * 태어난 고을 — ★ 고을 열일곱은 **경도표**지 행정구역이 아니오 (2026-09-04).
  *
  *   `calendar.CITY_LON` 이 이 열일곱의 경도만 들고 있고, 하는 일은 진태양시
  *   보정 하나입니다. 그런데 화면에는 이름만 나열돼 있어서, 경기도에서 난
@@ -189,7 +189,7 @@ const STEPS: Step[] = ORDER;
  *
  * ★ a1 에서 이미 한 단계를 지나 놓고도 a2 가 1/7 이었습니다. 손님
  *   입장에서는 **이미 한 수고가 0으로 리셋**됩니다. 여기서는 거짓말도
- *   필요 없습니다 — 실제로 한 단계를 지났습니다.
+ *   필요 없소 — 실제로 한 단계를 지났소.
  *
  * ★ a6·a7 은 진행을 안 그립니다. 결과가 보상인 구간에서 막대는 남은
  *   보상이 아니라 **남은 노동**을 강조합니다.
@@ -322,7 +322,7 @@ function EntryInner() {
   /*
    * ★ 때를 묻는 길을 셋으로 세웠습니다 (2026-09-02).
    *
-   *       ① 시·분을 적는다        ← 기본. 적은 그대로 셈합니다
+   *       ① 시·분을 적는다        ← 기본. 적은 그대로 셈하오
    *       ② 모르겠다 → 대강 칸    ← 새벽·아침·한낮…
    *       ③ 그것도 모르겠다       ← 세 기둥으로
    *
@@ -394,7 +394,7 @@ function EntryInner() {
       const raw = e instanceof ApiError ? e.message : "";
       setError(e instanceof ApiError && e.status < 500
         ? (birthMessageFrom(raw) ?? raw)
-        : "계산 서버에 연결하지 못했어요. 입력은 그대로 남아 있으니 잠시 후 다시 계산해 주세요.");
+        : "계산 서버에 연결하지 못했소. 입력은 그대로 남아 있으니 잠시 후 다시 계산해 주시오.");
     } finally {
       setBusy(false);
     }
@@ -467,11 +467,12 @@ function EntryInner() {
           <div className="gatecopy">
             <p className="conversion-kicker">성신당 星辰堂 · 사주로 읽는 나의 반복 패턴</p>
             <h1 className="conversion-title">왜 나는 비슷한 일에서<br />자꾸 마음이 걸릴까.</h1>
-            <p className="conversion-lead">태어난 정보와 지금의 고민을 바탕으로,<br />반복되는 패턴과 오늘 해볼 행동을 읽어보세요.</p>
+            <p className="conversion-lead">태어난 정보와 지금의 고민을 바탕으로,<br />반복되는 패턴과 오늘 해볼 행동을 읽어보시오.</p>
             <GuideIntro />
+            <CompanionCat state="welcome" message="어서 오시오. 서두르지 말고 함께 살펴보오." />
             <button className="btn mt" onClick={() => { s.set({cur:"pungun"}); go("a5"); }}>내 고민으로 무료 해석 보기</button>
-            <p className="conversion-note">{entryArm === 1 ? "무료 해석과 오늘 해볼 행동 하나 · 시간은 몰라도 돼요" : "첫 해석 무료 · 태어난 시간은 몰라도 돼요"}</p>
-            <p className="conversion-note">전통 사주를 바탕으로 한 자기 이해 콘텐츠예요.</p>
+            <p className="conversion-note">{entryArm === 1 ? "무료 해석과 오늘 해볼 행동 하나 · 시간은 몰라도 되오" : "첫 해석 무료 · 태어난 시간은 몰라도 되오"}</p>
+            <p className="conversion-note">전통 사주를 바탕으로 한 자기 이해 콘텐츠요.</p>
           </div>
         </div>
         <div className="gatedoubt"><Doubts compact first={null} /></div>
@@ -481,8 +482,8 @@ function EntryInner() {
 
   if (step === "a2") {
     return <Shell screen="a2" title="별칭 · 선택" onBack={back}>
-      <h1 className="conversion-title">어떻게 불러드릴까요?</h1>
-      <p className="conversion-lead">별칭은 해석에서 부르는 말에만 사용해요. 사주 계산에는 쓰지 않으며, 비워두셔도 괜찮아요.</p>
+      <h1 className="conversion-title">어떻게 부르면 되겠소?</h1>
+      <p className="conversion-lead">별칭은 해석에서 부르는 말에만 사용하오. 사주 계산에는 쓰지 않으며, 비워두셔도 괜찮소.</p>
       <label htmlFor="entry-alias">별칭 (선택, 최대 12글자)</label>
       <input id="entry-alias" className="fld" maxLength={12} value={s.name} onChange={e => s.set({ name: e.target.value })} />
       <button className="btn mt" onClick={() => go("a4")}>이 별칭으로 이어가기</button>
@@ -497,8 +498,8 @@ function EntryInner() {
     return <Shell screen="a3" title="태어난 정보" onBack={back}>
       <Progress step={2} total={PROGRESS_TOTAL} />
       <div className="conversion-intro"><p className="conversion-kicker">2 / 3 · 태어난 정보</p>
-        <h1 className="conversion-title">해석에 필요한 정보를<br />알려주세요.</h1>
-        <p className="conversion-lead">양력 생년월일을 입력해 주세요. 음력 생일은 양력으로 바꿔 입력해 주세요.</p></div>
+        <h1 className="conversion-title">해석에 필요한 정보를<br />알려주시오.</h1>
+        <p className="conversion-lead">양력 생년월일을 입력해 주시오. 음력 생일은 양력으로 바꿔 입력해 주시오.</p></div>
       <div className="f3">
         {([['year','태어난 해',4,'1993'],['month','월',2,'11'],['day','일',2,'25']] as const).map(([key,label,max,placeholder]) =>
           <div key={key}><label htmlFor={`birth-${key}`}>{label}</label>
@@ -509,20 +510,20 @@ function EntryInner() {
           </div>)}
       </div>
       {bad && <p className="warn" id="birth-error" role="alert">{bad}</p>}
-      {minor && <p className="warn" role="alert">만 14세 미만은 보호자 동의 절차가 필요해 현재 서비스를 이용할 수 없어요.</p>}
+      {minor && <p className="warn" role="alert">만 14세 미만은 보호자 동의 절차가 필요해 현재 서비스를 이용할 수 없소.</p>}
       <div className="conversion-card"><label htmlFor="birth-city">태어난 지역</label>
         <select id="birth-city" className="fld" value={s.city} onChange={e => s.set({ city:e.target.value, features:null, chartId:null })}>
           {CITY_GROUPS.map(([g,cs]) => <optgroup key={g} label={g}>{cs.map(c => <option key={c} value={c}>{c}</option>)}</optgroup>)}
-        </select><p className="conversion-note">현재 {s.city} 기준이에요. 출생지는 태어난 시간의 지역 보정에 사용합니다.</p>
+        </select><p className="conversion-note">현재 {s.city} 기준이오. 출생지는 태어난 시간의 지역 보정에 사용하오.</p>
       </div>
-      <p className="conversion-note">성별은 전통 명리의 대운 방향을 계산하는 데 사용해요.</p>
-      {!s.sexSet && <p className="conversion-note">여성·남성 중 하나를 선택해 주세요.</p>}
+      <p className="conversion-note">성별은 전통 명리의 대운 방향을 계산하는 데 사용하오.</p>
+      {!s.sexSet && <p className="conversion-note">여성·남성 중 하나를 선택해 주시오.</p>}
       <div className="og c2">{([['F','여성'],['M','남성']] as const).map(([value,label]) =>
         <button className={`op ${s.sexSet && s.sex === value ? 'on' : ''}`} key={value} aria-pressed={s.sexSet && s.sex === value}
           onClick={() => s.set({ sex:value, sexSet:true, features:null, chartId:null })}>{label}</button>)}
       </div>
       <button className="btn mt" disabled={!filled || !!bad || !!minor || !s.sexSet} onClick={() => go("a4")}>태어난 시간으로 이어가기</button>
-      <p className="conversion-note">시간을 모르면 다음 화면에서 ‘시간을 몰라요’를 선택할 수 있어요. <a href="/legal">개인정보 처리 안내</a></p>
+      <p className="conversion-note">시간을 모르면 다음 화면에서 ‘시간을 모르오’를 선택할 수 있소. <a href="/legal">개인정보 처리 안내</a></p>
     </Shell>;
   }
 
@@ -532,8 +533,8 @@ function EntryInner() {
         <Progress step={3} total={PROGRESS_TOTAL} />
         <div className="conversion-intro">
           <p className="conversion-kicker">3 / 3 · 태어난 시간</p>
-          <h1 className="conversion-title">아는 만큼만<br />알려주셔도 돼요.</h1>
-          <p className="conversion-lead">시간을 알면 시주까지 계산하고, 모르면 시주를 제외한 범위에서 해석해요.</p>
+          <h1 className="conversion-title">아는 만큼만<br />알려주셔도 되오.</h1>
+          <p className="conversion-lead">시간을 알면 시주까지 계산하고, 모르면 시주를 제외한 범위에서 해석하오.</p>
         </div>
         <div className="conversion-time conversion-card">
           <div className="f3 hm">
@@ -550,16 +551,16 @@ function EntryInner() {
                   s.set({ minute: value === "" ? 0 : Math.min(59, Number(value)), features: null, chartId: null }); }} />
             </div>
           </div>
-          {s.hourKnown && s.hour !== null && <p className="conversion-note">{clockWord(s.hour, s.minute ?? 0)}에 태어난 것으로 계산해요. 오후 3시는 15로 적어주세요.</p>}
+          {s.hourKnown && s.hour !== null && <p className="conversion-note">{clockWord(s.hour, s.minute ?? 0)}에 태어난 것으로 계산하오. 오후 3시는 15로 적어주시오.</p>}
           <button className="btn mt" disabled={!s.hourKnown || s.hour === null}
             onClick={() => go("a6")}>이 시간으로 무료 해석 보기</button>
         </div>
         <button className="btn gh" onClick={() => {
           s.set({ hourKnown: false, hour: null, minute: 0, chartId: null, features: null }); go("a6");
-        }}>시간을 몰라요 · 시주 없이 보기</button>
-        <CompanionCat message="모르는 시간을 추측해서 채우지 않아도 괜찮아요." />
-        <details className="conversion-details"><summary>별칭·성향도 추가하고 싶어요</summary>
-          <p className="conversion-note">선택 정보예요. 비워 두어도 무료로 볼 수 있어요.</p>
+        }}>시간을 모르오 · 시주 없이 보기</button>
+        <CompanionCat message="모르는 시간을 추측해서 채우지 않아도 괜찮소." />
+        <details className="conversion-details"><summary>별칭·성향도 추가하고 싶소</summary>
+          <p className="conversion-note">선택 정보요. 비워 두어도 무료로 볼 수 있소.</p>
           <button className="btn gh" onClick={() => go("a2")}>별칭 입력</button>
           <button className="btn gh" onClick={() => go("a4b")}>성향 4글자 선택</button>
         </details>
@@ -569,13 +570,13 @@ function EntryInner() {
 
   if (step === "a4b") {
     return <Shell screen="a4b" title="성향 4글자 · 선택" onBack={back}>
-      <h1 className="conversion-title">내가 생각하는 성향도<br />비교해볼까요?</h1>
-      <p className="conversion-lead">직접 고른 성향과 전통 사주 해석을 비교하는 선택 항목이에요. 사주 계산값은 바뀌지 않아요.</p>
+      <h1 className="conversion-title">내가 생각하는 성향도<br />비교해보겠소?</h1>
+      <p className="conversion-lead">직접 고른 성향과 전통 사주 해석을 비교하는 선택 항목이오. 사주 계산값은 바뀌지 않소.</p>
       <div className="og c2">{AXIS4.map(t => <button key={t} className={`op ${s.axis4===t ? 'on' : ''}`}
         aria-pressed={s.axis4===t} onClick={() => s.set({ axis4:t })}>{t}</button>)}</div>
       <button className="btn mt" disabled={!s.axis4} onClick={() => go("a4")}>선택한 성향으로 이어가기</button>
       <button className="btn gh" onClick={() => { s.set({ axis4:null }); go("a4"); }}>성향 없이 이어가기</button>
-      <p className="conversion-note">본 서비스의 성향 검사는 특정 상표의 검사가 아닙니다.</p>
+      <p className="conversion-note">특정 상표와 무관한 성향 대조요.</p>
     </Shell>;
   }
 
@@ -586,7 +587,7 @@ function EntryInner() {
         <div className="conversion-intro">
           <p className="conversion-kicker">1 / 3 · 고민 선택</p>
           <h1 className="conversion-title">지금 가장 알고 싶은 건<br />무엇인가요?</h1>
-          <p className="conversion-lead">지금 마음에 걸리는 것 하나를 골라주세요. 선택한 고민에 따라 해석에서 살펴볼 자리가 달라져요.</p>
+          <p className="conversion-lead">지금 마음에 걸리는 것 하나를 골라주시오. 선택한 고민에 따라 해석에서 살펴볼 자리가 달라지오.</p>
         </div>
         <div className="og c2">
           {CONCERNS.map((c) => (
@@ -598,7 +599,7 @@ function EntryInner() {
           ))}
         </div>
         <CompanionCat state={s.concernSet ? "selected" : "rest"}
-          message={s.concernSet ? "좋아요. 이 고민부터 살펴봐요." : "오늘 마음에 걸린 것부터 살펴봐요."} />
+          message={s.concernSet ? "좋소. 이 고민부터 살펴보오." : "오늘 마음에 걸린 것부터 살펴보오."} />
         <button className="btn mt" disabled={!s.concernSet} onClick={() => go("a3")}>이 고민으로 이어가기</button>
       </Shell>
     );
@@ -611,21 +612,21 @@ function EntryInner() {
         <button className="btn gh" onClick={() => go("a3")}>입력 정보 수정하기</button>
         <button className="btn gh" disabled={busy} onClick={() => void buildChart()}>다시 계산하기</button>
       </div>}
-      {!s.features && !error && <p className="conversion-lead" role="status">명식을 계산 중이에요.</p>}
+      {!s.features && !error && <p className="conversion-lead" role="status">명식을 계산 중이오.</p>}
       {s.features && <>
         <p className="conversion-kicker">명식 계산 완료</p>
-        <h1 className="conversion-title">이제, 지금의 고민과<br />함께 읽어볼게요.</h1>
-        <p className="conversion-note">{s.features.hour_known ? "태어난 시간까지 네 기둥을 계산했어요." : "태어난 시간을 몰라 시주를 제외한 세 기둥으로 읽어요."}</p>
-        <p className="conversion-note">다음은 {lens.name}의 첫 해석이에요. 입력한 고민을 바탕으로 다섯 가지 질문을 차례로 살펴봐요.</p>
+        <h1 className="conversion-title">이제, 지금의 고민과<br />함께 읽어보겠소.</h1>
+        <p className="conversion-note">{s.features.hour_known ? "태어난 시간까지 네 기둥을 계산했소." : "태어난 시간을 몰라 시주를 제외한 세 기둥으로 읽소."}</p>
+        <p className="conversion-note">다음은 {lens.name}의 첫 해석이오. 입력한 고민을 바탕으로 다섯 가지 질문을 차례로 살펴보오.</p>
         <Pillars f={s.features} />
-        <p className="conversion-note">명식은 태어난 해·달·날·시간을 각각 두 글자로 옮긴 것이에요.<br />모르는 시간의 두 글자는 비워 둡니다.</p>
+        <p className="conversion-note">명식은 태어난 해·달·날·시간을 각각 두 글자로 옮긴 것이오.<br />모르는 시간의 두 글자는 비워 두오.</p>
         <button className="btn mt" onClick={() => go("a7")}>내 고민의 무료 해석 읽기</button>
         <details className="conversion-details"><summary>계산 근거와 보정 내역 보기</summary>
           <ManseTable f={s.features} /><CalcPanel f={s.features} />
           {s.divergence?.cases?.map((c,i) => <div key={i} className="conversion-note">
             <p>{c.why}</p><p>이 서비스: {c.ours}<br />{c.mine}</p>
             <p>다른 계산 방식: {c.theirs}<br />{c.alt}</p>
-            <p>이 서비스는 위의 첫 번째 명식으로 해석해요.</p>
+            <p>이 서비스는 위의 첫 번째 명식으로 해석하오.</p>
           </div>)}
         </details>
       </>}
@@ -635,15 +636,15 @@ function EntryInner() {
   /* a7 · 훅 5단 — 값은 아직 묻지 않는다 */
   return (
     <Shell screen="a7" title={`${lens.name} · 첫 해석`} onBack={back}>
-      {/* ★ 진행 막대를 뗐습니다. 결과가 보상인 구간에서 막대는 남은
-          보상이 아니라 **남은 노동**을 강조합니다. */}
+      {/* ★ 진행 막대를 뗐소. 결과가 보상인 구간에서 막대는 남은
+          보상이 아니라 **남은 노동**을 강조하오. */}
       <Scene id="facing" />
       {!segments && !error && <Narration lines={[`${lens.name}, 선택한 고민과 명식을 함께 살펴본다.`]} />}
 
       {/*
         ★ 훅이 아무 설명 없이 대뜸 시작하고 있었습니다.
           손님은 "이현석. 모으기는 하는데 그걸로 뭘 할지가 없다." 를
-          갑자기 만납니다. 이게 무슨 화면인지, 왜 이런 말을 하는지,
+          갑자기 만나오. 이게 무슨 화면인지, 왜 이런 말을 하는지,
           「그렇소/아니오」가 무엇을 하는지 아무 데도 없었습니다.
 
           찌르기의 세기를 죽이지 않으면서 **무엇이 벌어질지만** 먼저
@@ -709,7 +710,7 @@ function EntryInner() {
       {hookDone && (
         <section className="conversion-card">
           <h2>내 경험과 가까웠던 장면이 있나요?</h2>
-          <p className="conversion-lead">이어지는 무료 해석에서 근거를 더 살펴보고, 오늘 해볼 행동 하나를 가져가세요.</p>
+          <p className="conversion-lead">이어지는 무료 해석에서 근거를 더 살펴보고, 오늘 해볼 행동 하나를 가져가시오.</p>
           <button className="btn mt" onClick={() => router.push("/pay?step=d0")}>무료 해석과 오늘의 행동 보기</button>
           <button className="btn gh" onClick={() => router.push("/summary")}>여기까지 본 내용 정리하기</button>
         </section>

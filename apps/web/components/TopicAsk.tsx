@@ -51,7 +51,7 @@ export default function TopicAsk({
     <section className="extraask noprint">
       <p className="ttl">{spec.title}</p>
       <p className="why">
-        고르신 것을 여덟 글자와 <b>맞대 봅니다</b>. 맞히려는 것이 아니라
+        고르신 것을 여덟 글자와 <b>맞대 보오</b>. 맞히려는 것이 아니라
         겹치는지 어긋나는지를 보는 것이오. 적으신 것은 남기지 않소.
       </p>
 
@@ -87,7 +87,7 @@ export default function TopicAsk({
               onClick={() => onSubmit({
                 topic: { choice: pick, ...(pick2 ? { choice2: pick2 } : {}) },
               })}>
-        {busy ? "맞대 보는 중입니다" : "이걸로 보겠습니다"}
+        {busy ? "맞대 보는 중이오" : "이걸로 보겠소"}
       </button>
     </section>
   );

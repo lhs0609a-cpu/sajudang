@@ -7,8 +7,8 @@
     POST /v1/pay/confirm   승인 → 인장 지급 · 잠금 해제
     POST /v1/pay/refund    환불 (열람 전 전액 / 계산 오류 전액)
 
-★ 하루 결제 2건 상한을 여기서 강제합니다. (CLAUDE.md 절대 규칙 4)
-★ 금액은 클라이언트가 보낸 값을 믿지 않고 서버가 티어에서 계산합니다.
+★ 하루 결제 2건 상한을 여기서 강제하오. (CLAUDE.md 절대 규칙 4)
+★ 금액은 클라이언트가 보낸 값을 믿지 않고 서버가 티어에서 계산하오.
 """
 from __future__ import annotations
 
@@ -135,7 +135,7 @@ def _plain_len(html: str) -> int:
 
 
 def _measure(rep: dict) -> tuple:
-    """(컷 수, 글자 수). 서버가 셉니다 — 화면이 적지 않습니다."""
+    """(컷 수, 글자 수). 서버가 세오 — 화면이 적지 않소."""
     return len(rep["cuts"]), sum(_plain_len(c["html"]) for c in rep["cuts"])
 
 
@@ -144,12 +144,12 @@ def get_tiers(req: TiersRequest) -> dict:
     """
     이 사람이 티어마다 **실제로** 무엇을 받는가.
 
-    부풀리지도 줄이지도 않습니다 — build_report 로 세어서 그대로 냅니다.
+    부풀리지도 줄이지도 않소 — build_report 로 세어서 그대로 내오.
 
-    ★ `all` · `sub` 은 이 캐릭터 몫만 세면 안 됩니다.
-      그 둘은 **스무 사람을 전부** 엽니다. 한 사람 몫(18컷)만 적어 두면
-      9,900원짜리 달삯과 견줄 때 같은 것으로 보입니다. 실제로 여는 것을
-      세서 적습니다 — 스무 사람 합계입니다.
+    ★ `all` · `sub` 은 이 캐릭터 몫만 세면 안 되오.
+      그 둘은 **스무 사람을 전부** 여오. 한 사람 몫(18컷)만 적어 두면
+      9,900원짜리 달삯과 견줄 때 같은 것으로 보이오. 실제로 여는 것을
+      세서 적소 — 스무 사람 합계이오.
     """
     from engine import lens as lens_mod
     from engine.features import Features
@@ -310,7 +310,7 @@ def confirm(req: ConfirmRequest) -> dict:
     if not initial:
         raise HTTPException(status_code=404, detail="모르는 주문이오.")
     if initial.get("session_id") != req.session_id:
-        raise HTTPException(status_code=403, detail="이 주문을 확인할 권한이 없어요.")
+        raise HTTPException(status_code=403, detail="이 주문을 확인할 권한이 없소.")
     try:
         with store.payment_lease(req.session_id) as check:
             order = store.get_json("order:" + req.order_id)
@@ -319,7 +319,7 @@ def confirm(req: ConfirmRequest) -> dict:
             else:
                 already = False
                 if order["status"] not in ("pending", "settling"):
-                    raise HTTPException(status_code=409, detail="취소되거나 종료된 주문은 다시 승인할 수 없어요.")
+                    raise HTTPException(status_code=409, detail="취소되거나 종료된 주문은 다시 승인할 수 없소.")
                 limit = BREAKS()["per_day_purchase"]
                 # A persisted settlement has already charged; finish its grant even at the limit.
                 if order["status"] != "settling" and _purchases_today(req.session_id) >= limit:
@@ -331,7 +331,7 @@ def confirm(req: ConfirmRequest) -> dict:
                 except payments.PaymentError as e:
                     raise HTTPException(status_code=402, detail=str(e))
                 if result.status not in payments.PAID_STATES or result.amount != order["amount"] or result.order_id != req.order_id:
-                    raise HTTPException(status_code=409, detail="승인 결과를 확인 중이에요. 결제 내역을 확인해 주세요.")
+                    raise HTTPException(status_code=409, detail="승인 결과를 확인 중이오. 결제 내역을 확인해 주시오.")
                 order = _settle_paid(req.order_id, order, result.pg_tid, check)
     except store.LeaseBusy as e:
         raise HTTPException(status_code=409, detail=str(e))
@@ -339,7 +339,7 @@ def confirm(req: ConfirmRequest) -> dict:
 
 
 def _granted(order: dict) -> dict:
-    """이 결제로 실제로 열린 것. 세어서 냅니다 — 부풀리지 않습니다."""
+    """이 결제로 실제로 열린 것. 세어서 내오 — 부풀리지 않소."""
     from engine import lens as lens_mod
     from engine.features import Features
     from engine.report import build_report
@@ -403,12 +403,12 @@ def webhook_check() -> dict:
     """
     이 자리가 맞는지 눈으로 보는 곳.
 
-    ★ 토스 개발자센터에 주소를 넣기 전에 사람이 브라우저로 열어 봅니다.
-      그런데 POST 만 열려 있어서 「Method Not Allowed」 만 떴습니다.
-      맞게 넣은 건지 틀리게 넣은 건지 알 수가 없습니다.
+    ★ 토스 개발자센터에 주소를 넣기 전에 사람이 브라우저로 열어 보오.
+      그런데 POST 만 열려 있어서 「Method Not Allowed」 만 떴소.
+      맞게 넣은 건지 틀리게 넣은 건지 알 수가 없소.
 
-    ★ 여기서 아무 일도 하지 않습니다. 상태를 바꾸지 않고, 무엇이
-      들어왔는지도 안 봅니다. **주소가 살아 있다는 것만** 알립니다.
+    ★ 여기서 아무 일도 하지 않소. 상태를 바꾸지 않고, 무엇이
+      들어왔는지도 안 보오. **주소가 살아 있다는 것만** 알리오.
     """
     return {
         "ok": True,
@@ -447,7 +447,7 @@ async def webhook(request: Request) -> dict:
             order = store.get_json("order:" + str(order_id))
             status = real.get("status")
             if real.get("orderId") not in (None, str(order_id)):
-                raise HTTPException(status_code=409, detail="주문 확인 결과가 일치하지 않아요.")
+                raise HTTPException(status_code=409, detail="주문 확인 결과가 일치하지 않소.")
             if status in payments.DEAD_STATES or (status == "PARTIAL_CANCELED" and not real.get("balanceAmount")):
                 check()
                 order.update(status="canceled", unlocked=[], pg_status=status)
@@ -455,7 +455,7 @@ async def webhook(request: Request) -> dict:
                 return {"ok": True, "applied": "canceled"}
             if status in payments.PAID_STATES and order.get("status") in ("pending", "settling"):
                 if int(real.get("totalAmount") or 0) != order["amount"]:
-                    raise HTTPException(status_code=409, detail="주문 금액과 승인 금액이 달라요.")
+                    raise HTTPException(status_code=409, detail="주문 금액과 승인 금액이 다르오.")
                 _settle_paid(str(order_id), order, real.get("paymentKey"), check)
                 return {"ok": True, "applied": "paid"}
             return {"ok": True, "applied": "none", "status": status}
@@ -520,11 +520,11 @@ def refund(req: RefundRequest) -> dict:
         raise HTTPException(status_code=404, detail="모르는 주문이오.")
     if not req.session_id or (initial.get("session_id") != req.session_id and
             req.order_id not in (store.get_json("orders:" + req.session_id) or [])):
-        raise HTTPException(status_code=403, detail="이 주문의 구매자만 환불을 요청할 수 있습니다.")
+        raise HTTPException(status_code=403, detail="이 주문의 구매자만 환불을 요청할 수 있소.")
     try:
         with store.payment_lease(initial["session_id"]) as check:
             if (store.get_json("order:" + req.order_id) or {}).get("session_id") != initial["session_id"]:
-                raise HTTPException(status_code=409, detail="다른 기기에서 구매를 복원했습니다. 내역을 새로 확인한 뒤 다시 요청해 주세요.")
+                raise HTTPException(status_code=409, detail="다른 기기에서 구매를 복원했소. 내역을 새로 확인한 뒤 다시 요청해 주시오.")
             return _refund_locked(req, check)
     except store.LeaseBusy as e:
         raise HTTPException(status_code=409, detail=str(e))
@@ -535,7 +535,7 @@ def _refund_locked(req: RefundRequest, check) -> dict:
     if not order:
         raise HTTPException(status_code=404, detail="모르는 주문이오.")
     if order.get("reissued_from"):
-        raise HTTPException(status_code=409, detail="추가 결제 없이 재발행된 리포트입니다. 원래 주문의 환불 내역을 확인해 주세요.")
+        raise HTTPException(status_code=409, detail="추가 결제 없이 재발행된 리포트이오. 원래 주문의 환불 내역을 확인해 주시오.")
     if order["status"] == "refunded":
         _stop_refunded_subscription(order, req.order_id)
         issued = _reissue_refunded(order, req.order_id, req.session_id)
@@ -549,12 +549,12 @@ def _refund_locked(req: RefundRequest, check) -> dict:
             "order_id": req.order_id, "reason": req.reason,
             "session_id": req.session_id, "status": "pending",
             "requested_at": datetime.now(timezone.utc).isoformat()})
-        return {"ok": True, "status": "review_requested", "say": "계산 오류 확인 요청을 접수했습니다. 확인 후 처리합니다."}
+        return {"ok": True, "status": "review_requested", "say": "계산 오류 확인 요청을 접수했소. 확인 후 처리하오."}
     if order.get("opened_at") and not order.get("calc_error_verified"):
         raise HTTPException(
             status_code=409,
-            detail=("이미 열람하신 리포트는 청약철회가 제한됩니다. "
-                    "계산이 틀린 것이 확인되면 전액 환불해 드립니다."))
+            detail=("이미 열람하신 리포트는 청약철회가 제한되오. "
+                    "계산이 틀린 것이 확인되면 전액 환불해 드리오."))
 
     try:
         payments.cancel(order["payment_key"], req.reason)
@@ -642,22 +642,22 @@ def peek(req: PeekRequest) -> dict:
     """
     이 목패가 여는 자리들 — **물음과 가려진 답.**
 
-    ★ 블러가 아닙니다
+    ★ 블러가 아니오
 
-      글을 내려보내고 CSS 로 흐리면 개발자도구에서 그대로 읽힙니다.
-      여기서는 앞머리만 진짜로 보내고 **뒤는 서버에 남깁니다.** 화면은
-      길이만큼 흐린 칸을 그립니다 — 벗겨도 나올 게 없습니다.
+      글을 내려보내고 CSS 로 흐리면 개발자도구에서 그대로 읽히오.
+      여기서는 앞머리만 진짜로 보내고 **뒤는 서버에 남기오.** 화면은
+      길이만큼 흐린 칸을 그리오 — 벗겨도 나올 게 없소.
       (docs/02 §7 · 이 집의 절대 규칙)
 
-    ★ 근거는 안 가립니다
+    ★ 근거는 안 가리오
 
-      무엇을 보고 한 말인지는 값을 치르기 전에도 보여 줍니다.
-      가리는 것은 **답**이지 근거가 아닙니다.
+      무엇을 보고 한 말인지는 값을 치르기 전에도 보여 주오.
+      가리는 것은 **답**이지 근거가 아니오.
 
-    ★ 지어낸 압박은 없습니다
+    ★ 지어낸 압박은 없소
 
-      남은 시간도 남은 자리도 없습니다. 궁금함은 그 사람의 여덟
-      글자에서 나와야지 시계에서 나오면 안 됩니다 (CLAUDE.md 규칙 4).
+      남은 시간도 남은 자리도 없소. 궁금함은 그 사람의 여덟
+      글자에서 나와야지 시계에서 나오면 안 되오 (CLAUDE.md 규칙 4).
     """
     from engine import lens as lens_mod
     from engine.features import Features

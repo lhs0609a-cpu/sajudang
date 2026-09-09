@@ -37,11 +37,11 @@ def load_features(chart_id: str) -> dict:
     if f is None:
         raise HTTPException(
             status_code=404,
-            detail="저장된 명식을 다시 계산해야 합니다. 입력 정보와 구매 내역은 유지됩니다.",
+            detail="저장된 명식을 다시 계산해야 하오. 입력 정보와 구매 내역은 유지되오.",
             headers={"X-Chart-Rebuild": "1"})
     if (store.get_json(_k_ver(chart_id)) != ENGINE_VER or
             store.get_json("chartdate:" + chart_id) != today().isoformat()):
-        raise HTTPException(status_code=409, detail="오늘 기준으로 명식을 갱신해야 합니다.",
+        raise HTTPException(status_code=409, detail="오늘 기준으로 명식을 갱신해야 하오.",
                             headers={"X-Chart-Rebuild": "1"})
     return f
 
@@ -51,8 +51,8 @@ def get_chart(chart_id: str) -> ChartResponse:
     """
     이미 세운 명식을 chart_id 로 다시 가져온다.
 
-    브라우저를 새로고침하면 화면 상태는 날아가지만 chart_id 는 남습니다.
-    이게 없으면 새로고침 한 번에 "아직 세우지 않았소" 로 돌아갑니다.
+    브라우저를 새로고침하면 화면 상태는 날아가지만 chart_id 는 남소.
+    이게 없으면 새로고침 한 번에 "아직 세우지 않았소" 로 돌아가오.
     """
     f = load_features(chart_id)
     return ChartResponse(chart_id=chart_id, features=f, cached=True,
@@ -65,17 +65,17 @@ def _divergence(req: "ChartRequest") -> dict | None:
 
     ★ 왜 먼저 말하나
 
-      손님은 다른 만세력과 대 봅니다. 백 명 중 넷다섯이 다르게 나옵니다
+      손님은 다른 만세력과 대 보오. 백 명 중 넷다섯이 다르게 나오오
       (tools/divergence.py). 그때 「우리가 맞소」 도 「그쪽이 맞소」 도
-      답이 아닙니다 — 갈리는 자리는 **계산이 아니라 선택**입니다.
+      답이 아니오 — 갈리는 자리는 **계산이 아니라 선택**이오.
 
-      발견당하면 「틀린 집」이 되고, 먼저 말하면 「아는 집」이 됩니다.
-      같은 사실인데 순서가 다릅니다.
+      발견당하면 「틀린 집」이 되고, 먼저 말하면 「아는 집」이 되오.
+      같은 사실인데 순서가 다르오.
 
-    ★ 다른 답도 같이 냅니다
+    ★ 다른 답도 같이 내오
 
-      감추면 숨긴 것이 됩니다. 저쪽 유파로는 무엇이 되는지까지 적어야
-      손님이 스스로 견줄 수 있습니다.
+      감추면 숨긴 것이 되오. 저쪽 유파로는 무엇이 되는지까지 적어야
+      손님이 스스로 견줄 수 있소.
     """
     from engine import calendar as cal
 
@@ -146,14 +146,14 @@ def _rarity(feat: dict) -> dict | None:
     """
     이 배치가 인구에서 몇 명인가.
 
-    ★ 표가 없거나 낡았으면 **아무것도 안 냅니다.** 지어낸 숫자를
-      진짜처럼 내면 이 집이 하지 않기로 한 일을 하는 것입니다.
+    ★ 표가 없거나 낡았으면 **아무것도 안 내오.** 지어낸 숫자를
+      진짜처럼 내면 이 집이 하지 않기로 한 일을 하는 것이오.
     """
     from engine import rarity as rr
     from engine.features import Features
     try:
         if rr.is_stale():
-            _RARITY_WHY.append("표가 지금 축과 안 맞습니다 (make_rarity 를 다시)")
+            _RARITY_WHY.append("표가 지금 축과 안 맞소 (make_rarity 를 다시)")
             del _RARITY_WHY[:-3]
             return None
         f = Features(**feat)
@@ -186,12 +186,12 @@ def post_chart(req: ChartRequest) -> ChartResponse:
     born = date(req.year, req.month, req.day)
     now = today()
     if born > now:
-        raise HTTPException(status_code=400, detail="생년월일이 오늘보다 뒤입니다. 태어난 날짜를 확인해 주세요.")
+        raise HTTPException(status_code=400, detail="생년월일이 오늘보다 뒤이오. 태어난 날짜를 확인해 주시오.")
     age = now.year - born.year - ((now.month, now.day) < (born.month, born.day))
     if age < 14:
-        raise HTTPException(status_code=400, detail="만 14세 이상만 이용할 수 있습니다.")
+        raise HTTPException(status_code=400, detail="만 14세 이상만 이용할 수 있소.")
     if req.birth_city not in CITY_LON:
-        raise HTTPException(status_code=400, detail="현재 지원하는 국내 출생 도시를 선택해 주세요. 해외 출생은 아직 지원하지 않습니다.")
+        raise HTTPException(status_code=400, detail="현재 지원하는 국내 출생 도시를 선택해 주시오. 해외 출생은 아직 지원하지 않소.")
     key = chart_key(req)
     cached = store.get_json(store.k_chart(key))
     # ★ 「같은 입력이면 같은 결과」는 **엔진이 안 바뀔 때만** 참이오

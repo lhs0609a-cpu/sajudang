@@ -47,7 +47,7 @@ export default function DailyPage() {
     return (
       <Shell screen="g1" title="오늘의 일진">
         <Narration lines={["먼저 글자를 세워야 하오."]} />
-        <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 보겠습니다</button>
+        <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 보겠소</button>
       </Shell>
     );
   }
@@ -75,7 +75,7 @@ export default function DailyPage() {
         바퀴 도는 것과 같소.
       </Say>
       {/*
-        ★ 「일진」이 무엇인지 아무 데도 안 적혀 있었습니다.
+        ★ 「일진」이 무엇인지 아무 데도 안 적혀 있었소.
           그리고 「그날의 기운」 은 모르는 말을 **뜬 말로** 바꾼 것이라
           아직 그림이 안 그려집니다. 세는 것으로 바꿔 적습니다.
       */}
@@ -168,7 +168,7 @@ export default function DailyPage() {
           **왜 어제와 다른지**를 말해 줘야 내일도 옵니다.
 
         ★ 그런데 여기 적혀 있던 「내일은 글자가 하나 바뀌오」 는
-          **틀린 말이었습니다.** 일진은 천간과 지지가 함께 한 칸씩
+          **틀린 말이었소.** 일진은 천간과 지지가 함께 한 칸씩
           갑니다 — 庚辰 다음은 辛巳라 두 글자가 다 바뀝니다. 같은 짝은
           예순 날 뒤에 돌아옵니다. 셈에서 나온 값으로 고쳤습니다.
       */}

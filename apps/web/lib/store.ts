@@ -53,7 +53,7 @@ export interface SessionState {
   chartId: string | null;
   /** 희소도 — 센 값. 없으면 화면이 그 자리를 접는다 */
   rarity: import("@shared/chart").Rarity | null;
-  /** 다른 만세력과 갈릴 수 있는 자리. 먼저 말해 줍니다. */
+  /** 다른 만세력과 갈릴 수 있는 자리. 먼저 말해 주오. */
   divergence: { cases: import("@shared/chart").DivergenceCase[] } | null;
   features: Features | null;
 
@@ -213,7 +213,7 @@ export const CONCERNS: { id: Concern; label: string; sub: string }[] = [
  *
  * ★ 값과 분량은 **서버가 셉니다** — `POST /v1/pay/tiers`.
  *   여기 "평생운 18컷 · 25페이지" 라고 적혀 있었는데 실제로 나오는 것은
- *   11~12컷 · 6탭이었습니다. 화면이 제 손으로 분량을 적으면 엔진이
+ *   11~12컷 · 6탭이었소. 화면이 제 손으로 분량을 적으면 엔진이
  *   달라져도 이 줄은 안 바뀌므로, 다시 어긋납니다.
  *   값도 같습니다 — 캐릭터마다 다르고, 서버가 청구하는 값만이 참입니다.
  */

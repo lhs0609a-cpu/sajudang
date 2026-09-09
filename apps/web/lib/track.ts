@@ -104,7 +104,7 @@ function send(batch: Ev[], beacon = false) {
       keepalive: true,
     }).catch(() => {});
   } catch {
-    /* 계측 실패는 삼킵니다 */
+    /* 계측 실패는 삼키오 */
   }
 }
 

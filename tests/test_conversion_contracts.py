@@ -36,7 +36,7 @@ def test_practice_is_complete_and_explicitly_not_a_prediction():
     for concern in PRACTICES:
         item=build(concern)
         assert item["source_kind"] == "general_practice"
-        assert "사주 계산 결과가 아닙니다" in item["source"]
+        assert "사주 계산 결과가 아니오" in item["source"]
         assert len(item["action"]) > 30
         actions.append(item["action"])
     assert len(set(actions)) == 6

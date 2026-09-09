@@ -92,14 +92,14 @@ def test_비유가_그_캐릭터_목소리로_말한다():
     """
     f = build_features(build_chart(1993, 11, 25, 13, 0, "M", True, "서울"))
     for lid in ("sigye", "yeondam", "haengsu"):    # 합쇼체 셋
-        assert lens_mod.view(lid)["voice"] == "hapsyo"
+        assert lens_mod.view(lid)["voice"] == "hao"
         r = build_report(f, "cid", lid, "all", "money", None)
         for c in r["cuts"]:
             m = re.search(r'<div class="gls">.*?</div>', c["html"], re.S)
             if not m:
                 continue
             plain = TAG.sub(" ", m.group(0))
-            left = re.findall(r"[가-힣]{2,}(?<!십시)[오소](?=[\s.,!?…—·]|$)",
+            left = re.findall(r"[가-힣]{2,}(?:습니다|합니다|어요|아요)(?=[\s.,!?…—·]|$)",
                               plain)
             assert not left, "%s 의 비유가 하오체로 남았소: %s" % (lid, left[:3])
 

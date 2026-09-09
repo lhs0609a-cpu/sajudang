@@ -286,7 +286,7 @@ export default function DevRail() {
             <button
               className="railoff"
               onClick={() => s.set({ admin: false, adminSet: true })}
-              title="레일을 끕니다. 다시 켜려면 주소 끝에 ?admin=1">
+              title="레일을 끄오. 다시 켜려면 주소 끝에 ?admin=1">
               숨기기
             </button>
           </div>

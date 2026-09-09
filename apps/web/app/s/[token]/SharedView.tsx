@@ -60,7 +60,7 @@ export default function SharedView({ token }: { token: string }) {
         <Scene id="gate" className="hero" />
         <Say who="도령" lens="pungun">{err}</Say>
         <button className="btn mt" onClick={() => router.push("/")}>
-          나도 내 운명을 확인해 보겠습니다
+          나도 내 운명을 확인해 보겠소
         </button>
       </Shell>
     );
@@ -168,8 +168,8 @@ export default function SharedView({ token }: { token: string }) {
       </p>
 
       {/* ③ ★ 의심 풀기 — 우리가 먼저 꺼낸다.
-          문장은 components/Doubts.tsx 에 한 벌만 둡니다. 전에는 이 화면
-          안에 갇혀 있어서, 직접 들어온 사람은 한 번도 못 봤습니다. */}
+          문장은 components/Doubts.tsx 에 한 벌만 두오. 전에는 이 화면
+          안에 갇혀 있어서, 직접 들어온 사람은 한 번도 못 봤소. */}
       <Doubts first={0} />
 
       {/* 친구가 받은 단서까지 같이 보여준다 */}
@@ -193,8 +193,8 @@ export default function SharedView({ token }: { token: string }) {
         {/*
           ★ 막이 그냥 끝나고 있었습니다. 남의 종이를 다 보고 나서
             버튼 둘이 나올 뿐이라, 「나도 해볼까」가 손님 머릿속에서
-            혼자 서야 했습니다. 재촉이 아니라 **무엇이 다른지**를
-            한 줄로 말합니다 — 여기 있는 건 남의 글자입니다.
+            혼자 서야 했소. 재촉이 아니라 **무엇이 다른지**를
+            한 줄로 말하오 — 여기 있는 건 남의 글자입니다.
         */}
         <ActOut kind="남긴 물음" next="골목">
           여기 있는 8글자는 끝까지 남의 것이오. 남의 옷을 걸쳐 본
@@ -204,17 +204,17 @@ export default function SharedView({ token }: { token: string }) {
         </ActOut>
         {/*
           ★ 열린 횟수가 **버튼 아래**에 있었습니다. 그건 고를 때
-            보라고 있는 수인데, 다 고르고 난 자리에 놓여 있었습니다.
-            누르기 전에 보이게 위로 올립니다.
+            보라고 있는 수인데, 다 고르고 난 자리에 놓여 있었소.
+            누르기 전에 보이게 위로 올리오.
         */}
         <p className="sm" style={{ textAlign: "center", color: "var(--paper3)" }}>
           이 종이는 {d.views}번 열렸소.
         </p>
         <button className="btn mt" onClick={() => router.push("/")}>
-          내 여덟 글자를 세우겠습니다
+          내 여덟 글자를 세우겠소
         </button>
         <button className="btn gh" onClick={() => router.push("/lobby")}>
-          어떤 사람들이 있는지부터 보겠습니다
+          어떤 사람들이 있는지부터 보겠소
         </button>
       </div>
     </Shell>

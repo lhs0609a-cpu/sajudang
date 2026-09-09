@@ -70,7 +70,7 @@ def test_every_choice_says_press_me():
     말해 줘야 누른다.
     """
     entry = _src("app/page.tsx")
-    for prompt in ("하나를 골라주세요", "하나를 선택해 주세요", "성향 4글자 선택"):
+    for prompt in ("하나를 골라주시오", "하나를 선택해 주시오", "성향 4글자 선택"):
         assert prompt in entry
     assert "aria-pressed" in entry
     assert "aria-pressed" in _src("app/pay/page.tsx")
@@ -82,7 +82,7 @@ def test_the_gate_says_what_is_missing():
     날짜만 들여다본다. 무엇이 비었는지 말해야 한다.
     """
     src = _src("app/page.tsx")
-    assert "여성·남성 중 하나를 선택해 주세요" in src, \
+    assert "여성·남성 중 하나를 선택해 주시오" in src, \
         "성별이 비었을 때 그 말을 안 하오"
 
 

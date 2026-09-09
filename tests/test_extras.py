@@ -231,8 +231,8 @@ def test_blood_says_it_is_not_evidence_first(f):
     """
     cut = extras.blood_cut(f, {"type": "A"})
     body = cut["html"]
-    assert "근거가 아닙니다" in body
-    assert body.index("근거가 아닙니다") < body.index("A형")
+    assert "근거가 아니오" in body
+    assert body.index("근거가 아니오") < body.index("A형")
     # 표시광고법 — 검증 불가능한 주장 금지
     for banned in ("과학적", "통계", "적중률", "입증"):
         assert banned not in body, banned

@@ -52,7 +52,7 @@ def build(f,lens_id,concern):
         'perspective':guard.enforce(perspective),
         'observation':guard.enforce(lens_cuts._counted(f,[axis])),
         'question':guard.enforce(question),
-        'scene':guard.enforce(f'{scene} 하나를 떠올리고, {record}을 나눠 보세요.'),
+        'scene':guard.enforce(f'{scene} 하나를 떠올리고, {record}을 나눠 보시오.'),
         'action':guard.enforce(action),
-        'boundary':'전통 해석을 돌아보기 위한 질문입니다. 맞는 경험이 없다면 내 이야기로 받아들이지 않아도 됩니다.',
+        'boundary':'전통 해석을 돌아보기 위한 질문이오. 맞는 경험이 없다면 내 이야기로 받아들이지 않아도 되오.',
         'source_kind':'traditional_interpretation_and_reflection'}

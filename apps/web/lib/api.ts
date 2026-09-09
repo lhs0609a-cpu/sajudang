@@ -118,13 +118,13 @@ async function rebuildSavedChart(chartId: string): Promise<void> {
     let saved;
     try { saved = JSON.parse(localStorage.getItem("sajudang-session") || "null")?.state; } catch {}
     if (!saved || saved.chartId !== chartId || !saved.year || !saved.month || !saved.day) {
-      throw new ApiError(409, "명식을 다시 입력해 주세요. 구매 내역은 내 첩에서 그대로 확인할 수 있습니다.");
+      throw new ApiError(409, "명식을 다시 입력해 주시오. 구매 내역은 내 첩에서 그대로 확인할 수 있소.");
     }
     const result = await call<ChartResponse>("/v1/chart", {method:"POST", body:JSON.stringify({
       year:saved.year, month:saved.month, day:saved.day, hour:saved.hourKnown ? saved.hour : null,
       minute:saved.hourKnown ? saved.minute : null, hour_known:saved.hourKnown, sex:saved.sex, birth_city:saved.city,
     })}, false);
-    if (result.chart_id !== chartId) throw new ApiError(409, "입력 정보가 변경됐습니다. 처음 화면에서 명식을 다시 확인해 주세요. 구매 내역은 유지됩니다.");
+    if (result.chart_id !== chartId) throw new ApiError(409, "입력 정보가 변경됐소. 처음 화면에서 명식을 다시 확인해 주시오. 구매 내역은 유지되오.");
   })();
   rebuilding.set(chartId, task);
   try { await task; } finally { rebuilding.delete(chartId); }
@@ -177,7 +177,7 @@ export const api = {
   /**
    * ★ session_id 를 반드시 실어 보냅니다.
    *   tier 는 "보고 싶다" 는 말일 뿐이고, 실제로 열리는 것은 서버가
-   *   치른 주문을 보고 정합니다. 안 보내면 무료 구간만 옵니다.
+   *   치른 주문을 보고 정합니다. 안 보내면 무료 구간만 오오.
    *   응답의 tier 가 **실제로 내려온 티어**이니 그걸 믿으세요.
    */
   report: (req: {
@@ -248,7 +248,7 @@ export const api = {
    *
    * ★ 글을 아무거나 보내지 않습니다. 훅은 뱅크에서 나온 문장이라
    *   statement_id 가 함께 가고, 캐릭터 첫마디는 이름으로 부릅니다.
-   *   서버에 열쇠가 없으면 `ready:false` 가 옵니다 — 오류가 아니라
+   *   서버에 열쇠가 없으면 `ready:false` 가 오오 — 오류가 아니라
    *   **없음**이라, 화면은 조용히 넘어갑니다.
    */
   voice: (ask: { kind: "hook"; statement_id: string; html: string }

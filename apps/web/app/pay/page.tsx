@@ -75,9 +75,9 @@ function Beat({ cut, chartId, lensId, concern, charName }: {
 }) {
   const [said, setSaid] = useState<string | null>(null);
   const answer = async (yes: boolean | null) => {
-    setSaid(yes === null ? "아직 모르셔도 괜찮아요. 이어서 읽어보세요."
-      : yes ? "경험과 가까운 장면이군요. 다음 내용도 살펴보세요."
-            : "맞지 않는 해석일 수 있어요. 이 장면은 건너뛰어도 괜찮아요.");
+    setSaid(yes === null ? "아직 모르셔도 괜찮소. 이어서 읽어보시오."
+      : yes ? "경험과 가까운 장면이군요. 다음 내용도 살펴보시오."
+            : "맞지 않는 해석일 수 있소. 이 장면은 건너뛰어도 괜찮소.");
     track("free_beat", "d0", { yes: yes === null ? 2 : yes ? 1 : 0 });
     if (!cut.statement_id) return;
     try {
@@ -97,10 +97,10 @@ function Beat({ cut, chartId, lensId, concern, charName }: {
     <div className="beat">
       <span className="q">이 장면이 내 경험과 가까운가요?</span>
       <div className="vt">
-        <button onClick={() => answer(true)}>그렇습니다</button>
-        <button onClick={() => answer(false)}>아닙니다</button>
+        <button onClick={() => answer(true)}>그렇소</button>
+        <button onClick={() => answer(false)}>아니오</button>
       </div>
-      <button className="lk vt3" onClick={() => answer(null)}>잘 모르겠습니다</button>
+      <button className="lk vt3" onClick={() => answer(null)}>잘 모르겠소</button>
     </div>
   );
 }
@@ -231,7 +231,7 @@ function PayInner() {
   /*
    * 결제창에서 돌아왔다 — 토스가 ?toss=ok&paymentKey=… 로 되돌려 보냅니다.
    *
-   * 결제창은 페이지를 통째로 떠났다 옵니다. 그래서 승인은 여기서 합니다.
+   * 결제창은 페이지를 통째로 떠났다 옵니다. 그래서 승인은 여기서 하오.
    * 금액은 안 보냅니다 — 서버가 주문에 적어 둔 값을 씁니다.
    */
   const tossBack = params.get("toss");
@@ -241,7 +241,7 @@ function PayInner() {
     const orderId = params.get("order") ?? params.get("orderId");
     const paymentKey = params.get("paymentKey");
     if (!orderId || !paymentKey) {
-      setErr("결제 정보를 확인할 수 없어요. 결제 내역에서 상태를 먼저 확인해 주세요.");
+      setErr("결제 정보를 확인할 수 없소. 결제 내역에서 상태를 먼저 확인해 주시오.");
       setSettling(false);
       return;
     }
@@ -273,7 +273,7 @@ function PayInner() {
   useEffect(() => {
     if (tossBack !== "fail") return;
     track("pay_fail", "d2");
-    setErr("결제창이 닫혔어요. 결제 내역을 확인한 뒤 다시 진행해 주세요.");
+    setErr("결제창이 닫혔소. 결제 내역을 확인한 뒤 다시 진행해 주시오.");
   }, [tossBack, params]);
 
   /*
@@ -281,8 +281,8 @@ function PayInner() {
    *
    * ★ 결제창과 **다른 길**입니다. 토스가 돌려보내는 것은 paymentKey 가
    *   아니라 `authKey` 이고, 이 시점에는 **아직 아무 돈도 안 빠져나갔습니다.**
-   *   서버가 authKey 를 빌링키로 바꾸고, 그 열쇠로 첫 달을 긁습니다.
-   *   그러니 여기서 "치렀다" 고 화면을 넘기면 안 됩니다 — 서버 대답을
+   *   서버가 authKey 를 빌링키로 바꾸고, 그 열쇠로 첫 달을 긁소.
+   *   그러니 여기서 "치렀다" 고 화면을 넘기면 안 되오 — 서버 대답을
    *   받고 넘깁니다.
    */
   const subBack = params.get("sub");
@@ -292,7 +292,7 @@ function PayInner() {
     const customerKey = params.get("customerKey");
     const authKey = params.get("authKey");
     if (!customerKey || !authKey) {
-      setErr("카드 등록 정보를 확인할 수 없어요. 내 첩에서 구독 상태를 확인해 주세요.");
+      setErr("카드 등록 정보를 확인할 수 없소. 내 첩에서 구독 상태를 확인해 주시오.");
       setCarding(false);
       return;
     }
@@ -322,16 +322,16 @@ function PayInner() {
   useEffect(() => {
     if (subBack !== "fail") return;
     track("pay_fail", "d2");
-    setErr("카드 등록이 중단되었어요. 내 첩에서 구독 상태를 확인해 주세요.");
+    setErr("카드 등록이 중단되었소. 내 첩에서 구독 상태를 확인해 주시오.");
   }, [subBack, params]);
 
   /* d2 · 주문 만들기 — 금액·상한은 서버가 판정한다 */
   useEffect(() => {
     if (!["d1", "d1b", "d2"].includes(step) || !s.chartId || order || tossBack || subBack) return;
     // ★ 안 고르고 d2 로 바로 들어온 자리(주소를 치거나 레일로 뛰거나).
-    //   없는 값으로 주문을 만들지 않고 목패로 돌려보냅니다.
+    //   없는 값으로 주문을 만들지 않고 목패로 돌려보내오.
     if (!pick) return;
-    // ★ 달삯은 주문이 아닙니다 — 카드를 걸어 두는 일이라 길이 다릅니다.
+    // ★ 달삯은 주문이 아니오 — 카드를 걸어 두는 일이라 길이 다릅니다.
     //   서버도 이 길로 오면 409 로 돌려보냅니다 (pay.prepare).
     if (pick === "sub") return;
     let alive = true;
@@ -491,8 +491,8 @@ function PayInner() {
                 여기 적는 건 전부 이미 참인 것입니다.
             */}
             {(lens?.price ?? 0) > 0 && <ActOut kind="딜레마" next="어디까지 볼지">
-              여기까지는 무료로 읽을 수 있어요. 더 살펴보고 싶다면 추가로 열리는 내용과 가격을 확인해 주세요.
-              <br />오늘은 여기까지 읽고, 내게 도움이 된 문장을 가져가셔도 좋아요.
+              여기까지는 무료로 읽을 수 있소. 더 살펴보고 싶다면 추가로 열리는 내용과 가격을 확인해 주시오.
+              <br />오늘은 여기까지 읽고, 내게 도움이 된 문장을 가져가셔도 좋소.
             </ActOut>}
             {(lens?.price ?? 0) > 0 && <button className="btn mt" onClick={() => router.push("/pay?step=d1")}>
               추가 해석과 가격 보기
@@ -500,11 +500,11 @@ function PayInner() {
             {/*
               ★ 이 버튼은 그대로 둡니다 — 브레이크는 매출보다 앞섭니다.
                 다만 목적지가 /lobby 라 **아무것도 안 남기고** 나갔습니다.
-                여기서 나간 손님을 다시 부를 고리가 없었습니다.
+                여기서 나간 손님을 다시 부를 고리가 없었소.
                 손에 뭔가를 들고 나가게 합니다.
             */}
             <button className="btn gh" onClick={() => router.push("/summary")}>
-              오늘은 여기까지 · 본 것을 한 장으로 받겠습니다
+              오늘은 여기까지 · 본 것을 한 장으로 받겠소
             </button>
           </>
         )}
@@ -515,7 +515,7 @@ function PayInner() {
   if (["d1", "d1b", "d2"].includes(step)) {
     if (lens?.price === 0 && !tossBack && !subBack) return (
       <Shell screen="d0" title="무료로 읽는 자리">
-        <CompanionCat message="이 인물의 해석은 무료로 읽을 수 있어요." />
+        <CompanionCat message="이 인물의 해석은 무료로 읽을 수 있소." />
         <button className="btn" onClick={() => router.push("/report/" + s.cur + "?tab=c2")}>무료 해석 읽기</button>
       </Shell>
     );
@@ -537,21 +537,21 @@ function PayInner() {
     );
     if (settling || carding) return (
       <Shell screen="d2" title="결제 결과 확인" legal>
-        <div className="conversion-card" role="status"><h2>결제 결과를 확인하고 있어요.</h2>
-          <p>서버에서 결제와 열람 권한을 확인한 뒤 해석을 열어드릴게요.</p></div>
+        <div className="conversion-card" role="status"><h2>결제 결과를 확인하고 있소.</h2>
+          <p>서버에서 결제와 열람 권한을 확인한 뒤 해석을 열어드리겠소.</p></div>
       </Shell>
     );
     return (
       <Shell screen="d1" title="추가 해석과 결제" legal onBack={() => router.push("/pay?step=d0")}>
         <div className="conversion-intro">
           <p className="conversion-kicker">내용 · 가격 · 열람 조건</p>
-          <h1 className="conversion-title">지금의 고민을<br />조금 더 깊이 읽어보세요.</h1>
-          <p className="conversion-lead">{charName}의 관점에서 추가로 열리는 내용을 확인하세요. 상품을 선택하면 아래에 결제 금액과 조건이 표시돼요.</p>
+          <h1 className="conversion-title">지금의 고민을<br />조금 더 깊이 읽어보시오.</h1>
+          <p className="conversion-lead">{charName}의 관점에서 추가로 열리는 내용을 확인하시오. 상품을 선택하면 아래에 결제 금액과 조건이 표시되오.</p>
         </div>
-        {!s.chartId && <div className="conversion-status"><p>먼저 태어난 정보로 무료 해석을 확인해 주세요.</p><button className="btn" onClick={() => router.push("/?step=a5")}>무료 해석 시작하기</button></div>}
+        {!s.chartId && <div className="conversion-status"><p>먼저 태어난 정보로 무료 해석을 확인해 주시오.</p><button className="btn" onClick={() => router.push("/?step=a5")}>무료 해석 시작하기</button></div>}
         {err && <div className="warn" role="alert"><p>{err}</p>{!tiers && <button className="btn" onClick={() => {setErr(null);setRetry(n => n + 1);}}>상품 다시 불러오기</button>}<button className="btn gh" onClick={() => router.push("/me")}>결제 내역·구독 확인</button>
           {(tossBack || subBack) && <button className="btn gh" onClick={() => router.replace("/pay?step=d1")}>상품으로 돌아가기</button>}</div>}
-        {s.chartId && !tiers && !err && <p role="status">이 명식에서 열리는 내용을 확인하고 있어요…</p>}
+        {s.chartId && !tiers && !err && <p role="status">이 명식에서 열리는 내용을 확인하고 있소…</p>}
         {tiers && <>
           <div className="conversion-products">{tiers.filter(t => t.id === "one").map(product)}</div>
           <details className="conversion-details" open={pick === "all" || pick === "sub" || !tiers.some(t => t.id === "one") ? true : undefined}>
@@ -563,14 +563,14 @@ function PayInner() {
             <h2>{tier.id === "one" ? `${charName} 해석` : tier.name}</h2>
             {tier.needs_extra_input && <div className="conversion-note">
               <p>일부 해석에 필요한 추가 입력: {(tier.required_inputs ?? []).map(key => (INPUT_LABELS[key] ?? '현재 상황')).join(' · ') || '상대 정보 또는 현재 상황'}.</p>
-              <p>입력은 선택입니다. 생년월일로 읽는 본문은 볼 수 있고, 입력하지 않은 정보에 대한 추가 해석은 열리지 않습니다. 혈액형·그림·카드는 자기 성찰을 위한 보조 소재입니다.</p>
+              <p>입력은 선택이오. 생년월일로 읽는 본문은 볼 수 있고, 입력하지 않은 정보에 대한 추가 해석은 열리지 않소. 혈액형·그림·카드는 자기 성찰을 위한 보조 소재이오.</p>
             </div>}
-            {tier.id === "all" && <p className="conversion-note">이미 읽은 내용도 포함됩니다. 전체 상품은 다른 인물의 관점을 함께 읽는 방식이며, 모든 인물에서 한 명 상품보다 본문이 길어지는 것은 아닙니다.</p>}
+            {tier.id === "all" && <p className="conversion-note">이미 읽은 내용도 포함되오. 전체 상품은 다른 인물의 관점을 함께 읽는 방식이며, 모든 인물에서 한 명 상품보다 본문이 길어지는 것은 아니오.</p>}
             {peek && peek.length > 0 && <details className="conversion-details"><summary>추가 해석 미리보기</summary>
               {peek.map((r, i) => <div key={r.lens_id+i}><h3>{r.ask}</h3><p>{r.head}</p>{r.source && <p className="conversion-note">해석 근거 · {r.source}</p>}</div>)}
             </details>}
             <details className="conversion-details"><summary>전체 분량과 열람 범위</summary>
-              <p className="conversion-note">현재 명식 기준 {tier.cuts}개 내용 · {tier.chars.toLocaleString()}자 · 약 {tier.minutes}분. {tier.lenses}명의 관점으로 읽습니다.</p>
+              <p className="conversion-note">현재 명식 기준 {tier.cuts}개 내용 · {tier.chars.toLocaleString()}자 · 약 {tier.minutes}분. {tier.lenses}명의 관점으로 읽소.</p>
               {tier.opens.length > 0 && <ul>{tier.opens.map(title => <li key={title}>{title}</li>)}</ul>}
             </details>
             {pick !== "sub" && order && <>
@@ -581,10 +581,10 @@ function PayInner() {
               {order.enabled && order.client_key && SELLABLE ? <button className="btn" disabled={busy} onClick={async () => {
                 setBusy(true); setErr(null); track("pay_start", "d1");
                 try { await openCheckout({ clientKey: order.client_key!, orderId: order.order_id, amount: order.amount, orderName: tier.name, customerKey: s.sessionId }); }
-                catch (e) { track("pay_fail", "d1"); setErr(e instanceof Error ? e.message : "결제창을 열지 못했어요. 다시 시도해 주세요."); }
+                catch (e) { track("pay_fail", "d1"); setErr(e instanceof Error ? e.message : "결제창을 열지 못했소. 다시 시도해 주시오."); }
                 finally { setBusy(false); }
               }}>{busy ? "결제창 연결 중…" : `${order.amount.toLocaleString()}원 결제하기`}</button>
-              : <p className="conversion-status">잠시 후 결제를 다시 시도해 주세요.</p>}
+              : <p className="conversion-status">잠시 후 결제를 다시 시도해 주시오.</p>}
             </>}
             {pick === "sub" && offer && <>
               <p className="conversion-price">{offer.amount.toLocaleString()}원 <small>{tier.days ?? 30}일마다 자동 결제</small></p>
@@ -593,17 +593,17 @@ function PayInner() {
               {offer.enabled && offer.client_key && SELLABLE ? <button className="btn" disabled={busy} onClick={async () => {
                 setBusy(true); setErr(null); track("pay_start", "d1");
                 try { await registerCard({ clientKey: offer.client_key!, customerKey: offer.customer_key }); }
-                catch (e) { track("pay_fail", "d1"); setErr(e instanceof Error ? e.message : "카드 등록을 연결하지 못했어요."); }
+                catch (e) { track("pay_fail", "d1"); setErr(e instanceof Error ? e.message : "카드 등록을 연결하지 못했소."); }
                 finally { setBusy(false); }
               }}>{busy ? "카드 등록 연결 중…" : `${offer.amount.toLocaleString()}원 정기결제 등록하기`}</button>
-              : <p className="conversion-status">지금 정기결제를 연결할 수 없어요. 잠시 후 다시 시도해 주세요.</p>}
+              : <p className="conversion-status">지금 정기결제를 연결할 수 없소. 잠시 후 다시 시도해 주시오.</p>}
             </>}
-            {!order && pick !== "sub" && !err && <p role="status">결제 금액과 조건을 확인하고 있어요…</p>}
-            {!offer && pick === "sub" && !err && <p role="status">정기결제 조건을 확인하고 있어요…</p>}
+            {!order && pick !== "sub" && !err && <p role="status">결제 금액과 조건을 확인하고 있소…</p>}
+            {!offer && pick === "sub" && !err && <p role="status">정기결제 조건을 확인하고 있소…</p>}
           </div>
         </div>}
         <button className="btn gh" onClick={() => router.push("/pay?step=d0")}>무료 해석으로 돌아가기</button>
-        <p className="conversion-note">하루 구매는 2건까지예요. 이미 구매했다면 내 첩에서 결제 내역과 복원 방법을 확인해 주세요.</p>
+        <p className="conversion-note">하루 구매는 2건까지요. 이미 구매했다면 내 첩에서 결제 내역과 복원 방법을 확인해 주시오.</p>
       </Shell>
     );
   }
@@ -611,13 +611,13 @@ function PayInner() {
   /* d3 · 완료 */
   if (step === "d3") {
     if (!s.paid && !granted && !sub?.has) return <Shell screen="d3" title="결제 내역 확인">
-      <p className="conversion-lead">이 화면만으로는 결제 완료를 확인할 수 없어요. 내 첩에서 결제 내역을 확인해 주세요.</p>
+      <p className="conversion-lead">이 화면만으로는 결제 완료를 확인할 수 없소. 내 첩에서 결제 내역을 확인해 주시오.</p>
       <button className="btn" onClick={() => router.push("/me")}>결제 내역 확인</button>
     </Shell>;
     return (
       <Shell screen="d3" title="열렸소">
         <Scene id="untie" />
-        <CompanionCat state="saved" message="해석이 열렸어요. 내 속도로 천천히 읽어보세요." />
+        <CompanionCat state="saved" message="해석이 열렸소. 내 속도로 천천히 읽어보시오." />
         <Narration lines={["붉은 끈이 풀렸다."]} />
 
         {/*
@@ -625,9 +625,9 @@ function PayInner() {
             사람은 경험의 **끝**으로 전체를 기억합니다. 재구매·후기·추천이
             갈리는 자리인데 방금 무엇을 얻었는지가 화면에 없었습니다.
             수는 서버가 셉니다 — 화면이 적지 않습니다. 셈이 안 되면
-            (명식 캐시가 지워졌으면) 지어내지 않고 그냥 안 적습니다.
+            (명식 캐시가 지워졌으면) 지어내지 않고 그냥 안 적소.
         */}
-        {/* ★ 인장이 c6 에서 **조용히 배열에 들어갈 뿐**이었습니다.
+        {/* ★ 인장이 c6 에서 **조용히 배열에 들어갈 뿐**이었소.
             값을 치른 직후가 이 집이 가장 따뜻해야 할 자리인데, 얻은
             표식이 화면에 한 번도 안 보였습니다. 여기서 찍습니다. */}
         <div className="seal">
@@ -636,7 +636,7 @@ function PayInner() {
         </div>
 
         {/*
-          ★ 달삯은 **다음이 있는** 결제입니다.
+          ★ 달삯은 **다음이 있는** 결제이오.
             한 번 치르는 것과 달리, 여기서 말 안 하면 손님은 다음 달에
             빠져나가는 것을 카드 명세서에서 처음 봅니다. 그건 몰래
             빼간 것과 같습니다. 언제 · 얼마 · 어디서 그만두는지를
@@ -671,11 +671,11 @@ function PayInner() {
           </div>
         )}
 
-        {/* 값을 치른 직후가 이 집이 가장 따뜻해야 할 자리입니다. */}
+        {/* 값을 치른 직후가 이 집이 가장 따뜻해야 할 자리이오. */}
         {/*
-          ★ 여기가 넷째로 낮았습니다 (연출 54).
+          ★ 여기가 넷째로 낮았소 (연출 54).
 
-            「잘 오셨소」 한 줄이 전부였습니다. 값을 치른 **직후**인데
+            「잘 오셨소」 한 줄이 전부였소. 값을 치른 **직후**인데
             치른 사람 얘기가 없어서, 인장과 컷 수만 뜨는 영수증
             화면이 됐습니다. 울림 20 · 명확 43 이 거기서 나왔습니다.
 
@@ -705,10 +705,10 @@ function PayInner() {
         </ActOut>
         {/* ★ 결제 직후에 탭을 한 번 더 누르게 하고 있었습니다.
             "읽으러 간다" → 표지(c1) → "편다" → 본문. 값을 치른 직후는
-            마찰을 0으로 둬야 할 구간입니다. 표지는 다시 읽으러 올 때 씁니다. */}
+            마찰을 0으로 둬야 할 구간이오. 표지는 다시 읽으러 올 때 쓰오. */}
         <button className="btn mt"
                 onClick={() => router.push("/report/" + s.cur + "?tab=c2")}>
-          바로 읽겠습니다
+          바로 읽겠소
         </button>
       </Shell>
     );

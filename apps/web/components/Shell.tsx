@@ -133,9 +133,9 @@ import SoundToggle from "@/components/SoundToggle";
 import DevRail from "@/components/DevRail";
 
 export const LEGAL = [
-  "본 서비스는 전통 명리학 해석에 기반한 자기이해·오락 목적 콘텐츠입니다.",
-  "의학적·법률적·재무적 판단의 근거가 아니며, 특정 결과를 보장하지 않습니다.",
-  "응답률 수치는 실제 사용자 응답 집계값이며 예측 적중률이 아닙니다.",
+  "본 서비스는 전통 명리학 해석에 기반한 자기이해·오락 목적 콘텐츠이오.",
+  "의학적·법률적·재무적 판단의 근거가 아니며, 특정 결과를 보장하지 않소.",
+  "응답률 수치는 실제 사용자 응답 집계값이며 예측 적중률이 아니오.",
 ];
 
 export function Legal() {
@@ -232,7 +232,7 @@ export function TopBar({ title, skipTo, onBack }: {
           닫아 두고 화면을 보다가 손님 눈으로 보고 싶어지면 주소를
           손으로 고쳐야 했습니다.
 
-          손님에게는 이 칸이 아예 없습니다 — 있는지도 모릅니다.
+          손님에게는 이 칸이 아예 없습니다 — 있는지도 모르오.
       */}
       {admin && (
         <button className="tb mode" onClick={() => {
@@ -349,8 +349,8 @@ export default function Shell({
   /*
    * ★ 화면 전체가 손님이 읽는 속도로 뜬다.
    *
-   *   순서는 화면 단위입니다. 여기 놓인 순서(DOM 순서 = 보이는 순서)대로
-   *   차례를 매깁니다 — 페이지마다 손댈 필요가 없습니다. 스물일곱 화면이
+   *   순서는 화면 단위이오. 여기 놓인 순서(DOM 순서 = 보이는 순서)대로
+   *   차례를 매깁니다 — 페이지마다 손댈 필요가 없소. 스물일곱 화면이
    *   전부 이 한 자리를 지납니다.
    *
    *   장면과 진행 막대는 뺍니다 — 배경이라 처음부터 있어야 합니다.
@@ -649,7 +649,7 @@ export default function Shell({
    *   장면이 제 결을 들고 있으니(`manifest.bed`) 화면이 늘어도 여기를
    *   고칠 일이 없습니다. 같은 방이면 안 끊깁니다.
    *
-   * ★ 소리가 꺼져 있으면 아무 일도 안 합니다. 켜는 순간 이어집니다.
+   * ★ 소리가 꺼져 있으면 아무 일도 안 합니다. 켜는 순간 이어지오.
    */
 
   // 계산 서버가 안 붙은 배포본이면 조용히 실패하지 않고 알린다
@@ -692,8 +692,8 @@ export default function Shell({
           <div className="warn" style={{ margin: "12px 16px 0" }}>
             <p>계산 서버가 아직 붙지 않았소.</p>
             <p className="sm">
-              화면과 서사는 볼 수 있으나 명식은 세울 수 없습니다.
-              <code> NEXT_PUBLIC_API_BASE </code>를 API 주소로 설정하세요.
+              화면과 서사는 볼 수 있으나 명식은 세울 수 없소.
+              <code> NEXT_PUBLIC_API_BASE </code>를 API 주소로 설정하시오.
             </p>
           </div>
         )}
@@ -714,7 +714,7 @@ export default function Shell({
         */}
         {pacing && (
           <button className="beatskip-hint noprint" onClick={revealAll}>
-            한 번에 다 보겠습니다
+            한 번에 다 보겠소
           </button>
         )}
       </div>

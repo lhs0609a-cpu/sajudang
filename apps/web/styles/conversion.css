@@ -60,3 +60,15 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,su
 @keyframes cat-nod { 50% { transform: translateY(4px) rotate(-4deg); } }
 @media (prefers-reduced-motion: reduce) { .companion-cat * { animation: none !important; } }
 @media (max-width: 360px) { .conversion-title { font-size: 28px; } .conversion-card { padding: 18px; } }
+
+/* The entry and its FAQ share document flow at every viewport and zoom level. */
+.phone[data-screen="a1"] .scr { padding: 0; }
+.phone[data-screen="a1"] .gatehero { position: relative; inset: auto; margin: 0; width: 100%; height: auto; min-height: 0; overflow: hidden; justify-content: flex-start; padding: 48px 0 8px; z-index: 0; }
+.phone[data-screen="a1"] .gatehero .gatecopy { width: 100%; max-width: none; box-sizing: border-box; padding: 32px 24px; margin: 0; }
+.phone[data-screen="a1"] .gatehero .sceneart.fill { position: absolute; inset: 0; width: 100%; height: 100%; aspect-ratio: auto; transform: none; mask-image: none; -webkit-mask-image: none; }
+.phone[data-screen="a1"] .gatehero .sceneart.fill::after { inset: 0; height: 100%; background: linear-gradient(180deg,#100c1833,#100c18a6 42%,#100c18ee); }
+.phone[data-screen="a1"] .gatedoubt { position: relative; inset: auto; z-index: 0; margin: 0; padding: 28px 24px; background: var(--bg); }
+.phone[data-screen="a1"] .guide-intro { margin: 20px 0; }
+.phone[data-screen="a1"] .conversion-title { font-size: clamp(27px,6vw,34px); line-height: 1.45; }
+.phone[data-screen="a1"] .conversion-lead { font-size: 16px; line-height: 1.8; }
+@media (max-width: 360px) { .phone[data-screen="a1"] .gatehero .gatecopy { padding: 24px 18px; } .guide-intro { padding: 12px; gap: 10px; } }

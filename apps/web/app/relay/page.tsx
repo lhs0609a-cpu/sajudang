@@ -64,7 +64,7 @@ export default function RelayPage() {
     return (
       <Shell screen="h1" title="이어지다">
         <Narration lines={["먼저 글자를 세워야 하오."]} />
-        <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 보겠습니다</button>
+        <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 보겠소</button>
       </Shell>
     );
   }
@@ -128,7 +128,7 @@ export default function RelayPage() {
             return (
               <div className="dz face" key={id} style={{ borderColor: "var(--teal)" }}>
                 <div className="k">값 없이</div>
-                {/* ★ 얼굴이 없었습니다 (2026-09-02). 이 집이 파는 것은
+                {/* ★ 얼굴이 없었소 (2026-09-02). 이 집이 파는 것은
                     해석이 아니라 **그 사람**인데, 이어 붙이는 자리에
                     이름과 값만 있었습니다. */}
                 <div className="dzhead">
@@ -147,7 +147,7 @@ export default function RelayPage() {
                 </div>
                 <p className="sm">{l?.quote}</p>
                 <button className="btn gh mt" onClick={() => void go(id)}>
-                  차 한 잔 하고 가겠습니다
+                  차 한 잔 하고 가겠소
                 </button>
               </div>
             );
@@ -187,7 +187,7 @@ export default function RelayPage() {
                         disabled={!r.released}
                         onClick={() => void go(r.lens_id)}
                       >
-                        <b>{r.released ? "듣겠습니다" : "아직 자리에 없습니다"}</b>
+                        <b>{r.released ? "듣겠소" : "아직 자리에 없소"}</b>
                         {/* ★ 여기 보이는 값이 그대로 청구됩니다.
                             전에는 카드가 캐릭터 값을 보여 주고 결제는
                             티어 값을 물려, 스무 캐릭터의 값이 한 번도
@@ -210,8 +210,8 @@ export default function RelayPage() {
                         className="op"
                         onClick={() => { s.markSkipped(r.lens_id); }}
                       >
-                        <b>이 사람은 됐습니다</b>
-                        <span>다시 권하지 않습니다</span>
+                        <b>이 사람은 됐소</b>
+                        <span>다시 권하지 않소</span>
                       </button>
                     </div>
                   </div>
@@ -224,7 +224,7 @@ export default function RelayPage() {
               {/* ★ 유예하는 길을 따로 냅니다. 세션만 닫고 제외는 안 합니다 —
                   브레이크는 그대로면서 손님이 무엇을 고르는지 알게 됩니다. */}
               {/*
-                ★ 당김 0점이던 자리입니다. 옆자리를 늘어놓고 끝났습니다.
+                ★ 당김 0점이던 자리입니다. 옆자리를 늘어놓고 끝났소.
                   브레이크(세션당 둘)는 그대로 두고, 그걸 **고를 이유**로
                   씁니다 — 지어낸 압박이 아니라 이미 있는 규칙입니다.
               */}
@@ -238,7 +238,7 @@ export default function RelayPage() {
                 둘까지만 잇소.
               </ActOut>
               <button className="btn gh mt" onClick={() => router.push("/lobby")}>
-                오늘은 그만 듣겠습니다
+                오늘은 그만 듣겠소
               </button>
             </>
           ) : (

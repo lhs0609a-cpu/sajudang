@@ -42,18 +42,18 @@ const TITLE: Record<string, string> = {
 
 const WHY: Record<string, string> = {
   blood: "피는 셈에 안 들어가오. 이 사람이 그걸로 한 겹 더 볼 뿐이오.",
-  image: "고른 그림이 여덟 글자와 어긋나는 데를 봅니다.",
-  cards: "셋을 뽑은 순서까지 봅니다.",
+  image: "고른 그림이 여덟 글자와 어긋나는 데를 보오.",
+  cards: "셋을 뽑은 순서까지 보오.",
   context: "지금 자리를 알아야 같은 글자도 다르게 읽히오.",
-  partner: "상대의 여덟 글자와 맞대 봅니다. 적으신 것은 남기지 않소.",
+  partner: "상대의 여덟 글자와 맞대 보오. 적으신 것은 남기지 않소.",
   /*
-   * ★ 맞히는 것이 아니라 **대 보는 것**이라고 적습니다.
+   * ★ 맞히는 것이 아니라 **대 보는 것**이라고 적소.
    *   여덟 글자로 만난 경위를 뽑을 수는 없습니다. 다만 짝을 보는
    *   글자가 어느 궁에 앉았는지는 이미 셈이 끝나 있어, 적으신 결과
    *   겹치는지 어긋나는지를 볼 수 있습니다 — 넉 자를 대 보는 것과
    *   같은 구조입니다.
    */
-  meet: "짝 글자가 앉은 자리와 맞대 봅니다. 적으신 것은 남기지 않소.",
+  meet: "짝 글자가 앉은 자리와 맞대 보오. 적으신 것은 남기지 않소.",
 };
 
 export default function ExtraAsk({
@@ -95,7 +95,7 @@ export default function ExtraAsk({
       <div className="ask blk">
         <p className="sm">고를 것을 못 펴겠소. 이 자리 하나만 접히오.</p>
         <button className="btn gh mt" onClick={() => setTryAt((n) => n + 1)}>
-          다시 펴 보겠습니다
+          다시 펴 보겠소
         </button>
       </div>
     );
@@ -245,7 +245,7 @@ export default function ExtraAsk({
           ))}
         </div>
         <p className="sm mt">
-          때는 안 묻소 — 모르는 걸 채우지 않소. 적으신 것은 <b>남기지 않습니다.</b>
+          때는 안 묻소 — 모르는 걸 채우지 않소. 적으신 것은 <b>남기지 않소.</b>
         </p>
       </>
     );
@@ -260,7 +260,7 @@ export default function ExtraAsk({
       {body}
       <button className="btn mt" disabled={!ready || busy}
               onClick={() => onSubmit(build())}>
-        {busy ? "다시 펴는 중입니다" : "이걸로 봐 주십시오"}
+        {busy ? "다시 펴는 중이오" : "이걸로 봐 주십시오"}
       </button>
       <p className="sm">
         안 적으셔도 되오.

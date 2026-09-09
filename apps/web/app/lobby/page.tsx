@@ -160,7 +160,7 @@ function LobbyInner() {
                       </span>
                     )}
                     <span className="spec">
-                      {l.released ? l.specialty : "아직 자리에 없습니다"}
+                      {l.released ? l.specialty : "아직 자리에 없소"}
                     </span>
                     {l.released && <span className="arch">{l.epithet}</span>}
                   </span>
@@ -197,20 +197,20 @@ function LobbyInner() {
             </div>
             {/* ★ 말하는 사람을 못박습니다. 안 넘기면 얼굴은 **지금 고른
                 사람**이 나와, 이름과 얼굴이 어긋납니다. */}
-            <p className="conversion-note">캐릭터 말투 예시 · 내 명식의 해석은 다음 화면에서 확인해요.</p>
+            <p className="conversion-note">캐릭터 말투 예시 · 내 명식의 해석은 다음 화면에서 확인하오.</p>
             <Say who={pickedLens.name} lens={pickedLens.id}>{pickedLens.quote}</Say>
             <button className="btn mt" onClick={() => {
               s.markRead(pickedLens.id);
               router.push(`/report/${pickedLens.id}`);
             }}>
-              이 사람에게 듣겠습니다
+              이 사람에게 듣겠소
             </button>
             <p className="sm">
               무료 구간까지는 값을 묻지 않소.
               {" "}{pickedLens.price.toLocaleString()}원부터.
             </p>
             <button className="btn gh" onClick={() => setTab("b3")}>
-              이 사람 자리를 크게 보겠습니다
+              이 사람 자리를 크게 보겠소
             </button>
             <button className="btn gh" onClick={() => {
               setPicked(null);
@@ -218,7 +218,7 @@ function LobbyInner() {
                 behavior: reducedMotion() ? "auto" : "smooth", block: "start",
               });
             }}>
-              스무 사람 목록으로 돌아가겠습니다
+              스무 사람 목록으로 돌아가겠소
             </button>
           </div>
         )}
@@ -227,7 +227,7 @@ function LobbyInner() {
           ★ 당김 0점이던 자리입니다. 스무 명을 늘어놓고 끝났습니다.
             고르기 어려운 것이 문제가 아니라 **골라야 할 이유**가
             없던 것이 문제입니다. 브레이크(세션당 둘)를 그대로 두고
-            그걸 **고를 이유**로 씁니다 — 지어낸 압박이 아닙니다.
+            그걸 **고를 이유**로 쓰오 — 지어낸 압박이 아닙니다.
         */}
         <ActOut kind="딜레마" next="그 사람의 자리">
           스물을 다 들을 수는 없소. <b>한 자리에서 이을 수 있는 건 둘이오.</b><br />
@@ -270,7 +270,7 @@ function LobbyInner() {
           ★ 80점이던 자리. 초상과 이름표와 한마디 인용이 전부라
             **이 사람 앞에 선 손님 얘기**가 없었습니다. 울림 45 ·
             팩폭 60. 파는 말을 더하는 대신, 이 사람이 **안 보는
-            자리**를 적습니다 — 고르는 데 쓸 수 있는 말입니다.
+            자리**를 적소 — 고르는 데 쓸 수 있는 말이오.
         */}
         <Say who="도령" lens="pungun">
           이 사람이 먼저 보는 자리는 「{lens.specialty}」 하나요.
@@ -285,7 +285,7 @@ function LobbyInner() {
               s.markRead(lens.id);
               router.push(`/report/${lens.id}`);
             }}>
-              이 사람에게 듣겠습니다
+              이 사람에게 듣겠소
             </button>
             <p className="sm mt">
               무료 구간까지는 값을 묻지 않소. {lens.price.toLocaleString()}원부터.
@@ -295,7 +295,7 @@ function LobbyInner() {
           <p className="sm mt">아직 자리에 없는 사람이오.</p>
         )}
         {/*
-          ★ 이 자리가 무엇을 근거로 한 말인지 없었습니다.
+          ★ 이 자리가 무엇을 근거로 한 말인지 없었소.
             「먼저 보는 자리」 는 취향이 아니라 이 집이 스무 사람에게
             **하나씩 나눠 준 자리**입니다. 그걸 밝혀야 스물이 왜
             스물인지가 섭니다.
@@ -322,7 +322,7 @@ function LobbyInner() {
         {s.features ? (
           <>
             {/*
-              ★ 표부터 들이밀고 있었습니다. 표는 셈이지 말이 아닙니다.
+              ★ 표부터 들이밀고 있었습니다. 표는 셈이지 말이 아니오.
                 무슨 화면인지 한 줄 먼저 놓습니다 (콜드 오픈).
             */}
             <Narration lines={["도령이 셈한 종이를 그대로 내밀었다.",
@@ -336,10 +336,10 @@ function LobbyInner() {
 
                 표와 막대는 다 있는데 **표를 읽는 사람 얘기가**
                 없었습니다. 숫자만 들이밀면 손님은 자기 것으로
-                안 봅니다. 울림 45 · 팩폭 60.
+                안 보오. 울림 45 · 팩폭 60.
 
                 해석은 안 얹습니다 — 그건 값을 치르는 자리 몫이오.
-                여기서는 이 표가 무엇을 센 것인지만 말합니다.
+                여기서는 이 표가 무엇을 센 것인지만 말하오.
             */}
             <Say who="도령" lens="pungun">
               {s.hourKnown ? '태어난 해·달·날·시의 네 기둥을 계산했소.' : '태어난 시간을 몰라 시주 없이 세 기둥을 계산했소.'}
@@ -369,7 +369,7 @@ function LobbyInner() {
         ) : (
           <>
             <Narration lines={["아직 글자를 세우지 않았소."]} />
-            <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 보겠습니다</button>
+            <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 보겠소</button>
           </>
         )}
         <button className="btn gh mt" onClick={() => setTab("b1")}>진열대로</button>
@@ -387,7 +387,7 @@ function LobbyInner() {
 
           목패 다섯 개와 버튼이 전부였습니다. 진열대는 손님이 가장
           자주 되돌아오는 자리인데 **되돌아온 사람 얘기가 없어서**,
-          메뉴판 한 장이 됐습니다. 울림 45 · 명확 45.
+          메뉴판 한 장이 됐소. 울림 45 · 명확 45.
 
           여기서 파는 말을 얹으면 안 됩니다. 그래서 적는 건 이
           화면이 이미 세고 있는 수뿐입니다 — 목패 5장, 들은 자리,
@@ -414,9 +414,9 @@ function LobbyInner() {
         </button>
         <button className="op" onClick={() => setTab("b4")}>
           <b>내 명식</b>
-          <span>{s.features ? "명식과 계산 근거" : "아직 세우지 않았습니다"}</span>
+          <span>{s.features ? "명식과 계산 근거" : "아직 세우지 않았소"}</span>
         </button>
-        {/* ★ 「일진」 이 풀이 없이 지나가고 있었습니다. 여덟 글자를 아직
+        {/* ★ 「일진」 이 풀이 없이 지나가고 있었소. 여덟 글자를 아직
               한 번도 못 본 손님이 여기서 처음 만나는 말입니다. */}
         <button className="op" onClick={() => router.push("/daily")}>
           <b>오늘의 일진</b><span>일진 (그날에 서는 두 글자) · 값 없이 매일</span>
@@ -431,7 +431,7 @@ function LobbyInner() {
       <ActOut kind="끊긴 동작" next="스무 사람">
         목패는 {LENSES.length}개요. 그대가 들은 자리는{" "}
         <b>{s.read.length}곳</b>이오.<br />
-        {/* ★ 스물이 왜 스물인지가 없었습니다. 「관점이 여럿」 은 뜬 말이라,
+        {/* ★ 스물이 왜 스물인지가 없었소. 「관점이 여럿」 은 뜬 말이라,
               같은 집을 어디서 보느냐로 바꿔 말합니다. */}
         한 사람이 명식을 다 보지는 않소. 저마다 <b>제 눈에 드는
         자리만</b> 짚소 — 같은 집을 대문에서 본 그림과 뒷마당에서 본

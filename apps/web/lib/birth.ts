@@ -52,7 +52,7 @@ export function birthProblem(
     return `${year}년 ${month}월은 ${last}일까지요.`;
   }
 
-  // 아직 오지 않은 날. 서버는 받지만 사람에게는 물어보는 게 맞습니다.
+  // 아직 오지 않은 날. 서버는 받지만 사람에게는 물어보는 게 맞소.
   const now = new Date();
   const born = new Date(year, month - 1, day);
   if (born.getTime() > now.getTime()) {

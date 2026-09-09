@@ -84,7 +84,7 @@ export function Pillars({ f }: { f: Features }) {
       {!f.hour_known && (
         <div className={"pil lk" + (flip ? " flip" : "")}
              style={{ animationDelay: `${cells.length * 0.33}s` }}
-             title="시각을 모르므로 세우지 않았습니다">
+             title="시각을 모르므로 세우지 않았소">
           <div className="p">시주</div>
           <div className="g">◇</div>
           <div className="j">◇</div>
@@ -104,7 +104,7 @@ export function ElementBar({ f }: { f: Features }) {
           이게 무엇을 센 것인지 모릅니다. */}
       <p className="barhead">
         <b>다섯 기운(오행)</b> — 여덟 글자를 나무·불·흙·쇠·물로 나눠 센 것이오.
-        많다고 좋고 적다고 나쁜 게 아니라, <b>치우친 자리</b>를 봅니다.
+        많다고 좋고 적다고 나쁜 게 아니라, <b>치우친 자리</b>를 보오.
       </p>
     <div className="elbar">
       {entries.map(([k, v], i) => (
@@ -151,8 +151,8 @@ const HIDDEN: Record<string, string[]> = {
  *
  * ★ 왜 이걸 따로 두나
  *
- *   손님은 쓰던 만세력 앱과 대 봅니다. 우리 화면이 다른 모양이면
- *   **한 줄씩 눈으로 옮겨** 가며 견줘야 합니다. 그러다 지칩니다.
+ *   손님은 쓰던 만세력 앱과 대 보오. 우리 화면이 다른 모양이면
+ *   **한 줄씩 눈으로 옮겨** 가며 견줘야 하오. 그러다 지치오.
  *
  *   만세력이 늘 그리는 모양 그대로 둡니다 — 오른쪽부터 시·일·월·년,
  *   위가 천간 아래가 지지, 그 아래 지장간. 그러면 나란히 놓고
@@ -237,7 +237,7 @@ export function ManseTable({ f }: { f: Features }) {
       <p className="sm dim">
         아랫줄은 <b>지장간</b> — 지지(아래에 오는 글자) 속에 숨은
         천간(위에 오는 글자)이오. 글자로는 안
-        보이지만 셈에는 듭니다.
+        보이지만 셈에는 드오.
         {hiddenOnly && (
           <> <b>{EL_KO[hiddenOnly.el]}</b>{batchim(EL_KO[hiddenOnly.el]) ? "이" : "가"}{" "}
           여덟 글자에는 없는데 셈에는 <b>{hiddenOnly.weight}</b>만큼 드는
@@ -273,7 +273,7 @@ export function CalcPanel({ f }: { f: Features }) {
           ? <b> ({c.day_shift > 0 ? "익" : "전"}일)</b> : null}</>
       : "시각 미상 — 보정 없음"],
     ["절기", <>{c.jieqi_name} 절입 {c.jieqi_at_kst} 기준 <em className="fork">집마다 다름</em>
-      <i className="gl">(계절이 바뀌는 마디 스물넷 · 넘어가는 시각까지 셉니다)</i></>],
+      <i className="gl">(계절이 바뀌는 마디 스물넷 · 넘어가는 시각까지 세오)</i></>],
     ["자시", <>{c.zi_policy} <em className="fork">집마다 다름</em>
       <i className="gl">(밤 11시부터 다음 날로 보는가)</i></>],
     ["시주", c.hour_used
@@ -322,7 +322,7 @@ export function CalcPanel({ f }: { f: Features }) {
   );
 }
 
-/* 글자 그대로 세기 — 손님이 직접 셀 수 있는 수라야 합니다.
+/* 글자 그대로 세기 — 손님이 직접 셀 수 있는 수라야 하오.
    서버의 상수와 같은 표입니다 (engine/constants.py). */
 const EL_GAN: Record<string, string> = {
   甲: "목", 乙: "목", 丙: "화", 丁: "화", 戊: "토",
@@ -377,13 +377,13 @@ export function Summary({ f }: { f: Features }) {
       <div className="term">
         <span className="k">{f.day_gan} 일간</span>
         <span className="v">여덟 글자 중 <b>나 자신</b>을 나타내는 글자요.
-          태어난 날의 윗 글자를 봅니다.</span>
+          태어난 날의 윗 글자를 보오.</span>
       </div>
 
       <div className="term">
         <span className="k">{f.strength}</span>
         <span className="v">{STRENGTH[f.strength] ?? ""} —
-          내 편을 드는 기운과 나를 누르는 기운을 견줘 봅니다.</span>
+          내 편을 드는 기운과 나를 누르는 기운을 견줘 보오.</span>
       </div>
 
       <div className="term">
@@ -402,9 +402,9 @@ export function Summary({ f }: { f: Features }) {
 
           0.3 은 지지 속에 숨은 글자(지장간)까지 넣어 **무게를 매긴**
           값입니다. 명리에서 쓰는 정식 셈이지만, **그 말을 안 하면
-          그냥 틀린 수**입니다.
+          그냥 틀린 수**이오.
 
-          그래서 순서를 뒤집습니다 —
+          그래서 순서를 뒤집소 —
             1. 손님이 직접 셀 수 있는 수를 먼저 냅니다 (여덟 글자)
             2. 숨은 글자까지 넣은 수를 그 다음에, 까닭과 함께
       */}

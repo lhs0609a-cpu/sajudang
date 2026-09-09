@@ -4,7 +4,7 @@ import WebVitals from '@/components/WebVitals';
 
 export const metadata: Metadata = {
   title: "성신당 星辰堂",
-  description: "사주로 읽는 나의 반복 패턴. 지금의 고민에 맞는 해석과 오늘 해볼 행동을 만나보세요.",
+  description: "사주로 읽는 나의 반복 패턴. 지금의 고민에 맞는 해석과 오늘 해볼 행동을 만나보시오.",
 };
 
 export const viewport: Viewport = {

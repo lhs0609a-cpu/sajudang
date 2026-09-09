@@ -64,7 +64,7 @@ let loading: Promise<TossFactory> | null = null;
 /** SDK 를 한 번만 받아 둡니다. 결제 화면에 올 때만 부릅니다. */
 export function loadToss(): Promise<TossFactory> {
   if (typeof window === "undefined") {
-    return Promise.reject(new Error("브라우저에서만 됩니다."));
+    return Promise.reject(new Error("브라우저에서만 되오."));
   }
   if (window.TossPayments) return Promise.resolve(window.TossPayments);
   if (loading) return loading;
@@ -103,7 +103,7 @@ export function returnUrls(orderId: string) {
 /**
  * 카드 등록 창을 띄웁니다 — 「한 달 듣기」.
  *
- * ★ 여기서 돈이 안 빠져나갑니다. 카드를 거는 것뿐입니다.
+ * ★ 여기서 돈이 안 빠져나가오. 카드를 거는 것뿐입니다.
  *   토스가 successUrl 로 `customerKey` 와 `authKey` 를 실어 돌려보내고,
  *   그 authKey 를 서버가 빌링키로 바꾼 **다음에** 첫 달을 긁습니다.
  *   그러니 이 함수가 끝났다고 구독이 선 것이 아닙니다.

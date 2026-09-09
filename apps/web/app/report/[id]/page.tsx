@@ -248,7 +248,7 @@ function ReportInner() {
     return (
       <Shell title="읽다">
         <Narration lines={["먼저 글자를 세워야 하오."]} />
-        <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 보겠습니다</button>
+        <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 보겠소</button>
       </Shell>
     );
   }
@@ -256,7 +256,7 @@ function ReportInner() {
     /*
      * ★ 여기가 막다른 화면이었습니다.
      *   오류 문구만 있고 버튼이 하나도 없어서, 한 번 깨지면 뒤로 버튼
-     *   말고는 나갈 길이 없었습니다. 값을 치른 사람일 수도 있습니다.
+     *   말고는 나갈 길이 없었소. 값을 치른 사람일 수도 있습니다.
      */
     return (
       <Shell title="읽다">
@@ -264,13 +264,13 @@ function ReportInner() {
         <button className="btn mt" onClick={() => {
           setErr(null); setRep(null); setRetry(n => n + 1);
         }}>
-          다시 펴 보겠습니다
+          다시 펴 보겠소
         </button>
         <button className="btn gh" onClick={() => router.push("/lobby")}>
           진열대로
         </button>
         <button className="btn gh" onClick={() => router.push("/me")}>
-          치른 것을 못 찾겠습니다
+          치른 것을 못 찾겠소
         </button>
       </Shell>
     );
@@ -312,7 +312,7 @@ function ReportInner() {
    * 「곧 큰 일이 있소」 같은 지어낸 말은 이 집이 금지한 것입니다.
    *
    *   ownCount   그 캐릭터만 보는 자리(lc_) 가 몇인가
-   *   firstOwn   그중 첫 자리의 이름 — 「더 있소」는 예고가 아닙니다
+   *   firstOwn   그중 첫 자리의 이름 — 「더 있소」는 예고가 아니오
    *   nextTurn   다음으로 대운이 바뀌는 나이. 그 해에 무슨 일이 난다는
    *              말은 안 합니다. **읽는 자리가 바뀐다**는 말입니다.
    */
@@ -362,7 +362,7 @@ function ReportInner() {
             제목만 적힌 꼴이었습니다. 울림 20 · 팩폭 43.
 
             표지에서 본문을 미리 말하면 안 됩니다. 그래서 여기
-            적는 건 **이 화면이 이미 아는 것**뿐입니다 — 기둥 4자리
+            적는 건 **이 화면이 이미 아는 것**뿐이오 — 기둥 4자리
             8글자, 이 사람이 먼저 보는 자리, 그리고 읽는 법.
         */}
         <Say who={rep.lens.name} lens={lensId}>
@@ -372,7 +372,7 @@ function ReportInner() {
           <b>실제 경험과 다른 문장은 받아들이지 않아도 좋소.</b>
           {" "}명식만으로 그대가 겪은 일을 알 수는 없소.
           <br /> 그래서 이 집은 칸마다 <b>근거 줄</b>을
-          답니다 — 대 보시오. 못 대는 줄이 있으면 그건 내 잘못이오.
+          다오 — 대 보시오. 못 대는 줄이 있으면 그건 내 잘못이오.
           <br />
           내가 먼저 보는 자리는 「{rep.lens.specialty ?? rep.lens.name}」이오.
           나머지 19명은 같은 명식을 놓고 다른 데를 먼저 짚소.
@@ -381,15 +381,15 @@ function ReportInner() {
         </Say>
         {/*
            ★ 표지가 「N컷이오」로 끝났습니다. 수는 있는데 **그중 무엇이
-             그대만의 것인지**가 없었습니다. 관점 컷(lc_)은 이 사람을
-             고른 까닭 그 자체라, 표지에서 이름을 불러 줘야 합니다.
+             그대만의 것인지**가 없었소. 관점 컷(lc_)은 이 사람을
+             고른 까닭 그 자체라, 표지에서 이름을 불러 줘야 하오.
          */}
         <ActOut kind="끊긴 동작" next={firstOwn?.title}>
           {rep.cuts.length}컷이오. 그중 <b>{ownCount}</b>은 {rep.lens.name}만
           보는 자리요 — 다른 열아홉은 그 자리를 안 보오.<br />
           <b>펴기 전까지는 무엇이 적혔는지 나도 말하지 않소.</b>
         </ActOut>
-        <button className="btn mt" onClick={() => setTab("c2")}>내 것을 펴겠습니다</button>
+        <button className="btn mt" onClick={() => setTab("c2")}>내 것을 펴겠소</button>
       </Shell>
     );
   }
@@ -423,7 +423,7 @@ function ReportInner() {
           <>
             <Narration lines={["대운 맵은 아직 잠겨 있소."]} />
             {rep.sells && (
-              <button className="btn mt" onClick={() => setTab("c4")}>어디까지 볼지 고르겠습니다</button>
+              <button className="btn mt" onClick={() => setTab("c4")}>어디까지 볼지 고르겠소</button>
             )}
           </>
         )}
@@ -439,13 +439,13 @@ function ReportInner() {
     );
   }
 
-  /* c4 · 페이월 — ★ 안 파는 자리에서는 아예 안 그립니다 */
+  /* c4 · 페이월 — ★ 안 파는 자리에서는 아예 안 그리오 */
   if (tab === "c4" && !rep.sells) {
     return (
       <Shell screen="c4" title={rep.lens.name}>
         <Scene id="oldpaper" />
         {/* 청동자는 무거운 리포트 뒤에 붙는 안전망입니다.
-            여기서는 값을 권하지 않습니다. 브레이크는 매출보다 앞섭니다. */}
+            여기서는 값을 권하지 않소. 브레이크는 매출보다 앞서오. */}
         <Say who={rep.lens.name} lens={lensId}>여기선 값을 받지 않소. 본 것이 전부요.</Say>
         <button className="btn mt" onClick={() => setTab("c2")}>본문으로</button>
       </Shell>
@@ -465,16 +465,16 @@ function ReportInner() {
           다른 해석자는 같은 명식을 다른 관점으로 읽소. 더 많은 관점이 더 정확한 답을 보장하지는 않소.
         </Say>
         {/*
-          ★ 여기가 `가가가가 가가가가가 가가가` 였습니다. 자리표시
+          ★ 여기가 `가가가가 가가가가가 가가가` 였소. 자리표시
             문자열이 그대로 배포돼 있었습니다.
 
-            궁금증은 **구체적일 때만** 생깁니다 — 무엇을 놓치는지 모르면
+            궁금증은 **구체적일 때만** 생기오 — 무엇을 놓치는지 모르면
             아쉽지도 않습니다. 이제 서버가 그 컷의 첫 줄을 잘라서
-            내려보냅니다 (engine/report._teaser). 본문의 40%를 넘지
-            않고, 조사에서 끊기지 않습니다.
+            내려보내오 (engine/report._teaser). 본문의 40%를 넘지
+            않고, 조사에서 끊기지 않소.
 
             읽히는 것은 맛보기까지. 그 뒤에 흐려진 자락을 이어 붙여
-            **이 아래로 더 있다**는 것만 보입니다.
+            **이 아래로 더 있다**는 것만 보이오.
         */}
         {rep.locked.map((l) => (
           <div className="dz" key={l.id}>
@@ -498,7 +498,7 @@ function ReportInner() {
           ★ 막이 그냥 끝나고 있었습니다. 접힌 목록 다음에 곧바로
             버튼 둘이라, 값을 치를지 말지를 **목록만 보고** 정하게
             했습니다. 여기는 딜레마로 끊는 자리입니다 — 다만 재촉이
-            아니라 접어 두는 쪽도 같이 냅니다.
+            아니라 접어 두는 쪽도 같이 내오.
         */}
         <ActOut kind="딜레마" next="어디까지 볼지">
           접힌 자리는 오늘 다 열어도 되고, 하나도 안 열어도 되오.
@@ -507,7 +507,7 @@ function ReportInner() {
           생각을 붙들고 있는 것 — 그것만은 안 하시는 게 좋소.
         </ActOut>
         <button className="btn mt" onClick={() => router.push("/pay?step=d1")}>
-          어디까지 볼지 고르겠습니다
+          어디까지 볼지 고르겠소
         </button>
         <button className="btn gh" onClick={() => setTab("c2")}>본문으로</button>
       </Shell>
@@ -525,7 +525,7 @@ function ReportInner() {
           ★ 68점이던 자리. 울림 45 · 비유 0 — 카드 만드는 법만 있고
             **이걸 누구에게 보낼지 재는 사람 얘기**가 없었습니다.
             공유는 재촉하면 안 되는 자리라, 안 보내도 된다는 말을
-            먼저 답니다.
+            먼저 다오.
         */}
         <Say who={rep.lens.name} lens={lensId}>
           {you}의 명식과 읽은 자리를 담은 공유 카드요.
@@ -561,7 +561,7 @@ function ReportInner() {
           생년월일시도 고을도 안 담기오.<br />
           <b>그런데 받은 사람은 제 것을 세워 보고 싶어지오.</b> 왜 그렇겠소?
         </ActOut>
-        <button className="btn gh mt" onClick={() => setTab("c6")}>다 읽었습니다</button>
+        <button className="btn gh mt" onClick={() => setTab("c6")}>다 읽었소</button>
       </Shell>
     );
   }
@@ -576,9 +576,9 @@ function ReportInner() {
         {/*
           ★ 여기가 셋째로 낮았습니다 (연출 53).
 
-            「어떻게 보셨소?」 한 줄과 별 다섯 개, 빈 칸이 전부였습니다.
+            「어떻게 보셨소?」 한 줄과 별 다섯 개, 빈 칸이 전부였소.
             방금 스무 컷을 읽고 나온 사람에게 **아무 말도 안 걸고**
-            평점부터 물었습니다. 울림 20 · 명확 38 이 거기서 나왔습니다.
+            평점부터 물었습니다. 울림 20 · 명확 38 이 거기서 나왔소.
 
             후기를 더 받으려고 재촉하는 게 아닙니다. 끝까지 읽은 것
             자체가 이 화면이 아는 사실이라, 그걸 먼저 짚습니다.
@@ -612,12 +612,12 @@ function ReportInner() {
           onChange={(e) => setReviewBody(e.target.value)}
         />
         <p className="sm">
-          구매가 확인된 분의 후기에만 &quot;결제 확인됨&quot; 표시가 붙습니다.
-          대가를 주고받은 글은 싣지 않습니다.
+          구매가 확인된 분의 후기에만 &quot;결제 확인됨&quot; 표시가 붙소.
+          대가를 주고받은 글은 싣지 않소.
         </p>
         {/* 연락처를 적어 두고 가는 손님이 있습니다. 미리 말합니다. */}
         <p className="sm">
-          연락처나 주민번호가 섞이면 저장하기 전에 지웁니다. 보관할 이유가 없소.
+          연락처나 주민번호가 섞이면 저장하기 전에 지우오. 보관할 이유가 없소.
         </p>
 
         {reviewSay ? (
@@ -628,7 +628,7 @@ function ReportInner() {
             disabled={!hasReview || reviewBusy}
             onClick={sendReview}
           >
-            {reviewBusy ? "받아 적는 중입니다" : "남기겠습니다"}
+            {reviewBusy ? "받아 적는 중이오" : "남기겠소"}
           </button>
         )}
 
@@ -638,13 +638,13 @@ function ReportInner() {
           모으면 인장첩에 남고, 남긴 말은 다음 사람이 보오.
         </ActOut>
         <button className="btn gh mt" onClick={async () => {
-          /* 아직 안 보낸 말이 있으면 나가기 전에 보냅니다.
+          /* 아직 안 보낸 말이 있으면 나가기 전에 보내오.
              손님이 친 글자를 버리지 않습니다. */
           await sendReview();
           if (!s.seals.includes(lensId)) s.set({ seals: [...s.seals, lensId] });
           router.push("/relay");
         }}>
-          인장을 받고 나가겠습니다
+          인장을 받고 나가겠소
         </button>
       </Shell>
     );
@@ -657,19 +657,19 @@ function ReportInner() {
   return (
     <Shell screen="c2" title={rep.lens.name}>
       {/*
-        ★ 18~22컷이 진행 표시 없이 한 두루마리로 이어졌습니다.
+        ★ 18~22컷이 진행 표시 없이 한 두루마리로 이어졌소.
           어디쯤 읽고 있는지, 얼마나 남았는지가 없어서 중도 이탈이 그대로
-          미완독이 됩니다 — 미완독은 후기도 재구매도 없습니다.
+          미완독이 되오 — 미완독은 후기도 재구매도 없습니다.
           훅에서 이미 단계 감각을 만들어 놨으니 결이 맞습니다.
       */}
       <ScrollProgress />
       {rep.editorial && <ReadingGuide guide={rep.editorial} />}
       {/* ★ 낡은 종이(oldpaper)를 깔고 있었습니다 (2026-09-06). 아래 글은
           「두루마리 끈을 풀었다 · 종이가 무릎까지」인데 영상에는 두루마리도
-          끈도 무릎도 없었습니다 — 손님이 짚은 자리입니다. */}
+          끈도 무릎도 없었소 — 손님이 짚은 자리입니다. */}
       <Scene id="unbind" />
       {/* ★ 여는 줄이 없었습니다. 두루마리가 대뜸 펴지고 글이 시작돼,
-          스물두 컷짜리 본문의 첫 줄이 설명이 됐습니다. 손이 먼저
+          스물두 컷짜리 본문의 첫 줄이 설명이 됐소. 손이 먼저
           움직이고 글은 그 뒤에 옵니다. */}
       <Narration lines={[`${rep.lens.name}의 본문을 펼쳤다.`,
                          "종이가 무릎까지 흘러내렸다."]} />
@@ -742,7 +742,7 @@ function ReportInner() {
         )}
 
         {/*
-          ★ 한 컷씩 뜹니다 (2026-09-02).
+          ★ 한 컷씩 뜨오 (2026-09-02).
 
             전에는 열여덟~스물두 컷이 한꺼번에 쏟아졌습니다. 그러면
             손님은 읽는 게 아니라 **훑습니다.** 한 컷씩 뜨면 그 컷
@@ -793,7 +793,7 @@ function ReportInner() {
 
       <div className="handles noprint">
         <button onClick={() => window.print()}>
-          내 것을 종이로 받겠습니다 (PDF)
+          내 것을 종이로 받겠소 (PDF)
         </button>
         <button onClick={() => void makeLink()} disabled={sharing}>
           {sharing ? "고리를 엮는 중…" : shareUrl ? "고리 다시 복사" : "고리 만들어 나누기"}
@@ -802,7 +802,7 @@ function ReportInner() {
           <button onClick={() => setTab("c4")}>잠긴 {rep.locked.length}컷</button>
         )}
         {daeunCut && <button onClick={() => setTab("c3")}>대운 맵</button>}
-        <button onClick={() => setTab("c6")}>다 읽었습니다</button>
+        <button onClick={() => setTab("c6")}>다 읽었소</button>
       </div>
 
       {shareMsg && <p className="handlenote noprint">{shareMsg}</p>}
@@ -813,7 +813,7 @@ function ReportInner() {
       </p>
 
       {/* ★ 아래로 — 더 있다는 표시 (2026-09-07).
-          컷이 한 개씩 뜨는데 **내릴 까닭을 화면이 말한 적이 없었습니다.**
+          컷이 한 개씩 뜨는데 **내릴 까닭을 화면이 말한 적이 없었소.**
           한 컷을 다 읽은 손님에게는 거기가 끝으로 보입니다. */}
       <ScrollHint />
     </Shell>

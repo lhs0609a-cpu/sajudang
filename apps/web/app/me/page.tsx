@@ -108,11 +108,11 @@ function MeInner() {
           후기는 여기서 안 받소. <b>그 사람의 마지막 자리</b>에서 받소 —
           다 읽고 인장을 받기 직전이오.
           &quot;결제 확인됨&quot; 배지는 값을 치르고 끝까지 읽은 분의 글에만
-          붙습니다. 대가를 주고받은 글은 싣지 않습니다.
+          붙소. 대가를 주고받은 글은 싣지 않소.
         </p>
 
         {/*
-          ★ 「그대의 말이 벽에 붙는다」 는 이미 참인 말입니다.
+          ★ 「그대의 말이 벽에 붙는다」 는 이미 참인 말이오.
             몇 명이 읽는다거나, 남기면 무엇이 좋아진다는 말은 안 씁니다.
         */}
         <ActOut kind="남긴 물음" next={heard > 0 ? "남기다" : "스무 사람"}>
@@ -131,11 +131,11 @@ function MeInner() {
         {heard > 0 ? (
           <button className="btn mt"
                   onClick={() => router.push("/report/" + last + "?tab=c6")}>
-            마지막으로 들은 자리에 남기겠습니다
+            마지막으로 들은 자리에 남기겠소
           </button>
         ) : (
           <button className="btn mt" onClick={() => router.push("/lobby?tab=b2")}>
-            스무 사람을 보겠습니다
+            스무 사람을 보겠소
           </button>
         )}
         <button className="btn gh" onClick={() => setTab("f2")}>인장첩으로</button>
@@ -146,20 +146,20 @@ function MeInner() {
   return (
     <Shell screen="f2" title="인장첩">
       <RefundHistory sessionId={s.sessionId} />
-      {subError && <div className="conversion-card" role="alert"><p>구독 상태를 확인하지 못했어요. 구독이 없거나 해지됐다는 뜻은 아닙니다.</p><button className="btn gh" onClick={() => {setSubError(false);setSubRetry(n => n + 1);}}>구독 상태 다시 확인하기</button></div>}
+      {subError && <div className="conversion-card" role="alert"><p>구독 상태를 확인하지 못했소. 구독이 없거나 해지됐다는 뜻은 아니오.</p><button className="btn gh" onClick={() => {setSubError(false);setSubRetry(n => n + 1);}}>구독 상태 다시 확인하기</button></div>}
       <Scene id="sealbook" />
       <Narration lines={["첩을 폈다.", "찍힌 인장은 " + s.seals.length + "개."]} />
       {/*
         ★ 첩이 무엇인지 한 번도 안 풀고 있었습니다.
           칸 스물이 그려져 있는데 「받은 인장 / 아직」 두 낱말뿐이라,
-          이게 모으는 것인지 잠긴 것인지 알 수가 없었습니다.
+          이게 모으는 것인지 잠긴 것인지 알 수가 없었소.
       */}
       <Say who="도령" lens="pungun">
         칸은 스물이오. 도장 찍힌 칸만 다시 펼쳐지오 — 열쇠 꾸러미 같은 것이오.
         <br />
         {/*
           ★ 76점이던 자리. 울림 20 — 칸 20개와 수 둘이 전부라
-            **첩을 든 사람 얘기**가 없었습니다. 모으는 자리는
+            **첩을 든 사람 얘기**가 없었소. 모으는 자리는
             자칫 재촉이 되므로, 안 채워도 된다는 말을 함께 답니다.
         */}
         그대가 지나온 자리마다 하나씩 찍힌 것이오. 값을 치른 표가
@@ -238,7 +238,7 @@ function MeInner() {
                           setSubSay(e instanceof ApiError ? e.message : "무르지 못했소.");
                         } finally { setSubBusy(false); }
                       }}>
-                {subBusy ? "무르는 중입니다" : "계속 듣겠습니다"}
+                {subBusy ? "무르는 중이오" : "계속 듣겠소"}
               </button>
             </>
           ) : (
@@ -262,7 +262,7 @@ function MeInner() {
                           setSubSay(e instanceof ApiError ? e.message : "그만두지 못했소.");
                         } finally { setSubBusy(false); }
                       }}>
-                {subBusy ? "그만두는 중입니다" : "그만두겠습니다"}
+                {subBusy ? "그만두는 중이오" : "그만두겠소"}
               </button>
             </>
           )}
@@ -277,10 +277,10 @@ function MeInner() {
       )}
 
       {/*
-        ★ 산 것을 되찾을 길이 없었습니다.
+        ★ 산 것을 되찾을 길이 없었소.
           로그인이 없어 자격이 이 브라우저의 난수(session_id)에 매여
-          있습니다. 데이터를 지우거나 기기를 바꾸면 치른 값을 통째로
-          잃었습니다 — 99,000원짜리를요. 주문번호는 결제 영수증과 승인
+          있소. 데이터를 지우거나 기기를 바꾸면 치른 값을 통째로
+          잃었소 — 99,000원짜리를요. 주문번호는 결제 영수증과 승인
           문자에 남으니, 그걸로 되찾습니다.
 
         ★ 달삯은 되찾을 때 **주인도 함께 옮깁니다.** 안 옮기면 다음
@@ -288,7 +288,7 @@ function MeInner() {
           열립니다.
       */}
       <div className="ask mt">
-        <div className="lab">치른 것을 못 찾겠습니다?</div>
+        <div className="lab">치른 것을 못 찾겠소?</div>
         <p className="sm">
           기기를 바꾸셨거나 이 브라우저를 비우셨으면 여기서 되찾으시오.
           <b>주문번호</b>는 결제 영수증과 승인 문자에 적혀 있소.
@@ -331,7 +331,7 @@ function MeInner() {
                     setFinding(false);
                   }
                 }}>
-          {finding ? "찾는 중입니다" : "되찾겠습니다"}
+          {finding ? "찾는 중이오" : "되찾겠소"}
         </button>
         {say && <p className="sm mt">{say}</p>}
       </div>
@@ -360,7 +360,7 @@ function MeInner() {
         처음부터 다시
       </button>
       <p className="sm mt">
-        지운 정보는 되돌릴 수 없습니다. 생년월일시는 사주 계산 목적으로만 씁니다.
+        지운 정보는 되돌릴 수 없소. 생년월일시는 사주 계산 목적으로만 쓰오.
       </p>
     </Shell>
   );

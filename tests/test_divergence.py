@@ -95,7 +95,7 @@ def test_the_other_answer_is_shown_too():
         encoding="utf-8")
     assert "divergence" in src, "화면이 안 받는다"
     assert "c.alt" in src, "저쪽 답을 안 보여 준다"
-    assert "이 서비스는 위의 첫 번째 명식으로 해석해요" in src, "어느 쪽을 쓰는지 안 밝힌다"
+    assert "이 서비스는 위의 첫 번째 명식으로 해석하오" in src, "어느 쪽을 쓰는지 안 밝힌다"
     assert "c.mine" in src
 
 
