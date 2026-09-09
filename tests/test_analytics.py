@@ -283,3 +283,37 @@ def test_funnel_is_closed_when_no_key_is_set(tmp_path, monkeypatch):
     from fastapi.testclient import TestClient
     import main
     assert TestClient(main.app).get("/v1/funnel").status_code == 503
+
+
+def test_goal_counts_mature_server_buyers_without_missing_screen_bias(an):
+    from datetime import datetime, timezone, timedelta
+    now = datetime.now(timezone.utc)
+    rows = []
+    for i in range(100):
+        sid = f"mature_browser_{i:08d}"
+        rows.append(dict(name="flow_started", screen="a1", sid=sid, n=2,
+                         at=(now-timedelta(days=8)).isoformat()))
+        if i < 4:
+            # Missing intermediate screen events must not erase a real approval.
+            for _ in range(2):
+                rows.append(dict(name="payment_approved",screen="d3",sid=sid,
+                                 at=(now-timedelta(days=7)).isoformat()))
+    rows += [dict(name="flow_started",screen="a1",sid="new_browser_00000001",n=2,
+                  at=(now-timedelta(hours=2)).isoformat()),
+             dict(name="payment_approved",screen="d3",sid="new_browser_00000001",
+                  at=(now-timedelta(hours=1)).isoformat()),
+             dict(name="pay_done",screen="d2",sid="mature_browser_00000099",
+                  at=(now-timedelta(days=7)).isoformat())]
+    an.EVENT_LOG_PATH.write_text("\n".join(json.dumps(row) for row in rows)+"\n",encoding="utf8")
+    goal = an.funnel()["goal"]
+    assert goal["visitors"] == 100
+    assert goal["buyers"] == 4
+    assert goal["conversion"] == 4
+    assert goal["additional_buyers_needed"] == 1
+
+
+def test_goal_without_mature_visitors_is_not_zero_percent(an):
+    _walk(an, "new_browser_00000001", len(an.FUNNEL))
+    goal = an.funnel()["goal"]
+    assert goal["visitors"] == 0
+    assert goal["conversion"] is None

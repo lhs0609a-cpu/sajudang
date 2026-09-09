@@ -230,6 +230,7 @@ def funnel() -> dict:
             timed.append((at, r))
     timed.sort(key=lambda item: item[0])
     cohorts, progress = {}, {}
+    approved = set()
     seen = defaultdict(set)
     reached = [set() for _ in FUNNEL]
     shown, answered, yes = defaultdict(set), defaultdict(set), defaultdict(set)
@@ -247,6 +248,8 @@ def funnel() -> dict:
             reached[0].add(sid)
         if sid not in cohorts or at - cohorts[sid] > timedelta(days=7):
             continue
+        if name == "payment_approved":
+            approved.add(sid)
         index = progress[sid]
         if index < len(FUNNEL):
             expected = FUNNEL[index][0]
@@ -295,7 +298,13 @@ def funnel() -> dict:
             segments.append({"dimension": field, "label": label, "visitors": len(members),
                              "mature": len(mature), "buyers": len(buyers),
                              "conversion": round(100 * len(buyers) / len(mature), 2) if mature else None})
-    return {"total_events": len(rows), "sessions": first, "steps": steps, "hook": hook,
+    mature = {sid for sid, at in cohorts.items() if now-at >= timedelta(days=7)}
+    buyers = len(mature & approved)
+    goal = {"target_percent": 5, "visitors": len(mature), "buyers": buyers,
+            "conversion": round(100 * buyers / len(mature), 2) if mature else None,
+            "additional_buyers_needed": max(0, (len(mature) + 19) // 20 - buyers),
+            "unit": "anonymous_browser", "approval_source": "server"}
+    return {"total_events": len(rows), "sessions": first, "steps": steps, "hook": hook, "goal": goal,
             "segments": segments, "context_missing": len(cohorts) - len(contexts),
             "counts": dict(Counter(r.get("name") for _, r in timed)),
             "screen_totals": {key: len(value) for key,value in seen.items()},

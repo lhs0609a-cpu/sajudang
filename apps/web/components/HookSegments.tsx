@@ -105,6 +105,12 @@ export default function HookSegments({
     }
   }, [restored.count,segments.length,onDone]);
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const activeHeading = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (open <= 1) return;
+    activeHeading.current?.focus({preventScroll:true});
+    activeHeading.current?.scrollIntoView({block:"start", behavior:"auto"});
+  }, [open]);
   useEffect(() => () => {if(advanceTimer.current) clearTimeout(advanceTimer.current);}, []);
 
   /*
@@ -171,6 +177,7 @@ export default function HookSegments({
 
   return (
     <>
+      <div className="hook-progress" role="status">경험 확인 {Object.keys(replies).length} / {segments.length}<span>답한 내용은 다시 펼쳐 읽을 수 있소.</span></div>
       {restored.count > 0 && <p className="conversion-note" role="status">앞서 답한 {restored.count}마디를 불러왔소. {restored.count === segments.length ? "무료 요약으로 이어가시오." : "남은 이야기부터 이어가시오."}</p>}
       {/*
         ★ 새로 열린 마디만 읽어 줍니다.
@@ -179,7 +186,11 @@ export default function HookSegments({
           **청하지도** 않습니다 — 만드는 데 값이 나가는 자리입니다.
       */}
       {segments.slice(0, open).map((seg, i) => (
-        <div className="blk in" key={seg.statement_id}>
+        <details className="hook-chapter" key={seg.statement_id} open={i === Math.min(open,segments.length)-1}>
+          <summary tabIndex={0} ref={node => {if(i === Math.min(open,segments.length)-1) activeHeading.current=node;}}>
+            <span>{i+1}. {seg.label || "그대의 반복 패턴"}</span><small>{replies[i] === undefined ? "지금 읽는 마디" : "답변 완료 · 다시 읽기"}</small>
+          </summary>
+        <div className="blk in">
           {/* ★ 몇 번째 마디인지. 0단은 label 이 비어 있어서 손님이
               어디쯤 왔는지 알 길이 없었습니다. */}
           {/*
@@ -267,6 +278,7 @@ export default function HookSegments({
             </div>
           )}
         </div>
+        </details>
       ))}
     </>
   );

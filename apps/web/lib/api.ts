@@ -131,30 +131,43 @@ async function rebuildSavedChart(chartId: string): Promise<void> {
 }
 
 async function call<T>(path: string, init?: RequestInit, recover = true): Promise<T> {
-  const res = await fetch(BASE + path, {
-    ...init,
-    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
-  });
-  if (!res.ok) {
-    const url = new URL(BASE + path);
-    if (recover && typeof window !== "undefined" && res.headers.get("X-Chart-Rebuild") === "1" &&
-        /^\/v1\/(chart\/|report$|hook$|summary$|daily$|omnibus$|pay\/(tiers|peek)$)/.test(url.pathname)) {
-      let body: {chart_id?:string} = {};
-      try { body = JSON.parse(typeof init?.body === "string" ? init.body : "{}"); } catch {}
-      const chartId = body.chart_id || url.searchParams.get("chart_id") ||
-        (url.pathname.startsWith("/v1/chart/") ? decodeURIComponent(url.pathname.slice(10)) : null);
-      if (chartId) { await rebuildSavedChart(chartId); return call<T>(path, init, false); }
+  // Bound read/calculation waits; payment mutations keep their own reconciliation flow.
+  const bounded = !path.startsWith("/v1/pay/") || /^\/v1\/pay\/(tiers|peek)(?:[?]|$)/.test(path);
+  const controller = bounded ? new AbortController() : null;
+  let timedOut = false;
+  const timeout = controller ? setTimeout(() => {timedOut=true;controller.abort();}, 20000) : null;
+  try {
+    const res = await fetch(BASE + path, {
+      ...init,
+      signal: controller ? (init?.signal ? AbortSignal.any([init.signal,controller.signal]) : controller.signal) : init?.signal,
+      headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+    });
+    if (!res.ok) {
+      const url = new URL(BASE + path);
+      if (recover && typeof window !== "undefined" && res.headers.get("X-Chart-Rebuild") === "1" &&
+          /^\/v1\/(chart\/|report$|hook$|summary$|daily$|omnibus$|pay\/(tiers|peek)$)/.test(url.pathname)) {
+        let body: {chart_id?:string} = {};
+        try { body = JSON.parse(typeof init?.body === "string" ? init.body : "{}"); } catch {}
+        const chartId = body.chart_id || url.searchParams.get("chart_id") ||
+          (url.pathname.startsWith("/v1/chart/") ? decodeURIComponent(url.pathname.slice(10)) : null);
+        if (chartId) { await rebuildSavedChart(chartId); return call<T>(path, init, false); }
+      }
+      let detail = res.statusText;
+      try {
+        const body = await res.json();
+        detail = typeof body.detail === "string" ? body.detail : JSON.stringify(body.detail);
+      } catch {
+        /* 본문이 JSON 이 아니면 statusText 로 둔다 */
+      }
+      throw new ApiError(res.status, detail);
     }
-    let detail = res.statusText;
-    try {
-      const body = await res.json();
-      detail = typeof body.detail === "string" ? body.detail : JSON.stringify(body.detail);
-    } catch {
-      /* 본문이 JSON 이 아니면 statusText 로 둔다 */
-    }
-    throw new ApiError(res.status, detail);
+    return await res.json() as T;
+  } catch (error) {
+    if (timedOut) throw new ApiError(408, "연결이 오래 걸리고 있소. 입력은 남아 있으니 다시 불러와 주시오.");
+    throw error;
+  } finally {
+    if (timeout) clearTimeout(timeout);
   }
-  return res.json() as Promise<T>;
 }
 
 const post = <T>(path: string, body: unknown) =>

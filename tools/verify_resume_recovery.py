@@ -8,7 +8,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "out/audit-20260909-round2/resume"
+OUT = ROOT / os.getenv("SJD_AUDIT_OUT", "out/five-percent-20260909/browser")
 OUT.mkdir(parents=True, exist_ok=True)
 WEB = os.getenv("SJD_AUDIT_WEB", "http://127.0.0.1:3029")
 API = "http://127.0.0.1:8029"
@@ -18,13 +18,20 @@ def main():
     results = []
     with sync_playwright() as pw:
         browser = pw.chromium.launch(channel="msedge", headless=True)
-        for width, answer in [(320, "neutral"), (390, "yes"), (390, "no"), (1920, "neutral"), (390, "ready"), (390, "temporary")]:
+        for width, answer in [(320, "neutral"), (390, "yes"), (390, "no"), (1920, "neutral"), (390, "ready"), (390, "temporary"), (360, "timeout"), (430, "preview-retry"), (390, "sales-timeout")]:
+            only = os.getenv("SJD_AUDIT_CASES", "").split(",")
+            if only != [""] and answer not in only: continue
             ctx = browser.new_context(viewport={"width": width, "height": 844}, reduced_motion="reduce")
             ctx.add_init_script("localStorage.setItem('sd.sound','off'); if(!localStorage.getItem('sajudang-session')) localStorage.setItem('sajudang-session',JSON.stringify({state:{admin:false,adminSet:true},version:0}));")
             status_calls = [0]
-            if answer in ("ready", "temporary"):
+            fault_calls = [0]
+            pending_routes = []
+            if answer in ("ready", "temporary", "sales-timeout"):
                 def sales_route(route):
                     status_calls[0] += 1
+                    if answer == "sales-timeout" and status_calls[0] == 1:
+                        pending_routes.append(route)
+                        return
                     temporary = answer == "temporary" and status_calls[0] == 1
                     route.fulfill(json={"ready":not temporary,"reason":"temporary" if temporary else None})
                 ctx.route("**/api/sales-status", sales_route)
@@ -40,6 +47,14 @@ def main():
                 if request.method == "OPTIONS":
                     route.fulfill(status=204, headers={"Access-Control-Allow-Origin": WEB,
                         "Access-Control-Allow-Credentials": "true", "Access-Control-Allow-Headers": "content-type", "Access-Control-Allow-Methods": "GET, POST, OPTIONS"})
+                    return
+                if answer == "timeout" and path == "/v1/hook" and fault_calls[0] == 0:
+                    fault_calls[0] += 1
+                    pending_routes.append(route)
+                    return  # Pending until the actual client deadline aborts it.
+                if answer == "preview-retry" and path == "/v1/pay/peek" and fault_calls[0] == 0:
+                    fault_calls[0] += 1
+                    route.fulfill(status=503,json={"detail":"시험용 일시 장애"},headers={"Access-Control-Allow-Origin":WEB,"Access-Control-Allow-Credentials":"true"})
                     return
                 response = route.fetch(url=API + path)
                 body = response.body()
@@ -82,6 +97,10 @@ def main():
                 page.get_by_role("button", name="내 고민의 무료 해석 읽기", exact=True).wait_for(timeout=30000)
                 snapshot("a6")
                 page.get_by_role("button", name="내 고민의 무료 해석 읽기", exact=True).click()
+                if answer == "timeout":
+                    page.get_by_role("button",name="무료 해석 다시 불러오기",exact=True).wait_for(timeout=25000)
+                    assert "연결이 오래 걸리고 있소" in page.locator("body").inner_text()
+                    page.get_by_role("button",name="무료 해석 다시 불러오기",exact=True).click()
                 page.locator(".vt").first.wait_for(timeout=30000)
                 snapshot("a7")
                 assert page.get_by_role("button", name="응답 건너뛰고 무료 요약 보기", exact=True).count() == 0
@@ -95,6 +114,7 @@ def main():
                         assert page.get_by_role('button',name=name,exact=True).count()==1
                     page.get_by_role("button", name=name, exact=True).last.click()
                     page.wait_for_timeout(850)
+                    assert page.locator(".hook-chapter[open]").count() == 1
                 page.reload()
                 page.get_by_text('앞서 답한 5마디를 불러왔소.',exact=False).wait_for(timeout=30000)
                 assert page.get_by_role('button',name=name,exact=True).count()==0
@@ -115,10 +135,18 @@ def main():
                 page.get_by_role("button", name="추가 해석과 가격 보기", exact=True).click()
                 page.locator(".conversion-product").first.wait_for(timeout=30000)
                 page.locator(".conversion-product").first.click()
+                if answer == "preview-retry":
+                    page.get_by_role("button",name="본문 미리보기 다시 불러오기",exact=True).click()
                 page.locator(".paid-preview").wait_for(timeout=30000)
-                if answer == "temporary":
+                if answer not in ("temporary", "sales-timeout"):
+                    page.reload()
+                    page.locator('.conversion-product[aria-pressed="true"]').wait_for(timeout=30000)
+                    page.locator(".paid-preview").wait_for(timeout=30000)
+                page.get_by_role("link",name="결제 조건 보기 ↓",exact=True).click()
+                assert page.locator("#checkout-terms").is_visible()
+                if answer in ("temporary", "sales-timeout"):
                     page.get_by_role("button", name="결제 연결 다시 확인하기", exact=True).click()
-                if answer in ("ready", "temporary"):
+                if answer in ("ready", "temporary", "sales-timeout"):
                     page.get_by_role("button", name="19,900원 결제하기", exact=True).wait_for(timeout=30000)
                 else:
                     page.get_by_text("현재 유료 판매를 준비하고 있소.", exact=True).wait_for()
@@ -137,6 +165,9 @@ def main():
                 (OUT / f"{width}-{answer}-failure.txt").write_text(page.locator("body").inner_text(), encoding="utf8")
                 results.append({"width": width, "answer": answer, "failure": str(exc), "screens": snapshots, "errors": errors})
             finally:
+                for held in pending_routes:
+                    try: held.abort()
+                    except Exception: pass
                 ctx.close()
             print(json.dumps({k: v for k, v in results[-1].items() if k not in ("screens", "requests")}), flush=True)
             (OUT / "results.json").write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf8")

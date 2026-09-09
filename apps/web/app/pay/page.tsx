@@ -88,16 +88,20 @@ function PayInner() {
    *   값을 치르는 자리에서 **안 고른 것이 골라져 있으면** 안 됩니다.
    */
   const [pick, setPick] = useState<Tier | null>(null);
+  const selectionKey = ["sd.checkout", s.chartId, s.cur, s.concern, s.axis4].join(":");
   const [order, setOrder] = useState<Order | null>(null);
   const [busy, setBusy] = useState(false);
   const [sales, setSales] = useState<{ready:boolean;reason:string|null}|null>(null);
   useEffect(() => {
     if (!["d1", "d1b", "d2"].includes(step)) return;
     let alive = true;
-    fetch("/api/sales-status").then(r => {if (!r.ok) throw new Error(); return r.json();})
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+    fetch("/api/sales-status", {signal:controller.signal}).then(r => {if (!r.ok) throw new Error(); return r.json();})
       .then(value => {if (alive) {setSales(value); if (!value.ready) track("checkout_blocked", "d1", {n:value.reason === "seller_setup" ? 1 : value.reason === "gateway_setup" ? 2 : 3});}})
-      .catch(() => {if(alive) setSales({ready:false,reason:"temporary"});});
-    return () => {alive=false;};
+      .catch(() => {if(alive) setSales({ready:false,reason:"temporary"});})
+      .finally(() => clearTimeout(timeout));
+    return () => {alive=false;clearTimeout(timeout);controller.abort();};
   }, [step, retry]);
   /* 목패 — ★ 값도 분량도 서버가 셉니다. 화면은 받아 적기만 합니다. */
   const [tiers, setTiers] = useState<TierCard[] | null>(null);
@@ -110,6 +114,8 @@ function PayInner() {
    *   블러가 아니라 서버가 안 보내는 것입니다 (engine/peek.py).
    */
   const [peek, setPeek] = useState<PeekRow[] | null>(null);
+  const [peekError, setPeekError] = useState<string | null>(null);
+  const [peekRetry, setPeekRetry] = useState(0);
   const [hidden, setHidden] = useState(0);
   /*
    * 걸어 둔 카드 — 「한 달 듣기」.
@@ -123,8 +129,12 @@ function PayInner() {
 
   useScreen(step);
   useEffect(() => {
-    setTiers(null); setPick(null); setOrder(null); setFree(null); setPeek(null); setOffer(null);
-  }, [s.chartId, s.cur, s.concern, s.axis4]);
+    setTiers(null); setPick(null); setOrder(null); setFree(null); setPeek(null); setOffer(null); setPeekError(null);
+    try {
+      const saved = sessionStorage.getItem(selectionKey);
+      if (saved === "one" || saved === "all" || saved === "sub") setPick(saved);
+    } catch { /* Storage may be unavailable; explicit selection still works. */ }
+  }, [s.chartId, s.cur, s.concern, s.axis4, selectionKey]);
 
   /* 목패 셋 — 서버가 센 값과 분량 */
   useEffect(() => {
@@ -158,6 +168,7 @@ function PayInner() {
   useEffect(() => {
     if (!["d1", "d1b", "d2"].includes(step) || !s.chartId || !pick) return;
     let alive = true;
+    setPeekError(null);
     api
       .payPeek({ chart_id: s.chartId, lens_id: s.cur, tier: pick,
                  concern: s.concern, axis4: s.axis4 })
@@ -167,10 +178,10 @@ function PayInner() {
         setHidden(r.hidden);
       })
       .catch((e) => {
-        if (alive) setErr(e instanceof ApiError ? e.message : "엿보지 못했소.");
+        if (alive) setPeekError(e instanceof ApiError ? e.message : "본문 미리보기를 불러오지 못했소.");
       });
     return () => { alive = false; };
-  }, [step, s.chartId, s.cur, s.concern, s.axis4, pick]);
+  }, [step, s.chartId, s.cur, s.concern, s.axis4, pick, peekRetry]);
 
   /* d0 · 무료 구간 */
   useEffect(() => {
@@ -391,6 +402,7 @@ function PayInner() {
     const selectTier = (t: TierCard) => {
       if (pick === t.id) return;
       setPick(t.id as Tier); setOrder(null); setOffer(null); setPeek(null); setErr(null);
+      try {sessionStorage.setItem(selectionKey,t.id);} catch {}
       track("tier_pick", "d1");
     };
     const product = (t: TierCard) => (
@@ -400,7 +412,8 @@ function PayInner() {
         <strong className="conversion-price">{t.price.toLocaleString()}원</strong>
         <span>{t.per_month ? `${t.days ?? 30}일마다 자동 결제` : "한 번 결제 · 영구 열람"}</span>
         <span>{t.lenses > 1 ? `${t.lenses}명의 해석을 함께 읽소.` : "이 인물의 추가 해석과 근거를 읽소. 다른 인물은 포함하지 않소."}</span>
-        <span>전체 {t.cuts}개 항목 · 약 {t.minutes}분 분량</span>{t.needs_extra_input && <span>일부 항목은 추가 정보가 있어야 열리오. 선택 후 필요한 정보를 확인하시오.</span>}
+        <span>전체 {t.cuts}개 항목 · 약 {t.minutes}분 분량 · 무료 내용 포함</span>{t.needs_extra_input && <span>일부 항목은 추가 정보가 있어야 열리오. 선택 후 필요한 정보를 확인하시오.</span>}
+        <span className="product-action">{pick === t.id ? "선택했소 · 아래에서 본문과 조건 확인" : "이 상품의 본문·결제 조건 보기 →"}</span>
       </button>
     );
     if (settling || carding) return (
@@ -432,6 +445,7 @@ function PayInner() {
           </details>
         </>}
         {tier && <div className="conversion-checkout" aria-live="polite">
+          <div className="checkout-jump"><span>{tier.price.toLocaleString()}원 · {tier.per_month ? "정기결제" : "한 번 결제"}</span><a href="#checkout-terms">결제 조건 보기 ↓</a></div>
           <div className="conversion-card">
             <h2>{tier.id === "one" ? `${charName} 해석` : tier.name}</h2>
             {tier.needs_extra_input && <div className="conversion-note">
@@ -439,6 +453,8 @@ function PayInner() {
               <p>입력은 선택이오. 생년월일로 읽는 본문은 볼 수 있고, 입력하지 않은 정보에 대한 추가 해석은 열리지 않소. 혈액형·그림·카드는 자기 성찰을 위한 보조 소재이오.</p>
             </div>}
             {tier.id === "all" && <p className="conversion-note">이미 읽은 내용도 포함되오. 전체 상품은 다른 인물의 관점을 함께 읽는 방식이며, 모든 인물에서 한 명 상품보다 본문이 길어지는 것은 아니오.</p>}
+            {!peek && !peekError && <p role="status">선택한 상품의 실제 본문을 불러오고 있소…</p>}
+            {peekError && <div className="conversion-status" role="alert"><p>{peekError}</p><button className="btn gh" onClick={() => setPeekRetry(n => n+1)}>본문 미리보기 다시 불러오기</button></div>}
             {peek && peek.length > 0 && <section className="paid-preview"><h3>다음 해석에서 풀어볼 질문</h3><p className="conversion-note">무료에서는 기둥·핵심 해석·오늘의 행동을 읽었소. 아래는 선택한 상품에서 추가로 열리는 해석의 실제 앞부분이오.</p>
               {peek.slice(0, 3).map((r, i) => <div key={r.lens_id+i}><h3>{r.ask}</h3><p>{r.head}… <span className="conversion-note">(본문 일부)</span></p>{r.source && <p className="conversion-note">해석 근거 · {r.source}</p>}</div>)}
             </section>}
@@ -446,6 +462,7 @@ function PayInner() {
               <p className="conversion-note">현재 명식 기준 {tier.cuts}개 내용 · {tier.chars.toLocaleString()}자 · 약 {tier.minutes}분. {tier.lenses}명의 관점으로 읽소.</p>
               {tier.opens.length > 0 && <ul>{tier.opens.map(title => <li key={title}>{title}</li>)}</ul>}
             </details>
+            <div id="checkout-terms" className="checkout-terms" tabIndex={-1}>
             {pick !== "sub" && order && <>
               <p className="conversion-price">{order.amount.toLocaleString()}원 <small>한 번 결제</small></p>
               <p className="conversion-note">{pick === "all" ? "전체 인물의 해석" : `${charName}의 해석`} · 영구 열람 · 자동 결제 없음</p>
@@ -473,6 +490,8 @@ function PayInner() {
             </>}
             {sales?.ready && !order && pick !== "sub" && !err && <p role="status">결제 금액과 조건을 확인하고 있소…</p>}
             {sales?.ready && !offer && pick === "sub" && !err && <p role="status">정기결제 조건을 확인하고 있소…</p>}
+            {!sales?.ready && <p className="conversion-note">현재 결제할 수 없는 상태요. 위 안내를 확인하고 무료 해석으로 돌아갈 수 있소.</p>}
+            </div>
           </div>
         </div>}
         <button className="btn gh" onClick={() => router.push("/pay?step=d0")}>무료 해석으로 돌아가기</button>

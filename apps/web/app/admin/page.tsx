@@ -59,6 +59,7 @@ type Overview = {
     sessions?: number;
     immature_sessions?: number;
     context_missing?: number;
+    goal?: {target_percent:number;visitors:number;buyers:number;conversion:number|null;additional_buyers_needed:number};
     segments?: {dimension:string;label:string;visitors:number;mature:number;buyers:number;conversion:number|null}[];
     steps?: { screen: string; label: string; sessions: number;
               from_prev: number | null; from_top: number | null;
@@ -816,6 +817,12 @@ export default function AdminPage() {
       <RefundReviews accessKey={key} token={token} />
       <section>
         <h2>어디서 나가는가 · 진입 동선 v2</h2>
+        {data?.funnel?.goal && <div className="conversion-card">
+          <h3>구매율 목표 {data.funnel.goal.target_percent}% · 1만 유입당 500구매</h3>
+          <p>{data.funnel.goal.conversion === null ? "7일 관찰이 끝난 방문이 아직 없소." : `관찰 완료 ${data.funnel.goal.visitors.toLocaleString()}개 브라우저 중 서버 승인 ${data.funnel.goal.buyers.toLocaleString()}개 · 실제 전환 ${data.funnel.goal.conversion}%`}</p>
+          {data.funnel.goal.conversion !== null && <p className="sm">이 관찰 집단에서 목표까지 {data.funnel.goal.additional_buyers_needed.toLocaleString()}개 구매가 더 필요하오. 미래 구매율 예측이나 달성 보장은 아니오.</p>}
+          <p className="sm">중간 화면 이벤트가 누락돼도 서버 승인이 확인되면 목표 집계에는 포함하오. 아래 순차 동선 표와 구매 수가 다를 수 있소. 익명 브라우저 기준이며 같은 사람의 여러 기기는 구분되오.</p>
+        </div>}
         <p className="sm">7일 관찰 미완료 {data?.funnel?.immature_sessions ?? 0}개 · 유입 분류 미수집 {data?.funnel?.context_missing ?? 0}개. QA 방문은 제외하며, 미도달만으로 이탈 이유를 단정하지 않소.</p>
         {!!data?.funnel?.segments?.length && <details className="conversion-details"><summary>기기·유입·재방문별 7일 결제 전환</summary><div style={{overflowX:"auto"}}><table className="admt"><thead><tr><th>구분</th><th>입장</th><th>관찰 완료</th><th>서버 승인</th><th>전환</th></tr></thead><tbody>{data.funnel.segments.map(row => <tr key={row.dimension+row.label}><td>{row.label}</td><td>{row.visitors}</td><td>{row.mature}</td><td>{row.buyers}</td><td>{row.conversion === null ? "관찰 중" : `${row.conversion}%`}</td></tr>)}</tbody></table></div><p className="sm">전환은 관찰 기간이 끝난 브라우저만 분모로 삼소. 세 분류의 방문 수를 서로 더하지 마시오. 추천 출처는 브라우저가 알려준 범위에서만 구분하오.</p></details>}
         <p className="sm">최근 30일 개편 첫 화면 진입 브라우저를 기준으로, 7일 안의 순차 이동과 서버 승인을 세오. 실제 사람 수와 다르며, 관찰 기간이 끝나지 않은 방문이 포함되오. 직접 진입·이전 동선은 제외하오.</p>
