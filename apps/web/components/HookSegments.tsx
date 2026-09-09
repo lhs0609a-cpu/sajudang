@@ -241,6 +241,7 @@ export default function HookSegments({
                    mood={replies[i] && seg.no === replies[i] ? "soft" : "cut"}>
                 {replies[i]}
               </Say>
+              {i < segments.length - 1 && <p className="hook-next">다음 마디 · {segments[i+1].label || "그 선택 뒤의 다른 면"}</p>}
             </div>
           )}
         </div>

@@ -1,0 +1,10 @@
+.reading-revelation {font:400 16px/1.85 var(--sans);margin:16px 0;color:var(--paper)}
+.next-reading {margin:26px 0 20px;padding-top:24px;border-top:1px solid var(--line)}
+.next-reading h2 {font:500 24px/1.55 var(--serif);letter-spacing:-.03em;margin:10px 0 20px}
+.next-reading article {display:flex;gap:12px;padding:16px 0;border-bottom:1px solid var(--line)}
+.next-reading article>div {min-width:0;flex:1}
+.next-reading-number {font:400 20px/1.5 var(--serif);color:var(--gold)}
+.next-reading h3 {font:500 16px/1.65 var(--sans);color:var(--paper);margin-bottom:8px}
+.next-reading article p {font:400 14px/1.8 var(--sans);color:var(--paper2);margin-bottom:8px}
+.next-reading small {font:400 12px/1.6 var(--sans);color:var(--paper3)}
+.hook-next {padding:14px 0 0;color:var(--gold);font:400 14px/1.8 var(--serif)}

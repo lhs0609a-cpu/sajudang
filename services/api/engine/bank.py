@@ -940,6 +940,11 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     #   캐릭터에게서도 「그대」로 나갔습니다. 조사도 같이 맞춥니다.
     for s in segs:
         s["html"] = _voice.address(s["html"], you)
+    from .reading_facts import scope_text
+    for segment in segs:
+        for field in ('html', 'source', 'yes', 'no'):
+            if segment.get(field):
+                segment[field] = scope_text(segment[field], f.hour_known)
     return segs
 
 

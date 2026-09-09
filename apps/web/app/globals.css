@@ -7,6 +7,7 @@
 @import "../styles/atelier.css";
 @import "../styles/mobile.css";
 @import "../styles/hamyo.css";
+@import "../styles/reading-journey.css";
 
 /* Reading and purchase hierarchy after the 10,000-journey audit. */
 .reading-title {font-size:clamp(24px,6vw,32px);line-height:1.4;margin-bottom:20px;text-wrap:balance}

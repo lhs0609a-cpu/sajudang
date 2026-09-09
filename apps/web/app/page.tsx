@@ -468,7 +468,7 @@ function EntryInner() {
             <div className="gate-wordmark"><span className="brand-seal" aria-hidden="true">星<br/>辰</span><span>성신당<small>별에 묻고, 나를 읽다</small></span></div>
             <p className="conversion-kicker">그대의 마음이 쉬어 가는 밤</p>
             <h1 className="conversion-title">자꾸 같은 곳에서<br />마음이 걸리오?</h1>
-            <p className="conversion-lead">태어난 순간에 담긴 결을 읽고,<br />지금의 고민을 함께 풀어보겠소.</p>
+            <p className="conversion-lead">잘 버텨온 힘이, 다른 자리에서는<br />나를 지치게 할 수도 있소.<br />그 갈림길을 사주로 함께 읽어보겠소.</p>
             <button className="btn mt" onClick={() => { s.set({cur:"pungun"}); go("a5"); }}>내 고민으로 무료 해석 보기</button>
             <p className="conversion-note">{entryArm === 1 ? "무료 해석과 오늘 해볼 행동 하나 · 시간은 몰라도 되오" : "첫 해석 무료 · 태어난 시간은 몰라도 되오"}</p>
             <GuideIntro />
@@ -686,10 +686,10 @@ function EntryInner() {
           */}
           <Say who={lens.name} lens={lens.id}>
             <b>{CONCERNS.find((c) => c.id === s.concern)?.label ?? "걸리는 것"}</b>
-            에 대해서요. 여기서부터 <b>5마디</b>요.<br />
+            을 붙잡는 반복부터 짚겠소. <b>5마디</b>를 따라오시오.<br />
             {s.hourKnown ? "기둥 4자리의 8글자" : "시주를 제외한 기둥 3자리의 6글자"}를 보고 하는 해석이오 —
             선택한 고민에 맞춰 살펴보겠소.<br />
-            각 마디가 그대의 경험과 맞는지 답해 주시오.<br />
+            그대에게 힘이 된 방식이, 어디서는 짐이 됐는지 살피겠소.<br />
             맞지 않는 대목은 따로 기억해 두고, 두 번 어긋나면 남은 질문의 관점을 바꾸겠소.
           </Say>
         </div>
@@ -708,8 +708,8 @@ function EntryInner() {
       )}
       {hookDone && (
         <section className="conversion-card">
-          <h2>내 경험과 가까웠던 장면이 있소?</h2>
-          <p className="conversion-lead">이어지는 무료 해석에서 근거를 더 살펴보고, 오늘 해볼 행동 하나를 가져가시오.</p>
+          <h2>마음에 걸린 대목, 왜 반복됐을 것 같소?</h2>
+          <p className="conversion-lead">다음 무료 해석에서 그 이유와 근거를 풀겠소. 같은 힘을 다르게 쓰는 행동 하나까지 챙겨 가시오.</p>
           <button className="btn mt" onClick={() => router.push("/pay?step=d0")}>무료 해석과 오늘의 행동 보기</button>
           <button className="btn gh" onClick={() => router.push("/summary")}>여기까지 본 내용 정리하기</button>
         </section>

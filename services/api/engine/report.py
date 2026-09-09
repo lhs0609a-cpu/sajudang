@@ -421,7 +421,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
          '<p class="tale">%s</p><p class="tale">%s</p>'
          '<p class="tale">%s</p><p class="sm">%s</p>'
          % (R["lead"],
-            R["zero"][parts["zero"]], R["strength"][parts["strength"]],
+            '여기서는 겉글자와 지지 속 숨은 기운을 함께 보오. ' + R["zero"][parts["zero"]], R["strength"][parts["strength"]],
             R["helper"][parts["helper"]], R["ilji"][parts["ilji"]],
             band["line"].format(words=rr["words"]), band["tail"],
             R["ilju"].format(gz=rr["ilju"]["gz"], words=rr["ilju"]["words"])
@@ -513,11 +513,11 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     else:
         place = '일지 <b>%s</b>는 조용한 편이오. 대신 밖에서 흔들리오.' % f.day_ji
     if f.gwan >= 2:
-        lean = "관이 둘이라 책임이 앞장서오."
+        lean = "관성이 %d개라 책임이 앞장서오." % f.gwan
     elif f.jae >= 2:
-        lean = "재가 둘이라 손이 크오."
+        lean = "재성이 %d개라 손이 크오." % f.jae
     elif f.sik >= 2:
-        lean = "식상이 둘이라 만드는 데 힘이 쏠리오."
+        lean = "식상이 %d개라 만드는 데 힘이 쏠리오." % f.sik
     else:
         lean = "어느 한쪽으로 크게 기울지 않았소."
     # ★ 곱하는 축에 **일간(10)** 을 더했습니다.
@@ -1667,6 +1667,12 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
     asks = None
     if not (extras or {}).get("topic"):
         asks = topic_mod.ask_spec(concern)
+
+    from .reading_facts import scope_text
+    for item in cuts + locked:
+        for field in ('html', 'source', 'teaser'):
+            if item.get(field):
+                item[field] = scope_text(item[field], f.hour_known)
 
     from engine.practice import build as build_practice
     from engine.editorial import build as build_editorial

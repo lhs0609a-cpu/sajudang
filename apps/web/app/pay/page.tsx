@@ -16,6 +16,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
 import PracticeCard from "@/components/PracticeCard";
 import ReadingGuide from '@/components/ReadingGuide';
+import NextReading from '@/components/NextReading';
+import { READING_QUESTIONS, freeRevelation } from '@/lib/reading-journey';
 import CompanionCat from "@/components/CompanionCat";
 import Scene from "@/components/scene/Scene";
 import ActOut from "@/components/ActOut";
@@ -343,7 +345,7 @@ function PayInner() {
     return (
       <Shell screen="d0" title="무료 요약과 오늘의 행동">
         <p className="conversion-kicker">{charName}의 해석 · 무료</p>
-        <h1 className="conversion-title reading-title">내 고민을 짧게 정리해 보겠소.</h1>
+        <h1 className="conversion-title reading-title">{READING_QUESTIONS[s.concern] ?? "그대가 반복해 온 선택을 짚어보겠소."}</h1>
         {err && <><Say who={charName} lens={s.cur}>{err}</Say><button className="btn" onClick={() => {setErr(null);setRetry(n => n + 1);}}>무료 해석 다시 불러오기</button></>}
         {!free && !err && <p role="status">해석과 근거를 정리하고 있소…</p>}
         {free && <>
@@ -355,10 +357,11 @@ function PayInner() {
             <p><strong>오늘은 이것부터 해보시오.</strong><br />맞지 않았던 문장 하나와 실제로 겪은 장면 하나를 나란히 적으시오. 다른 점이 무엇인지 먼저 살피는 것으로 충분하오.</p>
             <button className="btn gh" onClick={() => {track("reading_mismatch", "d0", {n: 1}); router.push("/?step=a3");}}>태어난 정보 다시 확인하기</button>
             <button className="btn gh" onClick={() => {track("reading_mismatch", "d0", {n: 2}); router.push("/lobby");}}>다른 해석자의 관점 살펴보기</button>
-          </section> : free.editorial ? <ReadingGuide guide={free.editorial} /> :
+          </section> : free.editorial ? <ReadingGuide guide={free.editorial} revelation={freeRevelation(cuts)} /> :
             <div className="conversion-card"><p>기둥과 해석 근거를 아래에서 확인할 수 있소. 맞는 부분만 경험에 대입해 보시오.</p></div>}
           {(lens?.price ?? 0) > 0 && <div className="reading-next">
-            <p>무료 해석은 여기까지요. 추가 내용과 가격을 먼저 살펴보거나, 아래 근거를 더 읽어도 되오.</p>
+            {rejected.length === 0 && <NextReading cuts={free.locked} />}
+            <p>{rejected.length ? "맞지 않았던 해석은 접어 두고, 추가로 다루는 질문을 먼저 살펴보시오." : "방금 읽은 패턴을 지금의 흐름과 함께 살피는 것이 다음 해석이오. 실제 내용과 가격을 확인하시오."}</p>
             {!SELLABLE && <p className="conversion-note">현재 유료 판매를 준비하고 있소. 무료 해석은 계속 읽을 수 있소.</p>}
             <button className="btn" onClick={openPrice}>추가 해석과 가격 보기</button>
           </div>}
@@ -410,8 +413,8 @@ function PayInner() {
       <Shell screen="d1" title="추가 해석과 결제" legal onBack={() => router.push("/pay?step=d0")}>
         <div className="conversion-intro">
           <p className="conversion-kicker">내용 · 가격 · 열람 조건</p>
-          <h1 className="conversion-title">무료 다음에는<br />무엇을 더 읽을 수 있소?</h1>
-          <p className="conversion-lead">{charName}의 추가 해석을 미리 살펴보시오. 무료 내용과의 차이를 확인한 뒤 결정해도 늦지 않소.</p>
+          <h1 className="conversion-title">반복되는 이유 다음엔,<br />어디를 바꿔야 하오?</h1>
+          <p className="conversion-lead">{charName}과 지금의 흐름, 필요한 힘, 선택을 바꿀 지점을 살펴보시오. 아래에서 실제 본문과 열람 범위를 먼저 확인할 수 있소.</p>
         </div>
         {sales?.reason === "seller_setup" && <div className="conversion-status" role="status"><strong>현재 유료 판매를 준비하고 있소.</strong><p>판매자 정보 등록이 끝나기 전에는 결제를 받지 않소. 다시 시도할 필요 없이 무료 해석을 계속 읽어도 되오.</p><a href="/legal">판매자 정보 확인하기</a></div>}
         {sales?.reason === "gateway_setup" && <p className="conversion-status" role="status">결제 서비스 연결을 준비하고 있소. 지금은 무료 해석을 이용해 주시오.</p>}
@@ -436,7 +439,7 @@ function PayInner() {
               <p>입력은 선택이오. 생년월일로 읽는 본문은 볼 수 있고, 입력하지 않은 정보에 대한 추가 해석은 열리지 않소. 혈액형·그림·카드는 자기 성찰을 위한 보조 소재이오.</p>
             </div>}
             {tier.id === "all" && <p className="conversion-note">이미 읽은 내용도 포함되오. 전체 상품은 다른 인물의 관점을 함께 읽는 방식이며, 모든 인물에서 한 명 상품보다 본문이 길어지는 것은 아니오.</p>}
-            {peek && peek.length > 0 && <section className="paid-preview"><h3>결제하면 더 읽는 질문</h3><p className="conversion-note">무료에서는 기둥·핵심 해석·오늘의 행동을 읽었소. 아래는 선택한 상품에서 추가로 열리는 해석의 실제 앞부분이오.</p>
+            {peek && peek.length > 0 && <section className="paid-preview"><h3>다음 해석에서 풀어볼 질문</h3><p className="conversion-note">무료에서는 기둥·핵심 해석·오늘의 행동을 읽었소. 아래는 선택한 상품에서 추가로 열리는 해석의 실제 앞부분이오.</p>
               {peek.slice(0, 3).map((r, i) => <div key={r.lens_id+i}><h3>{r.ask}</h3><p>{r.head}… <span className="conversion-note">(본문 일부)</span></p>{r.source && <p className="conversion-note">해석 근거 · {r.source}</p>}</div>)}
             </section>}
             <details className="conversion-details"><summary>전체 분량과 열람 범위</summary>

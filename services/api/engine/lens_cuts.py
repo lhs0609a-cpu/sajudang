@@ -366,6 +366,14 @@ def _fmt(tpl: str, w: dict) -> str:
 
 
 def _counted(f, axes: list) -> str:
+    from copy import copy
+    from .reading_facts import visible_elements, scope_text
+    displayed = copy(f)
+    displayed.elements = visible_elements(f)
+    return scope_text(_counted_visible(displayed, axes), f.hour_known)
+
+
+def _counted_visible(f, axes: list) -> str:
     """
     이 컷이 보는 자리를 세어 한 줄로.
 
