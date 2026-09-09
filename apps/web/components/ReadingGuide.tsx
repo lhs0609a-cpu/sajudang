@@ -10,6 +10,6 @@ export default function ReadingGuide({guide}:{guide:NonNullable<ReportResponse['
     <details className="conversion-details"><summary>내 경험에 대입해 보기</summary>
       <p>{guide.scene}</p>
     </details>
-    <CompanionCat state="rest" message="한 번에 다 읽지 않아도 되오. 지금 필요한 질문 하나부터." />
+    <CompanionCat state="rest" message="한 번에 다 안 읽어도 된다냥. 궁금한 것부터 보자!" />
   </section>;
 }

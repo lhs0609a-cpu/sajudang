@@ -472,7 +472,7 @@ function EntryInner() {
             <button className="btn mt" onClick={() => { s.set({cur:"pungun"}); go("a5"); }}>내 고민으로 무료 해석 보기</button>
             <p className="conversion-note">{entryArm === 1 ? "무료 해석과 오늘 해볼 행동 하나 · 시간은 몰라도 되오" : "첫 해석 무료 · 태어난 시간은 몰라도 되오"}</p>
             <GuideIntro />
-            <CompanionCat state="welcome" message="이 밤의 안내묘요. 그대 곁에서 함께 읽겠소." />
+            <CompanionCat state="welcome" message="안내묘 하묘당! 네 곁에 꼭 붙어 있을게냥." />
           </div>
         </div>
         <section className="gate-promise"><p className="brand-overline">성신당에서 만나는 세 가지</p><div><article><span>一</span><h2>나를 읽는 근거</h2><p>어떤 기둥에서 나온 말인지<br/>함께 보여드리오.</p></article><article><span>二</span><h2>지금의 고민</h2><p>돈, 일, 사랑, 사람.<br/>마음이 쓰이는 곳부터 보오.</p></article><article><span>三</span><h2>오늘의 작은 행동</h2><p>읽고 끝내지 않도록<br/>해볼 일 하나를 남기오.</p></article></div></section>
@@ -559,7 +559,7 @@ function EntryInner() {
         <button className="btn gh" onClick={() => {
           s.set({ hourKnown: false, hour: null, minute: 0, chartId: null, features: null }); go("a6");
         }}>시간을 모르오 · 시주 없이 보기</button>
-        <CompanionCat message="모르는 시간을 추측해서 채우지 않아도 괜찮소." />
+        <CompanionCat message="모르는 시간은 비워둬도 괜찮다냥." />
         <details className="conversion-details"><summary>별칭·성향도 추가하고 싶소</summary>
           <p className="conversion-note">선택 정보요. 비워 두어도 무료로 볼 수 있소.</p>
           <button className="btn gh" onClick={() => go("a2")}>별칭 입력</button>
@@ -600,7 +600,7 @@ function EntryInner() {
           ))}
         </div>
         <CompanionCat state={s.concernSet ? "selected" : "rest"}
-          message={s.concernSet ? "좋소. 이 고민부터 살펴보오." : "오늘 마음에 걸린 것부터 살펴보오."} />
+          message={s.concernSet ? "잘 골랐다냥. 이 고민부터 같이 보자!" : "오늘 마음에 걸린 건 뭐냥?"} />
         <button className="btn mt" disabled={!s.concernSet} onClick={() => go("a3")}>이 고민으로 이어가기</button>
       </Shell>
     );

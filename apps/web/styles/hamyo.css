@@ -1,0 +1,18 @@
+body .phone .companion-cat {align-items:center;gap:14px}
+body .phone .companion-cat svg {width:80px;height:80px;min-width:80px;flex:0 0 80px;overflow:visible;filter:drop-shadow(0 5px 6px #0002)}
+.hamyo-speech {position:relative;min-width:0;flex:1;padding:13px 15px;background:#ddc4930b;border:1px solid #ddc49323;border-radius:16px 16px 16px 4px}
+.hamyo-name {display:block;font:500 11px/1.5 var(--sans);color:#d0bd9a;letter-spacing:.03em;margin-bottom:5px}
+body .phone .hamyo-speech p {font:400 14px/1.75 var(--sans);color:var(--paper);margin:0;word-break:keep-all;overflow-wrap:break-word}
+.hamyo-paw {transform-box:fill-box;transform-origin:50% 95%}
+.companion-cat--welcome .hamyo-paw {animation:hamyo-wave .55s ease-in-out 2}
+.companion-cat--saved .hamyo-heart {animation:hamyo-love .7s ease-out 1}
+@keyframes hamyo-wave {0%,100%{transform:rotate(0)}50%{transform:rotate(-18deg)}}
+@keyframes hamyo-love {0%{opacity:0;transform:translateY(4px)}100%{opacity:1;transform:translateY(0)}}
+@media(max-width:767px) {
+  body .phone .companion-cat {gap:10px}
+  body .phone .companion-cat svg {width:72px;height:72px;min-width:72px;flex-basis:72px}
+  .hamyo-speech {padding:11px 12px}
+}
+@media(prefers-reduced-motion:reduce) {
+  .companion-cat .hamyo-paw,.companion-cat .hamyo-heart,.companion-cat--selected svg,.companion-cat--saved svg {animation:none!important}
+}

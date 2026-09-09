@@ -380,7 +380,7 @@ function PayInner() {
   if (["d1", "d1b", "d2"].includes(step)) {
     if (lens?.price === 0 && !tossBack && !subBack) return (
       <Shell screen="d0" title="무료로 읽는 자리">
-        <CompanionCat message="이 인물의 해석은 무료로 읽을 수 있소." />
+        <CompanionCat message="이 해석은 무료다냥. 편하게 읽어봐!" />
         <button className="btn" onClick={() => router.push("/report/" + s.cur + "?tab=c2")}>무료 해석 읽기</button>
       </Shell>
     );
@@ -487,7 +487,7 @@ function PayInner() {
     return (
       <Shell screen="d3" title="열렸소">
         <Scene id="untie" />
-        <CompanionCat state="saved" message="해석이 열렸소. 내 속도로 천천히 읽어보시오." />
+        <CompanionCat state="saved" message="해석이 열렸다냥! 네 속도로 천천히 읽어봐." />
         <Narration lines={["붉은 끈이 풀렸소."]} />
 
         {/*
