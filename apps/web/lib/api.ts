@@ -92,6 +92,7 @@ export interface TierCard {
   locked: number;
   opens: string[];
   needs_extra_input?: boolean;
+  required_inputs?: string[];
 }
 
 /** 값을 치른 직후 **실제로** 열린 것. 명식 캐시가 없으면 counted=false. */

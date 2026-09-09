@@ -472,8 +472,9 @@ export default function AdminPage() {
             물건의 상태**라, 주인이 열자마자 봐야 하는 것이 이쪽입니다. */}
       {worth && (
         <section>
-          <h2>자동 문장 검사 · v1</h2>
+          <h2>자동 문장 검사 · v2</h2>
           <p className="sm">문장 중복·출처 표기·분량을 검사하는 내부 지표입니다. 실제 고객 만족도, 사주 정확도, 결제율을 뜻하지 않습니다.</p>
+          <p className="sm">문장 표본: 고정 명식 6개 × 고민 6개, 월하 렌즈. 가격·분량 축은 같은 명식의 유료 캐릭터를 비교합니다. 전체 사용자나 모든 해석의 품질을 대표하지 않습니다.</p>
           <div className="worthtop">
             <div className={"worthbig g" + Math.min(4, Math.floor(worth.total / 20))}>
               <b>{worth.total}</b><span>/ 100</span>

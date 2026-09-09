@@ -107,3 +107,15 @@ def test_restored_permanent_purchase_index_survives_a_year(monkeypatch):
     now=store._now()
     monkeypatch.setattr(store,'_now',lambda:now+366*86400)
     assert report.entitled_tier('new-browser','pungun')=='all'
+
+
+def test_product_discloses_exact_missing_inputs():
+    from engine import lens, extras
+    result = chart.post_chart(ChartRequest(**REQ))
+    got = pay.get_tiers(pay.TiersRequest(chart_id=result.chart_id, lens_id='wolha', concern='love'))
+    tiers = {t['id']: t for t in got['tiers']}
+    expected = {lens.required_input(l['id']) for l in lens.released()} & set(extras.BUILDERS)
+    assert expected <= set(tiers['all']['required_inputs'])
+    assert set(tiers['all']['required_inputs']) <= set(extras.BUILDERS)
+    assert tiers['all']['needs_extra_input'] == bool(tiers['all']['required_inputs'])
+    assert set(tiers['one']['required_inputs']) <= set(tiers['all']['required_inputs'])

@@ -150,7 +150,7 @@ async def _http_error(request: Request, exc: StarletteHTTPException):
     elif exc.status_code == 405 and detail in ("Method Not Allowed", None):
         detail = "그 방법으로는 안 받소. 이 자리는 POST 로만 받소."
     elif exc.status_code == 500:
-        detail = "안에서 무언가 어긋났소. 값은 빠져나가지 않았소."
+        detail = "처리를 마치지 못했습니다. 결제 중이었다면 구매 내역과 카드 승인 내역을 먼저 확인해 주세요."
     return JSONResponse(status_code=exc.status_code,
                         content={"detail": detail},
                         headers=getattr(exc, "headers", None))

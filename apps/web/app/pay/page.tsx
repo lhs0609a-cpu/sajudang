@@ -10,6 +10,7 @@
  * ★ PG 키가 없으면 결제창을 띄우지 않고 그 사실을 그대로 알립니다.
  *   성공한 척하지 않습니다.
  */
+const INPUT_LABELS: Record<string,string> = {partner:'상대 생년월일·성별',meet:'관계 대상과 만난 경위',context:'현재 상황과 태도',blood:'혈액형 선택',image:'그림 선택',cards:'카드 세 장 선택'};
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
@@ -560,7 +561,10 @@ function PayInner() {
         {tier && <div className="conversion-checkout" aria-live="polite">
           <div className="conversion-card">
             <h2>{tier.id === "one" ? `${charName} 해석` : tier.name}</h2>
-            {tier.needs_extra_input && <p className="conversion-note">일부 해석은 상대 정보나 현재 상황을 추가로 입력하면 열립니다. 입력은 선택이며, 입력하지 않은 정보에 대한 해석은 제공되지 않습니다.</p>}
+            {tier.needs_extra_input && <div className="conversion-note">
+              <p>일부 해석에 필요한 추가 입력: {(tier.required_inputs ?? []).map(key => (INPUT_LABELS[key] ?? '현재 상황')).join(' · ') || '상대 정보 또는 현재 상황'}.</p>
+              <p>입력은 선택입니다. 생년월일로 읽는 본문은 볼 수 있고, 입력하지 않은 정보에 대한 추가 해석은 열리지 않습니다. 혈액형·그림·카드는 자기 성찰을 위한 보조 소재입니다.</p>
+            </div>}
             {tier.id === "all" && <p className="conversion-note">이미 읽은 내용도 포함됩니다. 전체 상품은 다른 인물의 관점을 함께 읽는 방식이며, 모든 인물에서 한 명 상품보다 본문이 길어지는 것은 아닙니다.</p>}
             {peek && peek.length > 0 && <details className="conversion-details"><summary>추가 해석 미리보기</summary>
               {peek.map((r, i) => <div key={r.lens_id+i}><h3>{r.ask}</h3><p>{r.head}</p>{r.source && <p className="conversion-note">해석 근거 · {r.source}</p>}</div>)}

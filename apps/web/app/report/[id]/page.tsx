@@ -14,6 +14,7 @@ import Scene from "@/components/scene/Scene";
 import ExtraAsk from "@/components/ExtraAsk";
 import TopicAsk from "@/components/TopicAsk";
 import Reveal from "@/components/Reveal";
+import Fold from "@/components/Fold";
 import ReadingGuide from '@/components/ReadingGuide';
 import ScrollHint from "@/components/ScrollHint";
 import SinsalSlots from "@/components/SinsalSlots";
@@ -349,7 +350,7 @@ function ReportInner() {
           {" "}{rep.cuts.length}컷
         </span>
         <p className="sm">
-          여덟 글자는 하나요. 읽는 눈이 스물이오.
+          명식은 하나요. 읽는 눈이 스물이오.
           <b> 같은 산을 스무 군데서 그린 그림</b> 같은 것이라, 어느 그림도
           거짓이 아니고 어느 하나도 산 전부가 아니오.
         </p>
@@ -479,7 +480,7 @@ function ReportInner() {
           <br />
           스무 사람 중 이 자리를 보는 건 나 1명이오. 같은 8글자를
           두고 나머지 19명은 다른 데를 짚소. 그러니 여기서 접어도
-          그대가 놓치는 건 <b>내 눈 하나</b>지 그대의 여덟 글자가
+          그대가 놓치는 건 <b>내 눈 하나</b>지 그대의 명식이
           아니오.
           <br /> 돈을 먼저 보고 싶으면 돈 보는 사람에게, 끊긴
           연락이 걸리면 그 사람에게 가시오 — 열쇠 꾸러미에서 맞는
@@ -569,7 +570,7 @@ function ReportInner() {
           {" "}읽은 자리 {rep.cuts.length}컷
         </span>
         <p className="sm">
-          <b>일간(日干)</b>은 여덟 글자 가운데 <b>그대 자신</b>을 가리키는
+          <b>일간(日干)</b>은 명식의 글자 가운데 <b>그대 자신</b>을 가리키는
           한 글자요. 여덟이 다 그대인 게 아니라, <b>그중 하나가 그대이고
           나머지 일곱이 그 둘레</b>요 — 마당 한가운데 선 사람과 담장
           같은 것이오.
@@ -588,7 +589,7 @@ function ReportInner() {
           </div>
         </div>
         <ActOut kind="남긴 물음" next="남기다">
-          이 카드에는 <b>여덟 글자와 읽은 자리</b>만 담기오.
+          이 카드에는 <b>명식과 읽은 자리</b>만 담기오.
           생년월일시도 고을도 안 담기오.<br />
           <b>그런데 받은 사람은 제 것을 세워 보고 싶어지오.</b> 왜 그렇겠소?
         </ActOut>
@@ -704,6 +705,7 @@ function ReportInner() {
           훅에서 이미 단계 감각을 만들어 놨으니 결이 맞습니다.
       */}
       <ScrollProgress />
+      {rep.editorial && <ReadingGuide guide={rep.editorial} />}
       {/* ★ 낡은 종이(oldpaper)를 깔고 있었습니다 (2026-09-06). 아래 글은
           「두루마리 끈을 풀었다 · 종이가 무릎까지」인데 영상에는 두루마리도
           끈도 무릎도 없었습니다 — 손님이 짚은 자리입니다. */}
@@ -795,7 +797,7 @@ function ReportInner() {
             첫 컷은 이미 화면에 있으니 기다리지 않습니다(eager).
         */}
         {body.map((c, i) => (
-          <Reveal key={c.id} think={thinkOf(c.source)} eager={i === 0}>
+          <Fold key={c.id} className="reading-section" initiallyOpen={i === 0} label={`${i + 1}. ${c.title}`}>
             <div className={"blk in" + (c.id.startsWith("lc_") ? " own" : "")}>
               {/* ★ 끝이 끝으로 읽히게 합니다.
                   closing_cut 의 자리 고정은 이미 돼 있는데, 손님은 그게
@@ -814,7 +816,7 @@ function ReportInner() {
                 : <div className="cutbody"
                        dangerouslySetInnerHTML={{ __html: c.html }} />}
             </div>
-          </Reveal>
+          </Fold>
         ))}
 
         {rep.closing && (
@@ -826,7 +828,7 @@ function ReportInner() {
         <div className="printfoot">
           성신당 星辰堂 · {rep.lens.name}이 본 것 · {printedOn}
           <br />
-          여덟 글자는 하나요. 읽는 눈이 스물이오.
+          명식은 하나요. 읽는 눈이 스물이오.
           맞힌다는 말은 하지 않소 — 무엇을 보고 한 말인지만 적어 두었소.
         </div>
       </div>
@@ -848,7 +850,7 @@ function ReportInner() {
       {shareMsg && <p className="handlenote noprint">{shareMsg}</p>}
       <p className="handlenote noprint">
         내려받기는 인쇄창에서 <b>“PDF로 저장”</b>을 고르면 되오.
-        고리에는 <b>생년월일시와 고을이 담기지 않소</b> — 여덟 글자와 읽은
+        고리에는 <b>생년월일시와 고을이 담기지 않소</b> — 명식과 읽은
         자리만 가오. 90일이 지나면 스스로 닫히오.
       </p>
 

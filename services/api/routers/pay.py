@@ -173,6 +173,7 @@ def get_tiers(req: TiersRequest) -> dict:
                            req.axis4)
         cuts, chars = _measure(rep)
         needs_extra_input = bool(rep.get("needs_input"))
+        required_inputs = {rep["needs_input"]} if rep.get("needs_input") else set()
         lenses = 1
         # 열리는 자리의 이름. 목패에 적으면 손님이 무엇을 사는지 압니다.
         opens = [c["title"] for c in rep["cuts"] if c["id"] not in free_ids]
@@ -187,6 +188,8 @@ def get_tiers(req: TiersRequest) -> dict:
                 cuts += c
                 chars += ch
                 needs_extra_input = needs_extra_input or bool(r.get("needs_input"))
+                if r.get("needs_input"):
+                    required_inputs.add(r["needs_input"])
             lenses = len(released)
 
         out.append({
@@ -210,6 +213,7 @@ def get_tiers(req: TiersRequest) -> dict:
             "locked": len(rep["locked"]) if tier == "one" else 0,
             "opens": opens,
             "needs_extra_input": needs_extra_input,
+            "required_inputs": sorted(required_inputs),
         })
     return {"tiers": out, "lens_id": req.lens_id,
             "refund_notice": payments.REFUND_NOTICE,

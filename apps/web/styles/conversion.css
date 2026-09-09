@@ -20,6 +20,12 @@
 .conversion-product strong { font: 700 18px/1.5 var(--sans); }
 .conversion-product span { font: 400 14px/1.7 var(--sans); color: var(--paper2); margin-top: 8px; }
 .conversion-checkout { scroll-margin-top: 24px; }
+.reading-section { border-bottom: 1px solid var(--line2); }
+.reading-section > summary { cursor: pointer; min-height: 56px; padding: 16px 12px; font: 600 17px/1.6 var(--sans); color: var(--paper); overflow-wrap: anywhere; }
+.phone[data-screen="c2"] .cutbody { font: 400 16px/1.85 var(--sans); overflow-wrap: anywhere; }
+.phone[data-screen="c2"] .src { font-size: 14px; line-height: 1.7; }
+.phone:is([data-screen="c0"],[data-screen="c1"],[data-screen="c2"]) .btn { min-height: 52px; font-size: 16px; }
+.phone[data-screen="c2"] .scr > .sceneart { height: 180px; min-height: 0; max-height: 180px; }
 .conversion-checkout .btn { margin-top: 16px; }
 .conversion-status { padding: 16px; border: 1px solid var(--line2); border-radius: 12px; margin: 16px 0; }
 .conversion-time .fld { min-height: 52px; }
