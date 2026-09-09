@@ -488,7 +488,7 @@ function PayInner() {
       <Shell screen="d3" title="열렸소">
         <Scene id="untie" />
         <CompanionCat state="saved" message="해석이 열렸소. 내 속도로 천천히 읽어보시오." />
-        <Narration lines={["붉은 끈이 풀렸다."]} />
+        <Narration lines={["붉은 끈이 풀렸소."]} />
 
         {/*
           ★ 여기가 "붉은 끈이 풀렸다 / 이제 나머지를 보시오" 한 줄이었습니다.

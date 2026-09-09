@@ -76,8 +76,8 @@ export default function RelayPage() {
         ★ 콜드 오픈이 없었습니다. 화면이 목록부터 시작해서, 손님은
           여기가 무슨 자리인지 모른 채 이름 넷을 봅니다.
       */}
-      <Narration lines={["도령이 문고리를 놓았다.",
-                         "옆방에서 인기척이 났다."]} />
+      <Narration lines={["도령이 문고리를 놓았소.",
+                         "옆방에서 인기척이 났소."]} />
       {/*
         ★ 여기가 여섯째로 낮았습니다 (연출 55).
 
@@ -155,7 +155,7 @@ export default function RelayPage() {
 
           {data && data.recommend.length > 0 ? (
             <>
-              <Narration lines={["도령이 옆자리를 가리켰다."]} />
+              <Narration lines={["도령이 옆자리를 가리켰소."]} />
               {data.recommend.map((r) => {
                 const l = LENS_BY_ID[r.lens_id];
                 return (

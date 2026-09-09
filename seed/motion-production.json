@@ -4,19 +4,6 @@
   "generated": 0,
   "jobs": [
     {
-      "id": "intro-pungun",
-      "label": "풍운도령 風雲道令",
-      "kind": "chars",
-      "priority": 0,
-      "source": "char/pungun/bust.webp",
-      "source_sha256": "708ae07e86022e6d421741d348bbff6d717fc6849b2ab78f943e90ccdb09bc65",
-      "seconds": 10,
-      "loop": false,
-      "prompt": "Use the supplied illustration as the exact character, composition and palette reference. Animate only elements visibly present. Preserve the face, hairstyle, costume and 2D line art. No invented objects, new text or camera cuts. A single warm greeting: one natural blink, a small nod and subtle breathing, then a composed resting pose. Face stays frontal and inside the frame. No invented lip speech; Korean narration will be added separately. Fixed camera.",
-      "destination": "char/pungun/intro-v2",
-      "status": "not_generated"
-    },
-    {
       "id": "scene-altar",
       "label": "명식 받침 · 네 자리",
       "kind": "scenes",
@@ -261,19 +248,6 @@
       "loop": true,
       "prompt": "Use the supplied illustration as the exact character, composition and palette reference. Animate only elements visibly present. Preserve the face, hairstyle, costume and 2D line art. No invented objects, new text or camera cuts. Static camera. The card held between two fingers flips over once and\ncomes back, face hidden both times. The raised brow stays raised. The\nplum robe's open collar shifts.\n\nThe head stays exactly where it is and does not turn — the app crops\nthis clip to the face, so any drift breaks the crop. No new pose, no\nexpression change. Only what is described above moves. Seamlessly\nloopable: the last frame must match the first exactly.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
       "destination": "char/paeseon",
-      "status": "not_generated"
-    },
-    {
-      "id": "char-pungun",
-      "label": "풍운도령 風雲道令",
-      "kind": "chars",
-      "priority": 1,
-      "source": "char/pungun/bust.webp",
-      "source_sha256": "708ae07e86022e6d421741d348bbff6d717fc6849b2ab78f943e90ccdb09bc65",
-      "seconds": 5,
-      "loop": true,
-      "prompt": "Use the supplied illustration as the exact character, composition and palette reference. Animate only elements visibly present. Preserve the face, hairstyle, costume and 2D line art. No invented objects, new text or camera cuts. Static camera. The jade pin in the high-tied hair catches the light once\nas it passes. A single slow blink. The silver trim at the collar\nbreathes with a shallow breath. The cool gaze never leaves the viewer.\n\nThe head stays exactly where it is and does not turn — the app crops\nthis clip to the face, so any drift breaks the crop. No new pose, no\nexpression change. Only what is described above moves. Seamlessly\nloopable: the last frame must match the first exactly.\n\nThis is a 2D hand-drawn animation, not live action. Preserve the\nillustration style exactly: flat cel shading, uniform lineart, painted\ntexture. Do not add photographic realism, skin pores, film grain or 3D\nlighting. Do not redraw or reshape any element. Animate only what is\ndescribed above; everything else stays completely still.",
-      "destination": "char/pungun",
       "status": "not_generated"
     },
     {
@@ -707,5 +681,9 @@
     "character": "pungun",
     "text": "풍운도령이오. 먼저 그대의 고민을 듣고, 무료 해석부터 안내하겠소.",
     "status": "not_generated"
-  }
+  },
+  "preserved_characters": [
+    "pungun"
+  ],
+  "preservation_reason": "User requested the original Pungun character and existing animation on 2026-09-09."
 }

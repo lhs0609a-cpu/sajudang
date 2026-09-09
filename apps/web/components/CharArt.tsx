@@ -91,7 +91,7 @@ function useBust(id: string, mood: Mood) {
 
     (async () => {
       // 그 표정이 있으면 그걸, 없으면 기본 얼굴로 내려옵니다.
-      if (mood !== "base") {
+      if (mood !== "base" && id !== "pungun") {
         const want = await first(FILE[mood]);
         if (want) {
           if (alive) setSrc(want);

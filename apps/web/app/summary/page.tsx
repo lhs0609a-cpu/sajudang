@@ -63,7 +63,7 @@ export default function SummaryPage() {
     );
   }
   if (err) return <Shell screen="c7" title="분석지"><Say who="도령" lens="pungun">{err}</Say><button className="btn" onClick={() => {setErr(null);setRetry(n => n + 1);}}>분석지 다시 불러오기</button></Shell>;
-  if (!sm) return <Shell screen="c7" title="분석지"><Narration lines={["종이를 편다."]} /></Shell>;
+  if (!sm) return <Shell screen="c7" title="분석지"><Narration lines={["종이를 펴오."]} /></Shell>;
 
   const shareUrl = share
     ? (typeof window !== "undefined" ? window.location.origin : "") + share.path
@@ -71,6 +71,7 @@ export default function SummaryPage() {
 
   return (
     <Shell screen="c7" title="분석지" legal>
+      <header className="editorial-heading"><p className="conversion-kicker">그대의 이야기 한 장</p><h1>마음에 남은 것만<br/>가만히 챙겨 가시오.</h1><p>읽어낸 근거와 중요한 단서를 한 장에 모았소.</p></header>
       <Scene id="scroll" className="hero" />
       {/*
         ★ 여기가 다섯째로 낮았습니다 (연출 55).
@@ -84,8 +85,8 @@ export default function SummaryPage() {
           여기 적는 건 전부 이 화면이 이미 아는 사실입니다.
           해석을 더 붙이지 않습니다 — 그건 아래 칸이 합니다.
       */}
-      <Narration lines={["종이 한 장이 상 위에 펴져 있다.",
-                         "먹이 아직 덜 말랐다."]} />
+      <Narration lines={["종이 한 장이 상 위에 펴져 있소.",
+                         "먹이 아직 덜 말랐소."]} />
       <Say who="도령" lens="pungun">
         이건 그대가 들고 나가는 한 장이오.
         <br />

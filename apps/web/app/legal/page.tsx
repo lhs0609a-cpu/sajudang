@@ -38,6 +38,7 @@ export default function LegalPage() {
     // 다른 화면과 같은 껍데기를 씁니다. 여기만 다르면 손님은 이 화면이
     // 우리 것이 아닌 줄 압니다 (tests/test_screen_beat.py 가 봅니다).
     <Shell title="알려 드리는 것">
+      <header className="editorial-heading"><p className="conversion-kicker">성신당의 약속</p><h1>편히 읽을 수 있도록<br/>먼저 약속을 적어두오.</h1><p>이용 조건과 개인정보, 결제·환불 기준을 확인하시오.</p></header>
       <div className="legalpg">
 
       <div className="ltabs">

@@ -27,6 +27,7 @@
  */
 
 import { useEffect, useState } from "react";
+import { iga } from "@/lib/josa";
 
 /** 한 줄이 서 있는 시간. 너무 길면 답답하고 너무 짧으면 못 읽습니다. */
 const BEAT_MS = 760;
@@ -65,7 +66,7 @@ export default function Thinking({
   return (
     <>
       <div className="calcrun think" aria-live="polite">
-        {who && <p className="whoIs">{who}가 보고 있소.</p>}
+        {who && <p className="whoIs">{iga(who)} 살펴보고 있소.</p>}
         {shown.map((l, i) => (
           <p key={i} className={!reduced && i === at - 1 ? "on" : undefined}>
             {l}

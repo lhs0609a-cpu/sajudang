@@ -465,16 +465,17 @@ function EntryInner() {
         <div className={`gatehero${gateRead ? " read" : ""}`}>
           <Scene id="gate" className="fill" bleed />
           <div className="gatecopy">
-            <p className="conversion-kicker">성신당 星辰堂 · 사주로 읽는 나의 반복 패턴</p>
-            <h1 className="conversion-title">왜 나는 비슷한 일에서<br />자꾸 마음이 걸릴까.</h1>
-            <p className="conversion-lead">태어난 정보와 지금의 고민을 바탕으로,<br />반복되는 패턴과 오늘 해볼 행동을 읽어보시오.</p>
-            <GuideIntro />
-            <CompanionCat state="welcome" message="어서 오시오. 서두르지 말고 함께 살펴보오." />
+            <div className="gate-wordmark"><span className="brand-seal" aria-hidden="true">星<br/>辰</span><span>성신당<small>별에 묻고, 나를 읽다</small></span></div>
+            <p className="conversion-kicker">그대의 마음이 쉬어 가는 밤</p>
+            <h1 className="conversion-title">자꾸 같은 곳에서<br />마음이 걸리오?</h1>
+            <p className="conversion-lead">태어난 순간에 담긴 결을 읽고,<br />지금의 고민을 함께 풀어보겠소.</p>
             <button className="btn mt" onClick={() => { s.set({cur:"pungun"}); go("a5"); }}>내 고민으로 무료 해석 보기</button>
             <p className="conversion-note">{entryArm === 1 ? "무료 해석과 오늘 해볼 행동 하나 · 시간은 몰라도 되오" : "첫 해석 무료 · 태어난 시간은 몰라도 되오"}</p>
-            <p className="conversion-note">전통 사주를 바탕으로 한 자기 이해 콘텐츠요.</p>
+            <GuideIntro />
+            <CompanionCat state="welcome" message="이 밤의 안내묘요. 그대 곁에서 함께 읽겠소." />
           </div>
         </div>
+        <section className="gate-promise"><p className="brand-overline">성신당에서 만나는 세 가지</p><div><article><span>一</span><h2>나를 읽는 근거</h2><p>어떤 기둥에서 나온 말인지<br/>함께 보여드리오.</p></article><article><span>二</span><h2>지금의 고민</h2><p>돈, 일, 사랑, 사람.<br/>마음이 쓰이는 곳부터 보오.</p></article><article><span>三</span><h2>오늘의 작은 행동</h2><p>읽고 끝내지 않도록<br/>해볼 일 하나를 남기오.</p></article></div></section>
         <div className="gatedoubt"><Doubts compact first={null} /></div>
       </Shell>
     );
@@ -498,7 +499,7 @@ function EntryInner() {
     return <Shell screen="a3" title="태어난 정보" onBack={back}>
       <Progress step={2} total={PROGRESS_TOTAL} />
       <div className="conversion-intro"><p className="conversion-kicker">2 / 3 · 태어난 정보</p>
-        <h1 className="conversion-title">해석에 필요한 정보를<br />알려주시오.</h1>
+        <h1 className="conversion-title">그대의 이야기가<br />시작된 날은 언제요?</h1>
         <p className="conversion-lead">양력 생년월일을 입력해 주시오. 음력 생일은 양력으로 바꿔 입력해 주시오.</p></div>
       <div className="f3">
         {([['year','태어난 해',4,'1993'],['month','월',2,'11'],['day','일',2,'25']] as const).map(([key,label,max,placeholder]) =>
@@ -639,7 +640,7 @@ function EntryInner() {
       {/* ★ 진행 막대를 뗐소. 결과가 보상인 구간에서 막대는 남은
           보상이 아니라 **남은 노동**을 강조하오. */}
       <Scene id="facing" />
-      {!segments && !error && <Narration lines={[`${lens.name}, 선택한 고민과 명식을 함께 살펴본다.`]} />}
+      {!segments && !error && <Narration lines={[`${lens.name}, 선택한 고민과 명식을 함께 살펴보오.`]} />}
 
       {/*
         ★ 훅이 아무 설명 없이 대뜸 시작하고 있었습니다.
@@ -664,7 +665,7 @@ function EntryInner() {
               들었구나」 가 됩니다.
           */}
           {/* ★ 첫 줄이 설명이었습니다. 손을 놓는 동작 하나로 엽니다. */}
-          <Narration lines={[`${lens.name}의 첫 해석이 준비됐다.`]} />
+          <Narration lines={[`${lens.name}의 첫 해석이 준비됐소.`]} />
           {/*
             ★ 여는 말에만 얼굴이 없었습니다 (2026-09-07).
 

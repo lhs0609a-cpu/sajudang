@@ -8,7 +8,7 @@ import { enableSound, onSoundChange, playBgm, setBgmDucked } from "@/lib/sound";
 
 const SEEN = "sd.entry-greeting.v1";
 
-/** Optional greeting: no automatic speech, forced wait, or substitute old portrait video. */
+/** Original Pungun greeting, preserved by request; speech and music require a click. */
 export default function EntryGreeting() {
   const video = useRef<HTMLVideoElement>(null);
   const audio = useRef<HTMLAudioElement | null>(null);
@@ -18,6 +18,12 @@ export default function EntryGreeting() {
   const [error, setError] = useState("");
   const ready = !!(ENTRY_MEDIA.video && ENTRY_MEDIA.voice);
   const active = useRef(false);
+  useEffect(() => {
+    const el=video.current;
+    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    void el.play().catch(() => {});
+    return () => {el.pause();};
+  }, []);
 
   function finish() {
     active.current = false;
@@ -75,13 +81,13 @@ export default function EntryGreeting() {
 
   return <>
     <div className="entry-greeting-portrait">
-      {ready ? <video ref={video} src={ENTRY_MEDIA.video!} poster="/char/pungun/bust.webp"
+      {ENTRY_MEDIA.video ? <video ref={video} src={ENTRY_MEDIA.video} poster="/char/pungun/greet.webp"
         muted playsInline preload="none" aria-label="풍운도령의 첫 인사" />
         : <CharArt lens={LENS_BY_ID.pungun} size="talk" />}
     </div>
     <div><p className="conversion-kicker">성신당 길잡이 · 풍운도령</p>
       <p>“{ENTRY_MEDIA.caption}”</p>
-      <p className="conversion-note">첫 해석은 내가 맡겠소. 다른 관점이 궁금하면 스무 해석자 중에서 고르면 되오.</p>
+      <p className="conversion-note">첫 이야기는 내가 읽겠소. 다른 시선이 필요하면 스무 해석자를 소개하리다.</p>
       <div className="entry-greeting-actions">
         {playing ? <button type="button" onClick={finish}>인사 건너뛰기</button>
           : (!music || (ready && !seen)) && <button type="button" onClick={start}>

@@ -15,6 +15,7 @@
  *   /lobby 가 아니라 "이름 없이 세운다"(입력을 건너뛰고 계속)로 두세요.
  */
 import Link from "next/link";
+import BrandFrame, { FolioLabel } from "./BrandFrame";
 import { useRouter } from "next/navigation";
 import {
   Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState,
@@ -664,6 +665,7 @@ export default function Shell({
         <DevRail />
       </Suspense>
       <div className="stage">
+      <BrandFrame screen={screen} />
       <div
         className="phone"
         data-screen={screen}
@@ -698,6 +700,7 @@ export default function Shell({
           </div>
         )}
         <div className="scr" ref={scrRef}>
+          {!bare && <FolioLabel screen={screen} title={title} />}
           {children}
           {legal && <Legal />}
           {/* 처마는 어느 화면에나 섭니다 — 대문(bare)만 빼고.

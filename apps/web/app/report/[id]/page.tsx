@@ -404,8 +404,8 @@ function ReportInner() {
             **그 마디를 지나온 사람 얘기**가 없었습니다. 여는 줄도
             없어 첫 줄이 근거 줄이었습니다.
         */}
-        <Narration lines={[`${rep.lens.name}의 해석을 시기별로 펼쳤다.`,
-                           "십 년마다 금이 그어져 있었다."]} />
+        <Narration lines={[`${rep.lens.name}의 해석을 시기별로 펼쳤소.`,
+                           "십 년마다 금이 그어져 있었소."]} />
         <Say who={rep.lens.name} lens={lensId}>
           {you}가 지나온 마디가 여기 다 그어져 있소. 십 년마다 한 칸씩
           갈리오.
@@ -455,7 +455,7 @@ function ReportInner() {
     return (
       <Shell screen="c4" title="여기서부터" legal>
         <Scene id="fold" />
-        <Narration lines={["두루마리가 반쯤 접혀 있다."]} />
+        <Narration lines={["두루마리가 반쯤 접혀 있소."]} />
         <Say who={rep.lens.name} lens={lensId}>
           여기까지 무료 해석이오. 아래에는 아직 열리지 않은 항목의 제목과 근거가 있소.
           <br /> 나가도 붙잡지 않소.
@@ -519,8 +519,8 @@ function ReportInner() {
     const nameCut = rep.cuts.find((c) => c.id === "lack");
     return (
       <Shell screen="c5" title="공유 카드">
-        <Narration lines={[`${rep.lens.name}의 해석에서 공유할 한 장을 골랐다.`,
-                           "손바닥만 한 것이었다."]} />
+        <Narration lines={[`${rep.lens.name}의 해석에서 공유할 한 장을 골랐소.`,
+                           "손바닥만 한 것이었소."]} />
         {/*
           ★ 68점이던 자리. 울림 45 · 비유 0 — 카드 만드는 법만 있고
             **이걸 누구에게 보낼지 재는 사람 얘기**가 없었습니다.
@@ -571,8 +571,8 @@ function ReportInner() {
     return (
       <Shell screen="c6" title="남기다" legal>
         <Scene id="wall" />
-        <Narration lines={["벽에 붉은 인장이 줄지어 찍혀 있다.",
-                           "빈 칸이 하나 남아 있다."]} />
+        <Narration lines={["벽에 붉은 인장이 줄지어 찍혀 있소.",
+                           "빈 칸이 하나 남아 있소."]} />
         {/*
           ★ 여기가 셋째로 낮았습니다 (연출 53).
 
@@ -671,8 +671,8 @@ function ReportInner() {
       {/* ★ 여는 줄이 없었습니다. 두루마리가 대뜸 펴지고 글이 시작돼,
           스물두 컷짜리 본문의 첫 줄이 설명이 됐소. 손이 먼저
           움직이고 글은 그 뒤에 옵니다. */}
-      <Narration lines={[`${rep.lens.name}의 본문을 펼쳤다.`,
-                         "종이가 무릎까지 흘러내렸다."]} />
+      <Narration lines={[`${rep.lens.name}의 본문을 펼쳤소.`,
+                         "종이가 무릎까지 흘러내렸소."]} />
 
       {/* ★ 추가 입력이 틀렸을 때. 리포트를 통째로 막지 않습니다 —
           그 컷만 빠지고 무엇이 틀렸는지 말해 줍니다. */}

@@ -73,7 +73,7 @@ function MeInner() {
     return (
       <Shell screen="r1" title="다녀간 사람들" legal>
         <Scene id="wall" />
-        <Narration lines={["벽에 종이가 붙어 있다.", "검은 고양이가 그 아래 앉아 있다."]} />
+        <Narration lines={["벽에 종이가 붙어 있소.", "안내묘가 그 아래 앉아 있소."]} />
         <Say who="도령" lens="pungun">
           대문 앞 방명록 같은 것이오. 다녀간 사람이 적고 간 말만 붙소.
           {" "}여기 붙은 말은 다 한 사람이 한 마디씩 남긴 것이오.
@@ -145,10 +145,11 @@ function MeInner() {
 
   return (
     <Shell screen="f2" title="인장첩">
+      <header className="editorial-heading"><p className="conversion-kicker">나의 서재</p><h1>다시 읽고 싶은 이야기를<br/>여기에 간직하오.</h1><p>구매한 해석과 남긴 인장, 열람 기록을 살펴보시오.</p></header>
       <RefundHistory sessionId={s.sessionId} />
       {subError && <div className="conversion-card" role="alert"><p>구독 상태를 확인하지 못했소. 구독이 없거나 해지됐다는 뜻은 아니오.</p><button className="btn gh" onClick={() => {setSubError(false);setSubRetry(n => n + 1);}}>구독 상태 다시 확인하기</button></div>}
       <Scene id="sealbook" />
-      <Narration lines={["첩을 폈다.", "찍힌 인장은 " + s.seals.length + "개."]} />
+      <Narration lines={["첩을 폈소.", "찍힌 인장은 " + s.seals.length + "개."]} />
       {/*
         ★ 첩이 무엇인지 한 번도 안 풀고 있었습니다.
           칸 스물이 그려져 있는데 「받은 인장 / 아직」 두 낱말뿐이라,

@@ -54,11 +54,12 @@ export default function DailyPage() {
 
   return (
     <Shell screen="g1" title="오늘의 일진">
+      <header className="editorial-heading"><p className="conversion-kicker">오늘의 한 장</p><h1>오늘은 어떤 마음으로<br/>하루를 열겠소?</h1><p>오늘의 기운을 읽고, 작은 행동 하나를 골라보시오.</p></header>
       <Scene id="banner" />
       {/* ★ 여는 줄이 없어 첫 줄이 「일진이란…」 이라는 뜻풀이였습니다.
           매일 오는 자리라 더 그렇습니다 — 같은 설명을 매일 읽습니다. */}
-      <Narration lines={["오늘 자 종이가 상 위에 새로 올라와 있다.",
-                         "어제 것은 치워져 있었다."]} />
+      <Narration lines={["오늘 자 종이가 상 위에 새로 올라와 있소.",
+                         "어제 것은 치워져 있었소."]} />
       {/*
         ★ 72점이던 자리. 비유 0 · 겪은 일 없음 — 매일 오는 화면이라
           같은 뜻풀이를 매일 읽게 됩니다. 오늘 것이 어제와 **무엇이

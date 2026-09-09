@@ -19,7 +19,8 @@ def jobs():
 def test_all_current_sources_exist_and_match_production_list():
     rows = jobs()
     assert len({j["id"] for j in rows}) == len(rows)
-    assert len([j for j in rows if j["id"].startswith("char-")]) == 20
+    assert len([j for j in rows if j["id"].startswith("char-")]) == 19
+    assert not any("pungun" in j.get("source", "") for j in rows), "User requested the original Pungun artwork and animation be retained"
     for job in rows:
         M.source(job)
 

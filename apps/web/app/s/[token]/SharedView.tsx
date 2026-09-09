@@ -104,10 +104,10 @@ export default function SharedView({ token }: { token: string }) {
       <Narration
         lines={
           who
-            ? [`${who}님이 이 종이를 보내 왔다.`,
-               "공유한 해석을 확인할 수 있다."]
-            : ["누가 보냈는지는 적혀 있지 않다.",
-               "받은 종이만 여기 있다."]
+            ? [`${who}님이 이 종이를 보내 왔소.`,
+               "공유한 해석을 확인할 수 있소."]
+            : ["누가 보냈는지는 적혀 있지 않소.",
+               "받은 종이만 여기 있소."]
         }
       />
       <Say who="도령" lens="pungun">

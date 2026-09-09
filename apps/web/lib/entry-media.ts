@@ -1,6 +1,6 @@
-/** Enable only after the new portrait's video and matching Korean voice pass review. */
+/** Preserve the original Pungun animation. A separate voice is not configured. */
 export const ENTRY_MEDIA: { video: string | null; voice: string | null; caption: string } = {
-  video: null,
+  video: "/char/pungun/greet.mp4",
   voice: null,
   caption: "풍운도령이오. 먼저 그대의 고민을 듣고, 무료 해석부터 안내하겠소.",
 };
