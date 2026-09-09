@@ -4,13 +4,12 @@
  * 신살 인물 — 이름표가 아니라 곁에 선 사람으로 보이게.
  *
  * 폴백 순서 (Scene 과 같은 구조)
- *   1. public/sinsal/{key}/figure.png     가 있으면 그 그림  ← 기본
- *   2. public/sinsal/{key}/clip.webm|mp4  가 있으면 영상
+ *   1. public/sinsal/{key}/clip.webm|mp4  가 있으면 영상
+ *   2. public/sinsal/{key}/figure.png     영상이 없거나 동작 줄이기면 정지 초상
  *   3. 없으면 SVG 실루엣 + 등장 연출
  *   4. prefers-reduced-motion 이면 정지 (poster 또는 정지 SVG)
  *
- * ★ 인물은 **움직이지 않는 것이 기본**입니다 (2026-09-03). 글 옆에
- *   서 있는 초상이라 스물여섯이 한꺼번에 움직이면 글을 못 읽습니다.
+ * ★ 2026-09-09: 새 이미지 기반 영상이 준비된 인물은 실제 동작을 우선한다.
  *
  * 모션은 참조 구현체의 캐릭터 관례를 그대로 씁니다.
  *   mBody 호흡 4.6s · mFx 입자 상승 · mProp 소품 흔들림 · blinkk 눈 깜빡임
@@ -54,7 +53,8 @@ function useHasClip(key: string) {
   const [has, setHas] = useState(false);
   useEffect(() => {
     let alive = true;
-    fetch(`/sinsal/${key}/poster.jpg`, { method: "HEAD" })
+    setHas(false);
+    fetch(`/sinsal/${key}/clip.webm`, { method: "HEAD" })
       .then((r) => alive && setHas(r.ok))
       .catch(() => {});
     return () => { alive = false; };
@@ -339,7 +339,7 @@ export default function SinsalFigure({
         } : undefined}
       >
         <span className="halo" />
-        {hasFigure ? (
+        {hasFigure && (!hasClip || still) ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={`/sinsal/${sinsalKey}/figure.png`} alt={f.title} />
         ) : hasClip && !still ? (
