@@ -5,6 +5,10 @@
 .phone .top .tt { min-width: 0; flex: 1; overflow-wrap: anywhere; }
 .guide-intro { display: flex; align-items: center; gap: 14px; text-align: left; margin: 20px 0; padding: 16px; background: #191420ee; border: 1px solid var(--line2); border-radius: 16px; }
 .guide-intro > .charart { flex-shrink: 0; }
+.entry-greeting-portrait { flex: 0 0 66px; }
+.entry-greeting-portrait video { display: block; width: 66px; height: 88px; object-fit: cover; border-radius: 8px; }
+.entry-greeting-actions { margin-top: 10px; }
+.entry-greeting-actions button { min-height: 44px; padding: 8px 12px; border: 1px solid var(--line2); border-radius: 10px; background: var(--bg3); color: var(--gold); font: 600 13px/1.5 var(--sans); cursor: pointer; }
 .guide-intro p { font: 400 15px/1.7 var(--sans); margin: 0 0 8px; }
 .guide-intro .conversion-kicker { font-weight: 700; color: var(--gold); }
 .guide-intro .conversion-note { font-size: 13px; margin-bottom: 0; }

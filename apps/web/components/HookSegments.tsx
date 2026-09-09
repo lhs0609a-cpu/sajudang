@@ -12,7 +12,6 @@ import { Say } from "@/components/Narration";
 import CharArt from "@/components/CharArt";
 import { LENS_BY_ID } from "@/lib/lenses";
 import { CONCERNS } from "@/lib/store";
-import { speakRemote } from "@/lib/sound";
 import { track } from "@/lib/track";
 import type { HookSegment } from "@shared/chart";
 
@@ -105,23 +104,7 @@ export default function HookSegments({
    *
    *   중립은 서버가 **노출로만** 셉니다 (answer 를 안 보냅니다).
    */
-  /*
-   * 새로 열린 마디를 읽어 준다.
-   *
-   * 훅은 사람마다 문장이 달라 미리 만들어 둘 수 없습니다. 서버가 그때
-   * 만들어 곳간에 두므로, 같은 말은 두 번 안 만듭니다.
-   */
-  const [said, setSaid] = useState(0);
-  useEffect(() => {
-    if (open <= said) return;
-    const seg = segments[open - 1];
-    setSaid(open);
-    if (seg?.statement_id && seg.html) {
-      void speakRemote(() => api.voice({
-        kind: "hook", statement_id: seg.statement_id!, html: seg.html,
-      }));
-    }
-  }, [open, said, segments]);
+  // Spoken dialogue is reserved for the optional first greeting.
 
   const vote = async (i: number, yes: boolean | null) => {
     track("hook_answer", "a7", { stage: i, yes: yes === null ? 2 : yes ? 1 : 0 });
