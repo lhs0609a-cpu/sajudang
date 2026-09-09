@@ -25,6 +25,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
 import CompanionCat from "@/components/CompanionCat";
+import GuideIntro from "@/components/GuideIntro";
 import Fold from "@/components/Fold";
 import { track, useScreen } from "@/lib/track";
 import { exposeEntry } from "@/lib/experiment";
@@ -467,8 +468,8 @@ function EntryInner() {
             <p className="conversion-kicker">성신당 星辰堂 · 사주로 읽는 나의 반복 패턴</p>
             <h1 className="conversion-title">왜 나는 비슷한 일에서<br />자꾸 마음이 걸릴까.</h1>
             <p className="conversion-lead">태어난 정보와 지금의 고민을 바탕으로,<br />반복되는 패턴과 오늘 해볼 행동을 읽어보세요.</p>
-            <CompanionCat state="welcome" />
-            <button className="btn mt" onClick={() => go("a5")}>내 고민으로 무료 해석 보기</button>
+            <GuideIntro />
+            <button className="btn mt" onClick={() => { s.set({cur:"pungun"}); go("a5"); }}>내 고민으로 무료 해석 보기</button>
             <p className="conversion-note">{entryArm === 1 ? "무료 해석과 오늘 해볼 행동 하나 · 시간은 몰라도 돼요" : "첫 해석 무료 · 태어난 시간은 몰라도 돼요"}</p>
             <p className="conversion-note">전통 사주를 바탕으로 한 자기 이해 콘텐츠예요.</p>
           </div>
@@ -615,6 +616,7 @@ function EntryInner() {
         <p className="conversion-kicker">명식 계산 완료</p>
         <h1 className="conversion-title">이제, 지금의 고민과<br />함께 읽어볼게요.</h1>
         <p className="conversion-note">{s.features.hour_known ? "태어난 시간까지 네 기둥을 계산했어요." : "태어난 시간을 몰라 시주를 제외한 세 기둥으로 읽어요."}</p>
+        <p className="conversion-note">다음은 {lens.name}의 첫 해석이에요. 입력한 고민을 바탕으로 다섯 가지 질문을 차례로 살펴봐요.</p>
         <Pillars f={s.features} />
         <p className="conversion-note">명식은 태어난 해·달·날·시간을 각각 두 글자로 옮긴 것이에요.<br />모르는 시간의 두 글자는 비워 둡니다.</p>
         <button className="btn mt" onClick={() => go("a7")}>내 고민의 무료 해석 읽기</button>
@@ -632,11 +634,11 @@ function EntryInner() {
 
   /* a7 · 훅 5단 — 값은 아직 묻지 않는다 */
   return (
-    <Shell screen="a7" title="도령이 말하다" onBack={back}>
+    <Shell screen="a7" title={`${lens.name} · 첫 해석`} onBack={back}>
       {/* ★ 진행 막대를 뗐습니다. 결과가 보상인 구간에서 막대는 남은
           보상이 아니라 **남은 노동**을 강조합니다. */}
       <Scene id="facing" />
-      {!segments && !error && <Narration lines={["도령이 종이를 들여다본다."]} />}
+      {!segments && !error && <Narration lines={[`${lens.name}, 선택한 고민과 명식을 함께 살펴본다.`]} />}
 
       {/*
         ★ 훅이 아무 설명 없이 대뜸 시작하고 있었습니다.
@@ -661,7 +663,7 @@ function EntryInner() {
               들었구나」 가 됩니다.
           */}
           {/* ★ 첫 줄이 설명이었습니다. 손을 놓는 동작 하나로 엽니다. */}
-          <Narration lines={["도령이 종이에서 눈을 뗐다."]} />
+          <Narration lines={[`${lens.name}의 첫 해석이 준비됐다.`]} />
           {/*
             ★ 여는 말에만 얼굴이 없었습니다 (2026-09-07).
 
@@ -684,7 +686,7 @@ function EntryInner() {
             <b>{CONCERNS.find((c) => c.id === s.concern)?.label ?? "걸리는 것"}</b>
             에 대해서요. 여기서부터 <b>5마디</b>요.<br />
             {s.hourKnown ? "기둥 4자리의 8글자" : "시주를 제외한 기둥 3자리의 6글자"}를 보고 하는 해석이오 —
-            이름도 사연도 안 들었소.<br />
+            선택한 고민에 맞춰 살펴보겠소.<br />
             한 마디가 끝날 때마다 맞는지 물어보겠소. 맥을 짚듯
             자리를 옮겨 가며 짚는 셈이오.<br />
             <b>두 번</b> 어긋나면 짚는 자리를 아예 바꾸오.

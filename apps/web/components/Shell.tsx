@@ -248,9 +248,9 @@ export function TopBar({ title, skipTo, onBack }: {
         <Link className="tb mode" href="/admin">주인</Link>
       )}
       <span className="tt">{title}</span>
-      <Link className="tb" href="/daily" aria-label="오늘의 일진">日</Link>
-      <Link className="tb" href="/me" aria-label="인장첩">印 {seals.length}</Link>
-      <Link className="tb" href="/lobby">진열대</Link>
+      <Link className="tb" href="/daily" aria-label="오늘의 일진">오늘</Link>
+      <Link className="tb" href="/me" aria-label={`내 첩 · 구매 내역과 인장 ${seals.length}개`}>내 첩</Link>
+      <Link className="tb" href="/lobby" aria-label="해석자와 메뉴 선택">메뉴</Link>
       {skipTo && <Link className="tb sk" href={skipTo}>건너뛰기</Link>}
     </div>
   );

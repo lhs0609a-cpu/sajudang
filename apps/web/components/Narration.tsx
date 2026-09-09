@@ -114,7 +114,7 @@ export function Say({ who, children, html, lens, mood }: {
             </span>
           )}
           <span className="saybody">
-            {i === 0 && <small>{who}</small>}
+            {i === 0 && <small>{who === "도령" ? "풍운도령 · 성신당 길잡이" : who}</small>}
             {body}
           </span>
         </div>
