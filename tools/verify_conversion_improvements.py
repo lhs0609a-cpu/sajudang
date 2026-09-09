@@ -17,7 +17,7 @@ def main():
     results = []
     with sync_playwright() as pw:
         browser = pw.chromium.launch(channel="msedge", headless=True)
-        for width, answer in [(320, "skip"), (390, "yes"), (390, "no"), (1920, "skip"), (390, "ready"), (390, "temporary")]:
+        for width, answer in [(320, "neutral"), (390, "yes"), (390, "no"), (1920, "neutral"), (390, "ready"), (390, "temporary")]:
             ctx = browser.new_context(viewport={"width": width, "height": 844}, reduced_motion="reduce")
             ctx.add_init_script("localStorage.setItem('sd.sound','off'); if(!localStorage.getItem('sajudang-session')) localStorage.setItem('sajudang-session',JSON.stringify({state:{admin:false,adminSet:true},version:0}));")
             status_calls = [0]
@@ -82,14 +82,12 @@ def main():
                 page.get_by_role("button", name="내 고민의 무료 해석 읽기", exact=True).click()
                 page.locator(".vt").first.wait_for(timeout=30000)
                 snapshot("a7")
-                if answer in ("yes", "no"):
-                    name = "그렇소" if answer == "yes" else "아니오"
-                    for i in range(5):
-                        page.get_by_role("button", name=name, exact=True).last.click()
-                        page.wait_for_timeout(850)
-                    page.get_by_role("button", name="무료 해석과 오늘의 행동 보기", exact=True).click()
-                else:
-                    page.get_by_role("button", name="응답 건너뛰고 무료 요약 보기", exact=True).click()
+                assert page.get_by_role("button", name="응답 건너뛰고 무료 요약 보기", exact=True).count() == 0
+                name = {"yes":"그렇소", "no":"아니오"}.get(answer,"잘 모르겠소")
+                for i in range(5):
+                    page.get_by_role("button", name=name, exact=True).last.click()
+                    page.wait_for_timeout(850)
+                page.get_by_role("button", name="무료 해석과 오늘의 행동 보기", exact=True).click()
                 page.get_by_role("button", name="추가 해석과 가격 보기", exact=True).wait_for(timeout=30000)
                 snapshot("d0")
                 assert page.locator(".reading-evidence").get_attribute("open") is None

@@ -252,7 +252,6 @@ export function TopBar({ title, skipTo, onBack }: {
       <Link className="tb" href="/daily" aria-label="오늘의 일진">오늘</Link>
       <Link className="tb" href="/me" aria-label={`내 첩 · 구매 내역과 인장 ${seals.length}개`}>내 첩</Link>
       <Link className="tb" href="/lobby" aria-label="해석자와 메뉴 선택">메뉴</Link>
-      {skipTo && <Link className="tb sk" href={skipTo}>건너뛰기</Link>}
     </div>
   );
 }
@@ -538,7 +537,7 @@ export default function Shell({
           timersRef.current.push(window.setTimeout(
             () => lightUp(el), wait * 1000));
           queueRef.current = now + (wait + holdOf(el)) * 1000;
-          // 다 떴으면 「한 번에 다 보겠습니다」 를 거둡니다.
+          // 다 떴으면 연출 진행 상태를 해제합니다.
           if (!root.querySelector("[data-beatwait]")) {
             timersRef.current.push(window.setTimeout(() => {
               setPacing(false);
@@ -573,7 +572,7 @@ export default function Shell({
   });
 
   /*
-   * 「한 번에 다 보겠습니다」 를 거두는 것은 **관찰자가** 합니다 —
+   * 연출 진행 상태를 해제하는 것은 **관찰자가** 합니다 —
    * 마지막 마디가 뜬 뒤에요. 시간으로 재면 굴림에 맡긴 뒤로는 맞지
    * 않습니다: 손님이 안 굴리면 영영 안 끝나고, 그동안 「다 보겠습니다」
    * 를 거두면 서두를 길이 사라집니다.
@@ -589,7 +588,7 @@ export default function Shell({
    *   울려서, 굴리려던 사람이 건너뛰기를 누른 셈이 됐습니다.
    *
    *   그래서 **누름(click)과 키만** 답니다. 굴림은 굴림입니다.
-   *   서두르는 사람에게는 「한 번에 다 보겠습니다」 가 있습니다.
+   *   클릭과 키보드로 본문을 한 번에 펼치는 동작은 유지합니다.
    */
   useEffect(() => {
     if (!pacing) return;
@@ -707,19 +706,6 @@ export default function Shell({
               대문은 첫 3초를 파는 자리라 아래 띠가 시선을 나눕니다. */}
           {!bare && <SiteFooter />}
         </div>
-        {/*
-          ★ 늦추는 데는 반드시 **건너뛰는 길**이 있어야 합니다.
-            뜸에 그렇게 하기로 이미 정해 두었고(lib/think), 화면 전체를
-            읽는 속도로 내보내는 지금은 더 그렇습니다. 화면 아무 데나
-            눌러도 되지만, **눌러도 된다는 걸 알아야** 누릅니다.
-
-          ★ 손님의 말이라 합쇼체입니다. 도령의 말이 아닙니다.
-        */}
-        {pacing && (
-          <button className="beatskip-hint noprint" onClick={revealAll}>
-            한 번에 다 보겠소
-          </button>
-        )}
       </div>
       </div>
     </>

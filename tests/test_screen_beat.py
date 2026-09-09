@@ -83,9 +83,8 @@ def test_slow_reveal_always_has_a_way_out():
             "%s 로 건너뛰고 있다 — 굴림은 글을 띄우는 손잡이지 "
             "건너뛰는 손잡이가 아니다" % ev)
 
-    # ② 눌러도 된다는 걸 알아야 누른다
-    assert "beatskip-hint" in src and "beatskip-hint" in css, \
-        "건너뛸 수 있다는 표시가 없다"
+    # ② 사용자 요청: 별도 건너뛰기 버튼을 표시하지 않는다.
+    assert "beatskip-hint" not in src, "건너뛰기 버튼이 남아 있다"
 
     # ③ 두 번째 오는 사람에게 같은 뜸은 지연이다
     assert "seenBefore" in src and "sessionStorage" in src, \

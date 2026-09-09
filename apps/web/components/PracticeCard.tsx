@@ -24,7 +24,7 @@ export default function PracticeCard({ practice }: { practice: Practice }) {
         track("practice_saved", "d0");
       } catch { setStatus("자동으로 복사하지 못했소. 위 문장을 길게 눌러 복사해 주시오."); }
     }}>행동 문장 복사하기</button>
-    <CompanionCat state={saved ? "saved" : "rest"} message={saved ? "발도장 꾹! 작은 행동 하나면 충분하다냥." : "지금이랑 안 맞으면 건너뛰어도 괜찮다냥."} />
+    <CompanionCat state={saved ? "saved" : "rest"} message={saved ? "발도장 꾹! 작은 행동 하나면 충분하다냥." : "지금 필요한 행동부터 골라보자냥."} />
     <p className="conversion-note" role="status">{status}</p>
   </section>;
 }

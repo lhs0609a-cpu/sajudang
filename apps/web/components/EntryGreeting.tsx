@@ -89,7 +89,7 @@ export default function EntryGreeting() {
       <p>“{ENTRY_MEDIA.caption}”</p>
       <p className="conversion-note">첫 이야기는 내가 읽겠소. 다른 시선이 필요하면 스무 해석자를 소개하리다.</p>
       <div className="entry-greeting-actions">
-        {playing ? <button type="button" onClick={finish}>인사 건너뛰기</button>
+        {playing ? <button type="button" onClick={finish}>인사 멈추기</button>
           : (!music || (ready && !seen)) && <button type="button" onClick={start}>
             {ready && !seen ? "목소리와 함께 인사 듣기" : "배경음 켜기"}
           </button>}

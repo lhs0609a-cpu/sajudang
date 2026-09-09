@@ -45,7 +45,6 @@ const OPENING_BEATS = [
   "이 사람 눈으로 다시 읽는 중",
 ];
 /** 뜸 넉 줄이 다 서는 데 걸리는 시간. Thinking 의 박자와 맞춥니다. */
-const OPENING_MS = 260 + OPENING_BEATS.length * 760 + 320;
 
 /** 두루마리를 얼마나 내려왔는가. 얇은 막대 한 줄. */
 function ScrollProgress() {
@@ -90,7 +89,6 @@ function ReportInner() {
   const [retry, setRetry] = useState(0);
   const [rating, setRating] = useState(0);
   /* 뜸이 끝났는가. 서버가 빨라도 이 장면을 지우지 않습니다 (a6 과 같은 결). */
-  const [opened, setOpened] = useState(false);
 
   /*
    * 이 캐릭터가 따로 받는 것.
@@ -125,7 +123,6 @@ function ReportInner() {
     setErr(null);
     setRep(null);
     /* 사람이 바뀌면 뜸도 처음부터. 새 사람이 새로 읽는 것입니다. */
-    setOpened(false);
   }
 
   /*
@@ -234,15 +231,6 @@ function ReportInner() {
     return () => { alive = false; };
   }, [s.chartId, lensId, s.tier, s.concern, s.axis4, s.sessionId, extras, retry]);
 
-  /*
-   * 뜸은 **글이 도착한 뒤부터** 셉니다. 도착 전부터 세면 느린 날에는
-   * 뜸이 끝나고도 빈 화면이 남습니다.
-   */
-  useEffect(() => {
-    if (!rep || opened) return;
-    const t = setTimeout(() => setOpened(true), OPENING_MS);
-    return () => clearTimeout(t);
-  }, [rep, opened]);
 
   if (!s.chartId) {
     return (
@@ -284,17 +272,15 @@ function ReportInner() {
    *   손님이 2026-09-02 에 그걸 짚었습니다 — "너무 빨라. 나오는
    *   속도가 기대감도 어느 정도 줘야지."
    *
-   *   그래서 무엇을 보는 중인지 한 줄씩 찍고, 다 찍기 전에는 넘기지
-   *   않습니다. 건너뛰는 길은 냅니다.
+   *   요청 중에는 진행 안내를 표시하고, 결과가 도착하면 본문을 엽니다.
    */
-  if (!rep || !opened) {
+  if (!rep) {
     return (
       <Shell title="읽다">
         <Scene id="scroll" className="hero" />
         <Thinking
           who={lens?.name}
           lines={OPENING_BEATS}
-          onSkip={rep ? () => setOpened(true) : undefined}
         />
         {!rep && (
           <p className="sm mt">
@@ -531,7 +517,7 @@ function ReportInner() {
           {you}의 명식과 읽은 자리를 담은 공유 카드요.
           생년월일시와 출생지는 담지 않소. 그래도 개인적인 해석이니 보낼 내용은 먼저 확인하시오.
           <br />
-          공유는 선택이오. 내 기기에 저장하거나 지금은 건너뛰어도 되오.
+          원하는 방식으로 내 기기에 저장하거나 공유하시오.
         </Say>
         <span className="src">
           근거 · {s.features?.day_gan} 일간 · {s.features?.strength} ·

@@ -689,18 +689,12 @@ function EntryInner() {
             에 대해서요. 여기서부터 <b>5마디</b>요.<br />
             {s.hourKnown ? "기둥 4자리의 8글자" : "시주를 제외한 기둥 3자리의 6글자"}를 보고 하는 해석이오 —
             선택한 고민에 맞춰 살펴보겠소.<br />
-            응답은 선택이오. 바로 요약과 오늘의 행동으로 넘어가도 되오.<br />
+            각 마디가 그대의 경험과 맞는지 답해 주시오.<br />
             맞지 않는 대목은 따로 기억해 두고, 두 번 어긋나면 남은 질문의 관점을 바꾸겠소.
           </Say>
         </div>
       )}
       {error && <><Say who="도령" lens="pungun">{error}</Say><button className="btn" onClick={() => {setError(null); setHookRetry(n => n + 1);}}>무료 해석 다시 불러오기</button></>}
-      {segments && s.chartId && (
-        <div className="reading-shortcut">
-          <button className="btn gh" onClick={() => {track("hook_skip", "a7"); router.push("/pay?step=d0");}}>응답 건너뛰고 무료 요약 보기</button>
-          <p className="conversion-note">건너뛰기는 동의로 집계하지 않소.</p>
-        </div>
-      )}
       {segments && s.chartId && (
         <HookSegments
           segments={segments}

@@ -211,7 +211,7 @@ export default function HookSegments({
                   한 덩이로 읽혀 끝이 무뎌집니다. 그리고 이건 참인
                   말입니다 — 「아니오」 둘이면 2단이 축을 바꿉니다
                   (bank.TURN_AT). 누르는 것이 다음 단을 정하오. */}
-              <p className="sm hookhint">응답은 선택이오. 맞지 않는 대목은 따로 짚겠소.</p>
+              <p className="sm hookhint">그대의 경험과 맞소? 맞지 않는 대목은 따로 짚겠소.</p>
               <div className="vt">
                 <button onClick={() => vote(i, true)}>그렇소</button>
                 <button onClick={() => vote(i, false)}>아니오</button>
@@ -219,7 +219,7 @@ export default function HookSegments({
               {/* ★ 세 번째 길. 이게 없어서 애매한 사람이 거짓 '그렇소' 를
                   눌렀고, 아무것도 안 누르면 다음 단이 안 열렸습니다. */}
               <button className="lk vt3" onClick={() => vote(i, null)}>
-                잘 모르겠소 · 그냥 듣겠소
+                잘 모르겠소
               </button>
             </>
           ) : (

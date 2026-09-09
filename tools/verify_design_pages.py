@@ -35,8 +35,6 @@ def main():
     try:
      page.goto(WEB+path,wait_until='networkidle',timeout=30000)
      if path.startswith('/report/'):
-      page.get_by_role('button',name='다 됐소 · 건너뛰겠소',exact=True).wait_for(timeout=15000)
-      page.get_by_role('button',name='다 됐소 · 건너뛰겠소',exact=True).click()
       page.locator('.phone[data-screen]').wait_for(timeout=15000)
      page.evaluate('document.fonts.ready')
      page.wait_for_timeout(200)

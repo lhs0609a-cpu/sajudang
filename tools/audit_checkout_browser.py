@@ -74,7 +74,7 @@ def main():
                 page.get_by_role("button", name="내 고민의 무료 해석 읽기", exact=True).click()
                 page.locator(".vt").first.wait_for(timeout=30000)
                 snapshot("a7")
-                name = {"yes": "그렇소", "no": "아니오", "neutral": "잘 모르겠소 · 그냥 듣겠소"}[answer]
+                name = {"yes": "그렇소", "no": "아니오", "neutral": "잘 모르겠소"}[answer]
                 for i in range(5):
                     page.get_by_role("button", name=name, exact=True).last.click()
                     page.wait_for_timeout(850)
