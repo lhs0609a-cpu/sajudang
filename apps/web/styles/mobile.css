@@ -1,0 +1,57 @@
+/* Phone reading layout: retain the desktop identity without desktop spacing. */
+@media (max-width:767px) {
+  html {scroll-padding-top:calc(72px + env(safe-area-inset-top,0px))}
+  body {font-size:16px;line-height:1.75}
+  body .stage {padding:0;max-width:none}
+  body .stage>.phone {max-width:none;border:0;border-radius:0;box-shadow:none;min-height:100svh}
+  body .phone .scr {padding:20px max(20px,env(safe-area-inset-right,0px)) calc(28px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px))}
+  body .phone .top {min-height:56px;padding:calc(4px + env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) 4px max(12px,env(safe-area-inset-left,0px));gap:2px}
+  body .phone .top .tt {display:none}
+  body .phone .top .snd {margin-right:auto}
+  body .phone button,body .phone .top .tb,body .phone summary {min-height:44px;touch-action:manipulation}
+  body .phone .top .tb,body .phone .snd {min-width:44px}
+  body .phone .top.bareSnd {top:calc(10px + env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));padding:0;min-height:44px}
+  body .phone .folio-label {padding-bottom:14px;margin-bottom:20px;gap:8px}
+  body .phone .conversion-title,body .phone .editorial-heading h1 {font-size:clamp(26px,7vw,32px);line-height:1.48;margin:10px 0 16px}
+  body .phone .conversion-intro {margin:4px 0 22px}
+  body .phone .editorial-heading {margin:0 0 24px;padding-bottom:20px}
+  body .phone .conversion-lead,body .phone .editorial-heading>p:last-child {font-size:15px;line-height:1.8}
+  body .phone .conversion-note,body .phone .sm {font-size:14px;line-height:1.75}
+  body .phone .conversion-kicker {font-size:12px;margin-bottom:10px}
+  body .phone .btn {min-height:54px;font-size:16px;padding:14px 16px}
+  body .phone input,body .phone select,body .phone textarea {font-size:16px;max-width:100%;scroll-margin-block:90px 32px}
+  body .phone .fld {min-height:52px;font-size:16px;padding:12px;min-width:0}
+  body .phone .f3 {gap:8px}
+  body .phone .f3>* {min-width:0}
+  body .phone label {font-size:13px}
+  body .phone .conversion-card,body .phone .conversion-product,body .phone .conversion-product[aria-pressed="true"],body .phone .dz,body .phone .ask {padding:20px;border-radius:12px}
+  body .phone .conversion-card h2 {font-size:22px;line-height:1.65}
+  body .phone .conversion-product strong {font-size:20px}
+  body .phone .conversion-status {padding:16px;font-size:14px;line-height:1.8}
+  body .phone .conversion-details {margin:16px 0}
+  body .phone .conversion-details summary {font-size:14px;padding:12px 0}
+  body .phone .nr,body .phone .say {font-size:16px;line-height:1.85}
+  body .phone .src {font-size:13px;line-height:1.75}
+  body .phone .blk {padding:20px 0}
+  body .phone .scr>.sceneart:not(.fill) {max-height:180px;margin-bottom:20px}
+  body .phone .tabs {display:flex;flex-wrap:wrap;gap:4px}
+  body .phone .tabs button {flex:1 1 80px;min-width:0;font-size:14px;padding:10px 8px}
+  body .phone .sitefoot {margin-top:32px;padding-top:20px}
+  body .phone .sitefoot a {display:inline-block;min-height:44px;padding:10px 4px;font-size:12px}
+  body .phone .companion-cat {gap:10px;margin-top:16px}
+  body .phone .companion-cat p {font-size:14px;line-height:1.75}
+  body .phone .companion-cat svg {width:56px;height:56px;min-width:56px;flex-basis:56px}
+  body .phone[data-screen="a1"] .gatehero .gatecopy {padding:calc(24px + env(safe-area-inset-top,0px)) max(22px,env(safe-area-inset-right,0px)) 24px max(22px,env(safe-area-inset-left,0px))}
+  body .phone[data-screen="a1"] .gate-wordmark {font-size:25px;gap:14px;margin-bottom:34px}
+  body .phone[data-screen="a1"] .conversion-title {font-size:clamp(30px,8.2vw,36px);line-height:1.45;margin:10px 0 18px}
+  body .phone[data-screen="a1"] .conversion-lead {margin:0 0 24px}
+  body .phone[data-screen="a1"] .guide-intro {margin-top:24px;padding:18px 0;gap:14px}
+  body .phone .guide-intro .entry-greeting-portrait {flex-basis:72px}
+  body .phone .guide-intro .entry-greeting-portrait video {width:72px;height:96px}
+  body .phone .guide-intro .conversion-note {font-size:13px;line-height:1.75}
+  body .phone .entry-greeting-actions button {min-height:44px;font-size:13px;padding:10px 14px}
+  body .phone[data-screen="a1"] .gate-promise,body .phone[data-screen="a1"] .gatedoubt {padding:28px max(22px,env(safe-area-inset-right,0px)) 28px max(22px,env(safe-area-inset-left,0px))}
+}
+@media (hover:none) and (pointer:coarse) {
+  body .phone .btn:not(:disabled):hover {transform:none;filter:none}
+}
