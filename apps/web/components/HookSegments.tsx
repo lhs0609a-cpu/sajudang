@@ -79,10 +79,31 @@ export default function HookSegments({
   onMiss?: (misses: number) => void;
   onDone?: () => void;
 }) {
-  const [open, setOpen] = useState(1);
-  const [replies, setReplies] = useState<Record<number, string>>({});
-  const [misses, setMisses] = useState(0);
-  const voted = useRef(new Set<number>());
+  const [restored] = useState(() => {
+    const review = useSession.getState().hookReview;
+    const answers = review?.chartId === chartId && review.concern === concern && review.lensId === lensId ? review.answers : {};
+    const replies: Record<number,string> = {};
+    let count=0, misses=0;
+    for (const seg of segments) {
+      if (!Object.prototype.hasOwnProperty.call(answers,seg.stage)) break;
+      const answer=answers[seg.stage];
+      replies[count]=answer===null ? "그럴 수 있소. 판단은 미뤄 두고 계속 보시오." : answer ? seg.yes : seg.no;
+      if (answer===false) misses++;
+      count++;
+    }
+    return {count,misses,replies};
+  });
+  const [open, setOpen] = useState(Math.min(restored.count+1,segments.length));
+  const [replies, setReplies] = useState<Record<number, string>>(restored.replies);
+  const [misses, setMisses] = useState(restored.misses);
+  const voted = useRef(new Set<number>(Object.keys(restored.replies).map(Number)));
+  const notified = useRef(false);
+  useEffect(() => {
+    if (!notified.current && restored.count === segments.length) {
+      notified.current=true;
+      onDone?.();
+    }
+  }, [restored.count,segments.length,onDone]);
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => {if(advanceTimer.current) clearTimeout(advanceTimer.current);}, []);
 
@@ -150,6 +171,7 @@ export default function HookSegments({
 
   return (
     <>
+      {restored.count > 0 && <p className="conversion-note" role="status">앞서 답한 {restored.count}마디를 불러왔소. {restored.count === segments.length ? "무료 요약으로 이어가시오." : "남은 이야기부터 이어가시오."}</p>}
       {/*
         ★ 새로 열린 마디만 읽어 줍니다.
           이미 읽은 마디를 다시 읽으면 손님이 아래로 내릴 때마다

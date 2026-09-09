@@ -344,6 +344,9 @@ function EntryInner() {
   /* 「아니오」가 몇 번 나왔는가 · 이미 방향을 틀었는가 */
   const [misses, setMisses] = useState(0);
   const [turned, setTurned] = useState(false);
+  useEffect(() => {
+    setSegments(null);setHookDone(false);setMisses(0);setTurned(false);
+  }, [s.chartId,s.concern,s.cur]);
 
   // 화면 이름이 곧 step 입니다. 어디서 나가는지 이걸로 셉니다.
   useScreen(step);
@@ -427,7 +430,9 @@ function EntryInner() {
     let alive = true;
     api.hook({
       chart_id: s.chartId, concern: s.concern, axis4: s.axis4,
-      name: s.name, lens_id: s.cur, misses,
+      name: s.name, lens_id: s.cur,
+      misses: Math.max(misses, s.hookReview?.chartId === s.chartId && s.hookReview.concern === s.concern && s.hookReview.lensId === s.cur
+        ? Object.values(s.hookReview.answers).filter(answer=>answer===false).length : 0),
     })
       .then((r) => alive && setSegments(r.segments))
       .catch((e) => alive && setError(e instanceof ApiError ? e.message : "훅을 만들지 못했소."));
@@ -697,6 +702,7 @@ function EntryInner() {
       {error && <><Say who="도령" lens="pungun">{error}</Say><button className="btn" onClick={() => {setError(null); setHookRetry(n => n + 1);}}>무료 해석 다시 불러오기</button></>}
       {segments && s.chartId && (
         <HookSegments
+          key={`${s.chartId}:${s.cur}:${s.concern}`}
           segments={segments}
           chartId={s.chartId}
           lensId={s.cur}
