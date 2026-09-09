@@ -18,17 +18,14 @@ import PracticeCard from "@/components/PracticeCard";
 import ReadingGuide from '@/components/ReadingGuide';
 import CompanionCat from "@/components/CompanionCat";
 import Scene from "@/components/scene/Scene";
-import Reveal from "@/components/Reveal";
 import ActOut from "@/components/ActOut";
 import { Narration, Say } from "@/components/Narration";
 import { api, ApiError } from "@/lib/api";
-import { io } from "@/lib/josa";
 import { LENS_BY_ID, youOf } from "@/lib/lenses";
 import { useSession, type Tier } from "@/lib/store";
 import { track, useScreen, analyticsId } from "@/lib/track";
 import { openCheckout, registerCard } from "@/lib/toss";
 import { SELLABLE } from "@/lib/biz";
-import { thinkOf } from "@/lib/think";
 import SinsalSlots from "@/components/SinsalSlots";
 import type { ReportResponse } from "@shared/chart";
 
@@ -58,53 +55,6 @@ interface Order {
   purchases_today: number;
   per_day_limit: number;
 }
-
-/*
- * 무료 구간의 숨 고르는 자리.
- *
- * ★ 8컷 1,592자가 한 번에 쏟아지고 상호작용이 0이었습니다. 훅에서 다섯 번
- *   쌓아 올린 참여가 여기서 끊깁니다. 세 컷마다 한 번, 가볍게 묻습니다.
- *   「글쎄올시다」를 여기에도 둡니다 — 이분법이 공감률을 오염시킵니다.
- */
-function Beat({ cut, chartId, lensId, concern, charName }: {
-  cut: { id: string; statement_id: string | null };
-  chartId: string;
-  lensId: string;
-  concern: string;
-  charName: string;
-}) {
-  const [said, setSaid] = useState<string | null>(null);
-  const answer = async (yes: boolean | null) => {
-    setSaid(yes === null ? "아직 모르셔도 괜찮소. 이어서 읽어보시오."
-      : yes ? "경험과 가까운 장면이군요. 다음 내용도 살펴보시오."
-            : "맞지 않는 해석일 수 있소. 이 장면은 건너뛰어도 괜찮소.");
-    track("free_beat", "d0", { yes: yes === null ? 2 : yes ? 1 : 0 });
-    if (!cut.statement_id) return;
-    try {
-      await api.feedback({
-        statement_id: cut.statement_id, chart_id: chartId,
-        answer: yes === null ? null : yes ? 1 : 0,
-        stage: "free", lens_id: lensId, concern,
-      });
-    } catch {
-      /* 기록 실패가 읽기를 막아서는 안 된다 */
-    }
-  };
-  if (said) {
-    return <div className="react on"><div className="say"><small>{charName}</small>{said}</div></div>;
-  }
-  return (
-    <div className="beat">
-      <span className="q">이 장면이 내 경험과 가까운가요?</span>
-      <div className="vt">
-        <button onClick={() => answer(true)}>그렇소</button>
-        <button onClick={() => answer(false)}>아니오</button>
-      </div>
-      <button className="lk vt3" onClick={() => answer(null)}>잘 모르겠소</button>
-    </div>
-  );
-}
-
 
 function PayInner() {
   const router = useRouter();
@@ -138,6 +88,15 @@ function PayInner() {
   const [pick, setPick] = useState<Tier | null>(null);
   const [order, setOrder] = useState<Order | null>(null);
   const [busy, setBusy] = useState(false);
+  const [sales, setSales] = useState<{ready:boolean;reason:string|null}|null>(null);
+  useEffect(() => {
+    if (!["d1", "d1b", "d2"].includes(step)) return;
+    let alive = true;
+    fetch("/api/sales-status").then(r => {if (!r.ok) throw new Error(); return r.json();})
+      .then(value => {if (alive) {setSales(value); if (!value.ready) track("checkout_blocked", "d1", {n:value.reason === "seller_setup" ? 1 : value.reason === "gateway_setup" ? 2 : 3});}})
+      .catch(() => {if(alive) setSales({ready:false,reason:"temporary"});});
+    return () => {alive=false;};
+  }, [step, retry]);
   /* 목패 — ★ 값도 분량도 서버가 셉니다. 화면은 받아 적기만 합니다. */
   const [tiers, setTiers] = useState<TierCard[] | null>(null);
   /* 값을 치른 직후 **무엇을 얻었는지**. ★ 서버가 셉니다. */
@@ -330,7 +289,7 @@ function PayInner() {
     if (!["d1", "d1b", "d2"].includes(step) || !s.chartId || order || tossBack || subBack) return;
     // ★ 안 고르고 d2 로 바로 들어온 자리(주소를 치거나 레일로 뛰거나).
     //   없는 값으로 주문을 만들지 않고 목패로 돌려보내오.
-    if (!pick) return;
+    if (!pick || !sales?.ready) return;
     // ★ 달삯은 주문이 아니오 — 카드를 걸어 두는 일이라 길이 다릅니다.
     //   서버도 이 길로 오면 409 로 돌려보냅니다 (pay.prepare).
     if (pick === "sub") return;
@@ -346,7 +305,7 @@ function PayInner() {
         if (alive) setErr(e instanceof ApiError ? e.message : "값을 매기지 못했소.");
       });
     return () => { alive = false; };
-  }, [step, s.chartId, s.sessionId, s.cur, s.concern, pick, order]);
+  }, [step, s.chartId, s.sessionId, s.cur, s.concern, pick, order, sales?.ready, retry]);
 
   /*
    * d2 · 달삯 — 손님 열쇠와 **고지 문구**를 받아 온다.
@@ -358,7 +317,7 @@ function PayInner() {
    */
   const [offer, setOffer] = useState<SubOffer | null>(null);
   useEffect(() => {
-    if (!["d1", "d1b", "d2"].includes(step) || pick !== "sub" || offer || subBack) return;
+    if (!["d1", "d1b", "d2"].includes(step) || pick !== "sub" || offer || subBack || !sales?.ready) return;
     let alive = true;
     setErr(null);
     api
@@ -368,146 +327,52 @@ function PayInner() {
         if (alive) setErr(e instanceof ApiError ? e.message : "카드 자리를 열지 못했소.");
       });
     return () => { alive = false; };
-  }, [step, pick, s.sessionId, offer, subBack]);
+  }, [step, pick, s.sessionId, offer, subBack, sales?.ready, retry]);
 
   if (step === "d0") {
-    /*
-     * ★ 리듬이 여기서 끊기고 있었습니다.
-     *
-     *   훅은 한 단씩 열리고 응답을 받습니다. 그런데 무료 리포트는 8컷
-     *   1,592자를 **한 번에 쏟습니다.** 상호작용이 0입니다. 훅에서 다섯 번
-     *   쌓아 올린 참여가 여기서 끊기고, 결제 갈림길은 이 벽 **바로 뒤**에
-     *   있습니다 — 가장 지친 자리에서 값을 묻는 구조였습니다.
-     *
-     *   세 컷마다 한 번 가볍게 묻습니다. 응답은 이미 feedback 이 받습니다.
-     */
+    if (!s.chartId) return <Shell screen="d0" title="무료 해석 시작하기">
+      <p className="conversion-lead">아직 태어난 정보가 없소. 생년월일과 고민을 고르면 무료로 요약해 드리겠소.</p>
+      <button className="btn" onClick={() => router.push("/?step=a5")}>내 고민으로 무료 해석 시작하기</button>
+    </Shell>;
     const cuts = free?.cuts ?? [];
-    /*
-     * ★ 안 편 자리를 **목차로 부르지 않습니다** (2026-09-04).
-     *
-     *   여기 「4 · 지금 어디에」 「5 · 필요한 것」 「6 · 대운 맵」 이라
-     *   적혀 있었습니다. 그건 이 집이 컷을 세는 말입니다. 「대운 맵」이
-     *   무엇인지 모르는 사람에게 그게 남았다고 해 봐야 아무것도 안
-     *   남습니다 — 값을 치를 까닭이 안 생깁니다.
-     *
-     *   손님이 궁금한 것은 **재물 · 사랑 · 운명 · 사람** 넷이고, 그 넷은
-     *   이미 그 사람의 여덟 글자 안에 세어져 있습니다. 세어 놓고 안
-     *   부르고 있었습니다 (engine/peek.build_wants).
-     */
-    const wants = free?.wants ?? [];
-    const names = (free?.locked ?? []).map((l) => l.title).slice(0, 3);
+    const review = s.hookReview;
+    const same = review?.chartId === s.chartId && review.concern === s.concern && review.lensId === s.cur;
+    const rejected = same ? Object.entries(review.answers).filter(([, answer]) => answer === false).map(([stage]) => stage) : [];
+    const stageNames: Record<string,string> = {"0":"처음 짚은 반복 패턴", "1":"고민을 대하는 방식", "2":"기운을 쓰는 방식", "2.5":"고민과 타고난 성향의 차이", "3":"마지막 확인 질문"};
+    const openPrice = () => {track("price_view", "d0"); router.push("/pay?step=d1");};
     return (
-      <Shell screen="d0" title="값 없이 한 겹 더">
-        <Scene id="oldpaper" />
-        {/* ★ 여는 줄이 없어 첫 줄이 곧바로 해석이었습니다. 값을 안
-            받는 구간이라는 것도 글에 안 적혀 있었습니다. */}
-        <Narration lines={[`${charName}의 무료 해석을 펼쳤다.`,
-                           "여기서는 아직 아무것도 받지 않는다."]} />
+      <Shell screen="d0" title="무료 요약과 오늘의 행동">
+        <p className="conversion-kicker">{charName}의 해석 · 무료</p>
+        <h1 className="conversion-title reading-title">내 고민을 짧게 정리해 보겠소.</h1>
         {err && <><Say who={charName} lens={s.cur}>{err}</Say><button className="btn" onClick={() => {setErr(null);setRetry(n => n + 1);}}>무료 해석 다시 불러오기</button></>}
-        {free?.editorial && <ReadingGuide guide={free.editorial} />}
-        {/*
-          ★ 한 컷씩 뜹니다 (2026-09-02). 여기가 손님이 "압도당한다" 고
-            짚은 자리입니다 — 여덟 컷 1,592자가 한 화면에 통째로
-            서 있었습니다. 뜨기 전 한 줄은 그 컷이 실제로 보는 자리라,
-            뜸이 곧 근거 예고가 됩니다 (lib/think.ts).
-        */}
-        {cuts.map((c, i) => (
-          <Reveal key={c.id} think={thinkOf(c.source)} eager={i === 0}>
-            <div className="blk in">
-              <div className="lab">{c.title}</div>
-              <span className="src">근거 · {c.source}</span>
-              {/*
-                ★ 신살 컷에 **인물이 안 붙고 있었습니다** (2026-09-04).
-
-                  서버는 이름마다 빈 자리를 남기고
-                  (`<div class="ssfig" data-sinsal="taegeuk">`),
-                  `SinsalSlots` 가 거기에 그림을 꽂습니다. 리포트(c2)와
-                  분석지(c7)와 건너온 자리(s1)에는 붙어 있었는데
-                  **무료 6단만 빠져 있었습니다** — 그냥 innerHTML 로
-                  부어서 빈 자리가 빈 채로 남았습니다.
-
-                  하필 신살은 **무료 컷**입니다. 값을 치르기 전에
-                  태극귀인·문창귀인·금여·양인을 만나는 자리가 여기인데,
-                  거기서 한자만 보고 있었습니다.
-              */}
-              {c.id === "sinsal"
-                ? <SinsalSlots html={c.html} />
-                : <div dangerouslySetInnerHTML={{ __html: c.html }} />}
-            </div>
-            {/* 세 컷마다 한 번. 벽을 걷는 리듬으로 되돌립니다. */}
-            {i % 3 === 2 && i < cuts.length - 1 && c.statement_id && (
-              <Beat cut={c} chartId={s.chartId!} lensId={s.cur}
-                    concern={s.concern} charName={charName} />
-            )}
-          </Reveal>
-        ))}
-        {free && (
-          <>
-            <Narration lines={[charName + "가 붓을 내려놓았다."]} />
-            {/*
-              ★ a7 과 d0 이 거의 같은 말로 끝나고 있었습니다 —
-                "여기까지가 값 없이 하는 얘기요. 왜와 언제는 아직 안 했소."
-                두 번째는 무게가 떨어지고, 손님은 **앞에서 이미 들은 말**이라
-                새 정보로 읽지 않습니다.
-
-                a7 은 격차를 **열고**, d0 은 격차를 **채웁니다** —
-                이 명식에서 지금 잠긴 자리를 **이름으로 부릅니다.**
-                막연한 미끼는 오히려 안 끌립니다. 제목은 이미 좋습니다.
-            */}
-            {free.practice && <PracticeCard key={free.practice.id} practice={free.practice} />}
-            <Say who={charName} lens={s.cur} html={
-              wants.length
-                ? `아직 안 편 자리가 <b>${free.locked.length}</b> 남았소.<br>` +
-                  `그 중 넷은 ${io(wants.map((w) => w.want).join(" · "))}.`
-                : names.length
-                  ? `아직 안 편 자리가 <b>${free.locked.length}</b> 남았소.<br>` +
-                    `「${names.join("」 「")}」${names.length >= 3 ? " …" : ""}`
-                  : "여기까지가 값 없이 하는 얘기요."} />
-            {/*
-              ★ 여는 줄(fact)은 **센 것**이라 대 볼 수 있고, 답은 앞머리만
-                진짜로 왔습니다. 흐린 칸은 글을 가린 게 아니라 **빈 칸**
-                입니다 — 서버가 안 보냈으니 브라우저를 뒤져도 안 나옵니다.
-                근거 줄은 안 가립니다. 그게 이 집이 값을 받는 방식입니다.
-            */}
-            {wants.map((w, i) => (
-              <div className="peek" key={w.want + i}>
-                <div className="pk">
-                  {w.want}
-                  <span dangerouslySetInnerHTML={{ __html: w.fact }} />
-                </div>
-                <p className="pkbody">
-                  <span className="pkask">{w.ask}</span> {w.head}
-                  <span className="pkmask" aria-label={`가려진 ${w.mask}자`}>
-                    {"▒".repeat(Math.min(22, Math.max(6, Math.round(w.mask / 12))))}
-                  </span>
-                </p>
-                {w.source && <span className="src">근거 · {w.source}</span>}
-                <p className="pkmore">여기서부터 <b>{w.mask}자</b>가 더 있소</p>
-              </div>
-            ))}
-            {/*
-              ★ 막을 끊는 줄이 없었습니다. 「아직 안 편 자리가 N 남았소」
-                는 수를 대지만 **다음 자리를 이름으로 안 부릅니다.**
-                여기 적는 건 전부 이미 참인 것입니다.
-            */}
-            {(lens?.price ?? 0) > 0 && <ActOut kind="딜레마" next="어디까지 볼지">
-              여기까지는 무료로 읽을 수 있소. 더 살펴보고 싶다면 추가로 열리는 내용과 가격을 확인해 주시오.
-              <br />오늘은 여기까지 읽고, 내게 도움이 된 문장을 가져가셔도 좋소.
-            </ActOut>}
-            {(lens?.price ?? 0) > 0 && <button className="btn mt" onClick={() => router.push("/pay?step=d1")}>
-              추가 해석과 가격 보기
-            </button>}
-            {/*
-              ★ 이 버튼은 그대로 둡니다 — 브레이크는 매출보다 앞섭니다.
-                다만 목적지가 /lobby 라 **아무것도 안 남기고** 나갔습니다.
-                여기서 나간 손님을 다시 부를 고리가 없었소.
-                손에 뭔가를 들고 나가게 합니다.
-            */}
-            <button className="btn gh" onClick={() => router.push("/summary")}>
-              오늘은 여기까지 · 본 것을 한 장으로 받겠소
-            </button>
-          </>
-        )}
+        {!free && !err && <p role="status">해석과 근거를 정리하고 있소…</p>}
+        {free && <>
+          {rejected.length > 0 ? <section className="conversion-card" aria-label="맞지 않았던 해석 다시 보기">
+            <h2>맞지 않았던 {rejected.length}마디는 접어 두겠소.</h2>
+            <p>그대가 아니라고 답한 해석을 성격으로 단정하지 않겠소. 생년월일에서 계산한 기둥은 그대로지만, 그 해석이 실제 경험과 같다는 뜻은 아니오.</p>
+            <ul>{rejected.map(stage => <li key={stage}>{stageNames[stage] ?? "확인 질문"}</li>)}</ul>
+            {free.editorial && <p className="conversion-note">계산에서 확인한 근거 · {free.editorial.observation}</p>}
+            <p><strong>오늘은 이것부터 해보시오.</strong><br />맞지 않았던 문장 하나와 실제로 겪은 장면 하나를 나란히 적으시오. 다른 점이 무엇인지 먼저 살피는 것으로 충분하오.</p>
+            <button className="btn gh" onClick={() => {track("reading_mismatch", "d0", {n: 1}); router.push("/?step=a3");}}>태어난 정보 다시 확인하기</button>
+            <button className="btn gh" onClick={() => {track("reading_mismatch", "d0", {n: 2}); router.push("/lobby");}}>다른 해석자의 관점 살펴보기</button>
+          </section> : free.editorial ? <ReadingGuide guide={free.editorial} /> :
+            <div className="conversion-card"><p>기둥과 해석 근거를 아래에서 확인할 수 있소. 맞는 부분만 경험에 대입해 보시오.</p></div>}
+          {(lens?.price ?? 0) > 0 && <div className="reading-next">
+            <p>무료 해석은 여기까지요. 추가 내용과 가격을 먼저 살펴보거나, 아래 근거를 더 읽어도 되오.</p>
+            {!SELLABLE && <p className="conversion-note">현재 유료 판매를 준비하고 있소. 무료 해석은 계속 읽을 수 있소.</p>}
+            <button className="btn" onClick={openPrice}>추가 해석과 가격 보기</button>
+          </div>}
+          <details className="conversion-details reading-evidence" onToggle={e => {if(e.currentTarget.open) track("reading_expand", "d0");}}>
+            <summary>{rejected.length ? "원래 해석과 계산 근거 확인하기" : "무료 해석의 자세한 근거 펼치기"} · {cuts.length}개 항목</summary>
+            {rejected.length > 0 && <p className="conversion-note">아래는 응답 전 생년월일과 고민으로 만든 원래 해석이오. 아니라고 답한 대목이 맞는 것으로 바뀐 것은 아니오.</p>}
+            {cuts.map(c => <section className="blk" key={c.id}>
+              <h2 className="lab">{c.title}</h2><p className="src">근거 · {c.source}</p>
+              {c.id === "sinsal" ? <SinsalSlots html={c.html} /> : <div dangerouslySetInnerHTML={{__html:c.html}} />}
+            </section>)}
+            {!rejected.length && free.practice && <PracticeCard key={free.practice.id} practice={free.practice} />}
+          </details>
+          <button className="btn gh" onClick={() => router.push("/summary")}>오늘은 여기까지 · 본 것을 한 장으로 받겠소</button>
+        </>}
       </Shell>
     );
   }
@@ -531,8 +396,8 @@ function PayInner() {
         <strong>{pick === t.id ? "✓ " : ""}{t.id === "one" ? `${charName} 해석` : t.name}</strong>
         <strong className="conversion-price">{t.price.toLocaleString()}원</strong>
         <span>{t.per_month ? `${t.days ?? 30}일마다 자동 결제` : "한 번 결제 · 영구 열람"}</span>
-        <span>{t.lenses > 1 ? `${t.lenses}명의 관점` : "이 인물의 관점"} · {t.note}</span>
-        {t.opens.length > 0 && <span>추가로 열리는 내용: {t.opens.slice(0,3).join(" · ")}</span>}
+        <span>{t.lenses > 1 ? `${t.lenses}명의 해석을 함께 읽소.` : "이 인물의 추가 해석과 근거를 읽소. 다른 인물은 포함하지 않소."}</span>
+        <span>전체 {t.cuts}개 항목 · 약 {t.minutes}분 분량</span>{t.needs_extra_input && <span>일부 항목은 추가 정보가 있어야 열리오. 선택 후 필요한 정보를 확인하시오.</span>}
       </button>
     );
     if (settling || carding) return (
@@ -545,11 +410,16 @@ function PayInner() {
       <Shell screen="d1" title="추가 해석과 결제" legal onBack={() => router.push("/pay?step=d0")}>
         <div className="conversion-intro">
           <p className="conversion-kicker">내용 · 가격 · 열람 조건</p>
-          <h1 className="conversion-title">지금의 고민을<br />조금 더 깊이 읽어보시오.</h1>
-          <p className="conversion-lead">{charName}의 관점에서 추가로 열리는 내용을 확인하시오. 상품을 선택하면 아래에 결제 금액과 조건이 표시되오.</p>
+          <h1 className="conversion-title">무료 다음에는<br />무엇을 더 읽을 수 있소?</h1>
+          <p className="conversion-lead">{charName}의 추가 해석을 미리 살펴보시오. 무료 내용과의 차이를 확인한 뒤 결정해도 늦지 않소.</p>
         </div>
+        {sales?.reason === "seller_setup" && <div className="conversion-status" role="status"><strong>현재 유료 판매를 준비하고 있소.</strong><p>판매자 정보 등록이 끝나기 전에는 결제를 받지 않소. 다시 시도할 필요 없이 무료 해석을 계속 읽어도 되오.</p><a href="/legal">판매자 정보 확인하기</a></div>}
+        {sales?.reason === "gateway_setup" && <p className="conversion-status" role="status">결제 서비스 연결을 준비하고 있소. 지금은 무료 해석을 이용해 주시오.</p>}
+        {sales?.reason === "temporary" && <div className="conversion-status" role="alert"><p>결제 가능 상태를 확인하지 못했소. 입력과 선택은 그대로 남아 있소.</p><button className="btn gh" onClick={() => {setSales(null);setRetry(n => n + 1);}}>결제 연결 다시 확인하기</button></div>}
+        {!sales && <p role="status">결제 가능 상태를 확인하고 있소…</p>}
         {!s.chartId && <div className="conversion-status"><p>먼저 태어난 정보로 무료 해석을 확인해 주시오.</p><button className="btn" onClick={() => router.push("/?step=a5")}>무료 해석 시작하기</button></div>}
         {err && <div className="warn" role="alert"><p>{err}</p>{!tiers && <button className="btn" onClick={() => {setErr(null);setRetry(n => n + 1);}}>상품 다시 불러오기</button>}<button className="btn gh" onClick={() => router.push("/me")}>결제 내역·구독 확인</button>
+          {tiers && pick && !tossBack && !subBack && <button className="btn gh" onClick={() => {setErr(null);setRetry(n => n + 1);}}>선택한 상품의 결제 조건 다시 확인하기</button>}
           {(tossBack || subBack) && <button className="btn gh" onClick={() => router.replace("/pay?step=d1")}>상품으로 돌아가기</button>}</div>}
         {s.chartId && !tiers && !err && <p role="status">이 명식에서 열리는 내용을 확인하고 있소…</p>}
         {tiers && <>
@@ -566,9 +436,9 @@ function PayInner() {
               <p>입력은 선택이오. 생년월일로 읽는 본문은 볼 수 있고, 입력하지 않은 정보에 대한 추가 해석은 열리지 않소. 혈액형·그림·카드는 자기 성찰을 위한 보조 소재이오.</p>
             </div>}
             {tier.id === "all" && <p className="conversion-note">이미 읽은 내용도 포함되오. 전체 상품은 다른 인물의 관점을 함께 읽는 방식이며, 모든 인물에서 한 명 상품보다 본문이 길어지는 것은 아니오.</p>}
-            {peek && peek.length > 0 && <details className="conversion-details"><summary>추가 해석 미리보기</summary>
-              {peek.map((r, i) => <div key={r.lens_id+i}><h3>{r.ask}</h3><p>{r.head}</p>{r.source && <p className="conversion-note">해석 근거 · {r.source}</p>}</div>)}
-            </details>}
+            {peek && peek.length > 0 && <section className="paid-preview"><h3>결제하면 더 읽는 질문</h3><p className="conversion-note">무료에서는 기둥·핵심 해석·오늘의 행동을 읽었소. 아래는 선택한 상품에서 추가로 열리는 해석의 실제 앞부분이오.</p>
+              {peek.slice(0, 3).map((r, i) => <div key={r.lens_id+i}><h3>{r.ask}</h3><p>{r.head}… <span className="conversion-note">(본문 일부)</span></p>{r.source && <p className="conversion-note">해석 근거 · {r.source}</p>}</div>)}
+            </section>}
             <details className="conversion-details"><summary>전체 분량과 열람 범위</summary>
               <p className="conversion-note">현재 명식 기준 {tier.cuts}개 내용 · {tier.chars.toLocaleString()}자 · 약 {tier.minutes}분. {tier.lenses}명의 관점으로 읽소.</p>
               {tier.opens.length > 0 && <ul>{tier.opens.map(title => <li key={title}>{title}</li>)}</ul>}
@@ -578,28 +448,28 @@ function PayInner() {
               <p className="conversion-note">{pick === "all" ? "전체 인물의 해석" : `${charName}의 해석`} · 영구 열람 · 자동 결제 없음</p>
               <div className="vow">{order.refund_say}</div><p className="conversion-note">{order.refund_notice}</p>
               <p className="conversion-note">오늘 구매 {order.purchases_today} / {order.per_day_limit}건</p>
-              {order.enabled && order.client_key && SELLABLE ? <button className="btn" disabled={busy} onClick={async () => {
+              {order.enabled && order.client_key && sales?.ready ? <button className="btn" disabled={busy} onClick={async () => {
                 setBusy(true); setErr(null); track("pay_start", "d1");
                 try { await openCheckout({ clientKey: order.client_key!, orderId: order.order_id, amount: order.amount, orderName: tier.name, customerKey: s.sessionId }); }
                 catch (e) { track("pay_fail", "d1"); setErr(e instanceof Error ? e.message : "결제창을 열지 못했소. 다시 시도해 주시오."); }
                 finally { setBusy(false); }
               }}>{busy ? "결제창 연결 중…" : `${order.amount.toLocaleString()}원 결제하기`}</button>
-              : <p className="conversion-status">잠시 후 결제를 다시 시도해 주시오.</p>}
+              : <p className="conversion-status">결제 서비스 연결이 준비되지 않았소. 무료 해석을 계속 읽거나 결제 내역을 확인해 주시오.</p>}
             </>}
             {pick === "sub" && offer && <>
               <p className="conversion-price">{offer.amount.toLocaleString()}원 <small>{tier.days ?? 30}일마다 자동 결제</small></p>
               <div className="vow">{offer.terms.map((t,i) => <p key={i}>{t}</p>)}</div>
               <p className="conversion-note">{offer.refund_notice}</p>
-              {offer.enabled && offer.client_key && SELLABLE ? <button className="btn" disabled={busy} onClick={async () => {
+              {offer.enabled && offer.client_key && sales?.ready ? <button className="btn" disabled={busy} onClick={async () => {
                 setBusy(true); setErr(null); track("pay_start", "d1");
                 try { await registerCard({ clientKey: offer.client_key!, customerKey: offer.customer_key }); }
                 catch (e) { track("pay_fail", "d1"); setErr(e instanceof Error ? e.message : "카드 등록을 연결하지 못했소."); }
                 finally { setBusy(false); }
               }}>{busy ? "카드 등록 연결 중…" : `${offer.amount.toLocaleString()}원 정기결제 등록하기`}</button>
-              : <p className="conversion-status">지금 정기결제를 연결할 수 없소. 잠시 후 다시 시도해 주시오.</p>}
+              : <p className="conversion-status">지금은 정기결제를 제공하지 않소. 한 번 결제하는 상품의 내용을 확인해 주시오.</p>}
             </>}
-            {!order && pick !== "sub" && !err && <p role="status">결제 금액과 조건을 확인하고 있소…</p>}
-            {!offer && pick === "sub" && !err && <p role="status">정기결제 조건을 확인하고 있소…</p>}
+            {sales?.ready && !order && pick !== "sub" && !err && <p role="status">결제 금액과 조건을 확인하고 있소…</p>}
+            {sales?.ready && !offer && pick === "sub" && !err && <p role="status">정기결제 조건을 확인하고 있소…</p>}
           </div>
         </div>}
         <button className="btn gh" onClick={() => router.push("/pay?step=d0")}>무료 해석으로 돌아가기</button>

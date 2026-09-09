@@ -57,6 +57,9 @@ type Overview = {
   live: { sessions_seen: number; active_15m: number };
   funnel: {
     sessions?: number;
+    immature_sessions?: number;
+    context_missing?: number;
+    segments?: {dimension:string;label:string;visitors:number;mature:number;buyers:number;conversion:number|null}[];
     steps?: { screen: string; label: string; sessions: number;
               from_prev: number | null; from_top: number | null;
               lost: number | null }[];
@@ -664,7 +667,7 @@ export default function AdminPage() {
         <h2>사람</h2>
         <div className="kpi">
           <div><b>{data?.live.active_15m ?? "—"}</b><span>지금 도는 사람</span></div>
-          <div><b>{data?.funnel?.sessions ?? "—"}</b><span>들어온 사람</span></div>
+          <div><b>{data?.funnel?.sessions ?? "—"}</b><span>입장 브라우저</span></div>
         </div>
       </section>
 
@@ -813,6 +816,8 @@ export default function AdminPage() {
       <RefundReviews accessKey={key} token={token} />
       <section>
         <h2>어디서 나가는가 · 진입 동선 v2</h2>
+        <p className="sm">7일 관찰 미완료 {data?.funnel?.immature_sessions ?? 0}개 · 유입 분류 미수집 {data?.funnel?.context_missing ?? 0}개. QA 방문은 제외하며, 미도달만으로 이탈 이유를 단정하지 않소.</p>
+        {!!data?.funnel?.segments?.length && <details className="conversion-details"><summary>기기·유입·재방문별 7일 결제 전환</summary><div style={{overflowX:"auto"}}><table className="admt"><thead><tr><th>구분</th><th>입장</th><th>관찰 완료</th><th>서버 승인</th><th>전환</th></tr></thead><tbody>{data.funnel.segments.map(row => <tr key={row.dimension+row.label}><td>{row.label}</td><td>{row.visitors}</td><td>{row.mature}</td><td>{row.buyers}</td><td>{row.conversion === null ? "관찰 중" : `${row.conversion}%`}</td></tr>)}</tbody></table></div><p className="sm">전환은 관찰 기간이 끝난 브라우저만 분모로 삼소. 세 분류의 방문 수를 서로 더하지 마시오. 추천 출처는 브라우저가 알려준 범위에서만 구분하오.</p></details>}
         <p className="sm">최근 30일 개편 첫 화면 진입 브라우저를 기준으로, 7일 안의 순차 이동과 서버 승인을 세오. 실제 사람 수와 다르며, 관찰 기간이 끝나지 않은 방문이 포함되오. 직접 진입·이전 동선은 제외하오.</p>
         {steps.length === 0 ? (
           <p className="sm">

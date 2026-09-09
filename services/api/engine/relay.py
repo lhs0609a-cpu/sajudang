@@ -433,7 +433,7 @@ def recommend(f, read: Optional[list] = None, skipped: Optional[list] = None,
                     "rule_id": "r_fallback", "lens_id": fb,
                     "name": info["name"], "priority": 0,
                     "price": info["price"], "released": info["released"],
-                    "reason": "여덟 글자에서 특별히 도드라지는 자리가 없어요",
+                    "reason": "여덟 글자에서 특별히 도드라지는 자리가 없소",
                     "quote": lens_mod.get(fb).get("opening_quote"),
                     "reach": 0.0, "complement": 0.0, "score": 0.0,
                 }]

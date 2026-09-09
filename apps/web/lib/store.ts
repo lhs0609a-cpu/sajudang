@@ -64,6 +64,7 @@ export interface SessionState {
   seals: string[];
   tier: Tier;
   paid: boolean;
+  hookReview: { chartId: string; concern: string; lensId: string; answers: Record<string, boolean | null> } | null;
   relayUsed: number;
   visits: number;
   visitDate: string | null;
@@ -152,6 +153,7 @@ const initial = {
   seals: [] as string[],
   tier: "free" as Tier,
   paid: false,
+  hookReview: null as SessionState["hookReview"],
   relayUsed: 0,
   visits: 0,
   visitDate: null as string | null,
@@ -185,6 +187,7 @@ export const useSession = create<SessionState>()(
         seals: s.seals, tier: s.tier, paid: s.paid, visits: s.visits, visitDate: s.visitDate,
         admin: s.admin, adminSet: s.adminSet, seasonOverride: s.seasonOverride,
         ilganOverride: s.ilganOverride,
+        hookReview: s.hookReview,
       }),
     },
   ),

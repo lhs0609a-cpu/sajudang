@@ -105,8 +105,8 @@ def main() -> int:
                 h["answer_rate"] if h["answer_rate"] is not None else "  -",
                 h["yes_rate"] if h["yes_rate"] is not None else "  -"))
         print()
-        print("  응답률이 낮은 단 = 거기서 창을 닫습니다.")
-        print("  '그렇소' 가 낮은 단 = 안 맞는 문장입니다. 둘은 고치는 법이 다릅니다.")
+        print("  낮은 응답률은 건너뛰기·관찰 미완료를 포함하므로 창을 닫았다고 단정할 수 없소.")
+        print("  '그렇소' 비율은 응답자의 반응이오. 이해 여부와 불일치 이유를 함께 확인하시오.")
 
     return 0
 

@@ -586,7 +586,7 @@ function EntryInner() {
         <Progress step={1} total={PROGRESS_TOTAL} />
         <div className="conversion-intro">
           <p className="conversion-kicker">1 / 3 · 고민 선택</p>
-          <h1 className="conversion-title">지금 가장 알고 싶은 건<br />무엇인가요?</h1>
+          <h1 className="conversion-title">지금 가장 알고 싶은 건<br />무엇이오?</h1>
           <p className="conversion-lead">지금 마음에 걸리는 것 하나를 골라주시오. 선택한 고민에 따라 해석에서 살펴볼 자리가 달라지오.</p>
         </div>
         <div className="og c2">
@@ -688,14 +688,18 @@ function EntryInner() {
             에 대해서요. 여기서부터 <b>5마디</b>요.<br />
             {s.hourKnown ? "기둥 4자리의 8글자" : "시주를 제외한 기둥 3자리의 6글자"}를 보고 하는 해석이오 —
             선택한 고민에 맞춰 살펴보겠소.<br />
-            한 마디가 끝날 때마다 맞는지 물어보겠소. 맥을 짚듯
-            자리를 옮겨 가며 짚는 셈이오.<br />
-            <b>두 번</b> 어긋나면 짚는 자리를 아예 바꾸오.
-            값은 아직 안 묻소.
+            응답은 선택이오. 바로 요약과 오늘의 행동으로 넘어가도 되오.<br />
+            맞지 않는 대목은 따로 기억해 두고, 두 번 어긋나면 남은 질문의 관점을 바꾸겠소.
           </Say>
         </div>
       )}
       {error && <><Say who="도령" lens="pungun">{error}</Say><button className="btn" onClick={() => {setError(null); setHookRetry(n => n + 1);}}>무료 해석 다시 불러오기</button></>}
+      {segments && s.chartId && (
+        <div className="reading-shortcut">
+          <button className="btn gh" onClick={() => {track("hook_skip", "a7"); router.push("/pay?step=d0");}}>응답 건너뛰고 무료 요약 보기</button>
+          <p className="conversion-note">건너뛰기는 동의로 집계하지 않소.</p>
+        </div>
+      )}
       {segments && s.chartId && (
         <HookSegments
           segments={segments}
@@ -709,7 +713,7 @@ function EntryInner() {
       )}
       {hookDone && (
         <section className="conversion-card">
-          <h2>내 경험과 가까웠던 장면이 있나요?</h2>
+          <h2>내 경험과 가까웠던 장면이 있소?</h2>
           <p className="conversion-lead">이어지는 무료 해석에서 근거를 더 살펴보고, 오늘 해볼 행동 하나를 가져가시오.</p>
           <button className="btn mt" onClick={() => router.push("/pay?step=d0")}>무료 해석과 오늘의 행동 보기</button>
           <button className="btn gh" onClick={() => router.push("/summary")}>여기까지 본 내용 정리하기</button>

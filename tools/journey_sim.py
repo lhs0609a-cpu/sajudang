@@ -199,7 +199,7 @@ def cuts_text(rep) -> str:
 # ══════════════════════════════════════════════════════════
 # 한 사람
 # ══════════════════════════════════════════════════════════
-def run_one(p, T: Tally, today: date):
+def run_one(p, T: Tally, today: date, *, include_omnibus: bool = True):
     rng = p["rng"]
 
     # ── 1 · 명식 ────────────────────────────────────────
@@ -250,8 +250,11 @@ def run_one(p, T: Tally, today: date):
     T.fit("훅 찌르기 = STAB[고민][약오행]",
           B["STAB"][p["concern"]][f.weak_el] in segs[0]["html"],
           "%s/%s" % (p["concern"], f.weak_el))
-    T.fit("훅 일간 줄 = STAB_GAN[일간]",
-          B["STAB_GAN"][f.day_gan] in segs[0]["html"], f.day_gan)
+    # count_blade replaces the old STAB_GAN prose with a counted day-stem lead.
+    expected_gan = ("<b>%s</b> 일간" % f.day_gan
+                    if bank_mod.count_blade(f, p["concern"])
+                    else B["STAB_GAN"][f.day_gan])
+    T.fit("훅 일간 줄 = 현재 렌더 분기의 일간", expected_gan in segs[0]["html"], f.day_gan)
     T.fit("훅 1단 = MYTH_TG[주도십신][고민]",
           B["MYTH_TG"][f.top_ten_god][p["concern"]] in segs[1]["html"],
           "%s/%s" % (f.top_ten_god, p["concern"]))
@@ -408,20 +411,21 @@ def run_one(p, T: Tally, today: date):
             T.blew("6b 두 번째 리포트", e)
 
     # ── 7 · 스무 사람 종합 ───────────────────────────────
-    T.reached["7 스무 사람 종합"] += 1
-    omni = None
-    try:
-        with T.clock("7 스무 사람 종합"):
-            omni = build_omnibus(f, "sim", p["concern"], p["axis4"], "", ex)
-    except Exception as e:
-        T.blew("7 스무 사람 종합", e)
-        T.stop["종합이 안 나옴"] += 1
-    if omni:
-        T.uniq["종합 전문"][json.dumps(omni, ensure_ascii=False,
-                                    sort_keys=True)] += 1
-        n_read = len(omni.get("chapters") or [])
-        if n_read < 20:
-            T.notes["종합에 스무 명이 다 안 옴 (%d명)" % n_read] += 1
+    if include_omnibus:
+        T.reached["7 스무 사람 종합"] += 1
+        omni = None
+        try:
+            with T.clock("7 스무 사람 종합"):
+                omni = build_omnibus(f, "sim", p["concern"], p["axis4"], "", ex)
+        except Exception as e:
+            T.blew("7 스무 사람 종합", e)
+            T.stop["종합이 안 나옴"] += 1
+        if omni:
+            T.uniq["종합 전문"][json.dumps(omni, ensure_ascii=False,
+                                        sort_keys=True)] += 1
+            n_read = len(omni.get("chapters") or [])
+            if n_read < 20:
+                T.notes["종합에 스무 명이 다 안 옴 (%d명)" % n_read] += 1
 
     # ── 8 · 오늘의 일진 ─────────────────────────────────
     T.reached["8 오늘의 일진"] += 1

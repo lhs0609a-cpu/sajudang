@@ -6,12 +6,12 @@
  * ★ html 은 서버가 렌더한 것입니다. 여기서 문장을 만들지 않습니다.
  * ★ 공감률은 서버가 shown=true 를 줄 때만 그립니다. 100건 미만이면 안 그립니다.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { Say } from "@/components/Narration";
 import CharArt from "@/components/CharArt";
 import { LENS_BY_ID } from "@/lib/lenses";
-import { CONCERNS } from "@/lib/store";
+import { CONCERNS, useSession } from "@/lib/store";
 import { track } from "@/lib/track";
 import type { HookSegment } from "@shared/chart";
 
@@ -82,6 +82,9 @@ export default function HookSegments({
   const [open, setOpen] = useState(1);
   const [replies, setReplies] = useState<Record<number, string>>({});
   const [misses, setMisses] = useState(0);
+  const voted = useRef(new Set<number>());
+  const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {if(advanceTimer.current) clearTimeout(advanceTimer.current);}, []);
 
   /*
    * 몇 단까지 열렸는지 남깁니다. 초반이 어디서 끊기는지 여기가 답합니다.
@@ -107,6 +110,13 @@ export default function HookSegments({
   // Spoken dialogue is reserved for the optional first greeting.
 
   const vote = async (i: number, yes: boolean | null) => {
+    if (voted.current.has(i)) return;
+    voted.current.add(i);
+    const session = useSession.getState();
+    const prev = session.hookReview;
+    const same = prev?.chartId === chartId && prev.concern === concern && prev.lensId === lensId;
+    session.set({ hookReview: { chartId, concern, lensId,
+      answers: { ...(same ? prev.answers : {}), [segments[i].stage]: yes } } });
     track("hook_answer", "a7", { stage: i, yes: yes === null ? 2 : yes ? 1 : 0 });
     const seg = segments[i];
     const say = yes === null
@@ -119,6 +129,11 @@ export default function HookSegments({
       setMisses(n);
       onMiss?.(n);
     }
+    // Recording feedback must not hold the next paragraph behind a slow request.
+    advanceTimer.current = setTimeout(() => {
+      setOpen((n) => Math.max(n, i + 2));
+      if (i + 1 >= segments.length) onDone?.();
+    }, 660);
     try {
       await api.feedback({
         statement_id: seg.statement_id, chart_id: chartId,
@@ -128,10 +143,6 @@ export default function HookSegments({
     } catch {
       /* 기록 실패가 읽기를 막아서는 안 된다 */
     }
-    setTimeout(() => {
-      setOpen((n) => Math.max(n, i + 2));
-      if (i + 1 >= segments.length) onDone?.();
-    }, 660);
   };
 
   const lens = LENS_BY_ID[lensId];
@@ -200,7 +211,7 @@ export default function HookSegments({
                   한 덩이로 읽혀 끝이 무뎌집니다. 그리고 이건 참인
                   말입니다 — 「아니오」 둘이면 2단이 축을 바꿉니다
                   (bank.TURN_AT). 누르는 것이 다음 단을 정하오. */}
-              <p className="sm hookhint">누르는 대로 다음 단이 갈리오.</p>
+              <p className="sm hookhint">응답은 선택이오. 맞지 않는 대목은 따로 짚겠소.</p>
               <div className="vt">
                 <button onClick={() => vote(i, true)}>그렇소</button>
                 <button onClick={() => vote(i, false)}>아니오</button>

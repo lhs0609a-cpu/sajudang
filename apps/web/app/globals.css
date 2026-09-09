@@ -4,3 +4,19 @@
 @import "../styles/overrides.css";
 
 @import "../styles/conversion.css";
+
+/* Reading and purchase hierarchy after the 10,000-journey audit. */
+.reading-title {font-size:clamp(24px,6vw,32px);line-height:1.4;margin-bottom:20px;text-wrap:balance}
+.conversion-status a {color:var(--gold);text-underline-offset:4px}
+.reading-shortcut {margin:16px 0 24px}
+.reading-next {margin:24px 0;padding:20px 0;border-top:1px solid var(--line)}
+.reading-next p,.paid-preview p {line-height:1.75}
+.reading-evidence summary {min-height:48px;display:list-item;padding:12px 0;cursor:pointer}
+.reading-evidence .blk {padding:20px 0}
+.paid-preview {margin:20px 0}
+.paid-preview>div {padding:12px 0;border-top:1px solid var(--line)}
+.paid-preview h3 {font-size:18px;line-height:1.5}
+[data-screen="d1"] .conversion-title {font-size:clamp(24px,6vw,32px);line-height:1.4;text-wrap:balance}
+[data-screen="d1"] .conversion-product {gap:10px;padding:20px;text-align:left}
+.conversion-details summary:focus-visible,.reading-next .btn:focus-visible {outline:2px solid var(--gold);outline-offset:4px}
+@media(max-width:359px){[data-screen="d1"] .conversion-product{padding:16px}[data-screen="d1"] .conversion-intro{padding-top:16px}}

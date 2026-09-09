@@ -30,7 +30,10 @@ async def main(args):
                 if not c:return
                 concern=['money','work','love','people','dir','health'][i%6]
                 r=await post('/v1/report',{'chart_id':c['chart_id'],'lens_id':args.lenses[i%len(args.lenses)],'concern':concern,'tier':'free'})
-                if r and not r.get('practice'):errors['missing_practice']+=1
+                if not r:return
+                if not r.get('practice'):
+                    errors['missing_practice']+=1
+                    return
                 completed+=1
                 if completed%1000==0:print(f'{completed}/{args.users} visits',flush=True)
         await asyncio.gather(*(visit(i) for i in range(args.users)))

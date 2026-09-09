@@ -57,6 +57,7 @@ SCREENS = {
 SERVER_EVENTS = {"payment_approved", "payment_refunded"}
 
 EVENTS = {
+    "entry_context", "hook_skip", "reading_expand", "price_view", "checkout_blocked", "reading_mismatch",
     "experiment_exposed",
     "web_lcp", "web_inp", "web_cls",
     "flow_started", "practice_saved", "chart_completed",
@@ -278,7 +279,24 @@ def funnel() -> dict:
         hook.append({"stage": stage, "shown": sh, "answered": an,
                      "answer_rate": round(100*an/sh,1) if sh else None,
                      "yes_rate": round(100*len(yes[stage])/an,1) if an else None})
+    contexts = {}
+    for at, row in timed:
+        sid = row.get("sid")
+        if row.get("name") == "entry_context" and sid in cohorts and cohorts[sid] <= at <= cohorts[sid] + timedelta(minutes=5):
+            contexts.setdefault(sid, row)
+    segments = []
+    for field, labels in (("n", ["모바일", "태블릿", "데스크톱"]),
+                          ("stage", ["직접·내부", "검색", "소셜", "기타 추천"]),
+                          ("yes", ["신규 브라우저", "재방문 브라우저"])):
+        for value, label in enumerate(labels):
+            members = {sid for sid, row in contexts.items() if row.get(field) == value}
+            mature = {sid for sid in members if now - cohorts[sid] >= timedelta(days=7)}
+            buyers = mature & reached[-1]
+            segments.append({"dimension": field, "label": label, "visitors": len(members),
+                             "mature": len(mature), "buyers": len(buyers),
+                             "conversion": round(100 * len(buyers) / len(mature), 2) if mature else None})
     return {"total_events": len(rows), "sessions": first, "steps": steps, "hook": hook,
+            "segments": segments, "context_missing": len(cohorts) - len(contexts),
             "counts": dict(Counter(r.get("name") for _, r in timed)),
             "screen_totals": {key: len(value) for key,value in seen.items()},
             "version": 2, "cohort_days": 30, "conversion_days": 7,

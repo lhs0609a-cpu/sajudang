@@ -25,6 +25,7 @@ const FLUSH_MS = 4000;
 const MAX_QUEUE = 40;
 
 export type EventName =
+  | "entry_context" | "hook_skip" | "reading_expand" | "price_view" | "checkout_blocked" | "reading_mismatch"
   | "experiment_exposed"
   | "web_lcp" | "web_inp" | "web_cls"
   | "flow_started" | "practice_saved" | "chart_completed"
@@ -80,6 +81,8 @@ let timer: ReturnType<typeof setTimeout> | null = null;
  */
 function isAdmin(): boolean {
   try {
+    if (new URLSearchParams(window.location.search).get("qa") === "1") sessionStorage.setItem("sd.qa", "1");
+    if (sessionStorage.getItem("sd.qa") === "1" || navigator.webdriver) return true;
     const raw = localStorage.getItem("sajudang-session");
     return !!raw && JSON.parse(raw)?.state?.admin === true;
   } catch {
@@ -88,7 +91,7 @@ function isAdmin(): boolean {
 }
 
 function send(batch: Ev[], beacon = false) {
-  if (!batch.length || !API_BASE) return;
+  if (!batch.length || !API_BASE || isAdmin()) return;
   const url = `${API_BASE}/v1/events`;
   const body = JSON.stringify({ events: batch });
   try {
@@ -157,7 +160,18 @@ export function useScreen(screen: string) {
     if (!screen) return;
     t0.current = Date.now();
     track("screen", screen);
-    if (screen === "a1") track("flow_started", screen, { n: 2 });
+    if (screen === "a1") {
+      track("flow_started", screen, { n: 2 });
+      try {
+        if (!isAdmin() && !sessionStorage.getItem("sd.entry-context")) {
+          const host = document.referrer ? new URL(document.referrer).hostname : "";
+          const channel = !host || host === location.hostname ? 0 : /(^|\.)(google\.[a-z.]+|naver\.com|daum\.net|bing\.com)$/.test(host) ? 1 : /(^|\.)(instagram\.com|facebook\.com|t\.co|youtube\.com|kakao\.com)$/.test(host) ? 2 : 3;
+          track("entry_context", screen, {stage:channel,n:innerWidth < 768 ? 0 : innerWidth < 1024 ? 1 : 2,yes:localStorage.getItem("sd.visited") ? 1 : 0});
+          sessionStorage.setItem("sd.entry-context", "1");
+          localStorage.setItem("sd.visited", "1");
+        }
+      } catch { /* No referrer, identity or campaign text is sent. */ }
+    }
     return () => {
       const ms = Date.now() - t0.current;
       if (ms > 250) track("drop_guess", screen, { ms });
