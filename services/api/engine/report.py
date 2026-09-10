@@ -19,6 +19,7 @@ from typing import Optional
 from . import bank as bank_mod
 from . import calendar as cal_mod
 from . import extras as extras_mod
+from . import visual as visual_mod
 from . import guard
 from . import heart as heart_mod
 from . import depth as depth_mod
@@ -1141,6 +1142,14 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         cuts.append(_cut(extra["id"], extra["title"], extra["source"],
                          extra["html"], extra["min_level"],
                          sid=extra["statement_id"]))
+
+    try:
+        scene_cut = visual_mod.scene_cut(lens_id, (extras or {}).get("scene"))
+    except visual_mod.VisualInputError as e:
+        scene_cut, extra_error = None, extra_error or str(e)
+    if scene_cut:
+        cuts.append(_cut(scene_cut["id"], scene_cut["title"], scene_cut["source"],
+                         scene_cut["html"], scene_cut["min_level"], sid=scene_cut["statement_id"]))
 
     # ── 9a-2 · 고민이 묻는 것 ─────────────────────────────
     #

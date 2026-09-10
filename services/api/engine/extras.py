@@ -32,7 +32,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Optional
 
-from . import guard
+from . import guard, visual
 from .bank import element_word, josa
 from .constants import CHUNG, HAP, ten_god
 
@@ -364,6 +364,8 @@ def meet_cut(f, m: dict) -> dict:
 
 
 BUILDERS = {
+    "face": visual.face_cut,
+    "body": visual.body_cut,
     "partner": partner_cut,
     "meet": meet_cut,
     "context": context_cut,
@@ -388,14 +390,18 @@ def build(f, need: Optional[str], extras: Optional[dict]) -> Optional[dict]:
     payload = (extras or {}).get(need)
     if not payload:
         return None
-    return BUILDERS[need](f, payload)
+    try:
+        return BUILDERS[need](f, payload)
+    except visual.VisualInputError as e:
+        raise ExtraInputError(str(e)) from e
 
 
-def choices() -> dict:
+def choices(lens_id: Optional[str] = None) -> dict:
     """화면이 고르게 보여줄 목록. 문장 원문은 내려보내지 않습니다."""
     T = text()
     return {
-        "situation": [{"id": k, "label": v["label"]}
+        **visual.choices(lens_id),
+        "situation": [{"id": k, "label": v["label"], "image": f"/choices/{k}.webp"}
                       for k, v in T["SITUATION"].items()],
         # 만남 — 누구랑 · 어떻게. 자유 입력은 안 받소.
         "meet_who": [{"id": k, "label": v["label"]}
@@ -406,6 +412,6 @@ def choices() -> dict:
                    {"id": "hold", "label": "버티는 중"},
                    {"id": "let", "label": "놓으려는 중"}],
         "blood": ["A", "B", "O", "AB"],
-        "image": [{"id": k, "label": v["label"]} for k, v in T["IMAGE"].items()],
-        "cards": [{"id": k, "label": v["label"]} for k, v in T["CARD"].items()],
+        "image": [{"id": k, "label": v["label"], "image": f"/choices/{k}.webp"} for k, v in T["IMAGE"].items()],
+        "cards": [{"id": k, "label": v["label"], "image": f"/choices/card-{k}.webp"} for k, v in T["CARD"].items()],
     }

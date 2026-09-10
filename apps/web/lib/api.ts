@@ -218,7 +218,8 @@ export const api = {
    * ★ 이 엔드포인트가 있는데 화면이 안 쓰고 있었습니다. 그래서
    *   캐릭터가 입력을 요구하는 51.3%에게 그 컷이 조용히 사라졌습니다.
    */
-  reportChoices: () => call<Record<string, unknown>>("/v1/report/choices"),
+  reportChoices: (lensId?: string) => call<Record<string, unknown>>(
+    "/v1/report/choices" + (lensId ? `?lens_id=${encodeURIComponent(lensId)}` : "")),
 
   relay: (req: {
     chart_id: string; session_id: string;

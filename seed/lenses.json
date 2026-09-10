@@ -194,7 +194,7 @@
   "price": 9900,
   "opening_quote": "글자는 나중에. 얼굴부터 봅시다.",
   "released": true,
-  "input": "photo",
+  "input": "face",
   "specialty": "기색과 자리",
   "topics": "관상 · 지금의 기색",
   "concerns": [
@@ -337,7 +337,7 @@
   "price": 9900,
   "opening_quote": "나는 병을 보지 않소. 기운의 치우침을 보오.",
   "released": true,
-  "input": "context",
+  "input": "body",
   "specialty": "몸과 건강",
   "topics": "몸 · 피로 · 잠",
   "concerns": [

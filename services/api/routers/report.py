@@ -179,13 +179,18 @@ def _mark_opened(session_id: str, tier: str, lens_id: str | None = None) -> None
 
 
 @router.get("/report/choices")
-def get_choices() -> dict:
+def get_choices(lens_id: str | None = None) -> dict:
     """
     추가 입력에서 고를 수 있는 것들. 화면이 목록을 만들 때 씁니다.
 
     ★ 문장 원문은 내려보내지 않습니다 — id 와 라벨만. (docs/02 §7)
     """
-    return extras_mod.choices()
+    if lens_id is not None:
+        try:
+            lens_mod.get(lens_id)
+        except lens_mod.LensError as e:
+            raise HTTPException(status_code=404, detail=str(e))
+    return extras_mod.choices(lens_id)
 
 
 # ══════════════════════════════════════════════════════════

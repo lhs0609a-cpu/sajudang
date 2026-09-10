@@ -18,14 +18,15 @@
  */
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import ChoiceGrid from "./ChoiceGrid";
 
-type Choice = { id: string; label: string };
+type Choice = { id: string; label: string; image?: string };
 type Choices = {
   situation: Choice[];
   stance: Choice[];
   blood: string[];
   image: Choice[];
-  card: Choice[];
+  cards: Choice[];
   /* 만남 — 누구랑 · 어떻게. 자유 입력은 안 받습니다. */
   meet_who: Choice[];
   meet_how: Choice[];
@@ -166,24 +167,16 @@ export default function ExtraAsk({
     ready = !!pick;
     build = () => ({ image: { pick } });
     body = (
-      <div className="og c2">
-        {ch.image.map((x) => (
-          <button key={x.id} className={`op ${pick === x.id ? "on" : ""}`}
-                  onClick={() => setPick(x.id)}>{x.label}</button>
-        ))}
-      </div>
+      <ChoiceGrid label="그림 선택" choices={ch.image} selected={pick ? [pick] : []}
+        onPick={setPick} disabled={busy} />
     );
   } else if (need === "cards") {
     ready = picks.length === 3;
     build = () => ({ cards: { picks } });
     body = (
       <>
-        <div className="og c2">
-          {ch.card.map((x) => (
-            <button key={x.id} className={`op ${picks.includes(x.id) ? "on" : ""}`}
-                    onClick={() => togglePick(x.id)}>{x.label}</button>
-          ))}
-        </div>
+        <ChoiceGrid label="패 석 장 선택" choices={ch.cards} selected={picks}
+          onPick={togglePick} disabled={busy} ordered concealed limit={3} />
         <p className="sm">{picks.length} / 3</p>
       </>
     );
@@ -195,12 +188,8 @@ export default function ExtraAsk({
     });
     body = (
       <>
-        <div className="og c2">
-          {ch.situation.map((x) => (
-            <button key={x.id} className={`op ${pick === x.id ? "on" : ""}`}
-                    onClick={() => setPick(x.id)}>{x.label}</button>
-          ))}
-        </div>
+        <ChoiceGrid label="현재 상황" choices={ch.situation} selected={pick ? [pick] : []}
+          onPick={setPick} disabled={busy} />
         <p className="sm mt">그 자리에서 지금 어찌하고 계시오?</p>
         <div className="og" style={{ gridTemplateColumns: "repeat(3,1fr)" }}>
           {ch.stance.map((x) => (

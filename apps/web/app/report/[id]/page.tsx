@@ -12,6 +12,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
 import Scene from "@/components/scene/Scene";
 import ExtraAsk from "@/components/ExtraAsk";
+import VisualConsultation from "@/components/VisualConsultation";
 import TopicAsk from "@/components/TopicAsk";
 import Reveal from "@/components/Reveal";
 import Fold from "@/components/Fold";
@@ -663,7 +664,13 @@ function ReportInner() {
       {/* ★ 추가 입력이 틀렸을 때. 리포트를 통째로 막지 않습니다 —
           그 컷만 빠지고 무엇이 틀렸는지 말해 줍니다. */}
       {/* ★ 이 캐릭터가 따로 받는 것. 안 물으면 그 컷이 조용히 사라집니다. */}
-      {rep.needs_input && !rep.extra_error && (
+      <VisualConsultation key={lensId + ":visual"} lensId={lensId} busy={asking}
+        locked={["monghwa", "paeseon"].includes(lensId) && rep.locked.some(c => c.id === (lensId === "monghwa" ? "image" : "cards"))}
+        saved={extras} onSubmit={(x) => {
+          setAsking(true);
+          setExtras((prev) => ({ ...(prev || {}), ...x }));
+        }} />
+      {rep.needs_input && !["face", "body", "image", "cards"].includes(rep.needs_input) && !rep.extra_error && (
         <ExtraAsk
           /* ★ 고른 것이 다음 캐릭터로 넘어갔습니다. 갑에게 고른 「A형」이
              남아 있어 을의 그림 물음에서 곧바로 「이걸로 보시오」가 켜지고,
@@ -742,7 +749,7 @@ function ReportInner() {
         */}
         {body.map((c, i) => (
           <Fold key={c.id} className="reading-section" initiallyOpen={i === 0} label={`${i + 1}. ${c.title}`}>
-            <div className={"blk in" + (c.id.startsWith("lc_") ? " own" : "")}>
+            <div id={`reading-${c.id}`} tabIndex={-1} className={"blk in" + (c.id.startsWith("lc_") ? " own" : "")}>
               {/* ★ 끝이 끝으로 읽히게 합니다.
                   closing_cut 의 자리 고정은 이미 돼 있는데, 손님은 그게
                   마지막인 줄 모른 채 지나갑니다. 기억은 마지막이 지배합니다. */}

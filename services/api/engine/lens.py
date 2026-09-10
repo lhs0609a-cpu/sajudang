@@ -174,6 +174,8 @@ def complement(prev_id: Optional[str], cand_id: str) -> float:
 
 # 실제로 리포트에 반영되는 추가 입력. 새로 구현하면 여기 넣으세요.
 IMPLEMENTED_INPUTS = frozenset({
+    "face",        # generated face shapes + explicit feature selection, no photo
+    "body",        # self-reported region and condition, no diagnosis
     "axis4",       # 성향 4글자 — 훅 2.5단 · 리포트 7컷 (engine/bank.axis_compare)
     "birthplace",  # 출생지 — 진태양시 보정 (engine/calendar)
     "blood",       # 혈액형 — 적혈랑        (engine/extras.blood_cut)

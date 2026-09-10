@@ -48,7 +48,7 @@ def f_no_hour():
 # ══════════════════════════════════════════════════════════
 # 배선 — 열둘이 추가 입력 없이 돌던 자리
 # ══════════════════════════════════════════════════════════
-def test_only_the_photo_is_still_missing():
+def test_every_advertised_input_is_implemented():
     """
     얼굴 사진 말고는 전부 붙었는가.
 
@@ -56,7 +56,7 @@ def test_only_the_photo_is_still_missing():
       그래서 캐릭터를 바꿔 또 사도 순서만 바뀐 같은 리포트였습니다.
     """
     missing = lens_mod.missing_inputs()
-    assert {m["input"] for m in missing} == {"photo"}, missing
+    assert missing == [], missing
 
 
 def test_photo_is_blocked_for_a_reason_not_forgotten():
