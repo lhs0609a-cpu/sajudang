@@ -475,7 +475,9 @@ function EntryInner() {
             <h1 className="conversion-title">자꾸 같은 곳에서<br />마음이 걸리오?</h1>
             <p className="conversion-lead">잘 버텨온 힘이, 다른 자리에서는<br />나를 지치게 할 수도 있소.<br />그 갈림길을 사주로 함께 읽어보겠소.</p>
             <button className="btn mt" onClick={() => { s.set({cur:"pungun"}); go("a5"); }}>내 고민으로 무료 해석 보기</button>
-            <p className="conversion-note">{entryArm === 1 ? "무료 해석과 오늘 해볼 행동 하나 · 시간은 몰라도 되오" : "첫 해석 무료 · 태어난 시간은 몰라도 되오"}</p>
+            {entryArm === 1
+              ? <p className="conversion-note">무료 해석과 오늘 해볼 행동 하나 · 시간은&nbsp;몰라도&nbsp;되오</p>
+              : <p className="conversion-note">첫 해석 무료 · 태어난 시간은 몰라도 되오</p>}
             <GuideIntro />
             <CompanionCat state="welcome" message="안내묘 하묘당! 네 곁에 꼭 붙어 있을게냥." />
           </div>
@@ -622,10 +624,12 @@ function EntryInner() {
       {s.features && <>
         <p className="conversion-kicker">명식 계산 완료</p>
         <h1 className="conversion-title">이제, 지금의 고민과<br />함께 읽어보겠소.</h1>
-        <p className="conversion-note">{s.features.hour_known ? "태어난 시간까지 네 기둥을 계산했소." : "태어난 시간을 몰라 시주를 제외한 세 기둥으로 읽소."}</p>
+        {s.features.hour_known
+          ? <p className="conversion-note">태어난 시간까지 네 기둥을 계산했소.</p>
+          : <p className="conversion-note">태어난 시간을 몰라 시주를 제외한 세&nbsp;기둥으로&nbsp;읽소.</p>}
         <p className="conversion-note">다음은 {lens.name}의 첫 해석이오. 입력한 고민을 바탕으로 다섯 가지 질문을 차례로 살펴보오.</p>
         <Pillars f={s.features} />
-        <p className="conversion-note">명식은 태어난 해·달·날·시간을 각각 두 글자로 옮긴 것이오.<br />모르는 시간의 두 글자는 비워 두오.</p>
+        <p className="conversion-note">명식은 태어난 해·달·날·시간을 각각<br />두 글자로 옮긴 것이오.<br />모르는 시간의 두 글자는 비워 두오.</p>
         <button className="btn mt" onClick={() => go("a7")}>내 고민의 무료 해석 읽기</button>
         <details className="conversion-details"><summary>계산 근거와 보정 내역 보기</summary>
           <ManseTable f={s.features} /><CalcPanel f={s.features} />

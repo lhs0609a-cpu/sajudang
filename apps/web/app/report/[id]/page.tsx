@@ -17,6 +17,8 @@ import TopicAsk from "@/components/TopicAsk";
 import Reveal from "@/components/Reveal";
 import Fold from "@/components/Fold";
 import ReadingGuide from '@/components/ReadingGuide';
+import ReadingAnalysis from '@/components/ReadingAnalysis';
+import Link from 'next/link';
 import ScrollHint from "@/components/ScrollHint";
 import SinsalSlots from "@/components/SinsalSlots";
 import Thinking from "@/components/Thinking";
@@ -116,9 +118,10 @@ function ReportInner() {
    *   그리는 중에 바로 지웁니다(리액트가 권하는 자리). 효과로 지우면
    *   앞사람 것으로 한 번 부르고 다시 부릅니다.
    */
-  const [seenLens, setSeenLens] = useState(lensId);
-  if (seenLens !== lensId) {
-    setSeenLens(lensId);
+  const readingIdentity = `${lensId}:${s.chartId}:${s.concern}`;
+  const [seenLens, setSeenLens] = useState(readingIdentity);
+  if (seenLens !== readingIdentity) {
+    setSeenLens(readingIdentity);
     setExtras(null);
     setAsking(false);
     setErr(null);
@@ -208,6 +211,7 @@ function ReportInner() {
   useEffect(() => {
     if (!s.chartId) return;
     let alive = true;
+    setErr(null);
     api.report({
       chart_id: s.chartId, lens_id: lensId, tier: s.tier,
       session_id: s.sessionId, concern: s.concern, axis4: s.axis4,
@@ -317,7 +321,8 @@ function ReportInner() {
   if (tab === "c1") {
     return (
       <Shell screen="c1" title={`${rep.lens.name} · 표지`}>
-        {rep.editorial && <ReadingGuide guide={rep.editorial} />}
+        {rep.reading ? <ReadingAnalysis reading={rep.reading} preview /> : rep.editorial && <ReadingGuide guide={rep.editorial} />}
+        {["all", "sub"].includes(rep.tier) && <Link className="btn" href="/omnibus">전체 풀이 한 권으로 읽기</Link>}
         <Scene id="scroll" className="hero" />
         <div style={{ textAlign: "center" }}>
           <p style={{ fontFamily: "var(--serif)", fontSize: 24, color: lens?.color ?? "var(--c)" }}>
@@ -650,7 +655,11 @@ function ReportInner() {
           훅에서 이미 단계 감각을 만들어 놨으니 결이 맞습니다.
       */}
       <ScrollProgress />
-      {rep.editorial && <ReadingGuide guide={rep.editorial} />}
+      {rep.reading ? <ReadingAnalysis reading={rep.reading} busy={asking} onSubmit={x => {
+        setAsking(true);
+        setExtras(prev => ({ ...(prev || {}), ...x }));
+      }} /> : rep.editorial && <ReadingGuide guide={rep.editorial} />}
+      {["all", "sub"].includes(rep.tier) && <Link className="btn" href="/omnibus">다른 영역까지 전체 풀이로 읽기</Link>}
       {/* ★ 낡은 종이(oldpaper)를 깔고 있었습니다 (2026-09-06). 아래 글은
           「두루마리 끈을 풀었다 · 종이가 무릎까지」인데 영상에는 두루마리도
           끈도 무릎도 없었소 — 손님이 짚은 자리입니다. */}

@@ -246,7 +246,7 @@ def post_omnibus(req: OmnibusRequest) -> dict:
     f = Features(**raw)
     try:
         data = build_omnibus(f, req.chart_id, req.concern,
-                             req.axis4, req.display_name, req.extras)
+                             req.axis4, req.display_name, req.extras, tier=tier)
     except extras_mod.ExtraInputError as e:
         raise HTTPException(status_code=422, detail=str(e))
     except (ValueError, KeyError) as e:

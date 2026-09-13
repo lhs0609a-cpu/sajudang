@@ -43,7 +43,8 @@ def load_features(chart_id: str) -> dict:
             store.get_json("chartdate:" + chart_id) != today().isoformat()):
         raise HTTPException(status_code=409, detail="오늘 기준으로 명식을 갱신해야 하오.",
                             headers={"X-Chart-Rebuild": "1"})
-    return f
+    # The cache date is already checked above; reuse it for older snapshots.
+    return {**f, "as_of": f.get("as_of") or store.get_json("chartdate:" + chart_id)}
 
 
 @router.get("/chart/{chart_id}", response_model=ChartResponse)
@@ -206,7 +207,9 @@ def post_chart(req: ChartRequest) -> ChartResponse:
     #   그대로 두오 — 바꾸면 이미 치른 주문과 리포트가 딴 명식을
     #   가리키오.
     if cached is not None and (store.get_json(_k_ver(key)) != ENGINE_VER or
-                              store.get_json("chartdate:" + key) != now.isoformat()):
+                              store.get_json("chartdate:" + key) != now.isoformat() or
+                              not cached.get("as_of") or
+                              (not req.hour_known and not cached.get("hour_sensitivity"))):
         cached = None
     if cached is not None:
         return ChartResponse(chart_id=key, features=cached, cached=True,
@@ -224,6 +227,9 @@ def post_chart(req: ChartRequest) -> ChartResponse:
         raise HTTPException(status_code=400, detail=str(e))
 
     features = build_features(chart, as_of=now).to_dict()
+    if not req.hour_known:
+        from engine.hour_sensitivity import compare
+        features["hour_sensitivity"] = compare(req.year, req.month, req.day, req.sex, req.birth_city)
     # 같은 입력이면 같은 결과라 캐시합니다. 다만 **무기한은 아닙니다** —
     # 다시 세우는 데 0.2ms 밖에 안 드는데 한 벌이 5KB 라, 만기를 안 주면
     # 저장소가 줄어들 힘이 하나도 없습니다. 만료돼도 다음 요청에 다시

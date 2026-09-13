@@ -82,6 +82,9 @@ class Features:
 
     # ── 투명성 ──
     correction: dict
+    # Optional for stored feature snapshots created before interpretation v1.
+    as_of: str = ""
+    hour_sensitivity: dict = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -294,6 +297,7 @@ def build_features(chart: Chart, as_of: Optional[date] = None) -> Features:
         gongmang=sinsal_mod.gongmang(day_gan, day_ji),
         helpers=[], ancestor={}, palaces=sinsal_mod.palaces(chart),
         correction=_correction_dict(chart),
+        as_of=as_of.isoformat(),
     )
     # 조상 해석은 용신을 쓰므로 Features 가 다 채워진 뒤에 붙인다
     feats.helpers = sinsal_mod.helpers(chart, feats)

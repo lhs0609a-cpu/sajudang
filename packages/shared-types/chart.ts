@@ -293,6 +293,7 @@ export interface WantRow {
 }
 
 export interface ReportResponse {
+  reading?: IntegratedReading | null;
   editorial?: { id:string;version:number;title:string;perspective:string;observation:string;question:string;scene:string;action:string;boundary:string;source_kind:string } | null;
   practice?: { id: string; version: number; source_kind: string; source: string; title: string; scene: string; action: string } | null;
   report_id: string;
@@ -345,6 +346,47 @@ export interface ReportResponse {
    *   거짓이면 페이월도, 목패로 가는 버튼도 그리지 않습니다.
    */
   sells: boolean;
+}
+
+export interface ReadingSection {
+  id: string;
+  title: string;
+  html: string;
+  status?: string;
+}
+
+export interface ConsultationSpec {
+  concern: string;
+  title: string;
+  note: string;
+  answers: Record<string, string>;
+  questions: { id: string; question: string; reason: string; options: { id: string; label: string }[] }[];
+}
+
+export interface IntegratedReading {
+  version: number;
+  fingerprint: string;
+  basis: string;
+  headline: string;
+  summary: ReadingSection[];
+  sections: ReadingSection[];
+  consultation: ConsultationSpec;
+  scope: string;
+  as_of: string;
+  boundary: string;
+  input_error: string | null;
+  empty_reason: string | null;
+}
+
+export interface OmnibusResponse {
+  chart_id: string;
+  tier: string;
+  concern: string;
+  reading: IntegratedReading;
+  head: { title: string; subtitle: string; headline: string; lens_count: number; hour_known: boolean; pillars: { label: string; gz: string }[] };
+  consensus: { html: string; unit: string; counts: { cut: string; label: string; n: number; of: number }[] };
+  split: { html: string };
+  chapters: { lens_id: string; name: string; archetype: string; needs_input: string | null; cuts: ReportCut[] }[];
 }
 
 /* ── 릴레이 ─────────────────────────────────────────────── */

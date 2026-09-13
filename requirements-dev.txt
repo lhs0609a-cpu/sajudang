@@ -26,3 +26,6 @@ Pillow>=10.0
 #   도구가 재서 seed/ambience.json 에 적어 두고, 검사는 그 기록이
 #   지금 파일 그대로인지만 봅니다. 이 저장소는 skip 0 입니다.
 numpy>=1.26
+
+# Local browser checks use installed Edge; no production API or payment calls.
+playwright>=1.50,<2

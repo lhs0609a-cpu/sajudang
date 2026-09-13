@@ -111,6 +111,9 @@ type WorthAxis = {
   score: number; parts?: WorthPart[]; why?: string; source?: string;
 };
 type Worth = {
+  interpretation_checks?: { cases: number; reports: number; claims: number; empty_reports: number; passed: boolean;
+    rejection_checks: number; rejection_passed: number; rules_covered: string[]; rules_total: number;
+    errors: { case: string; error: string }[]; note: string };
   at: string;
   total: number;
   /** 돈 번 느낌 · 안 아깝다 · 돈값은 한다 · 아깝다 · 못 판다 */
@@ -476,6 +479,15 @@ export default function AdminPage() {
             물건의 상태**라, 주인이 열자마자 봐야 하는 것이 이쪽입니다. */}
       {worth && (
         <section>
+          {worth.interpretation_checks && <div className="conversion-card">
+            <h2>해석 근거·답변 반영 검사</h2>
+            <p>{worth.interpretation_checks.passed ? "자동 검사 통과" : "검토가 필요한 항목 있음"} · 합성 명식 {worth.interpretation_checks.cases}건 / 풀이 {worth.interpretation_checks.reports}건</p>
+            <p>근거를 연결한 결론 {worth.interpretation_checks.claims}개 · 사용된 관계 규칙 {worth.interpretation_checks.rules_covered.length}/{worth.interpretation_checks.rules_total}</p>
+            <p>핵심 가설을 선택하지 못한 풀이 {worth.interpretation_checks.empty_reports}건 · 규칙과 실제 사례를 더 검토할 대상입니다.</p>
+            <p>경험과 다른 결론 제외 {worth.interpretation_checks.rejection_passed}/{worth.interpretation_checks.rejection_checks}</p>
+            <p className="sm">{worth.interpretation_checks.note}</p>
+            {worth.interpretation_checks.errors.map((error, index) => <p key={index}>{error.case} · {error.error}</p>)}
+          </div>}
           <h2>자동 문장 검사 · v2</h2>
           <p className="sm">문장 중복·출처 표기·분량을 검사하는 내부 지표이오. 실제 고객 만족도, 사주 정확도, 결제율을 뜻하지 않소.</p>
           <p className="sm">문장 표본: 고정 명식 6개 × 고민 6개, 월하 렌즈. 가격·분량 축은 같은 명식의 유료 캐릭터를 비교하오. 전체 사용자나 모든 해석의 품질을 대표하지 않소.</p>

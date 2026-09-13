@@ -98,6 +98,24 @@ def strip_tags(s: str) -> str:
     return s.strip()
 
 
+def _branches(seg: str) -> list:
+    """
+    `{a ? "갑" : "을"}` 은 화면에 **둘 중 하나**만 나갑니다.
+
+    strip_tags 는 식 안의 글을 이어 붙이니, 갈래가 있으면 갈래마다
+    따로 셉니다. 이어 붙이면 한 번도 안 나가는 긴 문단이 생겨 없는
+    과부를 짚습니다.
+    """
+    m = re.search(r"\{([^{}]*\?[^{}]*:[^{}]*)\}", seg)
+    if m:
+        lits = [g for g in re.findall(r"[`\"']([^`\"']*)[`\"']", m.group(1))
+                if re.search("[가-힣]", g)]
+        if len(lits) >= 2:
+            return [t for lit in lits
+                    for t in _branches(seg[:m.start()] + lit + seg[m.end():])]
+    return [strip_tags(seg)]
+
+
 def harvest():
     """화면에 나가는 한글 글줄을 뽑습니다."""
     out = []
@@ -133,11 +151,15 @@ def harvest():
                 out.append((rel, code.count(chr(10), 0, m.start()) + 1, "btn", t))
 
         # 그 밖의 문단 — 안내·경고·풀이
-        for m in re.finditer(r"<p(?![^>]*className=\"sm)[^>]*>(.{8,400}?)</p>",
+        # ★ `<p` 뒤에 공백이나 `>` 가 와야 문단입니다. 안 그러면 SVG 의
+        #   `<path` 에 걸려 그림 뒤의 글까지 한 덩이로 셉니다.
+        for m in re.finditer(r"<p(?=[\s>])(?![^>]*className=\"sm)[^>]*>(.{8,400}?)</p>",
                              code, re.S):
-            t = strip_tags(m.group(1))
-            if len(t) >= 8 and re.search("[가-힣]", t):
-                out.append((rel, code.count(chr(10), 0, m.start()) + 1, "nr", t))
+            line = code.count(chr(10), 0, m.start()) + 1
+            for seg in re.split(r"<br\s*/?>", m.group(1)):
+                for t in _branches(seg):
+                    if len(t) >= 8 and re.search("[가-힣]", t):
+                        out.append((rel, line, "nr", t))
 
         # <Say> 와 <p className="sm"> 안의 글
         for rx, kind in ((r"<Say[^>]*>\s*([^<{][^<]{7,})<", "say"),

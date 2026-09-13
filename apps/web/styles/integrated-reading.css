@@ -1,0 +1,29 @@
+.integrated-reading {margin:24px 0 36px;overflow-wrap:anywhere}
+.reading-plan-head {padding:24px 0 16px;border-bottom:1px solid var(--line)}
+.reading-plan-head h2 {font-size:clamp(23px,5.8vw,30px);line-height:1.5;text-wrap:balance}
+.reading-conclusions article {padding:24px 0;border-bottom:1px solid var(--line)}
+.reading-conclusions h3,.reading-plan-section h2 {font-size:21px;line-height:1.6;margin:8px 0 16px}
+.integrated-reading p {line-height:1.85;margin:12px 0}
+.integrated-reading .reading-thesis {font-size:18px}
+.integrated-reading .reading-origin {font-size:13px;color:var(--gold)}
+.integrated-reading .reading-action {padding:16px;border-left:3px solid var(--gold);background:rgba(167,130,64,.06)}
+.integrated-reading details {margin:18px 0;border:1px solid var(--line);padding:0 16px}
+.integrated-reading summary {padding:16px 0;min-height:48px;cursor:pointer;line-height:1.6}
+.integrated-reading summary:focus-visible,.reading-plan-nav a:focus-visible {outline:2px solid var(--gold);outline-offset:4px}
+.reading-plan-section {padding:26px 0;border-top:1px solid var(--line);scroll-margin-top:80px}
+.reading-plan-section h3 {font-size:17px;line-height:1.6;margin-top:24px}
+.reading-plan-nav {display:flex;flex-wrap:wrap;gap:8px;margin:24px 0}
+.reading-plan-nav a {padding:12px;border:1px solid var(--line);font-size:14px;line-height:1.5;text-decoration:none;color:inherit}
+.reading-consultation fieldset {border:0;padding:12px 0 20px;min-width:0}
+.reading-consultation legend {font-size:17px;line-height:1.6;font-weight:600}
+.reading-options {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.reading-options label {display:flex;align-items:flex-start;gap:8px;min-height:48px;padding:12px;border:1px solid var(--line);cursor:pointer;line-height:1.6;font-size:14px}
+.reading-options label.chosen {border-color:var(--gold);background:rgba(167,130,64,.09)}
+.reading-options input {margin-top:5px;accent-color:var(--gold);flex-shrink:0}
+.reading-consultation .btn {margin:8px 0 16px}
+.reading-book-appendix {margin:32px 0}
+.reading-book-appendix>details {border-top:1px solid var(--line);padding:14px 0}
+.reading-book-appendix summary {cursor:pointer;min-height:48px;line-height:1.7}
+.reading-book-appendix .cutbody {line-height:1.85}
+@media(max-width:359px){.reading-options{grid-template-columns:1fr}.reading-plan-head h2{font-size:23px}}
+@media print{.reading-plan-nav{display:none}.reading-plan-section,.reading-conclusions article{break-inside:avoid}.integrated-reading details{border:0;padding:0}}

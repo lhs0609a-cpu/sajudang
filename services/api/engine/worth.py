@@ -440,7 +440,9 @@ def score() -> dict:
     total = int(round(total))
     grade, say = next((g, s) for cut, g, s in GRADE if total >= cut)
     weak = sorted(axes.items(), key=lambda kv: kv[1]["score"])[:2]
+    from .reading_quality import measure
     return {
+        "interpretation_checks": measure(),
         "at": datetime.now().isoformat(timespec="seconds"),
         "total": total,
         "version": 2,

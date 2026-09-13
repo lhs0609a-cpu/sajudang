@@ -6,7 +6,7 @@
  */
 import type {
   ChartRequest, ChartResponse, DailyResponse, Features,
-  HookResponse, RelayResponse, ReportResponse, Shared, Summary,
+  HookResponse, RelayResponse, ReportResponse, Shared, Summary, OmnibusResponse,
 } from "@shared/chart";
 
 const BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
@@ -220,6 +220,12 @@ export const api = {
    */
   reportChoices: (lensId?: string) => call<Record<string, unknown>>(
     "/v1/report/choices" + (lensId ? `?lens_id=${encodeURIComponent(lensId)}` : "")),
+
+  omnibus: (req: {
+    chart_id: string; session_id: string; concern: string;
+    axis4?: string | null; display_name?: string;
+    extras?: Record<string, unknown> | null;
+  }) => post<OmnibusResponse>("/v1/omnibus", req),
 
   relay: (req: {
     chart_id: string; session_id: string;

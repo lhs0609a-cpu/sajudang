@@ -1685,10 +1685,14 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
 
     from engine.practice import build as build_practice
     from engine.editorial import build as build_editorial
-    editorial = build_editorial(f, lens_id, concern)
+    from . import interpretation
+    plan = interpretation.build_plan(f, concern, extras)
+    reading = interpretation.render(plan, f, tier)
+    editorial = build_editorial(f, lens_id, concern, plan=plan)
     if editorial:
         view = {**view, "open": editorial["question"], "close": editorial["action"]}
     return {
+        "reading": reading,
         "editorial": editorial,
         "practice": build_practice(concern),
         "report_id": report_id(chart_id, lens_id, tier, concern),

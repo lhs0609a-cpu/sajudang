@@ -1,34 +1,14 @@
 """
-스무 사람 종합 — 한 명식을 스무 명이 각자 본 것을 한 권으로 묶는다.
+종합 해석을 먼저 편집하고 캐릭터별 관점을 부록으로 붙인다.
 
-왜 이게 있어야 하는가
-    이 서비스의 한 줄은 "스무 명의 캐릭터가 같은 사주를 각자의 관점으로
-    해석" 입니다. 그런데 사람은 한 자리에서 한 명씩만 만납니다. 스무 명을
-    다 만나려면 릴레이를 열 번 넘게 돌아야 하고, 브레이크가 그걸 막습니다
-    (세션당 2명). 그래서 **스무 관점을 한 번에 받아 보는 자리**가 필요합니다.
-
-    이게 "여덟 글자 전부" 티어의 실체입니다. 컷 몇 개 더 여는 게 아니라
-    스무 사람의 눈을 다 받는 것입니다.
-
-무엇을 담는가
-    ① 여덟 글자와 셈에 쓴 것            — 근거. 이게 먼저입니다.
-    ② 스무 사람이 **한 목소리로** 짚는 것  — 겹치는 자리
-    ③ 스무 사람이 **갈리는 자리**         — 안 겹치는 자리
-    ④ 스무 사람 각각의 장                — 한 명씩, 제 관점으로
-    ⑤ 안 한 말                        — 셈으로 알 수 없는 것
-
-★ ②·③ 이 핵심입니다.
-    스무 명이 다 같은 말을 하면 그건 그냥 한 명입니다. 겹치는 자리와
-    갈리는 자리를 **세어서 보여주는 것**이 스무 명을 만나는 값입니다.
-    "여덟 명이 같은 자리를 짚었다" 는 사실은 지어낸 게 아니라 센 것입니다.
-
-★ 적중률이 아닙니다.
-    "몇 명이 같은 자리를 짚었다" 는 우리 문장 뱅크 안에서의 겹침이지
-    맞았다는 뜻이 아닙니다. 그렇게 읽히지 않게 문구를 답니다.
+reading: 근거를 연결한 핵심 결론, 선택 비교, 시기, 영역별 적용, 재점검.
+consensus/split: 같은 관계 규칙이 선택된 영역 수. 캐릭터의 순서나
+독립된 전문가들의 합의를 세는 것이 아니다. 키는 이전 API와 호환된다.
+chapters: 중복되는 공통 컷을 제외한 캐릭터별 관점과 추가 입력.
+권한은 라우터가 확인하며 구독의 깊이는 기존 sub 층을 따른다.
 """
 from __future__ import annotations
 
-import re
 from collections import Counter
 from typing import Optional
 
@@ -36,6 +16,7 @@ from . import guard
 from . import lens as lens_mod
 from . import report as report_mod
 from . import summary as summary_mod
+from . import interpretation
 
 # 겹침을 셀 때 쓰는 자리. 컷 id 를 사람 말로 옮긴 것.
 CUT_LABEL = {
@@ -53,35 +34,33 @@ CUT_LABEL = {
 }
 
 
-def _plain(html: str) -> str:
-    return re.sub(r"\s+", " ", re.sub("<[^>]+>", " ", html or "")).strip()
-
-
 def build_omnibus(f, chart_id: str, concern: str = "love",
                   axis4: Optional[str] = None,
                   display_name: str = "",
-                  extras: Optional[dict] = None) -> dict:
+                  extras: Optional[dict] = None, tier: str = "all") -> dict:
     """
-    스무 사람 종합. tier="all" 로 뽑습니다 — 이걸 받는 사람은 이미
-    값을 치른 사람입니다.
+    라우터에서 확인한 tier로 읽을 수 있는 범위만 조립합니다.
 
     extras 를 주면 그걸 받는 캐릭터의 장이 그만큼 두꺼워집니다.
     안 줘도 됩니다 — 그 장은 추가 입력 없이 쓰이고, `needs_input` 이
     무엇을 더 주면 되는지 알려 줍니다.
     """
     lenses = [l for l in lens_mod.all_lenses() if l.get("released")]
+    plan = interpretation.build_plan(f, concern, extras)
+    reading = interpretation.render(plan, f, tier, comprehensive=True)
 
     chapters = []
     lead_count = Counter()
     for l in lenses:
-        r = report_mod.build_report(f, chart_id, l["id"], "all", concern,
-                                    axis4, extras)
+        r = report_mod.build_report(f, chart_id, l["id"], tier, concern,
+                                    axis4, extras, display_name)
         view = lens_mod.view(l["id"])
 
         # 명식 컷은 장마다 되풀이할 필요가 없습니다. 앞에 한 번 나옵니다.
-        cuts = [c for c in r["cuts"] if c["id"] != "chart"]
-        if cuts:
-            lead_count[cuts[0]["id"]] += 1
+        # Shared natal material is explained once in the integrated reading.
+        # The appendix contains only the character's own perspective/input.
+        cuts = [c for c in r["cuts"] if c["id"].startswith("lc_") or
+                c["id"] in ("partner", "context", "blood", "image", "cards", "meet", "face", "body")]
 
         chapters.append({
             "lens_id": l["id"],
@@ -101,40 +80,43 @@ def build_omnibus(f, chart_id: str, concern: str = "love",
 
     # ── ② 한 목소리로 짚는 것 ──────────────────────────────
     #
-    # 몇 명이 그 자리를 **맨 앞에** 놓았는가로 셉니다. 컷이 있고 없고가
-    # 아니라 무엇을 먼저 보았는가라야 뜻이 있습니다.
-    agreed = [
-        {"cut": cid, "label": CUT_LABEL.get(cid, cid), "n": n,
-         "of": len(lenses)}
-        for cid, n in lead_count.most_common()
-    ]
+    # 같은 주장이 연결되는 영역을 센다. 캐릭터 순서와 무관하다.
+    # Count the same semantic claim across domains, never character ordering.
+    rejected = {c["id"] for c in plan["rejected"]}
+    domain_plans = [plan if key == concern else interpretation.build_plan(f, key)
+                    for key in interpretation.content()["domains"]]
+    claim_labels = {}
+    for domain in domain_plans:
+        for claim in domain["selected"]:
+            if claim["id"] not in rejected:
+                lead_count[claim["id"]] += 1
+                claim_labels[claim["id"]] = claim["title"]
+    agreed = [{"cut": cid, "label": claim_labels[cid], "n": n, "of": len(domain_plans)}
+              for cid, n in lead_count.most_common()]
 
     top = agreed[0] if agreed else None
     consensus_html = ""
     if top and top["n"] >= 2:
         consensus_html = (
-            '<p class="tale">스무 사람 중 <b>%d 사람</b>이 이 명식에서 '
-            '<b>%s</b>부터 보았소.</p>'
-            '<p class="sm">같은 자리를 여럿이 먼저 본다는 것은, 그 자리가 '
-            '이 여덟 글자에서 가장 눈에 띈다는 뜻이오. '
-            '맞았다는 뜻이 아니라 <b>도드라진다</b>는 뜻이오.</p>'
+            '<p class="tale"><b>%d개 영역</b>에서 함께 살펴볼 관계는 '
+            '<b>%s</b>입니다.</p>'
+            '<p class="sm">같은 명식과 규칙에서 나온 해석을 영역별로 연결한 것입니다. '
+            '독립된 전문가들의 합의나 예측의 확률을 뜻하지 않습니다.</p>'
             % (top["n"], top["label"])
         )
     else:
         consensus_html = (
-            '<p class="tale">스무 사람이 저마다 다른 자리부터 보았소.</p>'
-            '<p class="sm">한 자리로 모이지 않는 명식이오. '
-            '치우친 데가 뚜렷하지 않다는 뜻이기도 하오.</p>'
+            '<p class="tale">각 영역에서 확인할 관계를 따로 정리했습니다.</p>'
+            '<p class="sm">여러 영역에 반복되는 해석이 적다는 이유로 명식의 성향을 단정하지 않습니다.</p>'
         )
 
     # ── ③ 갈리는 자리 ────────────────────────────────────
     split = [a for a in agreed if a["n"] == 1]
     split_html = (
         '<p class="tale">%s</p>'
-        '<p class="sm">한 사람만 먼저 본 자리요. 남들이 안 보는 것을 '
-        '본 사람이 있다는 것이지, 그 사람이 틀렸다는 뜻은 아니오.</p>'
+        '<p class="sm">한 영역에서 우선 선택된 해석입니다. 다른 영역의 결론과 서로 반대라는 뜻은 아닙니다.</p>'
         % (" · ".join("<b>%s</b>" % a["label"] for a in split)
-           if split else "갈리는 자리는 없었소.")
+           if split else "한 영역에만 우선 선택된 해석은 없습니다.")
     )
 
     # ── 머리 ────────────────────────────────────────────
@@ -153,6 +135,8 @@ def build_omnibus(f, chart_id: str, concern: str = "love",
     }
 
     return {
+        "reading": reading,
+        "tier": tier,
         "chart_id": chart_id,
         "concern": concern,
         "head": head,
@@ -160,6 +144,7 @@ def build_omnibus(f, chart_id: str, concern: str = "love",
         "consensus": {
             "html": guard.enforce(consensus_html, {"omnibus": "consensus"}),
             "counts": agreed,
+            "unit": "영역",
         },
         "split": {"html": guard.enforce(split_html, {"omnibus": "split"})},
         "chapters": chapters,

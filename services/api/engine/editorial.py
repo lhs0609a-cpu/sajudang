@@ -6,6 +6,18 @@ It never turns a birth configuration into proof of a person's behaviour.
 from . import guard, lens_cuts, lens, voice
 from .editorial_questions import question as concern_question
 
+
+def _plan_voice(text, tone):
+    """Normalize the reviewed modern plan endings before the existing voice pass.
+
+    Integrated prose stays in plain Korean. Only character dialogue uses the
+    bank's canonical 하오체 and the established per-character transformation.
+    """
+    text = text.replace('보세요.', '보시오.').replace('살펴봅니다.', '살펴보오.')
+    if text.endswith('나요?'):
+        text = text[:-3] + '소?'
+    return voice.speak(text, tone)
+
 VERSION=2
 # axis, perspective, falsifiable question, small action
 ROLES={
@@ -39,18 +51,33 @@ CONCERNS={
  'health':('생활 리듬','하루를 마치는 시간의 습관','마칠 일·미룰 일·쉬기 시작할 시각'),
 }
 
-def build(f,lens_id,concern):
+def build(f,lens_id,concern,plan=None):
     if lens_id not in ROLES or concern not in CONCERNS:return None
     axis,perspective,question,action=ROLES[lens_id]
     tone = (lens.view(lens_id) or {}).get('voice')
     question = voice.speak(concern_question(lens_id, concern), tone)
     action = voice.speak(action, tone)
     value=lens_cuts.axis_value(f,axis,concern)
+    observation=lens_cuts._counted(f,[axis])
     label,scene,record=CONCERNS[concern]
+    # The report passes its shared plan; standalone editorial clients retain v2.
+    if plan is not None:
+        from .interpretation import next_action
+        selected = plan['selected']
+        if selected:
+            first = selected[0]
+            question = _plan_voice(first['question'], tone)
+            action = _plan_voice(next_action(plan), tone)
+            perspective = first['title']
+            observation = ' · '.join(plan['facts'][ref]['label'] for ref in first['evidence_ids'])
+        else:
+            question = _plan_voice('어떤 상황에서 이 고민이 가장 크게 느껴지는지 먼저 살펴보세요.', tone)
+            action = _plan_voice(next_action(plan), tone)
+        value = plan['fingerprint']
     return {'version':VERSION,'id':f'editorial:{VERSION}:{lens_id}:{concern}:{value}',
         'title':f'{label}, 이번 해석에서 확인할 것',
         'perspective':guard.enforce(perspective),
-        'observation':guard.enforce(lens_cuts._counted(f,[axis])),
+        'observation':guard.enforce(observation),
         'question':guard.enforce(question),
         'scene':guard.enforce(f'{scene} 하나를 떠올리시오. {record} — 이 셋을 나눠 보시오.'),
         'action':guard.enforce(action),
