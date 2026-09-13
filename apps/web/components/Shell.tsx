@@ -132,6 +132,8 @@ import { LENS_BY_ID } from "@/lib/lenses";
 import { api, apiMisconfigured } from "@/lib/api";
 import SoundToggle from "@/components/SoundToggle";
 import DevRail from "@/components/DevRail";
+import ReadingControls from "./ReadingControls";
+import PageFeedback from "./PageFeedback";
 
 export const LEGAL = [
   "본 서비스는 전통 명리학 해석에 기반한 자기이해·오락 목적 콘텐츠이오.",
@@ -462,6 +464,7 @@ export default function Shell({
     //   없어, 손님이 「차례대로 안 뜬다」 고 한 것도 실은 이 자리였습니다.
     if (["a3", "a4", "a5", "d1", "d1b", "d2"].includes(screen ?? "")
         || window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        || document.documentElement.dataset.readingMode === 'instant'
         || (!admin && seenBefore(screen))) {
       revealAll();
       return;
@@ -699,8 +702,10 @@ export default function Shell({
           </div>
         )}
         <div className="scr" ref={scrRef}>
+          <ReadingControls reveal={revealAll} />
           {!bare && <FolioLabel screen={screen} title={title} />}
           {children}
+          <PageFeedback key={screen || title} screen={screen} />
           {legal && <Legal />}
           {/* 처마는 어느 화면에나 섭니다 — 대문(bare)만 빼고.
               대문은 첫 3초를 파는 자리라 아래 띠가 시선을 나눕니다. */}

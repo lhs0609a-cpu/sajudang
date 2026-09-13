@@ -1679,6 +1679,10 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
 
     from .reading_facts import scope_text
     for item in cuts + locked:
+        # Character side remarks were authored in the former all-hao mode.
+        # Convert residual canonical endings after every prose layer is attached.
+        if item.get('html'):
+            item['html'] = guard.enforce(voice_mod.speak(item['html'], tone))
         for field in ('html', 'source', 'teaser'):
             if item.get(field):
                 item[field] = scope_text(item[field], f.hour_known)
@@ -1687,7 +1691,7 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
     from engine.editorial import build as build_editorial
     from . import interpretation
     plan = interpretation.build_plan(f, concern, extras)
-    reading = interpretation.render(plan, f, tier)
+    reading = interpretation.render(plan, f, tier, lens_id=lens_id)
     editorial = build_editorial(f, lens_id, concern, plan=plan)
     if editorial:
         view = {**view, "open": editorial["question"], "close": editorial["action"]}

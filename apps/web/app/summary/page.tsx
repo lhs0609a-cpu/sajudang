@@ -21,6 +21,8 @@ import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/store";
 import { useScreen } from "@/lib/track";
 import type { Summary } from "@shared/chart";
+import ReadingAnalysis from '@/components/ReadingAnalysis';
+import {readingContext} from '@/lib/reading-context';
 
 const EL_WORD: Record<string, string> = {
   목: "나무", 화: "불", 토: "흙", 금: "쇠", 수: "물",
@@ -38,6 +40,11 @@ export default function SummaryPage() {
   } | null>(null);
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copyError,setCopyError]=useState('');
+  const [extras,setExtras]=useState<Record<string,unknown>|null>(null);
+  const identity=`${s.chartId}:${s.concern}:${s.cur}`;
+  const [seenIdentity,setSeenIdentity]=useState(identity);
+  if(identity!==seenIdentity){setSeenIdentity(identity);setExtras(null);setSm(null);setErr(null);setShare(null);setCopied(false);setCopyError('');}
 
   useEffect(() => {
     if (!s.chartId) return;
@@ -45,14 +52,14 @@ export default function SummaryPage() {
     api
       .summary({
         chart_id: s.chartId, concern: s.concern, axis4: s.axis4,
-        lens_id: s.cur, name: s.name,
+        lens_id: s.cur, name: s.name, extras:extras??readingContext(s.chartId,s.concern),
       })
       .then((d) => { if (alive) setSm(d); })
       .catch((e) => {
         if (alive) setErr(e instanceof ApiError ? e.message : "분석지를 펴지 못했소.");
       });
     return () => { alive = false; };
-  }, [s.chartId, s.concern, s.axis4, s.cur, s.name, retry]);
+  }, [s.chartId, s.concern, s.axis4, s.cur, s.name, retry,extras]);
 
   if (!s.chartId) {
     return (
@@ -107,6 +114,9 @@ export default function SummaryPage() {
         편지처럼, 시간이 지나면 그냥 없어지는 것이오.
       </Say>
 
+      {sm.reading&&<ReadingAnalysis reading={sm.reading} onSubmit={setExtras}/>}
+      <details className="reading-source-book"><summary>공유에 담기는 기본 분석지와 사주 근거</summary>
+      <p className="sm">상담 답변을 반영한 이야기와 직접 적은 실행 카드는 공유에 담기지 않습니다.</p>
       {/* 표지 — 카드로 잘라 나가는 부분 */}
       <div className="card sumhead">
         <p className="sm">성신당 星辰堂</p>
@@ -118,7 +128,7 @@ export default function SummaryPage() {
           ))}
         </div>
         <p className="sm">
-          {sm.strength} · 흐름 {sm.flow} · 없는 것 {EL_WORD[sm.weak_el]} ·
+          {sm.strength} · 흐름 {sm.flow} · 비교적 약한 것 {EL_WORD[sm.weak_el]} ·
           필요한 것 {EL_WORD[sm.yongsin]}
         </p>
       </div>
@@ -146,6 +156,7 @@ export default function SummaryPage() {
         </div>
       )}
 
+      </details>
       {/* ★ 단서 — 접지 않는다 */}
       <div className="caveat">
         <div className="lab">셈에서 흐린 부분</div>
@@ -185,12 +196,13 @@ export default function SummaryPage() {
               <div className="k">링크</div>
               <p className="mono" style={{ wordBreak: "break-all" }}>{shareUrl}</p>
             </div>
-            <button className="btn mt" onClick={() => {
-              void navigator.clipboard?.writeText(shareUrl);
-              setCopied(true);
+            <button className="btn mt" onClick={async () => {
+              try {await navigator.clipboard.writeText(shareUrl);setCopied(true);setCopyError('');}
+              catch {setCopied(false);setCopyError('복사하지 못했소. 표시된 링크를 직접 선택해 복사할 수 있소.');}
             }}>
               {copied ? "베꼈소" : "링크 베끼기"}
             </button>
+            {copyError&&<p role="alert">{copyError}</p>}
             <p className="sm mt">담기는 것 · {share.includes.join(" · ")}</p>
             <p className="sm">담기지 않는 것 · {share.excludes.join(" · ")}</p>
             <p className="sm">{share.expires_days}일이 지나면 링크가 스스로 닫히오.</p>

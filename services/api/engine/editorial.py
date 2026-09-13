@@ -66,8 +66,10 @@ def build(f,lens_id,concern,plan=None):
         selected = plan['selected']
         if selected:
             first = selected[0]
-            question = _plan_voice(first['question'], tone)
-            action = _plan_voice(next_action(plan), tone)
+            from . import reading_narrator
+            question = reading_narrator.question(first, lens_id)
+            action = (_plan_voice(next_action(plan), tone) if plan['answers'] else
+                      reading_narrator.say(reading_narrator.story(first)[5], lens_id))
             perspective = first['title']
             observation = ' · '.join(plan['facts'][ref]['label'] for ref in first['evidence_ids'])
         else:

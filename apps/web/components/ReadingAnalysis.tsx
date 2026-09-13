@@ -1,7 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ConsultationSpec, IntegratedReading } from "@shared/chart";
+import ReadingFeedback from "./ReadingFeedback";
+import ReadingPractice from "./ReadingPractice";
+import {useSession} from '@/lib/store';
+import {rememberReadingContext} from '@/lib/reading-context';
 
 function Consultation({ spec, busy, onSubmit }: {
   spec: ConsultationSpec; busy: boolean;
@@ -36,12 +40,25 @@ export default function ReadingAnalysis({ reading, preview = false, busy = false
   reading: IntegratedReading; preview?: boolean; busy?: boolean;
   onSubmit?: (extras: Record<string, unknown>) => void;
 }) {
+  const session=useSession();
+  useEffect(()=>{
+    if(!preview&&!busy&&session.chartId)rememberReadingContext(session.chartId,reading.consultation.concern,reading.consultation.answers);
+  },[preview,busy,session.chartId,reading]);
   return <section className="integrated-reading" aria-label="근거를 연결한 종합 해석" aria-busy={busy}>
     <header className="reading-plan-head">
+      {reading.narrator && <p className="reading-speaker">{reading.narrator.name}의 이야기</p>}
       <p className="conversion-kicker">{reading.scope === "전체" ? "하나의 명식, 이어지는 이야기" : "이번 고민에서 먼저 볼 것"}</p>
       <h2>{preview ? reading.headline : reading.summary.length ? `이번 풀이의 핵심 ${reading.summary.length}가지` : "먼저 확인할 명식의 범위"}</h2>
       <p className="sm">{reading.boundary}</p>
       {reading.as_of && <p className="sm">{reading.as_of} 기준</p>}
+      {!preview && reading.journey && <>
+        <ol className="reading-journey" aria-label="이야기를 읽는 순서">
+          {reading.journey.steps.map(step => <li key={step}>{step}</li>)}
+        </ol>
+        {reading.journey.context_label && <p className="reading-context-note">
+          직접 알려주신 이유: {reading.journey.context_label}<br />이 사정을 반영해 이야기를 다시 읽었습니다.
+        </p>}
+      </>}
     </header>
     {reading.empty_reason && <p>{reading.empty_reason}</p>}
     {reading.input_error && <p role="alert" className="warn">{reading.input_error}</p>}
@@ -53,7 +70,7 @@ export default function ReadingAnalysis({ reading, preview = false, busy = false
       </article>)}
     </div>
     {!preview && <>
-      {onSubmit && <Consultation key={reading.fingerprint} spec={reading.consultation} busy={busy} onSubmit={onSubmit} />}
+      {onSubmit && <Consultation key={`consultation-${reading.fingerprint}`} spec={reading.consultation} busy={busy} onSubmit={onSubmit} />}
       <nav className="reading-plan-nav" aria-label="종합 해석 목차">
         {reading.sections.map(section => <a key={section.id} href={`#plan-${section.id}`}>{section.title}</a>)}
       </nav>
@@ -61,6 +78,9 @@ export default function ReadingAnalysis({ reading, preview = false, busy = false
         <h2>{section.title}</h2>
         <div className="cutbody" dangerouslySetInnerHTML={{ __html: section.html }} />
       </section>)}
+      {reading.practice && <ReadingPractice key={`practice-${reading.fingerprint}`} practice={reading.practice} id={reading.fingerprint} />}
+      {reading.narrator && <ReadingFeedback key={reading.fingerprint + reading.narrator.id} lensId={reading.narrator.id} version={reading.version}
+        resultKey={reading.fingerprint} scope={reading.scope==='전체'?'book':'focus'} />}
     </>}
   </section>;
 }

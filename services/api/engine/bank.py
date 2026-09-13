@@ -945,7 +945,8 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
         for field in ('html', 'source', 'yes', 'no'):
             if segment.get(field):
                 segment[field] = scope_text(segment[field], f.hour_known)
-    return segs
+    from .reading_hook import project
+    return project(segs,f,concern,axis4,you,misses)
 
 
 def tea(f) -> dict:

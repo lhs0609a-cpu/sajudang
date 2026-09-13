@@ -1,0 +1,332 @@
+[
+  {
+    "id": "a1",
+    "path": "/?step=a1",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "a1",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "a2",
+    "path": "/?step=a2",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "a2",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "a3",
+    "path": "/?step=a3",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "a3",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "a4",
+    "path": "/?step=a4",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "a4",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "a4b",
+    "path": "/?step=a4b",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "a4b",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "a5",
+    "path": "/?step=a5",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "a5",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "a6",
+    "path": "/?step=a6",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "a6",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "a7",
+    "path": "/?step=a7",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "a7",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "b1",
+    "path": "/lobby?tab=b1",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "b1",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "b2",
+    "path": "/lobby?tab=b2",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "b2",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "b3",
+    "path": "/lobby?tab=b3",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "b3",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "b4",
+    "path": "/lobby?tab=b4",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "b4",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "c1",
+    "path": "/report/pungun?tab=c1",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "c1",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "c2",
+    "path": "/report/pungun?tab=c2",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "c2",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "c3",
+    "path": "/report/pungun?tab=c3",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "c3",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "c4",
+    "path": "/report/pungun?tab=c4",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "c4",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "c5",
+    "path": "/report/pungun?tab=c5",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "c5",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "c6",
+    "path": "/report/pungun?tab=c6",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "c6",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "c7",
+    "path": "/summary",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "c7",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "c8",
+    "path": "/summary#share",
+    "http": null,
+    "same_document": true,
+    "actual_screen": "c7",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "d0",
+    "path": "/pay?step=d0",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "d0",
+    "overflow": false,
+    "errors": [],
+    "note": "결제 제공자 호출 차단 · 외부 결제 완료는 미검증"
+  },
+  {
+    "id": "d1",
+    "path": "/pay?step=d1",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "d1",
+    "overflow": false,
+    "errors": [],
+    "note": "결제 제공자 호출 차단 · 외부 결제 완료는 미검증"
+  },
+  {
+    "id": "d1b",
+    "path": "/pay?step=d1b",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "d1",
+    "overflow": false,
+    "errors": [],
+    "note": "결제 제공자 호출 차단 · 외부 결제 완료는 미검증"
+  },
+  {
+    "id": "d2",
+    "path": "/pay?step=d2",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "d1",
+    "overflow": false,
+    "errors": [],
+    "note": "결제 제공자 호출 차단 · 외부 결제 완료는 미검증"
+  },
+  {
+    "id": "d3",
+    "path": "/pay?step=d3",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "d3",
+    "overflow": false,
+    "errors": [],
+    "note": "결제 제공자 호출 차단 · 외부 결제 완료는 미검증"
+  },
+  {
+    "id": "h1",
+    "path": "/relay",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "h1",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "g1",
+    "path": "/daily",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "g1",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "f2",
+    "path": "/me?tab=f2",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "f2",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "r1",
+    "path": "/me?tab=r1",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "r1",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "s1",
+    "path": "/summary",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": "c7",
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "book",
+    "path": "/omnibus",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": null,
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "legal",
+    "path": "/legal",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": null,
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  },
+  {
+    "id": "shared",
+    "path": "/s/[token]",
+    "http": 200,
+    "same_document": false,
+    "actual_screen": null,
+    "overflow": false,
+    "errors": [],
+    "note": ""
+  }
+]

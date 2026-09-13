@@ -135,10 +135,8 @@ def build_daily(f, on: date | None = None,
     #   놓고 비교하기 가장 쉬운 자리입니다. 전에는 관계 5가지가 상한이라
     #   같은 날 다섯 명 중 한 명꼴로 글자 하나 안 틀리고 같았습니다.
     #
-    #   반복 자체가 위험한 게 아닙니다 — Barnum 효과 연구가 말하듯 사람은
-    #   여럿이 받은 문장도 제 얘기로 느낍니다. **다만 개인화되었다고 믿을
-    #   때만** 그렇습니다. 진짜 위험은 반복이 들통나는 것입니다.
-    #   알림 채널을 붙이기 전에 손봐야 하는 이유가 이것입니다.
+    #   같은 계산 구조에서 반복되는 문장을 개인의 경험을 알아낸 것처럼
+    #   제시하지 않습니다. 명식과 오늘의 관계를 확인할 질문으로 옮깁니다.
     #
     #   곱하는 축: 관계(5) × 내 일간(10) × 신강약(3) × 태어난 계절(4)
     B = bank()
@@ -158,7 +156,19 @@ def build_daily(f, on: date | None = None,
         if ask_line:
             body.append(ask_line)
 
+    from .constants import ten_god
+    from .reading_storyline import SCENES, DOMAINS
+    from .reading_practice import FALLBACK
+    from .reading_narrator import say
+    domain=concern if concern in DOMAINS else 'dir'
+    scene=SCENES[ten_god(gan,f.day_gan)][DOMAINS.index(domain)]
+    plain=[say(line,'pungun') for line in scene]
+    practice={'trigger':'오늘 비슷한 장면이 생길 때','action':plain[2],
+        'observe':'해본 일과 그 뒤에 달라진 점을 한 줄씩 나누어 보시오.',
+        'fallback':FALLBACK[domain],'remember':'오늘의 한 장면으로 그대 전체를 정할 필요는 없소.',
+        'source':'daily_reflection'}
     return {
+        'plain':plain,'practice':practice,
         "date": on.isoformat(),
         "gz": gan + ji,
         "gan": gan,

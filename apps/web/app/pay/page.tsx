@@ -18,6 +18,8 @@ import PracticeCard from "@/components/PracticeCard";
 import ReadingGuide from '@/components/ReadingGuide';
 import NextReading from '@/components/NextReading';
 import { READING_QUESTIONS, freeRevelation } from '@/lib/reading-journey';
+import ReadingAnalysis from '@/components/ReadingAnalysis';
+import {readingContext} from '@/lib/reading-context';
 import CompanionCat from "@/components/CompanionCat";
 import Scene from "@/components/scene/Scene";
 import ActOut from "@/components/ActOut";
@@ -70,6 +72,8 @@ function PayInner() {
   const you = youOf(s.cur, s.name, s.sex);
 
   const [free, setFree] = useState<ReportResponse | null>(null);
+  const [freeExtras,setFreeExtras]=useState<Record<string,unknown>|null>(null);
+  const [freeBusy,setFreeBusy]=useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
   /*
@@ -129,7 +133,7 @@ function PayInner() {
 
   useScreen(step);
   useEffect(() => {
-    setTiers(null); setPick(null); setOrder(null); setFree(null); setPeek(null); setOffer(null); setPeekError(null);
+    setTiers(null); setPick(null); setOrder(null); setFree(null); setFreeExtras(null); setPeek(null); setOffer(null); setPeekError(null);
     try {
       const saved = sessionStorage.getItem(selectionKey);
       if (saved === "one" || saved === "all" || saved === "sub") setPick(saved);
@@ -191,14 +195,14 @@ function PayInner() {
       .report({
         chart_id: s.chartId, lens_id: s.cur, tier: "free",
         session_id: s.sessionId, concern: s.concern, axis4: s.axis4,
-        name: s.name,
+        name: s.name, extras:freeExtras??readingContext(s.chartId,s.concern),
       })
       .then((r) => { if (alive) setFree(r); })
       .catch((e) => {
         if (alive) setErr(e instanceof ApiError ? e.message : "펴지 못했소.");
-      });
+      }).finally(()=>{if(alive)setFreeBusy(false);});
     return () => { alive = false; };
-  }, [step, s.chartId, s.cur, s.concern, s.axis4, free, retry]);
+  }, [step, s.chartId, s.cur, s.concern, s.axis4, free, retry,freeExtras]);
 
   /*
    * 결제창에서 돌아왔다 — 토스가 ?toss=ok&paymentKey=… 로 되돌려 보냅니다.
@@ -368,7 +372,9 @@ function PayInner() {
             <p><strong>오늘은 이것부터 해보시오.</strong><br />맞지 않았던 문장 하나와 실제로 겪은 장면 하나를 나란히 적으시오. 다른 점이 무엇인지 먼저 살피는 것으로 충분하오.</p>
             <button className="btn gh" onClick={() => {track("reading_mismatch", "d0", {n: 1}); router.push("/?step=a3");}}>태어난 정보 다시 확인하기</button>
             <button className="btn gh" onClick={() => {track("reading_mismatch", "d0", {n: 2}); router.push("/lobby");}}>다른 해석자의 관점 살펴보기</button>
-          </section> : free.editorial ? <ReadingGuide guide={free.editorial} revelation={freeRevelation(cuts)} /> :
+          </section> : free.reading ? <ReadingAnalysis reading={free.reading} busy={freeBusy} onSubmit={extras=>{
+            setFreeExtras(extras);setFreeBusy(true);setFree(null);
+          }}/> : free.editorial ? <ReadingGuide guide={free.editorial} revelation={freeRevelation(cuts)} /> :
             <div className="conversion-card"><p>기둥과 해석 근거를 아래에서 확인할 수 있소. 맞는 부분만 경험에 대입해 보시오.</p></div>}
           {(lens?.price ?? 0) > 0 && <div className="reading-next">
             {rejected.length === 0 && <NextReading cuts={free.locked} />}

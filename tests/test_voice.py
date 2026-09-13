@@ -143,10 +143,13 @@ def test_every_character_has_a_voice():
     assert not missing, missing
 
 
-def test_all_released_characters_use_requested_hao_voice():
-    # User's September 9 direction supersedes the former five-ending design.
+def test_released_characters_use_their_own_requested_voices():
+    # September 13: retain the doryeong's voice and restore each character's own speech.
     used = {lens_mod.view(l['id'])['voice'] for l in lens_mod.released()}
-    assert used == {V.HAO}
+    assert used == set(V.VOICES)
+    assert lens_mod.view('pungun')['voice'] == V.HAO
+    assert lens_mod.view('hongmae')['voice'] == V.BANMAL
+    assert lens_mod.view('dongja')['voice'] == V.HAEYO
 
 
 def test_the_pronoun_matches_the_character(reports):
@@ -244,10 +247,10 @@ def test_the_evidence_line_never_says_I(reports):
 # ══════════════════════════════════════════════════════════
 # 호칭 — 스무 명이 다르게 부르는가
 # ══════════════════════════════════════════════════════════
-def test_character_addresses_remain_valid_with_shared_hao_voice():
+def test_character_addresses_remain_valid_with_character_voices():
     for name in ('가은', ''):
         for l in lens_mod.released():
-            assert lens_mod.view(l['id'])['voice'] == V.HAO
+            assert lens_mod.view(l['id'])['voice'] in V.VOICES
             assert lens_mod.you_of(l['id'], name, 'F')
 
 

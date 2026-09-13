@@ -17,6 +17,7 @@ import { api } from "@/lib/api";
 import { useSession } from "@/lib/store";
 import { useScreen } from "@/lib/track";
 import type { DailyResponse } from "@shared/chart";
+import ReadingPractice from '@/components/ReadingPractice';
 
 const VISIT_WARN_AT = 3;
 
@@ -37,6 +38,7 @@ export default function DailyPage() {
   useEffect(() => {
     if (!s.chartId) return;
     let alive = true;
+    setData(null);setErr(null);
     api.daily(s.chartId, s.concern)
       .then((d) => alive && setData(d))
       .catch(() => alive && setErr("일진을 셈하지 못했소."));
@@ -56,6 +58,7 @@ export default function DailyPage() {
     <Shell screen="g1" title="오늘의 일진">
       <header className="editorial-heading"><p className="conversion-kicker">오늘의 한 장</p><h1>오늘은 어떤 마음으로<br/>하루를 열겠소?</h1><p>오늘의 기운을 읽고, 작은 행동 하나를 골라보시오.</p></header>
       <Scene id="banner" />
+      <details className="reading-source-book"><summary>오늘의 풀이를 읽는 방법</summary>
       {/* ★ 여는 줄이 없어 첫 줄이 「일진이란…」 이라는 뜻풀이였습니다.
           매일 오는 자리라 더 그렇습니다 — 같은 설명을 매일 읽습니다. */}
       <Narration lines={["오늘 자 종이가 상 위에 새로 올라와 있소.",
@@ -85,6 +88,8 @@ export default function DailyPage() {
         바뀌고, <b>예순 날</b>만에 같은 짝이 돌아오오. 그 둘이 그대의
         명식과 어디서 맞물리는지 보오.
       </p>
+      </details>
+      {!data&&!err&&<p role="status">오늘의 풀이를 불러오고 있소.</p>}
       {err && <><Say who="도령" lens="pungun">{err}</Say><button className="btn" onClick={() => {setErr(null);setRetry(n => n + 1);}}>일진 다시 불러오기</button></>}
 
       {/* 하루 3회 접속 시 만류 — 늘리지 마세요 */}
@@ -100,6 +105,12 @@ export default function DailyPage() {
 
       {data && (
         <>
+          <section className="reading-plan-section"><h2>{data.date} · 오늘 돌아볼 장면</h2>
+            {data.plain?.map((line,i)=><p key={i}>{line}</p>)}
+            <p className="sm">오늘의 글자와 내 사주를 연결한 점검 질문이오. 실제로 있었던 일과 맞춰 보시오.</p>
+          </section>
+          {data.practice&&<ReadingPractice key={data.date+data.statement_id} id={'daily:'+data.date+data.statement_id} practice={data.practice}/>}
+          <details className="reading-source-book"><summary>오늘의 계산 근거와 전통 풀이</summary>
           <div className="dz">
             <div className="k">{data.date}</div>
             <p style={{ fontFamily: "var(--serif)", fontSize: 26, color: "var(--c)" }}>
@@ -146,18 +157,19 @@ export default function DailyPage() {
           {data.terms_html && (
             <div dangerouslySetInnerHTML={{ __html: data.terms_html }} />
           )}
+          </details>
         </>
       )}
 
       {/* g2 회고 — statement_log 가 쌓이기 전에는 지어내지 않는다 */}
-      <div className="lab mt">g2 · 되짚기</div>
+      <div className="lab mt">되짚기</div>
       <p className="sm">
         여섯 달 전 그대가 &quot;그렇다&quot;고 한 문장을 여기 다시 꺼내오.
         아직 쌓인 것이 없어 비워 두었소.
       </p>
 
       {/* g3 차 한 잔 */}
-      <div className="lab mt">g3 · 차 한 잔</div>
+      <div className="lab mt">차 한 잔</div>
       <Scene id="tea" />
       <p className="sm">
         용신(모자란 것을 채워 줄 기운)에 맞는 차를 내오.

@@ -2,12 +2,38 @@
 from collections import Counter
 from datetime import date
 from functools import lru_cache
+from html.parser import HTMLParser
+import re
 import json
 from pathlib import Path
 
 from . import interpretation as ip, guard
 from .calendar import build_chart
 from .features import build_features
+
+
+class VisibleText(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.depth, self.parts = 0, []
+
+    def handle_starttag(self, tag, attrs):
+        if tag == 'details':
+            self.depth += 1
+
+    def handle_endtag(self, tag):
+        if tag == 'details':
+            self.depth = max(0, self.depth - 1)
+
+    def handle_data(self, text):
+        if not self.depth:
+            self.parts.append(text)
+
+
+def visible_text(html):
+    parser = VisibleText()
+    parser.feed(html)
+    return ' '.join(parser.parts)
 
 
 def cases():
@@ -31,12 +57,22 @@ def measure():
         "errors": [], "rules_covered": [], "human_review": None, "customer_value": None,
         "note": "자동 검사는 근거 연결·중복·답변 반영을 확인합니다. 전문가 검토와 실제 고객의 가격 대비 만족도는 아직 집계되지 않았습니다."}
     rules = Counter()
+    stories = {}
+    longest = 0
     for case in dataset["cases"]:
         try:
             f = features(case, dataset["as_of"])
             for concern in ip.content()["domains"]:
                 plan = ip.build_plan(f, concern)
                 reading = ip.render(plan, f, "all")
+                rows = reading['summary'] + reading['sections']
+                for row in rows:
+                    body = visible_text(row['html'])
+                    longest = max(longest, *(len(s.strip()) for s in re.split(r'[.!?]', body)))
+                    if re.search(r'[\u4e00-\u9fff]|십신|비겁|식상|재성|관성|인성|천간|지장간|비대칭|집계', body):
+                        result['errors'].append({'case':case['id'], 'concern':concern, 'error':'technical_prose', 'section':row['id']})
+                signature = tuple(visible_text(row['html']) for row in rows if row['id'] in ('portrait', 'focus'))
+                stories.setdefault((concern, signature), []).append(case['id'])
                 result["reports"] += 1
                 result["claims"] += len(plan["selected"])
                 result["empty_reports"] += int(not plan["selected"])
@@ -57,6 +93,10 @@ def measure():
         except (ValueError, KeyError, TypeError) as exc:
             result["errors"].append({"case": case["id"], "error": type(exc).__name__ + ": " + str(exc)})
     result["rules_covered"] = sorted(rules)
+    result['storytelling'] = {'longest_sentence_chars':longest,
+        'identical_portrait_and_focus': [{'concern':concern, 'cases':ids}
+            for (concern, signature), ids in stories.items() if signature and len(ids) > 1],
+        'note':'같은 근거 구조의 문장은 반복될 수 있습니다. 중복 목록은 편집 검토용이며 개인 적중률이 아닙니다.'}
     result["rules_total"] = len(ip.content()["rules"])
     result["passed"] = not result["errors"] and result["reports"] == result["cases"] * len(ip.content()["domains"])
     return result

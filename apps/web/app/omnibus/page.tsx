@@ -7,6 +7,7 @@ import ReadingAnalysis from "@/components/ReadingAnalysis";
 import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/store";
 import type { OmnibusResponse } from "@shared/chart";
+import {readingContext} from '@/lib/reading-context';
 
 export default function OmnibusPage() {
   const s = useSession();
@@ -25,7 +26,7 @@ export default function OmnibusPage() {
     let alive = true;
     setBusy(true); setError(null);
     api.omnibus({ chart_id: s.chartId, session_id: s.sessionId, concern: s.concern,
-      axis4: s.axis4, display_name: s.name.slice(0, 12), extras })
+      axis4: s.axis4, display_name: s.name.slice(0, 12), extras:extras??readingContext(s.chartId,s.concern) })
       .then(value => { if (alive) setBook(value); })
       .catch(err => { if (alive) {
         setBook(null);
@@ -74,6 +75,7 @@ export default function OmnibusPage() {
         </details>)}
       </section>
       <button className="btn gh noprint" onClick={() => window.print()}>종합 풀이 인쇄·PDF로 저장</button>
+      <Link className="btn gh noprint" href="/summary">분석지에 담아 보기</Link>
     </>}
     <Link className="btn gh noprint" href={`/report/${s.cur}`}>읽던 자리로</Link>
   </Shell>;

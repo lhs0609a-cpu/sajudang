@@ -190,6 +190,8 @@ class FeedbackResponse(BaseModel):
 
 
 class DailyResponse(BaseModel):
+    plain: list[str] = Field(default_factory=list)
+    practice: Optional[dict] = None
     date: str
     gz: str
     gan: str

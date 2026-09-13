@@ -18,6 +18,7 @@ import Reveal from "@/components/Reveal";
 import Fold from "@/components/Fold";
 import ReadingGuide from '@/components/ReadingGuide';
 import ReadingAnalysis from '@/components/ReadingAnalysis';
+import {readingContext} from '@/lib/reading-context';
 import Link from 'next/link';
 import ScrollHint from "@/components/ScrollHint";
 import SinsalSlots from "@/components/SinsalSlots";
@@ -215,7 +216,7 @@ function ReportInner() {
     api.report({
       chart_id: s.chartId, lens_id: lensId, tier: s.tier,
       session_id: s.sessionId, concern: s.concern, axis4: s.axis4,
-      name: s.name, extras,
+      name: s.name, extras:extras??readingContext(s.chartId,s.concern),
     })
       .then((r) => {
         if (!alive) return;
@@ -724,6 +725,8 @@ function ReportInner() {
         </div>
       )}
 
+      <details className="reading-source-book" open={rep.reading ? undefined : true}>
+      <summary>사주 용어로 자세히 읽기</summary>
       <div className="scroll" id="scroll">
         <div className="scrollhead">
           <p className="who">{rep.lens.name}</p>
@@ -793,6 +796,7 @@ function ReportInner() {
         </div>
       </div>
 
+      </details>
       <div className="handles noprint">
         <button onClick={() => window.print()}>
           내 것을 종이로 받겠소 (PDF)

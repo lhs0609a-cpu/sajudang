@@ -16,5 +16,5 @@ def test_rejection_is_respected_for_every_hook_stage():
             for segment in bank.build_hook(f,concern,misses=misses):
                 assert '맞지 않는 해석' in segment['no']
                 assert '아직 안 터진' not in segment['no']
-                assert segment['statement_id'].endswith(':copy2')
+                assert segment['statement_id'].endswith(':copy3')
                 assert '그럴 줄 알았소' not in segment['yes']

@@ -364,6 +364,10 @@ export interface ConsultationSpec {
 }
 
 export interface IntegratedReading {
+  access_tier?: string;
+  practice?: { trigger: string; action: string; observe: string; fallback: string; remember: string; source: string };
+  narrator?: { id: string; name: string };
+  journey?: { version: number; source: string; mode: string; steps: string[]; context_label: string | null };
   version: number;
   fingerprint: string;
   basis: string;
@@ -423,6 +427,8 @@ export interface RelayResponse {
 
 /* ── 일진 ───────────────────────────────────────────────── */
 export interface DailyResponse {
+  plain?: string[];
+  practice?: IntegratedReading['practice'];
   date: string;
   gz: string;
   gan: string;
@@ -477,6 +483,7 @@ export interface SinsalBrief {
 }
 
 export interface Summary {
+  reading?: IntegratedReading;
   name: string | null;
   lens: LensPublic;
   concern: string;

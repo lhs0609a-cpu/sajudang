@@ -174,6 +174,7 @@ const post = <T>(path: string, body: unknown) =>
   call<T>(path, { method: "POST", body: JSON.stringify(body) });
 
 export const api = {
+  pageEvaluation: (req:{session_id:string;page_id:string;ease:number;success:'yes'|'partly'|'no'}) => post<{ok:boolean}>('/v1/page-evaluation',req),
   chart: (req: ChartRequest) => post<ChartResponse>("/v1/chart", req),
 
   /** 새로고침 뒤 chart_id 만 남았을 때 명식을 되찾는다. */
@@ -279,7 +280,7 @@ export const api = {
   /* ── 분석지 · 공유 ── */
   summary: (req: {
     chart_id: string; concern: string; axis4?: string | null;
-    lens_id?: string; name?: string;
+    lens_id?: string; name?: string; extras?:Record<string,unknown>|null;
   }) => post<Summary>("/v1/summary", req),
 
   /** 공유 링크 발급. 생년월일시는 담기지 않는다. */
@@ -367,6 +368,13 @@ export const api = {
     session_id?: string; chart_id?: string;
   }) => post<{ ok: boolean; verified: boolean; visible: boolean; say: string }>(
     "/v1/review", req),
+
+  readingEvaluation: (req: {
+    chart_id: string; session_id: string; lens_id: string; version: number;
+    concern?: string; scope?: 'book'|'focus'; result_key?: string; value_for_money?: number|null;
+    clarity: "yes" | "partly" | "no"; recognition: "yes" | "partly" | "no";
+    comfort: "yes" | "partly" | "no"; usefulness: "yes" | "partly" | "no";
+  }) => post<{ok: boolean}>("/v1/reading-evaluation", req),
 
   /**
    * 주문번호로 치른 것을 되찾습니다.

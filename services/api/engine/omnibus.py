@@ -59,8 +59,13 @@ def build_omnibus(f, chart_id: str, concern: str = "love",
         # 명식 컷은 장마다 되풀이할 필요가 없습니다. 앞에 한 번 나옵니다.
         # Shared natal material is explained once in the integrated reading.
         # The appendix contains only the character's own perspective/input.
-        cuts = [c for c in r["cuts"] if c["id"].startswith("lc_") or
+        cuts = [c for c in r["cuts"] if
                 c["id"] in ("partner", "context", "blood", "image", "cards", "meet", "face", "body")]
+        # Character voices tell the same selected story. Do not append legacy
+        # personality claims that can contradict the integrated conclusion.
+        cuts = [{"id": "narration_" + c["id"], "title": c["title"],
+                 "html": c["html"], "source": "같은 사주에서 이어지는 이야기"}
+                for c in r["reading"]["summary"][:1]] + cuts
 
         chapters.append({
             "lens_id": l["id"],
@@ -133,6 +138,10 @@ def build_omnibus(f, chart_id: str, concern: str = "love",
         "correction": f.correction,
         "lens_count": len(lenses),
     }
+
+    from .reading_narrator import para, evidence
+    consensus_html = para('같은 버릇도 일할 때와 사람을 만날 때 다르게 드러날 수 있소. 앞의 이야기를 그대의 하루와 나란히 놓고 보시오.', 'pungun') + evidence(consensus_html)
+    split_html = para('같은 사람을 여러 자리에서 본 것이오. 목소리가 여럿이라고 더 확실한 이야기가 되는 것은 아니오.', 'pungun') + evidence(split_html)
 
     return {
         "reading": reading,

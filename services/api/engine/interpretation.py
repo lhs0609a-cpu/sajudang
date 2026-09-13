@@ -14,13 +14,13 @@ from html import escape
 import json
 from pathlib import Path
 
-from . import guard, solar_terms, topic, pattern
+from . import guard, solar_terms, topic, pattern, personal_reading
 from .calendar import year_ganji
 from .constants import (CHUNG, HAP, HIDDEN, GAN, JI, OHO, ELEMENT_OF_GAN,
                         GENERATED_BY, GENERATES, CONTROLS, CONTROLLED_BY,
                         TEN_GOD_GROUP, ten_god)
 
-VERSION = 1
+VERSION = 5
 GROUPS = {"비겁": "bi", "식상": "sik", "재성": "jae", "관성": "gwan", "인성": "inn"}
 STAGES = {"exploring": "아직 비교하는 중", "tried": "이미 바꿔 보았음", "constrained": "당장 바꾸기 어려움"}
 RESPONSES = {"yes": "비슷한 경험이 있음", "no": "내 경험과 다름", "mixed": "상황에 따라 다름", "unknown": "아직 판단하기 어려움"}
@@ -100,21 +100,34 @@ def _answer_key(rule_id, concern):
 
 
 def parse_answers(extras, concern):
+    from . import reading_context
     raw = (extras or {}).get("consultation")
     if raw is None:
         return {}, None
     if not isinstance(raw, dict) or set(raw) - {"concern", "answers"} or raw.get("concern") != concern:
         return {}, "지금 고민에 맞는 질문으로 다시 골라 주세요. 기존 명식 풀이는 그대로 볼 수 있습니다."
     answers = raw.get("answers", {})
-    if not isinstance(answers, dict) or len(answers) > len(content()["rules"]) + 2:
+    if not isinstance(answers, dict) or len(answers) > len(content()["rules"]) * 2 + 2:
         return {}, "답변 형식을 확인해 주세요."
     allowed = {_answer_key(r["id"], concern): set(RESPONSES) for r in content()["rules"]}
+    allowed.update({reading_context.key(concern, r['id']): set(reading_context.REASONS[r['id']]) | {'unknown'}
+                    for r in content()['rules']})
     allowed["driver"] = {d["id"] for d in content()["domains"][concern]["drivers"]}
     allowed["stage"] = set(STAGES)
     for key, value in answers.items():
         if key not in allowed or not isinstance(value, str) or value not in allowed[key]:
             return {}, "선택 목록에 없는 답변이 있어 반영하지 않았습니다. 다시 골라 주세요."
-    return dict(answers), None
+    clean = dict(answers)
+    for rule in content()['rules']:
+        reason_key = reading_context.key(concern, rule['id'])
+        if reason_key not in clean:
+            continue
+        confirmation = clean.get(_answer_key(rule['id'], concern))
+        if confirmation in ('no', 'unknown'):
+            clean.pop(reason_key)
+        elif confirmation not in ('yes', 'mixed'):
+            return {}, '먼저 실제로 비슷한 경험이 있었는지 알려주세요. 이유를 미리 정하지 않겠습니다.'
+    return clean, None
 
 
 def build_plan(f, concern="love", extras=None):
@@ -135,6 +148,7 @@ def build_plan(f, concern="love", extras=None):
         groups = rule["groups"]
         if not all(facts[f"group:{g}"]["value"] > 0 for g in groups):
             continue
+        rule = personal_reading.specialize(rule, facts)
         evidence = [f"group:{g}" for g in groups]
         matched = [key for key in PATTERN_LINKS.get(rule["id"], ()) if key in patterns]
         evidence.extend("pattern:" + key for key in matched)
@@ -199,6 +213,7 @@ def build_plan(f, concern="love", extras=None):
         "selected": selected, "rejected": [c for c in candidates if c["answer"] == "no"],
         "answers": answers, "input_error": error, "method": yongsin_review(f),
         "basis": fingerprint({"pillars": f.pillars, "strength": f.strength, "version": VERSION})}
+    plan["personal"] = personal_reading.profile(f, facts)
     plan["fingerprint"] = fingerprint({"basis": plan["basis"], "concern": concern, "answers": answers})
     violations = validate_plan(plan)
     if violations:
@@ -224,10 +239,18 @@ def validate_plan(plan):
 
 
 def questions(plan):
+    from . import reading_context
     domain = content()["domains"][plan["concern"]]
     first = next((c for c in plan["selected"] if _answer_key(c["id"], plan["concern"]) not in plan["answers"]), None)
     rows = []
-    if first:
+    pending = reading_context.pending(plan)
+    if pending:
+        rows.append({'id': reading_context.key(plan['concern'], pending['id']),
+            'question': '그때 그렇게 한 이유는 어느 쪽에 가까웠나요?',
+            'reason': '직접 알려주신 이유에 따라 조언과 위로를 바꿉니다. 사주로 알아낸 마음은 아닙니다.',
+            'options': [{'id': value, 'label': row[0]} for value, row in reading_context.REASONS[pending['id']].items()] +
+                       [{'id': 'unknown', 'label': '다른 이유이거나 아직 모르겠음'}]})
+    elif first:
         rows.append({"id": _answer_key(first["id"], plan["concern"]), "question": first["question"],
             "reason": "답변에 따라 이 해석을 유지하거나 조건을 좁히거나 제외합니다."})
         rows[-1]["options"] = [{"id": k, "label": v} for k, v in RESPONSES.items()]
@@ -249,9 +272,12 @@ def p(text, css=""):
 def claim_html(claim, plan):
     domain = content()["domains"][plan["concern"]]
     html = p(claim["thesis"], "reading-thesis")
-    html += p("강점으로 쓰는 조건 · " + claim["benefit"])
-    html += p("확인할 장면 · " + domain["scene"] + ". " + claim["trigger"] + "인지 살펴보세요.")
-    html += p("반복되면 치르는 비용 · " + claim["cost"])
+    for group in claim['groups']:
+        html += p(personal_reading.group_evidence(plan['facts'], group), 'reading-origin')
+    if not claim.get('directional'):
+        html += p("강점으로 쓰는 조건 · " + claim["benefit"])
+        html += p("확인할 장면 · " + domain["scene"] + ". " + claim["trigger"] + "인지 살펴보세요.")
+        html += p("반복되면 치르는 비용 · " + claim["cost"])
     if claim["answer"] != "unknown":
         html += p("직접 고른 경험 · " + RESPONSES[claim["answer"]], "reading-origin")
     html += p("다르게 읽어야 할 때 · " + claim["exception"])
@@ -276,6 +302,9 @@ def decision_html(plan):
     stage = answers.get("stage")
     driver = next((d for d in domain["drivers"] if d["id"] == answers.get("driver")), None)
     html = p("선택을 대신 결정하기보다, 두 방법의 조건을 비교합니다.")
+    if plan['selected']:
+        html += p('이 명식에서 먼저 비교할 문제 · ' + plan['selected'][0]['title'])
+        html += p('실행 기준 · ' + next_action(plan), 'reading-action')
     if driver:
         html += p("직접 고른 우선 문제 · " + driver["label"], "reading-origin") + p(driver["action"], "reading-action")
     if stage == "tried":
@@ -294,10 +323,14 @@ def decision_html(plan):
 
 
 def next_action(plan):
+    from . import reading_context
     domain, answers = content()["domains"][plan["concern"]], plan["answers"]
     driver = next((d for d in domain["drivers"] if d["id"] == answers.get("driver")), None)
     if answers.get("stage") == "tried":
         return "이미 시도한 장면에서 " + domain["record"] + "을 나눠 적고, 실제로 바뀌지 않은 조건 하나부터 확인해 보세요."
+    contextual = reading_context.selected(plan)
+    if contextual:
+        return contextual[2][2]
     action = driver["action"] if driver else plan["selected"][0]["action"] if plan["selected"] else "최근 장면 하나의 실제 사실과 내 해석을 따로 적어 보세요."
     if answers.get("stage") == "constrained":
         return "큰 결정보다 지금 조정할 수 있는 범위부터 살펴봅니다. " + action
@@ -307,19 +340,16 @@ def next_action(plan):
 def domain_html(claim, plan, explained):
     """Explain a natal relationship once; subsequent domains add only application."""
     domain = content()["domains"][plan["concern"]]
+    specific = personal_reading.domain_reading(plan, plan['concern'])
     if not claim:
-        return p("이 영역에서는 근거가 충분한 핵심 결론을 더 붙이지 않았습니다.")
+        return specific
     if claim["semantic_key"] in explained:
         html = p("앞에서 읽은 관계를 이 영역에 연결합니다 · " + claim["title"])
         html += p("별개의 성향을 하나 더 발견했다는 뜻이 아닙니다. 적용할 장면과 확인할 조건을 바꿔 봅니다.")
     else:
         html = claim_html(claim, plan)
         explained.add(claim["semantic_key"])
-    html += p("이 영역의 장면 · " + domain["scene"]) + p("확인할 기록 · " + domain["record"])
-    html += "<h3>지금 걸린 문제에 따라</h3>"
-    for driver in domain["drivers"]:
-        html += p(driver["label"] + "이 고민이라면 · " + driver["action"])
-    return guard.enforce(html)
+    return guard.enforce(specific + '<details><summary>함께 읽은 관계</summary>' + html + '</details>')
 
 
 def _transit(f, gan, ji):
@@ -353,6 +383,7 @@ def timing_html(f, include_calendar=False):
         html += f'<h3>{label} 대운 · 연 나이 {start}~{end - 1}세</h3>' + p(fact)
         html += p("원국과 만나는 자리 · " + (" · ".join(links) or "이번 비교에서 같은 지지·육합·충이 잡히지 않습니다."))
         html += p(("지나온 경험에서 확인할 것 · " if index < now else "이 구간을 돌아볼 질문 · ") + prompt)
+        html += p(personal_reading.transit_reading(f, d['gan'], d['ji']))
     if not f.daeun_started:
         html += p("아직 첫 대운 시작 전입니다. 첫 칸을 현재 대운으로 해석하지 않습니다.")
     if f.daeun and f.age >= int(f.daeun[-1]["start_age"]) + 10:
@@ -374,6 +405,7 @@ def timing_html(f, include_calendar=False):
         fact, links, prompt = _transit(f, gan, ji)
         start = solar_terms.ipchun_utc(year) + timedelta(hours=9)
         html += f'<h3>{year}년 입춘부터 · {start:%Y-%m-%d %H:%M}</h3>' + p(fact) + p("함께 볼 조건 · " + prompt)
+        html += p(personal_reading.transit_reading(f, gan, ji))
         if links:
             html += p(" · ".join(links))
     current = solar_terms.current_jie(utc)[1]
@@ -386,6 +418,7 @@ def timing_html(f, include_calendar=False):
         fact, links, prompt = _transit(f, gan, ji)
         start = at + timedelta(hours=9)
         html += f'<h3>{solar_terms.term_name(idx)}부터 · {start:%Y-%m-%d %H:%M}</h3>' + p(fact) + p("확인할 질문 · " + prompt)
+        html += p(personal_reading.transit_reading(f, gan, ji))
         if links:
             html += p(" · ".join(links))
     return guard.enforce(html)
@@ -433,7 +466,7 @@ def method_html(f, plan):
     return guard.enforce(html)
 
 
-def render(plan, f, tier="free", comprehensive=False):
+def render(plan, f, tier="free", comprehensive=False, lens_id="pungun"):
     """Project only entitled prose; the full candidate ledger stays on the server."""
     paid = tier != "free"
     shown = plan["selected"][:3 if paid else 1]
@@ -441,6 +474,8 @@ def render(plan, f, tier="free", comprehensive=False):
                 "html": claim_html(c, plan)} for c in shown]
     sections = []
     if paid:
+        sections.append({'id': 'portrait', 'title': '이 명식에서 두드러지는 성향과 쓰임', 'html': personal_reading.portrait_html(f, plan)})
+        sections.append({'id': 'focus', 'title': content()['domains'][plan['concern']]['label'] + '에 적용한 해석', 'html': personal_reading.domain_reading(plan, plan['concern'])})
         sections.append({"id": "decision", "title": "지금 고민의 두 선택", "html": decision_html(plan)})
         sections.append({"id": "timing", "title": "지나온 흐름과 다음 구간", "html": timing_html(f, tier == "all")})
         if comprehensive:
@@ -450,6 +485,7 @@ def render(plan, f, tier="free", comprehensive=False):
                     continue
                 # Reuse the same natal hypotheses, with no unrelated context answers.
                 domain_plan = build_plan(f, concern)
+                domain_plan['rejected'] = plan['rejected']
                 rejected = {c["id"] for c in plan["rejected"]}
                 claim = next((c for c in domain_plan["selected"] if c["id"] not in rejected), None)
                 html = domain_html(claim, domain_plan, explained)
@@ -464,10 +500,11 @@ def render(plan, f, tier="free", comprehensive=False):
         html += p("한 가지 실행 · " + next_action(plan))
         html += p("다음에 비슷한 장면이 생기면, 행동을 바꿨는지와 상대·환경의 조건이 달라졌는지를 따로 확인해 보세요. 맞지 않은 해석은 유지할 필요가 없습니다.")
         sections.append({"id": "review", "title": "한 가지 실행하고 다시 보기", "html": html})
-    result = {"version": VERSION, "fingerprint": plan["fingerprint"], "basis": plan["basis"],
+    result = {"version": VERSION, "access_tier": tier, "fingerprint": plan["fingerprint"], "basis": plan["basis"],
         "headline": shown[0]["title"] if shown else "한 가지 성향으로 압축하기보다 실제 상황부터 확인합니다.",
         "summary": summary, "sections": sections, "consultation": questions(plan), "input_error": plan["input_error"],
         "scope": "전체" if comprehensive else "선택한 고민", "as_of": getattr(f, "as_of", ""),
         "boundary": "계산된 배치를 전통 해석의 질문으로 옮겼습니다. 실제 경험은 고른 답변으로만 확인하며, 사건이나 상대의 마음을 단정하지 않습니다.",
         "empty_reason": None if shown else "이번 근거와 답변에서 유지할 수 있는 관계 해석이 부족해 결론 수를 억지로 채우지 않았습니다."}
-    return guard.enforce_deep(result)
+    from .reading_narrator import project
+    return project(result, plan, f, lens_id)
