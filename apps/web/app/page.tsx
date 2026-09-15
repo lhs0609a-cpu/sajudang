@@ -497,7 +497,7 @@ function EntryInner() {
             <button className="btn mt" onClick={() => { s.set({cur:"pungun"}); go("a5"); }}>내 고민으로 무료 해석 보기</button>
             <p className="conversion-note">{entryArm === 1 ? "무료 해석과 오늘 해볼 행동 하나 · 시간은 몰라도 되오" : "첫 해석 무료 · 태어난 시간은 몰라도 되오"}</p>
             <GuideIntro />
-            <CompanionCat state="welcome" message="안내묘 하묘당! 네 곁에 꼭 붙어 있을게냥." />
+            <CompanionCat state="welcome" message="나는 동글 달묘다냥. 네 이야기를 같이 읽어볼게!" />
           </div>
         </div>
         <section className="gate-promise"><p className="brand-overline">성신당에서 만나는 세 가지</p><div><article><span>一</span><h2>나를 읽는 근거</h2><p>어떤 기둥에서 나온 말인지<br/>함께 보여드리오.</p></article><article><span>二</span><h2>지금의 고민</h2><p>돈, 일, 사랑, 사람.<br/>마음이 쓰이는 곳부터 보오.</p></article><article><span>三</span><h2>오늘의 작은 행동</h2><p>읽고 끝내지 않도록<br/>해볼 일 하나를 남기오.</p></article></div></section>
