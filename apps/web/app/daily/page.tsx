@@ -17,6 +17,7 @@ import { api } from "@/lib/api";
 import { useSession } from "@/lib/store";
 import { useScreen } from "@/lib/track";
 import type { DailyResponse } from "@shared/chart";
+import ServerText from "@/components/ServerText";
 
 const VISIT_WARN_AT = 3;
 
@@ -110,7 +111,7 @@ export default function DailyPage() {
             </p>
             <p className="sm">{data.relation} 날</p>
           </div>
-          <span className="src">근거 · {data.source}</span>
+          <ServerText className="src" html={`근거 · ${data.source}`} />
           <div className="bar" style={{ margin: "12px 0" }}>
             <i style={{ ["--w" as string]: `${data.score}%` }} />
           </div>

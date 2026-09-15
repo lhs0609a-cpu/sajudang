@@ -21,6 +21,7 @@ import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/store";
 import { useScreen } from "@/lib/track";
 import type { Summary } from "@shared/chart";
+import ServerText from "@/components/ServerText";
 
 const EL_WORD: Record<string, string> = {
   목: "나무", 화: "불", 토: "흙", 금: "쇠", 수: "물",
@@ -131,7 +132,7 @@ export default function SummaryPage() {
       {sm.sections.map((sec) => (
         <div className="blk in" key={sec.id}>
           <div className="lab">{sec.title}</div>
-          <span className="src">근거 · {sec.source}</span>
+          <ServerText className="src" html={`근거 · ${sec.source}`} />
           <div dangerouslySetInnerHTML={{ __html: sec.html }} />
         </div>
       ))}

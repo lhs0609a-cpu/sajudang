@@ -14,6 +14,7 @@ import { LENS_BY_ID } from "@/lib/lenses";
 import { CONCERNS, useSession } from "@/lib/store";
 import { track } from "@/lib/track";
 import type { HookSegment } from "@shared/chart";
+import ServerText from "@/components/ServerText";
 
 /*
  * 노출 수를 화면에 낼 **바닥값** (2026-09-07).
@@ -226,12 +227,16 @@ export default function HookSegments({
               그래서 자리만 옮깁니다: 찌르고, 그 아래에 무엇을 보고 한
               말인지 적습니다.
           */}
+          {/* ★ 근거는 **그려야** 합니다 (2026-09-15).
+              엔진이 어려운 말에 다는 풀이는 `<i class="gl">` 로 싸여
+              옵니다. 글자로 꽂으면 손님 눈에 꺾쇠가 그대로 보입니다 —
+              「상관<i class="gl">(하고 싶은 말을…)</i>이 둘」. */}
           {seg.source && !seg.source_below && (
-            <span className="src">근거 · {seg.source}</span>
+            <ServerText className="src" html={`근거 · ${seg.source}`} />
           )}
           <div dangerouslySetInnerHTML={{ __html: seg.html }} />
           {seg.source && seg.source_below && (
-            <span className="src below">근거 · {seg.source}</span>
+            <ServerText className="src below" html={`근거 · ${seg.source}`} />
           )}
           {/* ★ 조건을 source 가 아니라 statement_id 로 바꿉니다.
               source 로 걸어 두면, 근거가 없는 단은 응답이 100건 쌓여도

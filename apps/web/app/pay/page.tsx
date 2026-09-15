@@ -35,6 +35,7 @@ import type { ReportResponse } from "@shared/chart";
 /* 목패의 모양은 lib/api.ts 한 곳에만 적습니다 — 여기 또 적으면
    서버가 필드를 늘려도 이 화면만 모릅니다. */
 import type { Granted, TierCard, SubView } from "@/lib/api";
+import ServerText from "@/components/ServerText";
 
 /** 카드를 걸기 전에 서버가 내려보내는 것 — 손님 열쇠와 고지 문구. */
 type SubOffer = Awaited<ReturnType<typeof api.subPrepare>>;
@@ -420,7 +421,7 @@ function PayInner() {
             <h2>맞지 않았던 {rejected.length}마디는 접어 두겠소.</h2>
             <p>그대가 아니라고 답한 해석을 성격으로 단정하지 않겠소. 생년월일에서 계산한 기둥은 그대로지만, <strong>그 해석이 실제 경험과 같다는 뜻은 아니오.</strong></p>
             <ul>{rejected.map(stage => <li key={stage}>{stageNames[stage] ?? "확인 질문"}</li>)}</ul>
-            {free.editorial && <p className="conversion-note">계산에서 확인한 근거 · {free.editorial.observation}</p>}
+            {free.editorial && <ServerText as="p" className="conversion-note" html={`계산에서 확인한 근거 · ${free.editorial.observation}`} />}
             <p><strong>오늘은 이것부터 해보시오.</strong><br />맞지 않았던 문장 하나와 실제로 겪은 장면 하나를 나란히 적으시오. 다른 점이 무엇인지 먼저 살피는 것으로 충분하오.</p>
             <button className="btn gh" onClick={() => {track("reading_mismatch", "d0", {n: 1}); router.push("/?step=a3");}}>태어난 정보 다시 확인하기</button>
             <button className="btn gh" onClick={() => {track("reading_mismatch", "d0", {n: 2}); router.push("/lobby");}}>다른 해석자의 관점 살펴보기</button>
@@ -466,7 +467,7 @@ function PayInner() {
             <summary>{rejected.length ? "원래 해석과 계산 근거 확인하기" : "무료 해석의 자세한 근거 펼치기"} · {cuts.length}개 항목</summary>
             {rejected.length > 0 && <p className="conversion-note">아래는 응답 전 생년월일과 고민으로 만든 원래 해석이오. 아니라고 답한 대목이 맞는 것으로 바뀐 것은 아니오.</p>}
             {cuts.map(c => <section className="blk" key={c.id}>
-              <h2 className="lab">{c.title}</h2><p className="src">근거 · {c.source}</p>
+              <h2 className="lab">{c.title}</h2><ServerText as="p" className="src" html={`근거 · ${c.source}`} />
               {c.id === "sinsal" ? <SinsalSlots html={c.html} /> : <div dangerouslySetInnerHTML={{__html:c.html}} />}
             </section>)}
             {!rejected.length && free.practice && <PracticeCard key={free.practice.id} practice={free.practice} />}
@@ -602,7 +603,7 @@ function PayInner() {
             {!peek && !peekError && <p role="status">선택한 상품의 실제 본문을 불러오고 있소…</p>}
             {peekError && <div className="conversion-status" role="alert"><p>{peekError}</p><button className="btn gh" onClick={() => setPeekRetry(n => n+1)}>본문 미리보기 다시 불러오기</button></div>}
             {peek && peek.length > 0 && <section className="paid-preview"><h3>다음 해석에서 풀어볼 질문</h3><p className="conversion-note">무료에서는 기둥·핵심 해석·오늘의 행동을 읽었소. 아래는 선택한 상품에서 추가로 열리는 해석의 실제 앞부분이오.</p>
-              {peek.slice(0, 3).map((r, i) => <div key={r.lens_id+i}><h3>{r.ask}</h3><p>{r.head}… <span className="conversion-note">(본문 일부)</span></p>{r.source && <p className="conversion-note">해석 근거 · {r.source}</p>}</div>)}
+              {peek.slice(0, 3).map((r, i) => <div key={r.lens_id+i}><h3>{r.ask}</h3><p>{r.head}… <span className="conversion-note">(본문 일부)</span></p>{r.source && <ServerText as="p" className="conversion-note" html={`해석 근거 · ${r.source}`} />}</div>)}
             </section>}
             <details className="conversion-details"><summary>전체 분량과 열람 범위</summary>
               <p className="conversion-note">현재 명식 기준 {tier.cuts}개 내용 · {tier.chars.toLocaleString()}자 · 약 {tier.minutes}분. {tier.lenses}명의 관점으로 읽소.</p>

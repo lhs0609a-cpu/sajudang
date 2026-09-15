@@ -28,6 +28,7 @@ import { LENS_BY_ID, youOf } from "@/lib/lenses";
 import { useSession } from "@/lib/store";
 import { thinkOf } from "@/lib/think";
 import type { ReportResponse } from "@shared/chart";
+import ServerText from "@/components/ServerText";
 
 type Tab = "c1" | "c2" | "c3" | "c4" | "c5" | "c6";
 
@@ -446,7 +447,7 @@ function ReportInner() {
         </Say>
         {daeunCut ? (
           <>
-            <span className="src">근거 · {daeunCut.source}</span>
+            <ServerText className="src" html={`근거 · ${daeunCut.source}`} />
             <div className="cutbody" dangerouslySetInnerHTML={{ __html: daeunCut.html }} />
           </>
         ) : (
@@ -512,7 +513,7 @@ function ReportInner() {
         {rep.locked.map((l) => (
           <div className="dz" key={l.id}>
             <div className="k">{l.title}</div>
-            <p className="sm">근거 · {l.source}</p>
+            <ServerText as="p" className="sm" html={`근거 · ${l.source}`} />
             {l.teaser ? (
               <p className="tz">
                 {l.teaser}
@@ -705,7 +706,7 @@ function ReportInner() {
           <p className="lastcut">이제 마지막 자리요.</p>
         )}
         <div className="lab">{c.title}</div>
-        <span className="src">{c.source}</span>
+        <ServerText className="src" html={c.source} />
         {c.id === "sinsal"
           ? <SinsalSlots html={c.html} />
           : <div className="cutbody" dangerouslySetInnerHTML={{ __html: c.html }} />}
