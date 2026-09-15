@@ -2,6 +2,10 @@ body .phone .companion-cat {align-items:center;gap:14px}
 body .phone .companion-cat svg {width:80px;height:80px;min-width:80px;flex:0 0 80px;overflow:visible;filter:drop-shadow(0 5px 6px #0002)}
 .hamyo-speech {position:relative;min-width:0;flex:1;padding:13px 15px;background:#ddc4930b;border:1px solid #ddc49323;border-radius:16px 16px 16px 4px}
 .hamyo-name {display:block;font:500 11px/1.5 var(--sans);color:#d0bd9a;letter-spacing:.03em;margin-bottom:5px}
+/* ★ 폰에서 11px 로 그려져 안 읽혔습니다 (tools/mobile_render.py).
+   atelier.css 에서 올려 봤자 이 파일이 뒤에 실려 덮습니다 —
+   덮는 자리에서 고쳐야 합니다 (globals.css 의 @import 차례). */
+@media(max-width:600px){.hamyo-name {font-size:12px}}
 body .phone .hamyo-speech p {font:400 14px/1.75 var(--sans);color:var(--paper);margin:0;word-break:keep-all;overflow-wrap:break-word}
 .hamyo-paw {transform-box:fill-box;transform-origin:50% 95%}
 .companion-cat--welcome .hamyo-paw {animation:hamyo-wave .55s ease-in-out 2}
@@ -15,4 +19,26 @@ body .phone .hamyo-speech p {font:400 14px/1.75 var(--sans);color:var(--paper);m
 }
 @media(prefers-reduced-motion:reduce) {
   .companion-cat .hamyo-paw,.companion-cat .hamyo-heart,.companion-cat--selected svg,.companion-cat--saved svg {animation:none!important}
+}
+
+
+/* ══════════ 폰에서 12px 아래로 그려지던 글 ══════════
+   (2026-09-15 · tools/mobile_render.py)
+
+   ★ 처음에는 **한 줄로 바닥을 깔았습니다** — 폰의 모든 글에
+     `font-size:max(12px,1em)`. 그랬더니 캐릭터 카드 글이 넓어져
+     360px 화면에서 **365px 로 삐져나왔습니다.** 바닥을 까는 것은
+     쉽지만, 좁은 칸에 든 글까지 같이 키우면 칸이 터집니다.
+
+     그래서 자리를 짚어 올립니다. 카드 안(.op.face)은 이미 12px 로
+     맞춰져 있으니 건드리지 않습니다. */
+@media(max-width:600px){
+  /* 화면 이름 줄 · 캐릭터 별명 · 브랜드 곁말 — 칸이 넉넉한 자리들 */
+  .hamyo-name {font-size:12px}
+  /* ★ `.arch`(캐릭터 별명)는 **안 올립니다.** 11 → 12px 로 올렸더니
+     얼굴 카드 글이 넓어져 360px 화면에서 365px 로 삐져나왔습니다
+     (삐짐 0 → 6). 좁은 칸에 든 글은 키우면 칸이 터집니다 —
+     여기서는 읽히는 것보다 안 깨지는 것이 먼저입니다. */
+  .brand-rail small,.brand-signature small {font-size:12px}
+  .phone .top .tt,.phone .top .tb {font-size:12px}
 }

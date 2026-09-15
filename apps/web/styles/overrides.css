@@ -2677,10 +2677,29 @@ body.has-rail .beatskip-hint { left: calc(50% + 116px); }
 .legalpg .biz dd em { font-style: normal; color: var(--paper3); opacity: .6; }
 .legalpg .back { margin-top: 22px; }
 
-/* 하단 고지의 링크 */
-.legal .llinks { margin-top: 9px; }
-.legal .llinks a { color: var(--paper3); text-decoration: underline; }
+/* 하단 고지의 링크
+   ★ 폰에서 **손가락이 안 닿았습니다** (2026-09-15 · tools/mobile_render.py).
+     글자만 12px 라 실제로 그려진 높이가 17px 였습니다. 애플·구글이
+     둘 다 44px 를 최소로 잡습니다. 그런데 이건 전자상거래법 제10조가
+     **상시** 닿을 수 있어야 한다고 적어 둔 링크들입니다 — 못 누르면
+     안 걸어 둔 것과 같습니다.
+
+     글자 크기는 안 올립니다(고지는 작게 두는 자리). 대신 여백으로
+     닿는 자리를 넓힙니다 — 보이는 것은 그대로고 손가락만 커집니다. */
+.legal .llinks { margin-top: 9px; line-height: 1; }
+.legal .llinks a {
+  display: inline-block; padding: 14px 6px; min-height: 44px;
+  box-sizing: border-box; color: var(--paper3); text-decoration: underline;
+}
 .legal .llinks a:hover { color: var(--gold); }
+
+/* 본문 안에 홀로 선 고지 링크도 같은 자리입니다 —
+   「개인정보 처리 안내」(a3) · 「판매자 정보 확인하기」(d1). */
+.phone .conversion-note > a,
+.phone .conversion-status > a {
+  display: inline-block; padding: 13px 4px; min-height: 44px;
+  box-sizing: border-box;
+}
 
 /* ══════════ 뜸과 한 컷씩 뜨기 ══════════
    ★ 손님이 2026-09-02 에 짚은 둘입니다.
