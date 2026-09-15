@@ -1,5 +1,6 @@
 """POST /v1/chart — 명식 산출. 가장 많이 불리는 엔드포인트."""
 import hashlib
+from dataclasses import fields as _dc_fields
 
 from fastapi import APIRouter, HTTPException
 
@@ -7,7 +8,7 @@ import store
 from service_clock import today
 from version import ENGINE_VER
 from engine.calendar import build_chart
-from engine.features import build_features
+from engine.features import Features as _Features, build_features
 from engine.solar_terms import SolarTermError
 from schemas.api import ChartRequest, ChartResponse
 
@@ -31,6 +32,10 @@ def chart_key(req: ChartRequest) -> str:
     return hashlib.sha256(raw.encode()).hexdigest()
 
 
+# 지금 판의 Features 가 가진 칸. 찍어 둔 명식이 이것과 다르면 안 씁니다.
+_FEATURE_KEYS = frozenset(f.name for f in _dc_fields(_Features))
+
+
 def load_features(chart_id: str) -> dict:
     """다른 라우터가 chart_id 로 Feature 를 꺼낼 때 쓴다."""
     f = store.get_json(store.k_chart(chart_id))
@@ -42,6 +47,19 @@ def load_features(chart_id: str) -> dict:
     if (store.get_json(_k_ver(chart_id)) != ENGINE_VER or
             store.get_json("chartdate:" + chart_id) != today().isoformat()):
         raise HTTPException(status_code=409, detail="오늘 기준으로 명식을 갱신해야 하오.",
+                            headers={"X-Chart-Rebuild": "1"})
+    # ★ 찍어 둔 칸이 지금 Features 와 다르면 **쓰지 않습니다** (2026-09-15).
+    #
+    #   판(ENGINE_VER)과 날짜가 같아도 칸이 다를 수 있습니다. 다른 갈래가
+    #   같은 판 이름으로 `as_of` 를 더 담아 두었고, 그걸 `Features(**raw)`
+    #   에 부으니 그 자리에서 터져 **훅이 500** 을 냈습니다. 손님에게는
+    #   첫 화면이 열리다 마는 것으로 보입니다.
+    #
+    #   모르는 칸을 조용히 걷어내고 쓰지는 않습니다 — 칸이 다르면 셈도
+    #   다를 수 있고, 이 집은 모르면 모른다고 합니다. 다시 세우라고
+    #   말합니다. 화면은 이 표시를 보고 되세웁니다(X-Chart-Rebuild).
+    if set(f) != _FEATURE_KEYS:
+        raise HTTPException(status_code=409, detail="명식을 다시 세워야 하오.",
                             headers={"X-Chart-Rebuild": "1"})
     return f
 
@@ -207,6 +225,11 @@ def post_chart(req: ChartRequest) -> ChartResponse:
     #   가리키오.
     if cached is not None and (store.get_json(_k_ver(key)) != ENGINE_VER or
                               store.get_json("chartdate:" + key) != now.isoformat()):
+        cached = None
+    # ★ 칸이 다른 것도 안 씁니다 — load_features 와 같은 까닭입니다.
+    #   여기서 안 걸러내면 옛 칸이 그대로 다시 나가고, 그걸 받은
+    #   다음 화면이 터집니다.
+    if cached is not None and set(cached) != _FEATURE_KEYS:
         cached = None
     if cached is not None:
         return ChartResponse(chart_id=key, features=cached, cached=True,
