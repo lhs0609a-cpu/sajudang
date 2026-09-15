@@ -137,11 +137,14 @@ export default function DailyPage() {
           {/* ★ 줄 단위로 그립니다. 관계·일간·신강약·계절·용신을 곱해 만든
               다섯 줄이라, 한 문단으로 뭉치면 읽히지 않습니다. */}
           <Say who="도령" lens="pungun">
+            {/* ★ 오늘의 줄에도 엔진이 굵은 글씨를 답니다 —
+                「돈이 <b>나가는 쪽</b>으로 도는 날이오」. 글자로 꽂으면
+                꺾쇠가 그대로 보입니다 (2026-09-15). */}
             {data.lines.map((l, i) => (
-              <p key={i} style={i ? { marginTop: 8 } : undefined}>{l}</p>
+              <ServerText as="p" key={i} html={l} />
             ))}
           </Say>
-          {data.notes.map((n) => <p className="sm" key={n}>· {n}</p>)}
+          {data.notes.map((n) => <ServerText as="p" className="sm" key={n} html={`· ${n}`} />)}
           {/*
             ★ 어려운 말이 여섯 개 지나가는데 풀이가 한 줄도 없었습니다
               (쉬움 30점). 리포트 컷이 쓰는 상자를 그대로 답니다 —

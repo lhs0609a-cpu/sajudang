@@ -42,3 +42,9 @@ body .phone .hamyo-speech p {font:400 14px/1.75 var(--sans);color:var(--paper);m
   .brand-rail small,.brand-signature small {font-size:12px}
   .phone .top .tt,.phone .top .tb {font-size:12px}
 }
+
+
+/* 오늘의 일진 다섯 줄 — 사이를 띄웁니다.
+   ★ 전에는 화면이 `style={{marginTop:8}}` 로 손으로 줬는데, 그 줄을
+     `ServerText` 로 바꾸면서 자리를 잃었습니다. 간격은 원래 CSS 몫이오. */
+.phone .say p + p { margin-top: 8px; }
