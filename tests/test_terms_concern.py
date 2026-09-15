@@ -118,7 +118,8 @@ def test_love_reads_the_spouse_star_as_a_partner_not_as_money():
     love = _g(s, "love", "M")
     assert "재물" in money and "짝" not in money
     assert "짝" in love, love
-    assert "재성⟪짝을 보는 자리⟫" in love, love
+    # 쉬운 말로 바꿨소 (2026-09-11 · docs/21) — 「짝을 보는 자리」 → 무엇인지.
+    assert "재성⟪돈과 짝을 함께 보는 글자⟫" in love, love
 
 
 def test_love_spouse_star_follows_the_sex():

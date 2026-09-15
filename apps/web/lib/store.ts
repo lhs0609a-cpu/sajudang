@@ -53,7 +53,7 @@ export interface SessionState {
   chartId: string | null;
   /** 희소도 — 센 값. 없으면 화면이 그 자리를 접는다 */
   rarity: import("@shared/chart").Rarity | null;
-  /** 다른 만세력과 갈릴 수 있는 자리. 먼저 말해 줍니다. */
+  /** 다른 만세력과 갈릴 수 있는 자리. 먼저 말해 주오. */
   divergence: { cases: import("@shared/chart").DivergenceCase[] } | null;
   features: Features | null;
 
@@ -64,8 +64,30 @@ export interface SessionState {
   seals: string[];
   tier: Tier;
   paid: boolean;
+  hookReview: { chartId: string; concern: string; lensId: string; answers: Record<string, boolean | null> } | null;
+  /**
+   * 물으신 자리가 되묻는 것에 **한 번** 고른 답.
+   *
+   * ★ 화면을 넘으면 사라져 **또 묻고 있었습니다** (2026-09-10).
+   *   무료 구간(d0)에서 고르고, 값을 치르고, 리포트로 가면 같은 것을
+   *   다시 물었습니다 — `extras` 가 화면마다 따로 사는 값이라서요.
+   *   손님 눈에는 「아까 말했는데」 입니다.
+   *
+   * ★ 고민이나 명식이 바뀌면 **버립니다.** 돈에서 고른 답이 몸 물음에
+   *   실려 가면 안 되오.
+   *
+   * ★ 상대 사주·현재 상황은 여기 안 둡니다. 그건 제3자의 생년월일이라
+   *   본인 동의가 없고, 계산하고 버리는 값입니다 (docs/11).
+   *   여기 두는 것은 **고른 것 한둘**뿐이오.
+   *
+   * ★ **건너뛴 것도 기억합니다.** `choice: ""` 가 「물었고 안 답했다」요.
+   *   안 남기면 화면을 옮길 때마다 또 뜹니다 — 건너뛴 사람에게
+   *   같은 물음을 세 번 내미는 셈이오.
+   */
+  topicPick: { chartId: string; concern: string; choice: string; choice2?: string } | null;
   relayUsed: number;
   visits: number;
+  visitDate: string | null;
 
   /* ── 관리자 레일 ──
      ?admin=1 로 켜고 ?admin=0 으로 끕니다. 전체 화면을 오가며
@@ -113,6 +135,7 @@ const initial = {
   city: "서울",
   axis4: null as string | null,
   concern: "love" as Concern,
+  topicPick: null as SessionState["topicPick"],
   /*
    * ── 손님이 **실제로 고른** 것인가 ──────────────────────
    *
@@ -151,8 +174,10 @@ const initial = {
   seals: [] as string[],
   tier: "free" as Tier,
   paid: false,
+  hookReview: null as SessionState["hookReview"],
   relayUsed: 0,
   visits: 0,
+  visitDate: null as string | null,
   admin: false,          // 첫 그림(SSR)에는 레일이 없다 — 켜는 것은 DevRail 이 한다
   adminSet: false,
   seasonOverride: null as Season | null,
@@ -180,9 +205,11 @@ export const useSession = create<SessionState>()(
         sex: s.sex, city: s.city, axis4: s.axis4, concern: s.concern,
         concernSet: s.concernSet, sexSet: s.sexSet,
         chartId: s.chartId, cur: s.cur, read: s.read, skipped: s.skipped,
-        seals: s.seals, tier: s.tier, paid: s.paid, visits: s.visits,
+        seals: s.seals, tier: s.tier, paid: s.paid, visits: s.visits, visitDate: s.visitDate,
         admin: s.admin, adminSet: s.adminSet, seasonOverride: s.seasonOverride,
         ilganOverride: s.ilganOverride,
+        hookReview: s.hookReview,
+        topicPick: s.topicPick,
       }),
     },
   ),
@@ -211,7 +238,7 @@ export const CONCERNS: { id: Concern; label: string; sub: string }[] = [
  *
  * ★ 값과 분량은 **서버가 셉니다** — `POST /v1/pay/tiers`.
  *   여기 "평생운 18컷 · 25페이지" 라고 적혀 있었는데 실제로 나오는 것은
- *   11~12컷 · 6탭이었습니다. 화면이 제 손으로 분량을 적으면 엔진이
+ *   11~12컷 · 6탭이었소. 화면이 제 손으로 분량을 적으면 엔진이
  *   달라져도 이 줄은 안 바뀌므로, 다시 어긋납니다.
  *   값도 같습니다 — 캐릭터마다 다르고, 서버가 청구하는 값만이 참입니다.
  */

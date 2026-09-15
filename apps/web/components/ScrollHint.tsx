@@ -33,7 +33,7 @@
 
 import { useEffect, useState } from "react";
 
-/** 바닥을 이만큼 남기면 «다 왔다» 로 봅니다. */
+/** 바닥을 이만큼 남기면 «다 왔다» 로 보오. */
 const BOTTOM_SLACK = 120;
 
 export default function ScrollHint({

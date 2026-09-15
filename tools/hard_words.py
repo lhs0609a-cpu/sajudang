@@ -163,7 +163,16 @@ def screen_text() -> dict:
     out = {}
     for p in list((WEB / "app").rglob("*.tsx")) + \
              list((WEB / "components").rglob("*.tsx")):
-        if p.name == "DevRail.tsx":
+        # 손님이 보는 화면만 봅니다.
+        #
+        # * 관리자 자리는 손님 글이 아닙니다. 거기 남은 「대운」·「일진」은
+        #   **화면 이름표**라(「c3 대운 맵」 · 「g1 오늘의 일진」) 풀 수가
+        #   없습니다 — 이름이니까요. 그걸 「안 풀린 어려운 말」로 세면
+        #   진짜 빠진 자리가 그 안에 묻힙니다.
+        #   DevRail 을 빼 두던 것과 같은 자리요.
+        if p.name in ("DevRail.tsx", "AssetBoard.tsx", "ExperimentPanel.tsx"):
+            continue
+        if "admin" in p.parts:
             continue
         src = p.read_text(encoding="utf-8")
         src = re.sub(r"/\*.*?\*/", " ", src, flags=re.S)   # 블록 주석

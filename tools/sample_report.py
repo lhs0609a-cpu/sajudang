@@ -100,13 +100,25 @@ def cuts_html(rep, f=None, drop=("daeun_map",)) -> str:
                   " · 잠긴 자리 %d컷" % len(rep["locked"]) if rep["locked"] else ""))
     if rep.get("opening"):
         out.append('<p class="saying">%s</p>' % rep["opening"])
-    for c in rep["cuts"]:
-        if c["id"] in drop:
+    # ★ 화면과 같이 접습니다 (engine/report.fold_of) — 본문 · 그 캐릭터의 눈 · 셈 장부.
+    groups = [(None, None),
+              ("lens", "%s의 눈으로 더 보기" % esc(rep["lens"]["name"])),
+              ("ledger", "셈 장부 — 위의 말이 어디서 나왔는지")]
+    for fold, head in groups:
+        part = [c for c in rep["cuts"]
+                if c["id"] not in drop and (c.get("fold") or None) == fold]
+        if not part:
             continue
-        own = " own" if c["id"].startswith("lc_") else ""
-        out.append('<div class="blk in%s"><div class="lab">%s</div>'
-                   '<span class="src">%s</span>%s</div>'
-                   % (own, esc(c["title"]), esc(c["source"]), c["html"]))
+        if head:
+            out.append('<details class="foldgroup"><summary class="foldhead">'
+                       '%s · %d컷</summary>' % (head, len(part)))
+        for c in part:
+            own = " own" if c["id"].startswith("lc_") else ""
+            out.append('<div class="blk in%s"><div class="lab">%s</div>'
+                       '<span class="src">%s</span>%s</div>'
+                       % (own, esc(c["title"]), esc(c["source"]), c["html"]))
+        if head:
+            out.append('</details>')
     if rep.get("closing"):
         out.append('<p class="saying close">%s</p>' % rep["closing"])
     out.append('</div>')

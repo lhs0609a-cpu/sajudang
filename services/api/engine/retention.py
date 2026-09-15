@@ -103,16 +103,16 @@ def _daily_hits(features: dict, gan: str, ji: str) -> Optional[dict]:
         return None
     if _CHUNG.get(day_ji) == ji:
         return {"why": "chung",
-                "text": "그대 일지 %s 와 정면으로 부딪히는 날이오." % day_ji}
+                "text": "그대 발밑 글자 %s 와 오늘 글자가 정면으로 부딪히는 날이오." % day_ji}
     if _HAP.get(day_ji) == ji:
         return {"why": "hap",
-                "text": "그대 일지 %s 와 묶이는 날이오." % day_ji}
+                "text": "그대 발밑 글자 %s 와 오늘 글자가 짝을 지어 묶이는 날이오." % day_ji}
     weak = features.get("weak_el")
     if weak and features.get("elements", {}).get(weak, 1) == 0:
         from .constants import ELEMENT_OF_GAN
         if ELEMENT_OF_GAN.get(gan) == weak:
             return {"why": "fill",
-                    "text": "여덟 자리에 하나도 없던 기운이 오늘 드는 날이오."}
+                    "text": "그대 여덟 글자에 하나도 없던 것이 오늘 들어오는 날이오."}
     return None
 
 
@@ -145,7 +145,7 @@ def plan_for(features: dict, birth: date, on: Optional[date] = None,
                 "payload": {
                     "statement_id": week_task.get("statement_id"),
                     "given_on": given.isoformat(),
-                    "text": "이레 전에 한 가지를 드렸소. 했는지만 말해 주시오.",
+                    "text": "일주일 전에 해 볼 일 한 가지를 드렸소. 했는지만 말해 주시오.",
                 },
             })
 
@@ -166,21 +166,21 @@ def plan_for(features: dict, birth: date, on: Optional[date] = None,
         candidates.append({
             "kind": "turning",
             "payload": {"start_age": turning,
-                        "text": "내년에 대운이 바뀌오. 십 년에 한 번 있는 자리요."},
+                        "text": "내년에 대운이 바뀌오. 십 년에 한 번 오는 때요."},
         })
 
     # ── 입춘 세운 ──────────────────────────────────────────
     if is_ipchun(on):
         candidates.append({
             "kind": "year",
-            "payload": {"text": "입춘이오. 올해의 간지가 오늘부터 바뀌오."},
+            "payload": {"text": "오늘은 입춘, 곧 봄이 시작되는 날이오. 사주에서는 오늘부터 새해 글자로 바뀌오."},
         })
 
     # ── 생일 ──────────────────────────────────────────────
     if (on.month, on.day) == (birth.month, birth.day):
         candidates.append({
             "kind": "birthday",
-            "payload": {"text": "오늘이 그 날이오. 한 해 치를 다시 보겠소?"},
+            "payload": {"text": "오늘이 그대 생일이오. 올 한 해 풀이를 다시 보겠소?"},
         })
 
     # ── 절입일 월운 ────────────────────────────────────────
@@ -189,14 +189,14 @@ def plan_for(features: dict, birth: date, on: Optional[date] = None,
         candidates.append({
             "kind": "month",
             "payload": {"term": jeolip,
-                        "text": "%s이오. 달의 기운이 오늘 바뀌오." % jeolip},
+                        "text": "오늘은 %s이오. 사주로 치는 달이 오늘 바뀌오." % jeolip},
         })
 
     # ── 새 캐릭터 ─────────────────────────────────────────
     if new_lens:
         candidates.append({
             "kind": "new_lens",
-            "payload": {"lens_id": new_lens, "text": "새 사람이 자리에 앉았소."},
+            "payload": {"lens_id": new_lens, "text": "성신당에 풀어 줄 사람이 새로 한 명 왔소."},
         })
 
     # ── 일진 ──────────────────────────────────────────────

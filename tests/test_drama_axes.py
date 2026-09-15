@@ -203,7 +203,7 @@ def test_cli_reads_the_flag():
 #   나머지 셋(c8 내보내기 · g2 되짚기 · g3 차 한 잔)은 다른 화면
 #   **안의 구역**이라 따로 안 섭니다. 그건 빠진 게 아니라 없는
 #   것이라, 여기 적어 두고 셈에서 뺍니다.
-SECTIONS = {"c8", "g2", "g3", "s2"}   # 다른 화면 안의 구역
+SECTIONS = {"c8", "g2", "g3", "s2", "d1b"}   # d1b 엿보기는 d1 안으로 통합
 
 
 def test_every_named_screen_is_measured():

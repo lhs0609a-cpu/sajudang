@@ -11,6 +11,9 @@
 export type Preset = "Static" | "Dolly In" | "Dolly Right";
 export type Ratio = "9:16" | "16:9" | "3:4" | "1:1";
 
+/** 입력·결제 화면 통합으로 사용을 멈춘 장면. 관리자 에셋 목록과 원본은 보존한다. */
+export const ARCHIVED_SCENES = ["coin", "desk", "door", "fork", "ink", "mirror", "room", "tray"] as const;
+
 /**
  * 일간 색을 입히는 방식. (docs/10 §4)
  *

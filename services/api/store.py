@@ -23,6 +23,8 @@ import os
 import sqlite3
 import threading
 import time
+import uuid
+from contextlib import contextmanager
 from typing import Any, Optional
 
 log = logging.getLogger("store")
@@ -182,6 +184,90 @@ def get_int(key: str) -> int:
         return int(v)
     except (TypeError, ValueError):
         return 0
+
+
+class LeaseBusy(RuntimeError):
+    pass
+
+
+@contextmanager
+def payment_lease(account: str):
+    """Serialize settlement per account across workers; fail closed on expiry.
+
+    Network calls are bounded well below this lease. Call check() immediately
+    before local settlement. Token-checked release cannot unlock a later owner.
+    """
+    key = "payment-lock:" + hashlib.sha256(account.encode()).hexdigest()
+    token = uuid.uuid4().hex
+    expires = _now() + 120
+    if _redis:
+        acquired = bool(_redis.set(key, json.dumps(token), nx=True, ex=120))
+    elif _db:
+        with _lock:
+            cursor = _db.execute(
+                "INSERT INTO kv(k,v,exp) VALUES(?,?,?) ON CONFLICT(k) DO UPDATE "
+                "SET v=excluded.v,exp=excluded.exp WHERE kv.exp < ?",
+                (key, json.dumps(token), expires, _now()))
+            acquired = cursor.rowcount == 1
+            _db.commit()
+    else:
+        with _lock:
+            acquired = _mem_get(key) is None
+            if acquired:
+                _mem[key] = (expires, token)
+    if not acquired:
+        raise LeaseBusy("결제 결과를 확인 중이에요. 잠시 후 다시 확인해 주세요.")
+
+    def check():
+        if _now() >= expires or get_json(key) != token:
+            raise LeaseBusy("결제 확인이 지연되고 있어요. 결제 내역을 확인해 주세요.")
+    try:
+        yield check
+    finally:
+        if _redis:
+            _redis.eval("if redis.call('get',KEYS[1]) == ARGV[1] then return redis.call('del',KEYS[1]) else return 0 end", 1, key, json.dumps(token))
+        elif _db:
+            with _lock:
+                _db.execute("DELETE FROM kv WHERE k=? AND v=?", (key, json.dumps(token)))
+                _db.commit()
+        else:
+            with _lock:
+                if _mem_get(key) == token:
+                    _mem.pop(key, None)
+
+
+def increment_once(marker: str, counter: str, ttl: int) -> bool:
+    """Atomic counter + permanent receipt: retrying settlement never counts twice."""
+    if _redis:
+        return bool(_redis.eval(
+            "if redis.call('exists',KEYS[1]) == 1 then return 0 end "
+            "redis.call('incr',KEYS[2]); "
+            "if redis.call('ttl',KEYS[2]) < 0 then redis.call('expire',KEYS[2],ARGV[1]) end "
+            "redis.call('set',KEYS[1],'true'); return 1", 2, marker, counter, ttl))
+    with _lock:
+        if _db:
+            try:
+                _db.execute("BEGIN IMMEDIATE")
+                if _db.execute("SELECT 1 FROM kv WHERE k=?", (marker,)).fetchone():
+                    _db.commit()
+                    return False
+                row = _db.execute("SELECT v,exp FROM kv WHERE k=?", (counter,)).fetchone()
+                current = int(json.loads(row[0])) if row and (row[1] is None or row[1] >= _now()) else 0
+                exp = row[1] if row and row[1] and row[1] >= _now() else _now()+ttl
+                _db.execute("INSERT INTO kv(k,v,exp) VALUES(?,?,?) ON CONFLICT(k) DO UPDATE SET v=excluded.v,exp=excluded.exp", (counter,json.dumps(current+1),exp))
+                _db.execute("INSERT INTO kv(k,v,exp) VALUES(?,?,NULL)", (marker,"true"))
+                _db.commit()
+                return True
+            except Exception:
+                _db.rollback()
+                raise
+        if _mem_get(marker) is not None:
+            return False
+        current = _mem_get(counter) or 0
+        exp = _mem.get(counter, (None, None))[0] or _now()+ttl
+        _mem[counter] = (exp, current+1)
+        _mem[marker] = (None, True)
+        return True
 
 
 def exists(key: str) -> bool:

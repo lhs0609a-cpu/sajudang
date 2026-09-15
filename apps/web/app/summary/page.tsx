@@ -32,6 +32,7 @@ export default function SummaryPage() {
   const s = useSession();
   const [sm, setSm] = useState<Summary | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
   const [share, setShare] = useState<{
     path: string; includes: string[]; excludes: string[]; expires_days: number;
   } | null>(null);
@@ -51,7 +52,7 @@ export default function SummaryPage() {
         if (alive) setErr(e instanceof ApiError ? e.message : "분석지를 펴지 못했소.");
       });
     return () => { alive = false; };
-  }, [s.chartId, s.concern, s.axis4, s.cur, s.name]);
+  }, [s.chartId, s.concern, s.axis4, s.cur, s.name, retry]);
 
   if (!s.chartId) {
     return (
@@ -61,8 +62,8 @@ export default function SummaryPage() {
       </Shell>
     );
   }
-  if (err) return <Shell screen="c7" title="분석지"><Say who="도령" lens="pungun">{err}</Say></Shell>;
-  if (!sm) return <Shell screen="c7" title="분석지"><Narration lines={["종이를 편다."]} /></Shell>;
+  if (err) return <Shell screen="c7" title="분석지"><Say who="도령" lens="pungun">{err}</Say><button className="btn" onClick={() => {setErr(null);setRetry(n => n + 1);}}>분석지 다시 불러오기</button></Shell>;
+  if (!sm) return <Shell screen="c7" title="분석지"><Narration lines={["종이를 펴오."]} /></Shell>;
 
   const shareUrl = share
     ? (typeof window !== "undefined" ? window.location.origin : "") + share.path
@@ -70,6 +71,11 @@ export default function SummaryPage() {
 
   return (
     <Shell screen="c7" title="분석지" legal>
+      {/* ★ 울림 45 · 콜드 오픈 0. 지문으로 열고, 이 종이를 누가
+          무엇 때문에 들고 가는지를 한 줄로 짚습니다. */}
+      <Narration lines={["종이 한 장이 마지막으로 접혔다."]} />
+      <p className="sm">여태 참고 미뤄 둔 것을 오늘 한 번 세어 보셨소. 이 한 장은 그 셈을 접어 둔 것이오 — 주머니에 넣어 두는 자와 같은 것이오.</p>
+      <header className="editorial-heading"><p className="conversion-kicker">그대의 이야기 한 장</p><h1>마음에 남은 것만<br/>가만히 챙겨 가시오.</h1><p>읽어낸 근거와 중요한 단서를 한 장에 모았소.</p></header>
       <Scene id="scroll" className="hero" />
       {/*
         ★ 여기가 다섯째로 낮았습니다 (연출 55).
@@ -88,18 +94,15 @@ export default function SummaryPage() {
       <Say who="도령" lens="pungun">
         이건 그대가 들고 나가는 한 장이오.
         <br />
-        여기 적힌 건 기둥 4자리에서 나온 8글자와, 그 여덟에서
-        뽑은 세 줄이오.
+        여기 적힌 건 {s.hourKnown ? "기둥 4자리의 8글자" : "시주(태어난 시의 두 글자)를 뺀 기둥 3자리의 6글자"}와,
+        그 명식에서 읽은 세 줄이오.
           <br />
         칸마다 <b>근거 줄</b>을 달아 두었소 — 무엇을 보고 한 말인지
         적어 두지 않으면 그건 점이 아니라 말장난이라서요. 흐린
         자리는 흐리다고 아래에 따로 적었소. 접지 않았소.
         <br />
-        <b>이 종이를 누구한테 보일지 여태 정하지 못하셨을 게요.</b>
-        {" "}보이면 아는 척당할 것 같고, 안 보이면 혼자 삼키는 것
-        같아 미뤄 두는 자리요.
-          <br /> 그래서 고리를 만들 때 생년월일시와
-        태어난 고을은 <b>뺐소.</b> 남는 건 글자와 읽은 자리뿐이오.
+        공유는 선택이오. 공유 카드에서 생년월일시와 출생지는 제외하오.
+        명식과 해석은 남으니, 공개해도 되는 내용인지 먼저 확인하시오.
         <br />
         {/* 90 은 routers/share.SHARE_TTL_DAYS 와 같은 수요. 아래
             내보내기 칸은 서버가 준 값을 그대로 찍습니다 — 둘이

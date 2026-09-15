@@ -47,7 +47,7 @@ type Size = "chip" | "talk" | "card" | "full";
 export type Mood = "base" | "cut" | "soft";
 
 /*
- * ★ 초상은 **웹피**로 옵니다 (2026-09-04).
+ * ★ 초상은 **웹피**로 오오 (2026-09-04).
  *
  *   PNG 로는 768×1024 한 장이 800KB 였습니다. 스무 명이면 16MB 이고,
  *   첫 장은 손님이 도령의 첫 마디를 읽기도 전에 받습니다. 팔레트로
@@ -91,7 +91,7 @@ function useBust(id: string, mood: Mood) {
 
     (async () => {
       // 그 표정이 있으면 그걸, 없으면 기본 얼굴로 내려옵니다.
-      if (mood !== "base") {
+      if (mood !== "base" && id !== "pungun") {
         const want = await first(FILE[mood]);
         if (want) {
           if (alive) setSrc(want);
@@ -258,7 +258,7 @@ export default function CharArt({
       {/*
         ★ 인사도 **계속 돕니다** (2026-09-05).
 
-          전에는 한 번만 틀었습니다 — 「되풀이되면 인사가 아니라
+          전에는 한 번만 틀었소 — 「되풀이되면 인사가 아니라
           태엽」이라 적어 두었지요. 손님이 계속 돌라 하셨으니 돕니다.
           대신 소리는 상단바의 ♪ 한 벌이 쥡니다.
       */}

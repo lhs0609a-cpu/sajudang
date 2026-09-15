@@ -25,7 +25,12 @@ const FLUSH_MS = 4000;
 const MAX_QUEUE = 40;
 
 export type EventName =
+  | "entry_context" | "hook_skip" | "reading_expand" | "price_view" | "checkout_blocked" | "reading_mismatch"
+  | "experiment_exposed"
+  | "web_lcp" | "web_inp" | "web_cls"
+  | "flow_started" | "practice_saved" | "chart_completed"
   | "screen" | "hook_shown" | "hook_answer" | "free_shown" | "free_beat"
+  | "topic_ask"
   | "tier_view" | "tier_pick" | "pay_start" | "pay_done" | "pay_fail"
   | "relay_take" | "relay_skip" | "share_click" | "share_land" | "drop_guess";
 
@@ -55,6 +60,13 @@ function sid(): string {
   }
 }
 
+/** Same anonymous browser key as the funnel. Never chart/session/payment credentials. */
+export function analyticsId(): string | null {
+  if (typeof window === "undefined" || isAdmin()) return null;
+  const value = sid();
+  return /^[A-Za-z0-9_-]{16,64}$/.test(value) ? value : null;
+}
+
 let queue: Ev[] = [];
 let timer: ReturnType<typeof setTimeout> | null = null;
 
@@ -70,6 +82,8 @@ let timer: ReturnType<typeof setTimeout> | null = null;
  */
 function isAdmin(): boolean {
   try {
+    if (new URLSearchParams(window.location.search).get("qa") === "1") sessionStorage.setItem("sd.qa", "1");
+    if (sessionStorage.getItem("sd.qa") === "1" || navigator.webdriver) return true;
     const raw = localStorage.getItem("sajudang-session");
     return !!raw && JSON.parse(raw)?.state?.admin === true;
   } catch {
@@ -78,7 +92,7 @@ function isAdmin(): boolean {
 }
 
 function send(batch: Ev[], beacon = false) {
-  if (!batch.length || !API_BASE) return;
+  if (!batch.length || !API_BASE || isAdmin()) return;
   const url = `${API_BASE}/v1/events`;
   const body = JSON.stringify({ events: batch });
   try {
@@ -94,7 +108,7 @@ function send(batch: Ev[], beacon = false) {
       keepalive: true,
     }).catch(() => {});
   } catch {
-    /* 계측 실패는 삼킵니다 */
+    /* 계측 실패는 삼키오 */
   }
 }
 
@@ -121,7 +135,7 @@ export function track(name: EventName, screen: string, extra?: Partial<Ev>) {
   if (isAdmin()) return;               // 관리자 레일은 퍼널에 안 실린다
   const s = sid();
   if (!s) return;
-  queue.push({ name, screen, sid: s, ...extra });
+  queue.push({ name, screen, sid: s, stage: extra?.stage, ms: extra?.ms, n: extra?.n, yes: extra?.yes });
   if (queue.length >= MAX_QUEUE) { flush(); return; }
   if (!timer) timer = setTimeout(() => flush(), FLUSH_MS);
 }
@@ -147,6 +161,18 @@ export function useScreen(screen: string) {
     if (!screen) return;
     t0.current = Date.now();
     track("screen", screen);
+    if (screen === "a1") {
+      track("flow_started", screen, { n: 2 });
+      try {
+        if (!isAdmin() && !sessionStorage.getItem("sd.entry-context")) {
+          const host = document.referrer ? new URL(document.referrer).hostname : "";
+          const channel = !host || host === location.hostname ? 0 : /(^|\.)(google\.[a-z.]+|naver\.com|daum\.net|bing\.com)$/.test(host) ? 1 : /(^|\.)(instagram\.com|facebook\.com|t\.co|youtube\.com|kakao\.com)$/.test(host) ? 2 : 3;
+          track("entry_context", screen, {stage:channel,n:innerWidth < 768 ? 0 : innerWidth < 1024 ? 1 : 2,yes:localStorage.getItem("sd.visited") ? 1 : 0});
+          sessionStorage.setItem("sd.entry-context", "1");
+          localStorage.setItem("sd.visited", "1");
+        }
+      } catch { /* No referrer, identity or campaign text is sent. */ }
+    }
     return () => {
       const ms = Date.now() - t0.current;
       if (ms > 250) track("drop_guess", screen, { ms });

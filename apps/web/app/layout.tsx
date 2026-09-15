@@ -1,15 +1,17 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import WebVitals from '@/components/WebVitals';
 
 export const metadata: Metadata = {
   title: "성신당 星辰堂",
-  description: "맞히는 집이 아니라, 근거 대는 집.",
+  description: "사주로 읽는 나의 반복 패턴. 지금의 고민에 맞는 해석과 오늘 해볼 행동을 만나보시오.",
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0C0A12",
+  viewportFit: "cover",
+  themeColor: "#141614",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -57,15 +59,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
           href={
             "https://fonts.googleapis.com/css2" +
-            "?family=Nanum+Myeongjo:wght@400;700;800" +
-            "&family=Noto+Serif+KR:wght@400;500;600;700" +
+            "?family=Noto+Serif+KR:wght@400;600;700" +
             "&family=Noto+Sans+KR:wght@400;500;700" +
-            "&family=IBM+Plex+Mono:wght@400;500" +
             "&display=swap"
           }
         />
       </head>
-      <body spellCheck={false}>{children}</body>
+      <body spellCheck={false}>{children}<WebVitals /></body>
     </html>
   );
 }

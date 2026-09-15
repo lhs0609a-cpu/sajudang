@@ -45,7 +45,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-/** 뜸을 들이는 시간. 너무 길면 답답하고 너무 짧으면 안 보입니다. */
+/** 뜸을 들이는 시간. 너무 길면 답답하고 너무 짧으면 안 보이오. */
 const THINK_MS = 620;
 
 export default function Reveal({

@@ -48,7 +48,7 @@ def f_no_hour():
 # ══════════════════════════════════════════════════════════
 # 배선 — 열둘이 추가 입력 없이 돌던 자리
 # ══════════════════════════════════════════════════════════
-def test_only_the_photo_is_still_missing():
+def test_every_advertised_input_is_implemented():
     """
     얼굴 사진 말고는 전부 붙었는가.
 
@@ -56,7 +56,7 @@ def test_only_the_photo_is_still_missing():
       그래서 캐릭터를 바꿔 또 사도 순서만 바뀐 같은 리포트였습니다.
     """
     missing = lens_mod.missing_inputs()
-    assert {m["input"] for m in missing} == {"photo"}, missing
+    assert missing == [], missing
 
 
 def test_photo_is_blocked_for_a_reason_not_forgotten():
@@ -231,8 +231,8 @@ def test_blood_says_it_is_not_evidence_first(f):
     """
     cut = extras.blood_cut(f, {"type": "A"})
     body = cut["html"]
-    assert "근거가 아닙니다" in body
-    assert body.index("근거가 아닙니다") < body.index("A형")
+    assert "근거가 아니오" in body
+    assert body.index("근거가 아니오") < body.index("A형")
     # 표시광고법 — 검증 불가능한 주장 금지
     for banned in ("과학적", "통계", "적중률", "입증"):
         assert banned not in body, banned
@@ -371,7 +371,8 @@ def test_적은_것과_글자를_맞대_본다(f):
     assert len(set(got.values())) >= 2, "무엇을 골라도 같은 말이 나오오"
     # 근거 줄에 **짝 글자가 앉은 자리**가 적혀 있어야 합니다
     src = extras.meet_cut(f, MEET)["source"]
-    assert "적은 결" in src, src
+    # 「적은 결」 → 「적으신 기둥」 (2026-09-11 · 쉬운 말 · docs/21)
+    assert "적으신 기둥" in src, src
 
 
 def test_상대의_이름도_생년월일도_안_받는다():

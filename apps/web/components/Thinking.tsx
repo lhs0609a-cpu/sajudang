@@ -19,14 +19,11 @@
  *   말은 아무것도 안 가리키지만 "월지와 일지를 견주는 중" 은 그 컷의
  *   근거 줄에 그대로 적혀 나옵니다. 손님이 나중에 대 볼 수 있습니다.
  *
- * ★ 서버가 빨라도 지우지 않습니다
- *
- *   a6 이 이미 그렇게 합니다 — "여기서의 기다림은 비용이 아니라
- *   값입니다." 다만 **건너뛰는 길**은 반드시 냅니다. 두 번째 오는
- *   사람에게 같은 뜸은 지연입니다.
+ * 결과가 준비되면 부모 화면이 본문을 바로 표시합니다.
  */
 
 import { useEffect, useState } from "react";
+import { iga } from "@/lib/josa";
 
 /** 한 줄이 서 있는 시간. 너무 길면 답답하고 너무 짧으면 못 읽습니다. */
 const BEAT_MS = 760;
@@ -34,13 +31,10 @@ const BEAT_MS = 760;
 export default function Thinking({
   who,
   lines,
-  onSkip,
 }: {
   /** 누가 보고 있는가. 첫 줄에 이름을 세웁니다. */
   who?: string;
   lines: string[];
-  /** 건너뛰기. 없으면 버튼을 안 답니다 (아직 도착 안 한 자리). */
-  onSkip?: () => void;
 }) {
   const [at, setAt] = useState(0);
 
@@ -65,7 +59,7 @@ export default function Thinking({
   return (
     <>
       <div className="calcrun think" aria-live="polite">
-        {who && <p className="whoIs">{who}가 보고 있소.</p>}
+        {who && <p className="whoIs">{iga(who)} 살펴보고 있소.</p>}
         {shown.map((l, i) => (
           <p key={i} className={!reduced && i === at - 1 ? "on" : undefined}>
             {l}
@@ -79,11 +73,6 @@ export default function Thinking({
           </p>
         ))}
       </div>
-      {onSkip && (
-        <button className="btn gh mt" onClick={onSkip}>
-          다 됐습니다 · 건너뛰겠습니다
-        </button>
-      )}
     </>
   );
 }

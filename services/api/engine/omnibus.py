@@ -41,15 +41,15 @@ from . import summary as summary_mod
 CUT_LABEL = {
     "chart": "여덟 글자",
     "lack": "없는 것",
-    "why": "되풀이의 까닭",
-    "place": "자리",
-    "sinsal": "이름 붙은 자리",
-    "helper": "곁에 서는 이",
-    "ancestor": "뿌리",
-    "daeun_now": "지금 서 있는 데",
-    "daeun_map": "긴 길",
-    "yongsin": "채울 것",
-    "axis": "어긋난 자리",
+    "why": "같은 일이 되풀이되는 까닭",
+    "place": "돈과 사람이 오가는 곳",
+    "sinsal": "옛사람이 붙인 이름",
+    "helper": "돕는 사람",
+    "ancestor": "집안에서 물려받은 것",
+    "daeun_now": "지금 지나는 십 년",
+    "daeun_map": "나이별로 바뀌는 십 년",
+    "yongsin": "모자라서 채울 것",
+    "axis": "성향과 어긋나는 점",
 }
 
 
@@ -115,26 +115,26 @@ def build_omnibus(f, chart_id: str, concern: str = "love",
         consensus_html = (
             '<p class="tale">스무 사람 중 <b>%d 사람</b>이 이 명식에서 '
             '<b>%s</b>부터 보았소.</p>'
-            '<p class="sm">같은 자리를 여럿이 먼저 본다는 것은, 그 자리가 '
+            '<p class="sm">여럿이 같은 것부터 보았다는 것은, 그것이 '
             '이 여덟 글자에서 가장 눈에 띈다는 뜻이오. '
-            '맞았다는 뜻이 아니라 <b>도드라진다</b>는 뜻이오.</p>'
+            '맞았다는 뜻이 아니라 <b>눈에 잘 띈다</b>는 뜻이오.</p>'
             % (top["n"], top["label"])
         )
     else:
         consensus_html = (
-            '<p class="tale">스무 사람이 저마다 다른 자리부터 보았소.</p>'
-            '<p class="sm">한 자리로 모이지 않는 명식이오. '
-            '치우친 데가 뚜렷하지 않다는 뜻이기도 하오.</p>'
+            '<p class="tale">스무 사람이 저마다 다른 것부터 보았소.</p>'
+            '<p class="sm">여럿이 한 가지로 모이지 않는 사주요. '
+            '크게 넘치거나 모자란 것이 뚜렷하지 않다는 뜻이기도 하오.</p>'
         )
 
     # ── ③ 갈리는 자리 ────────────────────────────────────
     split = [a for a in agreed if a["n"] == 1]
     split_html = (
         '<p class="tale">%s</p>'
-        '<p class="sm">한 사람만 먼저 본 자리요. 남들이 안 보는 것을 '
+        '<p class="sm">한 사람만 먼저 본 것이오. 남들이 안 보는 것을 '
         '본 사람이 있다는 것이지, 그 사람이 틀렸다는 뜻은 아니오.</p>'
         % (" · ".join("<b>%s</b>" % a["label"] for a in split)
-           if split else "갈리는 자리는 없었소.")
+           if split else "한 사람만 먼저 본 것은 없었소.")
     )
 
     # ── 머리 ────────────────────────────────────────────

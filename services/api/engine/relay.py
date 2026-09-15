@@ -305,6 +305,23 @@ DEFAULT_COMPLEMENT_W = 0.15
 #   최다 1순위 21.4% · 20/20 도 그대로입니다.
 DEFAULT_CONCERN_W = 0.45
 
+# ★ 값을 치르기 **전에** 또 적으라는 사람을 살짝 내립니다 (2026-09-10).
+#
+#   재 보니 1순위의 **62.7%** 가 추가 입력을 요구했습니다. 손님은 무료
+#   구간을 다 읽고 목패 앞에 섰는데, 거기서 처음 만나는 사람이 「상대의
+#   생년월일을 적으시오」 라고 합니다. 값을 치르기도 전에 또 서식입니다.
+#
+# ★ 세게 걸지 않습니다.
+#
+#   스무 사람 중 **열넷**이 추가 입력을 받습니다. 세게 걸면 그 열넷이
+#   영영 1순위가 안 되고, 그건 릴레이 쏠림을 다시 만드는 짓입니다
+#   (CLAUDE.md — 누구에게나 걸리는 규칙은 배경이 된다는 것과 같은 결).
+#   근거가 센 사람은 그대로 앞에 섭니다. **엇비슷할 때만** 바로 열리는
+#   쪽이 먼저 서게 하는 무게입니다.
+#
+#   고친 뒤에는 `.\dev.ps1 reach --write` 로 도달률을 다시 재시오.
+DEFAULT_INPUT_PENALTY = 0.20
+
 
 def _tuning() -> dict:
     d = _rules_file()
@@ -313,6 +330,8 @@ def _tuning() -> dict:
         "complement_weight": float(
             d.get("complement_weight", DEFAULT_COMPLEMENT_W)),
         "concern_weight": float(d.get("concern_weight", DEFAULT_CONCERN_W)),
+        "input_penalty": float(
+            d.get("input_penalty", DEFAULT_INPUT_PENALTY)),
     }
 
 
@@ -349,6 +368,7 @@ def rerank(items: list, last_lens: Optional[str] = None,
     t = _tuning()
     lam, w, cw = (t["exposure_lambda"], t["complement_weight"],
                   t["concern_weight"])
+    ip = t["input_penalty"]
     by_rule = {r["id"]: r for r in rules()}
 
     out = []
@@ -360,8 +380,11 @@ def rerank(items: list, last_lens: Optional[str] = None,
         it["reach"] = reach
         it["complement"] = round(comp, 3)
         it["concern_fit"] = fit
+        # 바로 열리는가. 값을 치르기 전에 또 적어야 하면 살짝 내립니다.
+        needs = 1.0 if lens_mod.required_input(it["lens_id"]) else 0.0
+        it["needs_input"] = bool(needs)
         it["score"] = round(it["priority"] / 100.0 - lam * reach + w * comp
-                            + cw * fit, 4)
+                            + cw * fit - ip * needs, 4)
         out.append(it)
     # 점수 내림차순. 같으면 priority — 결과가 흔들리지 않게 두 번째 키를 둔다.
     out.sort(key=lambda x: (-x["score"], -x["priority"], x["lens_id"]))
@@ -391,11 +414,39 @@ def rerank(items: list, last_lens: Optional[str] = None,
 #   근거(reason)는 그 사람의 명식이라 보여야 하지만, 어떤 규칙이 몇 점으로
 #   이겼는지는 알고리즘입니다. 새면 규칙을 역산할 수 있고, 사용자는 자기
 #   얘기가 아니라 순위표를 읽게 됩니다.
-PUBLIC_FIELDS = ("lens_id", "name", "price", "released", "reason", "quote")
+# ★ `asks` 를 함께 냅니다 (2026-09-10).
+#
+#   목패에 값은 적혀 있는데 **적을 것이 더 있다는 말이 없었습니다.**
+#   손님은 값을 치르고 나서야 「상대의 날을 아시오?」 를 만납니다.
+#   표시가와 청구가를 다르게 두지 않는 것과 같은 자리요 — 목패에 보인
+#   것이 그대로 나와야 하오.
+#
+#   내는 것은 **손님의 말**입니다. `input` 열쇳말(partner·blood)은
+#   우리 분기표라 안 냅니다.
+PUBLIC_FIELDS = ("lens_id", "name", "price", "released", "reason", "quote",
+                 "asks")
+
+# 추가 입력을 손님 말로. 화면(components/ExtraAsk.tsx)의 이름과 같은 벌이오.
+ASKS_SAY = {
+    "blood": "혈액형을 한 번 물으오",
+    "image": "그림 하나를 고르오",
+    "face": "닮은 얼굴형과 특징을 고르오",
+    "body": "불편한 부위와 상태를 고르오",
+    "cards": "카드 석 장을 고르오",
+    "context": "지금 무슨 일을 하고 있는지 한 번 물으오",
+    "partner": "상대의 태어난 날을 한 번 물으오",
+    "birthplace": "태어난 도시를 한 번 더 물으오",
+    "axis4": "성향 네 글자를 한 번 물으오",
+    "photo": "얼굴 사진을 물으오",
+    "meet": "누구와 있었던 일인지 한 번 물으오",
+}
 
 
 def _public_item(it: dict) -> dict:
-    return {k: it.get(k) for k in PUBLIC_FIELDS}
+    out = {k: it.get(k) for k in PUBLIC_FIELDS}
+    need = lens_mod.required_input(it["lens_id"])
+    out["asks"] = ASKS_SAY.get(need) if need else None
+    return out
 
 
 def recommend(f, read: Optional[list] = None, skipped: Optional[list] = None,
@@ -433,7 +484,7 @@ def recommend(f, read: Optional[list] = None, skipped: Optional[list] = None,
                     "rule_id": "r_fallback", "lens_id": fb,
                     "name": info["name"], "priority": 0,
                     "price": info["price"], "released": info["released"],
-                    "reason": "여덟 글자에서 특별히 도드라지는 자리가 없어요",
+                    "reason": "여덟 글자에서 특별히 눈에 띄는 점이 없소",
                     "quote": lens_mod.get(fb).get("opening_quote"),
                     "reach": 0.0, "complement": 0.0, "score": 0.0,
                 }]
@@ -461,7 +512,7 @@ def recommend(f, read: Optional[list] = None, skipped: Optional[list] = None,
         "recommend": [] if blocked else [_public_item(t) for t in top],
         "forced": forced,
         "blocked": blocked,
-        "block_reason": ("세션당 릴레이는 %d명까지요. 오늘은 여기까지 하십시다."
+        "block_reason": ("한 번 오셨을 때 이어서 만날 수 있는 사람은 %d명까지요. 오늘은 여기까지 하십시다."
                          % breaks["per_session_relay"]) if blocked else None,
         "breaks": breaks,
     }

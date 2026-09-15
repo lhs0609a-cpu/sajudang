@@ -86,7 +86,7 @@ def test_the_eight_characters_are_explained_once():
       첫 화면에서 한 번은 말해 줘야 뒤가 읽힙니다.
     """
     entry = (WEB / "app" / "page.tsx").read_text("utf-8")
-    assert "여덟 글자가 섰다" in entry
+    assert "명식은 태어난 해·달·날·시간" in entry
     assert "두 글자로 옮긴 것" in entry, "여덟 글자가 무엇인지 안 밝힙니다"
 
 
@@ -107,8 +107,9 @@ from engine.report import build_report, _plain     # noqa: E402
 
 def test_a_hard_word_is_explained_the_first_time_it_appears():
     out = T.gloss("자네 격은 편관이 잡았소.")
-    assert "편관<i class=\"gl\">(나를 누르는 힘)</i>" in out
-    assert "격<i class=\"gl\">(이 사주를 읽는 틀)</i>" in out
+    # 풀이 말은 쉬운 말로 바꿨소 (2026-09-11 · docs/21) — 풀이가 **붙는지**를 보오.
+    assert "편관<i class=\"gl\">(%s)</i>" % T.MEANING["편관"] in out
+    assert "격<i class=\"gl\">(%s)</i>" % T.MEANING["격"] in out
 
 
 def test_it_is_explained_only_once():

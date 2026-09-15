@@ -98,10 +98,43 @@ def test_tier_stays_locked_when_payment_fails(app):
 # 금액 — 서버가 정한다
 # ══════════════════════════════════════════════════════════
 def test_amount_comes_from_the_server(app):
+    """
+    ★ 달삯(sub)은 여기로 안 옵니다.
+      결제창은 **한 번 긁는** 자리입니다. 자동결제가 붙으면서 달삯은
+      카드 등록으로 갔습니다 (`/v1/pay/sub/prepare`). 여기로 받으면
+      14,900원을 한 번만 받고 자격이 서른 날 뒤 조용히 끊깁니다 —
+      「달마다」라 적힌 목패를 보고 누른 손님에게요.
+    """
     import payments
     for tier, want in payments.TIER_PRICE.items():
+        if tier == "sub":
+            continue
         o = _prepare(app, tier=tier).json()
         assert o["amount"] == want, tier
+
+
+def test_the_monthly_seat_is_not_sold_as_a_one_off(app):
+    """달삯을 결제창으로 받지 않는다. 받으면 한 번 긁고 끝납니다."""
+    r = _prepare(app, tier="sub")
+    assert r.status_code == 409, r.text
+    assert "카드" in r.json()["detail"]
+
+
+def test_the_monthly_seat_says_what_it_costs(app):
+    """카드를 걸기 **전에** 값·주기·다음 날·그만두는 길을 다 말한다."""
+    import payments
+    r = app.post("/v1/pay/sub/prepare",
+                 json={"session_id": "sess-sub-0001"})
+    # PG 키가 없는 기계에서는 503 이 정답입니다 — 성공한 척하지 않습니다.
+    if r.status_code == 503:
+        assert payments.subscriptions_problem()
+        return
+    o = r.json()
+    assert o["amount"] == payments.TIER_PRICE["sub"]
+    joined = " ".join(o["terms"])
+    assert format(payments.TIER_PRICE["sub"], ",") in joined
+    assert "달마다" in joined
+    assert "그만두" in joined
 
 
 def test_client_cannot_set_the_amount(app):
@@ -236,6 +269,78 @@ def test_unknown_order_is_refused(app):
         "session_id": "sess-x", "order_id": "sjd_없는주문",
         "payment_key": "pk"})
     assert r.status_code == 404
+
+
+def test_confirmation_requires_owner_even_after_payment(app, monkeypatch):
+    import payments
+    import store
+    order = _prepare(app, sid="owner-session-1234").json()
+    monkeypatch.setattr(payments, "confirm", lambda *args: pytest.fail("PG must not be called"))
+    for status in ("pending", "paid"):
+        saved = store.get_json("order:" + order["order_id"])
+        saved["status"] = status
+        store.set_json("order:" + order["order_id"], saved)
+        result = app.post("/v1/pay/confirm", json={"session_id": "different-session-1234",
+                          "order_id": order["order_id"], "payment_key": "pk"})
+        assert result.status_code == 403
+    public = app.get("/v1/pay/order/" + order["order_id"]).json()
+    assert not {"session_id", "chart_id", "payment_key", "analytics_sid"} & public.keys()
+
+
+def test_concurrent_confirmations_charge_and_count_once(app, monkeypatch):
+    from concurrent.futures import ThreadPoolExecutor
+    import time
+    import payments
+    import store
+    from routers import pay
+    calls = []
+    def charge(pk, oid, amount):
+        calls.append(oid)
+        time.sleep(.1)
+        return payments.PaymentResult(True, oid, amount, "tid", "DONE", {})
+    monkeypatch.setattr(payments, "confirm", charge)
+    sid = "parallel-owner-1234"
+    order = _prepare(app, sid=sid).json()
+    body = {"session_id": sid, "order_id": order["order_id"], "payment_key": "pk"}
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        results = list(pool.map(lambda _: app.post("/v1/pay/confirm", json=body), range(6)))
+    assert all(r.status_code in (200,409) for r in results)
+    assert any(r.status_code == 200 for r in results)
+    assert len(calls) == 1
+    assert pay._purchases_today(sid) == 1
+    assert store.get_json("orders:"+sid) == [order["order_id"]]
+    assert app.post("/v1/pay/confirm", json=body).json()["already"] is True
+
+
+def test_settlement_recovers_after_counter_was_written(app, monkeypatch):
+    import payments
+    import store
+    from routers import pay
+    sid = "recover-owner-1234"
+    order = _prepare(app, sid=sid).json()
+    monkeypatch.setattr(payments, "confirm", lambda pk, oid, amt:
+                        payments.PaymentResult(True, oid, amt, "tid", "DONE", {}))
+    saved = store.get_json("order:"+order["order_id"])
+    saved.update(status="settling", paid_at=pay.datetime.now(pay.timezone.utc).isoformat())
+    store.set_json("order:"+order["order_id"],saved)
+    store.increment_once("purchase-counted:"+order["order_id"],
+                         store.k_purchase_day(pay._user_key(sid),pay._today()),pay.DAY)
+    result=app.post("/v1/pay/confirm",json={"session_id":sid,"order_id":order["order_id"],"payment_key":"pk"})
+    assert result.status_code == 200, result.text
+    assert pay._purchases_today(sid) == 1
+
+
+def test_product_titles_are_contents_the_purchase_opens(app):
+    from routers.chart import load_features
+    from engine.features import Features
+    from engine.report import build_report
+    chart = _chart(app)
+    response=app.post("/v1/pay/tiers",json={"chart_id":chart,"lens_id":"yeondam","concern":"love"}).json()
+    f=Features(**load_features(chart))
+    free_ids={c["id"] for c in build_report(f,chart,"yeondam","free","love")["cuts"]}
+    for product in response["tiers"]:
+        report=build_report(f,chart,"yeondam",product["id"],"love")
+        assert product["opens"] == [c["title"] for c in report["cuts"] if c["id"] not in free_ids]
 
 
 # ══════════════════════════════════════════════════════════

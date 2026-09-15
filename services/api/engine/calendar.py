@@ -197,7 +197,10 @@ def build_chart(year: int, month: int, day: int,
                 hour: Optional[int], minute: Optional[int],
                 sex: str, hour_known: bool = True,
                 city: str = DEFAULT_CITY,
-                longitude: Optional[float] = None) -> Chart:
+                longitude: Optional[float] = None, *,
+                zi_policy: Optional[str] = None,
+                jieqi_basis: Optional[str] = None,
+                hour_basis: Optional[str] = None) -> Chart:
     """
     사주 명식을 세운다.
 
@@ -206,6 +209,11 @@ def build_chart(year: int, month: int, day: int,
     (다만 절입·일주 경계 판정에는 기준 시각이 하나 필요하므로 정오를 쓰고,
      그 때문에 결과가 갈릴 수 있는 경우 correction.boundary_note 에 남긴다.)
     """
+    zi_policy = zi_policy or ZI_POLICY
+    jieqi_basis = jieqi_basis or JIEQI_BASIS
+    hour_basis = hour_basis or HOUR_BASIS
+    if zi_policy not in ("조자시", "야자시") or jieqi_basis not in ("corrected", "standard") or hour_basis not in ("true_solar", "standard"):
+        raise ValueError("지원하지 않는 계산 기준입니다")
     if sex not in ("M", "F"):
         raise ValueError("sex 는 'M' 또는 'F' 여야 합니다: %r" % (sex,))
 
@@ -244,7 +252,7 @@ def build_chart(year: int, month: int, day: int,
     # ② 진태양시 (균시차 미반영 — docs/05 §1-5, 2차 검토 항목)
     #    HOUR_BASIS="standard" 는 경도 보정을 안 쓰는 집을 흉내 내는
     #    자리입니다. 갈리는 값을 손님에게 함께 보이려고 씁니다.
-    solar_min = std_min + (lon_min if HOUR_BASIS == "true_solar" else 0.0)
+    solar_min = std_min + (lon_min if hour_basis == "true_solar" else 0.0)
     day_shift = 0
     if solar_min < 0:
         solar_min += 1440
@@ -257,7 +265,7 @@ def build_chart(year: int, month: int, day: int,
                 + timedelta(minutes=solar_min))
 
     # ③ 절입 비교 기준 시각
-    if JIEQI_BASIS == "corrected":
+    if jieqi_basis == "corrected":
         ref = birth_utc + timedelta(minutes=lon_min)
     else:
         ref = birth_utc
@@ -274,7 +282,7 @@ def build_chart(year: int, month: int, day: int,
 
     # 일주 — 진태양시 날짜 기준, 조자시면 익일로 넘김
     solar_hour = int(solar_min // 60)
-    zi_rollover = (ZI_POLICY == "조자시" and hour_known and solar_hour == 23)
+    zi_rollover = (zi_policy == "조자시" and hour_known and solar_hour == 23)
     day_date = solar_date + timedelta(days=1) if zi_rollover else solar_date
     dg, dj = day_ganji(day_date)
 
@@ -336,8 +344,8 @@ def build_chart(year: int, month: int, day: int,
         before=before,
         after=_fmt_hm(solar_min) if hour_known else "미상",
         day_shift=day_shift if hour_known else 0,
-        zi_policy=ZI_POLICY,
-        jieqi_basis=JIEQI_BASIS,
+        zi_policy=zi_policy,
+        jieqi_basis=jieqi_basis,
         jieqi_name="%s(%s)" % (st.term_name(jq_idx), st.term_hanja(jq_idx)),
         jieqi_at_kst=jq_local.strftime("%Y-%m-%d %H:%M"),
         hour_used=hour_known,

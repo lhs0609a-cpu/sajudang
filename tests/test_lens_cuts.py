@@ -34,7 +34,7 @@ TAG = re.compile(r"<[^>]+>")
 # ★ 이건 '추가 입력까지 채웠을 때' 의 바닥입니다. 관점 컷 혼자 져야 하는
 #   몫은 engine.lens_cuts.OWN_FLOOR 가 따로 들고 있습니다 — 손님이 추가
 #   입력을 안 적어도 비싼 캐릭터는 더 줘야 하기 때문입니다.
-OWN_FLOOR = [(19900, 3), (15900, 2), (4900, 1), (0, 0)]
+OWN_FLOOR = [(19900, 3), (15900, 2), (9900, 1), (0, 0)]
 
 # 추가 입력을 채워 넣는 값. extras 는 저장되지 않습니다.
 FILL = {
@@ -266,7 +266,7 @@ def test_price_rungs_are_real_cuts():
 def test_expensive_lens_opens_the_rungs():
     """
     19,900원 캐릭터의 「이 자리 하나」는 층까지 열립니다.
-    4,900원 캐릭터는 안 열립니다 — 그 차이가 값의 몫입니다.
+    바닥값(9,900원) 캐릭터는 안 열립니다 — 그 차이가 값의 몫입니다.
     """
     from engine import report as report_mod
     f = next(_people())

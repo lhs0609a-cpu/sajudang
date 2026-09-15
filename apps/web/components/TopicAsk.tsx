@@ -34,10 +34,12 @@ export type TopicAskSpec = {
 };
 
 export default function TopicAsk({
-  spec, onSubmit, busy,
+  spec, onSubmit, onSkip, busy,
 }: {
   spec: TopicAskSpec;
   onSubmit: (extras: Record<string, unknown>) => void;
+  /** 넘어가는 길. 없으면 이 자리가 막다른 칸이 되오. */
+  onSkip?: () => void;
   busy?: boolean;
 }) {
   const [pick, setPick] = useState<string | null>(null);
@@ -51,7 +53,7 @@ export default function TopicAsk({
     <section className="extraask noprint">
       <p className="ttl">{spec.title}</p>
       <p className="why">
-        고르신 것을 여덟 글자와 <b>맞대 봅니다</b>. 맞히려는 것이 아니라
+        고르신 것을 여덟 글자와 <b>맞대 보오</b>. 맞히려는 것이 아니라
         겹치는지 어긋나는지를 보는 것이오. 적으신 것은 남기지 않소.
       </p>
 
@@ -88,6 +90,23 @@ export default function TopicAsk({
                 topic: { choice: pick, ...(pick2 ? { choice2: pick2 } : {}) },
               })}>
         {busy ? "맞대 보는 중입니다" : "이걸로 보겠습니다"}
+      </button>
+
+      {/*
+        ★ 「모르겠소」가 **머리말에만 있고 버튼이 없었습니다** (2026-09-10).
+
+          그렇소·아니오 둘만 두면 애매한 사람이 거짓 답을 눌러 공감률이
+          오염된다고 적어 놓고, 정작 넘어갈 길을 안 냈습니다. 고를 것을
+          안 고르면 단추가 잠긴 채라 이 자리가 **막다른 칸**이었습니다.
+
+        ★ 넘긴 것은 **판정하지 않습니다.** 답이 아니라 노출로만 셉니다 —
+          그래야 「이 문장이 맞았다」 는 셈이 안 더러워집니다.
+
+        ★ 버튼은 손님의 말(합쇼체)로 적습니다. 집의 말투로 적으면
+          손님은 그게 자기 말인 줄 모릅니다.
+      */}
+      <button className="lk" disabled={busy} onClick={() => onSkip?.()}>
+        잘 모르겠습니다 · 건너뛰겠습니다
       </button>
     </section>
   );

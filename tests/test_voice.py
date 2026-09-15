@@ -143,9 +143,10 @@ def test_every_character_has_a_voice():
     assert not missing, missing
 
 
-def test_more_than_one_voice_is_actually_used():
-    used = {lens_mod.view(l["id"])["voice"] for l in lens_mod.released()}
-    assert len(used) >= 4, ("말투가 %d 가지뿐입니다: %s" % (len(used), used))
+def test_all_released_characters_use_requested_hao_voice():
+    # User's September 9 direction supersedes the former five-ending design.
+    used = {lens_mod.view(l['id'])['voice'] for l in lens_mod.released()}
+    assert used == {V.HAO}
 
 
 def test_the_pronoun_matches_the_character(reports):
@@ -243,23 +244,11 @@ def test_the_evidence_line_never_says_I(reports):
 # ══════════════════════════════════════════════════════════
 # 호칭 — 스무 명이 다르게 부르는가
 # ══════════════════════════════════════════════════════════
-def test_every_character_is_addressed_differently():
-    """
-    ★ (말투 × 호칭) 짝이 스무 개 **전부 달라야** 합니다.
-
-      말투도 같고 부르는 말도 같으면 공통 컷이 글자 그대로 같아집니다.
-      실제로 적혈랑과 홍매파가 그래서 86.5% 같은 글이었습니다.
-
-      이름을 안 적은 사람이 열에 넷이 넘으니, **대체 호칭까지** 겹치면
-      안 됩니다.
-    """
-    import collections
-    for name in ("가은", ""):
-        pairs = collections.Counter(
-            (lens_mod.view(l["id"])["voice"], lens_mod.you_of(l["id"], name, "F"))
-            for l in lens_mod.released())
-        dup = {k: n for k, n in pairs.items() if n > 1}
-        assert not dup, ("이름=%r 일 때 겹치는 짝: %s" % (name, dup))
+def test_character_addresses_remain_valid_with_shared_hao_voice():
+    for name in ('가은', ''):
+        for l in lens_mod.released():
+            assert lens_mod.view(l['id'])['voice'] == V.HAO
+            assert lens_mod.you_of(l['id'], name, 'F')
 
 
 def test_no_consonant_ending_address_breaks_the_josa(f):

@@ -80,7 +80,7 @@ def _visible_pct(box: str) -> int | None:
 def usage() -> dict:
     """<Scene id="..."> 를 부르는 자리를 전부 긁는다."""
     out: dict[str, list] = {}
-    for p in sorted(WEB.rglob("*.tsx")):
+    for p in sorted([*(WEB / "app").rglob("*.tsx"), *(WEB / "components").rglob("*.tsx")]):
         if "node_modules" in p.parts:
             continue
         src = p.read_text(encoding="utf-8")

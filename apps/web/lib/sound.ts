@@ -84,6 +84,25 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 const KEY = "sd.sound";       // 켬/끔 — 이 기기에만 남습니다
 const VOL_BGM = 0.22;         // 배경음은 말보다 훨씬 아래로
 const VOL_VOICE = 0.9;
+let bgmDucked = false;
+
+/** Keep the opening voice intelligible; restore the bed on skip, mute, or exit. */
+export function setBgmDucked(ducked: boolean) {
+  bgmDucked = ducked;
+  const volume = ducked ? 0.07 : VOL_BGM;
+  if (gain && ac) {
+    gain.gain.cancelScheduledValues(ac.currentTime);
+    gain.gain.setTargetAtTime(volume, ac.currentTime, 0.18);
+  }
+  if (fallback) fallback.volume = volume;
+}
+
+/** Call inside an explicit sound button's click, including when already enabled. */
+export function enableSound() {
+  if (soundState() === "off") toggleSound();
+  const ctx = audioCtx();
+  if (ctx?.state === "suspended") void ctx.resume().catch(() => {});
+}
 
 /**
  * 이음새에 겹치는 길이(초).
@@ -144,7 +163,7 @@ export function soundState(): State {
 /**
  * 영상이 소리를 낼 것인가.
  *
- * ★ 배경음과 **같은 스위치**입니다 (2026-09-07).
+ * ★ 배경음과 **같은 스위치**이오 (2026-09-07).
  *   전에는 따로 봤는데, 기본값이 둘로 갈려 ♪ 가 거짓말을 했습니다.
  *   지금은 한 벌이라 ♪ 하나가 소리 전부를 말합니다.
  *
@@ -345,7 +364,7 @@ function playFallback(name: string) {
   }
   const el = fallback ?? new Audio();
   el.loop = true;
-  el.volume = VOL_BGM;
+  el.volume = bgmDucked ? 0.07 : VOL_BGM;
   el.src = src("bgm", name);
   el.onerror = () => { missing.add("bgm:" + name); playing = ""; };
   fallback = el;
@@ -376,7 +395,7 @@ async function startBgm(name: string) {
 
   const g = ctx.createGain();
   g.gain.setValueAtTime(0, ctx.currentTime);
-  g.gain.linearRampToValueAtTime(VOL_BGM, ctx.currentTime + FADE);
+  g.gain.linearRampToValueAtTime(bgmDucked ? 0.07 : VOL_BGM, ctx.currentTime + FADE);
   g.connect(ctx.destination);
 
   const s = ctx.createBufferSource();
@@ -476,7 +495,7 @@ export function speak(name: string) {
  * ★ 훅은 사람마다 문장이 달라 미리 만들어 둘 수 없습니다. 서버가 그때
  *   만들어 곳간에 두고 주소를 줍니다 (services/api/voice.py). 같은 말은
  *   두 번 안 만들므로 값이 트래픽이 아니라 **서로 다른 말의 수**에
- *   묶입니다.
+ *   묶이오.
  *
  * ★ 소리가 꺼져 있으면 **청하지도** 않습니다. 값이 나가는 자리라
  *   안 들을 소리를 만들면 안 됩니다.

@@ -21,6 +21,9 @@
     migrate-sqlite 로컬 SQLite 로 마이그레이션 왕복 시험
     screens        화면 연결 그래프 — 고아·막다른·죽은 버튼
     subject        ★ 주어 감사 — 누구 얘긴지 안 적힌 문장 찾기
+    worth          ★ 값값 점수 — 치른 값이 아깝지 않은가 (100점)
+    skim           ★ 훑어읽기 — 강조만 읽어도 말이 되는가 (--show)
+    same           ★ 같은 글 — 어느 자리가 스무 사람·여섯 고민에 겹치나
     text           ★ 글 감사 — 조사·보이지 않는 글자·낮추는 말
     hours          ★ 때 칸 감사 — 네 시간 칸이 시주를 얼마나 틀리나
     buttons        ★ 버튼 말투 — 손님이 누르는 것은 손님의 말인가
@@ -36,6 +39,7 @@
     migrate        알렘빅 upgrade head
     seed           마스터 시드 적재
     notify         알림 예약 (--dry 로 미리보기)
+    renew          ★ 달삯 갱신 — 기본은 보기만. 긁으려면 --charge
 
   == 프론트 ==
     web-pull       G: 소스 → 로컬 작업본으로 복사 + npm install
@@ -123,6 +127,9 @@ switch ($Task) {
   "crosscheck" { Need-Venv; Push-Location $Root; & $Py tools\crosscheck.py @Rest; Pop-Location }
   "screens" { Need-Venv; Push-Location $Root; & $Py tools\screen_graph.py; Pop-Location }
   "subject" { Need-Venv; Push-Location $Root; & $Py tools\subject_audit.py @Rest; Pop-Location }
+  "worth"   { Need-Venv; Push-Location $Root; & $Py tools\worth_score.py @Rest; Pop-Location }
+  "skim"    { Need-Venv; Push-Location $Root; & $Py tools\skim_audit.py @Rest; Pop-Location }
+  "same"    { Need-Venv; Push-Location $Root; & $Py tools\same_audit.py @Rest; Pop-Location }
   "text"    { Need-Venv; Push-Location $Root; & $Py tools\text_audit.py @Rest; Pop-Location }
   "hours"   { Need-Venv; Push-Location $Root; & $Py tools\hour_bucket_audit.py; Pop-Location }
   "buttons" { Need-Venv; Push-Location $Root; & $Py tools\button_voice_audit.py @Rest; Pop-Location }
@@ -154,6 +161,9 @@ switch ($Task) {
     & $Py tools\dup_rate.py;           if ($LASTEXITCODE) { Pop-Location; exit 1 }
     & $Py tools\subject_audit.py;      if ($LASTEXITCODE) { Pop-Location; exit 1 }
     & $Py tools\text_audit.py;         if ($LASTEXITCODE) { Pop-Location; exit 1 }
+    # ★ 훑어읽기 — 강조만 읽어도 말이 되는가. 값이 오르면 훑어읽기도
+    #   늘어야 합니다 (19,900원 21줄 · 0원 9.8줄).
+    & $Py tools\skim_audit.py;         if ($LASTEXITCODE) { Pop-Location; exit 1 }
     Pop-Location
     Write-Host "engine-check 통과" -ForegroundColor Green
     Write-Host "※ 회귀 50건은 독립 계산(crosscheck)으로 채워 잠갔습니다." -ForegroundColor Yellow
@@ -209,6 +219,11 @@ switch ($Task) {
 
   "seed" {
     Need-Venv; Push-Location "$Root\services\api"; & $Py -m scripts.seed; Pop-Location
+  }
+
+  "renew" {
+    # ★ 돈이 오가는 도구요. 기본은 **보기만** 하고, --charge 를 붙여야 긁소.
+    Need-Venv; Push-Location "$Root\services\api"; & $Py -m scripts.renew @Rest; Pop-Location
   }
 
   "notify" {

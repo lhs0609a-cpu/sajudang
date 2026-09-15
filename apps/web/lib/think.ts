@@ -44,5 +44,5 @@ export function thinkOf(source?: string | null): string | undefined {
   term = term.replace(/[0-9,]+.*$/, "").trim();
   if (!term) return undefined;
 
-  return `${term}${eul(term)} 봅니다…`;
+  return `${term}${eul(term)} 보오…`;
 }

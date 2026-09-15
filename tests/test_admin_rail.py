@@ -34,9 +34,9 @@ def test_default_comes_from_the_build_not_from_code():
     assert ENV in rail(), "기본값이 코드에 박혀 있으면 출시 때 끌 수 없습니다"
 
 
-def test_default_is_on_until_someone_sets_zero():
-    """값이 없으면 켜짐이어야 합니다 — 아직 출시 전입니다."""
-    assert 'process.env.%s !== "0"' % ENV in rail()
+def test_default_is_off_unless_explicitly_enabled():
+    """일반 방문자의 화면과 계측을 관리자 기본값으로 오염시키지 않는다."""
+    assert 'process.env.%s === "1"' % ENV in rail()
 
 
 def test_the_switch_is_written_down():
@@ -69,7 +69,7 @@ def test_explicit_choice_is_recorded_both_ways():
 
 def test_default_only_applies_when_nobody_chose():
     """이 조건이 빠지면 ?admin=0 으로 끈 레일이 다음 방문에 되살아납니다."""
-    assert "!s.adminSet && ADMIN_DEFAULT" in rail()
+    assert "!s.adminSet && s.admin !== ADMIN_DEFAULT" in rail()
 
 
 def test_the_effect_reruns_when_the_choice_changes():

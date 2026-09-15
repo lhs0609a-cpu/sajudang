@@ -105,14 +105,14 @@ def _sinsal_at(f, key: str) -> list:
 
 # 궁위 이름 — 짝 글자가 앉은 자리가 곧 **어떤 결로 오느냐**요.
 _SEAT_SAY = {
-    "년주": "짝을 보는 글자가 <b>년주</b>에 앉았소. 웃대·먼 데의 자리라, "
-            "<b>일찍 만나거나 멀리서 오는</b> 결이오. 집안이 얽히는 자리이기도 하오.",
-    "월주": "짝을 보는 글자가 <b>월주</b>에 앉았소. 여덟 글자에서 가장 무거운 "
-            "자리라, <b>일·배움·자란 데서 이어지는</b> 인연이 많소.",
-    "일주": "짝을 보는 글자가 <b>일주</b>, 곧 그대 자리에 앉았소. 가장 가까운 "
-            "자리라 <b>붙는 힘도 크고 부딪히는 힘도 크오</b>.",
-    "시주": "짝을 보는 글자가 <b>시주</b>에 앉았소. 늦자리라 <b>늦게 자리가 "
-            "잡히는</b> 결이오. 서두른 자리가 오래 안 가는 것이 그 때문이오.",
+    "년주": "짝을 보는 글자가 <b>년주</b>에 앉았소. 윗대와 먼 곳을 보는 기둥이라, "
+            "짝을 <b>일찍 만나거나 멀리서 만나는</b> 편이오. 집안이 얽히기도 하오.",
+    "월주": "짝을 보는 글자가 <b>월주</b>에 앉았소. 여덟 글자에서 가장 힘이 센 "
+            "기둥이라, <b>일터·학교·자란 동네에서 이어지는</b> 인연이 많소.",
+    "일주": "짝을 보는 글자가 <b>일주</b>, 곧 그대 자신의 기둥에 앉았소. 가장 가까운 "
+            "곳이라 <b>끌리는 힘도 크고 부딪히는 힘도 크오</b>.",
+    "시주": "짝을 보는 글자가 <b>시주</b>에 앉았소. 늦은 나이를 보는 기둥이라 짝이 "
+            "<b>늦게 정해지는</b> 편이오. 서둘러 만난 사람과 오래 안 가는 것이 그 때문이오.",
 }
 
 
@@ -156,22 +156,22 @@ def _pats() -> list:
 
     # ── 돈 ────────────────────────────────────────────────
     add(key="gunggeop", name="군겁쟁재(群劫爭財)",
-        gloss="여럿이 한 몫을 다투는 자리",
+        gloss="여럿이 돈 한 몫을 두고 다툼",
         at=("money", "people"),
         test=lambda f: f.bi >= 3 and f.jae <= 1,
         why=lambda f: "비겁 %d · 재성 %d" % (f.bi, f.jae),
-        say="나눌 입은 많은데 쥘 자리가 얕소. 버는 재주가 없는 것이 아니라 "
-            "<b>버는 족족 나가는 짜임</b>이오. 크게 벌수록 크게 새오.",
+        say="나눠 줄 사람은 많은데 손에 쥘 돈은 적소. 버는 재주가 없는 것이 아니라 "
+            "<b>버는 족족 나가는 짜임</b>이오. 크게 벌수록 크게 새 나가오.",
         ask="context")
 
     add(key="jaeda_sinyak", name="재다신약(財多身弱)",
-        gloss="재물은 많은데 몸이 여린 자리",
+        gloss="돈은 많은데 감당할 힘이 모자람",
         at=("money", "health"),
         test=lambda f: f.jae >= 3 and f.strength == "신약",
         why=lambda f: "재성 %d · %s" % (f.jae, f.strength),
-        say="쥘 것은 널렸는데 <b>들 힘이 모자라오</b>. 기회가 없는 것이 아니라 "
-            "기회가 와도 감당이 안 되는 자리요. 벌리는 것보다 <b>지키는 것</b>이 "
-            "먼저요.")
+        say="잡을 돈은 널렸는데 <b>그걸 들어 올릴 힘이 모자라오</b>. 기회가 없는 "
+            "것이 아니라 기회가 와도 감당이 안 되는 것이오. 일을 벌이는 것보다 "
+            "<b>가진 것을 지키는 것</b>이 먼저요.")
 
     # ★ 여기부터 2026-09-06 에 늘린 자리입니다 (docs/20 §4-2).
     #   돈을 물었을 때 실무가 보는 것은 「재성 몇 개」가 아니라
@@ -180,149 +180,150 @@ def _pats() -> list:
     #   상한 셋뿐이라, 누구에게나 걸리는 것이 먼저 오면 드문 자리가
     #   영영 안 나옵니다.
     add(key="sinwang_jaewang", name="신왕재왕(身旺財旺)",
-        gloss="드는 힘과 쥘 것이 같이 선 자리",
+        gloss="버티는 힘도 세고 돈도 많음",
         at=("money",),
         test=lambda f: f.strength == "신강" and f.jae >= 2,
         why=lambda f: "%s · 재성 %d" % (f.strength, f.jae),
-        say="드는 힘도 쥘 것도 <b>같이 있소</b>. 벌린 판을 그대가 감당하는 "
-            "짜임이라, 크게 벌였을 때 무너진 적이 적을 것이오. "
-            "다만 <b>멈출 자리</b>는 아무도 안 정해 주오.")
+        say="버티는 힘도 잡을 돈도 <b>같이 있소</b>. 벌인 일을 그대가 감당해 "
+            "내는 짜임이라, 크게 벌였을 때 무너진 적이 적을 것이오. "
+            "다만 <b>언제 멈출지</b>는 아무도 안 정해 주오.")
 
     add(key="jae_gongmang", name="재성 공망(空亡)",
-        gloss="쥐는 글자가 비었다고 보던 자리에 앉음",
+        gloss="돈 글자가 비어 있다고 보던 곳에 앉음",
         at=("money",),
         test=lambda f: f.jae >= 1 and _topic.gongmang_hit(f, "재성"),
-        why=lambda f: "재성이 앉은 자리가 공망 %s" % f.gongmang,
-        say="쥐는 글자가 <b>비어 있다고 보던 자리</b>에 걸렸소. 옛사람은 "
-            "여기를 <b>공들인 만큼 손에 안 남는 자리</b>로 읽었소 — 없다는 "
-            "뜻이 아니라 <b>쥐는 방식이 달라야 한다</b>는 뜻이오.",
+        why=lambda f: "재성이 앉은 글자가 공망 %s" % f.gongmang,
+        say="돈을 보는 글자가 <b>비어 있다고 보던 곳</b>에 앉았소. 옛사람은 "
+            "이것을 <b>공들인 만큼 손에 안 남는 돈</b>으로 읽었소 — 돈이 없다는 "
+            "뜻이 아니라 <b>돈을 모으는 방법이 달라야 한다</b>는 뜻이오.",
         ask="context")
 
     add(key="tamjae", name="탐재괴인(貪財壞印)",
-        gloss="벌리려다 받치는 것을 깎는 자리",
+        gloss="돈 욕심이 나를 받쳐 주던 것을 깎음",
         at=("money", "health"),
         test=lambda f: f.jae >= 2 and f.inn >= 1 and f.strength == "신약",
         why=lambda f: "재성 %d · 인성 %d · %s" % (f.jae, f.inn, f.strength),
-        say="쥐려는 힘이 <b>받쳐 주던 것을 깎소</b>. 벌이를 늘리려고 "
-            "배우던 것·쉬던 것·기대던 데를 먼저 접었을 것이오. "
-            "그 자리가 곧 그대를 세워 주던 자리요.")
+        say="돈을 잡으려는 마음이 <b>그대를 받쳐 주던 것을 깎소</b>. 벌이를 "
+            "늘리려고 공부·휴식·기댈 사람을 먼저 접었을 것이오. "
+            "그 셋이 곧 그대를 버티게 해 주던 것이오.")
 
     add(key="sisang_pyeonjae", name="시상편재(時上偏財)",
-        gloss="늦자리에 큰 재물이 앉음",
+        gloss="태어난 시각 글자에 큰돈 글자가 앉음",
         at=("money",),
         test=lambda f: f.hour_known and len(f.pillars) >= 4
         and ten_god_of(f.pillars[3]["gan"], f.day_gan) == "편재",
-        why=lambda f: "시간 %s · 편재" % f.pillars[3]["gan"],
-        say="<b>시주 천간에 편재</b>가 앉았소. 옛 책이 크게 치던 자리요 — "
-            "늦게 벌리는 판이 크고, <b>이른 나이의 벌이는 늘 성에 안 "
+        why=lambda f: "시주 천간 %s · 편재" % f.pillars[3]["gan"],
+        say="<b>시주 천간에 편재</b>가 앉았소. 옛 책이 크게 좋게 보던 배치요 — "
+            "나이 들어 벌이는 일이 크고, <b>젊을 때 벌이는 늘 성에 안 "
             "찼을</b> 것이오.")
 
     add(key="jaego", name="재고(財庫)",
-        gloss="쥔 것을 갈무리하는 자리",
+        gloss="번 돈을 모아 두는 창고",
         at=("money",),
         test=lambda f: any(p["ji"] == _topic.GO_JI[
             _topic.el_of_group(f.day_gan, "재성")] for p in f.pillars),
         why=lambda f: "재성 %s의 고지 %s"
         % (_topic.el_of_group(f.day_gan, "재성"),
            _topic.GO_JI[_topic.el_of_group(f.day_gan, "재성")]),
-        say="쥔 것을 <b>갈무리하는 자리</b>가 있소. 버는 재주와 쌓는 "
-            "재주는 다른데, 그대에게는 쌓는 쪽 자리가 있소. "
-            "다만 <b>열어야 쓰는</b> 창고요 — 넣기만 하다 못 쓴 돈이 있을 것이오.")
+        say="번 돈을 <b>모아 두는 창고</b>가 있소. 버는 재주와 모으는 "
+            "재주는 다른데, 그대에게는 모으는 재주가 있소. "
+            "다만 <b>열어야 쓰는</b> 창고요 — 모으기만 하다 못 쓴 돈이 있을 것이오.")
 
     add(key="jae_hidden", name="재성 암장(暗藏)",
-        gloss="쥐는 글자가 지지 속에만 있음",
+        gloss="돈 글자가 아랫 글자 속에만 숨음",
         at=("money",),
         test=lambda f: f.jae >= 1 and not group_tuchul(f, "재성"),
         why=lambda f: "재성 %d · 천간에 안 드러남" % f.jae,
-        say="쥐는 글자가 <b>겉으로 안 드러나오</b>. 남 눈에는 잘 버는 "
+        say="돈을 보는 글자가 <b>겉으로 안 드러나오</b>. 남 눈에는 잘 버는 "
             "듯 보이는데 그대 손에는 안 잡히거나, 통장에는 있는데 "
-            "쓸 수가 없는 자리요.")
+            "쓸 수가 없는 돈이오.")
 
     add(key="siksang_jae", name="식상생재(食傷生財)",
-        gloss="만들어서 파는 흐름",
+        gloss="만든 것이 돈이 됨",
         at=("money", "work"),
         test=lambda f: f.sik >= 1 and f.jae >= 1,
         why=lambda f: "식상 %d → 재성 %d" % (f.sik, f.jae),
-        say="만든 것이 <b>돈으로 이어지는 길</b>이 나 있소. 남 밑에서 받는 삯보다 "
-            "제 손으로 낸 것이 값이 되는 짜임이오.")
+        say="만든 것이 <b>돈으로 이어지는 길</b>이 나 있소. 남 밑에서 받는 월급보다 "
+            "제 손으로 만든 것이 돈이 되는 짜임이오.")
 
     add(key="jae_none", name="재성 없음",
-        gloss="쥐는 자리가 안 보임",
+        gloss="돈 글자가 안 보임",
         at=("money",),
         test=lambda f: f.jae == 0,
         why=lambda f: "재성 0 · 여덟 글자에 없소",
-        say="쥐는 자리가 <b>겉에 안 보이오</b>. 없다고 못 버는 것이 아니라, "
-            "돈이 <b>손에 잡히는 꼴로 안 오오</b> — 값이 아니라 이름·자리·"
+        say="돈을 보는 글자가 <b>겉에 안 보이오</b>. 없다고 못 버는 것이 아니라, "
+            "돈이 <b>현금으로 바로 안 오오</b> — 돈 대신 이름·직책·"
             "기회로 오는 사람이 많소.")
 
     add(key="jae_saeng_gwan", name="재생관(財生官)",
-        gloss="쥔 것이 자리로 바뀌는 길",
+        gloss="번 돈이 직함·명예로 바뀜",
         at=("money", "work"),
         test=lambda f: f.jae >= 1 and f.gwan >= 1,
         why=lambda f: "재성 %d → 관성 %d" % (f.jae, f.gwan),
-        say="쥔 것이 <b>자리로 바뀌는 길</b>이 나 있소. 돈만 좇는 사람이 "
+        say="번 돈이 <b>직함이나 명예로 바뀌는 길</b>이 나 있소. 돈만 좇는 사람이 "
             "아니라 <b>돈이 이름으로 남아야</b> 성에 차는 사람이오. "
-            "그래서 값을 늦게 부르다 손해 본 자리가 있소.")
+            "그래서 제 몫을 늦게 말하다 손해 본 적이 있소.")
 
     # ── 일 ────────────────────────────────────────────────
     add(key="sanggwan_gwan", name="상관견관(傷官見官)",
-        gloss="내지르는 힘과 규율이 마주 선 자리",
+        gloss="할 말 하는 힘과 규칙이 마주 섬",
         at=("work", "people"),
         test=lambda f: f.ten_gods.get("상관", 0) >= 1
         and f.ten_gods.get("정관", 0) >= 1,
         why=lambda f: "상관 %d · 정관 %d" % (f.ten_gods.get("상관", 0),
                                             f.ten_gods.get("정관", 0)),
-        say="옳은 말을 하고도 <b>지는 자리</b>가 있소. 규율을 지키는 힘과 "
-            "규율을 치는 힘이 한 몸에 있어, 조직에서 자주 부딪히오. "
+        say="옳은 말을 하고도 <b>지는 때</b>가 있소. 규칙을 지키려는 마음과 "
+            "규칙에 대드는 마음이 한 몸에 있어, 회사에서 자주 부딪히오. "
             "재주가 없어서가 아니오.",
         ask="context")
 
     add(key="gwan_in", name="관인상생(官印相生)",
-        gloss="맡은 것이 배움으로 이어지는 자리",
+        gloss="맡은 일이 배움으로 이어짐",
         at=("work",),
         test=lambda f: f.gwan >= 1 and f.inn >= 1,
         why=lambda f: "관성 %d · 인성 %d" % (f.gwan, f.inn),
-        say="맡은 것이 <b>자격과 문서로 남는</b> 짜임이오. 조직 안에서 크는 결이라, "
-            "혼자 벌이는 것보다 <b>이름이 걸린 자리</b>에서 값이 서오.")
+        say="맡은 일이 <b>자격증과 경력으로 남는</b> 짜임이오. 회사 같은 조직 안에서 "
+            "크는 사람이라, 혼자 일을 벌이는 것보다 <b>이름이 걸린 직책</b>에서 "
+            "인정을 받소.")
 
     add(key="gwan_none", name="관성 없음",
-        gloss="눌러 주는 자리가 안 보임",
+        gloss="잡아 주는 규칙 글자가 안 보임",
         at=("work", "dir"),
         test=lambda f: f.gwan == 0,
         why=lambda f: "관성 0 · 여덟 글자에 없소",
-        say="나를 눌러 모양을 잡아 주는 자리가 <b>겉에 없소</b>. 시키는 데서 "
-            "오래 못 버티고, <b>제가 정한 규율</b>로만 서는 사람이오. "
-            "자유로운 것이 아니라 <b>기댈 틀이 없는</b> 것이오.")
+        say="나를 잡아 주는 규칙 글자가 <b>겉에 없소</b>. 남이 시키는 곳에서는 "
+            "오래 못 버티고, <b>제가 정한 규칙</b>으로만 서는 사람이오. "
+            "자유로운 것이 아니라 <b>기댈 규칙이 없는</b> 것이오.")
 
     add(key="sal_in", name="살인상생(殺印相生)",
-        gloss="누르는 힘이 배움으로 돌아드는 자리",
+        gloss="압박이 배움으로 바뀜",
         at=("work", "health"),
         test=lambda f: f.ten_gods.get("편관", 0) >= 1 and f.inn >= 1,
         why=lambda f: "편관 %d · 인성 %d" % (f.ten_gods.get("편관", 0), f.inn),
-        say="몰아붙이는 압이 <b>배움으로 돌아드는</b> 길이 나 있소. 압이 "
+        say="몰아붙이는 압박이 <b>배움으로 바뀌는</b> 길이 나 있소. 압박이 "
             "그대를 깎지 않고 <b>자격과 이름으로 바뀌는</b> 짜임이라, "
-            "센 자리에서 오래 버틴 값이 남소.")
+            "힘든 곳에서 오래 버틴 만큼 남는 것이 있소.")
 
     add(key="siksin_jesal", name="식신제살(食神制殺)",
-        gloss="내는 힘으로 압을 다스리는 자리",
+        gloss="만드는 힘으로 압박을 이김",
         at=("work",),
         test=lambda f: f.ten_gods.get("식신", 0) >= 1
         and f.ten_gods.get("편관", 0) >= 1,
         why=lambda f: "식신 %d · 편관 %d" % (f.ten_gods.get("식신", 0),
                                             f.ten_gods.get("편관", 0)),
-        say="누르는 압을 <b>만들어 내는 힘으로 눌러 두는</b> 짜임이오. "
-            "시키는 대로만 하면 눌리고, <b>제 손으로 내놓을 때</b> 그 압이 "
-            "연장이 되오.")
+        say="누르는 압박을 <b>무언가 만들어 내는 힘으로 눌러 두는</b> 짜임이오. "
+            "시키는 대로만 하면 눌리고, <b>제 손으로 만들어 내놓을 때</b> 그 "
+            "압박이 도구가 되오 — 부담이 오히려 일을 밀어 준다는 말이오.")
 
     add(key="gwan_many", name="관살혼잡(官殺混雜)",
-        gloss="누르는 것이 여럿 겹친 자리",
+        gloss="나를 누르는 것이 여럿 겹침",
         at=("work", "health"),
         test=lambda f: f.ten_gods.get("정관", 0) >= 1
         and f.ten_gods.get("편관", 0) >= 1,
         why=lambda f: "정관 %d · 편관 %d" % (f.ten_gods.get("정관", 0),
                                             f.ten_gods.get("편관", 0)),
-        say="누르는 자리가 <b>결이 다른 둘</b>이오. 지켜야 할 규율과 몰아붙이는 "
-            "압이 같이 오니, <b>어느 쪽을 따를지</b>에서 힘이 다 나가오.")
+        say="나를 누르는 것이 <b>성질이 다른 둘</b>이오. 지켜야 할 규칙과 몰아붙이는 "
+            "압박이 같이 오니, <b>어느 것을 따를지</b> 고민하다 힘이 다 빠지오.")
 
     # ── 사랑 ──────────────────────────────────────────────
     add(key="spouse_none", name="배우자성 없음",
@@ -333,7 +334,7 @@ def _pats() -> list:
         why=lambda f: "%s 0 · %s" % (spouse_group(f),
                                      "남명" if f.sex == "M" else "여명"),
         say="짝을 보는 글자가 <b>겉에 안 보이오</b>. 인연이 없다는 말이 아니오 — "
-            "<b>고르는 눈이 늦게 열리고</b>, 온 사람을 알아보는 데 시간이 "
+            "<b>사람 보는 눈이 늦게 트이고</b>, 다가온 사람을 알아보는 데 시간이 "
             "걸리는 짜임이오.",
         ask="partner")
 
@@ -344,11 +345,11 @@ def _pats() -> list:
         and _count(f, spouse_group(f)) >= 3,
         why=lambda f: "%s %d" % (spouse_group(f), _count(f, spouse_group(f))),
         say="짝을 보는 글자가 <b>여럿</b>이오. 사람이 안 오는 것이 아니라 "
-            "<b>고르는 데서 오래 걸리오</b>. 겹친 만큼 재는 눈도 여럿이오.",
+            "<b>고르는 데 오래 걸리오</b>. 글자가 겹친 만큼 따지는 것도 많소.",
         ask="partner")
 
     add(key="spouse_seat", name="배우자궁",
-        gloss="짝을 보는 글자가 앉은 자리",
+        gloss="짝을 보는 글자가 어느 기둥에 앉았나",
         at=("love",),
         test=lambda f: bool(spouse_group(f))
         and _count(f, spouse_group(f)) in (1, 2)
@@ -360,7 +361,7 @@ def _pats() -> list:
         ask="meet")
 
     add(key="spouse_hidden", name="배우자성이 숨음",
-        gloss="짝 글자가 지지에만 있음",
+        gloss="짝 글자가 아랫 글자 속에만 있음",
         at=("love",),
         test=lambda f: bool(spouse_group(f))
         and _count(f, spouse_group(f)) >= 1
@@ -368,151 +369,152 @@ def _pats() -> list:
         why=lambda f: "%s %d · 천간에 안 드러남"
         % (spouse_group(f), _count(f, spouse_group(f))),
         say="짝을 보는 글자가 <b>겉으로 안 드러나오</b>. 가까이 있어도 "
-            "<b>늦게 알아보는</b> 결이라, 지나고 나서 «그때 그 사람이었구나» "
-            "하는 자리가 있소.",
+            "<b>늦게 알아보는</b> 편이라, 지나고 나서 «그때 그 사람이었구나» "
+            "하는 일이 있소.",
         ask="meet")
 
     add(key="spouse_open", name="배우자성이 드러남",
-        gloss="짝 글자가 천간에 있음",
+        gloss="짝 글자가 윗 글자에 드러남",
         at=("love",),
         test=lambda f: bool(spouse_group(f))
         and _count(f, spouse_group(f)) >= 1
         and group_tuchul(f, spouse_group(f)),
         why=lambda f: "%s %d · 천간에 드러남"
         % (spouse_group(f), _count(f, spouse_group(f))),
-        say="짝을 보는 글자가 <b>겉에 드러나 있소</b>. 인연이 <b>보이는 자리에서</b> "
-            "오는 결이라, 숨겨 두고 만나는 일이 잘 안 되오. 주변이 먼저 아오.",
+        say="짝을 보는 글자가 <b>겉에 드러나 있소</b>. 인연이 <b>남들 보는 앞에서</b> "
+            "오는 편이라, 숨겨 두고 만나기가 잘 안 되오. 주변 사람이 먼저 아오.",
         ask="meet")
 
     add(key="spouse_gongmang", name="배우자성 공망(空亡)",
-        gloss="짝 글자가 비었다고 보던 자리에 앉음",
+        gloss="짝 글자가 비어 있다고 보던 곳에 앉음",
         at=("love",),
         test=lambda f: bool(spouse_group(f))
         and _count(f, spouse_group(f)) >= 1
         and _topic.gongmang_hit(f, spouse_group(f)),
-        why=lambda f: "%s이 앉은 자리가 공망 %s" % (spouse_group(f), f.gongmang),
-        say="짝을 보는 글자가 <b>비어 있다고 보던 자리</b>에 걸렸소. "
-            "옛사람은 여기를 <b>공들인 만큼 손에 안 남는 자리</b>로 "
-            "읽었소 — 사람이 없다는 뜻이 아니라 <b>기대를 거는 방식이 "
+        why=lambda f: "%s이 앉은 글자가 공망 %s" % (spouse_group(f), f.gongmang),
+        say="짝을 보는 글자가 <b>비어 있다고 보던 곳</b>에 앉았소. "
+            "옛사람은 이것을 <b>공들인 만큼 돌아오지 않는 인연</b>으로 "
+            "읽었소 — 사람이 없다는 뜻이 아니라 <b>기대를 거는 방법이 "
             "달라야 한다</b>는 뜻이오.",
         ask="partner")
 
     add(key="ilji_chung", name="일지 충(沖)",
-        gloss="발밑 자리가 부딪힘",
+        gloss="내 발밑 글자가 다른 글자와 부딪힘",
         at=("love", "people", "health"),
         test=lambda f: bool(f.ilji_chung),
         why=lambda f: "일지 %s 충" % f.day_ji,
-        say="그대 <b>발밑 자리가 부딪히오</b>. 가까운 자리일수록 크게 흔들리니, "
-            "사람 일이 <b>미지근하게 끝나지 않고 한 번에 갈리오</b>.",
+        say="그대 <b>발밑 글자가 다른 글자와 부딪히오</b>. 가까운 사이일수록 크게 "
+            "흔들리니, 사람 일이 <b>흐지부지 끝나지 않고 한 번에 갈리오</b>.",
         ask="partner")
 
     add(key="ilji_hyeong", name="일지 형(刑)",
-        gloss="발밑 자리가 걸림",
+        gloss="내 발밑 글자가 다툼의 짝에 걸림",
         at=("love", "people", "health"),
         test=lambda f: f.day_ji in _topic.hyeong_at(f),
         why=lambda f: "형 %s · 일지 %s" % (_topic.hyeong(f), f.day_ji),
-        say="그대 <b>발밑 자리가 형에 걸렸소</b>. 옛 책은 형을 다툼과 "
-            "시비로 읽었소 — 가장 가까운 자리에서 <b>말이 상하는</b> 결이라, "
-            "먼 사람보다 곁의 사람과 더 자주 부딪히오.",
+        say="그대 <b>발밑 글자가 형에 걸렸소</b>. 옛 책은 형을 다툼과 "
+            "말싸움으로 읽었소 — 가장 가까운 사이에서 <b>말로 마음이 상하는</b> "
+            "편이라, 먼 사람보다 곁의 사람과 더 자주 부딪히오.",
         ask="partner")
 
     add(key="ilji_hap", name="일지 합(合)",
-        gloss="발밑 자리가 붙음",
+        gloss="내 발밑 글자가 다른 글자와 붙음",
         at=("love", "people"),
         test=lambda f: bool(f.ilji_hap),
         why=lambda f: "일지 %s 합" % f.day_ji,
-        say="그대 <b>발밑 자리가 붙는</b> 자리요. 사람이 잘 붙되 <b>끊는 데서 "
-            "오래 걸리오</b>. 정리했다 여긴 뒤에도 자리가 안 비오.",
+        say="그대 <b>발밑 글자가 다른 글자와 붙어 있소</b>. 사람과 잘 가까워지되 "
+            "<b>관계를 끊는 데 오래 걸리오</b>. 정리했다 여긴 뒤에도 마음이 잘 "
+            "안 비오.",
         ask="partner")
 
     add(key="dohwa", name="도화(桃花)",
-        gloss="끌리고 끌리는 자리",
+        gloss="사람을 끌어당김",
         at=("love", "people"),
         test=lambda f: bool(_sinsal_at(f, "dohwa")),
         why=lambda f: "도화 · %s" % " · ".join(_sinsal_at(f, "dohwa")),
-        say="<b>끌림이 오가는 자리</b>가 있소. 옛사람은 이걸 인기로도 보고 "
-            "구설로도 보았소 — 좋고 나쁨을 정한 표가 아니라 <b>사람이 모이는 "
-            "자리</b>를 가리키는 표요.")
+        say="<b>사람을 끌어당기는 힘</b>이 있소. 옛사람은 이걸 인기로도 보고 "
+            "남의 입에 오르내리는 일로도 보았소 — 좋다 나쁘다를 정한 것이 아니라 "
+            "<b>사람이 모여든다</b>는 것을 가리키는 이름이오.")
 
     add(key="wonjin", name="원진(怨嗔)",
-        gloss="까닭 없이 어긋나는 자리",
+        gloss="까닭 없이 어긋나는 사이",
         at=("love", "people"),
         test=lambda f: bool(_sinsal_at(f, "wonjin")),
         why=lambda f: "원진 · %s" % " · ".join(_sinsal_at(f, "wonjin")),
-        say="<b>까닭을 대기 어려운 어긋남</b>이 있는 자리요. 크게 잘못한 것이 "
-            "없는데 마음이 안 붙는 결이오. 사람을 탓하기 전에 이 자리를 보시오.",
+        say="<b>까닭을 대기 어려운 어긋남</b>이 있소. 크게 잘못한 것이 "
+            "없는데 마음이 잘 안 가는 사이가 생기오. 사람을 탓하기 전에 이 글자부터 보시오.",
         ask="partner")
 
     # ── 사람 ──────────────────────────────────────────────
     add(key="bigyeop_many", name="비겁 과다",
-        gloss="같은 자리가 여럿",
+        gloss="나와 같은 글자가 여럿",
         at=("people", "money"),
         test=lambda f: f.bi >= 4,
         why=lambda f: "비겁 %d" % f.bi,
-        say="나와 같은 자리가 <b>여럿</b>이오. 곁이 없는 것이 아니라 "
-            "<b>겨루는 사람이 먼저 오는</b> 짜임이오. 나눌 때 몫이 늘 갈리오.")
+        say="나와 같은 글자가 <b>여럿</b>이오. 곁에 사람이 없는 것이 아니라 "
+            "<b>겨루는 사람이 먼저 오는</b> 짜임이오. 나눌 때마다 몫 때문에 다투기 쉽소.")
 
     add(key="in_many", name="인성 과다",
-        gloss="받는 자리가 여럿",
+        gloss="배우고 기대는 글자가 여럿",
         at=("people", "work", "dir"),
         test=lambda f: f.inn >= 3,
         why=lambda f: "인성 %d" % f.inn,
-        say="받는 자리가 <b>여럿</b>이오. 배우고 기대는 데는 밝은데, "
-            "<b>내놓는 데서 막히오</b>. 준비가 길어지는 결이오.")
+        say="배우고 기대는 글자가 <b>여럿</b>이오. 배우는 것은 잘하는데, "
+            "<b>배운 것을 밖으로 내놓을 때 막히오</b>. 준비만 길어지기 쉽소.")
 
     add(key="yangin", name="양인(羊刃)",
-        gloss="날이 선 자리",
+        gloss="칼날처럼 센 기세",
         at=("people", "health", "work"),
         test=lambda f: bool(_sinsal_at(f, "yangin")),
         why=lambda f: "양인 · %s" % " · ".join(_sinsal_at(f, "yangin")),
-        say="<b>날이 선 자리</b>가 있소. 밀어붙이는 힘이 세니 이룰 때 크게 "
-            "이루고, <b>부딪힐 때 크게 부딪히오</b>. 힘을 쓸 데를 정해 두어야 하오.")
+        say="<b>칼날처럼 날카로운 기세</b>가 있소. 밀어붙이는 힘이 세니 이룰 때 크게 "
+            "이루고, <b>부딪힐 때 크게 부딪히오</b>. 그 힘을 어디에 쓸지 미리 정해 두어야 하오.")
 
     # ── 방향 ──────────────────────────────────────────────
     add(key="yeokma", name="역마(驛馬)",
-        gloss="움직이는 자리",
+        gloss="자주 옮겨 다님",
         at=("dir", "work"),
         test=lambda f: bool(_sinsal_at(f, "yeokma")),
         why=lambda f: "역마 · %s" % " · ".join(_sinsal_at(f, "yeokma")),
-        say="<b>움직이는 자리</b>가 있소. 한자리에 붙박여 있으면 도리어 지치고, "
-            "<b>옮기고 오갈 때</b> 결이 풀리는 짜임이오.")
+        say="<b>자주 옮겨 다니는 글자</b>가 있소. 한곳에 붙박여 있으면 도리어 지치고, "
+            "<b>옮기고 오갈 때</b> 일이 잘 풀리는 짜임이오.")
 
     add(key="samhap_guk", name="삼합국(三合局)",
-        gloss="지지 셋이 한 기운으로 뭉침",
+        gloss="아랫 글자 셋이 한 가지 성질로 뭉침",
         at=("dir", "people", "work"),
         test=lambda f: _topic.hap_group(f)[0] == "삼합",
         why=lambda f: "삼합 · %s 국(局)" % _topic.hap_group(f)[1],
-        say="지지 셋이 <b>한 기운으로 뭉쳤소</b>. 판이 이미 한쪽으로 굳은 "
-            "자리라, 그 쪽으로 갈 때는 남보다 빠르고 <b>반대로 틀 때는 "
+        say="지지 셋이 <b>한 가지 성질로 뭉쳤소</b>. 삶의 방향이 이미 한쪽으로 "
+            "굳어 있어, 그 방향으로 갈 때는 남보다 빠르고 <b>반대로 방향을 틀 때는 "
             "힘이 두 배로</b> 드오.")
 
     add(key="yeokma_jae", name="역마 재성",
-        gloss="움직이는 자리에 재물이 붙음",
+        gloss="옮겨 다니는 글자에 돈이 붙음",
         at=("dir", "money"),
         test=lambda f: bool(_sinsal_at(f, "yeokma"))
         and f.ten_gods.get("편재", 0) >= 1,
         why=lambda f: "역마 %s · 편재 %d"
         % (" · ".join(_sinsal_at(f, "yeokma")), f.ten_gods.get("편재", 0)),
-        say="움직이는 자리에 <b>크게 오가는 재물</b>이 붙었소. 한자리에 "
-            "앉아 버는 결이 아니라 <b>오가며 버는</b> 결이라, 발이 묶이면 "
+        say="옮겨 다니는 글자에 <b>크게 오가는 돈</b>이 붙었소. 한곳에 "
+            "앉아 버는 사람이 아니라 <b>오가며 버는</b> 사람이라, 발이 묶이면 "
             "벌이도 같이 묶이오.")
 
     add(key="banghap_guk", name="방합국(方合局)",
-        gloss="지지가 한 계절로 모임",
+        gloss="아랫 글자가 한 계절로 모임",
         at=("dir", "work"),
         test=lambda f: _topic.hap_group(f)[0] == "방합",
         why=lambda f: "방합 · %s" % _topic.hap_group(f)[1],
-        say="지지가 <b>한 계절로 모였소</b>. 같은 결이 두텁게 쌓인 자리라 "
-            "그 쪽 일에서는 남보다 깊이 가되, <b>다른 결을 만나면 크게 "
+        say="지지가 <b>한 계절로 모였소</b>. 같은 성질이 두텁게 쌓여 "
+            "그런 일에서는 남보다 깊이 가되, <b>성질이 다른 일을 만나면 크게 "
             "낯설어</b> 하오.")
 
     add(key="hwagae", name="화개(華蓋)",
-        gloss="혼자 파고드는 자리",
+        gloss="혼자 깊이 파고듦",
         at=("dir", "work"),
         test=lambda f: bool(_sinsal_at(f, "hwagae")),
         why=lambda f: "화개 · %s" % " · ".join(_sinsal_at(f, "hwagae")),
-        say="<b>혼자 파고드는 자리</b>가 있소. 사람 속에서 얻는 것보다 "
-            "<b>물러나 깊이 들어갈 때</b> 나오는 것이 큰 결이오.")
+        say="<b>혼자 파고드는 글자</b>가 있소. 사람들 속에서 얻는 것보다 "
+            "<b>혼자 물러나 깊이 공부할 때</b> 얻는 것이 더 큰 사람이오.")
 
     # ── 몸 ────────────────────────────────────────────────
     #
@@ -521,79 +523,80 @@ def _pats() -> list:
     #   금지입니다 (docs/11 · guard). 짜임이 말하는 것은 «어디서 힘이
     #   새고 어디서 부딪히는가» 까지요.
     add(key="gorip", name="고립(孤立)",
-        gloss="하나뿐인데 받쳐 줄 것이 없는 자리",
+        gloss="하나뿐인데 받쳐 줄 글자가 없음",
         at=("health",),
         test=lambda f: any(_topic.isolated(f, e)
                            for e in ("목", "화", "토", "금", "수")),
         why=lambda f: " · ".join(
             "%s 하나 · 낳아 줄 %s 없음" % (e, GENERATED_BY[e])
             for e in ("목", "화", "토", "금", "수") if _topic.isolated(f, e)),
-        say="개수로는 있는데 <b>받쳐 줄 것이 없는</b> 기운이 있소. "
-            "하나뿐인 데다 낳아 주는 자리가 비어, <b>쓰면 그대로 "
-            "바닥나오</b>. 그 자리를 쓸 때마다 남보다 두 배로 드오.",
+        say="개수로는 있는데 <b>받쳐 줄 글자가 없는</b> 것이 있소. "
+            "하나뿐인 데다 채워 주는 글자가 비어, <b>쓰면 쓰는 만큼 "
+            "바닥나오</b>. 그 힘을 쓸 때마다 남보다 두 배로 지치오.",
         ask="context")
 
     add(key="dosik", name="도식(倒食)",
-        gloss="받는 자리가 내놓는 자리를 엎는 짜임",
+        gloss="생각하는 힘이 먹고 쉬는 것을 밀어냄",
         at=("health", "work"),
         test=lambda f: f.ten_gods.get("편인", 0) >= 1
         and f.ten_gods.get("식신", 0) >= 1,
         why=lambda f: "편인 %d · 식신 %d" % (f.ten_gods.get("편인", 0),
                                             f.ten_gods.get("식신", 0)),
-        say="받는 자리와 내놓는 자리가 <b>한 몸에서 맞물려</b> 있소. "
-            "옛사람은 여기를 <b>먹고 자는 결이 흐트러지는 자리</b>로 "
+        say="받아들이는 글자와 내놓는 글자가 <b>한 몸에서 맞물려</b> 있소. "
+            "옛사람은 이것을 <b>먹고 자는 버릇이 흐트러지는 짜임</b>으로 "
             "읽었소 — 생각이 많아지면 끼니와 잠이 먼저 밀리오.")
 
     add(key="sik_many", name="식상 과다",
-        gloss="내놓는 자리가 넘침",
+        gloss="내놓는 글자가 넘침",
         at=("health", "people", "dir"),
         test=lambda f: f.sik >= 3,
         why=lambda f: "식상 %d" % f.sik,
-        say="내놓는 자리가 <b>넘치오</b>. 쓸 때 다 쓰고 잠으로 갚는 "
-            "결인데, <b>갚아지던 나이가 지나가고</b> 있소.")
+        say="밖으로 내놓는 글자가 <b>넘치오</b>. 힘을 다 쓰고 잠으로 채우는 "
+            "사람인데, <b>잠만 자면 회복되던 나이가 지나가고</b> 있소.")
 
     add(key="pyeongo", name="편고(偏枯)",
-        gloss="한쪽으로 몰리고 한쪽이 빈 자리",
+        gloss="한쪽이 넘치고 한쪽이 빔",
         at=("health",),
         test=lambda f: min(f.elements.values()) < 1.0
         and max(f.elements.values()) >= 3.0,
         why=lambda f: "%s %s · %s %s"
         % (f.strong_el, _amt(f.elements[f.strong_el]),
            f.weak_el, _amt(f.elements[f.weak_el])),
-        say="기운이 <b>한쪽으로 몰리고 한쪽이 비었소</b>. 넘치는 쪽이 모자란 "
-            "쪽을 만드는 짜임이라, 지치는 자리가 늘 같은 자리일 것이오. "
-            "병을 말하는 것이 아니라 <b>쓰는 결</b>을 말하는 것이오.",
+        say="나무·불·흙·쇠·물 다섯이 <b>한쪽으로 몰리고 한쪽이 비었소</b>. 넘치는 "
+            "것이 모자란 것을 만드는 짜임이라, 지칠 때 늘 같은 식으로 지칠 것이오. "
+            "병을 말하는 것이 아니라 <b>힘을 쓰는 버릇</b>을 말하는 것이오.",
         ask="context")
 
     add(key="johu_cold", name="조후 — 한랭",
-        gloss="차고 젖은 자리",
+        gloss="차갑고 축축한 쪽으로 기움",
         at=("health", "money"),
         test=lambda f: f.elements.get("수", 0) >= 3
         and f.elements.get("화", 0) < 1,
         why=lambda f: "수 %s · 화 %s" % (_amt(f.elements.get("수", 0)),
                                         _amt(f.elements.get("화", 0))),
-        say="<b>차고 젖은</b> 쪽으로 치우쳤소. 데우는 자리가 얕으니 "
-            "<b>시작이 더디고 안으로 쌓이오</b>. 밖으로 내는 자리를 하나 "
-            "만들어 두어야 하오.")
+        say="여덟 글자가 <b>차고 축축한</b> 쪽으로 치우쳤소 — 물이 많고 불이 "
+            "모자라다는 말이오. 데워 주는 불이 적으니 <b>시작이 더디고 마음이 "
+            "안으로 쌓이오</b>. 속을 밖으로 꺼낼 곳을 하나 만들어 두어야 하오.")
 
     add(key="johu_hot", name="조후 — 조열",
-        gloss="덥고 마른 자리",
+        gloss="덥고 메마른 쪽으로 기움",
         at=("health", "money"),
         test=lambda f: f.elements.get("화", 0) >= 3
         and f.elements.get("수", 0) < 1,
         why=lambda f: "화 %s · 수 %s" % (_amt(f.elements.get("화", 0)),
                                         _amt(f.elements.get("수", 0))),
-        say="<b>덥고 마른</b> 쪽으로 치우쳤소. 붙는 것은 빠르나 <b>오래 못 "
-            "가오</b>. 식히고 적시는 자리를 곁에 두어야 하오.")
+        say="여덟 글자가 <b>덥고 메마른</b> 쪽으로 치우쳤소 — 불이 많고 물이 "
+            "모자라다는 말이오. 불붙듯 시작은 빠르나 <b>오래 못 가오</b>. "
+            "마음을 식혀 줄 사람이나 쉬는 시간을 곁에 두어야 하오.")
 
     add(key="gongmang_ilji", name="공망(空亡)",
-        gloss="비어 있다고 보던 자리",
+        gloss="비어 있다고 보던 글자",
         at=("love", "people", "dir"),
         test=lambda f: bool(f.gongmang) and f.day_ji in (f.gongmang or ""),
         why=lambda f: "공망 %s · 일지 %s" % (f.gongmang, f.day_ji),
-        say="발밑 자리가 <b>비어 있다고 보던</b> 자리에 걸렸소. 옛사람은 "
-            "여기를 <b>애써도 손에 안 남는 자리</b>로 읽었소 — 없다는 뜻이 "
-            "아니라 <b>쥐는 방식이 달라야 한다</b>는 뜻이오.")
+        say="그대 발밑 글자가 <b>비어 있다고 보던</b> 글자에 걸렸소. 옛사람은 "
+            "이것을 <b>애써도 손에 안 남는 일</b>로 읽었소 — 없다는 뜻이 "
+            "아니라 <b>붙잡는 방법이 달라야 한다</b>는 뜻이오.")
 
     return P
 
@@ -615,7 +618,8 @@ def all_patterns() -> list:
     return _TABLE
 
 
-def read(f, concern: Optional[str] = None, limit: int = 3) -> list:
+def read(f, concern: Optional[str] = None, limit: int = 3,
+         focus: Optional[list] = None) -> list:
     """
     이 명식에서 **이 고민에 걸리는** 짜임들.
 
@@ -625,7 +629,20 @@ def read(f, concern: Optional[str] = None, limit: int = 3) -> list:
     돌려주는 것: [{"key","name","gloss","why","say","ask"}]
     """
     out = []
-    for p in all_patterns():
+    pats = all_patterns()
+    # ★ 손님이 되물음에 답했으면 **그 자리 짜임을 먼저** 봅니다 (2026-09-10).
+    #
+    #   전에는 늘 같은 차례로 앞 셋을 냈습니다. 그래서 짝사랑이든 이별이든
+    #   같은 짜임 셋이 섰고, 답이 처방에 안 닿았습니다(31컷 중 1컷).
+    #
+    #   ★ 새로 세지 않습니다. **어느 것을 먼저 볼지만** 바꿉니다 — 조건이
+    #     안 맞는 짜임은 여전히 안 냅니다. 답 안 한 사람은 예전과 같습니다.
+    #   `sorted` 는 안정 정렬이라 나머지는 원래 차례를 지킵니다.
+    if focus:
+        pri = {k: i for i, k in enumerate(focus)}
+        pats = sorted(pats, key=lambda p: (0 if p["key"] in pri else 1,
+                                           pri.get(p["key"], 99)))
+    for p in pats:
         if concern and concern not in p["at"]:
             continue
         try:

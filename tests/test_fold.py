@@ -36,7 +36,7 @@ sys.path.insert(0, str(ROOT / "services" / "api"))
 from engine import dramaturgy as D                     # noqa: E402
 from engine import screenscan as S                     # noqa: E402
 
-FOLD = re.compile(r"<Fold\b.*?</Fold>", re.S)
+FOLD = S.FOLD
 
 
 def test_접힌_글은_읽는_시간에서_빠진다():
@@ -88,8 +88,8 @@ def test_브레이크는_접히지_않았다():
     """
     keep = [
         "나가도 붙잡지 않소",          # 페이월 — 만류
-        "1원도 없소",                  # 결제 — 표시가 = 청구가
-        "하루에 2번",                  # 하루 결제 2건
+        "order.amount.toLocaleString()",  # 서버 주문 금액을 표시와 결제 버튼에 사용
+        "하루 구매는 2건",                # 하루 결제 2건
     ]
     src = "".join((WEB / "app" / p).read_text(encoding="utf-8")
                   for p in ("page.tsx", "pay/page.tsx",

@@ -15,6 +15,7 @@
  *   /lobby 가 아니라 "이름 없이 세운다"(입력을 건너뛰고 계속)로 두세요.
  */
 import Link from "next/link";
+import BrandFrame, { FolioLabel } from "./BrandFrame";
 import { useRouter } from "next/navigation";
 import {
   Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState,
@@ -133,9 +134,9 @@ import SoundToggle from "@/components/SoundToggle";
 import DevRail from "@/components/DevRail";
 
 export const LEGAL = [
-  "본 서비스는 전통 명리학 해석에 기반한 자기이해·오락 목적 콘텐츠입니다.",
-  "의학적·법률적·재무적 판단의 근거가 아니며, 특정 결과를 보장하지 않습니다.",
-  "응답률 수치는 실제 사용자 응답 집계값이며 예측 적중률이 아닙니다.",
+  "본 서비스는 전통 명리학 해석에 기반한 자기이해·오락 목적 콘텐츠이오.",
+  "의학적·법률적·재무적 판단의 근거가 아니며, 특정 결과를 보장하지 않소.",
+  "응답률 수치는 실제 사용자 응답 집계값이며 예측 적중률이 아니오.",
 ];
 
 export function Legal() {
@@ -232,7 +233,7 @@ export function TopBar({ title, skipTo, onBack }: {
           닫아 두고 화면을 보다가 손님 눈으로 보고 싶어지면 주소를
           손으로 고쳐야 했습니다.
 
-          손님에게는 이 칸이 아예 없습니다 — 있는지도 모릅니다.
+          손님에게는 이 칸이 아예 없습니다 — 있는지도 모르오.
       */}
       {admin && (
         <button className="tb mode" onClick={() => {
@@ -248,10 +249,9 @@ export function TopBar({ title, skipTo, onBack }: {
         <Link className="tb mode" href="/admin">주인</Link>
       )}
       <span className="tt">{title}</span>
-      <Link className="tb" href="/daily" aria-label="오늘의 일진">日</Link>
-      <Link className="tb" href="/me" aria-label="인장첩">印 {seals.length}</Link>
-      <Link className="tb" href="/lobby">진열대</Link>
-      {skipTo && <Link className="tb sk" href={skipTo}>건너뛰기</Link>}
+      <Link className="tb" href="/daily" aria-label="오늘의 일진">오늘</Link>
+      <Link className="tb" href="/me" aria-label={`내 첩 · 구매 내역과 인장 ${seals.length}개`}>내 첩</Link>
+      <Link className="tb" href="/lobby" aria-label="해석자와 메뉴 선택">메뉴</Link>
     </div>
   );
 }
@@ -317,7 +317,7 @@ export default function Shell({
 
   /*
    * 새로고침하면 features 는 사라지고 chartId 만 남습니다(용량 때문에
-   * 저장하지 않습니다). 그대로 두면 "아직 세우지 않았소" 로 돌아갑니다.
+   * 저장하지 않습니다). 그대로 두면 "아직 세우지 않음" 로 돌아갑니다.
    * chart_id 로 서버에서 되찾아 옵니다.
    */
   const chartId = useSession((s) => s.chartId);
@@ -349,8 +349,8 @@ export default function Shell({
   /*
    * ★ 화면 전체가 손님이 읽는 속도로 뜬다.
    *
-   *   순서는 화면 단위입니다. 여기 놓인 순서(DOM 순서 = 보이는 순서)대로
-   *   차례를 매깁니다 — 페이지마다 손댈 필요가 없습니다. 스물일곱 화면이
+   *   순서는 화면 단위이오. 여기 놓인 순서(DOM 순서 = 보이는 순서)대로
+   *   차례를 매깁니다 — 페이지마다 손댈 필요가 없소. 스물일곱 화면이
    *   전부 이 한 자리를 지납니다.
    *
    *   장면과 진행 막대는 뺍니다 — 배경이라 처음부터 있어야 합니다.
@@ -460,7 +460,8 @@ export default function Shell({
     // ★ 다만 **관리자는 뺍니다** (2026-09-04). 화면을 고치는 사람은 같은
     //   화면을 스무 번 엽니다. 두 번째부터 안 늦추면 고친 연출을 볼 수가
     //   없어, 손님이 「차례대로 안 뜬다」 고 한 것도 실은 이 자리였습니다.
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    if (["a3", "a4", "a5", "d1", "d1b", "d2"].includes(screen ?? "")
+        || window.matchMedia("(prefers-reduced-motion: reduce)").matches
         || (!admin && seenBefore(screen))) {
       revealAll();
       return;
@@ -536,7 +537,7 @@ export default function Shell({
           timersRef.current.push(window.setTimeout(
             () => lightUp(el), wait * 1000));
           queueRef.current = now + (wait + holdOf(el)) * 1000;
-          // 다 떴으면 「한 번에 다 보겠습니다」 를 거둡니다.
+          // 다 떴으면 연출 진행 상태를 해제합니다.
           if (!root.querySelector("[data-beatwait]")) {
             timersRef.current.push(window.setTimeout(() => {
               setPacing(false);
@@ -571,7 +572,7 @@ export default function Shell({
   });
 
   /*
-   * 「한 번에 다 보겠습니다」 를 거두는 것은 **관찰자가** 합니다 —
+   * 연출 진행 상태를 해제하는 것은 **관찰자가** 합니다 —
    * 마지막 마디가 뜬 뒤에요. 시간으로 재면 굴림에 맡긴 뒤로는 맞지
    * 않습니다: 손님이 안 굴리면 영영 안 끝나고, 그동안 「다 보겠습니다」
    * 를 거두면 서두를 길이 사라집니다.
@@ -587,7 +588,7 @@ export default function Shell({
    *   울려서, 굴리려던 사람이 건너뛰기를 누른 셈이 됐습니다.
    *
    *   그래서 **누름(click)과 키만** 답니다. 굴림은 굴림입니다.
-   *   서두르는 사람에게는 「한 번에 다 보겠습니다」 가 있습니다.
+   *   클릭과 키보드로 본문을 한 번에 펼치는 동작은 유지합니다.
    */
   useEffect(() => {
     if (!pacing) return;
@@ -648,7 +649,7 @@ export default function Shell({
    *   장면이 제 결을 들고 있으니(`manifest.bed`) 화면이 늘어도 여기를
    *   고칠 일이 없습니다. 같은 방이면 안 끊깁니다.
    *
-   * ★ 소리가 꺼져 있으면 아무 일도 안 합니다. 켜는 순간 이어집니다.
+   * ★ 소리가 꺼져 있으면 아무 일도 안 합니다. 켜는 순간 이어지오.
    */
 
   // 계산 서버가 안 붙은 배포본이면 조용히 실패하지 않고 알린다
@@ -663,6 +664,7 @@ export default function Shell({
         <DevRail />
       </Suspense>
       <div className="stage">
+      <BrandFrame screen={screen} />
       <div
         className="phone"
         data-screen={screen}
@@ -691,31 +693,19 @@ export default function Shell({
           <div className="warn" style={{ margin: "12px 16px 0" }}>
             <p>계산 서버가 아직 붙지 않았소.</p>
             <p className="sm">
-              화면과 서사는 볼 수 있으나 명식은 세울 수 없습니다.
-              <code> NEXT_PUBLIC_API_BASE </code>를 API 주소로 설정하세요.
+              화면과 서사는 볼 수 있으나 명식은 세울 수 없소.
+              <code> NEXT_PUBLIC_API_BASE </code>를 API 주소로 설정하시오.
             </p>
           </div>
         )}
         <div className="scr" ref={scrRef}>
+          {!bare && <FolioLabel screen={screen} title={title} />}
           {children}
           {legal && <Legal />}
           {/* 처마는 어느 화면에나 섭니다 — 대문(bare)만 빼고.
               대문은 첫 3초를 파는 자리라 아래 띠가 시선을 나눕니다. */}
           {!bare && <SiteFooter />}
         </div>
-        {/*
-          ★ 늦추는 데는 반드시 **건너뛰는 길**이 있어야 합니다.
-            뜸에 그렇게 하기로 이미 정해 두었고(lib/think), 화면 전체를
-            읽는 속도로 내보내는 지금은 더 그렇습니다. 화면 아무 데나
-            눌러도 되지만, **눌러도 된다는 걸 알아야** 누릅니다.
-
-          ★ 손님의 말이라 합쇼체입니다. 도령의 말이 아닙니다.
-        */}
-        {pacing && (
-          <button className="beatskip-hint noprint" onClick={revealAll}>
-            한 번에 다 보겠습니다
-          </button>
-        )}
       </div>
       </div>
     </>

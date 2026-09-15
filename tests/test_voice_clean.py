@@ -43,19 +43,21 @@ from engine.report import build_report                 # noqa: E402
 from voice_audit import ending_of, frozen, sentences   # noqa: E402
 
 
-@pytest.fixture(scope="module")
-def spoken():
-    """스무 명이 실제로 손님에게 내보내는 문장."""
-    f = build_features(build_chart(1993, 11, 25, 15, 55, "M", True, "서울"))
+@pytest.fixture(scope="module", params=[True, False])
+def spoken(request):
+    """스무 해석자 × 여섯 고민 × 출생시간 유무의 240개 결과."""
+    known = request.param
+    f = build_features(build_chart(1993, 11, 25, 15 if known else None, 55, "M", known, "서울"))
     out = {}
     for l in lens_mod.released():
         lines = []
         tier = "one" if l.get("price") else "free"
-        r = build_report(f, "t", l["id"], tier, "money", None)
-        for k in ("opening", "closing"):
-            lines += sentences(r.get(k) or "")
-        for c in r.get("cuts", []):
-            lines += sentences(c.get("html", ""))
+        for concern in ("money", "work", "love", "people", "dir", "health"):
+            r = build_report(f, "t", l["id"], tier, concern, None)
+            for k in ("opening", "closing"):
+                lines += sentences(r.get(k) or "")
+            for c in r.get("cuts", []):
+                lines += sentences(c.get("html", ""))
         out[l["id"]] = lines
     return out
 

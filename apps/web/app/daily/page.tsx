@@ -26,9 +26,11 @@ export default function DailyPage() {
   const s = useSession();
   const [data, setData] = useState<DailyResponse | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
 
   useEffect(() => {
-    s.set({ visits: s.visits + 1 });
+    const day = new Intl.DateTimeFormat('en-CA', {timeZone:'Asia/Seoul', year:'numeric', month:'2-digit', day:'2-digit'}).format(new Date());
+    s.set({ visits: s.visitDate === day ? s.visits + 1 : 1, visitDate: day });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -39,7 +41,7 @@ export default function DailyPage() {
       .then((d) => alive && setData(d))
       .catch(() => alive && setErr("일진을 셈하지 못했소."));
     return () => { alive = false; };
-  }, [s.chartId, s.concern]);
+  }, [s.chartId, s.concern, retry]);
 
   if (!s.chartId) {
     return (
@@ -52,38 +54,41 @@ export default function DailyPage() {
 
   return (
     <Shell screen="g1" title="오늘의 일진">
+      <header className="editorial-heading"><p className="conversion-kicker">오늘의 한 장</p><h1>오늘은 어떤 마음으로<br/>하루를 열겠소?</h1><p>오늘의 기운을 읽고, 작은 행동 하나를 골라보시오.</p></header>
       <Scene id="banner" />
       {/* ★ 여는 줄이 없어 첫 줄이 「일진이란…」 이라는 뜻풀이였습니다.
           매일 오는 자리라 더 그렇습니다 — 같은 설명을 매일 읽습니다. */}
       <Narration lines={["오늘 자 종이가 상 위에 새로 올라와 있다.",
                          "어제 것은 치워져 있었다."]} />
+      {/* ★ 비유 40 · 겪은 일 0. 매일 오는 자리라 같은 설명을 매일
+          읽습니다. 지나온 날을 짚는 한 줄을 답니다. */}
+      <p className="sm">어제도 그제도 이 종이가 있었을 것이오. 오늘 것은 오늘만 맞소 — 날씨를 보는 것처럼, 옷을 고르는 데 쓰지 하루를 정하는 데 쓰지 않소.</p>
       {/*
         ★ 72점이던 자리. 비유 0 · 겪은 일 없음 — 매일 오는 화면이라
           같은 뜻풀이를 매일 읽게 됩니다. 오늘 것이 어제와 **무엇이
           다른지**를 그림으로 한 줄 답니다.
       */}
       <Say who="도령" lens="pungun">
-        여덟 글자는 그대로 두고, 오늘 자 두 글자만 그 위에 얹는 것이오.
+        입력한 명식은 그대로 두고, 오늘 자 두 글자만 그 위에 얹는 것이오.
         <br />
-        <b>여태 「오늘 왜 이렇게 안 풀리지」 싶은 날이 있었소.</b>
-        {" "}그런 날 대개는 참고 넘겼을 것이오. 그 날짜를 여기 대 보면
-        얹힌 글자가 무엇이었는지 보이오.
+        오늘의 두 글자가 입력한 명식과 어떻게 놓이는지 전통 해석으로 살펴보오.
+        오늘 일어날 사건이나 하루의 좋고 나쁨을 확정하는 결과는 아니오.
         <br />
         날마다 다른 손님이 상에 앉는 것처럼, 두 글자가 매일 바뀌오.
         같은 짝은 60일 뒤에나 돌아오오 — 예순 칸짜리 수레바퀴가 한
         바퀴 도는 것과 같소.
       </Say>
       {/*
-        ★ 「일진」이 무엇인지 아무 데도 안 적혀 있었습니다.
+        ★ 「일진」이 무엇인지 아무 데도 안 적혀 있었소.
           그리고 「그날의 기운」 은 모르는 말을 **뜬 말로** 바꾼 것이라
           아직 그림이 안 그려집니다. 세는 것으로 바꿔 적습니다.
       */}
       <p className="lede8">
         일진 (그날에 새로 서는 두 글자) 이오. 날마다 <b>두 글자가 다</b>
-        바뀌고, <b>예순 날</b>만에 같은 짝이 돌아오오. 그 둘이 그대 여덟
-        글자와 어디서 맞물리는지 보오.
+        바뀌고, <b>예순 날</b>만에 같은 짝이 돌아오오. 그 둘이 그대의
+        명식과 어디서 맞물리는지 보오.
       </p>
-      {err && <Say who="도령" lens="pungun">{err}</Say>}
+      {err && <><Say who="도령" lens="pungun">{err}</Say><button className="btn" onClick={() => {setErr(null);setRetry(n => n + 1);}}>일진 다시 불러오기</button></>}
 
       {/* 하루 3회 접속 시 만류 — 늘리지 마세요 */}
       {s.visits >= VISIT_WARN_AT && (
@@ -167,7 +172,7 @@ export default function DailyPage() {
           **왜 어제와 다른지**를 말해 줘야 내일도 옵니다.
 
         ★ 그런데 여기 적혀 있던 「내일은 글자가 하나 바뀌오」 는
-          **틀린 말이었습니다.** 일진은 천간과 지지가 함께 한 칸씩
+          **틀린 말이었소.** 일진은 천간과 지지가 함께 한 칸씩
           갑니다 — 庚辰 다음은 辛巳라 두 글자가 다 바뀝니다. 같은 짝은
           예순 날 뒤에 돌아옵니다. 셈에서 나온 값으로 고쳤습니다.
       */}

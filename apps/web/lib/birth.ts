@@ -52,7 +52,7 @@ export function birthProblem(
     return `${year}년 ${month}월은 ${last}일까지요.`;
   }
 
-  // 아직 오지 않은 날. 서버는 받지만 사람에게는 물어보는 게 맞습니다.
+  // 아직 오지 않은 날. 서버는 받지만 사람에게는 물어보는 게 맞소.
   const now = new Date();
   const born = new Date(year, month - 1, day);
   if (born.getTime() > now.getTime()) {
@@ -71,4 +71,32 @@ export function birthMessageFrom(detail: unknown): string | null {
   if (/day is out of range|day/.test(text)) return "그 달에 없는 날이오.";
   if (/hour/.test(text)) return "때가 잘못 적혔소.";
   return null;
+}
+
+/**
+ * 적어 주신 날로 **세어서** 돌려주는 값 둘.
+ *
+ * ★ 되비추기가 아니라 돌려주기입니다 (tools/give_take.py 머리말).
+ *   `{s.year}` 는 손님이 방금 적은 것을 그대로 보여 주는 것이라 아무것도
+ *   준 게 아닙니다. 산 날수와 만 나이는 **우리가 세어서** 주는 것이고,
+ *   손님이 달력을 펴고 대 볼 수 있습니다.
+ *
+ * ★ 여기서 간지(띠·년주)는 안 냅니다.
+ *   해가 바뀌는 자리는 설이 아니라 **입춘**이라, 1~2월생은 화면에서
+ *   대충 세면 틀립니다. 계산은 지어내지 않습니다 (CLAUDE.md 절대 규칙 1) —
+ *   간지는 서버가 절입 시각을 보고 세운 뒤에 냅니다.
+ */
+export function livedDays(y: number, m: number, d: number, now = new Date()): number {
+  const born = Date.UTC(y, m - 1, d);
+  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.max(0, Math.round((today - born) / 86400000));
+}
+
+/** 만 나이. 생일이 안 지났으면 한 살 뺍니다. */
+export function ageNow(y: number, m: number, d: number, now = new Date()): number {
+  let age = now.getFullYear() - y;
+  const passed = now.getMonth() + 1 > m
+    || (now.getMonth() + 1 === m && now.getDate() >= d);
+  if (!passed) age -= 1;
+  return Math.max(0, age);
 }

@@ -23,11 +23,11 @@ BONUS_SAME_JI = 8
 FLOOR, CEIL = 12, 96
 
 RELATION_TEXT = {
-    "같은 기운이 겹치는": "같은 기운이 하나 더 놓이는 날이오. 밀어붙이기는 쉽고, 물러서기는 어렵소.",
-    "기운이 빠져나가는": "내놓는 쪽으로 기울어지는 날이오. 쏟고 나면 비는 걸 염두에 두시오.",
-    "눌리는": "위에서 누르는 기운이 있는 날이오. 굳이 맞서지 않아도 되오.",
-    "내가 다스리는": "손에 잡히는 쪽으로 도는 날이오. 벌이는 것보다 정리가 낫소.",
-    "기운을 받는": "받는 쪽으로 도는 날이오. 도움을 청하기 어렵지 않은 날이지.",
+    "같은 기운이 겹치는": "오늘은 그대와 같은 편 글자가 하나 더 드는 날이오. 밀고 나가기는 쉽고, 한발 물러서기는 어렵소.",
+    "기운이 빠져나가는": "오늘은 그대 힘을 밖으로 내어 쓰는 날이오. 다 쏟고 나면 지치니 조금 남겨 두시오.",
+    "눌리는": "오늘은 그대를 위에서 누르는 글자가 드는 날이오. 굳이 맞서지 않아도 되오.",
+    "내가 다스리는": "오늘은 그대가 손에 쥐고 다룰 수 있는 글자가 드는 날이오. 새 일을 벌이기보다 있는 것을 정리하는 게 낫소.",
+    "기운을 받는": "오늘은 그대를 돕는 글자가 드는 날이오. 남에게 도움을 청하기 어렵지 않은 날이오.",
 }
 
 
@@ -97,37 +97,37 @@ def build_daily(f, on: date | None = None,
     #   여기는 근거 대는 집이니 방어가 아니라 **셈법 공개**로 처리합니다.
     #   무엇이 몇 점을 올리고 내렸는지 그대로 내려보냅니다.
     score = BASE
-    why = [{"k": "기준", "v": BASE, "t": "누구나 여기서 시작하오"}]
+    why = [{"k": "기준", "v": BASE, "t": "누구나 이 점수에서 시작하오"}]
     if el == f.yongsin:
         score += BONUS_YONGSIN
         why.append({"k": "용신", "v": BONUS_YONGSIN,
-                    "t": "오늘 천간이 그대에게 드는 %s요" % element_word(f.yongsin)})
+                    "t": "오늘 날의 윗글자가 그대에게 모자란 것을 채워 주는 %s요" % element_word(f.yongsin)})
     if el == f.strong_el:
         score += PENALTY_STRONG
-        why.append({"k": "넘치는 기운", "v": PENALTY_STRONG,
-                    "t": "이미 많은 %s가 오늘 또 드오" % element_word(f.strong_el)})
+        why.append({"k": "넘치는 것", "v": PENALTY_STRONG,
+                    "t": "그대에게 이미 많은 %s — 오늘 또 하나 들어오오" % element_word(f.strong_el)})
     if ji == CHUNG[f.day_ji]:
         score += PENALTY_CHUNG
         why.append({"k": "충", "v": PENALTY_CHUNG,
-                    "t": "일지 %s와 오늘 지지가 부딪히오" % f.day_ji})
+                    "t": "그대 일지 %s와 오늘 날의 아랫글자가 부딪히오" % f.day_ji})
     if ji == f.day_ji:
         score += BONUS_SAME_JI
         why.append({"k": "겹침", "v": BONUS_SAME_JI,
-                    "t": "일지 %s와 오늘 지지가 같소" % f.day_ji})
+                    "t": "그대 일지 %s와 오늘 날의 아랫글자가 같소" % f.day_ji})
     raw = score
     score = max(FLOOR, min(CEIL, score))
     if score != raw:
-        why.append({"k": "한도", "v": score - raw,
-                    "t": "%d~%d 밖으로는 안 나가오" % (FLOOR, CEIL)})
+        why.append({"k": "점수 범위", "v": score - raw,
+                    "t": "점수는 %d에서 %d 사이로만 매기오" % (FLOOR, CEIL)})
 
     # 한자 뒤 조사는 읽는 법에 따라 갈린다. 조사가 붙지 않는 형태로 쓴다.
     notes = []
     if el == f.yongsin:
-        notes.append("오늘 천간이 용신 %s에 해당하오." % element_word(f.yongsin))
+        notes.append("오늘 날의 윗글자가 그대 용신 %s에 해당하오." % element_word(f.yongsin))
     if ji == CHUNG[f.day_ji]:
-        notes.append("일지 %s — 오늘 지지와 부딪히는 날이오." % f.day_ji)
+        notes.append("그대 일지 %s — 오늘 날의 아랫글자와 부딪히는 날이오." % f.day_ji)
     elif ji == f.day_ji:
-        notes.append("일지 %s — 오늘 지지와 겹치오." % f.day_ji)
+        notes.append("그대 일지 %s — 오늘 날의 아랫글자와 같소." % f.day_ji)
 
     # ── 본문을 곱한다 ────────────────────────────────────
     #
@@ -168,8 +168,8 @@ def build_daily(f, on: date | None = None,
         "score": score,
         # 이 점수가 무엇을 센 것인가. 화면이 그대로 펼쳐 보입니다.
         "score_why": why,
-        "score_says": ("오늘 일진과 그대 여덟 글자가 맞물린 자리를 센 것이오. "
-                       "좋고 나쁨이 아니라 부딪히는 수요."),
+        "score_says": ("오늘 일진이 그대 여덟 글자와 몇 군데서 돕고 부딪히는지 센 점수요. "
+                       "좋은 날·나쁜 날을 정하는 점수가 아니오."),
         "text": " ".join(body),
         "lines": body,
         "notes": notes,

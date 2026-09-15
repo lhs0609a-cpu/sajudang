@@ -158,10 +158,16 @@ def test_repo_holds_no_plaintext_password():
     bad = []
     mark = "ADMIN_PASSWORD_HASH="
     algo = "pbkdf2_" + "sha256$"       # 이 파일이 스스로 걸리지 않게 나눠 적소
-    for pat in ("*.py", "*.ts", "*.tsx", "*.ps1", "*.json", "*.md"):
-        for f in ROOT.rglob(pat):
-            if any(p in f.parts for p in
-                   ("node_modules", ".git", ".venv", "__pycache__", ".next")):
+    import os
+    # Prune generated/dependency trees before walking. Filtering after rglob
+    # still traverses every dependency and local worktree for every extension.
+    ignored = {"node_modules", ".git", ".venv", "__pycache__", ".next", "output"}
+    extensions = {".py", ".ts", ".tsx", ".ps1", ".json", ".md"}
+    for folder, dirs, names in os.walk(ROOT):
+        dirs[:] = [d for d in dirs if d not in ignored]
+        for name in names:
+            f = Path(folder) / name
+            if f.suffix not in extensions:
                 continue
             if f.name == Path(__file__).name:
                 continue

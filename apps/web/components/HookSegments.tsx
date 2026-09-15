@@ -6,13 +6,12 @@
  * ★ html 은 서버가 렌더한 것입니다. 여기서 문장을 만들지 않습니다.
  * ★ 공감률은 서버가 shown=true 를 줄 때만 그립니다. 100건 미만이면 안 그립니다.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { Say } from "@/components/Narration";
 import CharArt from "@/components/CharArt";
 import { LENS_BY_ID } from "@/lib/lenses";
-import { CONCERNS } from "@/lib/store";
-import { speakRemote } from "@/lib/sound";
+import { CONCERNS, useSession } from "@/lib/store";
 import { track } from "@/lib/track";
 import type { HookSegment } from "@shared/chart";
 
@@ -80,9 +79,39 @@ export default function HookSegments({
   onMiss?: (misses: number) => void;
   onDone?: () => void;
 }) {
-  const [open, setOpen] = useState(1);
-  const [replies, setReplies] = useState<Record<number, string>>({});
-  const [misses, setMisses] = useState(0);
+  const [restored] = useState(() => {
+    const review = useSession.getState().hookReview;
+    const answers = review?.chartId === chartId && review.concern === concern && review.lensId === lensId ? review.answers : {};
+    const replies: Record<number,string> = {};
+    let count=0, misses=0;
+    for (const seg of segments) {
+      if (!Object.prototype.hasOwnProperty.call(answers,seg.stage)) break;
+      const answer=answers[seg.stage];
+      replies[count]=answer===null ? "그럴 수 있소. 판단은 미뤄 두고 계속 보시오." : answer ? seg.yes : seg.no;
+      if (answer===false) misses++;
+      count++;
+    }
+    return {count,misses,replies};
+  });
+  const [open, setOpen] = useState(Math.min(restored.count+1,segments.length));
+  const [replies, setReplies] = useState<Record<number, string>>(restored.replies);
+  const [misses, setMisses] = useState(restored.misses);
+  const voted = useRef(new Set<number>(Object.keys(restored.replies).map(Number)));
+  const notified = useRef(false);
+  useEffect(() => {
+    if (!notified.current && restored.count === segments.length) {
+      notified.current=true;
+      onDone?.();
+    }
+  }, [restored.count,segments.length,onDone]);
+  const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const activeHeading = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (open <= 1) return;
+    activeHeading.current?.focus({preventScroll:true});
+    activeHeading.current?.scrollIntoView({block:"start", behavior:"auto"});
+  }, [open]);
+  useEffect(() => () => {if(advanceTimer.current) clearTimeout(advanceTimer.current);}, []);
 
   /*
    * 몇 단까지 열렸는지 남깁니다. 초반이 어디서 끊기는지 여기가 답합니다.
@@ -105,25 +134,16 @@ export default function HookSegments({
    *
    *   중립은 서버가 **노출로만** 셉니다 (answer 를 안 보냅니다).
    */
-  /*
-   * 새로 열린 마디를 읽어 준다.
-   *
-   * 훅은 사람마다 문장이 달라 미리 만들어 둘 수 없습니다. 서버가 그때
-   * 만들어 곳간에 두므로, 같은 말은 두 번 안 만듭니다.
-   */
-  const [said, setSaid] = useState(0);
-  useEffect(() => {
-    if (open <= said) return;
-    const seg = segments[open - 1];
-    setSaid(open);
-    if (seg?.statement_id && seg.html) {
-      void speakRemote(() => api.voice({
-        kind: "hook", statement_id: seg.statement_id!, html: seg.html,
-      }));
-    }
-  }, [open, said, segments]);
+  // Spoken dialogue is reserved for the optional first greeting.
 
   const vote = async (i: number, yes: boolean | null) => {
+    if (voted.current.has(i)) return;
+    voted.current.add(i);
+    const session = useSession.getState();
+    const prev = session.hookReview;
+    const same = prev?.chartId === chartId && prev.concern === concern && prev.lensId === lensId;
+    session.set({ hookReview: { chartId, concern, lensId,
+      answers: { ...(same ? prev.answers : {}), [segments[i].stage]: yes } } });
     track("hook_answer", "a7", { stage: i, yes: yes === null ? 2 : yes ? 1 : 0 });
     const seg = segments[i];
     const say = yes === null
@@ -136,6 +156,11 @@ export default function HookSegments({
       setMisses(n);
       onMiss?.(n);
     }
+    // Recording feedback must not hold the next paragraph behind a slow request.
+    advanceTimer.current = setTimeout(() => {
+      setOpen((n) => Math.max(n, i + 2));
+      if (i + 1 >= segments.length) onDone?.();
+    }, 660);
     try {
       await api.feedback({
         statement_id: seg.statement_id, chart_id: chartId,
@@ -145,10 +170,6 @@ export default function HookSegments({
     } catch {
       /* 기록 실패가 읽기를 막아서는 안 된다 */
     }
-    setTimeout(() => {
-      setOpen((n) => Math.max(n, i + 2));
-      if (i + 1 >= segments.length) onDone?.();
-    }, 660);
   };
 
   const lens = LENS_BY_ID[lensId];
@@ -156,6 +177,8 @@ export default function HookSegments({
 
   return (
     <>
+      <div className="hook-progress" role="status">경험 확인 {Object.keys(replies).length} / {segments.length}<span>답한 내용은 다시 펼쳐 읽을 수 있소.</span></div>
+      {restored.count > 0 && <p className="conversion-note" role="status">앞서 답한 {restored.count}마디를 불러왔소. {restored.count === segments.length ? "무료 요약으로 이어가시오." : "남은 이야기부터 이어가시오."}</p>}
       {/*
         ★ 새로 열린 마디만 읽어 줍니다.
           이미 읽은 마디를 다시 읽으면 손님이 아래로 내릴 때마다
@@ -163,7 +186,11 @@ export default function HookSegments({
           **청하지도** 않습니다 — 만드는 데 값이 나가는 자리입니다.
       */}
       {segments.slice(0, open).map((seg, i) => (
-        <div className="blk in" key={seg.statement_id}>
+        <details className="hook-chapter" key={seg.statement_id} open={i === Math.min(open,segments.length)-1}>
+          <summary tabIndex={0} ref={node => {if(i === Math.min(open,segments.length)-1) activeHeading.current=node;}}>
+            <span>{i+1}. {seg.label || "그대의 반복 패턴"}</span><small>{replies[i] === undefined ? "지금 읽는 마디" : "답변 완료 · 다시 읽기"}</small>
+          </summary>
+        <div className="blk in">
           {/* ★ 몇 번째 마디인지. 0단은 label 이 비어 있어서 손님이
               어디쯤 왔는지 알 길이 없었습니다. */}
           {/*
@@ -217,15 +244,15 @@ export default function HookSegments({
                   한 덩이로 읽혀 끝이 무뎌집니다. 그리고 이건 참인
                   말입니다 — 「아니오」 둘이면 2단이 축을 바꿉니다
                   (bank.TURN_AT). 누르는 것이 다음 단을 정하오. */}
-              <p className="sm hookhint">누르는 대로 다음 단이 갈리오.</p>
+              <p className="sm hookhint">그대의 경험과 맞소? 맞지 않는 대목은 따로 짚겠소.</p>
               <div className="vt">
-                <button onClick={() => vote(i, true)}>그렇습니다</button>
+                <button onClick={() => vote(i, true)}>맞습니다</button>
                 <button onClick={() => vote(i, false)}>아닙니다</button>
               </div>
               {/* ★ 세 번째 길. 이게 없어서 애매한 사람이 거짓 '그렇소' 를
                   눌렀고, 아무것도 안 누르면 다음 단이 안 열렸습니다. */}
               <button className="lk vt3" onClick={() => vote(i, null)}>
-                잘 모르겠습니다 · 그냥 듣겠습니다
+                잘 모르겠습니다
               </button>
             </>
           ) : (
@@ -247,9 +274,21 @@ export default function HookSegments({
                    mood={replies[i] && seg.no === replies[i] ? "soft" : "cut"}>
                 {replies[i]}
               </Say>
+              {/*
+                ★ 다음 마디를 **이름으로** 부릅니다 (2026-09-10).
+
+                  「더 있소」 는 예고가 아닙니다. 이름을 대야 손님이
+                  무엇이 남았는지 알고 그걸 보러 갑니다 — 이 집이
+                  연출 점수에서 「이름으로 예고」 를 세는 까닭입니다
+                  (engine/dramaturgy.NAMED_NEXT). 여태 이름을 대고
+                  있었는데 낫표를 안 둘러 자에도 안 걸리고 눈에도
+                  덜 띄었습니다.
+              */}
+              {i < segments.length - 1 && <p className="hook-next">다음 마디 · 「{segments[i+1].label || "그 선택 뒤의 다른 면"}」.</p>}
             </div>
           )}
         </div>
+        </details>
       ))}
     </>
   );

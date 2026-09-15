@@ -18,14 +18,15 @@
  */
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import ChoiceGrid from "./ChoiceGrid";
 
-type Choice = { id: string; label: string };
+type Choice = { id: string; label: string; image?: string };
 type Choices = {
   situation: Choice[];
   stance: Choice[];
   blood: string[];
   image: Choice[];
-  card: Choice[];
+  cards: Choice[];
   /* 만남 — 누구랑 · 어떻게. 자유 입력은 안 받습니다. */
   meet_who: Choice[];
   meet_how: Choice[];
@@ -42,18 +43,18 @@ const TITLE: Record<string, string> = {
 
 const WHY: Record<string, string> = {
   blood: "피는 셈에 안 들어가오. 이 사람이 그걸로 한 겹 더 볼 뿐이오.",
-  image: "고른 그림이 여덟 글자와 어긋나는 데를 봅니다.",
-  cards: "셋을 뽑은 순서까지 봅니다.",
+  image: "고른 그림이 여덟 글자와 어긋나는 데를 보오.",
+  cards: "셋을 뽑은 순서까지 보오.",
   context: "지금 자리를 알아야 같은 글자도 다르게 읽히오.",
-  partner: "상대의 여덟 글자와 맞대 봅니다. 적으신 것은 남기지 않소.",
+  partner: "상대의 여덟 글자와 맞대 보오. 적으신 것은 남기지 않소.",
   /*
-   * ★ 맞히는 것이 아니라 **대 보는 것**이라고 적습니다.
+   * ★ 맞히는 것이 아니라 **대 보는 것**이라고 적소.
    *   여덟 글자로 만난 경위를 뽑을 수는 없습니다. 다만 짝을 보는
    *   글자가 어느 궁에 앉았는지는 이미 셈이 끝나 있어, 적으신 결과
    *   겹치는지 어긋나는지를 볼 수 있습니다 — 넉 자를 대 보는 것과
    *   같은 구조입니다.
    */
-  meet: "짝 글자가 앉은 자리와 맞대 봅니다. 적으신 것은 남기지 않소.",
+  meet: "짝 글자가 앉은 자리와 맞대 보오. 적으신 것은 남기지 않소.",
 };
 
 export default function ExtraAsk({
@@ -166,24 +167,16 @@ export default function ExtraAsk({
     ready = !!pick;
     build = () => ({ image: { pick } });
     body = (
-      <div className="og c2">
-        {ch.image.map((x) => (
-          <button key={x.id} className={`op ${pick === x.id ? "on" : ""}`}
-                  onClick={() => setPick(x.id)}>{x.label}</button>
-        ))}
-      </div>
+      <ChoiceGrid label="그림 선택" choices={ch.image} selected={pick ? [pick] : []}
+        onPick={setPick} disabled={busy} />
     );
   } else if (need === "cards") {
     ready = picks.length === 3;
     build = () => ({ cards: { picks } });
     body = (
       <>
-        <div className="og c2">
-          {ch.card.map((x) => (
-            <button key={x.id} className={`op ${picks.includes(x.id) ? "on" : ""}`}
-                    onClick={() => togglePick(x.id)}>{x.label}</button>
-          ))}
-        </div>
+        <ChoiceGrid label="패 석 장 선택" choices={ch.cards} selected={picks}
+          onPick={togglePick} disabled={busy} ordered concealed limit={3} />
         <p className="sm">{picks.length} / 3</p>
       </>
     );
@@ -195,12 +188,8 @@ export default function ExtraAsk({
     });
     body = (
       <>
-        <div className="og c2">
-          {ch.situation.map((x) => (
-            <button key={x.id} className={`op ${pick === x.id ? "on" : ""}`}
-                    onClick={() => setPick(x.id)}>{x.label}</button>
-          ))}
-        </div>
+        <ChoiceGrid label="현재 상황" choices={ch.situation} selected={pick ? [pick] : []}
+          onPick={setPick} disabled={busy} />
         <p className="sm mt">그 자리에서 지금 어찌하고 계시오?</p>
         <div className="og" style={{ gridTemplateColumns: "repeat(3,1fr)" }}>
           {ch.stance.map((x) => (
@@ -245,7 +234,7 @@ export default function ExtraAsk({
           ))}
         </div>
         <p className="sm mt">
-          때는 안 묻소 — 모르는 걸 채우지 않소. 적으신 것은 <b>남기지 않습니다.</b>
+          때는 안 묻소 — 모르는 걸 채우지 않소. 적으신 것은 <b>남기지 않소.</b>
         </p>
       </>
     );

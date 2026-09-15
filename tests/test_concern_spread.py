@@ -49,6 +49,11 @@ CONCERNS = ("money", "work", "love", "people", "dir", "health")
 # 물음에 따라 바뀌면 **안 되는** 컷
 FIXED = {"chart"}
 
+# ★ 이 사람을 한 줄로 세우는 컷 (engine/spine · 2026-09-11).
+#   무엇을 물었든 **같은 사람**이라, 명식처럼 물음이 바꿀 것이 아니오.
+#   물으신 고민은 바로 뒤의 장면(spine_scene)과 이번 주 한 가지가 받습니다.
+PERSON = {"spine", "spine_depth", "lens_bridge"}
+
 PEOPLE = [
     ((1993, 7, 14, 5, 20), "F"),
     ((1988, 11, 2, 21, 40), "M"),
@@ -103,7 +108,7 @@ def test_the_chart_cut_never_moves(reports):
 def test_most_of_the_report_moves_with_the_question(reports):
     """컷 스물일곱 중 대부분이 갈려야 합니다."""
     for f, rep in reports:
-        ids = [x["id"] for x in rep["love"]]
+        ids = [x["id"] for x in rep["love"] if x["id"] not in PERSON]
         same = 0
         for cid in ids:
             texts = {_flat(x["html"]) for c in CONCERNS for x in rep[c]
@@ -151,8 +156,10 @@ def test_a_lens_speaks_differently_on_and_off_its_seat():
     on = topic.lens_line("wolha", "love")
     off = topic.lens_line("wolha", "money")
     assert on != off
-    assert "내 자리가 아니" in off, off
-    assert "내 자리가 아니" not in on, on
+    # 「내 자리가 아니오」 → 「내가 맡은 일이 아니오」 (2026-09-11 · docs/21)
+    NOT_MINE = ("내 자리가 아니", "맡은 일이 아니")
+    assert any(w in off for w in NOT_MINE), off
+    assert not any(w in on for w in NOT_MINE), on
 
 
 def test_the_lens_line_never_opens_with_self_introduction():

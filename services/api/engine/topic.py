@@ -265,11 +265,19 @@ _JOSA_AFTER = re.compile(
 #   반은 틀립니다. 「관성이 하나이오」 가 그 자리였습니다.
 _COPULA_AFTER = re.compile(
     r"\{(\w+)\}" + _TAGS + r"\s*(이오|요)(?=\s|$|[.,!?)\]<])")
+# ★ 「으로/로」 도 같은 자리입니다 (2026-09-15).
+#   이 짝이 표에 없어서 `{weak}으로` 가 「불으로」 로 그대로 나갔습니다.
+#   받침을 보고 고르는 조사는 여기 한 벌에 다 있어야, 다음에 쓰는
+#   사람이 손으로 박지 않습니다 (CLAUDE.md 「자리표시 뒤에 조사를
+#   손으로 박기」).
+_RO_AFTER = re.compile(
+    r"\{(\w+)\}" + _TAGS + r"\s*(으로|로)(?=\s|$|[.,!?)\]<])")
 _JOSA_PAIR = {"이": ("이", "가"), "가": ("이", "가"),
               "은": ("은", "는"), "는": ("은", "는"),
               "을": ("을", "를"), "를": ("을", "를"),
               "와": ("과", "와"), "과": ("과", "와"),
-              "이오": ("이오", "요"), "요": ("이오", "요")}
+              "이오": ("이오", "요"), "요": ("이오", "요"),
+              "으로": ("으로", "로"), "로": ("으로", "로")}
 
 
 def _batchim(val: str) -> bool:
@@ -285,6 +293,22 @@ def _batchim(val: str) -> bool:
     return has_batchim(sound) if sound else False
 
 
+def _rieul(val: str) -> bool:
+    """마지막 글자의 받침이 ㄹ 인가. 「으로」 와 「로」 를 가르는 자리요."""
+    if not val:
+        return False
+    last = val[-1]
+    if not ("가" <= last <= "힣"):
+        from .constants import GAN_SOUND, JI_SOUND
+        snd = JI_SOUND.get(last) or GAN_SOUND.get(last)
+        if not snd:
+            return False
+        last = snd[-1]
+        if not ("가" <= last <= "힣"):
+            return False
+    return (ord(last) - 0xAC00) % 28 == 8      # ㄹ
+
+
 def _fmt(tpl: str, w: dict) -> str:
     """자리표시를 갈아 끼우되 뒤따르는 조사를 받침에 맞춘다."""
     def sub(m):
@@ -295,9 +319,15 @@ def _fmt(tpl: str, w: dict) -> str:
         if not val:
             return val
         hard, soft = _JOSA_PAIR[j]
+        # ★ 「으로/로」 만 셈이 다릅니다 — ㄹ 받침은 「로」 를 씁니다
+        #   (불로 · 물로 · 하늘로). 받침 있고 없고로만 고르면 「불으로」
+        #   가 나갑니다.
+        if j in ("으로", "로"):
+            return val + tags + (hard if (_batchim(val) and not _rieul(val))
+                                 else soft)
         return val + tags + (hard if _batchim(val) else soft)
 
-    out = _COPULA_AFTER.sub(sub, tpl)
+    out = _RO_AFTER.sub(sub, _COPULA_AFTER.sub(sub, tpl))
     return _JOSA_AFTER.sub(sub, out).format(**w)
 
 
@@ -344,6 +374,62 @@ def _group_jis(f, group: str) -> list:
     """이 묶음이 본기로 앉은 지지들."""
     return [p["ji"] for p in f.pillars
             if GROUP_OF.get(ten_god(HIDDEN[p["ji"]][0][0], f.day_gan)) == group]
+
+
+def _group_gans(f, group: str) -> list:
+    """이 묶음이 **천간에 드러난** 자리들 — 투출(透出).
+
+    ★ 왜 따로 세나
+
+      같은 「재성 하나」라도 지지 속에만 숨은 것과 천간에 나온 것은
+      실무가 다르게 봅니다. 드러난 것은 밖으로 나가는 힘이고, 숨은
+      것은 안에서만 도는 힘입니다. 짝을 볼 때 이 갈래가 가장 크게
+      갈립니다 — 마음이 밖으로 나갔는가, 안에만 있었는가.
+
+      일간(나 자신)은 안 셉니다. 그건 짝이 아니라 나요.
+    """
+    out = []
+    for i, p in enumerate(f.pillars):
+        if i == 2:          # 일간 = 나 자신
+            continue
+        if GROUP_OF.get(ten_god(p["gan"], f.day_gan)) == group:
+            out.append(p["gan"])
+    return out
+
+
+def tuchul(f, group: str) -> bool:
+    """이 묶음이 천간에 드러났는가."""
+    return bool(_group_gans(f, group))
+
+
+def rooted(f, group: str) -> bool:
+    """드러난 것에 **뿌리**가 있는가 — 천간에도 있고 지지에도 있는가.
+
+    오래가는 것은 개수가 아니라 뿌리입니다. 천간에만 뜬 것은 바람에
+    흔들리고, 지지에만 있는 것은 밖으로 안 나옵니다.
+    """
+    return bool(_group_gans(f, group)) and bool(_group_jis(f, group))
+
+
+def jaego(f) -> Optional[str]:
+    """재고(財庫) — 그대의 재성 기운이 **갈무리되는 지지**가 있는가.
+
+    ★ 부동산·묵혀 두는 재산을 볼 때 실무가 먼저 보는 자리입니다.
+      쥐는 힘(재성)이 **어디에 담기는가**요 — 흐르는 돈과 담기는 돈은
+      다릅니다.
+
+    ★ 이 자리로 **사고파는 때를 말하지 않습니다** (docs/11).
+      「담기는 자리가 있소/없소」 까지입니다. 그 앞으로는 안 갑니다.
+    """
+    el = ELEMENT_OF_GAN.get(f.day_gan)
+    if not el:
+        return None
+    # 재성 = 내가 이기는 오행
+    jae_el = CONTROLS.get(el)
+    go = GO_JI.get(jae_el)
+    if not go:
+        return None
+    return go if any(p["ji"] == go for p in f.pillars) else None
 
 
 def gongmang_hit(f, group: str) -> bool:
@@ -504,7 +590,7 @@ def _rows_money(f) -> list:
         seats = group_seats(f, "재성")
         if seats:
             rows.append(_row("seat", seats[0],
-                             "재성 %d · 앉은 자리 %s"
+                             "재성 %d · 앉은 기둥 %s"
                              % (f.jae, " · ".join(seats))))
         rows.append(_row("bridge", "놓임" if f.sik else "끊김",
                          "식상 %d → 재성 %d" % (f.sik, f.jae)))
@@ -516,7 +602,7 @@ def _rows_money(f) -> list:
     go = GO_JI[jae_el]
     has_go = any(p["ji"] == go for p in f.pillars)
     rows.append(_row("store", "있음" if has_go else "없음",
-                     "재성 %s의 고지 %s %d자리"
+                     "재성 %s의 창고 글자(고지) %s %d자리"
                      % (jae_el, go, sum(1 for p in f.pillars
                                         if p["ji"] == go)),
                      quiet=not has_go, w={"go": go}))
@@ -524,11 +610,11 @@ def _rows_money(f) -> list:
     if f.jae:
         if gongmang_hit(f, "재성"):
             rows.append(_row("empty", "공망",
-                             "재성 %d · 앉은 자리가 공망 %s"
+                             "재성 %d · 앉은 글자가 공망 %s"
                              % (f.jae, f.gongmang)))
         elif chung_hit(f, "재성"):
             rows.append(_row("empty", "충",
-                             "재성 %d · 앉은 지지가 충 1" % f.jae))
+                             "재성 %d · 앉은 지지가 부딪힘(충) 1" % f.jae))
 
     live = ("용신" if jae_el == f.yongsin else
             "기신" if jae_el == f.strong_el else "무관")
@@ -569,14 +655,14 @@ def _rows_health(f) -> list:
                      quiet=(heat == "고름")))
 
     rows.append(_row("lift", f.strength,
-                     "%s · 나를 돕는 자리 %d · 월령 %s · 일지 %s"
+                     "%s · 나를 돕는 글자 %d · 태어난 달(월령) %s · 일지 %s"
                      % (f.strength, f.bi + f.inn,
                         "얻음" if f.deuk_ryeong else "못 얻음",
                         "얻음" if f.deuk_ji else "못 얻음")))
 
     n = chung_pairs(f)
     rows.append(_row("shake", "둘이상" if n >= 2 else ("하나" if n else "없음"),
-                     "지지 충 %d쌍%s" % (n, " · 일지 충" if f.ilji_chung else ""),
+                     "서로 부딪히는 지지(충) %d쌍%s" % (n, " · 일지 충" if f.ilji_chung else ""),
                      quiet=(n == 0)))
 
     g = f.ten_gods
@@ -602,7 +688,7 @@ def _rows_health(f) -> list:
     rows.append(_row("blade", blade,
                      ("%s %d자리 · %s" % (blade, len(blade_at),
                                          " · ".join(blade_at))
-                      if blade != "없음" else "이름 붙은 날붙이 0자리"),
+                      if blade != "없음" else "칼 이름이 붙은 신살 0자리"),
                      quiet=(blade == "없음")))
     return rows
 
@@ -635,7 +721,7 @@ def _rows_work(f) -> list:
     shake = ("형충" if hy and n_ch else "형" if hy else
              "충" if n_ch else "없음")
     rows.append(_row("shake", shake,
-                     "지지 충 %d쌍 · 형 %s" % (n_ch, hy or "없음"),
+                     "서로 부딪히는 지지(충) %d쌍 · 형 %s" % (n_ch, hy or "없음"),
                      quiet=(shake == "없음"), w={"hy": hy or "없음"}))
     rows.append(_row("lift", f.strength,
                      "%s · 비겁 %d · 관성 %d" % (f.strength, f.bi, f.gwan)))
@@ -647,7 +733,7 @@ def _rows_work(f) -> list:
         seats = group_seats(f, "관성")
         if seats:
             rows.append(_row("seat", seats[0],
-                             "관성 %d · 앉은 자리 %s"
+                             "관성 %d · 앉은 기둥 %s"
                              % (f.gwan, " · ".join(seats))))
     rows.append(_row("voice", "셋이상" if f.sik >= 3 else
                      ("있음" if f.sik else "없음"),
@@ -700,7 +786,7 @@ def _rows_love(f) -> list:
         seats = group_seats(f, grp)
         if seats:
             rows.append(_row("seat", seats[0],
-                             "%s %d · 앉은 자리 %s"
+                             "%s %d · 앉은 기둥 %s"
                              % (grp, n, " · ".join(seats)),
                              w={"grp": grp}))
     # ★ 배우자궁에 **무엇이 앉았는가** — 실무가 사랑에서 가장 먼저 보는
@@ -729,7 +815,7 @@ def _rows_love(f) -> list:
                      quiet=(flower == "없음")))
     if n and gongmang_hit(f, grp):
         rows.append(_row("empty", "공망",
-                         "%s %d · 앉은 자리가 공망 %s"
+                         "%s %d · 앉은 글자가 공망 %s"
                          % (grp, n, f.gongmang), w={"grp": grp}))
     return rows
 
@@ -795,17 +881,17 @@ def _rows_dir(f) -> list:
     kind, el = hap_group(f)
     if kind:
         rows.append(_row("group", kind,
-                         "%s · %s 국(局) %d자리 · 도는 쪽 %s"
+                         "%s · %s 국(局) %d자리 · 도는 방향 %s"
                          % (kind, el, visible(f, el), WHERE[el]),
                          w={"kind": kind, "gel": el, "gwhere": WHERE[el]}))
     # ★ 힘이 흐르는 쪽. 갈림길에서 «무엇으로 정하는가» 요.
     rows.append(_row("lean", f.flow,
-                     "가장 센 자리 %s · %s %d자리"
+                     "가장 센 십신 묶음 %s · %s %d자리"
                      % (f.flow, f.flow_el, visible(f, f.flow_el))))
     rows.append(_row("rule", "없음" if f.gwan == 0 else "있음",
                      "관성 %d" % f.gwan))
     rows.append(_row("where", f.yongsin,
-                     "용신 %s %d자리 · 도는 쪽 %s"
+                     "용신 %s %d자리 · 도는 방향 %s"
                      % (f.yongsin, visible(f, f.yongsin), WHERE[f.yongsin])))
     nxt = _next_daeun(f)
     if nxt:
@@ -831,22 +917,79 @@ _ROWS = {"money": _rows_money, "health": _rows_health, "work": _rows_work,
          "love": _rows_love, "people": _rows_people, "dir": _rows_dir}
 
 
-def scale(f, concern: str) -> list:
+# ══════════════════════════════════════════════════════════
+# 되물음의 답이 **흘러가는 자리** (2026-09-10 · docs/40 §9)
+# ══════════════════════════════════════════════════════════
+#
+# ★ 답이 처방에 거의 안 닿고 있었습니다.
+#
+#   사랑에서 「혼자 마음만」 과 「끝나는 중」 을 골랐을 때 유료 31컷을
+#   견주니 **달라진 컷이 하나**(topic_ask)였습니다. 짝사랑이든 이별이든
+#   저울·짜임·때가 글자 하나 안 달랐습니다. 물어 놓고 처방은 그대로요.
+#
+#   여덟 글자가 모자란 게 아니었습니다. 사랑에서 셀 수 있는 사실 열
+#   가지로 2,000명이 353가지 조합(실효 177갈래)으로 갈리는데, 물음은
+#   그중 8갈래만 쓰고 있었습니다.
+#
+# ★ 새로 세지 않습니다. 답은 **어느 칸·어느 짜임을 먼저 볼지**를 고릅니다.
+#   조건이 안 맞는 것은 여전히 안 냅니다 — 지어내는 것이 없습니다.
+#   답 안 한 사람은 예전과 **같은 글**을 받습니다.
+def _focus(concern: str, sub: Optional[dict]) -> Optional[dict]:
+    if not sub or not sub.get("choice"):
+        return None
+    return (table().get("SUB_FOCUS", {}).get(concern) or {}).get(sub["choice"])
+
+
+def focus_pats(concern: str, sub: Optional[dict]) -> Optional[list]:
+    """이 답에서 **먼저 볼 짜임** 차례. 없으면 None."""
+    fx = _focus(concern, sub)
+    return list(fx.get("pats") or []) if fx else None
+
+
+def _sub_label(concern: str, sub: Optional[dict]) -> str:
+    spec = table()["ASK"].get(concern) or {}
+    return (spec.get("options") or {}).get((sub or {}).get("choice") or "", "")
+
+
+def scale(f, concern: str, sub: Optional[dict] = None) -> list:
     """
     이 고민에서 세는 칸들. 최대 다섯.
+
+    sub : 되물음에 고른 답 {"choice", "choice2"}. 있으면 **그 자리 칸을
+          먼저** 세웁니다. 없으면 예전과 같습니다.
 
     돌려주는 것: [{"k","say","ev"}]
     """
     if concern not in _ROWS:
         raise TopicError("모르는 고민 축: %r" % (concern,))
     rows = _ROWS[concern](f)
-    loud = [r for r in rows if not r["quiet"]]
-    quiet = [r for r in rows if r["quiet"]]
-    keep = loud[:MAX_ROWS]
-    if len(keep) < MAX_ROWS:
-        keep += quiet[:MAX_ROWS - len(keep)]
     order = {id(r): i for i, r in enumerate(rows)}
-    keep.sort(key=lambda r: order[id(r)])
+    fx = _focus(concern, sub)
+    if fx and fx.get("rows"):
+        # ★ 답에 맞는 칸을 **앞에** 세웁니다. 다만 **조용한 칸은 끌어올리지
+        #   않습니다** (2026-09-10).
+        #
+        #   처음에는 「답이 가리키면 조용한 칸이라도 세운다」 였습니다.
+        #   같은 자로 재 보니 답 안 한 때는 문턱(2%) 아래던 돈 저울이
+        #   **답하면 4.29%** 로 뛰었습니다. 조용한 칸은 조용한 까닭이
+        #   있습니다 — 그 사람에게서 셀 것이 적어 누구에게나 같은 말
+        #   (「없음」「적음」)이 나옵니다. 그걸 앞에 세우면 답을 한 사람일수록
+        #   **남과 같은 글**을 받습니다. 정교하게 하려던 것이 거꾸로 뭉개졌소.
+        #
+        #   그래서 **소리 나는 칸끼리 차례만** 바꿉니다. 소리 나는 칸이 다섯에
+        #   못 차면 조용한 칸으로 채우는 것은 예전과 같습니다.
+        pri = {k: i for i, k in enumerate(fx["rows"])}
+        keep = sorted(rows, key=lambda r: (r["quiet"],
+                                           0 if r["k"] in pri else 1,
+                                           pri.get(r["k"], 99),
+                                           order[id(r)]))[:MAX_ROWS]
+    else:
+        loud = [r for r in rows if not r["quiet"]]
+        quiet = [r for r in rows if r["quiet"]]
+        keep = loud[:MAX_ROWS]
+        if len(keep) < MAX_ROWS:
+            keep += quiet[:MAX_ROWS - len(keep)]
+        keep.sort(key=lambda r: order[id(r)])
 
     base = _words(f)
     out = []
@@ -864,10 +1007,13 @@ def scale(f, concern: str) -> list:
     return out
 
 
-def scale_sid(concern: str, rows: list) -> str:
-    return "scale:%s:%s" % (concern,
-                            ",".join("%s=%s" % (r["k"], r["case"])
-                                     for r in rows))
+def scale_sid(concern: str, rows: list, sub: Optional[dict] = None) -> str:
+    # ★ 답이 다르면 번호도 다릅니다. 같은 번호로 묶으면 짝사랑에게 맞은
+    #   문장과 이별에게 맞은 문장의 공감률이 한 통에 섞입니다.
+    tail = (":@" + sub["choice"]) if sub and sub.get("choice") else ""
+    return "scale:%s:%s%s" % (concern,
+                              ",".join("%s=%s" % (r["k"], r["case"])
+                                       for r in rows), tail)
 
 
 # ══════════════════════════════════════════════════════════
@@ -885,7 +1031,7 @@ def _next_daeun(f) -> Optional[tuple]:
     return age, max(0, age - int(f.age))
 
 
-def turn(f, concern: str) -> Optional[dict]:
+def turn(f, concern: str, sub: Optional[dict] = None) -> Optional[dict]:
     """
     물으신 자리가 대운에서 드는 때.
 
@@ -917,18 +1063,18 @@ def turn(f, concern: str) -> Optional[dict]:
     nxt = _next_daeun(f)
     if nxt:
         end, left = nxt[0], nxt[1]
-        left_say = ("<b>올해</b>가 그 갈리는 해요" if left <= 0 else
-                    "<b>%s 해</b> 남았소" % _years(left))
+        left_say = ("<b>올해</b>가 바로 대운이 바뀌는 해요" if left <= 0 else
+                    "바뀌기까지 <b>%s 해</b> 남았소" % _years(left))
         parts.append(
-            "이 칸은 <b>%d살</b>에 들어와 <b>%d살</b>까지요. 그대는 지금 "
+            "지금 대운은 <b>%d살</b>에 시작해 <b>%d살</b>까지요. 그대는 지금 "
             "<b>%d살</b>이니 %s. %s"
             % (start, end, int(f.age), left_say,
                _pick("TURN", "phase", phase_of(int(f.age), start))))
     else:
         parts.append(
-            "이 칸은 <b>%d살</b>에 들어온 <b>마지막 칸</b>이오. 갈아탈 "
-            "물길이 더는 없으니, 여기서 안 한 것은 이 판에서는 안 하는 "
-            "것이오." % start)
+            "지금 대운은 <b>%d살</b>에 시작한 <b>마지막 대운</b>이오. 다음 "
+            "대운이 더는 없으니, 지금 안 하면 이 대운 동안은 끝내 안 하게 "
+            "되오." % start)
 
     # 이 자리의 대운이 **다음에** 드는 칸
     hit = None
@@ -940,9 +1086,33 @@ def turn(f, concern: str) -> Optional[dict]:
         age = int(hit["start_age"])
         parts.append(_fmt(_pick("TURN", "hit", concern),
                           {"grp": grp, "age": age,
-                           "year": f.saju_year + age, "tg": hit["ten_god"]}))
+                           # ★ 양력 생년 + 나이. saju_year(입춘)에 양력
+                           #   나이를 더하면 1·2월생이 한 해 어긋납니다.
+                           "year": f.birth_year + age, "tg": hit["ten_god"]}))
     else:
         parts.append(_fmt(_pick("TURN", "none", concern), {"grp": grp}))
+    # ★ 세운 한 줄 — 물으신 자리를 **올해** 건드리는가 (2026-09-10).
+    #
+    #   답이 가리키는 자리(`SUB_FOCUS.grp`)를 올해 세운이 치는지만
+    #   셉니다. 무슨 일이 생긴다고 말하지 않습니다 — 그 자리가 올해
+    #   한 번 움직인다는 셈까지요. 몸 고민에는 안 답니다(건강을 해로
+    #   못 박으면 그건 예언이오).
+    yr_mark = ""
+    if sub and sub.get("choice") and concern != "health":
+        fx = _focus(concern, sub) or {}
+        sg = None
+        if sub.get("choice2"):
+            sg = (table().get("SUB2_GRP", {}).get(concern) or {}).get(sub["choice2"])
+        sg = sg or fx.get("grp")
+        if sg == "@love":
+            sg = grp
+        if sg:
+            yg = GROUP_OF.get(f.year_ten_god, f.year_ten_god)
+            yr_hit = (yg == sg)
+            parts.append(_fmt(_pick("TURN", "year", "hit" if yr_hit else "miss"),
+                              {"year_gz": f.year_gz, "year_tg": f.year_ten_god,
+                               "grp": sg, "label": _sub_label(concern, sub)}))
+            yr_mark = ":yr=%s:@%s" % ("hit" if yr_hit else "miss", sub["choice"])
     parts.append(_pick("TURN", "tail"))
 
     return {
@@ -951,12 +1121,13 @@ def turn(f, concern: str) -> Optional[dict]:
         #   why.AXIS 에 있소. why.line 으로 부르면 이치도 출처도 안
         #   붙어 관측만 남소 (tests/test_evidence 가 잡소).
         "ev": _why.axis_line(
-            "지금 대운 %s(%s) · 다음 %s 대운 %s"
-            % (f.daeun[f.daeun_now]["gz"], f.daeun_ten_god, grp,
-               ("%d세" % int(hit["start_age"])) if hit else "여덟 칸에 없음"),
+            "지금 %d살 · 대운 %s(%s) · %d살부터 · 다음 %s 대운 %s"
+            % (int(f.age), f.daeun[f.daeun_now]["gz"], f.daeun_ten_god,
+               int(f.daeun[f.daeun_now]["start_age"]), grp,
+               ("%d살" % int(hit["start_age"])) if hit else "앞으로 올 대운에 없음"),
             "daeun_ten_god"),
-        "sid": "turn:%s:%s:%s" % (concern, now_grp,
-                                  "hit" if hit else "none"),
+        "sid": "turn:%s:%s:%s%s" % (concern, now_grp,
+                                    "hit" if hit else "none", yr_mark),
     }
 
 
@@ -995,14 +1166,14 @@ def pattern_tail(concern: str, strength: str) -> str:
 #   넘고 있었는데, 원인도 같았습니다: 축이 글자 둘뿐이라 가짓수가
 #   열여섯에서 멈춥니다. 세어서 적으면 근거가 서고 쏠림도 풀립니다.
 AXIS_COUNT = {
-    "EI": (("밖으로 도는 힘", ("비견", "겁재", "식신", "상관")),
-           ("안으로 도는 힘", ("정인", "편인", "정관", "편관"))),
-    "SN": (("현실을 딛는 힘", ("정재", "편재", "정관", "편관")),
-           ("넓혀 보는 힘", ("편인", "상관", "편재"))),
-    "TF": (("판단으로 가는 힘", ("정관", "편관", "정재", "편재")),
-           ("마음으로 가는 힘", ("식신", "상관", "정인"))),
-    "JP": (("정해 두는 힘", ("정관", "정재", "정인")),
-           ("트고 바꾸는 힘", ("상관", "편재", "겁재"))),
+    "EI": (("밖으로 나서는 힘", ("비견", "겁재", "식신", "상관")),
+           ("안으로 모으는 힘", ("정인", "편인", "정관", "편관"))),
+    "SN": (("눈앞 현실을 보는 힘", ("정재", "편재", "정관", "편관")),
+           ("넓게 떠올리는 힘", ("편인", "상관", "편재"))),
+    "TF": (("따져서 정하는 힘", ("정관", "편관", "정재", "편재")),
+           ("마음으로 정하는 힘", ("식신", "상관", "정인"))),
+    "JP": (("미리 정해 두는 힘", ("정관", "정재", "정인")),
+           ("그때그때 바꾸는 힘", ("상관", "편재", "겁재"))),
 }
 
 
@@ -1026,7 +1197,7 @@ def _axis_counted(f, key: str) -> str:
 
     if hi == 0 and lo == 0:
         return ("<b>%s</b>도 <b>%s</b>도 여덟 글자에 <b>하나도 없소</b>. "
-                "이 축은 글자가 안 짚는 자리라, 적으신 쪽을 그대로 두오."
+                "여덟 글자로는 이 축을 가를 수 없어, 적으신 글자를 바꾸지 않고 두오."
                 % (hi_w, lo_w))
 
     hi_say, hi_num = say(hi_w, hi)
@@ -1038,8 +1209,15 @@ def _axis_counted(f, key: str) -> str:
     # ★ 강약이 이 축을 한 번 더 미오. 감추면 근거와 결론이 어긋나오 —
     #   힘의 수는 안으로가 많은데 글자는 E 로 나오는 자리가 생기오.
     if key == "EI" and f.strength in ("신강", "신약"):
-        out += (" 그대는 <b>%s</b>이라 밖으로 도는 쪽을 <b>두 자리</b> %s 보오."
+        out += (" 그대는 <b>%s</b>이라 밖으로 나서는 쪽을 <b>둘</b> %s 보았소."
                 % (f.strength, "더 얹어" if f.strength == "신강" else "덜어"))
+    # ★ 근거 줄에 **아라비아 숫자**를 남깁니다 (2026-09-07).
+    #
+    #   여기까지는 한글 수사(「셋이오」)로만 적었습니다. 사람이 읽기에는
+    #   그게 맞는데, 근거 줄은 **셈을 보이는 자리**라 손님이 만세력을
+    #   펴고 대 볼 수 있어야 합니다. 재보니 근거 줄에 숫자가 든 컷이
+    #   25%뿐이었습니다 (engine/worth 에서 가장 낮은 칸).
+    # ★ 「(5 : 1)」 은 손님이 못 읽었습니다 (2026-09-11) — 수는 근거 줄에 둡니다.
     return out
 
 
@@ -1083,17 +1261,18 @@ def face(f, concern: str, axis4: Optional[str] = None) -> Optional[dict]:
         body.append('<p class="hit"><b>%s</b> %s</p>' % (r["letter"], r["face"]))
         body.append('<p class="cnt">%s</p>' % _axis_counted(f, r["axis"]))
         if r["gap"]:
-            body.append('<p class="tale">헌데 여덟 글자는 <b>%s</b> 쪽이오. %s</p>'
+            body.append('<p class="tale">헌데 여덟 글자는 적으신 것과 달리 <b>%s</b> 글자가 나오오. %s</p>'
                         % (r["mine"], r["gap"]))
     body.append('<p class="tale">%s</p>'
                 % _pick("FACE", "tail_gap" if gaps else "tail_same"))
 
     return {
         "say": "".join(body),
+        # ★ 근거 줄에 센 수를 답니다 — 축 몇을 보고 몇이 어긋났는지.
         "ev": _why.axis_line(
-            "%s · 여덟 글자에서 뽑은 넉 자 %s"
+            "%s · 여덟 글자에서 뽑은 넉 자 %s · 본 축 %d · 어긋난 축 %d"
             % (("적으신 넉 자 %s" % said) if usable else "넉 자를 안 적으셨소",
-               "".join(a[k] for k, _ in AXES)),
+               "".join(a[k] for k, _ in AXES), len(rows), len(gaps)),
             "concern"),
         "sid": "face:%s:%s:%s" % (concern, "".join(letters),
                                   ",".join(gaps) or "-"),
@@ -1233,11 +1412,27 @@ def ask_spec(concern: str) -> Optional[dict]:
 
 
 # 적은 것이 글자와 겹치는가 — 셀 수 있는 값으로만 판정합니다.
+def _love_group(f) -> str:
+    """짝을 보는 글자 묶음. 남=재성 · 여=관성 (bank.CONCERN_AXIS)."""
+    from . import bank as _bank
+    return _bank.concern_group("love", f.sex)
+
+
 def _ask_hit(f, concern: str, slot: str, choice: str) -> Optional[bool]:
     g = f.ten_gods
     if concern == "money" and slot == "from":
         return {"pay": g["정재"] >= 1,
                 "biz": g["편재"] >= 1,
+                # 집·땅 — 담기는 자리(재고)와 흙을 봅니다.
+                # ★ 「지금 사시오/파시오」 는 안 냅니다. 자리만 읽소.
+                "estate": jaego(f) is not None or visible(f, "토") >= 3,
+                # 굴리는 것(주식·코인 따위) — **편재**를 봅니다.
+                #
+                # ★ 이 집은 무엇이 오를지는 모릅니다. 그건 사주가 아니오.
+                #   다만 **크게 걸었을 때 버티는 사람인가**는 셀 수 있소 —
+                #   굴리는 자리(편재) · 감당(재다신약) · 나눌 입(군겁쟁재).
+                #   그건 시점 지시가 아니라 **그릇**이오 (docs/11 을 안 넘소).
+                "invest": g["편재"] >= 1,
                 "many": g["편재"] >= 1 or has_sinsal(f, "yeokma"),
                 "none": f.jae == 0 or f.inn >= 3}.get(choice)
     if concern == "money" and slot == "leak":
@@ -1250,8 +1445,48 @@ def _ask_hit(f, concern: str, slot: str, choice: str) -> Optional[bool]:
         el = want.get(choice)
         return None if el is None else (
             el in f.weak_els or visible(f, el) >= 3)
+    # ── 사랑 ──────────────────────────────────────────
+    #
+    # ★ 유파는 이 집이 이미 정한 것을 그대로 씁니다.
+    #     짝 글자   남=재성 · 여=관성 (bank.CONCERN_AXIS.gF)
+    #     배우자궁   **일지** (features.palaces 일주 · docs/14 §6)
+    #     도화       「끌리는 자리」까지만. 길흉을 단정하지 않소 (docs/14 §7)
+    #
+    # ★ 홍염(紅艶)은 안 씁니다 — 이 집의 신살 표에 없습니다.
+    #   없는 것으로 세면 그건 계산이 아니라 지어내기요 (절대 규칙 1).
+    if concern == "love" and slot == "from":
+        grp = _love_group(f)
+        return {
+            # 마음만 있는 자리 — 밖으로 나갔는가(투출)를 보오
+            "alone": tuchul(f, grp) or has_sinsal(f, "dohwa"),
+            # 만나는 중 — 곁자리가 묶였는가(합), 부딪히는가(충)
+            "dating": bool(f.ilji_hap) and not f.ilji_chung,
+            # 끝났거나 끝나는 중 — 끊기는 자리
+            "broke": bool(f.ilji_chung) or gongmang_hit(f, grp)
+                     or has_sinsal(f, "wonjin"),
+            # 오래갈지 — 개수가 아니라 뿌리
+            "long": rooted(f, grp),
+        }.get(choice)
+    if concern == "work" and slot == "leak":
+        # ★ 두 번째 물음은 **셈이 갈리는 자리에만** 둡니다 (docs/40 §9).
+        #   일에서 보는 것이 무엇인가 — 자리·벌이·사람·버팀은 각각
+        #   관성·재성·비겁·인성으로 **실제로 갈립니다.** 그래서 둡니다.
+        #   (사랑의 「누가 끝냈소」는 여덟 글자가 몰라 안 둡니다.)
+        return {"rise": f.gwan >= 1, "pay": f.jae >= 1,
+                "people": f.bi >= 1, "hold": f.inn >= 1,
+                "dunno": None}.get(choice)
     if concern == "work" and slot == "from":
+        # ★ 시험이 「준비 중」에 뭉개져 있었습니다 (2026-09-10).
+        #   훈장(시험·공부·자격증)이 붙어 있는 자리인데 물음에는
+        #   갈래가 없었습니다. 셋을 갈라 세웁니다 —
+        #     내 일  식상생재(만든 것이 값으로 건너가는 다리)
+        #     시험   인성 · 문창귀인
+        #     옮김   역마 · 맡는 자리의 충
         return {"org": f.gwan >= 1,
+                "biz": f.sik >= 1 and f.jae >= 1,
+                "exam": f.inn >= 2 or has_sinsal(f, "munchang"),
+                "move": has_sinsal(f, "yeokma") or chung_hit(f, "관성"),
+                # 옛 열쇳말도 그대로 받습니다 — 이미 답한 손님이 있소.
                 "alone": f.bi >= 2 or f.gwan == 0,
                 "ready": f.inn >= 2,
                 "rest": f.sik >= 3 or f.strength == "신약"}.get(choice)
@@ -1305,7 +1540,7 @@ def ask_cut(f, concern: str, payload: dict) -> Optional[dict]:
                         else say["dunno"], w))
     ev = ["%s → %s" % (spec["options"][pick],
                        "글자와 겹침" if hit else
-                       ("글자는 다른 데" if hit is False else "판정 안 함"))]
+                       ("글자는 다른 것을 가리킴" if hit is False else "판정 안 함"))]
     hit2 = None
     if pick2:
         parts.append(said(spec["lead2"], spec["options2"][pick2]))
@@ -1316,7 +1551,7 @@ def ask_cut(f, concern: str, payload: dict) -> Optional[dict]:
                             else say2["dunno"], w))
         ev.append("%s → %s" % (spec["options2"][pick2],
                                "글자와 겹침" if hit2 else
-                               ("글자는 다른 데" if hit2 is False else "판정 안 함")))
+                               ("글자는 다른 것을 가리킴" if hit2 is False else "판정 안 함")))
     parts.append('<p class="tale">%s</p>' % spec["tail"])
 
     body = "".join(parts)
@@ -1324,7 +1559,16 @@ def ask_cut(f, concern: str, payload: dict) -> Optional[dict]:
         "id": "topic_ask", "title": spec["title"],
         "source": _why.axis_line(" · ".join(ev), "concern"),
         "html": guard.enforce(body, {"cut": "topic_ask"}),
-        "min_level": 1,
+        # ★ 손님이 적은 것은 **그 자리에서** 값을 합니다 (2026-09-10).
+        #
+        #   전에는 1층(유료)이었습니다. 무료 구간에서 묻고 답은 값을
+        #   치러야 보이면, 그건 묻는 것이 아니라 **받아 내는 것**이오.
+        #   이 파일이 이미 경계하던 「물어 놓고 안 받는 자리」와 같은 병입니다.
+        #
+        #   깊이는 그대로 값 뒤에 있습니다 — 세는 자리(concern_scale) ·
+        #   짜임(concern_pattern) · 때(concern_turn) · 얼굴(concern_face)
+        #   넷은 안 건드립니다. 무료는 **적은 것과 글자가 겹치는가**까지요.
+        "min_level": 0,
         "statement_id": "ask:%s:%s:%s:%s"
                         % (concern, pick, pick2 or "-",
                            "%s%s" % ("h" if hit else ("m" if hit is False else "u"),

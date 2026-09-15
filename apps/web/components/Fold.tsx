@@ -33,11 +33,13 @@
 import { useEffect, useRef, type ReactNode } from "react";
 
 export default function Fold({
-  label = "왜 묻소?", children,
+  label = "왜 묻소?", children, initiallyOpen = false, className = "fold",
 }: {
   /** 접힌 것을 여는 한 마디. 손님이 속으로 하는 물음으로. */
   label?: string;
   children: ReactNode;
+  initiallyOpen?: boolean;
+  className?: string;
 }) {
   /*
    * ★ 종이에는 접힌 자리가 없습니다.
@@ -47,15 +49,19 @@ export default function Fold({
    */
   const ref = useRef<HTMLDetailsElement>(null);
   useEffect(() => {
-    const open = () => { if (ref.current) ref.current.open = true; };
+    let beforePrint: boolean | undefined;
+    const open = () => { if (ref.current) { beforePrint ??= ref.current.open; ref.current.open = true; } };
+    const restore = () => { if (ref.current && beforePrint !== undefined) { ref.current.open = beforePrint; beforePrint = undefined; } };
     window.addEventListener("beforeprint", open);
+    window.addEventListener("afterprint", restore);
     const mq = window.matchMedia("print");
-    mq.addEventListener?.("change", (e) => { if (e.matches) open(); });
-    return () => window.removeEventListener("beforeprint", open);
+    const change = (e: MediaQueryListEvent) => { if (e.matches) open(); else restore(); };
+    mq.addEventListener?.("change", change);
+    return () => { window.removeEventListener("beforeprint", open); window.removeEventListener("afterprint", restore); mq.removeEventListener?.("change", change); };
   }, []);
 
   return (
-    <details className="fold" ref={ref}>
+    <details className={className} ref={ref} open={initiallyOpen}>
       <summary>{label}</summary>
       <div className="foldin">{children}</div>
     </details>

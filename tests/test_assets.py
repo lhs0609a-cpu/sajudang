@@ -55,7 +55,11 @@ def test_every_declared_scene_is_actually_used():
       `door` 가 그랬습니다. 에셋 하나가 그냥 돈입니다.
     """
     man, used = _manifest(), _usage()
-    ghosts = sorted(set(man) - set(used))
+    archive = re.search(r'ARCHIVED_SCENES = \[([^\]]+)\]', MANIFEST.read_text("utf-8"))
+    archived = set(re.findall(r'"([a-z]+)"', archive.group(1))) if archive else set()
+    assert archived <= set(man), "보관 목록에도 실제 에셋 선언이 필요합니다"
+    assert not archived.intersection(used), "다시 사용하는 장면은 보관 목록에서 해제하세요"
+    ghosts = sorted(set(man) - set(used) - archived)
     assert not ghosts, ("아무 화면도 안 부르는 장면: %s" % ghosts)
 
 

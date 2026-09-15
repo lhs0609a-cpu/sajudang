@@ -7,10 +7,12 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
+import RefundHistory from '@/components/RefundHistory';
 import Scene from "@/components/scene/Scene";
 import ActOut from "@/components/ActOut";
 import { Narration, Say } from "@/components/Narration";
 import { api, ApiError } from "@/lib/api";
+import type { SubView } from "@/lib/api";
 import { LENSES } from "@/lib/lenses";
 import { useSession } from "@/lib/store";
 import { useScreen } from "@/lib/track";
@@ -27,6 +29,27 @@ function MeInner() {
   const [oid, setOid] = useState("");
   const [finding, setFinding] = useState(false);
   const [say, setSay] = useState<string | null>(null);
+
+  /*
+   * 걸어 둔 카드 — 「한 달 듣기」.
+   *
+   * ★ 그만두는 길은 **시작한 길만큼 쉬워야** 합니다 (docs/11 §5).
+   *   전화도 메일도 아니고 버튼 하나입니다. 그리고 자리를 감추지
+   *   않습니다 — 찾기 어렵게 두면 안 둔 것과 같습니다.
+   */
+  const [sub, setSub] = useState<SubView | null>(null);
+  const [subBusy, setSubBusy] = useState(false);
+  const [subSay, setSubSay] = useState<string | null>(null);
+  const [subError, setSubError] = useState(false);
+  const [subRetry, setSubRetry] = useState(0);
+  useEffect(() => {
+    if (!s.sessionId) return;
+    let alive = true;
+    api.subStatus(s.sessionId)
+      .then((r) => { if (alive) {setSub(r);setSubError(false);} })
+      .catch(() => { if (alive) setSubError(true); });
+    return () => { alive = false; };
+  }, [s.sessionId, subRetry]);
 
   if (tab === "r1") {
     /*
@@ -50,7 +73,9 @@ function MeInner() {
     return (
       <Shell screen="r1" title="다녀간 사람들" legal>
         <Scene id="wall" />
-        <Narration lines={["벽에 종이가 붙어 있다.", "검은 고양이가 그 아래 앉아 있다."]} />
+        <Narration lines={["벽에 종이가 붙어 있다.", "안내묘가 그 아래 앉아 있다."]} />
+      {/* ★ 울림 60. 남의 말만 붙어 있고 **읽는 사람** 얘기가 없었습니다. */}
+      <p className="sm">여기 붙은 말도 여태 혼자 참고 있던 사람들이 적고 간 것이오. 그대도 한 마디 남길 수 있고, 안 남겨도 되오.</p>
         <Say who="도령" lens="pungun">
           대문 앞 방명록 같은 것이오. 다녀간 사람이 적고 간 말만 붙소.
           {" "}여기 붙은 말은 다 한 사람이 한 마디씩 남긴 것이오.
@@ -63,10 +88,9 @@ function MeInner() {
           그대가 여기 선 건 남의 말을 보러 온 것이 아니오. 제 말을
           남길지 말지 재러 온 것이오.
           <br />
-          <b>여태 어디서든 후기 한 줄 안 남기고 나오셨소.</b>
-          {" "}쓸 말이 없어서가 아니라, 적어 놓고 나면 그게 제 말로
-          남는 게 껄끄러워 참은 것이오. 그 마음이 맞소 — 그러니
-          안 남기셔도 되오.
+          <b>도움이 된 말과 맞지 않았던 말을 함께 남겨도 좋소.</b>
+          {" "}별점을 높게 줄 필요도, 억지로 쓸 필요도 없소.
+          직접 읽으며 느낀 것만 적어 주시오.
           <br />
           벽에 붙는 몫은 20명이고, 붙는 것은 그중 그대가 끝까지
           들은 사람뿐이오. 1명만 들었어도 1명이 붙소.
@@ -86,11 +110,11 @@ function MeInner() {
           후기는 여기서 안 받소. <b>그 사람의 마지막 자리</b>에서 받소 —
           다 읽고 인장을 받기 직전이오.
           &quot;결제 확인됨&quot; 배지는 값을 치르고 끝까지 읽은 분의 글에만
-          붙습니다. 대가를 주고받은 글은 싣지 않습니다.
+          붙소. 대가를 주고받은 글은 싣지 않소.
         </p>
 
         {/*
-          ★ 「그대의 말이 벽에 붙는다」 는 이미 참인 말입니다.
+          ★ 「그대의 말이 벽에 붙는다」 는 이미 참인 말이오.
             몇 명이 읽는다거나, 남기면 무엇이 좋아진다는 말은 안 씁니다.
         */}
         <ActOut kind="남긴 물음" next={heard > 0 ? "남기다" : "스무 사람"}>
@@ -123,19 +147,26 @@ function MeInner() {
 
   return (
     <Shell screen="f2" title="인장첩">
+      {/* ★ 연출 80. 칸만 그려져 있고 **모으는 사람 얘기**가
+          없었습니다. 재촉하지 않고, 지나온 것만 짚습니다. */}
+      <Narration lines={["첩이 상 위에 펼쳐져 있다."]} />
+      <p className="sm">칸은 <b>20개</b>요. 돈이든 일이든 사람이든, 여태 혼자 읽고 참고 덮어 둔 것이 있거든 여기 남소. 미뤄 둔 것도 지워지지 않소 — 책장에 꽂아 둔 책처럼, 안 펴도 어디 있는지는 아오.</p>
+      <header className="editorial-heading"><p className="conversion-kicker">나의 서재</p><h1>다시 읽고 싶은 이야기를<br/>여기에 간직하오.</h1><p>구매한 해석과 남긴 인장, 열람 기록을 살펴보시오.</p></header>
+      <RefundHistory sessionId={s.sessionId} />
+      {subError && <div className="conversion-card" role="alert"><p>구독 상태를 확인하지 못했소. 구독이 없거나 해지됐다는 뜻은 아니오.</p><button className="btn gh" onClick={() => {setSubError(false);setSubRetry(n => n + 1);}}>구독 상태 다시 확인하기</button></div>}
       <Scene id="sealbook" />
       <Narration lines={["첩을 폈다.", "찍힌 인장은 " + s.seals.length + "개."]} />
       {/*
         ★ 첩이 무엇인지 한 번도 안 풀고 있었습니다.
           칸 스물이 그려져 있는데 「받은 인장 / 아직」 두 낱말뿐이라,
-          이게 모으는 것인지 잠긴 것인지 알 수가 없었습니다.
+          이게 모으는 것인지 잠긴 것인지 알 수가 없었소.
       */}
       <Say who="도령" lens="pungun">
         칸은 스물이오. 도장 찍힌 칸만 다시 펼쳐지오 — 열쇠 꾸러미 같은 것이오.
         <br />
         {/*
           ★ 76점이던 자리. 울림 20 — 칸 20개와 수 둘이 전부라
-            **첩을 든 사람 얘기**가 없었습니다. 모으는 자리는
+            **첩을 든 사람 얘기**가 없었소. 모으는 자리는
             자칫 재촉이 되므로, 안 채워도 된다는 말을 함께 답니다.
         */}
         그대가 지나온 자리마다 하나씩 찍힌 것이오. 값을 치른 표가
@@ -144,14 +175,13 @@ function MeInner() {
         <b>빈 칸을 보고 채우고 싶어지셨소.</b> 스무 칸이 그려져
         있으면 사람은 다 채우려 드오. 그건 이 첩이 그렇게 생겨서지
         그대에게 스물이 필요해서가 아니오.
-        {" "}여태 그런 칸을 채우다 지친 적이 있었을 것이오.
+        {" "}부담스럽다면 이미 읽은 자리 하나만 다시 보아도 좋소.
         <br />
         칸 1개로 끝나도 되오. 두 칸이 붙어 있다고 둘째를 들어야 하는
         건 아니오 — 한 자리에 2명까지만 잇는 것도 그 때문이오.
           <br />
-        {" "}20개를 다 채우려다 도중에 지치고 그만둔 사람이,
-        1개만 제대로 읽고 간 사람보다 남은 게 적었소. 서둘러 모으다
-        정작 읽기를 미룬 것이오.
+        {" "}한 개를 읽고 오늘 해볼 행동을 하나 골라도 충분하오.
+        나머지 칸은 필요할 때 열어 보시오.
       </Say>
       <p className="tx">
         찬 칸이 <b>{s.seals.length}개</b>, 빈 칸이{" "}
@@ -177,11 +207,92 @@ function MeInner() {
         })}
       </div>
       {/*
-        ★ 산 것을 되찾을 길이 없었습니다.
+        ══════════════════════════════════════════════════════
+        걸어 둔 카드 — 「한 달 듣기」
+        ══════════════════════════════════════════════════════
+
+        ★ 그만두는 자리를 **감추지 않습니다.**
+          정기결제에서 가장 흔한 어긋남이 이것입니다 — 거는 것은 버튼
+          하나인데 그만두는 것은 메일이나 전화입니다. 그건 브레이크를
+          없앤 것과 같습니다. 여기서는 거는 자리와 그만두는 자리가
+          똑같이 버튼 하나입니다 (docs/11 §5).
+
+        ★ 그만둬도 **이미 치른 달은 끝까지** 봅니다. 남은 날을 뺏는
+          해지는 값을 치른 사람에게서 도로 가져가는 것입니다.
+      */}
+      {sub?.has && (
+        <div className="ask mt">
+          <div className="lab">달마다 듣고 계시오</div>
+          <p className="sm">
+            {sub.price.toLocaleString()}원 / 달
+            {sub.card && <> · 카드 끝자리 <b>{sub.card}</b></>}
+            {sub.months && sub.months > 1 && <> · {sub.months}달째</>}
+          </p>
+          {sub.ending ? (
+            <>
+              <p className="sm">
+                그만두기를 눌러 두셨소. 더 안 빠져나가오 —{" "}
+                <b>{(sub.period_end ?? "").slice(0, 10)}</b>까지는 그대로
+                보시오.
+              </p>
+              <button className="btn mt" disabled={subBusy}
+                      onClick={async () => {
+                        setSubBusy(true); setSubSay(null);
+                        try {
+                          const r = await api.subResume({ session_id: s.sessionId });
+                          setSub(r.sub); setSubSay(r.say);
+                        } catch (e) {
+                          setSubSay(e instanceof ApiError ? e.message : "무르지 못했소.");
+                        } finally { setSubBusy(false); }
+                      }}>
+                {subBusy ? "무르는 중입니다" : "계속 듣겠습니다"}
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="sm">
+                다음은 <b>{(sub.next_charge ?? "").slice(0, 10)}</b>이오.
+                그 뒤로도 서른 날마다요.
+              </p>
+              {/*
+                ★ 그만두기가 유령 버튼이 아닙니다. 누르면 그 자리에서
+                  끝납니다 — 「나중에」처럼 레이블과 결과가 어긋나지
+                  않게, 무슨 일이 일어나는지 버튼 위에 적어 둡니다.
+              */}
+              <button className="btn gh mt" disabled={subBusy}
+                      onClick={async () => {
+                        setSubBusy(true); setSubSay(null);
+                        try {
+                          const r = await api.subCancel({ session_id: s.sessionId });
+                          setSub(r.sub); setSubSay(r.say);
+                        } catch (e) {
+                          setSubSay(e instanceof ApiError ? e.message : "그만두지 못했소.");
+                        } finally { setSubBusy(false); }
+                      }}>
+                {subBusy ? "그만두는 중입니다" : "그만두겠습니다"}
+              </button>
+            </>
+          )}
+          {sub.fails ? (
+            <p className="sm">
+              카드에서 값이 안 걷혔소 ({sub.fails}번). 사흘은 그대로
+              열어 두오 — 그 안에 카드를 다시 걸어 주시오.
+            </p>
+          ) : null}
+          {subSay && <p className="sm mt">{subSay}</p>}
+        </div>
+      )}
+
+      {/*
+        ★ 산 것을 되찾을 길이 없었소.
           로그인이 없어 자격이 이 브라우저의 난수(session_id)에 매여
-          있습니다. 데이터를 지우거나 기기를 바꾸면 치른 값을 통째로
-          잃었습니다 — 24,900원짜리를요. 주문번호는 결제 영수증과 승인
+          있소. 데이터를 지우거나 기기를 바꾸면 치른 값을 통째로
+          잃었소 — 99,000원짜리를요. 주문번호는 결제 영수증과 승인
           문자에 남으니, 그걸로 되찾습니다.
+
+        ★ 달삯은 되찾을 때 **주인도 함께 옮깁니다.** 안 옮기면 다음
+          달 청구가 옛 브라우저로 가서, 돈은 나가는데 여기서는 안
+          열립니다.
       */}
       <div className="ask mt">
         <div className="lab">치른 것을 못 찾겠습니다?</div>
@@ -204,6 +315,23 @@ function MeInner() {
                     }
                     s.set({ tier: r.tier as typeof s.tier, paid: true });
                     setSay(r.say);
+                    /*
+                     * ★ 달삯이면 **주인까지** 옮깁니다.
+                     *   주문만 옮기면 이 기기에서 보이기는 하는데 다음
+                     *   달 청구는 옛 브라우저로 갑니다. 돈은 나가고
+                     *   자격은 안 오는 자리가 됩니다.
+                     */
+                    if (r.tier === "sub") {
+                      try {
+                        const sr = await api.subRestore({
+                          session_id: s.sessionId, order_id: oid });
+                        setSub(sr.sub);
+                        setSay(sr.say);
+                      } catch {
+                        setSay("치른 것은 찾았소만, 걸어 두신 카드는 못 찾았소. "
+                               + "다음 달은 다시 걸어 주시오.");
+                      }
+                    }
                   } catch (e) {
                     setSay(e instanceof ApiError ? e.message : "찾지 못했소.");
                   } finally {
@@ -239,7 +367,7 @@ function MeInner() {
         처음부터 다시
       </button>
       <p className="sm mt">
-        지운 정보는 되돌릴 수 없습니다. 생년월일시는 사주 계산 목적으로만 씁니다.
+        지운 정보는 되돌릴 수 없소. 생년월일시는 사주 계산 목적으로만 쓰오.
       </p>
     </Shell>
   );

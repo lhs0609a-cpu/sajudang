@@ -523,7 +523,7 @@ def _top_copy(src: str) -> dict:
 #       그 밖의 축   그대로 셉니다. 편 사람은 읽으니까요.
 #
 #   안 가르면 접어도 점수가 그대로라, 접을 이유가 없어집니다.
-FOLD = re.compile(r"<Fold\b.*?</Fold>", re.S)
+FOLD = re.compile(r"<Fold\b.*?</Fold>|<details\b(?![^>]*\bopen\b).*?</details>", re.S)
 
 # 굵은 글씨 — 「여기부터 보시오」 라고 정해 주는 자리.
 #
@@ -661,6 +661,51 @@ def _engine_text() -> dict:
         '<span class="src">근거 · %s</span>' % (dly.get("source") or ""),
     ]))
     return out
+
+
+# ══════════════════════════════════════════════════════════
+# 살아 있는 길 — 진입 흐름을 **손으로 안 적는다**
+# ══════════════════════════════════════════════════════════
+#
+# ★ 왜 여기 생겼는가 (2026-09-10)
+#
+#   `tools/give_take.py` 는 차례를 파일에 박아 두었습니다
+#   (`FUNNEL = ["a1", "a2", "a5", …]`). 그런데 화면 코드의 차례는
+#   그 뒤에 바뀌었습니다 — 별칭과 성향 넉 자가 훅 **뒤로** 물러나
+#   본길에서 빠졌습니다. 자는 없는 순서를 재고 있었고, 「첫 돌려줌이
+#   여섯 번째 화면」 이라는 답도 그 없는 순서의 답이었습니다.
+#
+#   차례는 코드에 이미 있습니다. 읽으면 됩니다.
+_STEP_BLOCK = re.compile(r'step === "(\w+)"')
+_GO = re.compile(r'go\("(\w+)"\)')
+# 주 단추. `onClick` 안이 중괄호로 겹쳐 있어(`{ s.set({…}); go("a5"); }`)
+# 괄호를 맞춰 자르려 들면 빗나갑니다. 표시 뒤 300자 안의 첫 `go()` 를 봅니다.
+_PRIMARY = re.compile(r'className="btn mt"')
+
+
+def live_path(start: str = "a1") -> list:
+    """진입 흐름에서 **주 단추만 눌러 갔을 때** 지나는 화면, 차례대로.
+
+    곁문(별칭·성향 넉 자)은 유령 단추(`btn gh`)라 본길이 아닙니다.
+    """
+    src = (WEB / "app" / "page.tsx").read_text(encoding="utf-8")
+    marks = [(m.group(1), m.start()) for m in _STEP_BLOCK.finditer(src)]
+    marks.append(("__end__", len(src)))
+    nxt = {}
+    for i in range(len(marks) - 1):
+        sid, a = marks[i]
+        chunk = src[a:marks[i + 1][1]]
+        for m in _PRIMARY.finditer(chunk):
+            g = _GO.search(chunk, m.end(), m.end() + 300)
+            if g:
+                nxt.setdefault(sid, g.group(1))
+                break
+    path, cur, seen = [], start, set()
+    while cur and cur not in seen:
+        seen.add(cur)
+        path.append(cur)
+        cur = nxt.get(cur)
+    return path
 
 
 # ══════════════════════════════════════════════════════════

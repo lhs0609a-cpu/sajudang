@@ -3,10 +3,10 @@
 
     uvicorn main:app --reload --port 8000
 
-★ 문장 뱅크 원문·렌즈 프롬프트·릴레이 조건식은 절대 응답에 넣지 않습니다.
-  렌더된 HTML 만 내려보냅니다. (docs/02 §7)
+★ 문장 뱅크 원문·렌즈 프롬프트·릴레이 조건식은 절대 응답에 넣지 않소.
+  렌더된 HTML 만 내려보내오. (docs/02 §7)
 
-★ GuardMiddleware 는 끄지 마세요. (CLAUDE.md 절대 규칙 3)
+★ GuardMiddleware 는 끄지 마시오. (CLAUDE.md 절대 규칙 3)
 """
 import asyncio
 import contextlib
@@ -38,6 +38,7 @@ logging.basicConfig(
 # 엔진 판은 version.py 한 자리에 삽니다 — 라우터도 봐야 하는데
 # 여기 두면 돌아가는 임포트가 생깁니다.
 from version import ENGINE_VER  # noqa: E402,F401
+from routers import jobs
 
 # 브라우저가 이 API 를 부를 수 있는 출처. 쉼표로 여러 개.
 #   CORS_ORIGINS=https://sajudang-three.vercel.app,http://localhost:3000
@@ -87,6 +88,7 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(title="성신당 API", version=ENGINE_VER, lifespan=lifespan)
+app.include_router(jobs.router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -94,6 +96,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-Chart-Rebuild"],
 )
 app.add_middleware(GuardMiddleware)
 
@@ -147,7 +150,7 @@ async def _http_error(request: Request, exc: StarletteHTTPException):
     elif exc.status_code == 405 and detail in ("Method Not Allowed", None):
         detail = "그 방법으로는 안 받소. 이 자리는 POST 로만 받소."
     elif exc.status_code == 500:
-        detail = "안에서 무언가 어긋났소. 값은 빠져나가지 않았소."
+        detail = "처리를 마치지 못했소. 결제 중이었다면 구매 내역과 카드 승인 내역을 먼저 확인해 주시오."
     return JSONResponse(status_code=exc.status_code,
                         content={"detail": detail},
                         headers=getattr(exc, "headers", None))
@@ -162,7 +165,7 @@ def _voice_stats() -> dict:
     소리가 켜졌는가, 곳간에 몇 마디가 쌓였는가.
 
     ★ 곳간 수를 보는 이유 — 값이 트래픽이 아니라 **서로 다른 말의 수**에
-      묶이는 구조라, 이 숫자가 곧 지금까지 든 값입니다.
+      묶이는 구조라, 이 숫자가 곧 지금까지 든 값이오.
     """
     import voice
     try:

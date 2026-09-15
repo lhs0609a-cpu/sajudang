@@ -9,17 +9,17 @@
     POST /v1/pay/sub/restore    기기를 바꿨을 때 되찾기
 
 ★ 왜 파일을 따로 두는가
-  `routers/pay.py` 는 **한 번 치르는 값**의 자리입니다. 구독은 손님이
-  없는 자리에서 우리가 카드를 긁는 일이라, 지키는 것이 다릅니다 —
+  `routers/pay.py` 는 **한 번 치르는 값**의 자리이오. 구독은 손님이
+  없는 자리에서 우리가 카드를 긁는 일이라, 지키는 것이 다르오 —
   카드 열쇠·갱신·해지·연체. 섞어 두면 「한 번 치르기」를 고치다 달삯이
-  같이 흔들립니다.
+  같이 흔들리오.
 
 ★ 절대 규칙
-  1. 빌링키는 **어떤 응답에도** 실리지 않습니다. 카드 뒷자리만 냅니다.
-  2. 금액은 서버가 정합니다 (`payments.TIER_PRICE["sub"]`).
-  3. 자동갱신은 **하루 결제 2건 브레이크에 안 셉니다** — 손님이 누른
-     것이 아닙니다. 처음 등록만 셉니다.
-  4. 그만둔 사람에게 다시 안 긁습니다. 기간이 끝나면 열쇠를 버립니다.
+  1. 빌링키는 **어떤 응답에도** 실리지 않소. 카드 뒷자리만 내오.
+  2. 금액은 서버가 정하오 (`payments.TIER_PRICE["sub"]`).
+  3. 자동갱신은 **하루 결제 2건 브레이크에 안 세오** — 손님이 누른
+     것이 아니오. 처음 등록만 세오.
+  4. 그만둔 사람에게 다시 안 긁소. 기간이 끝나면 열쇠를 버리오.
 """
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 import payments
 import store
@@ -79,9 +79,9 @@ def _customer_key(session_id: str) -> str:
     """
     토스에 보내는 손님 열쇠.
 
-    ★ 세션 아이디를 그대로 보내지 않습니다. 그건 우리 쪽 자격의
-      열쇠라, 밖으로 나가면 안 됩니다. 해시를 씁니다 — 같은 브라우저면
-      늘 같은 값이 나와야 카드가 겹쳐 등록되지 않습니다.
+    ★ 세션 아이디를 그대로 보내지 않소. 그건 우리 쪽 자격의
+      열쇠라, 밖으로 나가면 안 되오. 해시를 쓰오 — 같은 브라우저면
+      늘 같은 값이 나와야 카드가 겹쳐 등록되지 않소.
     """
     return "sjd_" + hashlib.sha256(
         ("customer:" + session_id).encode()).hexdigest()[:24]
@@ -96,8 +96,8 @@ def _save(sub: dict) -> None:
 
 
 def active(sub: Optional[dict]) -> bool:
-    """지금 볼 수 있는가. **끊긴 것과 그만둔 것은 다릅니다** —
-    그만둔 사람도 이미 치른 달까지는 봅니다."""
+    """지금 볼 수 있는가. **끊긴 것과 그만둔 것은 다르오** —
+    그만둔 사람도 이미 치른 달까지는 보오."""
     if not sub or sub.get("status") == "dead":
         return False
     ends = _at(sub.get("period_end"))
@@ -137,7 +137,7 @@ def _view(sub: Optional[dict]) -> dict:
 
 
 def _terms(price: int, when: datetime) -> list:
-    """등록 버튼 위에 놓이는 고지. 네 가지를 다 말합니다."""
+    """등록 버튼 위에 놓이는 고지. 네 가지를 다 말하오."""
     return [t.format(price=format(price, ","),
                      next="%d월 %d일" % (when.month, when.day))
             for t in payments.SUB_TERMS]
@@ -190,6 +190,7 @@ def prepare(req: PrepareRequest) -> dict:
 # ② 등록 끝 — 빌링키를 받고 첫 달을 긁는다
 # ══════════════════════════════════════════════════════════
 class RegisterRequest(BaseModel):
+    analytics_sid: Optional[str] = Field(default=None, pattern=r"^[A-Za-z0-9_-]{16,64}$")
     session_id: str
     customer_key: str
     auth_key: str
@@ -199,6 +200,22 @@ class RegisterRequest(BaseModel):
 
 @router.post("/register")
 def register(req: RegisterRequest) -> dict:
+    try:
+        with store.payment_lease(req.session_id) as check:
+            existing = _load(req.session_id)
+            if active(existing) and not store.get_json(_registration_key(req)):
+                return {"ok": True, "already": True, "order_id": (existing.get("orders") or [""])[-1],
+                        "sub": _view(existing), "say": "이미 이용 중인 구독이오."}
+            return _register_locked(req, check)
+    except store.LeaseBusy as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
+
+def _registration_key(req: RegisterRequest) -> str:
+    return "registration:" + hashlib.sha256((req.session_id + ":" + req.auth_key).encode()).hexdigest()
+
+
+def _register_locked(req: RegisterRequest, check) -> dict:
     problem = payments.subscriptions_problem()
     if problem:
         raise HTTPException(status_code=503, detail=problem)
@@ -212,34 +229,38 @@ def register(req: RegisterRequest) -> dict:
     limit = BREAKS()["per_day_purchase"]
     daykey = store.k_purchase_day(_user_key(req.session_id),
                                   _now().date().isoformat())
-    if store.get_int(daykey) >= limit:
+    if store.get_int(daykey) >= limit and not (store.get_json(_registration_key(req)) or {}).get("pg_tid"):
         raise HTTPException(status_code=429,
                             detail="하루에 %d건까지만 받소." % limit)
 
-    try:
-        issued = payments.issue_billing_key(req.auth_key, req.customer_key)
-    except payments.PaymentsDisabled as e:
-        raise HTTPException(status_code=503, detail=str(e))
-    except payments.PaymentError as e:
-        raise HTTPException(status_code=402, detail=str(e))
-
-    billing_key = issued["billingKey"]
-    card = issued.get("card") or {}
+    journal_key = _registration_key(req)
+    journal = store.get_json(journal_key)
+    if not journal:
+        try:
+            issued = payments.issue_billing_key(req.auth_key, req.customer_key)
+        except payments.PaymentError as e:
+            raise HTTPException(status_code=402, detail=str(e))
+        journal = {"billing_key":payments.seal(issued["billingKey"]),
+                   "card":issued.get("card") or {},
+                   "order_id":"sjd_sub_" + uuid.uuid4().hex[:24],
+                   "started_at":_now().isoformat()}
+        check(); store.set_json(journal_key,journal,ttl=14*DAY)
+    billing_key = payments.unseal(journal["billing_key"])
+    card = journal["card"]
     amount = payments.TIER_PRICE["sub"]
-    order_id = "sjd_sub_" + uuid.uuid4().hex[:16]
+    order_id = journal["order_id"]
 
     # ★ 카드를 등록했다고 값이 치러진 것이 아닙니다. 여기서 긁습니다.
     #   이 자리가 빠지면 카드만 잡아 두고 자격을 여는 꼴이 됩니다.
-    try:
-        result = payments.charge_billing(
-            billing_key, req.customer_key, amount, order_id,
-            payments.TIER_NAME["sub"])
-    except payments.PaymentError as e:
-        # 열쇠는 발급됐지만 첫 달을 못 긁었습니다. 자격을 열지 않고,
-        # 열쇠도 저장하지 않습니다 — 안 긁힌 카드를 들고 있을 이유가 없습니다.
-        raise HTTPException(status_code=402, detail=str(e))
-
-    now = _now()
+    if not journal.get("pg_tid"):
+        try:
+            result = payments.charge_billing(billing_key, req.customer_key, amount,
+                                            order_id, payments.TIER_NAME["sub"])
+        except payments.PaymentError as e:
+            raise HTTPException(status_code=402, detail=str(e))
+        journal["pg_tid"] = result.pg_tid
+        check(); store.set_json(journal_key,journal,ttl=14*DAY)
+    now = _at(journal["started_at"])
     ends = now + timedelta(days=PERIOD_DAYS)
     sub = {
         "user_key": _user_key(req.session_id),
@@ -261,10 +282,16 @@ def register(req: RegisterRequest) -> dict:
         "concern": req.concern,
         "orders": [order_id],
     }
+    check()
+    sub["analytics_sid"] = req.analytics_sid
     _save(sub)
-    _write_order(sub, order_id, result.pg_tid, now, ends, first=True)
-    store.incr(daykey, ttl=DAY)
+    _write_order(sub, order_id, journal["pg_tid"], now, ends, first=True)
+    store.increment_once("purchase-counted:" + order_id, daykey, DAY)
+    if req.analytics_sid:
+        import analytics
+        analytics.record([{ "name": "payment_approved", "screen": "d3", "sid": req.analytics_sid, "n": amount }], server=True)
 
+    store.delete(journal_key)
     return {"ok": True, "order_id": order_id,
             "sub": _view(sub),
             "say": "카드를 걸어 두었소. 오늘부터 서른 날, 그리고 그 뒤로도."}
@@ -275,9 +302,9 @@ def _write_order(sub: dict, order_id: str, pg_tid: Optional[str],
     """
     청구 한 번 = 주문 한 건.
 
-    ★ 갱신마다 주문을 새로 적습니다. 하나를 늘려 쓰면 「무엇을 언제
-      얼마에 치렀는가」가 사라져 영수증도 환불도 못 냅니다. 자격을
-      보는 자리(routers/report._paid_orders)도 이 주문을 봅니다.
+    ★ 갱신마다 주문을 새로 적소. 하나를 늘려 쓰면 「무엇을 언제
+      얼마에 치렀는가」가 사라져 영수증도 환불도 못 내오. 자격을
+      보는 자리(routers/report._paid_orders)도 이 주문을 보오.
     """
     store.set_json("order:" + order_id, {
         "session_id": sub["session_id"], "chart_id": sub.get("chart_id"),
@@ -288,12 +315,13 @@ def _write_order(sub: dict, order_id: str, pg_tid: Optional[str],
         "unlocked": payments.unlocks_for("sub"),
         # 몇 번째 달인가. 주인 화면이 첫 달과 갱신을 갈라 봅니다.
         "renewal": not first,
+        "analytics_sid": sub.get("analytics_sid"),
     })
     okey = "orders:" + sub["session_id"]
     orders = store.get_json(okey) or []
     if order_id not in orders:
         orders.append(order_id)
-        store.set_json(okey, orders, ttl=730 * DAY)
+        store.set_json(okey, orders)
 
 
 # ══════════════════════════════════════════════════════════
@@ -313,6 +341,14 @@ class SessionRequest(BaseModel):
 
 @router.post("/cancel")
 def cancel(req: SessionRequest) -> dict:
+    try:
+        with store.payment_lease(req.session_id):
+            return _cancel_locked(req)
+    except store.LeaseBusy as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
+
+def _cancel_locked(req: SessionRequest) -> dict:
     sub = _load(req.session_id)
     if not sub or sub.get("status") == "dead":
         raise HTTPException(status_code=404, detail="걸어 두신 카드가 없소.")
@@ -335,8 +371,16 @@ def cancel(req: SessionRequest) -> dict:
 
 @router.post("/resume")
 def resume(req: SessionRequest) -> dict:
-    """그만두기를 무르기. **기간이 살아 있을 때만**입니다 —
-    끝난 뒤에는 카드를 다시 걸어야 합니다(열쇠를 버렸으므로)."""
+    try:
+        with store.payment_lease(req.session_id):
+            return _resume_locked(req)
+    except store.LeaseBusy as e:
+        raise HTTPException(status_code=409, detail=str(e))
+
+
+def _resume_locked(req: SessionRequest) -> dict:
+    """그만두기를 무르기. **기간이 살아 있을 때만**이오 —
+    끝난 뒤에는 카드를 다시 걸어야 하오(열쇠를 버렸으므로)."""
     sub = _load(req.session_id)
     if not sub or not sub.get("ending") or not active(sub):
         raise HTTPException(status_code=409,
@@ -354,17 +398,42 @@ class RestoreRequest(BaseModel):
 
 @router.post("/restore")
 def restore(req: RestoreRequest) -> dict:
+    from contextlib import ExitStack
+    initial = store.get_json("order:" + req.order_id)
+    if not initial:
+        raise HTTPException(status_code=404, detail="그런 주문번호가 없소.")
+    owner = initial.get("session_id")
+    if not owner:
+        raise HTTPException(status_code=409, detail="구매 내역의 소유자를 확인해야 하오.")
+    try:
+        with ExitStack() as stack:
+            checks = [stack.enter_context(store.payment_lease(sid))
+                      for sid in sorted({owner, req.session_id})]
+            current = store.get_json("order:" + req.order_id) or {}
+            if current.get("session_id") != owner:
+                raise HTTPException(status_code=409, detail="다른 기기에서 복원 중이오. 다시 시도해 주시오.")
+            existing = _load(req.session_id)
+            if owner != req.session_id and active(existing):
+                raise HTTPException(status_code=409, detail="이 기기에 이미 이용 중인 구독이 있소. 내역을 먼저 확인해 주시오.")
+            for check in checks:
+                check()
+            return _restore_locked(req)
+    except store.LeaseBusy:
+        raise HTTPException(status_code=409, detail="구매 내역을 처리 중이오. 잠시 후 다시 복원해 주시오.")
+
+
+def _restore_locked(req: RestoreRequest) -> dict:
     """
     기기를 바꿨을 때.
 
-    ★ 로그인이 없습니다. 자격이 이 브라우저의 난수(session_id)에 매여
-      있어서, 데이터를 지우면 치른 값을 잃습니다. 「한 번 치르기」는
-      주문번호로 되찾는데(pay.restore), 구독은 그것만으로 모자랍니다 —
+    ★ 로그인이 없소. 자격이 이 브라우저의 난수(session_id)에 매여
+      있어서, 데이터를 지우면 치른 값을 잃소. 「한 번 치르기」는
+      주문번호로 되찾는데(pay.restore), 구독은 그것만으로 모자라오 —
       **다음 달 청구가 옛 브라우저로 가서** 돈은 나가는데 새 기기에서는
-      안 열립니다. 그래서 구독 레코드의 주인까지 함께 옮깁니다.
+      안 열리오. 그래서 구독 레코드의 주인까지 함께 옮기오.
 
-    ★ 손님 열쇠(customer_key)는 **안 바꿉니다.** 토스에 등록된 카드가
-      그 열쇠에 매여 있어서, 바꾸면 다음 청구가 통째로 실패합니다.
+    ★ 손님 열쇠(customer_key)는 **안 바꾸오.** 토스에 등록된 카드가
+      그 열쇠에 매여 있어서, 바꾸면 다음 청구가 통째로 실패하오.
     """
     order = store.get_json("order:" + req.order_id)
     if not order:
@@ -392,9 +461,13 @@ def restore(req: RestoreRequest) -> dict:
     okey = "orders:" + req.session_id
     orders = store.get_json(okey) or []
     for oid in sub.get("orders", []):
+        moved = store.get_json("order:" + oid)
+        if moved:
+            moved["session_id"] = req.session_id
+            store.set_json("order:" + oid, moved)
         if oid not in orders:
             orders.append(oid)
-    store.set_json(okey, orders, ttl=730 * DAY)
+    store.set_json(okey, orders)
 
     return {"ok": True, "sub": _view(sub),
             "say": "찾았소. 다음 달부터는 이 자리로 오오."}
@@ -411,6 +484,9 @@ def restore(req: RestoreRequest) -> dict:
 def due(sub: dict, now: Optional[datetime] = None) -> bool:
     """오늘 긁을 때가 되었는가."""
     now = now or _now()
+    last_try = _at(sub.get("last_try"))
+    if sub.get("fails") and last_try and last_try.date() == now.date():
+        return False
     if sub.get("status") == "dead" or sub.get("ending"):
         return False
     if sub.get("fails", 0) >= MAX_FAILS:
@@ -420,55 +496,67 @@ def due(sub: dict, now: Optional[datetime] = None) -> bool:
 
 
 def renew(sub: dict, now: Optional[datetime] = None) -> dict:
-    """
-    한 건 긁는다. 돌려주는 것: {"ok": bool, "reason": str|None}
-
-    ★ 실패해도 바로 안 끊습니다. 사흘은 열어 두고 다시 겁니다
-      (GRACE_DAYS). 네 번 실패하면 그만 긁고 **끊습니다** — 계속
-      긁으면 카드사가 우리를 막습니다.
-    """
     now = now or _now()
     try:
-        key = payments.unseal(sub["billing_key"])
-    except payments.PaymentError as e:
-        sub.update(status="dead", last_error=str(e))
-        _save(sub)
-        return {"ok": False, "reason": str(e)}
+        with store.payment_lease(sub["session_id"]) as check:
+            latest = store.get_json("sub:" + sub["user_key"])
+            if not latest:
+                return {"ok": True, "already": True, "reason": "이동하거나 종료된 구독이오."}
+            sub.update(latest)
+            if not due(sub, now):
+                return {"ok": True, "already": True, "period_end": sub.get("period_end")}
+            return _renew_locked(sub, now, check)
+    except store.LeaseBusy:
+        return {"ok": False, "reason": "다른 요청에서 결제를 확인 중이오.", "retry": True}
 
-    order_id = "sjd_sub_" + uuid.uuid4().hex[:16]
-    try:
-        result = payments.charge_billing(
-            key, sub["customer_key"], sub["amount"], order_id,
-            payments.TIER_NAME["sub"])
-    except payments.PaymentError as e:
-        fails = sub.get("fails", 0) + 1
-        sub.update(fails=fails, last_error=str(e),
-                   last_try=now.isoformat())
-        if fails >= MAX_FAILS:
-            sub.update(status="dead", billing_key="")
-        _save(sub)
-        return {"ok": False, "reason": str(e), "fails": fails}
 
-    # ★ 다음 기간은 **끝난 날부터** 셉니다. 오늘부터 세면 갱신이
-    #   늦어질 때마다 손님이 하루씩 손해 봅니다.
-    base = _at(sub.get("period_end")) or now
-    ends = max(base, now - timedelta(days=GRACE_DAYS)) \
-        + timedelta(days=PERIOD_DAYS)
-    sub.update(period_end=ends.isoformat(), months=sub.get("months", 1) + 1,
-               fails=0, last_error=None)
-    sub.setdefault("orders", []).append(order_id)
+def _renew_locked(sub: dict, now: datetime, check) -> dict:
+    period = sub["period_end"]
+    token = hashlib.sha256((sub["customer_key"] + ":" + period).encode()).hexdigest()[:32]
+    order_id = "sjd_renew_" + token
+    journal_key = "renew-journal:" + order_id
+    journal = store.get_json(journal_key)
+    if not journal:
+        base = _at(period) or now
+        ends = max(base, now - timedelta(days=GRACE_DAYS)) + timedelta(days=PERIOD_DAYS)
+        journal = {"state":"pending", "created_at":now.isoformat(),
+                   "ends":ends.isoformat(), "months":sub.get("months",1)+1}
+        store.set_json(journal_key, journal)
+    if journal["state"] != "paid":
+        # Provider idempotency expires after 15 days; never replay an unresolved old charge.
+        if now - _at(journal["created_at"]) > timedelta(days=14):
+            return {"ok":False,"reason":"오래된 결제 결과를 운영자가 확인해야 하오."}
+        try:
+            result = payments.charge_billing(payments.unseal(sub["billing_key"]),
+                sub["customer_key"], sub["amount"], order_id, payments.TIER_NAME["sub"])
+        except payments.BillingUncertain as e:
+            return {"ok":False,"reason":str(e),"retry":True}
+        except payments.PaymentError as e:
+            sub.update(fails=sub.get("fails",0)+1,last_error=str(e),last_try=now.isoformat())
+            if sub["fails"] >= MAX_FAILS:
+                sub.update(status="dead",billing_key="")
+            check(); _save(sub)
+            return {"ok":False,"reason":str(e),"fails":sub["fails"]}
+        check()
+        journal.update(state="paid",pg_tid=result.pg_tid,paid_at=now.isoformat())
+        store.set_json(journal_key,journal)
+    ends = _at(journal["ends"])
+    check()
+    _write_order(sub,order_id,journal["pg_tid"],_at(journal["paid_at"]),ends,first=False)
+    sub.update(period_end=ends.isoformat(),months=journal["months"],fails=0,last_error=None)
+    if order_id not in sub.setdefault("orders",[]):
+        sub["orders"].append(order_id)
     _save(sub)
-    _write_order(sub, order_id, result.pg_tid, now, ends, first=False)
-    return {"ok": True, "order_id": order_id, "period_end": ends.isoformat()}
+    return {"ok":True,"order_id":order_id,"period_end":ends.isoformat()}
 
 
 def retire(sub: dict) -> None:
     """
-    끝난 구독의 **카드 열쇠를 버립니다.**
+    끝난 구독의 **카드 열쇠를 버리오.**
 
-    ★ 그만둔 사람의 카드를 계속 들고 있을 까닭이 없습니다. 들고 있으면
-      언젠가 실수로 긁힙니다. 기록(몇 달 들었는가)은 남기고 열쇠만
-      버립니다.
+    ★ 그만둔 사람의 카드를 계속 들고 있을 까닭이 없소. 들고 있으면
+      언젠가 실수로 긁히오. 기록(몇 달 들었는가)은 남기고 열쇠만
+      버리오.
     """
     sub.update(status="dead", billing_key="", retired_at=_now().isoformat())
     _save(sub)

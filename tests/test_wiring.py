@@ -147,7 +147,8 @@ def test_report_mentions_every_tied_weak_element():
             continue
         rep = build_report(f, "cid", "pungun", "free", "love")
         cut = next(x for x in rep["cuts"] if x["id"] == "lack")
-        assert "둘 다 없는 자리요" in cut["html"]
+        # 「둘 다 없는 자리요」 → 「둘 다 없다는 말이오」 (2026-09-11 · docs/21)
+        assert "둘 다 없다는 말이오" in cut["html"]
         found = True
         break
     assert found, "최약 오행 동률 사례를 찾지 못했습니다"

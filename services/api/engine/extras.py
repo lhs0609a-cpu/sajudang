@@ -32,7 +32,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Optional
 
-from . import guard
+from . import guard, visual
 from .bank import element_word, josa
 from .constants import CHUNG, HAP, ten_god
 
@@ -67,7 +67,7 @@ def _partner_features(p: dict):
         raise ExtraInputError("상대 생년월일에서 %s 이(가) 비었소." % e)
     except (TypeError, ValueError) as e:
         # calendar.check_birth_date 가 이미 우리말로 말합니다. 덧붙이기만 합니다.
-        raise ExtraInputError("상대 쪽 날이 어긋났소 — %s" % e)
+        raise ExtraInputError("상대의 생년월일이 맞지 않소 — %s" % e)
     return build_features(ch)
 
 
@@ -108,7 +108,7 @@ def partner_cut(f, p: dict) -> dict:
 
     body = (
         '<p class="tale">그대 일간은 <b>%s</b>, 상대 일간은 <b>%s</b>. '
-        '그대를 기준으로 보면 <b>%s</b>입니다.</p>'
+        '그대를 가운데 두고 보면 상대는 <b>%s</b>에 해당하오.</p>'
         '<p class="tale">%s</p>'
         '<p class="tale">%s</p>'
         '<p class="tale">%s</p>'
@@ -124,7 +124,7 @@ def partner_cut(f, p: dict) -> dict:
                el_iga=josa(element_word(fill_el), "이", "가")),
            T["PARTNER_CLOSE"]))
     return {
-        "id": "partner", "title": "상대와의 배치",
+        "id": "partner", "title": "상대와 맞춰 본 사주",
         "source": "%s일간 ↔ %s일간 · 일지 %s/%s · %s"
                   % (f.day_gan, pf.day_gan, f.day_ji, pf.day_ji, tg),
         "html": guard.enforce(body, {"cut": "partner"}),
@@ -180,7 +180,7 @@ def context_cut(f, c: dict) -> dict:
         fit = "보통"
 
     body = (
-        '<p class="tale">지금 <b>%s</b>이라 하셨습니다.</p>'
+        '<p class="tale">지금 <b>%s</b>이라 하셨소.</p>'
         '<p class="tale">%s</p>'
         '<p class="tale">%s</p>'
         '<p class="tale">%s</p>'
@@ -214,7 +214,7 @@ def blood_cut(f, b: dict) -> dict:
     body = ('<p class="sm">%s</p><p class="tale">%s</p><p class="tale">%s</p>'
             % (T["BLOOD_DISCLAIMER"], T["BLOOD"][t], T["BLOOD_VS"][f.strength]))
     return {
-        "id": "blood", "title": "피와 글자",
+        "id": "blood", "title": "혈액형과 사주",
         "source": "%s형 ↔ %s %d" % (t, f.strength, f.strength_score),
         "html": guard.enforce(body, {"cut": "blood"}),
         "min_level": 0,
@@ -270,7 +270,7 @@ def cards_cut(f, c: dict) -> dict:
     body = ('<p class="sm">%s</p>%s<p class="tale">%s</p>'
             % (T["CARD_DISCLAIMER"], rows, T["CARD_VS"]))
     return {
-        "id": "cards", "title": "뽑은 석 장",
+        "id": "cards", "title": "뽑은 카드 석 장",
         "source": " · ".join(T["CARD"][p]["label"] for p in picks),
         "html": guard.enforce(body, {"cut": "cards"}),
         "min_level": 0,
@@ -334,8 +334,8 @@ def meet_cut(f, m: dict) -> dict:
         key = "nosex"
     elif not seat:
         match = ('<p class="tale">짝을 보는 <b>%s</b>이 여덟 글자에 '
-                 '안 보이오. 그러니 적으신 결이 <b>글자보다 앞서</b> '
-                 '있는 것이오 — 그대가 만든 자리라는 뜻이오.</p>' % grp)
+                 '안 보이오. 그러니 적으신 만남은 <b>사주에 적힌 것이 아니라</b> '
+                 '그대가 스스로 만든 인연이라는 말이오.</p>' % grp)
         key = "none"
     elif seat == said:
         match = '<p class="tale">%s</p>' % T["MEET_SAME"][seat]
@@ -353,9 +353,9 @@ def meet_cut(f, m: dict) -> dict:
                T["MEET_WHO"][who]["label"], T["MEET_HOW"][how]["label"],
                match))
     return {
-        "id": "meet", "title": "만난 결과 글자",
-        "source": "%s %s · 적은 결 %s%s"
-                  % (grp or "짝 자리", seat or "없음", said,
+        "id": "meet", "title": "만남과 사주 맞대 보기",
+        "source": "%s %s · 적으신 기둥 %s%s"
+                  % (grp or "짝 글자", seat or "없음", said,
                      " · 겹침" if seat == said else ""),
         "html": guard.enforce(body, {"cut": "meet"}),
         "min_level": 1,
@@ -364,6 +364,8 @@ def meet_cut(f, m: dict) -> dict:
 
 
 BUILDERS = {
+    "face": visual.face_cut,
+    "body": visual.body_cut,
     "partner": partner_cut,
     "meet": meet_cut,
     "context": context_cut,
@@ -388,14 +390,18 @@ def build(f, need: Optional[str], extras: Optional[dict]) -> Optional[dict]:
     payload = (extras or {}).get(need)
     if not payload:
         return None
-    return BUILDERS[need](f, payload)
+    try:
+        return BUILDERS[need](f, payload)
+    except visual.VisualInputError as e:
+        raise ExtraInputError(str(e)) from e
 
 
-def choices() -> dict:
+def choices(lens_id: Optional[str] = None) -> dict:
     """화면이 고르게 보여줄 목록. 문장 원문은 내려보내지 않습니다."""
     T = text()
     return {
-        "situation": [{"id": k, "label": v["label"]}
+        **visual.choices(lens_id),
+        "situation": [{"id": k, "label": v["label"], "image": f"/choices/{k}.webp"}
                       for k, v in T["SITUATION"].items()],
         # 만남 — 누구랑 · 어떻게. 자유 입력은 안 받소.
         "meet_who": [{"id": k, "label": v["label"]}
@@ -406,6 +412,6 @@ def choices() -> dict:
                    {"id": "hold", "label": "버티는 중"},
                    {"id": "let", "label": "놓으려는 중"}],
         "blood": ["A", "B", "O", "AB"],
-        "image": [{"id": k, "label": v["label"]} for k, v in T["IMAGE"].items()],
-        "cards": [{"id": k, "label": v["label"]} for k, v in T["CARD"].items()],
+        "image": [{"id": k, "label": v["label"], "image": f"/choices/{k}.webp"} for k, v in T["IMAGE"].items()],
+        "cards": [{"id": k, "label": v["label"], "image": f"/choices/card-{k}.webp"} for k, v in T["CARD"].items()],
     }

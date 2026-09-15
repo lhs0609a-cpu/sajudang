@@ -133,7 +133,7 @@ export default function PromptModal({
                 {e.preset}
               </span>
               {/*
-                ★ 시키는 비율은 `ratio` 가 아니라 `spec[0]` 입니다.
+                ★ 시키는 비율은 `ratio` 가 아니라 `spec[0]` 이오.
 
                   `ratio` 는 2026-09-01 부터 **보여 주는 상자**입니다
                   (manifest.SceneSpec.box 주석). 장면 원본은 전부 9:16
@@ -173,7 +173,7 @@ export default function PromptModal({
 
             {seasonal && (
               <div className="hint" style={{ borderColor: "var(--teal)" }}>
-                <b>한 장이면 되오.</b> 이 그림이 사계절 내내 나옵니다.<br />
+                <b>한 장이면 되오.</b> 이 그림이 사계절 내내 나오오.<br />
                 지금 보이는 것은 <b>{SEASON_KO[season] ?? season}</b> 이고,
                 레일에서 계절을 바꾸면 다른 꽃으로 갈아 보실 수 있소.
                 마음에 드는 걸로 한 장만 뽑으시오.<br />
