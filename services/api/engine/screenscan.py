@@ -226,6 +226,15 @@ FOLD_LABEL = re.compile(r'label="[^"]*"')
 CODEY = re.compile(r"=>|className|useState|const |return |;|\)\s*\{|\bprops\b")
 
 
+# 따로 앉는 단락 태그. `<b>` 처럼 문장 **안에** 끼는 것과 다릅니다 —
+# 이게 사이에 끊겨 있으면 화면에서도 둘은 따로 앉은 덩이입니다.
+# ★ `b` 는 넣지 마시오 — 그걸 넣으면 굵게 쓴 데서 잘린 한 문장을
+#   도로 잇는 규칙이 죽습니다 (바로 위 머리말).
+BLOCK_TAG = re.compile(
+    r"</?(?:p|div|section|article|li|ul|ol|h[1-6]|button|br|blockquote|"
+    r"details|summary|td|tr|table|Say|Narration|ActOut|Shell|Fold|Reveal)\b")
+
+
 def _strip_code(src: str) -> str:
     src = re.sub(r"/\*.*?\*/", " ", src, flags=re.S)
     return re.sub(r"//[^\n]*", " ", src)
@@ -285,13 +294,13 @@ def _readable(chunk: str) -> str:
             continue
         if CODEY.search(t):
             continue
-        out.append(t)
+        out.append((t, m.start(), m.end()))
     # 같은 글이 두 번 잡히면(문자열 + JSX) 한 번만 셉니다
     seen, uniq = set(), []
-    for t in out:
+    for t, a, b in out:
         if t not in seen:
             seen.add(t)
-            uniq.append(t)
+            uniq.append((t, a, b))
     # ★ 굵게 쓴 데서 잘린 한 문장을 도로 잇습니다 (2026-09-04).
     #
     #   화면 글은 이렇게 생겼습니다 —
@@ -304,10 +313,36 @@ def _readable(chunk: str) -> str:
     #       읽기속도  문단 수가 부풀어 숨 쉴 자리가 있는 것처럼 보입니다
     #
     #   문장부호로 끝나지 않은 조각은 다음 것과 잇습니다.
-    joined, buf = [], ""
-    for t in uniq:
+    #
+    # ★ 묶음표도 **끝입니다** (2026-09-15).
+    #
+    #   근거 줄은 마침표로 안 끝납니다 — 「…보오 〔자평 명리 · 용신〕」.
+    #   그래서 이 자리가 근거 줄을 **뒤엣것에 붙였습니다.** 진열대에서는
+    #   근거 줄과 목패 다섯 개가 한 문단이 되어 열 줄짜리 벽으로 잡혔고,
+    #   화면에서는 따로 앉는 것들입니다.
+    #
+    #   말투 층에서 똑같은 자리를 겪었습니다 — 출처 묶음표가 문장 끝을
+    #   가려 근거 줄 전부가 하오체로 남았습니다 (engine/voice 머리말).
+    #   끝을 가리는 것은 마침표가 아니라 **그 뒤에 붙은 것**입니다.
+    #
+    # ★ **끊긴 태그와 끚은 태그는 다릅니다** (2026-09-15).
+    #
+    #   위 규칙은 `<b>` 처럼 문장 **안에** 끊긴 태그를 위한
+    #   것입니다. 그런데 조건이 「마침표로 안 끝났다」 하나라,
+    #   목패 다섯 개처럼 이름표만 있는 단추가 줄지어 있으면 그것들을
+    #   통째로 한 문단으로 묶었습니다 — 진열대가 「열 줄짜리 벽」이
+    #   된 까닭입니다. 화면에서는 단추 다섯 개가 따로 앉습니다.
+    #
+    #   조각 사이의 **원문**을 봅니다. 거기 단락 태그가 끊겨 있으면
+    #   둘은 화면에서도 따로 앉은 것이니 안 잉습니다.
+    joined, buf, prev = [], "", 0
+    for t, a, b in uniq:
+        if buf and BLOCK_TAG.search(chunk[prev:a]):
+            joined.append(buf)
+            buf = ""
         buf = (buf + " " + t).strip() if buf else t
-        if re.search(r"[.!?…:]$", buf) or len(buf) > 300:
+        prev = b
+        if re.search(r"[.!?…:〕」』】]$", buf) or len(buf) > 300:
             joined.append(buf)
             buf = ""
     if buf:
@@ -607,6 +642,74 @@ def _screens() -> dict:
 SAMPLE = (1993, 11, 25, 15, 55, "M")
 
 
+def hook_html(segs: list) -> str:
+    """훅 다섯 마디를 **화면이 그리는 대로** 잇는다.
+
+    ★ 자가 화면보다 적게 보고 있었습니다 (2026-09-15).
+
+      여기는 `seg["html"]` 만 이어 붙였습니다. 그런데 화면이 그리는
+      것은 그보다 넷이 더 있습니다 — 이름표 · **근거 줄** · 다음 마디
+      이름 · 물음 (`components/HookSegments.tsx`). 그래서 자는
+      「a7 에 근거 줄이 없소」 라 적었습니다. 근거는 거기 있었습니다.
+      `seg["source"]` 라는 **딴 칸**에 있었을 뿐입니다.
+
+      한 칸만 보고 「없다」 고 적는 자는 고칠 데를 안 가리킵니다 —
+      고치라는 자리가 이미 고쳐져 있으니, 그 옆의 진짜 빈 자리가
+      그만큼 늦게 보입니다. `tools/dropout_sim.compose_seg` 는 이미
+      화면대로 잇고 있었고, 둘이 어긋난 채 각자 재고 있었습니다.
+
+    ★ 잇는 것도 **줄바꿈으로** 잇습니다.
+
+      빈칸으로 이으면 다섯 마디가 한 덩이가 되어, 줄길이·읽기속도
+      축이 없는 벽을 봅니다 (d0 에서 한 번 겪은 자리).
+    """
+    return chr(10).join(seg_html(segs, i) for i in range(len(segs)))
+
+
+
+def wrap_engine(screen_text: str, engine_html: str) -> str:
+    """엔진 글을 화면 글 **사이에** 끼운다.
+
+    화면 글의 앞은 앞에, 끝은 끝에 두고 그 사이에 넣습니다. 콜드 오픈은
+    첫 두 줄을, 버튼은 마지막 한 줄을 봅니다 — 둘 다 화면 글이라야
+    실제로 보이는 것과 같아집니다.
+
+    ★ 이을 때도 **줄바꿈으로** 잇습니다. 빈칸으로 이으면 화면 글이 도로
+      한 덩이가 되어, 줄길이·읽기속도 축이 없는 벽을 봅니다
+      (`_readable` 과 같은 까닭).
+
+    ★ 밖에서도 부를 수 있게 꺼내 두었습니다 (2026-09-15).
+      `tools/dropout_sim` 이 사람마다 무료 리포트를 잴 때 이 껍데기를
+      안 씌우고 재어, 「d0 당김 75」 가 나왔습니다. 여는 줄과 버튼이
+      빠진 채로 잰 값이오 — 화면에는 둘 다 있습니다. 자가 두 벌이면
+      고칠 데를 잘못 가리킵니다.
+    """
+    nl = chr(10)
+    ls = D._lines(screen_text or "")
+    head = nl.join(ls[:-TAIL_KEEP]) if len(ls) > TAIL_KEEP else ""
+    tail = nl.join(ls[-TAIL_KEEP:]) if ls else ""
+    return nl.join(x for x in (head, engine_html, tail) if x)
+
+def seg_html(segs: list, i: int) -> str:
+    """훅 **한 마디**. 화면이 그리는 차례 그대로 —
+    이름표 · 근거(0단만 아래) · 본문 · 다음 마디 이름 · 물음."""
+    s = segs[i]
+    out = []
+    if s.get("label"):
+        out.append('<div class="lab">%s</div>' % s["label"])
+    if s.get("source") and not s.get("source_below"):
+        out.append('<span class="src">근거 · %s</span>' % s["source"])
+    out.append(s["html"])
+    if s.get("source") and s.get("source_below"):
+        out.append('<span class="src below">근거 · %s</span>' % s["source"])
+    if i < len(segs) - 1:
+        out.append('<p>다음 마디 · 「%s」.</p>'
+                   % (segs[i + 1].get("label") or "그 선택 뒤의 다른 면"))
+    if s.get("question"):
+        out.append("<p>%s</p>" % s["question"])
+    return chr(10).join(out)
+
+
 def _engine_text() -> dict:
     from .bank import build_hook
     from .calendar import build_chart
@@ -620,7 +723,7 @@ def _engine_text() -> dict:
     out = {}
 
     segs = build_hook(f, "work", "INTJ", name="", you="그대")
-    out["a7"] = "".join(s["html"] for s in segs)
+    out["a7"] = hook_html(segs)
 
     free = build_report(f, "scan", "pungun", "free", "work", "INTJ")
     # ★ 따로 서는 것은 **따로 잇습니다** (줄바꿈으로).
@@ -736,17 +839,7 @@ def scan_all() -> list:
     eng = _engine_text()
     for sid, html in eng.items():
         if sid in ENGINE_MID:
-            # 화면 글의 **앞은 앞에, 끝은 끝에** 두고 그 사이에 넣습니다.
-            # 콜드 오픈은 첫 두 줄을, 버튼은 마지막 한 줄을 봅니다 —
-            # 둘 다 화면 글이라야 실제로 보이는 것과 같아집니다.
-            # ★ 이을 때도 **줄바꿈으로** 잇습니다. 빈칸으로 이으면
-            #   화면 글이 도로 한 덩이가 되어, 줄길이·읽기속도 축이
-            #   없는 벽을 봅니다 (_readable 과 같은 까닭).
-            nl = chr(10)
-            ls = D._lines(text.get(sid, ""))
-            head = nl.join(ls[:-TAIL_KEEP]) if len(ls) > TAIL_KEEP else ""
-            tail = nl.join(ls[-TAIL_KEEP:]) if ls else ""
-            text[sid] = nl.join(x for x in (head, html, tail) if x)
+            text[sid] = wrap_engine(text.get(sid, ""), html)
         else:
             text[sid] = html + chr(10) + text.get(sid, "")
 

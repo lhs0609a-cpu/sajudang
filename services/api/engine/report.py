@@ -14,6 +14,7 @@ tier
 from __future__ import annotations
 
 import hashlib
+import re
 from typing import Optional
 
 from . import bank as bank_mod
@@ -1812,6 +1813,31 @@ def _how_many(f, el: str) -> str:
     return "하나도 없소" if n == 0 else "%s이오" % count_word(n)
 
 
+
+# ★ 근거 줄의 풀이에서 「나」는 **손님**입니다 (2026-09-15).
+#
+#   `terms.MEANING` 은 명리의 말로 쓰여 있어 「나를 기준으로 …」 「나를
+#   채워 주는 것」 입니다. 명리에서 그 「나」는 일간, 곧 손님이오.
+#   그런데 근거 줄은 캐릭터가 말하는 상자 안에 앉습니다 — 거기서
+#   「나」는 **말하는 사람**으로 읽힙니다. 손님이 한 번 짚은 자리요
+#   ("이 부분은 당신한테 하는 말이어야지"). `tests/test_voice` 가 셉니다.
+#
+#   그래서 근거 줄에 다는 풀이만 「그대」로 돌려 씁니다. 그 뒤에
+#   호칭 층이 캐릭터마다 갈아 끼우오 (아래 `voice_mod.address`).
+_GL_BOX = re.compile(r'(<i class="gl">\()([^<]*?)(\)</i>)')
+_I_FORMS = (("내가", "그대가"), ("나를", "그대를"), ("나에게", "그대에게"),
+            ("나와", "그대와"), ("나는", "그대는"), ("나의", "그대의"),
+            ("나 자신", "그대 자신"), ("내 ", "그대 "))
+
+
+def _src_you(src: str) -> str:
+    def one(m):
+        body = m.group(2)
+        for a, b in _I_FORMS:
+            body = body.replace(a, b)
+        return m.group(1) + body + m.group(3)
+    return _GL_BOX.sub(one, src or "")
+
 def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
                  axis4: Optional[str] = None,
                  extras: Optional[dict] = None,
@@ -1938,6 +1964,44 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
         #   캐릭터마다 갈아 끼웁니다 — 하게체·반말에서는 서술 어미와
         #   같은 꼴이 되어 뒤에서는 처방을 못 가립니다.
         do_spot = skim_mod.find_do(c["html"])
+        # ★ 근거 줄에도 풀이를 답니다 (2026-09-15).
+        #
+        #   훅은 여태 달고 있었고(`bank` 1046) 리포트만 안 달았습니다.
+        #   그런데 근거 줄은 이 집에서 **어려운 말이 가장 빽빽한 줄**
+        #   입니다 — 셈을 보이는 자리라 그렇습니다. 무료 여섯 컷을
+        #   재보니 십신·일간·월지·용신·공망 다섯이 **근거 줄에만**
+        #   나오고 한 번도 안 풀린 채 지나갔습니다.
+        #
+        #   근거를 손님이 모르는 말로 대면 그건 근거가 아니라 주문이오.
+        #
+        #   화면은 근거를 컷 **위**에 먼저 그립니다(report/[id] 709).
+        #   그러니 여기서도 먼저 풀어야 손님이 처음 만나는 자리에서
+        #   풀립니다 — `seen` 을 같이 쓰니 본문에서 또 풀지 않습니다.
+        #
+        # ★ 근거 줄의 `seen` 은 **따로 셉니다** (2026-09-15).
+        #
+        #   같이 세었더니 근거 줄이 **캐릭터마다 갈렸습니다.** 관점
+        #   컷(lc_)은 그 사람 몫이라 사람마다 다른 자리에 끼는데, 거기서
+        #   「용신」 을 먼저 써 버리면 뒤에 오는 공통 컷의 근거 줄에는
+        #   풀이가 안 붙습니다. 그러면 같은 여덟 글자를 두고 청암은
+        #   풀이 없는 근거를, 풍운은 풀이 붙은 근거를 받습니다.
+        #
+        #   근거는 캐릭터가 바꾸지 않습니다 — 바뀌는 것은 말하는 차례와
+        #   어조뿐이오 (seed/lens_view.json 머리말 · tests/test_voice).
+        #
+        #   묶음을 따로 세는 것으로는 안 됩니다. **차례 자체가** 사람마다
+        #   다르니, 차례에 기대는 셈은 어느 것이든 갈립니다. 그래서 근거
+        #   줄은 **제 줄 안에서만** 셉니다 — 그러면 그 줄의 글자만 보고
+        #   정해지니 스무 벌이 한 벌입니다.
+        #
+        #   같은 말이 근거 줄 여럿에 나오면 여러 번 풀립니다. 그건 값이
+        #   싼 되풀이요 — 근거 줄은 서로 멀찍이 떨어져 앉고, 손님은 그
+        #   가운데 하나만 눈에 담기도 합니다. 「사전을 리포트에 붓기」와
+        #   다릅니다. 그건 **한 컷 안에** 사전을 편 것이고, 이건 한 줄에
+        #   괄호 하나요.
+        if c.get("source"):
+            c["source"] = _src_you(terms_mod.gloss(c["source"], set(),
+                                                  concern, f.sex))
         c["html"] = terms_mod.gloss(
             voice_mod.speak(voice_mod.address(c["html"], you), tone), seen,
             concern, f.sex)

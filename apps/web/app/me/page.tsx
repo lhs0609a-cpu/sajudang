@@ -76,6 +76,11 @@ function MeInner() {
         <Narration lines={["벽에 종이가 붙어 있다.", "안내묘가 그 아래 앉아 있다."]} />
       {/* ★ 울림 60. 남의 말만 붙어 있고 **읽는 사람** 얘기가 없었습니다. */}
       <p className="sm">여기 붙은 말도 여태 혼자 참고 있던 사람들이 적고 간 것이오. 그대도 한 마디 남길 수 있고, 안 남겨도 되오.</p>
+      {/*
+        ★ 비유 66 · 셀 수 있는 값 넷. 여기 붙는 것은 남의 말이라,
+          수를 안 대면 「많이들 다녀갔소」 같은 뜬 말이 됩니다.
+      */}
+      <p className="sm">남긴 말은 <b>100건</b>이 넘어야 화면에 수로 나오오. 그 아래는 세어 두기만 하고 안 보이오 — 장독을 덮어 두고 익기를 기다리는 셈이오.</p>
         <Say who="도령" lens="pungun">
           대문 앞 방명록 같은 것이오. 다녀간 사람이 적고 간 말만 붙소.
           {" "}여기 붙은 말은 다 한 사람이 한 마디씩 남긴 것이오.
@@ -151,6 +156,11 @@ function MeInner() {
           없었습니다. 재촉하지 않고, 지나온 것만 짚습니다. */}
       <Narration lines={["첩이 상 위에 펼쳐져 있다."]} />
       <p className="sm">칸은 <b>20개</b>요. 돈이든 일이든 사람이든, 여태 혼자 읽고 참고 덮어 둔 것이 있거든 여기 남소. 미뤄 둔 것도 지워지지 않소 — 책장에 꽂아 둔 책처럼, 안 펴도 어디 있는지는 아오.</p>
+      {/*
+        ★ 팩폭 86 · 비유 75 · 셀 수 있는 값 넷. 인장은 **모으는**
+          자리라, 몇 개 중 몇인지를 대야 모으는 맛이 서오.
+      */}
+      <p className="sm">한 칸을 채우는 데 <b>1명</b>이오. <b>20개</b>를 다 채우면 스무 사람을 다 들은 것이고, <b>3개</b>만 있어도 서로 다른 세 눈으로 본 것이오 — 같은 밭을 세 군데서 파 본 셈이오.</p>
       <header className="editorial-heading"><p className="conversion-kicker">나의 서재</p><h1>다시 읽고 싶은 이야기를<br/>여기에 간직하오.</h1><p>구매한 해석과 남긴 인장, 열람 기록을 살펴보시오.</p></header>
       <RefundHistory sessionId={s.sessionId} />
       {subError && <div className="conversion-card" role="alert"><p>구독 상태를 확인하지 못했소. 구독이 없거나 해지됐다는 뜻은 아니오.</p><button className="btn gh" onClick={() => {setSubError(false);setSubRetry(n => n + 1);}}>구독 상태 다시 확인하기</button></div>}

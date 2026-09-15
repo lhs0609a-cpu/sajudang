@@ -178,25 +178,69 @@ def compose_seg(segs, i) -> str:
       `seg["source"]` 라는 딴 칸에 있고, 다음 마디 이름은 화면이
       `HookSegments` 에서 붙입니다. 자가 화면과 다른 것을 보고 있었소.
 
-      화면이 그리는 차례 그대로 잇습니다 (apps/web/components/HookSegments.tsx) —
-      이름표 · 근거(0단만 아래) · 본문 · 다음 마디 이름 · 물음.
-    """
-    s = segs[i]
-    out = []
-    if s.get("label"):
-        out.append('<div class="lab">%s</div>' % s["label"])
-    if s.get("source") and not s.get("source_below"):
-        out.append('<span class="src">근거 · %s</span>' % s["source"])
-    out.append(s["html"])
-    if s.get("source") and s.get("source_below"):
-        out.append('<span class="src below">근거 · %s</span>' % s["source"])
-    if i < len(segs) - 1:
-        out.append('<p>다음 마디 · 「%s」.</p>'
-                   % (segs[i + 1].get("label") or "그 선택 뒤의 다른 면"))
-    if s.get("question"):
-        out.append('<p>%s</p>' % s["question"])
-    return chr(10).join(out)
+    ★ 잇는 법은 **집이 들고** 이 도구는 빌려 씁니다 (2026-09-15).
 
+      같은 셈을 두 벌 들고 있었더니, 한쪽만 고쳐져 `screenscan` 은
+      「a7 에 근거 줄이 없소」 라 적고 이 도구는 안 적는 자리가
+      생겼습니다. 도구와 화면이 다른 것을 보면 어느 쪽이 맞는지
+      아무도 모릅니다 — `engine/screenscan.hook_html` 한 벌입니다.
+    """
+    return S.seg_html(segs, i)
+
+
+def free_html(cuts) -> str:
+    """무료 여섯 컷을 **화면이 그리는 대로** 잇는다.
+
+    ★ 훅에서 겪은 것과 **똑같은 자리**였습니다 (2026-09-15).
+
+      여기는 `"".join(c["html"])` 이었습니다. 화면이 그리는 것은 그보다
+      둘이 더 있습니다 — 컷 이름표와 **근거 줄**
+      (`apps/web/app/report/[id]/page.tsx` 의 컷 상자).
+
+      그래서 10만 명을 돌리면 d0 의 명확이 70 에서 멈췄습니다. 근거
+      줄에 걸린 30점을 못 받은 것인데, 근거는 거기 있었습니다 —
+      `c["source"]` 라는 딴 칸에요. 「고칠 차례」 표의 맨 윗줄이
+      **이미 고쳐져 있는 자리**를 가리키고 있었던 것입니다.
+
+      빈칸이 아니라 **줄바꿈으로** 잇습니다. 빈칸으로 이으면 여섯
+      상자가 한 덩이가 되어, 줄길이·읽기속도 축이 없는 벽을 봅니다
+      (engine/screenscan._engine_text 가 d0 에서 같은 말을 합니다).
+    """
+    nl = chr(10)
+    out = []
+    for c in cuts:
+        if c.get("title"):
+            out.append('<div class="lab">%s</div>' % c["title"])
+        if c.get("source"):
+            out.append('<span class="src">근거 · %s</span>' % c["source"])
+        out.append(c["html"])
+    return nl.join(out)
+
+
+
+_SHELL: dict = {}
+
+
+def _shell(sid: str) -> str:
+    """그 화면이 **제 손으로 든 글**. 엔진 글을 여기 끼워 잽니다."""
+    if not _SHELL:
+        _SHELL.update({k: v[0] for k, v in S._screens().items()})
+    return _SHELL.get(sid, "")
+
+
+# 점수 한 벌에서 **떨굴 때 쓰는 칸만** 남긴다.
+#
+# ★ 1만 명을 재면 4.7GB 까지 불었습니다 (2026-09-15). 한 사람마다
+#   점수 여섯 벌(훅 다섯 + 무료 하나)을 통째로 들고 있었는데, 그 안에는
+#   「무엇이 모자란지」 적은 **글자 목록**까지 들어 있습니다. 떨구는 데는
+#   안 쓰는 것들입니다. 10만 명을 보려면 여기를 줄여야 합니다 —
+#   묶음을 나눠 돌려도 한 묶음이 못 버티면 소용이 없습니다.
+KEEP = ("pull", "bite", "heart", "clear", "plain", "figure", "pace",
+        "mark", "secs", "unglossed")
+
+
+def slim(g: dict) -> dict:
+    return {k: g[k] for k in KEEP if k in g}
 
 
 def measure_one(p, cache):
@@ -236,7 +280,7 @@ def measure_one(p, cache):
         html = compose_seg(segs, i)
         g = D.score("a7", "훅", html, "read")
         g["unglossed"] = unglossed(html)
-        marks.append(g)
+        marks.append(slim(g))
         # [가정한 것] 손님의 대답. 셀 수 있는 말이 많을수록 반응이 뚜렷하고,
         # 어려운 말이 많을수록 「잘 모르겠습니다」 로 갑니다.
         p_dunno = 0.10 + 0.30 * (1 - g["plain"] / 100.0) \
@@ -260,10 +304,12 @@ def measure_one(p, cache):
 
     # ── 무료 리포트
     free = build_report(f, "sim", ENTRY_LENS, "free", p["concern"], p["axis4"])
-    fh = "".join(c["html"] for c in free["cuts"])
+    # 화면 껍데기(여는 줄 · 마감 · 버튼)를 씌워서 잽니다 — 손님이
+    # 보는 것은 컷만이 아닙니다 (engine/screenscan.wrap_engine).
+    fh = S.wrap_engine(_shell("d0"), free_html(free["cuts"]))
     g = D.score("d0", "무료", fh, "read")
     g["unglossed"] = unglossed(fh)
-    out["free"] = g
+    out["free"] = slim(g)
     out["locked"] = len(free.get("locked") or [])
     ids = {c["id"] for c in free["cuts"]}
     out["solace"] = ("solace" in ids or "hope" in ids)
@@ -477,8 +523,15 @@ def main() -> int:
     ap.add_argument("n", nargs="?", type=int, default=10000)
     ap.add_argument("--json", default="")
     ap.add_argument("--fixes", type=int, default=14)
+    # ★ 씨앗을 밖에서 줄 수 있게 (2026-09-15).
+    #   10만 명을 한 번에 돌리면 메모리가 못 버팁니다 — 한 사람마다
+    #   잰 것을 다 들고 있어야 「고칠 차례」를 같은 난수로 다시 돌릴 수
+    #   있기 때문입니다. 그래서 1만 명씩 **다른 씨앗으로 열 번** 돌려
+    #   합칩니다. 씨앗이 같으면 같은 사람을 열 번 보는 것이라 뜻이 없소.
+    ap.add_argument("--seed", type=int, default=SEED)
     a = ap.parse_args()
     n = a.n
+    seed = a.seed
 
     t0 = time.perf_counter()
     entry = live_path()
@@ -500,7 +553,7 @@ def main() -> int:
     print()
 
     # ── [센 것] 한 사람씩 엔진에 통과
-    pop = sample_people(n, seed=SEED)
+    pop = sample_people(n, seed=seed)
     measured, blew = [], collections.Counter()
     for i, p in enumerate(pop):
         m = measure_one(p, None)
@@ -508,7 +561,7 @@ def main() -> int:
             blew[m["why"]] += 1
             continue
         tr = traits(p["rng"])
-        measured.append((m, tr, SEED * 31 + i))
+        measured.append((m, tr, seed * 31 + i))
         if (i + 1) % 1000 == 0:
             print("    … %d/%d  (%.0f초)" % (i + 1, n, time.perf_counter() - t0),
                   flush=True)
@@ -580,7 +633,7 @@ def main() -> int:
     # ── [가정한 것] 퍼널
     results = {}
     for name, scale in CASES:
-        results[name] = run(measured, path, screens, gt, scale, SEED)
+        results[name] = run(measured, path, screens, gt, scale, seed)
 
     print("-" * 76)
     print("  [센 것 + 가정한 것] 퍼널 — %d명이 들어왔을 때" % len(measured))
@@ -659,7 +712,7 @@ def main() -> int:
     for sid, ax, cur in cand:
         gains, reach = {}, {}
         for name, scale in CASES:
-            paid, _, _, rc = run(measured, path, screens, gt, scale, SEED,
+            paid, _, _, rc = run(measured, path, screens, gt, scale, seed,
                                  patch=(sid, ax, 85))
             gains[name] = paid - base[name][0]
             reach[name] = rc - base[name][1]

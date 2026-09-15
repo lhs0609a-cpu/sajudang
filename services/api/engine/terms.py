@@ -261,7 +261,28 @@ _TAGS = re.compile(r"<[^>]*>")
 _ALREADY = re.compile(r"[(（]")
 
 
-def _ok(text: str, term: str, start: int, end: int) -> bool:
+def used_here(text: str, term: str, start: int, end: int) -> bool:
+    """이 자리의 글자가 **정말 그 용어인가** — 풀렸는지는 안 봅니다.
+
+    ★ 자와 풀이가 다른 표를 보고 있었습니다 (2026-09-15).
+
+      `engine/dramaturgy` 의 쉬움 축은 어려운 말을 제 벌로 찾았습니다 —
+      앞 글자만 보는 성긴 자입니다. 그래서 훅에서 이 둘이 「안 풀린
+      말」로 섰습니다:
+
+          편재격 — 격국 이름 한 낱말인데 앞 두 글자만 떼어 셌습니다
+          세운 벽 — 세우다의 활용형인데 歲運 으로 셌습니다
+
+      둘 다 **여기가 이미 가르고 있는 자리**입니다(`NOT_BEFORE` ·
+      `ONLY_PARTICLE`). 풀이는 옳게 안 풀었는데 자는 「안 풀었다」고
+      적었으니, 고칠 데를 가리키는 게 아니라 고칠 수 없는 데를
+      가리킨 것입니다. 표는 한 벌이라야 합니다.
+    """
+    return _ok(text, term, start, end, glossed_too=True)
+
+
+def _ok(text: str, term: str, start: int, end: int,
+        glossed_too: bool = False) -> bool:
     """이 자리에서 풀어도 되는가."""
     tail = text[end:end + 6]
     for bad in NOT_BEFORE.get(term, ()):
@@ -275,8 +296,9 @@ def _ok(text: str, term: str, start: int, end: int) -> bool:
         nxt = tail.lstrip()[:1]
         if not (_PARTICLE.match(tail) or (nxt and not _is_hangul(nxt))):
             return False
-    # 바로 뒤가 여는 괄호면 이미 풀린 것입니다
-    return not _ALREADY.match(tail[:1])
+    # 바로 뒤가 여는 괄호면 이미 풀린 것입니다. 「쓰였는가」를 묻는
+    # 자리(used_here)는 풀렸어도 쓰인 것이라 이 칸을 안 봅니다.
+    return True if glossed_too else not _ALREADY.match(tail[:1])
 
 
 def _is_hangul(ch: str) -> bool:

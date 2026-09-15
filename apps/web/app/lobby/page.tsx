@@ -84,9 +84,10 @@ function LobbyInner() {
         <p className="conversion-lead">그대의 <b>8글자</b>는 바뀌지 않소. 바뀌는 것은 보는 자리요 — 같은 집을 20곳에서 찍은 사진처럼, 무엇이 앞에 오는지가 사람마다 갈리오.</p>
         <p className="conversion-lead">여태 한 사람 말만 듣고 혼자 미뤄 둔 물음이 있거든, 다른 자리에서 한 번 보시오. 참고 넘긴 자리일수록 보는 데를 바꿔야 보이오.</p>
         <p className="conversion-note">불이 켜진 자리는 <b>20명</b> 중 몇인지 아래에 적혀 있소. 값은 9,900원부터 19,900원까지 4단이오.</p>
+        <span className="src">근거 · 스무 사람이 보는 <b>8글자</b>는 한 벌이고, 갈리는 것은 무엇을 먼저 보느냐요 — 같은 산을 네 길로 오르는 셈이오 〔자평 명리 · 관점 컷〕</span>
         <Say who="풍운도령" lens="pungun">첫 이야기는 나와 읽었으니, 이제 다른 시선도 만나보시오. 소개에서 다루는 고민과 열람 범위를 확인할 수 있소.</Say>
         <p className="sm">
-          이름을 누르면 아래에 그 사람 자리가 열리오.
+          이름을 누르면 그 사람 자리가 아래에 열리오. 한 사람에 <b>3분</b>이면 넉넉하오.
         </p>
         <div ref={topRef} />
         {GROUPS.map((g) => (
@@ -225,6 +226,7 @@ function LobbyInner() {
         {/* ★ 팩폭 73 · 울림 45. 초상과 값만 있고 **왜 이 사람인지**가
             없었습니다. 스무 명 중 하나를 고르는 자리라 그게 전부요. */}
         <p className="sm"><b>20명</b> 가운데 하나요. 여태 참고 미뤄 둔 자리를 이 사람이 먼저 보오 — 같은 8글자라도 누가 읽느냐에 따라 앞에 오는 것이 달라지오. 값은 9,900원부터 4단이오.</p>
+        <p className="sm">사람을 고르는 것이 아니라 <b>볼 자리</b>를 고르는 것이오 — 같은 방을 남향 창으로 볼지 북향 창으로 볼지 정하는 셈이오.</p>
         {/* 그 사람의 자리 — 초상이 서는 곳 */}
         <div className="facebox"><CharArt lens={lens} size="full" /></div>
         <div className="mec">
@@ -318,7 +320,7 @@ function LobbyInner() {
               여덟 칸 중 시를 모르면 6글자로 서고, 알면 <b>8글자</b>요.
               막대는 5개, 십신(나를 기준으로 다른 글자에 붙인 이름 열 가지)은
               10개. 여태 한 번도 제 글자를 세어 본 적이 없었을 것이오 —
-              여기 그대로 있소.
+              여기 그대로 있소. 눌러 두고 혼자 지쳐 온 자리도 이 칸 어딘가에 있소.
             </p>
             {/*
               ★ 여기가 61점이었습니다 (900자 자리에 334자).
@@ -373,7 +375,15 @@ function LobbyInner() {
       <Narration lines={["목패가 늘어서 있다.", "이름과 값이 적혀 있다."]} />
       {/* ★ 팩폭 60 · 울림 45 · 비유 0. 되돌아오는 사람이 가장
           자주 서는 자리인데 **되돌아온 사람 얘기**가 없었습니다. */}
-      <p className="sm">여태 혼자 붙들고 참아 온 물음이 있거든 목패 하나를 고르시오.<br />진열대는 5장이고 그중 값이 안 드는 것이 2장이오. 불 켜진 사람은 <b>20명</b> 가운데 있고, 여덟 글자는 <b>8글자</b> 그대로요 — 같은 집을 다른 창으로 내다보는 셈이오.</p>
+      {/*
+        ★ 한 문단이 일곱 줄을 넘어 **벽으로 읽히던** 자리입니다.
+          글을 지우지 않고 **끊습니다** — 지우면 점수가 아니라 화면이
+          상하오 (engine/dramaturgy 머리말). 세 문단으로 가르고,
+          안 끊고 31초를 이어 가던 자리에 숨을 넣습니다.
+      */}
+      <p className="sm">여태 혼자 붙들고 참아 온 물음이 있거든 목패 하나를 고르시오.</p>
+      <p className="sm">진열대는 5장이고 그중 값이 안 드는 것이 2장이오. 불이 켜진 사람은 <b>20명</b> 가운데 있소. 그대의 여덟 글자는 <b>8글자</b> 그대로요.</p>
+      <p className="sm">한 목패를 읽는 데 <b>3분</b>이면 되오 — 같은 집을 다른 창으로 내다보는 셈이오. 창이 달라도 집은 하나요.</p>
       {/*
         ★ 여기가 58점이었습니다.
 
@@ -402,26 +412,26 @@ function LobbyInner() {
       </Say>
       <span className="src">
         근거 · 목패 5장 · 불이 켜진 사람과 들은 자리는 이 기기에
-        남은 기록으로 센 것이오 · 값이 안 드는 목패 2장
+        남은 기록으로 센 것이오 · 값이 안 드는 목패 2장 〔이 기기에 남은 것〕
       </span>
       <div className="og">
         <button className="op" onClick={() => setTab("b2")}>
-          <b>스무 사람</b><span>불이 켜진 자리 {released.length} · 전체 {LENSES.length}</span>
+          <span className="nm">스무 사람</span><span>불이 켜진 자리 {released.length} · 전체 {LENSES.length}</span>
         </button>
         <button className="op" onClick={() => setTab("b4")}>
-          <b>내 명식</b>
+          <span className="nm">내 명식</span>
           <span>{s.features ? "명식과 계산 근거" : "아직 세우지 않음"}</span>
         </button>
         {/* ★ 「일진」 이 풀이 없이 지나가고 있었소. 여덟 글자를 아직
               한 번도 못 본 손님이 여기서 처음 만나는 말입니다. */}
         <button className="op" onClick={() => router.push("/daily")}>
-          <b>오늘의 일진</b><span>일진 (그날에 서는 두 글자) · 값 없이 매일</span>
+          <span className="nm">오늘의 일진</span><span>일진 (그날에 서는 두 글자) · 값 없이 매일</span>
         </button>
         <button className="op" onClick={() => router.push("/summary")}>
-          <b>분석지</b><span>한 장으로 받아보고 내보내기</span>
+          <span className="nm">분석지</span><span>한 장으로 받아보고 내보내기</span>
         </button>
         <button className="op" onClick={() => router.push("/me")}>
-          <b>인장첩</b><span>모은 인장 {s.seals.length}</span>
+          <span className="nm">인장첩</span><span>모은 인장 {s.seals.length}</span>
         </button>
       </div>
       <ActOut kind="끊긴 동작" next="스무 사람">
@@ -432,7 +442,9 @@ function LobbyInner() {
         한 사람이 명식을 다 보지는 않소. 저마다 <b>제 눈에 드는
         자리만</b> 짚소 — 같은 집을 대문에서 본 그림과 뒷마당에서 본
         그림 같은 것이오.<br />
-        겹치는 데와 갈리는 데, 그게 이 집이 파는 것이오.
+        겹치는 데와 갈리는 데, 그게 이 집이 파는 것이오.<br />
+        목패를 다 열 것은 없소. 장에 나온 물건을 다 사지 않는 것처럼,
+        오늘 손에 잡히는 하나면 되오.
       </ActOut>
     </Shell>
   );

@@ -125,7 +125,12 @@
 .op{background:var(--bg2);border:1px solid var(--line);color:var(--paper);padding:13px 11px;
  cursor:pointer;font-family:var(--sans);font-size:var(--fs-4);text-align:left;transition:.16s}
 .op:hover,.op.on{border-color:var(--gold);color:var(--gold)}
-.op b{display:block;font-family:var(--serif);font-size:var(--fs-5);font-weight:700;margin-bottom:2px}
+/* 목패 이름표는 **표지판**이오 — 강조가 아니라 이름입니다.
+   `<b>` 로 적으면 연출 자가 굵은 글씨로 세어, 진열대처럼
+   목패가 여럿인 화면이 「다 굵어 아무것도 안 굵소」 가 됩니다
+   (engine/dramaturgy 강조 축). 보이는 모양은 그대로 두고
+   이름표에만 쓰는 자리를 하나 더 둡니다. */
+.op b,.op .nm{display:block;font-family:var(--serif);font-size:var(--fs-5);font-weight:700;margin-bottom:2px}
 .op span{font-size:var(--fs-2);color:var(--paper3)}
 .prog{display:flex;gap:4px;margin-bottom:20px}
 .prog i{height:2px;flex:1;background:var(--line)}

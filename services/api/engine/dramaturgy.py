@@ -174,7 +174,18 @@ PREACH = re.compile(r"힘내|노력하시|긍정적|마음먹기|이겨내|극�
                     r"努力|받아들이시오|감사하")
 
 # 비유 — 그림이 그려지는 한 줄
-FIGURE = re.compile(r"처럼|같이|마치|셈이오|셈입니다|셈이|빗대|듯이")
+#
+# ★ 그림 뱅크가 쓰는 꼴을 **자가 다 안 세고 있었습니다** (2026-09-15).
+#
+#   `engine/flavor` 의 비유 백여 줄을 세어 보니 「…과 같소」 가 15줄,
+#   「…같은 것이오」 가 6줄이었습니다. 자에는 그 꼴이 없어서, 그 줄이
+#   뽑힌 사람에게는 **그림을 달아 놓고도 비유 0** 이 나왔습니다.
+#   같은 컷이 `pick` 에 따라 세어지기도 하고 안 세어지기도 했습니다.
+#
+#   「같소」 만으로는 안 됩니다 — 「다르지 않소」 같은 자리에도 걸립니다.
+#   앞에 조사(과·와)나 매인이름씨(것)가 붙은 꼴만 봅니다.
+FIGURE = re.compile(r"처럼|같이|마치|셈이오|셈입니다|셈이|빗대|듯이|"
+                    r"[과와] 같소|같은 것이오|같은 것이라|것과 같")
 
 
 # ══════════════════════════════════════════════════════════
@@ -193,6 +204,36 @@ HARD = tuple(sorted(terms.MEANING, key=len, reverse=True))
 HARD_AT = {w: re.compile(r"(?<![가-힣])" + re.escape(w)) for w in HARD}
 HARD_GLOSSED = {w: re.compile(r"(?<![가-힣])" + re.escape(w) + r"\s*[（(]")
                 for w in HARD}
+
+
+def _hard_used(text: str) -> list:
+    """이 글에 **정말로 쓰인** 어려운 말.
+
+    ★ 자를 두 벌 들고 있었습니다 (2026-09-15).
+
+      여기서는 앞 글자 하나만 보고(`(?<![가-힣])`) 어려운 말을 셌습니다.
+      그런데 **뒤 글자**도 봐야 합니다 — 「편재격」은 격국 이름 한
+      낱말이라 앞 두 글자를 떼면 없는 말을 센 것이고, 「받으려 세운
+      벽」의 세운은 세우다의 활용형입니다.
+
+      풀이를 다는 `engine/terms` 는 이 둘을 이미 가릅니다
+      (`NOT_BEFORE` · `NOT_AFTER` · `ONLY_PARTICLE`). 그래서 훅에
+      「편재·세운을 안 풀었소」 가 떠 있었는데, 그건 안 푼 게 아니라
+      **풀면 안 되는 자리**였습니다. 자가 고칠 수 없는 데를 가리키면
+      고칠 수 있는 데가 그만큼 늦게 보입니다.
+
+      앞 글자는 여기서 보고 뒤 글자는 저기서 봅니다 — 둘 다 통과한
+      것만 셉니다. 이 자는 전보다 **덜** 잡지 더 잡지 않습니다.
+    """
+    out = []
+    for w in HARD:
+        for m in HARD_AT[w].finditer(text):
+            if terms.used_here(text, w, m.start(), m.end()):
+                out.append(w)
+                break
+    return out
+
+
 SENT = re.compile(r"(?<=[.!?…])\s+")
 
 
@@ -521,7 +562,7 @@ def score(sid: str, title: str, html: str, kind: str = "read",
     #   본문이 그림이 되지는 않습니다 — 그러면 상자 하나로 스무 컷이
     #   전부 통과합니다.
     boxed = " ".join(GLS.findall(html or ""))
-    used = [w for w in HARD if HARD_AT[w].search(text)]
+    used = _hard_used(text)
     glossed = [w for w in used
                if HARD_GLOSSED[w].search(text) or ("<b>%s</b>" % w) in boxed]
     plain_s = round(100 * (1.0 if not used else _pct(len(glossed), len(used))))
