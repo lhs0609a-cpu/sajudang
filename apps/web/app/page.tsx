@@ -182,7 +182,7 @@ const CITIES = CITY_GROUPS.flatMap(([, cs]) => cs);
  * 화면 순서. ★ 고민(a5)이 이름(a2) 바로 뒤로 올라왔습니다.
  *   id 는 그대로 둡니다 — 계측 화이트리스트와 docs/08 이 이 이름을 씁니다.
  */
-const ORDER: Step[] = ["a1", "a5", "a3", "a4", "a6", "a7", "a2", "a4b"];
+const ORDER: Step[] = ["a1", "a5", "a3", "a4", "a4b", "a6", "a7", "a2"];
 const STEPS: Step[] = ORDER;
 
 /*
@@ -493,7 +493,7 @@ function EntryInner() {
                 있는 말이라야 맞았을 때 소름이 돋소.
             */}
             <p className="conversion-lead">태어난 해·달·날 <b>셋만 적으면</b> <b>6글자</b>가 서오. 태어난 시각까지 알면 <b>8글자</b>요. 지도를 펴고 지금 선 자리에 손가락을 얹는 셈이오.</p>
-            <p className="conversion-lead">그 글자에서 <b>10가지</b> 십신(十神)을 세고, <b>10년</b>마다 바뀌는 대운(열 해씩 갈리는 큰 마디)을 짚소. 맞히는 것이 아니라 세는 것이오.</p>
+            <p className="conversion-lead">그 글자에서 <b>10가지</b> 십신(十神)을 세고, <b>10년</b>마다 바뀌는 대운(열 해씩 갈리는 큰 마디)을 짚소. <mark>맞히는 것이 아니라 세는 것이오.</mark></p>
             {/*
               ★ 근거 줄이 **입력 화면 넷에 하나도** 없었습니다 (2026-09-15).
 
@@ -535,7 +535,7 @@ function EntryInner() {
       <Narration lines={["도령이 아직 그대를 뭐라 부를지 정하지 못했다."]} />
       <h1 className="conversion-title">어떻게 부르면 되겠소?</h1>
       <p className="conversion-lead">별칭은 해석에서 부르는 말에만 사용하오. 사주 계산에는 쓰지 않으며, 비워두셔도 괜찮소.</p>
-      <p className="conversion-lead">적으시면 스무 사람이 그 이름으로 부르오. 어떤 이는 그대라 하고 어떤 이는 자네라 하오 — 편지 겉봉에 이름을 적는 셈이오.</p>
+      <p className="conversion-lead"><mark>적으시면 스무 사람이 그 이름으로 부르오.</mark> 어떤 이는 그대라 하고 어떤 이는 자네라 하오 — 편지 겉봉에 이름을 적는 셈이오.</p>
       <p className="conversion-note">여태 이런 데 이름을 적고 후회한 적이 있거든, 비워 두셔도 <b>해석은 똑같이</b> 나오오. 별칭은 12글자까지요.</p>
       <span className="src">근거 · 별칭은 부르는 말 한 자리에만 쓰오 — <b>4기둥 8글자</b> 셈에는 한 자도 안 들어가오 〔이름은 명식 밖〕</span>
       <p className="conversion-note">다음 자리 — 「태어난 때」로 돌아가오. 아직 안 적은 것이 하나 남았소.</p>
@@ -597,7 +597,7 @@ function EntryInner() {
           이름은 사람 눈에도 예고로 안 읽히오 — 예고는 **무엇이
           오는지**가 보여야 예고입니다.
       */}
-      <p className="conversion-lead">해와 달과 날, 이 셋이 <b>6글자</b>를 만드오. 여기에 시를 더하면 <b>8글자</b>요. 태어난 날에 이미 적혀 있던 것을 옮겨 적는 셈이오 — 달력을 펴고 대 보시면 같은 글자가 나오오.</p>
+      <p className="conversion-lead">해와 달과 날, 이 셋이 <b>6글자</b>를 만드오. 여기에 시를 더하면 <b>8글자</b>요. <mark>태어난 날에 이미 적혀 있던 것을 옮겨 적는 셈이오</mark> — 달력을 펴고 대 보시면 같은 글자가 나오오.</p>
       <span className="src">근거 · 해·달·날 여섯 글자는 태어난 날에 이미 적혀 있소 〔자평 명리 · 네 기둥 가운데 셋〕</span>
       {/*
         ★ 감동 88 · 비유 85 로 이 화면이 이 구간에서 가장 낮았습니다.
@@ -657,12 +657,30 @@ function EntryInner() {
                 없는 것을 지어내지 않는 것이 이 집의 규칙이라, 모르는
                 것을 모른다고 하는 손님이 옳게 하고 있는 것입니다.
           */}
-          <p className="conversion-note">때를 알면 <b>여덟 글자</b>가 다 서오. 모르면 <b>여섯 글자</b>로 보오. 시주(태어난 시의 두 글자)는 곁자리와 뒷일을 보는 자리요. 모르면 모르는 대로 보오 — 없는 두 글자를 지어내지는 않소.</p>
+          <p className="conversion-note">때를 알면 <b>여덟 글자</b>가 다 서오. 모르면 <b>여섯 글자</b>로 보오. 시주(태어난 시의 두 글자)는 곁자리와 뒷일을 보는 자리요. <mark>모르면 모르는 대로 보오 — 없는 두 글자를 지어내지는 않소.</mark></p>
+          {/*
+            ★ 성향 넉 자를 **본길로 되돌렸습니다** (2026-09-16).
+
+              손님이 물었습니다 — "엠비티아이 처음에 파악하는 칸은
+              어디로 갔어."
+
+              접힌 자리 안의 유령 단추로 물러나 있었습니다. 재 보니
+              그 칸이 비면 훅 2.5단이 **694자 → 241자**로 줄어듭니다.
+              그 마디가 「그대가 적은 넉 자와 여덟 글자가 어디서
+              갈리는가」 — 이 집에서 가장 「내 얘기」처럼 읽히는
+              자리인데, 손님이 스스로 낸 값이 있어야 열립니다.
+
+              ★ 셈도 그 가정으로 돌고 있었습니다. `journey_sim` 은
+                55%가 적는다고 잡는데 화면에서는 칸이 접혀 있었으니,
+                10만 명 셈이 화면보다 후했습니다.
+
+              한 번 눌러 건너뛸 수 있게 둡니다 — 선택 입력입니다.
+          */}
           <button className="btn mt" disabled={!s.hourKnown || s.hour === null}
-            onClick={() => go("a6")}>이 시간으로 무료 해석 보기</button>
+            onClick={() => go("a4b")}>이 시간으로 이어가기</button>
         </div>
         <button className="btn gh" onClick={() => {
-          s.set({ hourKnown: false, hour: null, minute: 0, chartId: null, features: null }); go("a6");
+          s.set({ hourKnown: false, hour: null, minute: 0, chartId: null, features: null }); go("a4b");
         }}>시간을 모르오 · 시주(태어난 시의 두 글자) 없이 보기</button>
         {/*
           ★ 감동 45 로 이 흐름에서 가장 낮던 자리입니다.
@@ -683,10 +701,9 @@ function EntryInner() {
         <p className="conversion-lead">시를 모르는 것은 흠이 아니오. 여덟 칸짜리 자에서 두 칸을 안 쓰는 것처럼, 남은 여섯 칸으로도 재오.</p>
         <p className="conversion-note">다음 자리 — 「글자가 서다」. 몇 글자가 설 것 같소?</p>
         <CompanionCat message="모르는 시간은 비워둬도 괜찮다냥." />
-        <details className="conversion-details"><summary>별칭·성향도 추가하고 싶소</summary>
+        <details className="conversion-details"><summary>별칭도 적고 싶소</summary>
           <p className="conversion-note">선택 정보요. 비워 두어도 무료로 볼 수 있소.</p>
           <button className="btn gh" onClick={() => go("a2")}>별칭 입력</button>
-          <button className="btn gh" onClick={() => go("a4b")}>성향 4글자 선택</button>
         </details>
       </Shell>
     );
@@ -704,7 +721,7 @@ function EntryInner() {
       <Narration lines={["도령이 넉 자 적힌 쪽지를 내려다본다."]} />
       <h1 className="conversion-title">내가 생각하는 성향도<br />비교해보겠소?</h1>
       <p className="conversion-lead">직접 고른 성향과 전통 사주 해석을 비교하는 선택 항목이오. 사주 계산값은 바뀌지 않소.</p>
-      <p className="conversion-lead">여덟 글자에서 <b>4축</b>을 세워 그대가 고른 넉 자와 나란히 놓소. 넷 다 겹치는 사람은 100명 중 6명뿐이오 — 자와 자를 맞대 보는 셈이오.</p>
+      <p className="conversion-lead">여덟 글자에서 <b>4축</b>을 세워 그대가 고른 넉 자와 나란히 놓소. <mark>넷 다 겹치는 사람은 100명 중 6명뿐이오</mark> — 자와 자를 맞대 보는 셈이오.</p>
       <p className="conversion-lead">어긋난 데가 있거든 그게 여태 그대를 지치게 한 곳이오. 참고 미뤄 온 일, 말 못 한 사람, 설친 잠이 대개 거기 걸려 있소.</p>
       {/*
         ★ 근거 줄은 마침표로 안 끝나오 (「… 〔자평 명리 · 용신〕」).
@@ -714,14 +731,19 @@ function EntryInner() {
           짧은 줄이 사라져 울림이 20점 깎였습니다. 짧은 줄 **뒤**에
           답니다.
       */}
+      {/* ★ 본길에 선 칸은 **누르는 것이라고 말해야** 합니다.
+          여태는 곁문이라 「성향 4글자 선택」 이라는 단추 이름이 그
+          몫을 했는데, 본길로 오면서 그 단추가 없어졌습니다
+          (tests/test_pick_affordance 가 잡았습니다). */}
+      <p className="conversion-lead">아래 <b>열여섯 칸</b>에서 하나를 골라주시오. 그대가 스스로 보는 그대요.</p>
       <p className="conversion-note">비워 두어도 되오.</p>
       <span className="src">근거 · 여덟 글자에서 <b>4축</b>을 세워 그대가 고른 <b>4글자</b>와 나란히 놓소 〔자평 명리 · 성향 대조〕</span>
       <div className="og c2">{AXIS4.map(t => <button key={t} className={`op ${s.axis4===t ? 'on' : ''}`}
         aria-pressed={s.axis4===t} onClick={() => s.set({ axis4:t })}>{t}</button>)}</div>
-      <button className="btn mt" disabled={!s.axis4} onClick={() => go("a4")}>선택한 성향으로 이어가기</button>
-      <button className="btn gh" onClick={() => { s.set({ axis4:null }); go("a4"); }}>성향 없이 이어가기</button>
+      <button className="btn mt" disabled={!s.axis4} onClick={() => go("a6")}>선택한 성향으로 무료 해석 보기</button>
+      <button className="btn gh" onClick={() => { s.set({ axis4:null }); go("a6"); }}>성향 없이 바로 보겠습니다</button>
       <p className="conversion-note">특정 상표와 무관한 성향 대조요.</p>
-      <p className="conversion-note">다음 자리 — 「태어난 때」로 돌아가오. 아직 안 본 자리가 하나 남았소.</p>
+      <p className="conversion-note">다음 자리 — 「글자가 서다」. 여덟 글자가 그 자리에서 서오.</p>
     </Shell>;
   }
 
@@ -743,7 +765,7 @@ function EntryInner() {
               「무언가 알게 되오」 는 고리가 아닙니다. 수를 대고 다음
               자리를 가리켜야 고리입니다.
           */}
-          <p className="conversion-note">고른 자리 하나가 여덟 글자 중 어디를 볼지를 정하오. 같은 명식도 물은 데가 다르면 볼 자리가 달라지오 — <b>셋만 더</b> 적으시면 그 자리가 서오.</p>
+          <p className="conversion-note">고른 자리 하나가 여덟 글자 중 어디를 볼지를 정하오. <mark>같은 명식도 물은 데가 다르면 볼 자리가 달라지오</mark> — <b>셋만 더</b> 적으시면 그 자리가 서오.</p>
           {/*
             ★ 여기가 팩폭 48 · 감동 70 이던 자리입니다.
               「아닐 게요」 같은 물러서는 말이 섞여 있었고, 겪은 마음의
@@ -828,7 +850,7 @@ function EntryInner() {
             같은 여덟 글자를 살림의 말로 한 번 되짚습니다.
         */}
         <p className="conversion-lead">이 여덟 글자로 그대는 돈을 벌고, 밥을 먹고, 사람을 만나고, 밤에 잠을 잤소. 종이 위에 집 한 채를 올려놓은 셈이오.</p>
-        <p className="conversion-lead">자가 키를 재도 크다 작다는 말하지 않소. 여기까지가 셈이고, 값을 매기는 것은 다음 자리요.</p>
+        <p className="conversion-lead"><mark>자가 키를 재도 크다 작다는 말하지 않소.</mark> 여기까지가 셈이고, 값을 매기는 것은 다음 자리요.</p>
         <p className="conversion-lead">아직 안 본 것이 있소 — 그대가 물은 <b>{concernWord}</b>이 이 글자들의 어느 자리에 걸리는지요.</p>
         <p className="conversion-note">명식은 태어난 해·달·날·시간을 각각 두 글자로 옮긴 것이오. 모르는 시간의 두 글자는 비워 두오.</p>
         <p className="conversion-note">다음 자리 — 「{lens.name}의 첫 해석」.</p>

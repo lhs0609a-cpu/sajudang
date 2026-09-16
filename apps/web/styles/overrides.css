@@ -3659,3 +3659,11 @@ u {
   color: var(--gold); text-underline-offset: 4px;
 }
 .resthere .rest-lines small { color: var(--paper3); margin-left: 8px; }
+
+/* ══════════ 값 화면에서 다른 사람으로 ══════════
+   값을 더 권하는 자리가 아니라 **바꿔 볼 수 있다고 알리는** 자리요.
+   그래서 목패보다 조용하게 둡니다 (app/pay/page 머리말). */
+.otherseats { margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--line); }
+.otherseats .lab { color: var(--gold); margin-bottom: 6px; }
+.otherseats .sm { line-height: 1.75; margin-bottom: 12px; }
+.otherseats .og { margin-bottom: 12px; }

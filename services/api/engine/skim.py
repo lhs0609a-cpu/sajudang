@@ -263,6 +263,34 @@ def _do_at(html: str, spot: tuple) -> str:
 #
 # ★ 두 자리에서만 찾습니다. 지어내지 않습니다.
 _BITE = re.compile(r'(<p class="bite">)(.*?)(</p>)', re.S)
+
+# ★ 훅이 제 손으로 짚어 둔 결론 자리 (2026-09-16).
+#
+#   `skim` 머리말은 「화면 스물여덟 곳 전부에 한 번에 붙습니다」 라
+#   적혀 있는데, 재 보니 실제로 걸린 곳은 **둘**이었습니다 — 리포트
+#   본문과 무료 6단. 훅 5단은 4,443자에 굵은 글씨 마흔아홉인데
+#   형광펜이 **한 줄도** 없었습니다. 10만 명 가운데 24%가 거기서
+#   나갑니다. 그 사람들에게 이 집의 글은 크기가 하나뿐입니다.
+#
+#   훅에는 `.bite` 가 없습니다. 대신 마디마다 저자가 짚어 둔 자리가
+#   있습니다 — 뱅크가 직접 붙인 클래스입니다.
+#
+#       blade   0단 찌르기   아픈 한 줄
+#       relief  2단 순서     「끈기가 없어서가 아니오 …」  되풀이의 정체
+#       cax     2.5단 어긋남 「물으신 일에서는 이렇게 나오오」
+#       nameB   3단 이름     이름을 붙이는 줄
+#       hit     2단 곁       relief 가 없을 때
+#       lived   1단 부정확인 「…했을 것이오」  겪은 일
+#
+#   **차례가 뜻입니다.** 한 마디에 둘이 있으면 앞엣것이 결론이오 —
+#   순서 마디에는 `hit`(아픈 말)와 `relief`(받아 주는 말)가 같이
+#   있는데, 훑어읽는 손님이 가져가야 할 것은 받아 주는 쪽입니다.
+#
+#   ★ 그래도 **지어내지는 않습니다.** 이 목록에 없는 마디는 비워
+#     둡니다 — 없는 데는 안 칠하는 규칙 그대로요.
+BEAT_KEY = ("blade", "relief", "cax", "nameB", "hit", "lived")
+_BEAT = {k: re.compile(r'(<p class="%s[^"]*">)(.*?)(</p>)' % k, re.S)
+         for k in BEAT_KEY}
 _BOLD = re.compile(r"<b>(.*?)</b>", re.S)
 # 문장 꼴 — **마침표로 끝나는 것**만.
 #
@@ -317,7 +345,17 @@ def _pen(html: str) -> str:
             return (html[:m.start()] + m.group(1) + "<mark>" + head + "</mark>"
                     + rest + m.group(3) + html[m.end():])
 
-    # `.bite` 가 없으면 **문장 꼴로 굵게 해 둔 자리**를 씁니다.
+    # 훅은 `.bite` 를 안 씁니다. 마디마다 저자가 짚어 둔 자리를 봅니다.
+    for k in BEAT_KEY:
+        m = _BEAT[k].search(html)
+        if not m:
+            continue
+        head, rest = _first_sentence(m.group(2))
+        if _TAG.sub("", head).strip():
+            return (html[:m.start()] + m.group(1) + "<mark>" + head + "</mark>"
+                    + rest + m.group(3) + html[m.end():])
+
+    # 그것도 없으면 **문장 꼴로 굵게 해 둔 자리**를 씁니다.
     for b in _BOLD.finditer(html):
         # 조용한 자리(비유·풀이·근거) 안이면 건너뜁니다.
         # ★ 태그가 아니라 **속 글**의 자리를 봅니다. `b.start()` 를 주면

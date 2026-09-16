@@ -25,7 +25,8 @@ import Scene from "@/components/scene/Scene";
 import ActOut from "@/components/ActOut";
 import { Narration, Say } from "@/components/Narration";
 import { api, ApiError } from "@/lib/api";
-import { LENS_BY_ID, youOf } from "@/lib/lenses";
+import { LENS_BY_ID, LENSES, youOf } from "@/lib/lenses";
+import CharArt from "@/components/CharArt";
 import { useSession, type Tier } from "@/lib/store";
 import { track, useScreen, analyticsId } from "@/lib/track";
 import { openCheckout, registerCard } from "@/lib/toss";
@@ -535,7 +536,7 @@ function PayInner() {
               않지만 「8초」 는 대 볼 수 있소.
           */}
           <p>값을 치르고 화면이 안 열려 불안했던 일이 여태 있었을 것이오. 혼자 기다리게 두지 않소. 승인은 대개 1분 안에 끝나고, 8초가 넘으면 결제 내역으로 가는 길을 아래에 내오. 같은 주문이 <b>2번</b> 긁히는 일은 없소.</p>
-          <p className="sm">열람 권한은 치른 그 자리 하나에 붙소 — 20명이 한꺼번에 열리는 것은 아니오.</p>
+          <p className="sm"><mark>열람 권한은 치른 그 자리 하나에 붙소 — 20명이 한꺼번에 열리는 것은 아니오.</mark></p>
           <span className="src">근거 · 토스 승인 응답 · 주문 기록 · 열람 권한 표</span>
           <p className="sm">이 화면에서 나가도 값은 그대로요. 승인이 끝나면 「내 첩」의 결제 내역에 남소.</p>
         </div>
@@ -575,7 +576,7 @@ function PayInner() {
               나온 셈**이오 — 없던 것을 주는 것이 아니라 세어 둔 것을
               펴는 자리라야 값이 값으로 읽히오. 조르지는 않습니다.
           */}
-          <p className="conversion-lead">셈은 이미 끝났소. 그대의 <b>8글자</b>에서 십신(열 가지 셈법) 10개를 세고, 대운(열 해씩 갈리는 큰 마디)을 10년씩 갈라 두었소. 아직 안 읽은 것은 그 셈이오.</p>
+          <p className="conversion-lead"><mark>셈은 이미 끝났소.</mark> 그대의 <b>8글자</b>에서 십신(열 가지 셈법) 10개를 세고, 대운(열 해씩 갈리는 큰 마디)을 10년씩 갈라 두었소. 아직 안 읽은 것은 그 셈이오.</p>
           <p className="conversion-lead">참고 미룬 것, 혼자 삼킨 것, 말 못 하고 지나간 것. 그것이 여덟 글자의 어느 자리에 걸리는지 보오.</p>
           <p className="conversion-lead">이 집에는 20명이 있고, 저마다 같은 8글자를 다른 자리에서 읽소. 기둥 4자리 중 어디를 먼저 보는지가 사람마다 갈리오 — 같은 산을 서로 다른 네 길로 오르는 셈이오.</p>
           {/*
@@ -638,6 +639,42 @@ function PayInner() {
           <details className="conversion-details" open={pick === "all" || pick === "sub" || !tiers.some(t => t.id === "one") ? true : undefined}>
             <summary>다른 열람 방식 보기</summary><div className="conversion-products">{tiers.filter(t => t.id !== "one").map(product)}</div>
           </details>
+          {/*
+            ★ 이 화면에 **다른 사람으로 가는 길이 없었습니다** (2026-09-16).
+
+              손님이 짚었습니다 — "추가 해석과 결제에서 스무 사람들도
+              넘어갈 수 있도록 잘 보여야지. 스무 사람 페이지를 보여주던가."
+
+              맞습니다. 여기 있는 것은 목패 하나(지금 고른 사람)와
+              「스무 사람 전부 99,000원」 뿐이었습니다. 뒤엣것은 **상품**
+              이지 사람을 고르는 자리가 아닙니다. 이 사람이 안 맞는
+              손님에게는 나가는 길밖에 없었습니다 — 10만 명에서 나간
+              사람의 25.7%가 이 화면입니다.
+
+              이 집이 파는 것은 「겹치는 데와 갈리는 데」요. 그러려면
+              **누구로 볼지 고를 수 있어야** 합니다. 값을 더 권하는
+              자리가 아니라 **바꿔 볼 수 있다고 알리는** 자리입니다.
+
+              ★ 여기서 값을 안 올립니다. 다른 사람으로 가면 그 사람
+                목패가 서고, 값은 저마다 제 값입니다 (price_of).
+          */}
+          <section className="otherseats">
+            <p className="lab">이 사람이 아니어도 되오</p>
+            <p className="sm">같은 <b>8글자</b>를 <b>20명</b>이 저마다 다른 자리에서 읽소. <mark>값도 저마다 다르오 — 같은 산을 서로 다른 길로 오르는 셈이오.</mark></p>
+            <div className="og c2">
+              {LENSES.filter((l) => l.released && l.id !== s.cur).slice(0, 4).map((l) => (
+                <button key={l.id} className="op face"
+                        onClick={() => { s.set({ cur: l.id }); router.push("/pay?step=d1"); }}>
+                  <CharArt lens={l} size="chip" />
+                  <span className="who">
+                    <span className="nm" style={{ color: l.color }}>{l.name}</span>
+                    <span className="spec">{l.specialty}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+            <button className="btn gh" onClick={() => router.push("/lobby?tab=b2")}>스무 사람을 다 보겠습니다</button>
+          </section>
         </>}
         {tier && <div className="conversion-checkout" aria-live="polite">
           <div className="checkout-jump"><span>{tier.price.toLocaleString()}원 · {tier.per_month ? "정기결제" : "한 번 결제"}</span><a href="#checkout-terms">결제 조건 보기 ↓</a></div>
@@ -736,7 +773,7 @@ function PayInner() {
             값이 넷뿐이었습니다. 끝은 기억을 지배하는 자리라, 마지막
             줄일수록 손에 잡히는 말이라야 하오.
         */}
-        <p className="conversion-lead">오늘 읽은 것은 <b>8글자</b>에서 나온 셈이오. 내일 아침 밥을 먹고 일터에 나가고 사람을 만날 때, 그 가운데 <b>한 자리</b>만 달리 보면 되오 — 열쇠 하나를 주머니에 넣고 나가는 셈이오.</p>
+        <p className="conversion-lead"><mark>오늘 읽은 것은 <b>8글자</b>에서 나온 셈이오.</mark> 내일 아침 밥을 먹고 일터에 나가고 사람을 만날 때, 그 가운데 <b>한 자리</b>만 달리 보면 되오 — 열쇠 하나를 주머니에 넣고 나가는 셈이오.</p>
 
         {/*
           ★ 달삯은 **다음이 있는** 결제이오.

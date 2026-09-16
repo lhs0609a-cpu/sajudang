@@ -158,6 +158,22 @@ def build_daily(f, on: date | None = None,
         if ask_line:
             body.append(ask_line)
 
+    # ★ 훑어읽기 — 이 화면의 결론 한 줄 (2026-09-16).
+    #
+    #   `engine/skim` 이 다는 강조 넷이 여태 **리포트에만** 걸려
+    #   있었습니다. 일진은 1,415자에 굵은 글씨 열셋인데 형광펜이
+    #   한 줄도 없었습니다 — 다 안 읽는 손님에게는 크기가 하나뿐인
+    #   글이오.
+    #
+    #   그렇다고 아무 줄에나 칠하지 않습니다. 이 화면의 결론은
+    #   **구조로 정해져 있습니다** — 물으신 자리가 있으면 그 줄이고
+    #   (`ask_line`), 없으면 오늘과 여덟 글자의 관계 줄(`body[0]`)
+    #   입니다. 관점 컷의 `key` 문단 마지막 문장을 쓰는 것과 같은
+    #   까닭이오. 짐작이 아니라 **지어진 자리**입니다.
+    key = len(body) - 1 if ask_line else 0
+    body = list(body)
+    body[key] = "<mark>%s</mark>" % body[key]
+
     return {
         "date": on.isoformat(),
         "gz": gan + ji,

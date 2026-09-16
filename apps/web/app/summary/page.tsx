@@ -118,8 +118,11 @@ export default function SummaryPage() {
         <p className="gz">{sm.day_gan} · {sm.ilgan_name}</p>
         <p className="hl">{sm.headline}</p>
         <div className="three">
+          {/* ★ 서버 글은 **그려야** 하오. 셋째 줄에 형광펜이 붙어 오는데
+              (engine/summary) 글자로 꽂으면 손님 눈에 꺾쇠가 보입니다 —
+              근거 줄에서 한 번 겪은 자리요 (2026-09-16). */}
           {sm.three_lines.map((l, i) => (
-            <p key={i}><span className="n">{i + 1}</span>{l}</p>
+            <p key={i}><span className="n">{i + 1}</span><ServerText html={l} /></p>
           ))}
         </div>
         <p className="sm">
@@ -214,7 +217,7 @@ export default function SummaryPage() {
         생년월일시와 고을은 한 자도 안 담기오 〔분석지 · 공유 payload〕
       </span>
       <p className="sm">
-        여덟 글자는 그대로 두고 <b>읽은 자리</b>만 옮겨 적은 것이오 —
+        <mark>여덟 글자는 그대로 두고 <b>읽은 자리</b>만 옮겨 적은 것이오</mark> —
         먼 길 떠나기 전에 지도에서 갈 데만 베껴 그리는 셈이오.
         접어서 주머니에 넣고 다니다가, 마음이 걸릴 때 한 번 펴 보시오.
       </p>

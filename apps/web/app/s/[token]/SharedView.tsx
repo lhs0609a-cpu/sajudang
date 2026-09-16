@@ -19,6 +19,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Shell from "@/components/Shell";
+import ServerText from "@/components/ServerText";
 import ActOut from "@/components/ActOut";
 import { useScreen } from "@/lib/track";
 import Scene from "@/components/scene/Scene";
@@ -89,7 +90,7 @@ export default function SharedView({ token }: { token: string }) {
           그 자리에서 나갑니다. 지문으로 열고 한 줄로 짚습니다. */}
       <Narration lines={["누군가 그대에게 한 장을 건넸다."]} />
       <Scene id="gate" className="hero" />
-      <p className="sm">보낸 사람이 여태 혼자 참고 있던 것을 여기서 한 번 세어 본 것이오. 생년월일은 안 실려 있고, 실린 것은 <b>8글자</b>에서 나온 셈뿐이오.</p>
+      <p className="sm">보낸 사람이 여태 혼자 참고 있던 것을 여기서 한 번 세어 본 것이오. <mark>생년월일은 안 실려 있고, 실린 것은 <b>8글자</b>에서 나온 셈뿐이오.</mark></p>
       {/*
         ★ 이 집을 **처음 보는 사람이 서는 화면**입니다. 그런데 분량이
           900자 자리에 720자였고, 비유 62 · 셀 수 있는 값 넷이었습니다.
@@ -139,8 +140,9 @@ export default function SharedView({ token }: { token: string }) {
         <p className="gz">{d.day_gan} · {d.ilgan_name}</p>
         <p className="hl">{d.headline}</p>
         <div className="three">
+          {/* ★ 서버 글은 그려야 하오 — 셋째 줄에 형광펜이 붙어 옵니다. */}
           {d.three_lines.map((l, i) => (
-            <p key={i}><span className="n">{i + 1}</span>{l}</p>
+            <p key={i}><span className="n">{i + 1}</span><ServerText html={l} /></p>
           ))}
         </div>
         {d.pillars && (

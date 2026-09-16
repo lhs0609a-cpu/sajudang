@@ -26,6 +26,7 @@ from typing import Optional
 
 from . import guard
 from . import terms
+from . import skim as _skim
 from . import voice as _voice
 from . import why as _why
 from .constants import ELEMENT_OF_GAN
@@ -1066,6 +1067,22 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
         for field in ('html', 'source', 'yes', 'no'):
             if segment.get(field):
                 segment[field] = scope_text(segment[field], f.hour_known)
+    # ★ 훑어읽기 층 — **맨 끝**입니다 (2026-09-16).
+    #
+    #   `engine/skim` 은 리포트에만 걸려 있었습니다. 훅은 4,443자에
+    #   굵은 글씨 마흔아홉인데 형광펜이 한 줄도 없었습니다 — 10만 명
+    #   가운데 24%가 나가는 자리인데요. 다 안 읽는 손님에게 이 화면은
+    #   크기가 하나뿐인 글이었습니다.
+    #
+    #   말투·호칭 층 **뒤**입니다. 어미를 갈아 끼우면 문장 끝이
+    #   바뀌는데, 문장 꼴을 찾는 규칙이 그 앞에서 돌면 갈아 끼운 뒤의
+    #   어미를 못 봅니다.
+    #
+    #   밑줄은 안 칩니다. 밑줄은 **손님이 할 것**인데 훅은 처방하지
+    #   않소 — 다섯 마디가 다 짚는 말입니다. 없는 데는 비웁니다.
+    for segment in segs:
+        if segment.get("html"):
+            segment["html"] = _skim.mark(segment["html"])
     return segs
 
 

@@ -199,7 +199,14 @@ def build_summary(chart, f, concern: str = "love",
         #   이름은 사람이 기억하는 한 줄이고, 수는 남에게 옮길 거리입니다.
         "name_word": name_word(f),
         "rarity": rarity_bit(f, "full"),
-        "three_lines": lines,
+        # ★ 훑어읽기 — 셋째 줄이 결론이오 (2026-09-16).
+        #
+        #   세 줄은 ①없는 것 ②힘이 나가는 곳 ③**그래서 붙는 이름**
+        #   으로 지어져 있습니다(`three_lines` 머리말). 셋째가 앞의
+        #   둘을 받는 자리라, 한 줄만 읽는 손님이 가져갈 것은 그것이오.
+        #   짐작이 아니라 **지어진 차례**입니다.
+        "three_lines": ([lines[0], lines[1], "<mark>%s</mark>" % lines[2]]
+                        if len(lines) >= 3 else lines),
         "strength": f.strength,
         "flow": f.flow,
         "weak_el": f.weak_el,
