@@ -574,6 +574,41 @@ function PayInner() {
           <p className="conversion-lead">참고 미룬 것, 혼자 삼킨 것, 말 못 하고 지나간 것. 그것이 여덟 글자의 어느 자리에 걸리는지 보오.</p>
           <p className="conversion-lead">이 집에는 20명이 있고, 저마다 같은 8글자를 다른 자리에서 읽소. 기둥 4자리 중 어디를 먼저 보는지가 사람마다 갈리오 — 같은 산을 서로 다른 네 길로 오르는 셈이오.</p>
           {/*
+            ★ 고르러 온 화면인데 **고를 것이 첫 화면에 없었습니다**
+              (2026-09-16).
+
+              머리글이 836px 이라 폰 한 화면을 통째로 채우고, 목패는
+              1,168px 에서 시작합니다 — 1.4화면을 내려야 값이 보입니다.
+              10만 명을 돌려 보면 나간 사람의 25.7%, 값 축으로 나간
+              사람의 64%가 이 한 화면입니다.
+
+              머리글을 지우지는 않습니다. 「셈은 이미 끝났소」 는 값
+              **앞에** 놓여야 값이 값으로 읽히오. 대신 **길을 냅니다** —
+              바로 보고 싶은 사람은 바로 보게. 조르는 줄이 아니라
+              가리키는 줄이오.
+
+              ★ 값은 서버가 준 것만 적습니다. 화면이 제 손으로 값을
+                적으면 표시가와 청구가가 갈립니다 (payments.price_of).
+          */}
+          {/*
+            ★ 「…원부터」 에 **달삯을 섞지 않습니다.**
+
+              처음에 값 전부에서 가장 싼 것을 골랐더니 「14,900원부터」
+              가 나왔습니다. 그건 달마다 나가는 값이오 — 한 번 긁는
+              값처럼 적으면, 그 목패를 보고 누른 손님이 서른 날 뒤에
+              카드 명세서에서 두 번째를 봅니다. 이 집이 금한 자리요.
+              한 번 치르는 것만 세어 적습니다.
+          */}
+          {(() => {
+            const once = (tiers ?? []).filter((t) => !t.per_month);
+            if (!once.length) return null;
+            return (
+              <p className="conversion-note jumpline">
+                <a href="#pricelist">목패 {once.length}종 · 한 번 치러 {Math.min(...once.map((t) => t.price)).toLocaleString()}원부터 — 값표로 바로 가기 ↓</a>
+              </p>
+            );
+          })()}
+          {/*
             ★ 10만 명을 돌려 보니 **여기가 이탈 1위**였습니다 — 나간
               사람의 21.2%, 값 축으로 나간 사람의 64%가 이 한 화면이오.
               그런데 이 집에서 근거 줄이 없는 자리이기도 했습니다.
@@ -594,7 +629,7 @@ function PayInner() {
           {(tossBack || subBack) && <button className="btn gh" onClick={() => router.replace("/pay?step=d1")}>상품으로 돌아가기</button>}</div>}
         {s.chartId && !tiers && !err && <p role="status">이 명식에서 열리는 내용을 확인하고 있소…</p>}
         {tiers && <>
-          <div className="conversion-products">{tiers.filter(t => t.id === "one").map(product)}</div>
+          <div id="pricelist" className="conversion-products">{tiers.filter(t => t.id === "one").map(product)}</div>
           <details className="conversion-details" open={pick === "all" || pick === "sub" || !tiers.some(t => t.id === "one") ? true : undefined}>
             <summary>다른 열람 방식 보기</summary><div className="conversion-products">{tiers.filter(t => t.id !== "one").map(product)}</div>
           </details>

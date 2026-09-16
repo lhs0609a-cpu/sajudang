@@ -107,11 +107,55 @@ export default function HookSegments({
   }, [restored.count,segments.length,onDone]);
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activeHeading = useRef<HTMLElement | null>(null);
+  /*
+   * ★ 답한 마디를 **접지 않습니다** (2026-09-16).
+   *
+   *   손님이 짚었습니다 — "맞습니다 하면 다음 정확한 위치로 이동해야
+   *   하는데 문제가 있어."
+   *
+   *   재보니 이랬습니다. 「맞습니다」를 누르면 도령이 받아 줍니다 —
+   *   그게 이 화면에서 손님이 값을 받는 유일한 순간입니다. 그런데
+   *   0.66초 뒤에 다음 마디가 열리면서, 열린 마디는 **하나뿐**이라는
+   *   규칙에 걸려 방금 답한 마디가 통째로 접혔습니다. 대꾸가 접힌
+   *   상자 안으로 들어가 버립니다 (그려짐=false). 동시에 화면은 다음
+   *   마디 머리로 뜁니다. 그러니 손님 눈에는 **누르자 글이 사라지고
+   *   화면이 튀는** 것으로 보입니다.
+   *
+   *   열린 마디를 하나로 묶어 둔 까닭은 화면이 길어지지 않게 하려는
+   *   것이었는데, 그 대가로 대화의 받아치는 쪽을 버렸습니다. 대화는
+   *   주고받는 것이오 — 받은 말을 지우면 그건 대화가 아닙니다.
+   *
+   *   이제 **열린 것은 열린 채로** 둡니다. 접는 것은 손님이 하오.
+   */
+  const [opened, setOpened] = useState<Set<number>>(
+    () => new Set([Math.min(restored.count, segments.length - 1)]));
+  /*
+   * ★ 옮겨 가는 자리는 **대꾸**입니다.
+   *
+   *   전에는 새 마디의 머리로 갔습니다. 그러면 방금 받은 말이 화면
+   *   위로 밀려 나가고, 손님은 읽지도 못한 대꾸를 지나쳐 다음 글
+   *   앞에 섭니다. 대꾸를 맨 위에 놓으면 그 아래에 새 마디 머리가
+   *   바로 따라옵니다 — 받고, 이어집니다.
+   */
+  const replyNode = useRef<HTMLElement | null>(null);
+  /*
+   * ★ 방금 답한 자리는 **셈으로 짚지 않습니다.**
+   *
+   *   전에는 `open-2` 로 뒤에서 세었습니다. 그런데 마지막 마디를
+   *   답하면 `open` 이 마디 수를 넘어가 그 셈이 한 칸 어긋납니다 —
+   *   다섯째를 답했는데 넷째의 대꾸로 갔습니다. 그러면 마지막 대꾸도
+   *   못 읽고, 그 아래 「무료 해석 보기」 단추도 1.2화면 아래에 남아
+   *   화면에 누를 것이 하나도 없습니다.
+   *
+   *   센 값이 아니라 **적어 둔 값**을 씁니다.
+   */
+  const [answered, setAnswered] = useState<number>(-1);
   useEffect(() => {
-    if (open <= 1) return;
+    if (answered < 0) return;
     activeHeading.current?.focus({preventScroll:true});
-    activeHeading.current?.scrollIntoView({block:"start", behavior:"auto"});
-  }, [open]);
+    const go = replyNode.current ?? activeHeading.current;
+    go?.scrollIntoView({block:"start", behavior:"auto"});
+  }, [answered, open]);
   useEffect(() => () => {if(advanceTimer.current) clearTimeout(advanceTimer.current);}, []);
 
   /*
@@ -159,7 +203,14 @@ export default function HookSegments({
     }
     // Recording feedback must not hold the next paragraph behind a slow request.
     advanceTimer.current = setTimeout(() => {
+      setOpened((prev) => {
+        const nx = new Set(prev);
+        nx.add(i);
+        if (i + 1 < segments.length) nx.add(i + 1);
+        return nx;
+      });
       setOpen((n) => Math.max(n, i + 2));
+      setAnswered(i);
       if (i + 1 >= segments.length) onDone?.();
     }, 660);
     try {
@@ -187,7 +238,18 @@ export default function HookSegments({
           **청하지도** 않습니다 — 만드는 데 값이 나가는 자리입니다.
       */}
       {segments.slice(0, open).map((seg, i) => (
-        <details className="hook-chapter" key={seg.statement_id} open={i === Math.min(open,segments.length)-1}>
+        <details className="hook-chapter" key={seg.statement_id}
+                 open={opened.has(i)}
+                 onToggle={(e) => {
+                   /* 접고 펴는 것은 손님 몫이오. 화면이 도로 뒤집지 않소. */
+                   const on = (e.currentTarget as HTMLDetailsElement).open;
+                   setOpened((prev) => {
+                     if (prev.has(i) === on) return prev;
+                     const nx = new Set(prev);
+                     if (on) nx.add(i); else nx.delete(i);
+                     return nx;
+                   });
+                 }}>
           <summary tabIndex={0} ref={node => {if(i === Math.min(open,segments.length)-1) activeHeading.current=node;}}>
             <span>{i+1}. {seg.label || "그대의 반복 패턴"}</span><small>{replies[i] === undefined ? "지금 읽는 마디" : "답변 완료 · 다시 읽기"}</small>
           </summary>
@@ -261,7 +323,8 @@ export default function HookSegments({
               </button>
             </>
           ) : (
-            <div className="react on">
+            <div className="react on"
+                 ref={node => {if(i === answered) replyNode.current=node;}}>
               {/*
                 ★ 여기가 얼굴이 없던 자리입니다.
 

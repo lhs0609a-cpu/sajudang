@@ -2784,6 +2784,22 @@ body.has-rail .beatskip-hint { left: calc(50% + 116px); }
   .seatnow { animation: none; }
 }
 
+/* ★ 고른 자리가 한 화면에 안 들어왔습니다 (2026-09-16).
+
+     손님이 사람을 고르면 화면이 그 자리로 데려갑니다. 그런데 그
+     상자가 1,015px 이고 폰 화면은 844px 이라, 데려다 놓으면 정작
+     **누를 단추 셋이 전부 화면 밖**이었습니다 — 고르고 나서 화면에
+     할 수 있는 일이 하나도 없습니다. 훅에서 겪은 것과 같은 자리요.
+
+     자리의 38%가 초상 한 장(384px)이었습니다. 손님은 방금 목록에서
+     그 얼굴을 보고 고른 참입니다 — 여기서 다시 크게 볼 까닭이 적소.
+     큰 초상은 「이 사람 자리를 크게 보겠습니다」 가 따로 엽니다. */
+@media (max-width: 767px) {
+  .seatnow .facebox { max-height: 232px; overflow: hidden; }
+  .seatnow .facebox img,
+  .seatnow .facebox svg { max-height: 232px; width: auto; }
+}
+
 /* ══════════ 상담 분야 · 이어지는 자리의 얼굴 ══════════
    ★ 손님이 2026-09-02 에 짚은 둘입니다.
 

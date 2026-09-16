@@ -2,6 +2,9 @@
 .hook-progress span {color:var(--paper2)}
 .hook-chapter {border-top:1px solid var(--line);margin:0;scroll-margin-top:76px}
 .hook-chapter>summary {cursor:pointer;min-height:60px;padding:14px 4px;line-height:1.5;scroll-margin-top:76px}
+/* 답한 뒤 옮겨 가는 자리 — 도령의 대꾸. 머리와 같은 여백을 두어야
+   위 띠에 안 가리오 (components/HookSegments 머리말). */
+.hook-chapter .react {scroll-margin-top:76px}
 .hook-chapter>summary span {font-size:17px}
 .hook-chapter>summary small {display:block;margin-top:4px;color:var(--paper2);font-size:13px}
 .hook-chapter>summary:focus-visible {outline:2px solid var(--gold);outline-offset:3px}
@@ -11,3 +14,9 @@
 .checkout-jump a {display:inline-flex;align-items:center;min-height:44px;color:var(--gold);text-underline-offset:4px}
 .checkout-terms {scroll-margin-top:88px}
 @media(max-width:767px){.checkout-jump{position:sticky;top:8px;z-index:5;box-shadow:0 4px 16px #0003}.hook-chapter>summary{padding:14px 4px}}
+
+/* 값표로 바로 가는 줄 — 머리글이 한 화면을 채우는 자리에서만 씁니다.
+   붙박이로 두지 않소. 따라다니며 조르는 것은 브레이크를 없애는 것이오. */
+.jumpline a {display:inline-flex;align-items:center;min-height:44px;
+  color:var(--gold);text-underline-offset:4px}
+#pricelist {scroll-margin-top:80px}
