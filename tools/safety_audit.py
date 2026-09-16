@@ -47,6 +47,7 @@ if str(ROOT / "tools") not in sys.path:
 
 from engine import bank as bank_mod                   # noqa: E402
 from engine import dramaturgy as D                    # noqa: E402
+from engine import heart as heart_mod                 # noqa: E402
 from engine import screenscan as S                    # noqa: E402
 from engine.calendar import build_chart               # noqa: E402
 from engine.features import build_features            # noqa: E402
@@ -58,8 +59,8 @@ CONCERNS = ("money", "work", "love", "people", "dir", "health")
 
 # 앞을 보는 자리 — 이게 하나도 없으면 그 장은 진단서입니다.
 FORWARD = {"hope", "week", "yongsin", "helper", "closing_cut", "counter"}
-# 알아주는 자리
-HOLD = {"solace", "hope", "helper"}
+# 알아주는 자리 — 컷 통째가 손잡이인 것. 표는 집이 듭니다.
+HOLD = set(heart_mod.HOLD_CUTS)
 
 # ★ 아픈 말은 **팩폭 점수로 재면 안 됩니다.**
 #
@@ -74,10 +75,9 @@ BLADE = re.compile(r'class="(?:blade|bite|stab)[" ]')
 #   훅은 `bladerelief`, 리포트는 `hold` (engine/heart.hold_line).
 #   자와 글이 **같은 표**를 봐야 합니다.
 RELIEF = re.compile(r'class="(?:bladerelief|hold)[" ]')
-HOLD_WORD = re.compile(
-    r"혼자가 아니|그대 탓이 아니|잘못이 아니|당연하오|당연합니다|"
-    r"게을러서가 아니|모자라서가 아니|여태 그 자리 없이|이미 쥐|"
-    r"이미 가진|처음부터 쥐")
+# 말뭉치는 집이 듭니다 (engine/heart.HOLD_WORDS) — 두 벌을 들면
+# 자가 위로를 아픈 말로 셉니다.
+HOLD_WORD = re.compile(heart_mod.HOLD_WORDS)
 
 
 def hurt(html: str) -> int:

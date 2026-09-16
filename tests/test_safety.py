@@ -43,9 +43,10 @@ CONCERNS = ("money", "work", "love", "people", "dir", "health")
 # 집이 스스로 짚어 둔 아픈 자리 · 손잡이 자리
 BLADE = re.compile(r'class="(?:blade|bite|stab)[" ]')
 HOLD = re.compile(r'class="(?:bladerelief|hold)[" ]')
-HOLD_WORD = re.compile(
-    r"혼자가 아니|그대 탓이 아니|잘못이 아니|당연하오|게을러서가 아니|"
-    r"여태 그 자리 없이|이미 쥐|이미 가진|처음부터 쥐")
+# ★ 말뭉치도 손잡이 표도 **집이 들고** 검사는 빌려 씁니다.
+#   두 벌을 들었더니 위로 컷을 아픈 컷으로 세는 일이 있었습니다.
+HOLD_WORD = re.compile(heart_mod.HOLD_WORDS)
+HOLD_CUTS = heart_mod.HOLD_CUTS
 
 # 몇 사람만 봅니다 — 구조를 보는 검사라 표본이 크지 않아도 됩니다.
 BIRTHS = [
@@ -75,6 +76,9 @@ def test_아픈_컷에는_손잡이가_같이_온다(b, concern):
         rep = build_report(f, "t", "pungun", tier, concern, "INTJ")
         for c in rep["cuts"]:
             if not BLADE.search(c["html"] or ""):
+                continue
+            # 위로·희망·누가 돕는가는 **컷 통째가** 손잡이오
+            if c["id"] in HOLD_CUTS:
                 continue
             assert _holds(c["html"]), (
                 "아프게만 하고 지나가오: %s · %s · %s" % (tier, concern, c["id"]))
