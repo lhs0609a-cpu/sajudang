@@ -10,6 +10,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Shell from "@/components/Shell";
+import RestHere from "@/components/RestHere";
 import Scene from "@/components/scene/Scene";
 import ActOut from "@/components/ActOut";
 import { Narration, Say } from "@/components/Narration";
@@ -29,11 +30,17 @@ export default function DailyPage() {
   const [err, setErr] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
 
-  useEffect(() => {
-    const day = new Intl.DateTimeFormat('en-CA', {timeZone:'Asia/Seoul', year:'numeric', month:'2-digit', day:'2-digit'}).format(new Date());
-    s.set({ visits: s.visitDate === day ? s.visits + 1 : 1, visitDate: day });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  /*
+   * ★ 방문 세기를 걷었습니다 (2026-09-16).
+   *
+   *   여기서 세면 **스토어가 되살아나기 전**에 셉니다. `useEffect([])`
+   *   가 잡는 `s.visitDate` 는 아직 `null` 이라, 매번 「오늘 처음」 이
+   *   되어 `visits` 가 1 로 돌아갔습니다. 그래서 바로 아래 「하루 3회
+   *   만류」 는 **여태 한 번도 뜬 적이 없습니다.** 브레이크를 달아
+   *   두고 안 걸리게 해 둔 셈이오.
+   *
+   *   이제 처마(`Shell`)가 되살아난 뒤에 한 벌로 셉니다.
+   */
 
   useEffect(() => {
     if (!s.chartId) return;
@@ -107,6 +114,10 @@ export default function DailyPage() {
           </p>
         </div>
       )}
+      {/* 만류 곁에 **도움 받을 곳**을 둡니다. 여기까지 온 사람은
+          이미 여러 번 온 사람이오 (2026-09-16). */}
+      <RestHere visits={s.visits} hour={new Date().getHours()}
+                concern={s.concern} returning={s.visits > 1} />
 
       {data && (
         <>

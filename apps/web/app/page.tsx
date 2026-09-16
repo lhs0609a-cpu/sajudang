@@ -24,6 +24,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
+import RestHere from "@/components/RestHere";
 import CompanionCat from "@/components/CompanionCat";
 import GuideIntro from "@/components/GuideIntro";
 import Fold from "@/components/Fold";
@@ -933,6 +934,19 @@ function EntryInner() {
           <button className="btn gh" onClick={() => router.push("/summary")}>여기까지 본 내용 정리하기</button>
         </section>
       )}
+      {/*
+        ★ 쉬어 가는 자리 (2026-09-16).
+
+          훅은 이 집에서 가장 아픈 자리요. 10만 명을 돌려 보면 나간
+          사람의 24%가 여기서 나갑니다 — 찌르는 말을 받고 나가는
+          것이오. 찌르는 것은 그대로 둡니다. 다만 신호가 겹치는
+          사람에게는 **그만두어도 된다고 말하는 자리**를 하나 엽니다.
+
+          조르지 않고, 진단하지 않고, 아무것도 안 팝니다.
+      */}
+      <RestHere visits={s.visits} hookMisses={misses}
+                hour={new Date().getHours()} concern={s.concern}
+                returning={s.visits > 1} />
     </Shell>
   );
 }

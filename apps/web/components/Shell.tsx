@@ -129,6 +129,7 @@ function holdOf(el: HTMLElement): number {
 }
 import { useSession } from "@/lib/store";
 import { LENS_BY_ID } from "@/lib/lenses";
+import { CARE_LINES } from "@/lib/care";
 import { api, apiMisconfigured } from "@/lib/api";
 import SoundToggle from "@/components/SoundToggle";
 import DevRail from "@/components/DevRail";
@@ -203,6 +204,30 @@ export function SiteFooter() {
         <span aria-hidden="true"> · </span>
         <a className="own" href="/admin">주인 자리</a>
       </p>
+      {/*
+       * ★ 도움 받을 곳은 **처마**에 둡니다 (2026-09-16).
+       *
+       *   처음에 `Legal` 안에 넣었는데, 그건 `legal` 을 켠 몇 화면에만
+       *   섭니다. 처마는 대문 빼고 어느 화면에나 서오 — 훅에서도,
+       *   무료 6단에서도, 일진에서도 손에 닿아야 합니다.
+       *
+       *   조르지 않습니다. 튀어나오지도 않습니다. 힘든 사람 앞에
+       *   상담 전화를 들이미는 것은 「당신 위험해 보여요」 라고 말하는
+       *   것이라 도리어 문을 닫게 하오. 걸어 두고, 찾는 사람이 찾게
+       *   둡니다. 신호가 겹칠 때만 본문에서 한 번 더 냅니다
+       *   (`components/RestHere`).
+       *
+       *   번호는 `lib/care.ts` 한 벌에서 옵니다. 두 벌을 들면 한쪽만
+       *   고쳐져 틀린 번호가 나가오.
+       */}
+      <p className="lk carehead">마음이 많이 힘들 때</p>
+      <ul className="lk care">
+        {CARE_LINES.map((l) => (
+          <li key={l.tel}>
+            <a href={`tel:${l.tel.replace(/-/g, "")}`}>{l.name} {l.tel}</a>
+          </li>
+        ))}
+      </ul>
     </nav>
   );
 }
@@ -308,6 +333,51 @@ export default function Shell({
     if (!screen) return;
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [screen]);
+
+  /*
+   * ★ 오늘 몇 번째 왔는지 셉니다 (2026-09-16).
+   *
+   *   여태 `/daily` 한 곳에서만 셌습니다. 그래서 훅을 하루에 세 번
+   *   되풀이해 읽는 사람은 **아무도 안 세고 있었습니다** — 그 사람이
+   *   이 집을 가장 오래 붙들고 있는 사람인데요.
+   *
+   *   어느 문으로 들어와도 한 번 셉니다. 이 수는 서버로 안 갑니다
+   *   (계측에 준식별자를 안 싣는 것과 같은 자리).
+   */
+  const countVisit = useSession((st) => st.countVisit);
+  useEffect(() => {
+    /*
+     * ★ **되살아난 뒤에** 셉니다.
+     *
+     *   저장된 것을 되살리기 전에 세면 `visitDate` 가 아직 비어 있어
+     *   매번 「오늘 처음」 이 되고, `visits` 는 영영 1 입니다. 일진
+     *   화면이 그렇게 세고 있었고, 그 바람에 하루 3회 만류가 한 번도
+     *   안 떴습니다 — 브레이크를 달아 두고 안 걸리게 해 둔 셈이오.
+     */
+    /*
+     * ★ **한 번 온 것은 한 번**입니다.
+     *
+     *   처마는 화면마다 섭니다. 그대로 세면 a1→a5→a3→a4→a6→a7 만
+     *   걸어도 여섯 번이 되어, 처음 온 사람이 곧바로 「되풀이」 로
+     *   잡힙니다. 그건 세는 게 아니라 부풀리는 것이오.
+     *
+     *   한 탭에서 한 번만 셉니다 (`sessionStorage`). 닫고 다시 오면
+     *   그때 또 셉니다 — 그게 「다시 온 것」 이오.
+     */
+    const once = () => {
+      try {
+        if (sessionStorage.getItem("sd.visit-counted")) return;
+        sessionStorage.setItem("sd.visit-counted", "1");
+      } catch { /* 저장을 막아 둔 브라우저에서는 그냥 셉니다 */ }
+      countVisit();
+    };
+    const p = (useSession as unknown as {
+      persist?: { hasHydrated: () => boolean;
+                  onFinishHydration: (f: () => void) => () => void };
+    }).persist;
+    if (!p || p.hasHydrated()) { once(); return; }
+    return p.onFinishHydration(once);
+  }, [countVisit]);
 
   const features = useSession((s) => s.features);
   const cur = useSession((s) => s.cur);

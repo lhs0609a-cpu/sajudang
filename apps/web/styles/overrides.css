@@ -3620,3 +3620,42 @@ u {
 @media (max-width: 520px) {
   .worthbig b { font-size: 32px; }
 }
+
+/* ══════════ 도움 받을 곳 ══════════
+   처마에 늘 걸어 둡니다. 눈에 띄되 튀지 않게 — 「당신 위험해 보여요」
+   로 읽히면 도리어 문을 닫습니다 (components/Shell 머리말). */
+.sitefoot .lk.carehead { margin-top: 8px; color: var(--paper3); }
+.sitefoot ul.lk.care {
+  list-style: none; margin: 2px 0 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 0 14px; justify-content: center;
+}
+.sitefoot ul.lk.care li { margin: 0; }
+.sitefoot .lk.care a { color: var(--paper2); }
+.sitefoot .lk.care a:hover,
+.sitefoot .lk.care a:focus-visible { color: var(--gold); }
+
+/* ══════════ 쉬어 가는 자리 ══════════
+   ★ 경고처럼 보이면 안 됩니다. 붉은 띠를 두르면 「당신 위험해요」 로
+     읽혀 도리어 문을 닫습니다 (components/RestHere 머리말).
+     글의 끝에 조용히 서는 한 자리요 — 종이 한 장 접어 둔 꼴. */
+.resthere {
+  margin: 28px 0 8px; padding: 18px 16px 14px;
+  border: 1px solid var(--line); border-radius: 14px;
+  background: var(--bg2);
+}
+.resthere .lab { color: var(--paper3); margin-bottom: 8px; }
+.resthere .rest-head {
+  font-family: var(--serif); font-size: var(--fs-5); margin-bottom: 8px;
+}
+.resthere .rest-body { line-height: 1.75; margin-bottom: 10px; }
+.resthere .rest-limit {
+  color: var(--paper2); font-size: var(--fs-2); line-height: 1.7;
+  margin-bottom: 12px;
+}
+.resthere .rest-lines { list-style: none; margin: 0; padding: 0; }
+.resthere .rest-lines li { margin: 0; }
+.resthere .rest-lines a {
+  display: inline-flex; align-items: center; min-height: 44px;
+  color: var(--gold); text-underline-offset: 4px;
+}
+.resthere .rest-lines small { color: var(--paper3); margin-left: 8px; }

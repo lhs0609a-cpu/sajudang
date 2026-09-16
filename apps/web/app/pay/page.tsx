@@ -15,6 +15,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import TopicAsk from "@/components/TopicAsk";
 import Shell from "@/components/Shell";
+import RestHere from "@/components/RestHere";
 import PracticeCard from "@/components/PracticeCard";
 import ReadingGuide from '@/components/ReadingGuide';
 import NextReading from '@/components/NextReading';
@@ -474,6 +475,10 @@ function PayInner() {
           </details>
           <button className="btn gh" onClick={() => router.push("/summary")}>오늘은 여기까지 · 본 것을 한 장으로 받겠습니다</button>
         </>}
+        {/* 쉬어 가는 자리 — 값을 묻기 **전**입니다. 값 뒤에 두면
+            그건 안 산 사람을 붙잡는 자리가 되오. */}
+        <RestHere visits={s.visits} hour={new Date().getHours()}
+                  concern={s.concern} returning={s.visits > 1} />
       </Shell>
     );
   }
