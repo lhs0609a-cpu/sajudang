@@ -1307,7 +1307,33 @@ def cut_line(f, cut_id: str, concern: Optional[str]) -> str:
     from .bank import concern_group
     w = dict(_words(f))
     w["grp"] = concern_group(concern, f.sex) or ""
-    return '<p class="tale">%s</p>' % _fmt(tpl, w)
+    # ★ 긴 컷에는 **두 줄**입니다 (2026-09-17).
+    #
+    #   손님이 다시 짚었습니다 — 「돈을 선택했는데 왜 돈에 대한걸
+    #   말안해」. 기계는 돌고 있었는데 분량이 모자랐습니다: 희소도
+    #   1,001자와 신살 1,307자에 물으신 자리의 말이 **한 번**뿐이라,
+    #   손님 눈에는 안 보입니다. 한 줄로 천 자를 물들일 수는 없소.
+    #
+    #   그래서 값은 글 하나 또는 여럿을 받습니다. 컷을 새로 만들지는
+    #   않습니다 — 그 컷이 이미 센 값을 물으신 자리의 말로 짚을 뿐이오.
+    rows = tpl if isinstance(tpl, (list, tuple)) else [tpl]
+    return "".join('<p class="tale">%s</p>' % _fmt(x, w) for x in rows if x)
+
+
+def hook_line(concern, stage) -> str:
+    """훅 한 마디가 **물으신 자리의 말**로 한 번 옮기는 줄.
+
+    ★ 새로 점치는 것이 아닙니다 — 그 마디가 이미 한 말을 손님이
+      쓰는 말로 옮길 뿐이오. `engine/real` 이 뜬 말 뒤에 살림의 말을
+      붙이는 것과 같은 자리입니다.
+
+    ★ 모르면 빈 글자입니다. 고민을 안 물었으면 안 답니다.
+    """
+    if not concern:
+        return ""
+    row = (table().get("HOOK_AT", {}) or {}).get(str(stage)) or {}
+    t = row.get(concern)
+    return '<p class="tale atask">%s</p>' % t if t else ""
 
 
 def lens_line(lens_id: Optional[str], concern: Optional[str]) -> str:

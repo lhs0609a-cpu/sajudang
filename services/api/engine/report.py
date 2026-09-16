@@ -1139,14 +1139,45 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
                 '여덟 글자에서는 이걸 <b>%s</b>으로 보오 — 그대의 %s은 <b>%d</b>이오. '
                 '글자가 가장 많이 몰린 곳은 <b>%s</b>이오.</p>'
                 % (josa(you, "이", "가"), word, grp, grp, asked, loud))
+        # ★ 물으신 자리로 **돌아오는 줄** — 세 가지에 다 답니다
+        #   (2026-09-17). 처음에는 「몰린 곳이 다르다」 가지에만
+        #   달았는데, 물으신 글자가 **하나도 없는 사람**(asked == 0)이
+        #   가장 답을 못 받고 있었습니다 — 없다고 말하고 끝났소.
+        #   없을 때야말로 돌아와야 하오.
+        back = ""
+        try:
+            _rows = topic_mod.scale(f, concern, sub) or []
+        except Exception:                               # noqa: BLE001
+            _rows = []
+        for _r in _rows:
+            if (_r.get("say") or "").strip():
+                back = ('<p class="tale">그래도 물으신 자리는 그대로 '
+                        '보겠소. %s</p>' % _r["say"])
+                break
         if asked == 0:
-            body = lead + '<p class="tale">%s</p>' % (B2["CONCERN_EMPTY"] % grp)
+            body = (lead + '<p class="tale">%s</p>' % (B2["CONCERN_EMPTY"] % grp)
+                    + back)
         elif grp == loud:
-            body = lead + '<p class="tale">%s</p>' % B2["CONCERN_SAME"][grp]
+            body = (lead + '<p class="tale">%s</p>' % B2["CONCERN_SAME"][grp]
+                    + back)
         else:
+            # ★ 몰린 곳으로 말을 돌리고 **안 돌아왔습니다** (2026-09-17).
+            #
+            #   손님이 짚었습니다 — 「돈을 선택했는데 왜 돈에 대한걸
+            #   말안해」. 재보니 물은 자리 ≠ 몰린 곳일 때 세 문단 중
+            #   **둘이 몰린 곳** 얘기였습니다. 일을 물어도 「가장 크게
+            #   외치는 것은 손에 쥐는 돈 문제요」 로 새고, 사람을 물어도
+            #   같은 말이 나왔습니다 — 그래서 일과 사람의 이 컷이
+            #   95% 같았습니다.
+            #
+            #   몰린 곳을 짚는 것은 맞습니다. 물은 데만 보면 여덟
+            #   글자가 외치는 것을 못 듣소. 다만 **돌아와야** 합니다.
+            #   `topic.scale` 이 물으신 자리에서 이미 센 값을 들고
+            #   있으니 그 첫 줄로 돌아옵니다 — 지어내는 것이 없소.
             body = (lead
                     + '<p class="tale">헌데 %s</p>' % B2["CONCERN_ELSE"][loud]
-                    + '<p class="tale">%s</p>' % B2["WHY_TAIL"][loud])
+                    + '<p class="tale">%s</p>' % B2["WHY_TAIL"][loud]
+                    + back)
         # ★ 그 사람의 주도 십신을 **물으신 자리의 말**로 옮깁니다.
         #
         #   「상관」 은 명리의 말이지 손님의 말이 아닙니다. 그런데 뱅크에

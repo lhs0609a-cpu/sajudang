@@ -567,6 +567,27 @@ def count_blade(f, concern: Optional[str] = None) -> str:
             % (lead, more, seats[empty[0]], relief))
 
 
+
+def _asked_count(f, concern, top) -> str:
+    """물으신 자리에서 **이 사람에게 실제로 센 값** 한 줄.
+
+    ★ 없으면 옛 줄로 돌아갑니다 — 지어내지 않습니다.
+      고민을 안 물었거나(`concern` 없음) 그 자리에서 셀 것이 안 걸린
+      사람에게는 여덟 글자의 일반 셈을 그대로 냅니다.
+    """
+    if concern:
+        try:
+            from . import topic as _topic
+            rows = _topic.scale(f, concern) or []
+        except Exception:                               # noqa: BLE001
+            rows = []
+        for r in rows:
+            ev = (r.get("ev") or "").strip()
+            if ev:
+                return "8글자에서 물으신 자리를 세면 <b>%s</b>요." % ev
+    return "8글자에 %s %s 들었고 일간은 <b>%s</b>요." % (
+        josa(top, "이", "가"), count_word(f.ten_gods[top]), f.day_gan)
+
 def build_hook(f, concern: str, axis4: Optional[str] = None,
                name: str = "", you: str = "그대", misses: int = 0) -> list:
     """
@@ -711,7 +732,22 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
               #   「여덟 자」 를 「8글자」 로 적으면 손님이 만세력을 펴고
               #   대 볼 수 있고, 자 비유를 「처럼」 으로 세우면 그림이
               #   그려집니다. 뜻은 그대로 두고 꼴만 바꿉니다.
-              '<p class="cnt">8글자에 %s %s 들었고 일간은 <b>%s</b>요. '
+              # ★ 「센 것」 은 **물으신 자리의 값**이라야 하오 (2026-09-17).
+              #
+              #   손님이 두 번째로 짚었습니다 — 「돈을 선택했는데 왜
+              #   돈에 대한걸 말안해」. 재보니 이 마디는 고민이 바뀌어도
+              #   **97%가 글자 그대로 같았습니다.** 갈리는 것은 낱말
+              #   둘뿐이었소 — 「잘난 척한다/제멋대로다/튄다」.
+              #
+              #   그런데 여기서 대는 셈이 「8글자에 상관이 둘 들었고
+              #   일간은 庚요」 였습니다. 그건 무엇을 물었든 같은 수요.
+              #   CLAUDE.md 가 금한 「고민을 낱말로만 가르기」 그대로였소.
+              #
+              #   `engine/topic.scale` 이 고민마다 **완전히 다른 다섯
+              #   줄**을 이미 내고 있었습니다 — 돈이면 쥐는 자리·드는
+              #   힘·드러남, 사랑이면 짝을 보는 글자·앉은 자리. 컷을
+              #   새로 만들 것이 없소. 있는 것을 여기서 쓰면 되오.
+              '<p class="cnt">%s '
               '여기까지는 센 것이오. 그래서 어떤 사람인지는 세어서 나오지 않소 — '
               '키를 재는 자처럼, 8글자도 치수는 내되 「크다·작다」를 '
               '정하지는 않소.</p>'
@@ -719,9 +755,8 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
               '있었을 것이오. 그러고도 말은 못 했을 것이오.</p>'
               '<p>옛 풀이에서는 <b>%s는 모습</b>으로 읽기도 하오. '
               '겪은 일과 맞춰 보시오.</p>')
-             % (esc_you, m1, m2,
-                josa(top, "이", "가"), count_word(f.ten_gods[top]),
-                f.day_gan, josa(esc_you, "은", "는"), truth),
+             % (esc_you, m1, m2, _asked_count(f, concern, top),
+                josa(esc_you, "은", "는"), truth),
         question="이 말은 어떻소?",
         yes="그럴 줄 알았소. 그럼 순서를 짚어드리리다.",
         no="그 말이 나올 자리라 넣어 둔 것이오. 다음을 보시오.",
@@ -1053,6 +1088,20 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
             s["source"] = terms.gloss(s["source"], seen, concern, f.sex)
         s["html"] += terms.picture_box(seen - boxed, concern, f.sex)
         boxed |= seen
+
+    # ★ 마디마다 **물으신 자리의 말**로 한 번 옮깁니다 (2026-09-17).
+    #
+    #   손님이 짚었습니다 — 「돈을 선택했는데 왜 돈에 대한걸 말안해.
+    #   다른것도 그렇고」. 재보니 훅 3,600자에 물은 자리의 말이 한두
+    #   번이었습니다. 훅의 뱅크는 십신과 성격의 말로 쓰여 있어, 돈은
+    #   「정재(월급처럼 모이는 돈)」 같은 풀이 덕에 우연히 나왔고
+    #   일·사랑·방향·몸은 거의 안 나왔습니다.
+    #
+    #   말투 층 **앞**입니다 — 뒤에 붙이면 이 줄만 하오체로 남소.
+    for s in segs:
+        line = _topic.hook_line(concern, s.get("stage"))
+        if line:
+            s["html"] += line
 
     # ★ 뱅크에 박아 둔 「그대」를 그 캐릭터의 호칭으로 바꿉니다.
     #
