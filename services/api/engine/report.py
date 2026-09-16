@@ -651,7 +651,24 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
             bank_mod._pick("BLAME", top, f.strength),
             B["WHY_TAIL"][f.flow])
          # 물으러 온 그 자리를 때립니다.
-         + _bite.html(concern, top, f.strength, bit)),
+         + _bite.html(concern, top, f.strength, bit)
+         # ★ 이 컷에 **셀 수 있는 값이 하나도 없었습니다** (2026-09-17).
+         #
+         #   손님이 물었소 — 「엄청 쉽고 날카롭게 전체페이지 다
+         #   구성했어?」 재보니 「왜 반복되나」 가 518자에 수 0개,
+         #   팩폭 60 이었습니다. 이 리포트에서 **가장 날카로워야 할
+         #   컷**인데 「신강이오」 「체력은 남는데」 「버는 재주는 있는데
+         #   남는 게 없소」 — 전부 틀릴 수가 없는 말이오.
+         #
+         #   수는 **이미 다 세어 두었습니다.** 근거 줄에만 있고 본문에
+         #   안 왔을 뿐이오. 손님이 만세력을 펴고 대 볼 수 있게 본문
+         #   으로 옮깁니다 — 지어내는 것이 없소.
+         + ('<p class="bite">세어 보시오 — 여덟 글자에 <b>%s %d개</b>요. '
+            '%s 겉으로 <b>%d자</b>고, 판이 바뀌는 때는 <b>%d살</b>이오. '
+            '되풀이는 마음이 아니라 <b>이 수</b>에서 나오오.</p>'
+            % (top, f.ten_gods[top],
+               josa(bank_mod.element_word(f.weak_el), "은", "는"),
+               _visible(f, f.weak_el), _close_age(f)))),
         0, sid="why:%s:%s:%s:%s" % (top, concern, f.strength, f.flow)))
 
     # ── 위로 — 가장 아픈 말 **바로 뒤** ──────────────────
