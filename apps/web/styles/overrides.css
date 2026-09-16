@@ -3667,3 +3667,12 @@ u {
 .otherseats .lab { color: var(--gold); margin-bottom: 6px; }
 .otherseats .sm { line-height: 1.75; margin-bottom: 12px; }
 .otherseats .og { margin-bottom: 12px; }
+
+/* ══════════ 이어지는 자리 (무료 끝) ══════════
+   목록이 아니라 추천이오 — 근거를 같이 냅니다. 값 카드보다 조용하게
+   두되, 나가는 길밖에 없던 자리를 메웁니다. */
+.nextseats { margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--line); }
+.nextseats .lab { color: var(--gold); margin-bottom: 6px; }
+.nextseats .sm { line-height: 1.75; margin-bottom: 12px; }
+.nextseats .dz { margin-bottom: 14px; }
+.nextseats .nsname { font-family: var(--serif); font-size: var(--fs-5); }

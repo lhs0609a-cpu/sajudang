@@ -100,7 +100,7 @@ def main() -> int:
     print("  흐릿한 틀 — 많이 나오는 순 (지문·코드 뺀 %d문장 중 %d · %.0f%%)"
           % (tot, bad, 100.0 * bad / max(1, tot)))
     print("=" * 76)
-    top = cnt.most_common(28)
+    top = cnt.most_common(60)
     cover = sum(v for _, v in top)
     for k, v in top:
         print("  %5d회 [%-14s] %s" % (v, src.get(k, "?")[:14], k[:58]))

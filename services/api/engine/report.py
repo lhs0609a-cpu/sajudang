@@ -834,7 +834,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
          + ('<p class="tale">%s</p>' % _live("daeun_ten_god",
                                               f.daeun_ten_god).strip()
             if _live_has("daeun_ten_god", f.daeun_ten_god) else "")),
-        1, sid="daeun:%s:%s" % (f.daeun_ten_god, sun_tg)))
+        0, sid="daeun:%s:%s" % (f.daeun_ten_god, sun_tg)))
 
     # ── 6 · 필요한 것 (용신 + 다과상) ────────────────────
     # ★ 여기가 가장 심하게 겹치던 자리입니다.
@@ -870,7 +870,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
             else "모자란 힘을 채워 주는 것이 필요하오.",
             B["YONGSIN_WHERE"][top],
             tea["name"], tea["text"])),
-        1, sid="yongsin:%s:%s:%s:%s" % (f.yongsin, f.strength, season, top)))
+        0, sid="yongsin:%s:%s:%s:%s" % (f.yongsin, f.strength, season, top)))
 
     # ── 7 · 대운 맵 ─────────────────────────────────────
     #
@@ -1067,7 +1067,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         "helper", "누가 돕는가",
         _why.line("길신 %d자리" % len({h["pillar"] for h in f.helpers}),
                   "신살", "신살"),
-        body, 1, sid=("helper:%s" % ",".join(
+        body, 0, sid=("helper:%s" % ",".join(
             sorted({h["sinsal"] + ":" + h["pillar"] for h in f.helpers}))
             if f.helpers else "helper:none:%s:%s" % (f.strength, f.yongsin))))
 
@@ -1168,8 +1168,8 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
             _rows = []
         for _r in _rows:
             if (_r.get("say") or "").strip():
-                back = ('<p class="tale">그래도 물으신 자리는 그대로 '
-                        '보겠소. %s</p>' % _r["say"])
+                back = ('<p class="tale">그래도 물으신 것은 물으신 대로 '
+                        '답하겠소. %s</p>' % _r["say"])
                 break
         if asked == 0:
             body = (lead + '<p class="tale">%s</p>' % (B2["CONCERN_EMPTY"] % grp)
@@ -1314,7 +1314,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
                           % (word, grp, josa(grp, "이", "가"),
                              count_word(asked), asked, len(rows)),
                           grp, "십신"),
-                sbody, 1, sid=topic_mod.scale_sid(concern, rows, sub)))
+                sbody, 0, sid=topic_mod.scale_sid(concern, rows, sub)))
 
         # ── 7-4 · 그 자리에 걸린 짜임 ─────────────────────
         #
@@ -1367,7 +1367,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         tn = topic_mod.turn(f, concern, sub)
         if tn:
             cuts.append(_cut("concern_turn", "%s의 때" % word,
-                             tn["ev"], tn["say"], 1, sid=tn["sid"]))
+                             tn["ev"], tn["say"], 0, sid=tn["sid"]))
 
         # ── 7-6 · 넉 자가 이 자리에서 내는 얼굴 ───────────
         #
@@ -1378,7 +1378,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         fc = topic_mod.face(f, concern, axis4)
         if fc:
             cuts.append(_cut("concern_face", "넉 자가 %s에서 내는 얼굴" % word,
-                             fc["ev"], fc["say"], 1, sid=fc["sid"]))
+                             fc["ev"], fc["say"], 0, sid=fc["sid"]))
 
     # ── 9 · 이 캐릭터가 따로 받는 것 ──────────────────────
     #
@@ -1525,7 +1525,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         heart_mod.hope(f, you, bank_mod.concern_word(concern), _visible)
         + ('<p class="tale">%s</p>' % _live("strong_el", f.strong_el).strip()
            if _live_has("strong_el", f.strong_el) else ""),
-        1, sid="hope:%s:%s:%s:%d"
+        0, sid="hope:%s:%s:%s:%d"
                % (f.strong_el, f.yongsin, top, min(int(f.age) // 10, 9))))
 
     season = bank_mod.born_season(f)

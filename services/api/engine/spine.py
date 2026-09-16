@@ -212,7 +212,9 @@ def head_html(sp: dict) -> str:
         plain = PATTERN_PLAIN.get(base, "")
         out += ('<p class="tale">옛 책은 이 길을 <b>%s</b>%s 불렀소%s</p>'
                 % (sp["pattern"], "이라" if _jo(base, "x", "") != base else "라",
-                   (" — %s이라는 뜻이오." % plain) if plain else "."))
+                   # ★ 「A라는 뜻이오」 는 이름을 이름으로 바꾼 것이오.
+                   #   쉽게 말하면 무엇인지를 앞에 답니다 (2026-09-17).
+                   (" 쉽게 말하면 <b>%s</b>이오." % plain) if plain else "."))
     out += '<p class="tale">%s</p>' % sp["strength_line"]
     if sp["empty_line"]:
         out += '<p class="tale">%s</p>' % sp["empty_line"]

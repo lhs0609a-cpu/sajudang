@@ -323,13 +323,25 @@ def test_리포트에_고민_컷이_선다(people):
 
 
 def test_무료에는_본문이_안_내려간다(people):
-    """잠긴 컷은 블러가 아니라 **서버가 안 주는** 것이오."""
+    """잠긴 컷은 블러가 아니라 **서버가 안 주는** 것이오.
+
+    ★ 어느 컷이 잠기는지는 **바뀝니다** (2026-09-17).
+
+      손님이 시켰소 — "무료로 줄때 충분히 많이 줘야해. 흠뻑 젖어들어서
+      다음꺼도 보고싶게. 지금은 분량이 너무 적어." 그래서 물으신 자리
+      컷 셋(저울·때·얼굴)과 희망·지금 어디에·필요한 것·누가 돕는가를
+      무료로 내렸습니다.
+
+      이 검사가 지키는 것은 **어느 컷이냐**가 아니라 「잠긴 것은 본문이
+      안 내려간다」 입니다. 컷 이름을 박아 두면 무료 구성을 고칠 때마다
+      검사가 먼저 붉어지고, 그러다 검사를 지우게 되오. 규칙을 셉니다.
+    """
     rep = build_report(people[0], "cid", "pungun", "free", "money", None)
-    ids = [x["id"] for x in rep["cuts"]]
-    locked = [x["id"] for x in rep["locked"]]
-    for cid in ("concern_scale", "concern_turn", "concern_face"):
-        assert cid not in ids, "%s 가 무료로 나갔소" % cid
-        assert cid in locked, "%s 가 잠긴 목록에도 없소" % cid
+    ids = {x["id"] for x in rep["cuts"]}
+    assert rep["locked"], "잠긴 것이 하나도 없으면 무료가 전부요"
+    for x in rep["locked"]:
+        assert x["id"] not in ids, "%s 가 잠겼는데 무료로도 나갔소" % x["id"]
+        assert not x.get("html"), "%s 의 본문이 내려갔소" % x["id"]
 
 
 def test_훅_마감에_저울_한_줄이_선다(people):

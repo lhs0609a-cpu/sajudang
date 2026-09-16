@@ -16,6 +16,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import TopicAsk from "@/components/TopicAsk";
 import Shell from "@/components/Shell";
 import RestHere from "@/components/RestHere";
+import NextSeats from "@/components/NextSeats";
 import PracticeCard from "@/components/PracticeCard";
 import ReadingGuide from '@/components/ReadingGuide';
 import NextReading from '@/components/NextReading';
@@ -474,6 +475,21 @@ function PayInner() {
             </section>)}
             {!rejected.length && free.practice && <PracticeCard key={free.practice.id} practice={free.practice} />}
           </details>
+          {/*
+            ★ 무료가 끝나면 **누구에게 물을지** 잇습니다 (2026-09-17).
+
+              손님이 시켰소 — "자연스럽게 무료가 끝나면 20명 보여주고
+              누구한테 상담받을지도 연결되어야하고".
+
+              여기 있던 것은 「값을 고르겠습니다」 와 「한 장으로
+              받겠습니다」 둘뿐이었소. 이 사람 말이 안 맞는 손님에게는
+              나가는 길밖에 없었습니다.
+
+              목록이 아니라 **추천**입니다 — 이 집은 사주 조건이 다음
+              사람을 고르는 집이오. 브레이크(세션 2명)는 서버가 세니
+              그대로 둡니다.
+          */}
+          <NextSeats />
           <button className="btn gh" onClick={() => router.push("/summary")}>오늘은 여기까지 · 본 것을 한 장으로 받겠습니다</button>
         </>}
         {/* 쉬어 가는 자리 — 값을 묻기 **전**입니다. 값 뒤에 두면
@@ -563,7 +579,7 @@ function PayInner() {
               **여기서 그만둘까 더 볼까**입니다. 그러니 여태 무엇을
               보았고 무엇이 남았는지부터 말합니다.
           */}
-          <p className="conversion-lead">여기까지는 <b>여덟 글자를 세는 자리</b>였소. 앞으로는 <b>그 셈으로 무엇을 할지</b>요. 같은 지도를 펴 놓고 이번에는 갈 길에 손가락을 얹는 셈이오.</p>
+          <p className="conversion-lead">여기까지는 <b>여덟 글자를 세는 자리</b>였소. 앞으로는 <b>그 셈으로 무엇을 할지</b>요. 같은 지도를 펴 놓고 이번에는 갈 길을 손가락으로 짚는 것처럼 하겠소.</p>
           {/*
             ★ 팩폭 54 · 비유 32 · 셀 수 있는 값 없음 — 목패가 서는
               자리인데 **대 볼 수 있는 말이 하나도 없었습니다.**
@@ -576,7 +592,7 @@ function PayInner() {
               나온 셈**이오 — 없던 것을 주는 것이 아니라 세어 둔 것을
               펴는 자리라야 값이 값으로 읽히오. 조르지는 않습니다.
           */}
-          <p className="conversion-lead"><mark>셈은 이미 끝났소.</mark> 그대의 <b>8글자</b>에서 십신(열 가지 셈법) 10개를 세고, 대운(열 해씩 갈리는 큰 마디)을 10년씩 갈라 두었소. 아직 안 읽은 것은 그 셈이오.</p>
+          <p className="conversion-lead"><mark>셈은 이미 끝났소.</mark> 그대의 <b>8글자</b>에서 십신(열 가지 셈법) 10개를 세고, 대운(열 해씩 갈리는 큰 마디)을 10년씩 갈라 두었소. 아직 안 읽은 것은 그렇게 세어 둔 값이오.</p>
           <p className="conversion-lead">참고 미룬 것, 혼자 삼킨 것, 말 못 하고 지나간 것. 그것이 여덟 글자의 어느 자리에 걸리는지 보오.</p>
           <p className="conversion-lead">이 집에는 20명이 있고, 저마다 같은 8글자를 다른 자리에서 읽소. 기둥 4자리 중 어디를 먼저 보는지가 사람마다 갈리오 — 같은 산을 서로 다른 네 길로 오르는 셈이오.</p>
           {/*
@@ -622,7 +638,7 @@ function PayInner() {
               적으면, 손님이 대 볼 것이 값표뿐이오.
           */}
           <span className="src">근거 · 컷 수와 값은 서버가 세어 내려보낸 것이오 — 목패에 보인 값이 그대로 청구되오 · 등급 <b>4단</b>(9,900~19,900원) 〔표시가와 청구가는 한 값〕</span>
-          <p className="conversion-note">자는 이미 대어 두었소. 눈금을 읽을지가 남았을 뿐이오 — 지도를 사는 것이 아니라 펴는 셈이오.</p>
+          <p className="conversion-note">자는 이미 대어 두었소. 눈금을 읽을지가 남았을 뿐이오 — 지도를 새로 사는 것이 아니라 접힌 것을 펴는 셈이오.</p>
           <p className="conversion-note">여태 미뤄 온 물음이 있거든 여기서 짚고 가시오.</p>
         </div>
         {sales?.reason === "seller_setup" && <div className="conversion-status" role="status"><strong>현재 유료 판매를 준비하고 있소.</strong><p>판매자 정보 등록이 끝나기 전에는 결제를 받지 않소. 다시 시도할 필요 없이 무료 해석을 계속 읽어도 되오.</p><a href="/legal">판매자 정보 확인하기</a></div>}
@@ -660,7 +676,7 @@ function PayInner() {
           */}
           <section className="otherseats">
             <p className="lab">이 사람이 아니어도 되오</p>
-            <p className="sm">같은 <b>8글자</b>를 <b>20명</b>이 저마다 다른 자리에서 읽소. <mark>값도 저마다 다르오 — 같은 산을 서로 다른 길로 오르는 셈이오.</mark></p>
+            <p className="sm">같은 <b>8글자</b>를 <b>20명</b>이 저마다 다른 자리에서 읽소. <mark>값도 저마다 다르오 — 같은 산을 동쪽 길로 오르느냐 서쪽 길로 오르느냐 하는 것과 같소.</mark></p>
             <div className="og c2">
               {LENSES.filter((l) => l.released && l.id !== s.cur).slice(0, 4).map((l) => (
                 <button key={l.id} className="op face"
@@ -726,7 +742,7 @@ function PayInner() {
             </div>
           </div>
         </div>}
-        <p className="conversion-lead">고르지 않아도 무료 해석은 그대로 열려 있소. 다만 <b>「본문」</b>에 아직 안 연 자리가 남소 — 그대가 물은 자리의 <b>셈</b>과 <b>때</b>가 거기 있소.</p>
+        <p className="conversion-lead">고르지 않아도 무료 해석은 그대로 열려 있소. 다만 <b>「본문」</b>에 아직 안 연 글이 남소 — 그대가 물은 것을 세어 둔 값과 바뀌는 때가 거기 있소.</p>
         <button className="btn gh" onClick={() => router.push("/pay?step=d0")}>무료 해석으로 돌아가기</button>
         <p className="conversion-note">하루 구매는 2건까지요. 이미 구매했다면 내 첩에서 결제 내역과 복원 방법을 확인해 주시오.</p>
       </Shell>
@@ -839,7 +855,7 @@ function PayInner() {
         <ActOut kind="끊긴 동작" next="본문">
           {granted?.cuts
             ? <>열렸소. <b>{granted.cuts}컷</b>이 기다리고 있소.</>
-            : <>열렸소. 감춰 둔 자리가 기다리고 있소.</>}
+            : <>열렸소. 아직 안 연 글이 기다리고 있소.</>}
           <br />
           <b>아직 한 줄도 안 보셨소.</b>
         </ActOut>
