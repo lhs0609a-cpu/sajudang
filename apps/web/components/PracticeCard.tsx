@@ -4,6 +4,7 @@ import { useState } from "react";
 import CompanionCat from "@/components/CompanionCat";
 import { track } from "@/lib/track";
 import ServerText from "@/components/ServerText";
+import { ArtImage } from "./ReadingArtwork";
 
 export interface Practice {
   id: string; version: number; source_kind: string; source: string;
@@ -14,6 +15,7 @@ export default function PracticeCard({ practice }: { practice: Practice }) {
   const [status, setStatus] = useState("");
   const [saved, setSaved] = useState(false);
   return <section className="conversion-card" aria-label="오늘 해볼 행동">
+    <ArtImage art="action" className="practice-art" />
     <p className="conversion-kicker">오늘 해볼 행동 하나 · 무료</p>
     <h2>{practice.title}</h2><p>{practice.scene}</p>
     <p className="conversion-lead">{practice.action}</p>

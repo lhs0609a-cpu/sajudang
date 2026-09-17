@@ -22,6 +22,7 @@ import { useSession } from "@/lib/store";
 import { useScreen } from "@/lib/track";
 import type { Summary } from "@shared/chart";
 import ServerText from "@/components/ServerText";
+import { CutArtwork, ElementArtwork } from "@/components/ReadingArtwork";
 
 const EL_WORD: Record<string, string> = {
   목: "나무", 화: "불", 토: "흙", 금: "쇠", 수: "물",
@@ -116,6 +117,7 @@ export default function SummaryPage() {
       <div className="card sumhead">
         <p className="sm">성신당 星辰堂</p>
         <p className="gz">{sm.day_gan} · {sm.ilgan_name}</p>
+        <div className="summary-element-art"><ElementArtwork element={sm.yongsin} /><span>해석에서 살펴본 기운 · {EL_WORD[sm.yongsin] ?? sm.yongsin}</span></div>
         <p className="hl">{sm.headline}</p>
         <div className="three">
           {/* ★ 서버 글은 **그려야** 하오. 셋째 줄에 형광펜이 붙어 오는데
@@ -134,7 +136,7 @@ export default function SummaryPage() {
       {/* 본문 */}
       {sm.sections.map((sec) => (
         <div className="blk in" key={sec.id}>
-          <div className="lab">{sec.title}</div>
+          <CutArtwork id={sec.id} title={sec.title} />
           <ServerText className="src" html={`근거 · ${sec.source}`} />
           <div dangerouslySetInnerHTML={{ __html: sec.html }} />
         </div>

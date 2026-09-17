@@ -17,6 +17,7 @@ import TopicAsk from "@/components/TopicAsk";
 import ProbeAsk, { type ProbeSpec } from "@/components/ProbeAsk";
 import Reveal from "@/components/Reveal";
 import ReadingGuide from '@/components/ReadingGuide';
+import { CutArtwork, ReadingPath } from '@/components/ReadingArtwork';
 import ScrollHint from "@/components/ScrollHint";
 import SinsalSlots from "@/components/SinsalSlots";
 import Thinking from "@/components/Thinking";
@@ -752,7 +753,7 @@ function ReportInner() {
         {numbered && i === list.length - 1 && list.length > 1 && (
           <p className="lastcut">이제 마지막 자리요.</p>
         )}
-        <div className="lab">{numbered ? `${i + 1}. ${c.title}` : c.title}</div>
+        <CutArtwork id={c.id} title={numbered ? `${i + 1}. ${c.title}` : c.title} />
         <ServerText className="src" html={c.source} />
         {c.id === "sinsal"
           ? <SinsalSlots html={c.html} />
@@ -771,6 +772,7 @@ function ReportInner() {
           훅에서 이미 단계 감각을 만들어 놨으니 결이 맞습니다.
       */}
       <ScrollProgress />
+      <ReadingPath />
       {rep.editorial && <ReadingGuide guide={rep.editorial} />}
       {/* ★ 낡은 종이(oldpaper)를 깔고 있었습니다 (2026-09-06). 아래 글은
           「두루마리 끈을 풀었다 · 종이가 무릎까지」인데 영상에는 두루마리도

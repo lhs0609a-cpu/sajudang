@@ -28,6 +28,8 @@ import RestHere from "@/components/RestHere";
 import CompanionCat from "@/components/CompanionCat";
 import GuideIntro from "@/components/GuideIntro";
 import Fold from "@/components/Fold";
+import { ConcernArtwork, ConcernReminder } from "@/components/ConcernArtwork";
+import { ArtImage, BirthStructure } from "@/components/ReadingArtwork";
 import { track, useScreen } from "@/lib/track";
 import { exposeEntry } from "@/lib/experiment";
 import { ageNow, birthMessageFrom, birthProblem, livedDays } from "@/lib/birth";
@@ -514,7 +516,7 @@ function EntryInner() {
             <CompanionCat state="welcome" message="나는 동글 달묘다냥. 네 이야기를 같이 읽어볼게!" />
           </div>
         </div>
-        <section className="gate-promise"><p className="brand-overline">성신당에서 만나는 세 가지</p><div><article><span>一</span><h2>나를 읽는 근거</h2><p>어떤 기둥에서 나온 말인지<br/>함께 보여드리오.</p></article><article><span>二</span><h2>지금의 고민</h2><p>돈, 일, 사랑, 사람.<br/>마음이 쓰이는 곳부터 보오.</p></article><article><span>三</span><h2>오늘의 작은 행동</h2><p>읽고 끝내지 않도록<br/>해볼 일 하나를 남기오.</p></article></div></section>
+        <section className="gate-promise illustrated-promises"><p className="brand-overline">성신당에서 만나는 세 가지</p><div><article><ArtImage art="birth" /><span>一</span><h2>나를 읽는 근거</h2><p>어떤 기둥에서 나온 말인지<br/>함께 보여드리오.</p></article><article><ArtImage art="archive" /><span>二</span><h2>지금의 고민</h2><p>돈, 일, 사랑, 사람.<br/>마음이 쓰이는 곳부터 보오.</p></article><article><ArtImage art="action" /><span>三</span><h2>오늘의 작은 행동</h2><p>읽고 끝내지 않도록<br/>해볼 일 하나를 남기오.</p></article></div></section>
         <div className="gatedoubt"><Doubts compact first={null} /></div>
         {/*
           ★ 끝이 그냥 끝나고 있었습니다. 다음 자리를 **이름으로** 부르고
@@ -552,6 +554,7 @@ function EntryInner() {
     const minor = filled && !bad && needsGuardian(s.year!,s.month!,s.day!);
     return <Shell screen="a3" title="태어난 정보" onBack={back}>
       <Progress step={2} total={PROGRESS_TOTAL} />
+      {s.concernSet && <ConcernReminder concern={s.concern} />}
       <div className="conversion-intro"><p className="conversion-kicker">2 / 3 · 태어난 정보</p>
         <h1 className="conversion-title">그대의 이야기가<br />시작된 날은 언제요?</h1>
         <p className="conversion-lead">양력 생년월일을 입력해 주시오. 음력 생일은 양력으로 바꿔 입력해 주시오.</p></div>
@@ -624,12 +627,14 @@ function EntryInner() {
         {/* 콜드 오픈 — 설명 전에 지문부터. */}
         <Narration lines={["도령이 물시계 쪽을 보았다."]} />
         <Progress step={3} total={PROGRESS_TOTAL} />
+        {s.concernSet && <ConcernReminder concern={s.concern} />}
         <div className="conversion-intro">
           <p className="conversion-kicker">3 / 3 · 태어난 시간</p>
           <h1 className="conversion-title">아는 만큼만<br />알려주셔도 되오.</h1>
           <p className="conversion-lead">시간을 알면 시주(태어난 시의 두 글자)까지 계산하고, 모르면 그 두 글자를 뺀 범위에서 해석하오.</p>
         </div>
         <div className="conversion-time conversion-card">
+          <BirthStructure hourKnown={s.hourKnown && s.hour !== null} />
           <div className="f3 hm">
             <div><label htmlFor="birth-hour">시 (0–23)</label>
               <input id="birth-hour" className="fld" inputMode="numeric" maxLength={2} placeholder="15"
@@ -755,6 +760,7 @@ function EntryInner() {
           <p className="conversion-kicker">1 / 3 · 고민 선택</p>
           <h1 className="conversion-title">지금 가장 알고 싶은 건<br />무엇이오?</h1>
           <p className="conversion-lead">지금 마음에 걸리는 것 하나를 골라주시오. 선택한 고민에 따라 해석에서 살펴볼 자리가 달라지오.</p>
+          <details className="conversion-details concern-explanation"><summary>고민에 따라 해석이 어떻게 달라지오?</summary>
           {/*
             ★ 여기는 아직 생년월일이 없어 **돌려줄 셈이 없습니다.**
               그렇다고 받기만 해도 되는 건 아닙니다. 돌려줄 수 없으면
@@ -779,13 +785,16 @@ function EntryInner() {
           <p className="conversion-lead">돈·일·사람·잠·연락 가운데 오늘 가장 무거운 것 하나를 아래 6개에서 고르시오.</p>
           <span className="src">근거 · 고른 자리에 따라 저울·때·얼굴·물음 넷을 다르게 세오 — 같은 지도를 펴도 짚는 곳이 달라지는 셈이오 〔자평 명리 · 고민축〕</span>
           <p className="conversion-note">다음 자리 — 「날·고을」.</p>
+          </details>
         </div>
-        <div className="og c2">
+        <div className="concern-grid" role="group" aria-label="지금 가장 마음에 걸리는 고민 하나 선택">
           {CONCERNS.map((c) => (
-            <button key={c.id} className={`op ${s.concernSet && s.concern === c.id ? "on" : ""}`}
+            <button type="button" key={c.id} className={`concern-card ${s.concernSet && s.concern === c.id ? "on" : ""}`}
               aria-pressed={s.concernSet && s.concern === c.id}
               onClick={() => s.set({ concern: c.id as Concern, concernSet: true })}>
-              <b>{c.label}</b><span>{c.sub}</span>
+              <span className="concern-art"><ConcernArtwork concern={c.id} /></span>
+              <span className="concern-copy"><b>{c.label}</b><span>{c.sub}</span></span>
+              <span className="concern-check" aria-hidden="true">{s.concernSet && s.concern === c.id ? "✓" : ""}</span>
             </button>
           ))}
         </div>

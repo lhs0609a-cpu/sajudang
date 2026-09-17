@@ -16,6 +16,7 @@
  */
 import Link from "next/link";
 import BrandFrame, { FolioLabel } from "./BrandFrame";
+import { ScreenReadingGuide } from "./ReadingArtwork";
 import { useRouter } from "next/navigation";
 import {
   Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState,
@@ -770,6 +771,7 @@ export default function Shell({
         )}
         <div className="scr" ref={scrRef}>
           {!bare && <FolioLabel screen={screen} title={title} />}
+          {!bare && <ScreenReadingGuide screen={screen} />}
           {children}
           {legal && <Legal />}
           {/* 처마는 어느 화면에나 섭니다 — 대문(bare)만 빼고.

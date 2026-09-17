@@ -1,4 +1,5 @@
 "use client";
+import { CutArtwork } from "@/components/ReadingArtwork";
 
 /**
  * @screen d0 d1 d1b d2 d3
@@ -470,7 +471,7 @@ function PayInner() {
             <summary>{rejected.length ? "원래 해석과 계산 근거" : "무료 해석의 자세한 근거"} · {cuts.length}개 항목</summary>
             {rejected.length > 0 && <p className="conversion-note">아래는 응답 전 생년월일과 고민으로 만든 원래 해석이오. 아니라고 답한 대목이 맞는 것으로 바뀐 것은 아니오.</p>}
             {cuts.map(c => <section className="blk" key={c.id}>
-              <h2 className="lab">{c.title}</h2><ServerText as="p" className="src" html={`근거 · ${c.source}`} />
+              <CutArtwork id={c.id} title={c.title} /><ServerText as="p" className="src" html={`근거 · ${c.source}`} />
               {c.id === "sinsal" ? <SinsalSlots html={c.html} /> : <div dangerouslySetInnerHTML={{__html:c.html}} />}
             </section>)}
             {!rejected.length && free.practice && <PracticeCard key={free.practice.id} practice={free.practice} />}

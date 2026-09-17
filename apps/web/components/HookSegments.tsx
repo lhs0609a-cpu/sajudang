@@ -15,6 +15,7 @@ import { CONCERNS, useSession } from "@/lib/store";
 import { track } from "@/lib/track";
 import type { HookSegment } from "@shared/chart";
 import ServerText from "@/components/ServerText";
+import { ConcernArtwork } from "./ConcernArtwork";
 
 /*
  * 노출 수를 화면에 낼 **바닥값** (2026-09-07).
@@ -251,6 +252,7 @@ export default function HookSegments({
                    });
                  }}>
           <summary tabIndex={0} ref={node => {if(i === Math.min(open,segments.length)-1) activeHeading.current=node;}}>
+            {CONCERNS.some(c => c.id === concern) && <span className="hook-topic-thumb" aria-hidden="true"><ConcernArtwork concern={concern as (typeof CONCERNS)[number]["id"]} /></span>}
             <span>{i+1}. {seg.label || "그대의 반복 패턴"}</span><small>{replies[i] === undefined ? "지금 읽는 마디" : "답변 완료 · 다시 읽기"}</small>
           </summary>
         <div className="blk in">

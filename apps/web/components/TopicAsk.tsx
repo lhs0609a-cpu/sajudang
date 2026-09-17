@@ -23,6 +23,8 @@
  *   손님은 그게 자기 말인 줄 모릅니다. (.\dev.ps1 buttons)
  */
 import { useState } from "react";
+import { ConcernReminder } from "./ConcernArtwork";
+import { useSession } from "@/lib/store";
 
 export type TopicAskSpec = {
   id: string;
@@ -43,6 +45,7 @@ export default function TopicAsk({
   busy?: boolean;
 }) {
   const [pick, setPick] = useState<string | null>(null);
+  const concern = useSession(s => s.concern);
   const [pick2, setPick2] = useState<string | null>(null);
 
   /* 둘째 물음이 있으면 둘 다 고른 뒤에야 보냅니다 — 하나만 보내면
@@ -51,6 +54,7 @@ export default function TopicAsk({
 
   return (
     <section className="extraask noprint">
+      <ConcernReminder concern={concern} />
       <p className="ttl">{spec.title}</p>
       <p className="why">
         고르신 것을 여덟 글자와 <b>맞대 보오</b>. 맞히려는 것이 아니라

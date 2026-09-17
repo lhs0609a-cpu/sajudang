@@ -8,6 +8,7 @@
  */
 import { useEffect, useState } from "react";
 import { batchim } from "@/lib/josa";
+import { ElementArtwork } from "./ReadingArtwork";
 import type { Features } from "@shared/chart";
 
 const EL_WORD: Record<string, string> = {
@@ -103,24 +104,19 @@ export function ElementBar({ f }: { f: Features }) {
       {/* ★ 목·화·토·금·수 다섯 글자와 숫자만 있었습니다. 손님은
           이게 무엇을 센 것인지 모릅니다. */}
       <p className="barhead">
-        <b>다섯 기운(오행)</b> — 여덟 글자를 나무·불·흙·쇠·물로 나눠 센 것이오.
-        많다고 좋고 적다고 나쁜 게 아니라, <b>치우친 자리</b>를 보오.
+        <b>다섯 기운(오행)</b> — {f.hour_known ? "여덟" : "여섯"} 글자와 지지 속에 숨은 글자까지 반영한 기운의 무게요.
+        그림으로 이름을 익히고, 막대와 수치로 <b>치우친 자리</b>를 보오. 많고 적음이 좋고 나쁨을 뜻하지는 않소.
       </p>
-    <div className="elbar">
-      {entries.map(([k, v], i) => (
-        <div key={k}>
+    <div className="element-visuals" aria-label="오행별 기운의 무게 비교">
+      {entries.map(([k, v]) => (
+        <div key={k} className="element-row">
+          <ElementArtwork element={k} />
+          <div className="element-row-name"><b>{EL_WORD[k] ?? k}</b><small>{k}</small></div>
           {/* 막대 자리를 고정 높이로 잡아야 라벨이 한 줄로 선다.
               안 잡으면 막대 길이만큼 라벨이 위아래로 흩어지고
               아래 글씨를 덮는다. */}
-          <span className="bar">
-            <i style={{
-              ["--h" as string]: `${Math.max(3, (v / max) * 48)}px`,
-              animationDelay: `${i * 0.11}s`,
-            }} />
-          </span>
-          <div className="lb">{k}</div>
-          <div className="ko">{EL_WORD[k] ?? ""}</div>
-          <div className="vv">{v}</div>
+          <meter min={0} max={max} value={v} aria-label={`${EL_WORD[k] ?? k} 기운의 무게`} />
+          <b className="element-value">{v}</b>
         </div>
       ))}
     </div>
