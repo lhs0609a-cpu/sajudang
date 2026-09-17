@@ -428,6 +428,55 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     #   관점 컷은 값을 치르고 이 사람을 고른 까닭이라 그 자리가
     #   먼저입니다 — 공통 컷은 남는 것을 씁니다. 붙는 자리(append)는
     #   아래 그대로이니 순서는 안 바뀝니다.
+    # ★ 공통 컷 몫을 **먼저 뗍니다** (2026-09-17)
+    #
+    #   바로 아래 주석이 「관점 컷이 먼저 가져갑니다」 라고 적혀 있고
+    #   그건 값을 치른 사람에게는 맞는 말입니다. 그런데 **무료로 읽는
+    #   사람은 관점 컷을 못 봅니다.** 잠긴 컷이 살림의 말을 가져가
+    #   버려서, 값을 안 치른 사람의 열아홉 컷에는 살림 줄이 한 개도
+    #   안 남았습니다 — 재 보니 딱 한 개였습니다.
+    #
+    #   그래서 아래 다섯 축은 공통 컷 몫으로 먼저 떼어 둡니다.
+    #   관점 컷이 쓰는 축은 열넷이라 다섯을 떼도 남습니다.
+    # ★ 살림의 **장면** — 자리마다 딛는 축이 다르오 (2026-09-17)
+    #
+    #   손님이 물었습니다 — "구체적으로 날카롭게? 사례중심으로?"
+    #   재 보니 그림(비유)은 깔렸는데 **장면이 천 자에 0.9줄**이었고,
+    #   값을 치르고 가장 오래 읽는 여덟 자리가 통째로 0이었습니다
+    #   (tools/like_me.py) — 위로 · 명식 · 용신 · 없는 것 · 이번 주 ·
+    #   쥔 것 · 저울 · 때 · 얼굴.
+    #
+    #   `real.FLOW_TOPIC` 이 그 일을 하려고 만든 표인데 컷 **하나**에만
+    #   걸려 있었습니다. 여기서 아홉 자리에 겁니다 — 컷이 이미 근거로
+    #   삼는 축을 그대로 딛고, 고민이 바뀌면 칸도 바뀝니다.
+    live_scene: dict = {}
+    _scene_keys = {
+        "concern_scale": top,
+        "lack": weak,
+        "yongsin": getattr(f, "yongsin", ""),
+        "hope": strong,
+        "concern_turn": lens_cuts_mod._daeun_phase(f),
+        "concern_face": getattr(f, "strength", ""),
+        "solace": rarity_mod.look(f).get("band", ""),
+    }
+    _scene_seen: set = set()
+    for _cid, _table in _real.SCENE_AT.items():
+        _say = _real.scene_add(_table, _scene_keys.get(_cid, ""), concern,
+                               _scene_seen)
+        if _say:
+            live_scene[_cid] = _say
+
+    live_common: dict = {}
+    for _cut_id, _axis, _key in (
+            ("why", "top_ten_god", top),
+            ("spine", "flow", getattr(f, "flow", "")),
+            ("yongsin", "yongsin", getattr(f, "yongsin", "")),
+            ("daeun_now", "daeun_phase", lens_cuts_mod._daeun_phase(f)),
+            ("chart", "season", bank_mod.born_season(f))):
+        _say = _live(_axis, _key).strip()
+        if _say:
+            live_common[_cut_id] = _say
+
     lc_built = lens_cuts_mod.build(f, lens_id, concern, real_seen)
     lack = B["LACK"][weak]
     patt = B["PATT"][top]
@@ -709,7 +758,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         place = ('일지 <b>%s</b>가 다른 글자와 부딪히고 있소. 가까운 사람과의 '
                  '사이가 조용할 수 없는 배치요.' % f.day_ji)
     else:
-        place = ('일지 <b>%s</b>는 조용한 편이오. 대신 집 밖의 일로 흔들리오.'
+        place = ('일지 <b>%s</b>는 조용하오. 대신 집 밖의 일로 흔들리오.'
                  % f.day_ji)
     if f.gwan >= 2:
         lean = "관성이 %d개라 책임이 앞장서오." % f.gwan
@@ -728,7 +777,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
                   "일지", "십신"),
         # ★ 셀 수 있는 줄. 이 컷은 일지·일간을 보면서 **개수를 안 냈습니다** —
         #   그래서 틀릴 수가 없었습니다. 관·재·식상을 세어 박습니다.
-        ('<p class="cnt"><b>관성 %d · 재성 %d · 식상 %d.</b></p>'
+        ('<p class="cnt"><b>관성 %d개 · 재성 %d개 · 식상 %d개.</b></p>'
          '<p class="tale">%s</p><p class="tale">%s</p><p class="tale">%s</p>')
         % (f.gwan, f.jae, f.sik, place, lean, B["PLACE_NOTE"][f.day_gan]),
         0, sid="place:%s:%s:%s" % (f.day_ji, "chung" if f.ilji_chung else "-",
@@ -856,6 +905,11 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         #   덤으로 「쇠이오」 가 「쇠요」 가 됩니다 — 조사를 받침으로 고릅니다.
         ('<p class="tale">그대에게 필요한 건 <b>%s</b>%s. 그대 여덟 글자 겉에 '
          '%s %s.</p>'
+         # ★ 기울기를 **수로** 보입니다 (2026-09-17). 모자란 것만 대고
+         #   많은 것을 안 대면 손님이 기울기를 못 봅니다 — 대 볼 수
+         #   있는 수가 둘이라야 「얼마나 기울었나」 가 보이오.
+         '<p class="cnt"><b>겉으로 세면 %s %d자, 가장 많은 %s %d자요.</b> '
+         '한쪽이 비고 한쪽이 몰린 만큼 품이 더 들었소.</p>'
          '<p class="tale">%s</p>'
          '<p class="tale">%s 사람에게서 그걸 구하면 그 사람이 지치오. '
          '<b>먼저 그대 안에 두시오.</b></p>'
@@ -865,6 +919,8 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
             "이오" if bank_mod.has_batchim(element_word(f.yongsin)) else "요",
             josa(element_word(f.yongsin), "은", "는"),
             _how_many(f, f.yongsin),
+            element_word(f.yongsin), _visible(f, f.yongsin),
+            element_word(f.strong_el), _visible(f, f.strong_el),
             B["YONGSIN_SEASON"][season],
             "넘치는 힘을 덜어 내 방향을 잡아 주는 것이 필요하오." if f.strength == "신강"
             else "모자란 힘을 채워 주는 것이 필요하오.",
@@ -1016,7 +1072,17 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         # ★ 「귀인」 은 terms 표에 두지 않습니다 — 「태극귀인」 안쪽에
         #   걸려 이름이 「태극귀인(옛사람이 좋게 본…)」 이 됩니다.
         #   묶음말은 여기서 한 번에 풉니다.
-        body = ('<p class="sm">옛사람이 이름을 붙여 둔 글자 짝을 <b>신살</b>이라 하오. '
+        # ★ 세는 말이 **근거 줄에만** 있었습니다 (2026-09-17).
+        #
+        #   리포트에서 가장 큰 컷(1,500자)인데 반증 가능한 말이 둘뿐이라
+        #   팩폭 73이었습니다. 몇 개가 붙었고 그중 몇 개를 펴는지는
+        #   이미 세어 둔 값이오 — 대기만 하면 됩니다. 「먼저 고르고
+        #   나서 편다」는 것도 이 줄에서 손님 눈에 보입니다.
+        body = ('<p class="cnt"><b>그대 여덟 글자에 붙은 이름은 %d개요.</b> '
+                '그 가운데 물으신 <b>%s</b>에 걸리는 것은 <b>%d개</b>라, '
+                '그것만 펴겠소.</p>'
+                % (len(f.sinsal), bank_mod.concern_word(concern), len(on))) + (
+                '<p class="sm">옛사람이 이름을 붙여 둔 글자 짝을 <b>신살</b>이라 하오. '
                 '좋게 보던 것은 <b>길신</b>이고, 그중 크게 좋게 보던 것에는 '
                 '<b>귀인</b>이라 이름을 붙였소. 조심해 보던 것은 <b>살</b>, '
                 '어느 쪽도 아닌 것은 <b>특수</b>요. '
@@ -1032,7 +1098,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         "sinsal", "이름 붙은 자리",
         _why.line("신살 %d · 공망 %s" % (len(f.sinsal), f.gongmang),
                   "신살", "신살"),
-        body + '<p class="sm">신살 표는 가르치는 학파마다 조금씩 다르오. 우리가 '
+        body + '<p class="sm">신살 표는 가르치는 학파마다 다르오. 우리가 '
                '쓰는 표는 문서에 적어 두었소.</p>',
         0, sid="sinsal:%s:%s" % (concern,
                                  ",".join(x["key"] for x in on))))
@@ -1052,8 +1118,17 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
                 '<p>%s</p><p class="sm">%s</p></div>'
                 % (" · ".join(names), h["pillar"],
                    T["helper_lead"][h["pillar"]], h["kind"]))
-        body = ('<p class="tale">길신이 어느 기둥에 앉았는지 보고 읽은 것이오. '
+        # ★ 세는 말이 **본문에 하나도** 없었습니다 (2026-09-17).
+        #   길신 자리 수는 근거 줄에만 있고 본문은 「누가 돕는가」 만
+        #   말했습니다. 팩폭 60 — 이 집에서 가장 무딘 컷 가운데
+        #   하나였소. 수는 이미 세어 두었으니 대기만 하면 되오.
+        body = ('<p class="cnt"><b>여덟 글자 네 기둥 가운데 길신이 앉은 것은 '
+                '%d자리요.</b> 이름으로 세면 %d개고, 한 기둥에 겹쳐 앉은 것은 '
+                '한 자리로 보오. 네 기둥을 다 채운 사람은 드무오 — '
+                '없는 기둥은 없는 대로 두오.</p>'
+                '<p class="tale">길신이 어느 기둥에 앉았는지 보고 읽은 것이오. '
                 '기둥마다 가리키는 사람이 달라서, 누가 도울 사람인지만 짚소.</p>'
+                % (len(seen_p), len(f.helpers))
                 + "".join(rows))
     else:
         # ★ 여기가 '가짓수는 많은데 쏠린' 자리였습니다.
@@ -1544,20 +1619,32 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         #   골라 「불 켜진 데서 한 끼」 처럼 한 줄(척추)과 따로 놀았습니다.
         #   척추 × 고민 표에 그 사람의 이번 주 한 가지가 있으면 그걸 씁니다.
         #   용신 처방은 셈 장부의 「5 · 필요한 것」 에 그대로 있습니다.
+        # ★ 이 컷도 세는 말이 하나도 없었습니다 (2026-09-17 · 팩폭 60).
+        #   「하나만 하시오」 는 셀 수 있는 처방인데, **왜 하필 이
+        #   하나인지**를 대는 수가 없었습니다. 모자란 것은 이미
+        #   세어 두었으니 그걸 댑니다 — 틀리면 손님이 바로 아오.
         (('<p class="tale">%s</p>'
           '<p class="tale">한 줄 「%s」이 가장 잘 빠지는 착각을 막는 일이오. '
           '하나만 하시오.</p>'
+          '<p class="cnt"><b>이 한 가지는 모자란 %s을 메우는 쪽이오 — '
+          '여덟 글자 겉에 %d자요.</b></p>'
           '<p class="sm">다음에 오시거든 <b>했는지만</b> 말해 주시오. '
           '했는지 안 했는지 셀 수 없는 말은 처방이 아니라 덕담이오.</p>'
-          % (scn["act"], sp["name"])) if scn and scn.get("act") else
+          % (scn["act"], sp["name"], element_word(f.yongsin),
+             _visible(f, f.yongsin))) if scn and scn.get("act") else
          ('<p class="tale">%s</p><p class="tale">%s</p>'
           '<p class="tale">%s</p>'
+          '<p class="cnt"><b>이 한 가지는 모자란 %s을 메우는 쪽이오 — '
+          '여덟 글자 겉에 %d자요.</b></p>'
           '<p class="sm">다음에 오시거든 <b>했는지만</b> 말해 주시오. '
           '했는지 안 했는지 셀 수 없는 말은 처방이 아니라 덕담이오.</p>'
-          % (B["WEEK_DO"][f.yongsin][season], B["WEEK_WHY"][f.yongsin],
-             B["WEEK_HOW"][f.day_gan]))),
+          % (_real.scene_of("week_do", getattr(f, "yongsin", ""), concern)
+             or B["WEEK_DO"][f.yongsin][season],
+             B["WEEK_WHY"][f.yongsin],
+             B["WEEK_HOW"][f.day_gan],
+             element_word(f.yongsin), _visible(f, f.yongsin)))),
         0, sid=("week:scene:%s:%s" % (sp["id"], concern)) if scn and scn.get("act")
-        else "week:%s:%s:%s" % (f.yongsin, season, f.day_gan)))
+        else "week:%s:%s:%s@%s" % (f.yongsin, season, f.day_gan, concern)))
 
     # ── 10 · 덮는 말 ─────────────────────────────────────
     #
@@ -1654,6 +1741,56 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         #   있다 해도 여기서 먼저 막는 것이 맞습니다.
         c["html"] += guard.enforce(line, {"cut": c["id"], "at": concern})
         c["statement_id"] = "%s@%s" % (c["statement_id"], concern)
+
+    # ★ 물으신 자리의 **살림** 한 줄 (2026-09-17 · real.FLOW_TOPIC)
+    #
+    #   손님이 말했습니다 — "너무 다 추상적이야 … 구체적으로 내
+    #   이야기구나 딱 보자마자 소름돋게 만들어야는데".
+    #
+    #   위의 `cut_line` 은 **셈**을 물으신 자리의 말로 짚습니다. 이
+    #   줄은 그 셈이 **어제 어느 자리였는지**를 댑니다. 「식상이
+    #   많소」 는 셈이고, 「회의에서 옳은 말을 하고 집에 와서 후회한
+    #   밤이 있을 것이오」 는 손님이 제 기억에서 대 볼 수 있는 자리요.
+    #
+    #   한 장에 한 번입니다 — 되풀이되면 그건 그림이 아니라 녹음이오.
+    live_topic = _real.topic_line(getattr(f, "flow", "") or "", concern)
+    if live_topic:
+        for c in cuts:
+            if c["id"] != "concern":
+                continue
+            c["html"] += '<p class="tale real">%s</p>' % guard.enforce(
+                live_topic, {"cut": c["id"], "at": concern})
+            break
+
+    # ★ 표는 있는데 **안 걸려 있었습니다** (2026-09-17)
+    #
+    #   `engine/real.TABLES` 는 축 아홉을 들고 있는데, 리포트에서
+    #   불리는 것은 셋뿐이었습니다 — weak_el · daeun_ten_god ·
+    #   strong_el. 나머지 여섯(top_ten_god · flow · yongsin ·
+    #   daeun_phase · season)은 **표만 있고 한 번도 안 붙었습니다.**
+    #
+    #   CLAUDE.md 가 「살림의 말을 절반의 컷에만 걸기」 라 적어 둔
+    #   바로 그 자리요. 그때는 관점 컷에만 걸려 있었고, 고치면서
+    #   공통 컷 셋까지 왔다가 거기서 멈췄습니다.
+    #
+    #   `real_seen` 이 한 장에 한 번을 지키니 되풀이는 안 납니다 —
+    #   축이 다르면 줄도 다릅니다.
+    for cut_id, say in live_common.items():
+        for c in cuts:
+            if c["id"] != cut_id:
+                continue
+            c["html"] += '<p class="tale real">%s</p>' % guard.enforce(
+                say, {"cut": cut_id, "at": concern})
+            break
+
+    # ★ 장면은 **컷 맨 끝**에 섭니다 — 셈을 보인 뒤라야 「내 얘기」가 되오.
+    for cut_id, say in live_scene.items():
+        for c in cuts:
+            if c["id"] != cut_id:
+                continue
+            c["html"] += '<p class="tale scene">%s</p>' % guard.enforce(
+                say, {"cut": cut_id, "at": concern})
+            break
 
     return cuts, extra_error
 

@@ -11,9 +11,9 @@ export default function ReadingGuide({guide,revelation}:{guide:NonNullable<Repor
     {revelation && <p className="reading-revelation"><strong>{guide.perspective}</strong><br/>{guide.question}</p>}
     <p><strong>오늘 해볼 것</strong><br />{guide.action}</p>
     <p className="conversion-note">{guide.boundary}</p>
-    <details className="conversion-details"><summary>내 경험에 대입해 보기</summary>
-      <p>{guide.scene}</p>
-    </details>
+    {/* ★ 접어 두지 않습니다 (2026-09-17). 이 한 줄이 「내 얘기구나」를
+        만드는 자리인데 눌러야 열리고 있었습니다. */}
+    <p className="reading-scene">{guide.scene}</p>
     <CompanionCat state="rest" message="한 번에 다 안 읽어도 된다냥. 궁금한 것부터 보자!" />
   </section>;
 }

@@ -429,7 +429,7 @@ function PayInner() {
             <button className="btn gh" onClick={() => {track("reading_mismatch", "d0", {n: 1}); router.push("/?step=a3");}}>태어난 정보 다시 확인하기</button>
             <button className="btn gh" onClick={() => {track("reading_mismatch", "d0", {n: 2}); router.push("/lobby");}}>다른 해석자의 관점 살펴보기</button>
           </section> : free.editorial ? <ReadingGuide guide={free.editorial} revelation={freeRevelation(cuts)} /> :
-            <div className="conversion-card"><p>기둥과 해석 근거를 아래에서 확인할 수 있소. 맞는 부분만 경험에 대입해 보시오.</p></div>}
+            <div className="conversion-card"><p>기둥과 해석 근거를 아래에서 확인할 수 있소. 맞는 부분만 경험에 대입해 보시오. 영수증을 같이 건네는 셈이오 — 그러니까 <b>여덟 글자</b> 가운데 어느 글자에서 나온 말인지 줄마다 적어 두었다는 말이오.</p></div>}
           {/*
             ★ 되묻는 자리. 목패 **앞**에 둡니다 — 답이 무료 구간 안에서
               값을 해야 「묻고 처방한다」가 되오. 값을 치른 뒤에 물으면
@@ -466,8 +466,8 @@ function PayInner() {
             {!SELLABLE && <p className="conversion-note">현재 유료 판매를 준비하고 있소. 무료 해석은 계속 읽을 수 있소.</p>}
             <button className="btn" onClick={openPrice}>추가 해석과 가격 보기</button>
           </div>}
-          <details className="conversion-details reading-evidence" onToggle={e => {if(e.currentTarget.open) track("reading_expand", "d0");}}>
-            <summary>{rejected.length ? "원래 해석과 계산 근거 확인하기" : "무료 해석의 자세한 근거 펼치기"} · {cuts.length}개 항목</summary>
+          <details className="conversion-details reading-evidence" open onToggle={e => {if(e.currentTarget.open) track("reading_expand", "d0");}}>
+            <summary>{rejected.length ? "원래 해석과 계산 근거" : "무료 해석의 자세한 근거"} · {cuts.length}개 항목</summary>
             {rejected.length > 0 && <p className="conversion-note">아래는 응답 전 생년월일과 고민으로 만든 원래 해석이오. 아니라고 답한 대목이 맞는 것으로 바뀐 것은 아니오.</p>}
             {cuts.map(c => <section className="blk" key={c.id}>
               <h2 className="lab">{c.title}</h2><ServerText as="p" className="src" html={`근거 · ${c.source}`} />
@@ -594,7 +594,7 @@ function PayInner() {
           */}
           <p className="conversion-lead"><mark>셈은 이미 끝났소.</mark> 그대의 <b>8글자</b>에서 십신(열 가지 셈법) 10개를 세고, 대운(열 해씩 갈리는 큰 마디)을 10년씩 갈라 두었소. 아직 안 읽은 것은 그렇게 세어 둔 값이오.</p>
           <p className="conversion-lead">참고 미룬 것, 혼자 삼킨 것, 말 못 하고 지나간 것. 그것이 여덟 글자의 어느 자리에 걸리는지 보오.</p>
-          <p className="conversion-lead">이 집에는 20명이 있고, 저마다 같은 8글자를 다른 자리에서 읽소. 기둥 4자리 중 어디를 먼저 보는지가 사람마다 갈리오 — 같은 산을 서로 다른 네 길로 오르는 셈이오.</p>
+          <p className="conversion-lead">이 집에는 20명이 있고, 저마다 같은 8글자를 다른 자리에서 읽소. 기둥 4자리 중 어디를 먼저 보는지가 사람마다 갈리오 — 같은 집을 스무 사람이 저마다 다른 창으로 들여다보는 셈이오 — 그러니까 집은 하나인데 보이는 데가 다르다는 말이오.</p>
           {/*
             ★ 고르러 온 화면인데 **고를 것이 첫 화면에 없었습니다**
               (2026-09-16).
@@ -676,7 +676,7 @@ function PayInner() {
           */}
           <section className="otherseats">
             <p className="lab">이 사람이 아니어도 되오</p>
-            <p className="sm">같은 <b>8글자</b>를 <b>20명</b>이 저마다 다른 자리에서 읽소. <mark>값도 저마다 다르오 — 같은 산을 동쪽 길로 오르느냐 서쪽 길로 오르느냐 하는 것과 같소.</mark></p>
+            <p className="sm">같은 <b>8글자</b>를 <b>20명</b>이 저마다 다른 자리에서 읽소. <mark>값도 저마다 다르오 — 창을 어느 쪽에 내느냐에 따라 방에 드는 햇빛이 달라지는 것과 같소.</mark></p>
             <div className="og c2">
               {LENSES.filter((l) => l.released && l.id !== s.cur).slice(0, 4).map((l) => (
                 <button key={l.id} className="op face"
@@ -706,7 +706,7 @@ function PayInner() {
             {peek && peek.length > 0 && <section className="paid-preview"><h3>다음 해석에서 풀어볼 질문</h3><p className="conversion-note">무료에서는 기둥·핵심 해석·오늘의 행동을 읽었소. 아래는 선택한 상품에서 추가로 열리는 해석의 실제 앞부분이오.</p>
               {peek.slice(0, 3).map((r, i) => <div key={r.lens_id+i}><h3>{r.ask}</h3><p>{r.head}… <span className="conversion-note">(본문 일부)</span></p>{r.source && <ServerText as="p" className="conversion-note" html={`해석 근거 · ${r.source}`} />}</div>)}
             </section>}
-            <details className="conversion-details"><summary>전체 분량과 열람 범위</summary>
+            <details className="conversion-details" open><summary>전체 분량과 열람 범위</summary>
               <p className="conversion-note">현재 명식 기준 {tier.cuts}개 내용 · {tier.chars.toLocaleString()}자 · 약 {tier.minutes}분. {tier.lenses}명의 관점으로 읽소.</p>
               {tier.opens.length > 0 && <ul>{tier.opens.map(title => <li key={title}>{title}</li>)}</ul>}
             </details>

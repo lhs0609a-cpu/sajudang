@@ -486,14 +486,14 @@ function EntryInner() {
                 「여태」로 짚습니다 — 「~했을 게요」는 물러서는 말이라
                 팩폭을 도로 깎습니다 (HEDGE 에 「게요」가 있소).
             */}
-            <p className="conversion-lead">여태 참고 넘겨 왔을 것이오.<br />잘 버텨온 그 힘이, 다른 자리에서는<br />그대를 지치게 하오.</p>
+            <p className="conversion-lead">여태 참고 넘겨 왔을 것이오.<br />회사에서 잘 버티게 해 준 그 힘이,<br />집에서는 그대를 지치게 하오.</p>
             {/*
               ★ 「셀 수 있는 값이 적소」 도 여기였습니다. 수를 대면
                 손님이 만세력을 펴고 **대 볼 수** 있습니다. 대 볼 수
                 있는 말이라야 맞았을 때 소름이 돋소.
             */}
-            <p className="conversion-lead">태어난 해·달·날 <b>셋만 적으면</b> <b>6글자</b>가 서오. 태어난 시각까지 알면 <b>8글자</b>요. 지도를 펴고 지금 선 자리에 손가락을 얹는 셈이오.</p>
-            <p className="conversion-lead">그 글자에서 <b>10가지</b> 십신(十神)을 세고, <b>10년</b>마다 바뀌는 대운(열 해씩 갈리는 큰 마디)을 짚소. <mark>맞히는 것이 아니라 세는 것이오.</mark></p>
+            <p className="conversion-lead">태어난 해·달·날 <b>셋만 적으면</b> <b>6글자</b>가 서오. 태어난 시각까지 알면 <b>8글자</b>요. 지도를 펴고 지금 선 데에 손가락을 얹는 셈이오 — 그러니까 어디로 갈지 정하기 전에 어디 서 있는지부터 본다는 말이오.</p>
+            <p className="conversion-lead">그 글자에서 <b>10가지</b> 십신(十神)을 세고, <b>10년</b>마다 바뀌는 대운(열 해씩 갈리는 큰 마디)을 짚소. <mark>맞히는 것이 아니라 세는 것이오. 줄자로 키를 재는 것과 같소 — 그러니까 잘 맞혔다 못 맞혔다가 아니라, 몇인지를 대는 일이라는 말이오.</mark></p>
             {/*
               ★ 근거 줄이 **입력 화면 넷에 하나도** 없었습니다 (2026-09-15).
 
@@ -535,7 +535,7 @@ function EntryInner() {
       <Narration lines={["도령이 아직 그대를 뭐라 부를지 정하지 못했다."]} />
       <h1 className="conversion-title">어떻게 부르면 되겠소?</h1>
       <p className="conversion-lead">별칭은 해석에서 부르는 말에만 사용하오. 사주 계산에는 쓰지 않으며, 비워두셔도 괜찮소.</p>
-      <p className="conversion-lead"><mark>적으시면 스무 사람이 그 이름으로 부르오.</mark> 어떤 이는 그대라 하고 어떤 이는 자네라 하오 — 편지 겉봉에 이름을 적는 셈이오.</p>
+      <p className="conversion-lead"><mark>적으시면 스무 사람이 그 이름으로 부르오.</mark> 어떤 이는 그대라 하고 어떤 이는 자네라 하오 — 봉투 겉에 이름을 적는 셈이오 — 그러니까 안에 든 글은 그대로고 부르는 말만 바뀐다는 말이오.</p>
       <p className="conversion-note">여태 이런 데 이름을 적고 후회한 적이 있거든, 비워 두셔도 <b>해석은 똑같이</b> 나오오. 별칭은 12글자까지요.</p>
       <span className="src">근거 · 별칭은 부르는 말 한 자리에만 쓰오 — <b>4기둥 8글자</b> 셈에는 한 자도 안 들어가오 〔이름은 명식 밖〕</span>
       <p className="conversion-note">다음 자리 — 「태어난 때」로 돌아가오. 아직 안 적은 것이 하나 남았소.</p>
@@ -698,7 +698,7 @@ function EntryInner() {
             보이고, 그림이 그려지면 모르는 것이 흠으로 안 읽힙니다.
         */}
         <span className="src">근거 · 때를 알면 4기둥 <b>8글자</b>, 모르면 3기둥 <b>6글자</b> 〔자평 명리 · 시주〕</span>
-        <p className="conversion-lead">시를 모르는 것은 흠이 아니오. 여덟 칸짜리 자에서 두 칸을 안 쓰는 것처럼, 남은 여섯 칸으로도 재오.</p>
+        <p className="conversion-lead">시를 모르는 것은 흠이 아니오. 여덟 눈금짜리 줄자에서 두 눈금을 안 쓰는 것과 같소 — 시각을 몰라도 남은 여섯 글자는 그대로 선다는 말이오.</p>
         <p className="conversion-note">다음 자리 — 「글자가 서다」. 몇 글자가 설 것 같소?</p>
         <CompanionCat message="모르는 시간은 비워둬도 괜찮다냥." />
         <details className="conversion-details"><summary>별칭도 적고 싶소</summary>
@@ -721,7 +721,7 @@ function EntryInner() {
       <Narration lines={["도령이 넉 자 적힌 쪽지를 내려다본다."]} />
       <h1 className="conversion-title">내가 생각하는 성향도<br />비교해보겠소?</h1>
       <p className="conversion-lead">직접 고른 성향과 전통 사주 해석을 비교하는 선택 항목이오. 사주 계산값은 바뀌지 않소.</p>
-      <p className="conversion-lead">여덟 글자에서 <b>4축</b>을 세워 그대가 고른 넉 자와 나란히 놓소. <mark>넷 다 겹치는 사람은 100명 중 6명뿐이오</mark> — 자와 자를 맞대 보는 셈이오.</p>
+      <p className="conversion-lead">여덟 글자에서 <b>4축</b>을 세워 그대가 고른 넉 자와 나란히 놓소. <mark>넷 다 겹치는 사람은 100명 중 6명뿐이오</mark> — 줄자 두 개를 나란히 대 보는 셈이오 — 그러니까 그대가 스스로 잰 치수와 글자가 잰 치수를 나란히 놓는다는 말이오.</p>
       <p className="conversion-lead">어긋난 데가 있거든 그게 여태 그대를 지치게 한 곳이오. 참고 미뤄 온 일, 말 못 한 사람, 설친 잠이 대개 거기 걸려 있소.</p>
       {/*
         ★ 근거 줄은 마침표로 안 끝나오 (「… 〔자평 명리 · 용신〕」).
@@ -765,7 +765,7 @@ function EntryInner() {
               「무언가 알게 되오」 는 고리가 아닙니다. 수를 대고 다음
               자리를 가리켜야 고리입니다.
           */}
-          <p className="conversion-note">고른 자리 하나가 여덟 글자 중 어디를 볼지를 정하오. <mark>같은 명식도 물은 데가 다르면 볼 자리가 달라지오</mark> — <b>셋만 더</b> 적으시면 그 자리가 서오.</p>
+          <p className="conversion-note">고른 자리 하나가 여덟 글자 중 어디를 볼지를 정하오. <mark>같은 명식도 무엇을 물었느냐에 따라 보는 글자가 달라지오</mark> — <b>셋만 더</b> 적으시면 글자가 그 자리에 바로 서오.</p>
           {/*
             ★ 여기가 팩폭 48 · 감동 70 이던 자리입니다.
               「아닐 게요」 같은 물러서는 말이 섞여 있었고, 겪은 마음의
@@ -850,7 +850,7 @@ function EntryInner() {
             같은 여덟 글자를 살림의 말로 한 번 되짚습니다.
         */}
         <p className="conversion-lead">이 여덟 글자로 그대는 돈을 벌고, 밥을 먹고, 사람을 만나고, 밤에 잠을 잤소. 종이 위에 집 한 채를 올려놓은 셈이오.</p>
-        <p className="conversion-lead"><mark>자가 키를 재도 크다 작다는 말하지 않소.</mark> 여기까지가 셈이고, 값을 매기는 것은 다음 자리요.</p>
+        <p className="conversion-lead"><mark>자가 키를 재도 크다 작다는 말하지 않소.</mark> 줄자에 눈금만 있고 좋다 나쁘다는 안 적혀 있는 것과 같소 — 그러니까 몇인지만 대고 잘잘못은 안 적는다는 말이오. 여기까지가 셈이고, 값을 매기는 것은 다음 자리에서 하오.</p>
         <p className="conversion-lead">아직 안 본 것이 있소 — 그대가 물은 <b>{concernWord}</b>이 이 글자들의 어느 자리에 걸리는지요.</p>
         <p className="conversion-note">명식은 태어난 해·달·날·시간을 각각 두 글자로 옮긴 것이오. 모르는 시간의 두 글자는 비워 두오.</p>
         <p className="conversion-note">다음 자리 — 「{lens.name}의 첫 해석」.</p>
@@ -862,7 +862,7 @@ function EntryInner() {
             붙어 버립니다 — 버튼 글자까지 딸려 들어가 마지막 줄이 81자가
             됐습니다. 딱지를 문장으로 바꾸면 그 자리에서 끊기오.
         */}
-        <details className="conversion-details"><summary>계산 근거와 보정 내역 보기</summary>
+        <details className="conversion-details" open><summary>계산 근거와 보정 내역</summary>
           <ManseTable f={s.features} /><CalcPanel f={s.features} />
           {s.divergence?.cases?.map((c,i) => <div key={i} className="conversion-note">
             <p>{c.why}</p><p>이 서비스는 이렇게 보오.<br />{c.ours}<br />{c.mine}</p>

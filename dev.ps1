@@ -139,6 +139,12 @@ switch ($Task) {
   "busts"   { Need-Venv; Push-Location $Root; & $Py tools\bust_align.py @Rest; Pop-Location }
   "figures" { Need-Venv; Push-Location $Root; & $Py tools\figure_sheet.py @Rest; Pop-Location }
   "drama"   { Need-Venv; Push-Location $Root; & $Py tools\drama_audit.py @Rest; Pop-Location }
+  # 내 얘기 같은가 — 그림(비유) · 장면(사례) · 내 수를 천 자당으로 셉니다
+  "likeme"  { Need-Venv; Push-Location $Root; & $Py tools\like_me.py @Rest; Pop-Location }
+  # 쉬움 × 날카로움 — 한 표로. 둘 다 낮은 자리부터 보시오
+  "sharp"   { Need-Venv; Push-Location $Root; & $Py tools\sharp_easy.py @Rest; Pop-Location }
+  # 쉬운 말 — 스무 사람 · 모든 화면 전부
+  "easy"    { Need-Venv; Push-Location $Root; & $Py tools\easy_all.py @Rest; Pop-Location }
   # 배경이 다시 돌 때 튀는가 (--fix --all 로 고침). ffmpeg 이 필요합니다.
   "loop"    { Need-Venv; Push-Location $Root; & $Py tools\loop_seam.py @Rest; Pop-Location }
   # 그림을 맡기기 **전에** — 명령어가 그 화면에 맞는가

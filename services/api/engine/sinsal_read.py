@@ -113,12 +113,22 @@ def _stance(at: list, age: int) -> tuple:
         return (None, None)
     lo, hi = PALACE_AGE[best]
     when = PALACE_WHEN[best]
+    # ★ 사람 말 옆에 **수를 나란히** 답니다 (2026-09-17).
+    #
+    #   「서른하나에서 마흔다섯 사이 나이 얘기라」 까지는 사람 말이고,
+    #   손님이 제 나이를 대 보려면 수가 있어야 하오. 지금 몇 살인지도
+    #   같이 적습니다 — 그래야 이 줄이 **틀릴 수 있는 말**이 됩니다.
+    #   신살 컷은 리포트에서 가장 큰 컷인데 반증 가능한 말이 둘뿐이라
+    #   팩폭이 73이었습니다 (engine/dramaturgy).
+    span = "%d~%d살" % (lo, hi) if hi < 99 else "%d살 넘은" % lo
     if age > hi:
-        return ("<b>%s</b> 나이 얘기라, 그대는 이미 <b>지나온 나이</b>요" % when, best)
+        return ("<b>%s</b>(%s) 나이 얘기라, 지금 <b>%d살</b>인 그대에게는 "
+                "이미 <b>지나온 나이</b>요" % (when, span, age), best)
     if age < lo:
-        return ("<b>%s</b> 나이 얘기라, 그대에게는 <b>아직 안 온 나이</b>요" % when, best)
-    return ("<b>%s</b> 나이 얘기라, 그대가 <b>지금 선 자리</b>, 곧 지금 "
-            "그대 나이의 얘기요" % when, best)
+        return ("<b>%s</b>(%s) 나이 얘기라, 지금 <b>%d살</b>인 그대에게는 "
+                "<b>아직 안 온 나이</b>요" % (when, span, age), best)
+    return ("<b>%s</b>(%s) 나이 얘기라, <b>%d살</b>인 그대가 <b>지금 바로 "
+            "그 나이</b>에 서 있소" % (when, span, age), best)
 
 
 # ══════════════════════════════════════════════════════════

@@ -230,7 +230,7 @@ export default function HookSegments({
   return (
     <>
       <div className="hook-progress" role="status">경험 확인 {Object.keys(replies).length} / {segments.length}<span>답한 내용은 다시 펼쳐 읽을 수 있소.</span></div>
-      {restored.count > 0 && <p className="conversion-note" role="status">앞서 답한 {restored.count}마디를 불러왔소. {restored.count === segments.length ? "무료 요약으로 이어가시오." : "남은 이야기부터 이어가시오."}</p>}
+      {restored.count > 0 && <p className="conversion-note" role="status">앞서 답한 {restored.count}마디를 불러왔소. 읽던 책에 끼워 둔 쪽지를 다시 편 셈이오. {restored.count === segments.length ? "무료 요약으로 이어가시오." : "남은 이야기부터 이어가시오."}</p>}
       {/*
         ★ 새로 열린 마디만 읽어 줍니다.
           이미 읽은 마디를 다시 읽으면 손님이 아래로 내릴 때마다

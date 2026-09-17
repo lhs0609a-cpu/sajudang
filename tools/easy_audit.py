@@ -62,7 +62,10 @@ VAGUE_RE = re.compile("|".join(
     r"(?<![가-힣])%s(?=[이가은는을를의에도로와과만]|[ ,.]|$)" % w if len(w) == 1
     else re.escape(w) for w in VAGUE))
 # ② 비유 표지 — 뒤에 풀이가 없으면 수수께끼
-FIGURE = re.compile(r"같이,|같소|셈이오|셈이라|처럼|듯이|것과 같")
+# ★ 「것 같소」 는 비유 표지가 아니라 **추측 어미**입니다 (2026-09-17).
+#   「마음에 걸린 대목, 왜 반복됐을 것 같소?」 가 「풀지 않은 비유」 로
+#   잡혔습니다. 손님에게 묻는 말이지 그림이 아니오.
+FIGURE = re.compile(r"같이,|(?<!것 )같소|셈이오|셈이라|처럼|듯이|것과 같")
 UNPACK = re.compile(r"그러니까|곧 |말이오|뜻이오|이란 |란 말")
 
 TAG = re.compile(r"<[^>]+>")
@@ -73,10 +76,47 @@ SOURCES = list((ROOT / "seed").glob("*.json")) + \
     list((ROOT / "services" / "api" / "engine").glob("*.py"))
 
 
+# 화면 글에서 새 나온 **코드 조각** — 손님은 이걸 못 봅니다 (2026-09-17).
+#
+# ★ `engine/screenscan` 은 소스 순서로 읽습니다. 그래서 JSX 의 조건절이
+#   글 사이에 섞여 「…0 && ` · 잠긴 자리 $ ▮ 컷`} 근거 · 입력한 명식…」
+#   같은 **있지도 않은 문장**이 만들어지고, 그것이 흐릿한 문장으로
+#   잡혔습니다. 고칠 글이 아니라 고칠 자가 없는 자리요.
+#
+#   `▮` 하나만 든 문장은 **뺍니다 안 합니다** — 그건 값이 들어갈
+#   자리일 뿐 진짜 글줄입니다 (「끝까지 들은 자리는 ▮ 곳이오」).
+#   `tools/easy_source` 는 ▮ 까지 통째로 뺐는데, 그러면 진짜 글도
+#   같이 숨습니다.
+CODEY = re.compile(r"&&|\{|\}|=>|className|\.length|\$")
+
+
 def sentences(html: str) -> list:
+    """한 문장씩. **덩이를 넘어서 잇지 않습니다.**
+
+    ★ 화면 글은 줄바꿈으로 이어져 옵니다 (engine/screenscan 끝). 그
+      덩이 하나하나가 화면에서 따로 앉는 것 — 문단 · 나레이션 한 줄 ·
+      버튼입니다. 그런데 여기서 온 글을 마침표로만 갈랐더니, 마침표
+      없이 끝나는 버튼이 **다음 덩이와 한 문장**이 됐습니다 —
+
+          「맞습니다 아닙니다 잘 모르겠습니다 다음 마디 · 「…」.」
+
+      손님은 이런 문장을 본 적이 없습니다. 고칠 글이 아니라 자가
+      만든 문장이오. 줄바꿈에서 먼저 끊고, 그 안에서 마침표로 가릅니다.
+      마침표 없이 끝난 꼬리도 한 덩이로 셉니다 — 근거 줄은 묶음표로
+      끝나오.
+    """
     t = _html.unescape(TAG.sub(" ", html.replace("<br />", " ")))
-    t = re.sub(r"\s+", " ", t)
-    return [s.strip() for s in SENT.findall(t) if len(s.strip()) > 6]
+    out = []
+    for line in t.split(chr(10)):
+        line = re.sub(r"\s+", " ", line).strip()
+        if not line:
+            continue
+        got = [x.strip() for x in SENT.findall(line)]
+        tail = SENT.sub("", line).strip()
+        if tail:
+            got.append(tail)
+        out += [x for x in got if len(x) > 6 and not CODEY.search(x)]
+    return out
 
 
 # 손에 잡히는 말 — 이게 하나라도 있으면 뜬 낱말 하나쯤은 그림이 됩니다.

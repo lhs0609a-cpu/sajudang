@@ -16,7 +16,6 @@ import VisualConsultation from "@/components/VisualConsultation";
 import TopicAsk from "@/components/TopicAsk";
 import ProbeAsk, { type ProbeSpec } from "@/components/ProbeAsk";
 import Reveal from "@/components/Reveal";
-import Fold from "@/components/Fold";
 import ReadingGuide from '@/components/ReadingGuide';
 import ScrollHint from "@/components/ScrollHint";
 import SinsalSlots from "@/components/SinsalSlots";
@@ -408,10 +407,13 @@ function ReportInner() {
           <br /> 그래서 이 집은 칸마다 <b>근거 줄</b>을
           다오 — 대 보시오. 못 대는 줄이 있으면 그건 내 잘못이오.
           <br />
-          내가 먼저 보는 자리는 「{rep.lens.specialty ?? rep.lens.name}」이오.
+          내가 먼저 보는 데는 「{rep.lens.specialty ?? rep.lens.name}」이오.
           나머지 19명은 같은 명식을 놓고 다른 데를 먼저 짚소.
-          두루마리처럼 위에서 아래로 한 컷씩 뜨니, 훑지 말고
-          한 칸씩 보시오.
+          <br />
+          두루마리처럼 위에서 아래로 한 컷씩 뜨오 — 그러니까 상자를
+          한꺼번에 쏟지 않고 하나씩 꺼내 놓는다는 말이오.
+          <br />
+          훑지 말고 하나씩 보시오.
         </Say>
         {/*
            ★ 표지가 「N컷이오」로 끝났습니다. 수는 있는데 **그중 무엇이
@@ -419,8 +421,8 @@ function ReportInner() {
              고른 까닭 그 자체라, 표지에서 이름을 불러 줘야 하오.
          */}
         <ActOut kind="끊긴 동작" next={firstOwn?.title}>
-          {rep.cuts.length}컷이오. 그중 <b>{ownCount}</b>은 {rep.lens.name}만
-          보는 자리요 — 다른 열아홉은 그 자리를 안 보오.<br />
+          {rep.cuts.length}컷이오. 그중 <b>{ownCount}컷</b>은 {rep.lens.name}만
+          보는 글이오 — 다른 열아홉은 거기를 안 보오.<br />
           <b>펴기 전까지는 무엇이 적혔는지 나도 말하지 않소.</b>
         </ActOut>
         <button className="btn mt" onClick={() => setTab("c2")}>내 것을 펴겠습니다</button>
@@ -585,7 +587,7 @@ function ReportInner() {
             먼저 다오.
         */}
         <Say who={rep.lens.name} lens={lensId}>
-          {you}의 명식과 읽은 자리를 담은 공유 카드요.
+          {you}의 명식과 읽은 컷을 담은 공유 카드요.
           생년월일시와 출생지는 담지 않소. 그래도 개인적인 해석이니 보낼 내용은 먼저 확인하시오.
           <br />
           원하는 방식으로 내 기기에 저장하거나 공유하시오.
@@ -618,7 +620,7 @@ function ReportInner() {
           </div>
         </div>
         <ActOut kind="남긴 물음" next="남기다">
-          이 카드에는 <b>명식과 읽은 자리</b>만 담기오.
+          이 카드에는 <b>명식과 읽은 컷</b>만 담기오.
           생년월일시도 고을도 안 담기오.<br />
           <b>그런데 받은 사람은 제 것을 세워 보고 싶어지오.</b> 왜 그렇겠소?
         </ActOut>
@@ -722,20 +724,41 @@ function ReportInner() {
   const coreCuts = body.filter((c) => !c.fold);
   const lensCuts = body.filter((c) => c.fold === "lens");
   const ledgerCuts = body.filter((c) => c.fold === "ledger");
+  /*
+   * ★ 접힌 것을 폅니다 (2026-09-17).
+   *
+   *   손님이 말했습니다 — "내려가면서 자동으로 내용이 보여야하는데
+   *   토글이 너무 많아서 읽기가 쉽지 않아 자동으로 전체 다 펼쳐져야지"
+   *
+   *   맞는 말입니다. 무료가 열아홉 컷이 되면서 **접힌 손잡이가 열여덟
+   *   개**가 됐습니다. 값을 치른 자리는 스물아홉까지 갑니다. 그러면
+   *   손님이 하는 일은 읽기가 아니라 **누르기**입니다.
+   *
+   * ★ 이 자리의 본래 규칙은 접기가 아니라 **한 컷씩 뜨기**였습니다
+   *
+   *   바로 위 주석이 「한 컷씩 뜨오 … 스크롤을 내리면 뜨고」 라고
+   *   적혀 있고 CLAUDE.md 에도 그렇게 적혀 있는데, 정작 코드는
+   *   `Fold`(눌러야 열리는 details)를 쓰고 있었습니다. 글과 코드가
+   *   어긋나 있었고 손님은 **코드 쪽**을 겪고 있었습니다.
+   *
+   *   그래서 `Reveal` 로 되돌립니다 — 누를 것이 없고, 내려가면
+   *   저절로 뜹니다. 분량을 줄이려고 접었던 것은 그대로 남습니다:
+   *   한 번에 쏟지 않는다는 규칙은 **뜸**이 지킵니다.
+   */
   const renderCut = (c: (typeof body)[number], i: number, list: typeof body, numbered: boolean) => (
-    <Fold key={c.id} className="reading-section" initiallyOpen={numbered && i === 0}
-          label={numbered ? `${i + 1}. ${c.title}` : c.title}>
+    <Reveal key={c.id} className="reading-section"
+            eager={numbered && i === 0} think={thinkOf(c.source)}>
       <div id={`reading-${c.id}`} tabIndex={-1} className={"blk in" + (c.id.startsWith("lc_") ? " own" : "")}>
         {numbered && i === list.length - 1 && list.length > 1 && (
           <p className="lastcut">이제 마지막 자리요.</p>
         )}
-        <div className="lab">{c.title}</div>
+        <div className="lab">{numbered ? `${i + 1}. ${c.title}` : c.title}</div>
         <ServerText className="src" html={c.source} />
         {c.id === "sinsal"
           ? <SinsalSlots html={c.html} />
           : <div className="cutbody" dangerouslySetInnerHTML={{ __html: c.html }} />}
       </div>
-    </Fold>
+    </Reveal>
   );
   const pillars = s.features?.pillars ?? [];
 
@@ -883,17 +906,15 @@ function ReportInner() {
 
         {lensCuts.length > 0 && (
           <section className="foldgroup">
-            <p className="foldhead">
-              <b>{rep.lens.name}</b>의 눈으로 더 보기 — {lensCuts.length}컷을 접어 두었소
-            </p>
+            {/* ★ 한 줄로 둡니다 — 여러 줄로 쪼개면 과부 줄 감사가 앞뒤
+                조각을 한 문장으로 읽어 엉뚱한 데를 짚소 (tools/widow). */}
+            <p className="foldhead"><b>{rep.lens.name}</b>의 눈으로 보는 자리 — {lensCuts.length}컷</p>
             {lensCuts.map((c, i) => renderCut(c, i, lensCuts, false))}
           </section>
         )}
         {ledgerCuts.length > 0 && (
           <section className="foldgroup">
-            <p className="foldhead">
-              <b>셈 장부</b> — 근거 {ledgerCuts.length}컷을 접어 두었소
-            </p>
+            <p className="foldhead"><b>셈 장부</b> — 근거 {ledgerCuts.length}컷</p>
             {ledgerCuts.map((c, i) => renderCut(c, i, ledgerCuts, false))}
           </section>
         )}

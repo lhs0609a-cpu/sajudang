@@ -114,13 +114,21 @@ def test_the_palace_carries_an_age():
     sv = {"key": "yangin", "name": "양인", "at": ["년주"]}
     assert "열다섯 안쪽" in sr.when_line(sv, 33)
     assert "지나온" in sr.when_line(sv, 33)
-    # 아홉 살은 년주(0~15) **안**이라 「지금 선 자리」요.
-    assert "지금 선 자리" in sr.when_line(sv, 9)
+    # ★ 사람 말 옆에 **수**가 같이 서야 대 볼 수 있습니다 (2026-09-17).
+    #   「열다섯 안쪽」 까지는 말이고, 손님이 제 나이를 맞대려면
+    #   구간과 지금 나이가 수로 있어야 하오.
+    assert "0~15살" in sr.when_line(sv, 33)
+    assert "33살" in sr.when_line(sv, 33)
+    # 아홉 살은 년주(0~15) **안**이라 지금 그 나이에 선 것이오.
+    nine = sr.when_line(sv, 9)
+    assert "지금 바로 그 나이" in nine and "9살" in nine
+    assert "지나온" not in nine and "아직" not in nine
     # 아직 안 온 자리는 시주(46~)를 서른셋이 볼 때요.
     later = {"key": "hwagae", "name": "화개", "at": ["시주"]}
     assert "아직" in sr.when_line(later, 33)
     now = {"key": "geumyeo", "name": "금여", "at": ["일주"]}
-    assert "지금 선 자리" in sr.when_line(now, 33)
+    assert "지금 바로 그 나이" in sr.when_line(now, 33)
+    assert "31~45살" in sr.when_line(now, 33)
 
 
 def test_every_palace_in_the_doc_has_an_age():

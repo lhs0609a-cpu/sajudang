@@ -118,7 +118,7 @@ export default function RelayPage() {
         <div className="warn">
           <p>{data.block_reason}</p>
           <p className="sm">
-            한 자리에서 여러 사람을 몰아 듣는다고 더 알게 되지 않소.
+            하루에 여러 사람을 몰아 듣는다고 더 알게 되지 않소.
             오늘 들은 것을 먼저 두고 보시오.
           </p>
           <button className="btn gh mt" onClick={() => router.push("/lobby")}>진열대로</button>
@@ -158,7 +158,7 @@ export default function RelayPage() {
 
           {data && data.recommend.length > 0 ? (
             <>
-              <Narration lines={["도령이 옆자리를 가리켰다."]} />
+              <Narration lines={["도령이 옆방 문을 가리켰다."]} />
               {data.recommend.map((r) => {
                 const l = LENS_BY_ID[r.lens_id];
                 return (
@@ -235,8 +235,8 @@ export default function RelayPage() {
                 );
               })}
               <p className="sm mt">
-                이번 자리에서 이을 수 있는 사람은 {data.breaks.per_session_relay}명까지요.
-                지금까지 {s.relayUsed}명.
+                오늘 더 들을 수 있는 사람은 {data.breaks.per_session_relay}명까지요.
+                지금까지 {s.relayUsed}명 들으셨소.
               </p>
               {/* ★ 유예하는 길을 따로 냅니다. 세션만 닫고 제외는 안 합니다 —
                   브레이크는 그대로면서 손님이 무엇을 고르는지 알게 됩니다. */}
@@ -246,11 +246,11 @@ export default function RelayPage() {
                   씁니다 — 지어낸 압박이 아니라 이미 있는 규칙입니다.
               */}
               <ActOut kind="딜레마" next="그 사람이 먼저 보는 자리">
-                오늘 이을 수 있는 자리는{" "}
-                <b>{Math.max(0, data.breaks.per_session_relay - s.relayUsed)}</b>이오.
-                {" "}스물 중 <b>{s.read.length}</b>은 이미 들으셨소.
+                오늘 더 들을 수 있는 사람은{" "}
+                <b>{Math.max(0, data.breaks.per_session_relay - s.relayUsed)}명</b>이오.
+                {" "}스물 중 <b>{s.read.length}명</b>은 이미 들으셨소.
                 <br />
-                한 상에 열 그릇을 놓으면 맛을 못 보오.{" "}
+                한 상에 열 그릇을 한꺼번에 놓는 것과 같소 — 그러니까 다 맛보려다 아무 맛도 못 본다는 말이오.{" "}
                 <b>한 사람을 끝까지 듣는 편이 낫소</b> — 그래서 하루에
                 둘까지만 잇소.
               </ActOut>
@@ -259,7 +259,7 @@ export default function RelayPage() {
               </button>
             </>
           ) : (
-            data && <Narration lines={["오늘 이을 자리는 없소."]} />
+            data && <Narration lines={["오늘 더 들을 사람은 없소."]} />
           )}
         </>
       )}

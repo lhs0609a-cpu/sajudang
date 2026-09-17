@@ -217,8 +217,15 @@ def harvest():
         #   「} 그림이나 아래 이름을...」 이라는 있지도 않은 글줄이 나왔고,
         #   그 } 때문에 한 줄에 들어가는 문장이 두 줄로 감겨 **없는 과부**가
         #   잡혔습니다. 자가 부풀면 진짜 조각이 그 안에 묻힙니다.
+        # ★ 스스로 닫는 표(<p ... />)는 문단을 **열지 않습니다** (2026-09-17).
+        #
+        #   `<p className="saying" dangerouslySetInnerHTML={...} />` 를 여는
+        #   표로 읽으면, 글이 거기서 시작해 **한참 아래의** </p> 까지
+        #   이어집니다. 그 사이의 `)}` `{lensCuts.length > 0 && (` 같은
+        #   코드 조각이 글에 섞여, 있지도 않은 「— 컷」 이라는 과부 줄이
+        #   잡혔습니다. <path> 를 물었던 것과 같은 자리요.
         for m in re.finditer(r"<p(?![A-Za-z])(?![^>]*className=\"sm)"
-                             r"[^>]*>(.{8,400}?)</p>", code, re.S):
+                             r"[^>]*[^/]>(.{8,400}?)</p>", code, re.S):
             for t in _pieces(m.group(1)):
                 out.append((rel, code.count(chr(10), 0, m.start()) + 1, "nr", t))
 

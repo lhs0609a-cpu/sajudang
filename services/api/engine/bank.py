@@ -135,6 +135,13 @@ def count_phrase(n: int) -> str:
 
 def josa(word: str, with_batchim: str, without: str) -> str:
     """`josa("나무", "이", "가")` → "나무가"."""
+    # ★ 「너가」는 비문이오 (2026-09-17). 주격에서만 '네' 로 섭니다 —
+    #   `voice.address` 는 이미 이 자리를 막고 있었는데, 조립하는
+    #   쪽에서 부르는 이 함수는 안 막고 있었습니다. 그래서 반말을
+    #   쓰는 사람의 고민 컷이 「너가 물으러 오신 고민은」 으로
+    #   나갔습니다 (tests/test_voice).
+    if word == "너" and without == "가":
+        return "네가"
     return word + (with_batchim if has_batchim(word) else without)
 
 
