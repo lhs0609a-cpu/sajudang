@@ -111,11 +111,26 @@ def test_the_informal_voices_drop_the_honorific(f):
     """
     ★ 「정하시지」는 반말이라면서 존대가 섞인 말입니다.
       반말·하게체는 '시' 를 뗍니다.
+
+    ★ 반말 시키는 말은 **해체**입니다 (2026-09-17).
+
+      「정하지」 는 시키는 말이 아니라 권유로 읽힙니다. 반말로 시키는
+      말은 어간에 아/어를 붙인 꼴이오 — 정해 · 적어 · 끊어 · 봐 · 줘.
+      스무 명이 다 하오체일 때는 이 자리가 한 번도 안 드러났습니다.
     """
-    assert V._word("정하시오", V.BANMAL) == "정하지"
+    assert V._word("정하시오", V.BANMAL) == "정해"
     assert V._word("정하시오", V.HAGE) == "정하게"
     assert V._word("정하시오", V.HAPSYO) == "정하십시오"
     assert V._word("정하시오", V.HAEYO) == "정하세요"
+    # 매개모음 「으」 는 하게·반말에서 뗍니다 — 끊으게(✗) 끊게(○)
+    assert V._word("끊으시오", V.HAGE) == "끊게"
+    assert V._word("끊으시오", V.BANMAL) == "끊어"
+    assert V._word("끊으시오", V.HAPSYO) == "끊으십시오"
+    # 하오체가 풀어 놓은 불규칙은 하게체에서 되감습니다
+    assert V._word("물으시오", V.HAGE) == "묻게"
+    assert V._word("물으시오", V.BANMAL) == "물어"
+    assert V._word("고르시오", V.BANMAL) == "골라"
+    assert V._word("만드시오", V.HAGE) == "만들게"
 
 
 def test_tags_and_attributes_are_never_touched():
@@ -143,10 +158,40 @@ def test_every_character_has_a_voice():
     assert not missing, missing
 
 
-def test_all_released_characters_use_requested_hao_voice():
-    # User's September 9 direction supersedes the former five-ending design.
-    used = {lens_mod.view(l['id'])['voice'] for l in lens_mod.released()}
-    assert used == {V.HAO}
+def test_the_twenty_do_not_all_speak_the_same_way():
+    """
+    ★ 손님이 시킨 것 (2026-09-17)
+
+        "캐릭터마다 말투가 다 달라야하는데 하오 다 똑같아"
+
+      2026-09-09 에 「하오체 한 벌」 로 못 박았던 자리입니다. 그때는
+      뱅크에 손으로 쓴 말투가 섞여 있어 한 사람 안에서 결이 갈렸고,
+      그래서 한 벌로 되돌렸습니다. 지금은 말투 층이 다섯 결을 제대로
+      짓고(시키는 말 포함) 뱅크는 하오체 한 벌이라, 갈라도 안 섞입니다.
+
+      결은 **설정집(docs/07)의 첫 대사**가 정합니다 —
+        은별 「…제일 중요한 대목이에요」 · 연담 「…보겠습니다」
+        노파 「…듣게」 · 홍매파 「됐고, 대봐」 · 시계장이 「인사는 됐소」
+    """
+    used = [lens_mod.view(l["id"])["voice"] for l in lens_mod.released()]
+    assert set(used) <= set(V.VOICES), set(used) - set(V.VOICES)
+    assert len(set(used)) >= 4, "스무 명이 %d결로만 말하오" % len(set(used))
+    # 한 결이 절반을 넘으면 「다 똑같다」 는 말을 또 듣습니다.
+    top = max(used.count(v) for v in set(used))
+    assert top <= len(used) // 2, "한 결이 %d명을 먹었소" % top
+
+
+def test_the_address_and_the_voice_agree():
+    """
+    ★ 「자네」 는 하게체와, 「너」 는 반말과 짝입니다. 어긋나면
+      「자네가 정하오」 처럼 두 결이 한 문장에 섞입니다.
+    """
+    PAIR = {"자네": {V.HAGE}, "너": {V.BANMAL}}
+    for l in lens_mod.released():
+        v = lens_mod.view(l["id"])
+        want = PAIR.get(v.get("you"))
+        if want:
+            assert v["voice"] in want, (l["id"], v.get("you"), v["voice"])
 
 
 def test_the_pronoun_matches_the_character(reports):
@@ -244,10 +289,11 @@ def test_the_evidence_line_never_says_I(reports):
 # ══════════════════════════════════════════════════════════
 # 호칭 — 스무 명이 다르게 부르는가
 # ══════════════════════════════════════════════════════════
-def test_character_addresses_remain_valid_with_shared_hao_voice():
+def test_character_addresses_remain_valid_in_every_voice():
+    """부르는 말은 결이 무엇이든 서야 합니다 — 이름을 안 적어도."""
     for name in ('가은', ''):
         for l in lens_mod.released():
-            assert lens_mod.view(l['id'])['voice'] == V.HAO
+            assert lens_mod.view(l['id'])['voice'] in V.VOICES
             assert lens_mod.you_of(l['id'], name, 'F')
 
 

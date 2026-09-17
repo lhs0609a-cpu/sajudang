@@ -1483,8 +1483,28 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     #   첫 관점 컷 **끝에** 한 번만 답니다. 앞에 붙이면 맛보기가 앞머리를
     #   고르는 셈(`peek._about_you` 가 여는 말 길이만큼 건너뜀)이 어긋나,
     #   엿보기가 손님이 아니라 화자 얘기로 열립니다.
+    # ★ 첫 관점 컷은 **값을 치르기 전에** 엽니다 (2026-09-17).
+    #
+    #   손님이 말했습니다 — "초반에 풍운도령이 말하는 게 다른 캐릭터급으로
+    #   쭉쭉 양이 많아야 하는데 너무 적어. 그래선 결제가 안 일어나."
+    #
+    #   재 보니 무료 19컷 12,528자 가운데 **그 사람 목소리로 선 글이
+    #   398자(3.2%)** 였습니다 — 곁말 여섯 줄과 여닫는 말이 전부고,
+    #   그 사람만 보는 자리(lc_)는 **한 컷도** 안 열렸습니다. 값을
+    #   치르기 전에는 그 사람을 들어 본 적이 없는 셈이니, 더 듣고
+    #   싶어질 까닭도 없습니다. 엿보기는 열여덟 자라 「양」이 아니오.
+    #
+    #   그래서 **맨 앞 한 컷만** 엽니다. 나머지는 그대로 잠깁니다 —
+    #   값 사다리(lens_cuts.OWN_FLOOR)가 요구하는 자기 몫은 유료
+    #   등급에서 세므로 순서는 안 바뀝니다. 「낮춰서 내고 무엇이
+    #   잠겼는지 말한다」 는 이 집의 자리와 같습니다.
+    #   ★ 어느 컷을 여는가 — **물은 자리를 딛는 컷**입니다. 맨 앞엣것을
+    #     열었더니 돈을 물은 사람에게 「뿌리가 있는가」 가 맛보기로
+    #     나갔습니다 (tests/test_topic_reach). 없으면 맨 앞엣것으로.
+    free_lc = next((lc["id"] for lc in lc_built if lc.get("asks")),
+                   lc_built[0]["id"] if lc_built else None)
     lens_say = topic_mod.lens_line(lens_id, concern)
-    for lc in lc_built:
+    for nth, lc in enumerate(lc_built):
         html = lc["html"]
         sid = lc["statement_id"]
         if lens_say:
@@ -1492,7 +1512,8 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
             sid = "%s@%s" % (sid, concern)
             lens_say = ""
         cuts.append(_cut(lc["id"], lc["title"], lc["source"], html,
-                         lc["min_level"], sid=sid))
+                         0 if lc["id"] == free_lc else lc["min_level"],
+                         sid=sid))
 
     # ★ 묻는 자리와 받는 자리가 **갈려** 있었습니다 (2026-09-04).
     #
@@ -2216,8 +2237,8 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
         # 제 몫이 **한 컷**뿐이라, 공통 컷이 안 갈리면 서로 같은
         # 상품이 됩니다. 컷을 더 주면 값 사다리가 무너지니 대신
         # 같은 자리를 **그 사람 눈으로** 보게 합니다.
-        c["html"] = _flavor.side(c["html"], lens_id, c["id"], you)
-        c["html"] = _flavor.ask(c["html"], lens_id, asked)
+        c["html"] = _flavor.side(c["html"], lens_id, c["id"], you, tone)
+        c["html"] = _flavor.ask(c["html"], lens_id, asked, tone)
         c["html"] += voice_mod.speak(
             voice_mod.address(
                 terms_mod.picture_box(seen - before, concern, f.sex), you),

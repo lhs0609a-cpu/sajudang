@@ -31,7 +31,7 @@ from typing import Optional
 from . import guard
 from . import real as _real
 from . import why as _why
-from .bank import born_season, element_word, josa, josa_hanja
+from .bank import born_season, element_word, josa, josa_hanja, josa_num
 
 SEED = Path(__file__).resolve().parents[3] / "seed"
 
@@ -472,7 +472,9 @@ def _numend(v) -> str:
     n = float(v)
     if 0 < n < 1:
         return "1도 안 되오"
-    return "%s요" % _num(v)
+    # ★ 숫자는 **읽는 소리**로 맺습니다 — 0은 영이라 「0이오」,
+    #   4는 사라 「4요」. 「0요」 로 두면 하게체에서 「0네」 가 되오.
+    return josa_num(_num(v), "이오", "요")
 
 
 def _num(v) -> str:
@@ -638,6 +640,12 @@ def build(f, lens_id: Optional[str], concern: Optional[str] = None,
                 axes[0] if axes else ""),
             "html": guard.enforce(body, {"cut": spec["id"]}),
             "min_level": int(spec.get("min_level", 1)),
+            # ★ 이 컷이 **물은 자리**를 딛는가 (2026-09-17).
+            #   무료로 여는 맛보기 한 컷을 고를 때 이걸 봅니다 —
+            #   돈을 물은 사람에게 뿌리 얘기를 맛보기로 내면
+            #   「돈을 물었는데 돈 얘기가 없다」 가 첫인상이 되오.
+            "asks": any((spec.get(k) or {}).get("axis") == "concern"
+                        for k in ("a", "b", "c")),
             "statement_id": "%s:%s:%s:%s" % (spec["id"], ka, kb, kc),
         })
     return out

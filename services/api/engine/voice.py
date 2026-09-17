@@ -112,6 +112,112 @@ def _a_eo(stem: str) -> Optional[str]:
     return "아" if jung in _BRIGHT_JUNG else "어"
 
 
+# ══════════════════════════════════════════════════════════
+# 시키는 말 — 결마다 어간에 붙는 것이 다르다
+# ══════════════════════════════════════════════════════════
+#
+# ★ 스무 명이 다 하오체라 이 자리가 한 번도 안 드러났습니다
+#   (2026-09-17). 말투를 다섯 결로 갈라 놓고 보니 하게체·반말의
+#   시키는 말이 **비문**이었습니다 —
+#
+#       끊으시오 → 끊으게 (✗ 끊게) · 끊으지 (✗ 끊어)
+#       보시오   → 보게 (○) · 보지 (△ 권유로 읽히오)
+#
+#   까닭은 둘입니다.
+#
+#   ① **매개모음 「으」**. 「끊으시오」 의 '으' 는 받침 뒤에 넣는
+#      소리라, 합쇼·해요는 그걸 지키고(끊으십시오·끊으세요) 하게·
+#      반말은 **뗍니다**(끊게·끊어). 여태 안 떼고 있었습니다.
+#   ② **반말 시키는 말은 해체**입니다. 「…지」 가 아니라 어간에
+#      아/어를 붙인 꼴이오 — 끊어 · 적어 · 잡아 · 해 · 봐 · 줘.
+#      「끊으지」 는 한국어에 없는 말입니다.
+#
+# ★ 받침 없는 어간은 줄어들며 모음이 바뀝니다 (보→봐 · 두→둬).
+#   서술 어미에서는 물러섰지만(「네요」로 남김), 시키는 말은 물러설
+#   자리가 없습니다 — 「보지」 는 시키는 말로 안 읽히오. 그래서
+#   줄어드는 꼴을 여기서는 셈으로 짓습니다.
+_IMP_CONTRACT = {"하": "해", "되": "돼", "마": "마", "오": "와"}
+# ㅗ+ㅏ→ㅘ · ㅜ+ㅓ→ㅝ · ㅣ+ㅓ→ㅕ · ㅡ 탈락
+_IMP_JUNG = {8: 9, 13: 14, 20: 6}      # ㅗ→ㅘ · ㅜ→ㅝ · ㅣ→ㅕ
+_IMP_KEEP_JUNG = {0, 1, 4, 5, 6, 7, 11, 15, 16, 17, 19, 20}
+# 하오체가 이미 풀어 놓은 ㄷ불규칙을 하게체에서 되감는 자리
+_HAGE_BACK = {"물": "묻", "들": "듣", "실": "싣", "걸": "걷"}
+
+
+def _imp_haeche(stem: str, had_eu: bool = False) -> Optional[str]:
+    """해체 시키는 말. 못 지으면 None — 지어내지 않습니다.
+
+    had_eu  하오체가 「…으시오」 였는가. 그랬다면 어간은 **이미 불규칙이
+            풀린 꼴**이오 (듣다→들으시오→들어 · 묻다→물으시오→물어).
+            그러니 받침이 ㄷ·ㅂ·ㅅ·ㅎ 이어도 물러서지 않습니다 —
+            물러서면 「잡지 · 받지」 같은 비문이 나오오.
+    """
+    if not stem:
+        return None
+    last = stem[-1]
+    if last in _IMP_CONTRACT:
+        return stem[:-1] + _IMP_CONTRACT[last]
+    # 르불규칙 — 고르 → 골라 · 다르 → 달라 · 부르 → 불러
+    if len(stem) >= 2 and last == "르":
+        prev = ord(stem[-2])
+        if _BASE <= prev <= _LAST and (prev - _BASE) % _JONG == 0:
+            jung = ((prev - _BASE) // _JONG) % 21
+            tail = "라" if jung in _BRIGHT_JUNG else "러"
+            return stem[:-2] + chr(prev + 8) + tail
+    # ㄹ탈락이 하오체에서 일어난 자리 — 만드시오 → 만들어 · 드시오 → 들어
+    if last == "드" and not had_eu:
+        return stem[:-1] + "들어"
+    if had_eu:                                # 어간이 이미 풀려 있소
+        o = ord(last)
+        if _BASE <= o <= _LAST and (o - _BASE) % _JONG != 0:
+            jong = (o - _BASE) % _JONG
+            jung = ((o - _BASE) // _JONG) % 21
+            if jong == _JONG_SS:
+                return stem + "어"
+            return stem + ("아" if jung in _BRIGHT_JUNG else "어")
+    add = _a_eo(stem)
+    if add:                                   # 받침 있는 어간 — 적어 · 잡아
+        return stem + add
+    o = ord(last)
+    if not (_BASE <= o <= _LAST) or (o - _BASE) % _JONG != 0:
+        return None
+    jung = ((o - _BASE) // _JONG) % 21
+    cho = (o - _BASE) // (_JONG * 21)
+    if jung == 18:                            # ㅡ 탈락 — 쓰 → 써 · 크 → 커
+        return stem[:-1] + chr(_BASE + (cho * 21 + 4) * _JONG)
+    if jung in _IMP_JUNG:                     # 보 → 봐 · 두 → 둬 · 히 → 혀
+        return stem[:-1] + chr(_BASE + (cho * 21 + _IMP_JUNG[jung]) * _JONG)
+    if jung in _IMP_KEEP_JUNG:                # 가 · 서 · 켜 · 매 · 내 · 세
+        return stem
+    return None
+
+
+def _imperative(stem: str, voice: str) -> str:
+    """하오체 「…시오」 를 그 결의 시키는 말로."""
+    if voice in _IMP_KEEP_SI:                 # 합쇼·해요는 매개모음을 지킵니다
+        return stem + _IMP_KEEP_SI[voice]
+    # 하게·반말은 매개모음을 뗍니다 — 끊으 → 끊
+    bare, had_eu = stem, False
+    if len(bare) >= 2 and bare[-1] == "으":
+        prev = ord(bare[-2])
+        if _BASE <= prev <= _LAST and (prev - _BASE) % _JONG != 0:
+            bare, had_eu = bare[:-1], True
+    if voice == HAGE:
+        # 하게체는 어간을 **원형 그대로** 부릅니다. 하오체에서 이미
+        #   풀려 나온 불규칙은 되감아야 하오 —
+        #     물으시오(묻다) → 묻게 · 들으시오(듣다) → 듣게
+        #     마시오(말다)   → 말게 · 드시오(들다) → 들게
+        if had_eu and bare in _HAGE_BACK:
+            return _HAGE_BACK[bare] + "게"
+        if bare == "마" and stem == "마":
+            return "말게"
+        if bare.endswith("드") and not had_eu:
+            return bare[:-1] + "들게"
+        return bare + "게"
+    said = _imp_haeche(bare, had_eu)
+    return said if said else bare + _IMP_DROP_SI[voice]
+
+
 def _drop_riul(ch: str) -> Optional[str]:
     """
     ㄹ 받침을 뗀다. 살 → 사 · 들 → 드 · 힘들 의 '들' → 드
@@ -223,9 +329,7 @@ def _word(w: str, voice: str, ask: bool = False) -> str:
 
     # ── 시키는 말 ──────────────────────────────────────
     if w.endswith("시오"):
-        if voice in _IMP_KEEP_SI:
-            return w[:-2] + _IMP_KEEP_SI[voice]
-        return w[:-2] + _IMP_DROP_SI[voice]
+        return _imperative(w[:-2], voice)
 
     # ── 명사 + 요 ──────────────────────────────────────
     if w.endswith("요"):
@@ -325,7 +429,12 @@ _TAGS = re.compile(r"<[^>]*>")
 # ★ 한 글자도 잡습니다 — 「<b>庚戌</b>요.」 처럼 **이름은 태그 안**에 있고
 #   어미만 밖에 남는 자리가 흔합니다. 두 글자를 요구하면 그 자리가
 #   통째로 안 바뀌어, 합쇼체 캐릭터가 「…<b>庚戌</b>요.」 라고 말했습니다.
-_ENDING = re.compile(r"([^\s.!?…—–〔]+)(?=\s*(?:([.!?…])|[—–]|〔|$))")
+# ★ **쉼표 앞**도 문장 끝입니다 (2026-09-17).
+#   「먼저 말하겠소, 기다리겠소?」 에서 앞엣것이 안 바뀌어
+#   하게체 캐릭터가 「먼저 말하겠소, 기다리겠네?」 라고 말했습니다 —
+#   한 문장 안에서 결이 둘입니다. 줄표·묶음표에서 겪은 것과 같은
+#   자리요. 이름씨는 받침 규칙이 막아 줍니다(미소, → 그대로).
+_ENDING = re.compile(r"([^\s.!?…—–〔,]+)(?=\s*(?:([.!?…])|[—–,]|〔|$))")
 
 
 def _piece(text: str, voice: str) -> str:

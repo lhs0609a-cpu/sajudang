@@ -120,7 +120,8 @@ def open_of(lens_id: str) -> str:
     return OPEN.get(lens_id, "")
 
 
-def ask(html: str, lens_id: str, seen: Optional[set] = None) -> str:
+def ask(html: str, lens_id: str, seen: Optional[set] = None,
+        tone: Optional[str] = None) -> str:
     """
     본문 **마지막 문장**에 그 캐릭터의 묻는 꼬리를 단다.
 
@@ -133,6 +134,10 @@ def ask(html: str, lens_id: str, seen: Optional[set] = None) -> str:
     tail = ASK.get(lens_id, "")
     if not html or not tail:
         return html
+    # ★ 하오체로 적힌 꼬리는 그 사람 결로 갈아 끼웁니다. 해요체·반말로
+    #   적어 둔 꼬리는 `speak` 가 건드릴 어미가 없어 그대로 남습니다.
+    from . import voice as _voice
+    tail = _voice.speak(tail, tone)
     if seen is not None:
         # 한 장에 넷까지. 그 이상은 버릇이 아니라 말버릇 흉내입니다.
         if len(seen) >= 4:
@@ -409,7 +414,7 @@ SIDE_AT = ("lack", "why", "closing_cut", "solace", "hope", "sinsal")
 
 
 def side(html: str, lens_id: str, cut_id: str,
-         you: Optional[str] = None) -> str:
+         you: Optional[str] = None, tone: Optional[str] = None) -> str:
     """
     공통 컷에 그 사람의 곁말을 단다.
 
@@ -419,8 +424,15 @@ def side(html: str, lens_id: str, cut_id: str,
 
       곁말을 하오체·「그대」 로 적어 두었더니, 자네·아저씨를 쓰는
       캐릭터의 리포트에 「그대」 가 그대로 나갔습니다
-      (tests/test_voice.py 가 잡았습니다). 어미는 각자 제 결로 이미
-      적었으니 말투 층은 안 태우고, **부르는 말만** 갈아 끼웁니다.
+      (tests/test_voice.py 가 잡았습니다).
+
+    ★ 말투 층도 태웁니다 (2026-09-17).
+
+      전에는 「어미는 각자 제 결로 이미 적었다」 며 안 태웠습니다.
+      스무 명이 다 하오체일 때는 그 말이 맞았습니다. 결을 다섯으로
+      가르고 나니 곁말만 하오체로 남아, 하게체 캐릭터의 리포트에
+      「자네가 정하오」 가 나왔습니다 — 한 화면 안에서 말투가 갈리는
+      바로 그 자리요 (tests/test_voice_clean).
     """
     if cut_id not in SIDE_AT:
         return html
@@ -430,9 +442,10 @@ def side(html: str, lens_id: str, cut_id: str,
     txt = rows[SIDE_AT.index(cut_id)]
     if not txt or not html:
         return html
+    from . import voice as _voice
     if you:
-        from . import voice as _voice
         txt = _voice.address(txt, you)
+    txt = _voice.speak(txt, tone)
     return html + '<p class="side">%s</p>' % txt
 
 

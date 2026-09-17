@@ -145,6 +145,26 @@ def josa(word: str, with_batchim: str, without: str) -> str:
     return word + (with_batchim if has_batchim(word) else without)
 
 
+# 숫자의 읽는 소리에 받침이 있는가 — 영·일·삼·육·칠·팔 은 있고
+#   이·사·오·구 는 없습니다. 열쇠는 **끝자리**입니다 (13 → 삼).
+_NUM_BATCHIM = {"0": True, "1": True, "2": False, "3": True, "4": False,
+                "5": False, "6": True, "7": True, "8": True, "9": False}
+
+
+def josa_num(num, with_batchim: str, without: str) -> str:
+    """
+    숫자 뒤의 조사·맺음. **읽는 소리**로 고릅니다 — `josa_hanja` 와 같은
+    자리요. 「0」 은 영이라 받침이 있어 「0이오」 고, 「4」 는 사라
+    「4요」 입니다.
+
+    ★ 스무 명이 다 하오체일 때는 안 드러났습니다 (2026-09-17).
+      「불은 0요」 가 하오체에서는 그럭저럭 읽혔는데, 하게체로 갈리자
+      「불은 0네」 가 되었습니다 — 「0이네」 라야 하오.
+    """
+    d = str(num).strip()[-1:]
+    return str(num) + (with_batchim if _NUM_BATCHIM.get(d, False) else without)
+
+
 def josa_hanja(hanja: str, with_batchim: str, without: str) -> str:
     """
     한자 뒤의 조사. **읽는 소리**로 고릅니다 — `申` 는 '신' 이라 `申이`,
