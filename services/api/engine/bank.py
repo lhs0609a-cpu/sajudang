@@ -349,8 +349,15 @@ def _seg(stage, label, source, body, question, yes, no, sid,
         "source_below": bool(source_below),
         "html": guard.enforce(body, {"stage": stage, "statement_id": sid}),
         "question": question,
-        "yes": "맞는 일이 있었다면 그 일을 떠올리며 다음 풀이와 견주어 보시오.",
-        "no": "맞지 않는 해석으로 두겠소. 그대가 겪은 일을 이 말에 억지로 맞출 필요는 없소.",
+        # 호출부가 단마다 만든 응답을 그대로 내려보냅니다. 여기서
+        # 공통 문구로 덮어쓰면 고민별·단계별 답이 모두 같은 말이 되어
+        # 화면에서 선택한 고민이 반영되지 않은 것처럼 보입니다.
+        # 예전 응답을 집계·편집하는 규칙이 쓰던 핵심 표현은 남기되,
+        # 호출부의 단계별 문장을 우선합니다.
+        "yes": yes.replace("그럴 줄 알았소", "그럴 법했소"),
+        "no": ("맞지 않는 해석으로 두겠소. " + no
+               if "맞지 않는 해석" not in no else no).replace(
+                   "아직 안 터진", "아직 드러나지 않은"),
         "statement_id": sid + ":copy2",
     }
 
@@ -1129,6 +1136,14 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
         line = _topic.hook_line(concern, s.get("stage"))
         if line:
             s["html"] += line
+            # 답변을 누른 뒤에도 선택한 고민이 이어져야 합니다. 응답은
+            # 문단 안에 들어가므로 hook_line의 p 태그를 span으로 바꿔
+            # 관심사별 한 줄을 yes/no 양쪽에 붙입니다.
+            reply_line = (line.replace('<p class="tale atask">',
+                                       '<span class="tale atask">')
+                              .replace('</p>', '</span>'))
+            s["yes"] = "%s %s" % (s["yes"], reply_line)
+            s["no"] = "%s %s" % (s["no"], reply_line)
 
     # ★ 뱅크에 박아 둔 「그대」를 그 캐릭터의 호칭으로 바꿉니다.
     #

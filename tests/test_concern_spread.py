@@ -42,6 +42,7 @@ sys.path.insert(0, str(ROOT / "services" / "api"))
 from engine import topic                                   # noqa: E402
 from engine.calendar import build_chart                    # noqa: E402
 from engine.features import build_features                 # noqa: E402
+from engine.bank import build_hook                          # noqa: E402
 from engine.report import build_report                     # noqa: E402
 
 CONCERNS = ("money", "work", "love", "people", "dir", "health")
@@ -134,6 +135,26 @@ def test_statement_ids_split_when_the_words_split(reports):
             assert len(sids) >= len(texts), (
                 "%s — 문장은 %d가지인데 열쇠는 %d가지요"
                 % (cid, len(texts), len(sids)))
+
+
+def test_hook_answers_use_each_stage_response_and_split_by_concern():
+    """훅에서 선택한 고민과 단에 맞는 답변을 실제로 보여 줍니다."""
+    f = build_features(build_chart(*PEOPLE[0][0], PEOPLE[0][1], city="서울"))
+    hooks = {c: build_hook(f, c, axis4="INFP") for c in CONCERNS}
+
+    # 각 단의 yes/no는 호출부가 만든 단별 문구여야 합니다. 과거에는
+    # _seg가 이를 공통 문장으로 덮어써서 어떤 고민을 골라도 같은 답이
+    # 노출됐습니다.
+    for c, segments in hooks.items():
+        assert segments
+        assert all(seg["yes"] and seg["no"] for seg in segments), c
+        assert len({seg["yes"] for seg in segments}) >= 3, c
+        assert len({seg["no"] for seg in segments}) >= 3, c
+
+    # 같은 단의 응답도 관심사에 따라 달라져야 합니다.
+    for i in range(min(len(v) for v in hooks.values())):
+        assert len({hooks[c][i]["yes"] for c in CONCERNS}) >= 3
+        assert len({hooks[c][i]["no"] for c in CONCERNS}) >= 3
 
 
 # ══════════════════════════════════════════════════════════
