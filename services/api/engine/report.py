@@ -22,6 +22,7 @@ from . import calendar as cal_mod
 from . import extras as extras_mod
 from . import visual as visual_mod
 from . import guard
+from . import reading_offer
 from . import heart as heart_mod
 from . import depth as depth_mod
 from . import lens as lens_mod
@@ -1501,8 +1502,8 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     #   ★ 어느 컷을 여는가 — **물은 자리를 딛는 컷**입니다. 맨 앞엣것을
     #     열었더니 돈을 물은 사람에게 「뿌리가 있는가」 가 맛보기로
     #     나갔습니다 (tests/test_topic_reach). 없으면 맨 앞엣것으로.
-    free_lc = next((lc["id"] for lc in lc_built if lc.get("asks")),
-                   lc_built[0]["id"] if lc_built else None)
+    # Free preview now includes up to three complete chapters; ask2 stays paid.
+    free_lc = reading_offer.free_character_ids(lens_id, lc_built)
     lens_say = topic_mod.lens_line(lens_id, concern)
     for nth, lc in enumerate(lc_built):
         html = lc["html"]
@@ -1512,7 +1513,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
             sid = "%s@%s" % (sid, concern)
             lens_say = ""
         cuts.append(_cut(lc["id"], lc["title"], lc["source"], html,
-                         0 if lc["id"] == free_lc else lc["min_level"],
+                         0 if lc["id"] in free_lc else lc["min_level"],
                          sid=sid))
 
     # ★ 묻는 자리와 받는 자리가 **갈려** 있었습니다 (2026-09-04).
@@ -1934,6 +1935,18 @@ def apply_view(cuts: list, view: dict) -> list:
         # ★ 한 줄은 **셈 바로 뒤, 물은 자리 앞**입니다 (2026-09-11).
         #   무엇을 물었든 먼저 「이 사람이 누구인가」 가 서야 나머지
         #   서른 컷이 그 한 줄을 증명하는 자리가 됩니다.
+        # ★ 희소도는 **명식 바로 뒤**입니다 (2026-09-20 · docs/45).
+        #
+        #   스물두 컷 가운데 열한 번째에 앉아 있었습니다. 그런데 이게
+        #   이 집이 가진 것 중 가장 센 자산입니다 — 실사용자 후기에서
+        #   가장 강한 반응을 만든 것이 적중이 아니라 **분모**였습니다
+        #   (「일년에 12일 있는 최악의 날」). 바깥에서는 같은 물건을
+        #   따로 팔기도 합니다.
+        #
+        #   자리만 옮깁니다. 골라 담지 않습니다 — 축은 미리 정해져
+        #   있고 흔하면 흔하다고 그대로 냅니다(`rarity.py`).
+        if c["id"] == "rarity":
+            return (0, 0.3)
         if c["id"] == "spine":
             return (0, 0.5)
         if c["id"] == "spine_depth":
@@ -2353,4 +2366,5 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
                                   {"cut": "close"}) if view.get("close") else None),
         "cuts": cuts,
         "locked": locked,
+        "reading_offer": reading_offer.build(lens_id, cuts, locked, sells),
     }

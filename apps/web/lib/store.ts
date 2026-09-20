@@ -64,7 +64,7 @@ export interface SessionState {
   seals: string[];
   tier: Tier;
   paid: boolean;
-  hookReview: { chartId: string; concern: string; lensId: string; answers: Record<string, boolean | null> } | null;
+  hookReview: { chartId: string; concern: string; lensId: string; edition?: string; answers: Record<string, boolean | null> } | null;
   /**
    * 물으신 자리가 되묻는 것에 **한 번** 고른 답.
    *
@@ -278,7 +278,7 @@ export const SCREEN_GROUPS: { group: string; label: string; items: ScreenLink[] 
       { id: "a4b", name: "성향 4글자", href: "/?step=a4b" },
       { id: "a5", name: "고민", href: "/?step=a5" },
       { id: "a6", name: "명식", href: "/?step=a6" },
-      { id: "a7", name: "훅 5단", href: "/?step=a7" },
+      { id: "a7", name: "첫 해석 3장", href: "/?step=a7" },
     ],
   },
   {

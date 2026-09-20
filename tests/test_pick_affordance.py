@@ -32,6 +32,13 @@ WEB = ROOT / "apps" / "web"
 
 
 def _src(rel: str) -> str:
+    # ★ 진입부 글은 `app/page.tsx` 가 아니라 `components/EntryFlow.tsx` 가
+    #   듭니다 (2026-09-20 · docs/45). page.tsx 는 흐름만 잡습니다 —
+    #   둘을 같이 읽어야 자가 눈을 안 감습니다.
+    if rel == "app/page.tsx":
+        flow = WEB / "components" / "EntryFlow.tsx"
+        return "\n".join([(WEB / rel).read_text(encoding="utf-8"),
+                          flow.read_text(encoding="utf-8")])
     return (WEB / rel).read_text(encoding="utf-8")
 
 

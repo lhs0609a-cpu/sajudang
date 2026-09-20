@@ -52,6 +52,7 @@ class ChartResponse(BaseModel):
 
 
 class HookRequest(BaseModel):
+    edition: Literal["classic", "entry2"] = "classic"
     chart_id: str
     concern: Concern
     axis4: Optional[str] = Field(default=None, min_length=4, max_length=4)
@@ -66,6 +67,7 @@ class HookRequest(BaseModel):
 
 
 class HookSegment(BaseModel):
+    response_mode: Literal["experience", "continue"] = "experience"
     stage: str
     label: str
     source: Optional[str]
@@ -76,6 +78,10 @@ class HookSegment(BaseModel):
     question: str
     yes: str
     no: str
+    # 화면이 제 손으로 장 이름과 버튼 글을 적지 않게 서버가 내려보냅니다.
+    # 장 수가 바뀌면 화면의 하드코딩 배열이 먼저 깨지던 자리입니다.
+    nav: str = ""
+    next_label: str = ""
     statement_id: str
 
 
@@ -110,6 +116,7 @@ class ReportRequest(BaseModel):
 
 
 class ReportResponse(BaseModel):
+    reading_offer: Optional[dict] = None
     editorial: Optional[dict] = None
     practice: Optional[dict] = None
     report_id: str

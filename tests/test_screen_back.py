@@ -32,7 +32,9 @@ def _screens():
 def test_entry_flow_walks_back_one_step():
     """한 주소 위 여러 단계인 화면은 제 손으로 뒤를 잡는다."""
     src = (WEB / "app" / "page.tsx").read_text(encoding="utf-8")
-    assert "onBack={back}" in src, "진입 흐름에 되돌아가는 길이 없다"
+    flow = (WEB / "components" / "EntryFlow.tsx").read_text(encoding="utf-8")
+    # 뒤로 가는 손잡이는 화면을 그리는 쪽(EntryFlow)이 답니다.
+    assert "onBack={back}" in flow, "진입 흐름에 되돌아가는 길이 없다"
     # 앞으로 가는 자리는 발자국을 남겨야 한다
     raw = re.sub(r"/\*.*?\*/", " ", src, flags=re.S)
     stray = re.findall(r'setStep\("a\w+"\)', raw)

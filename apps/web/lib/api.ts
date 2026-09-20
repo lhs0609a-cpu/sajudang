@@ -181,6 +181,7 @@ export const api = {
     call<ChartResponse>(`/v1/chart/${encodeURIComponent(chartId)}`),
 
   hook: (req: {
+    edition?: "classic" | "entry2";
     chart_id: string; concern: string; axis4?: string | null;
     name?: string; lens_id?: string | null;
     /** 「아니오」가 몇 번 나왔는가. 둘이면 도령이 짚는 자리를 바꿉니다. */

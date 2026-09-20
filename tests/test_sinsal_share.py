@@ -280,5 +280,6 @@ def test_the_doubts_reach_people_who_came_in_directly():
     """
     from pathlib import Path
     root = Path(__file__).resolve().parents[1] / "apps" / "web"
-    entry = (root / "app" / "page.tsx").read_text(encoding="utf-8")
+    # 들머리 글은 EntryFlow 가 듭니다 (docs/45).
+    entry = (root / "components" / "EntryFlow.tsx").read_text(encoding="utf-8")
     assert "<Doubts" in entry, "직접 들어온 사람은 여섯 문답을 못 봅니다"

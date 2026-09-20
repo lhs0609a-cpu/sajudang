@@ -4,6 +4,7 @@
     python tools/falsifiable.py            # 스무 명 전부
     python tools/falsifiable.py pungun     # 한 사람만
     python tools/falsifiable.py --hook     # 훅 다섯 단
+    python tools/falsifiable.py --entry    # 진입부 첫 해석 네 장
 
 ★ 왜 이걸 재나
 
@@ -42,6 +43,7 @@ if str(ROOT / "services" / "api") not in sys.path:
     sys.path.insert(0, str(ROOT / "services" / "api"))
 
 from engine import bank as bank_mod              # noqa: E402
+from engine import entry_hook as entry_mod       # noqa: E402
 from engine import lens as lens_mod              # noqa: E402
 from engine.calendar import build_chart          # noqa: E402
 from engine.features import build_features       # noqa: E402
@@ -57,6 +59,17 @@ CHARTS = [
 
 # ── 금지하는 것 ────────────────────────────────────────────
 NUM = re.compile(r"\d")                       # 나이 · 연도 · 개수
+# ★ 이 집은 수를 **한글로도** 적습니다 (`bank.count_word` — 「상관 2」는
+#   분기표처럼 보이고 「상관이 둘」은 근거로 읽힙니다). 그런데 이 자는
+#   `\d` 만 보고 있어서 「겉에 쇠는 셋이오, 불은 하나도 없소」 를 0점으로
+#   쳤습니다. CLAUDE.md 가 「한글로 적은 수를 안 세기」 를 금칙으로 적어
+#   둔 자리인데, 정작 재는 자가 그러고 있었습니다 (2026-09-20 · docs/45).
+#   ★ 다만 지나가는 「하나」까지 세면 자가 헐거워집니다. 「여덟 글자」는
+#     늘 여덟이라 **틀릴 수가 없습니다.** 뒤에 세는 자리가 오는 것만 봅니다 —
+#     `tests/test_falsifiable.py` 가 쓰는 규칙과 같은 한 벌입니다.
+NUM_KO = re.compile(r"(?:하나|둘|셋|넷|다섯|여섯|일곱|여덟|아홉|열)"
+                    r"(?=이오|이고|이네|이에요|뿐|밖에|째|이 비|가 비)"
+                    r"|하나도 없")
 WHEN = re.compile(r"올해|내년|작년|이번 주|다음 달|스물|서른|마흔|쉰|예순")
 ACT = re.compile(
     r"(본다|한다|간다|산다|온다|잔다|먹는다|미룬다|고른다|버린다|남긴다|"
@@ -75,7 +88,8 @@ def judge(text: str) -> tuple:
     """(문장 수, 금지하는 문장, 금지 안 하는 문장)"""
     sents = [s.strip() for s in SPLIT.split(text) if len(s.strip()) > 4]
     hard = sum(1 for s in sents
-               if NUM.search(s) or WHEN.search(s) or ACT.search(s))
+               if NUM.search(s) or NUM_KO.search(s) or WHEN.search(s)
+               or ACT.search(s))
     soft = sum(1 for s in sents
                if FREQ.search(s) or BOTH.search(s) or VAGUE.search(s))
     return len(sents), hard, soft
@@ -97,11 +111,30 @@ def bar(pct: float, width: int = 22) -> str:
 def main() -> int:
     args = [a for a in sys.argv[1:] if not a.startswith("-")]
     only_hook = "--hook" in sys.argv
+    only_entry = "--entry" in sys.argv
     print("=" * 76)
     print("  틀릴 수 있는 말인가 — 문장이 무엇을 금지하는가")
     print("=" * 76)
 
     fs = list(features())
+
+    # 진입부 — 값을 치르기 전에 보는 전부. 여기가 가장 무뎠던 자리입니다.
+    if only_entry:
+        agg = collections.defaultdict(lambda: [0, 0, 0])
+        for f in fs:
+            for c in entry_mod.CONCERNS:
+                for s in entry_mod.build(f, c):
+                    n, hard, soft = judge(_plain(s["html"]))
+                    a = agg["%s · %s" % (s["stage"], s.get("nav") or "")]
+                    a[0] += n; a[1] += hard; a[2] += soft
+        print("")
+        print("진입부 — 장별")
+        print("  %-18s %6s %8s %7s  %s" % ("장", "문장", "금지함", "비율", ""))
+        for k in sorted(agg):
+            n, hard, soft = agg[k]
+            p = 100 * hard / max(n, 1)
+            print("  %-18s %6d %8d %6.0f%%  %s" % (k, n, hard, p, bar(p)))
+        return 0
 
     if only_hook:
         agg = collections.defaultdict(lambda: [0, 0, 0])

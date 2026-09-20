@@ -1,4 +1,5 @@
 "use client";
+import CharacterReadingOffer from "@/components/CharacterReadingOffer";
 
 /**
  * @screen c1 c2 c3 c4 c5 c6
@@ -496,85 +497,28 @@ function ReportInner() {
     );
   }
   if (tab === "c4") {
-    return (
-      <Shell screen="c4" title="여기서부터" legal>
-        <Scene id="fold" />
-        <Narration lines={["두루마리가 반쯤 접혀 있다."]} />
-        <Say who={rep.lens.name} lens={lensId}>
-          여기까지 무료 해석이오. 아래에는 아직 열리지 않은 항목의 제목과 근거가 있소.
-          <br /> 나가도 붙잡지 않소.
-          <br />
-          제목을 보고 지금 필요한 내용인지 먼저 고르시오. 다음 화면에서 가격과 열리는 범위를 확인한 뒤 결제할 수 있소.
-          <br />
-          다른 해석자는 같은 명식을 다른 관점으로 읽소. 더 많은 관점이 더 정확한 답을 보장하지는 않소.
-        </Say>
-        {/* ★ 비유 0 · 겪은 말 0. 값이 걸리는 자리인데 **읽는 사람**이
-            글에 없었습니다. 조르지 않고 알아주는 한 줄만 답니다. */}
-        <p className="sm">여태 혼자 참고 미뤄 둔 물음이라 여기까지 오신 것이오. <mark><b>접힌 글은 아직 안 편 것이지 없는 것이 아니오</b></mark> — 지도를 반만 펴 놓은 것과 같소. 길은 이미 다 그려져 있고 종이만 접혀 있소. 자물쇠가 아니라 접힌 자국처럼, 펴면 그 자리에 그대로 있소.</p>
-        {/*
-          ★ 여기가 `가가가가 가가가가가 가가가` 였소. 자리표시
-            문자열이 그대로 배포돼 있었습니다.
-
-            궁금증은 **구체적일 때만** 생기오 — 무엇을 놓치는지 모르면
-            아쉽지도 않습니다. 이제 서버가 그 컷의 첫 줄을 잘라서
-            내려보내오 (engine/report._teaser). 본문의 40%를 넘지
-            않고, 조사에서 끊기지 않소.
-
-            읽히는 것은 맛보기까지. 그 뒤에 흐려진 자락을 이어 붙여
-            **이 아래로 더 있다**는 것만 보이오.
-        */}
-        {rep.locked.map((l) => (
-          <div className="dz" key={l.id}>
-            <div className="k">{l.title}</div>
-            <ServerText as="p" className="sm" html={`근거 · ${l.source}`} />
-            {l.teaser ? (
-              <p className="tz">
-                {l.teaser}
-                <span className="bl">그 다음은 값을 치른 뒤에 보이오</span>
-              </p>
-            ) : (
-              <p className="bl">가려 둔 자리요</p>
-            )}
-            {/* 분량은 서버가 셉니다. 화면이 적지 않습니다. */}
-            <p className="sm">
-              {l.need_tier_name}부터 열리오 · {l.chars.toLocaleString()}자
-            </p>
-          </div>
-        ))}
-        {/*
-          ★ 막이 그냥 끝나고 있었습니다. 접힌 목록 다음에 곧바로
-            버튼 둘이라, 값을 치를지 말지를 **목록만 보고** 정하게
-            했습니다. 여기는 딜레마로 끊는 자리입니다 — 다만 재촉이
-            아니라 접어 두는 쪽도 같이 내오.
-        */}
-        {/*
-          ★ 명확 70 — 이 집에서 **근거 줄이 없던** 마지막 화면입니다.
-            컷마다 근거는 달려 있는데(위 `dz`), 화면 제 말에는 무엇을
-            보고 접었는지가 없었습니다. 값이 갈리는 자리라 더 그렇소.
-        */}
-        <span className="src">
-          근거 · 접힌 자리는 <b>{rep.locked.length}컷</b>이고, 값 등급은
-          9,900원부터 19,900원까지 <b>4단</b>이오 · 컷 수는 서버가 세어
-          내려보낸 것이오 〔표시가와 청구가는 한 값〕
-        </span>
-        <ActOut kind="딜레마" next="어디까지 볼지">
-          접힌 자리는 오늘 다 열어도 되고, 하나도 안 열어도 되오.
-          <br />
-          <b>둘 다 답이오.</b> 다만 절반만 열어 두고 저녁 내내 그
-          생각을 붙들고 있는 것 — 그것만은 안 하시는 게 좋소.
-          <br />
-          접힌 자리를 다 펴도 <b>20분</b>이면 읽소. 반쯤 접은 지도를
-          끝까지 펴는 것처럼, 오래 걸리는 일은 아니오.
-        </ActOut>
-        <button className="btn mt" onClick={() => router.push("/pay?step=d1")}>
-          어디까지 볼지 고르겠습니다
-        </button>
-        <button className="btn gh" onClick={() => setTab("c2")}>본문으로</button>
-      </Shell>
-    );
+    return <Shell screen="c4" title={rep.lens.name} legal>
+      {/*
+        ★ 여기서 **만류와 딜레마가 사라져 있었습니다** (2026-09-20 · docs/45).
+          화면을 `CharacterReadingOffer` 로 갈아 끼우면서 「나가도 붙잡지
+          않소」 와 「둘 다 답이오」 가 같이 지워졌습니다. 그건 글이 아니라
+          **브레이크**요 — 지우면 이 집이 다른 집이 됩니다 (CLAUDE.md).
+      */}
+      <Scene id="fold" />
+      <Narration lines={["두루마리가 반쯤 접혀 있다."]} />
+      <CharacterReadingOffer report={rep} onContinue={() => router.push("/pay?step=d1")} />
+      <Say who={rep.lens.name} lens={lensId}>
+        접힌 자리는 오늘 다 열어도 되고, 하나도 안 열어도 되오.
+        <br /><b>둘 다 답이오.</b> 나가도 붙잡지 않소.
+        <br />
+        다만 절반만 열어 두고 저녁 내내 그 생각을 붙들고 있는 것 — 그것만은 안 하시는 게 좋소.
+        <br />
+        다른 해석자는 같은 명식을 다른 관점으로 읽소. 더 많은 관점이 더 정확한 답을 보장하지는 않소.
+      </Say>
+      <button className="btn gh" onClick={() => setTab("c2")}>무료 풀이로 돌아가기</button>
+    </Shell>;
   }
 
-  /* c5 · 공유 카드 */
   if (tab === "c5") {
     const nameCut = rep.cuts.find((c) => c.id === "lack");
     return (
@@ -914,6 +858,8 @@ function ReportInner() {
             {lensCuts.map((c, i) => renderCut(c, i, lensCuts, false))}
           </section>
         )}
+        {rep.tier === "free" && rep.sells && <CharacterReadingOffer report={rep}
+          onContinue={() => router.push("/pay?step=d1")} />}
         {ledgerCuts.length > 0 && (
           <section className="foldgroup">
             <p className="foldhead"><b>셈 장부</b> — 근거 {ledgerCuts.length}컷</p>

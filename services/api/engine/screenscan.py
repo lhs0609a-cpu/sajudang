@@ -359,13 +359,20 @@ def _readable(chunk: str) -> str:
 
 
 # 화면 파일 — 손님이 도는 순서대로
-PAGES = ("app/page.tsx", "app/lobby/page.tsx", "app/report/[id]/page.tsx",
+PAGES = ("app/lobby/page.tsx", "app/report/[id]/page.tsx",
          "app/pay/page.tsx", "app/me/page.tsx", "app/daily/page.tsx",
          "app/relay/page.tsx", "app/summary/page.tsx",
          # ★ 공유로 건너오는 자리(s1). 이 파일이 빠져 있어서 **이 집을
          #   처음 보는 사람이 서는 화면**이 점수 밖에 있었습니다.
          #   글은 page.tsx 가 아니라 SharedView.tsx 가 들고 있습니다.
-         "app/s/[token]/SharedView.tsx")
+         "app/s/[token]/SharedView.tsx",
+         # ★ 진입부(a1~a7). 글이 `app/page.tsx` 에서 `EntryFlow.tsx` 로
+         #   옮겨 갔는데 **자가 안 따라왔습니다** (2026-09-20 · docs/45).
+         #   그 바람에 손님이 처음 읽는 여덟 화면이 통째로 점수 밖에
+         #   있었습니다 — s1 이 빠져 있던 것과 같은 자리요.
+         #   `app/page.tsx` 는 이제 흐름만 잡고 화면은 한 장도 안 그립니다 —
+         #   `<Shell screen>` 이 전부 이 파일로 옮겨 왔습니다.
+         "components/EntryFlow.tsx")
 
 
 # ★ 찍어 둔 화면 글 — 배포본에서도 점수를 내기 위해 (2026-09-03)

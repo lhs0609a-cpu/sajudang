@@ -65,9 +65,9 @@ def test_actout_belongs_to_its_own_screen():
     """a7 의 막 끝이 a6 의 점수로 올라가지 않는다."""
     S._screens.cache_clear()
     pairs = S._screens()
-    src = (WEB / "app" / "page.tsx").read_text(encoding="utf-8")
-    # The new result finishes with a concrete free-content CTA.
-    next_step = "무료 해석과 오늘의 행동"
+    src = (WEB / "components" / "EntryFlow.tsx").read_text(encoding="utf-8")
+    # 마감은 **남은 것**으로 말합니다 — 앞을 깎지 않습니다 (docs/45 §6-4).
+    next_step = "스무 사람 중"
     assert next_step in src
     assert next_step in pairs["a7"][0], "a7 이 제 다음 행동을 못 든다"
     assert next_step not in pairs["a6"][0], "a6 가 a7 의 예고를 훔쳤다"

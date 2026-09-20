@@ -2,7 +2,7 @@
 from fastapi import APIRouter, HTTPException
 
 import store
-from engine import bank, lens as lens_mod, voice as voice_mod
+from engine import bank, entry_hook, lens as lens_mod, voice as voice_mod
 from engine.features import Features
 from routers.chart import load_features
 from schemas.api import HookRequest, HookResponse
@@ -23,14 +23,14 @@ def post_hook(req: HookRequest) -> HookResponse:
     #   「copy4-hao」 가 박힌 채였으면 고친 말투가 안 나갔습니다.
     key = store.k_hook(req.chart_id, req.concern, req.axis4 or "",
                        req.lens_id or "",
-                       "%s#%d#copy5-voice5" % (req.name, req.misses))
+                       "%s#%d#copy6-voice5#%s" % (req.name, req.misses, req.edition))
     cached = store.get_json(key)
     if cached is not None:
         return HookResponse(chart_id=req.chart_id, segments=cached, cached=True)
 
     f = Features(**raw)
     try:
-        segs = bank.build_hook(
+        segs = entry_hook.build(f, req.concern, req.name, req.misses)             if req.edition == "entry2" else bank.build_hook(
             f, req.concern, req.axis4, name=req.name,
             you=lens_mod.you_word(req.lens_id, req.name, raw.get("sex")),
             misses=req.misses)
@@ -49,11 +49,23 @@ def post_hook(req: HookRequest) -> HookResponse:
     #   묻는 말과 응답 두 줄도 같이 태웁니다. 대사 세 줄 중 둘만
     #   갈면 그게 더 눈에 띕니다.
     tone = lens_mod.view(req.lens_id).get("voice")
-    if tone and tone != voice_mod.HAO:
-        for s in segs:
-            for k in ("html", "question", "yes", "no"):
-                if s.get(k):
-                    s[k] = voice_mod.speak(s[k], tone)
+    # ★ 호칭도 갈아 끼웁니다 (2026-09-20).
+    #
+    #   말투(어미)는 아래에서 갈고 있었는데 **호칭은 안 갈고** 있었습니다.
+    #   `bank.build_hook` 은 `you=` 를 받아 조립 단계에서 박는데, 진입부
+    #   훅(entry_hook)은 그 인자가 없어 「그대」로 고정이었습니다. 자네라
+    #   부르는 사람에게서도 「그대」가 나갔습니다 — 손님이 이 집에서 처음
+    #   읽는 글이라 여기서 사람이 어긋나면 뒤가 다 흔들립니다.
+    #   근거 줄은 **호칭만** 갈고 말투는 안 태웁니다 — 리포트 쪽과 같은
+    #   층입니다(`report._src_you`). 근거는 셈 장부라 집의 말로 둡니다.
+    you = lens_mod.you_word(req.lens_id, req.name, raw.get("sex"))
+    for s in segs:
+        for k in ("html", "source", "question", "yes", "no"):
+            if not s.get(k):
+                continue
+            s[k] = voice_mod.address(s[k], you)
+            if k != "source" and tone and tone != voice_mod.HAO:
+                s[k] = voice_mod.speak(s[k], tone)
 
     store.set_json(key, segs, ttl=HOOK_TTL)
     return HookResponse(chart_id=req.chart_id, segments=segs, cached=False)

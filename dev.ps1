@@ -21,6 +21,7 @@
     migrate-sqlite 로컬 SQLite 로 마이그레이션 왕복 시험
     screens        화면 연결 그래프 — 고아·막다른·죽은 버튼
     subject        ★ 주어 감사 — 누구 얘긴지 안 적힌 문장 찾기
+    entry          ★ 진입부 감사 — 값을 치르기 전에 보는 전부 (--show)
     worth          ★ 값값 점수 — 치른 값이 아깝지 않은가 (100점)
     skim           ★ 훑어읽기 — 강조만 읽어도 말이 되는가 (--show)
     same           ★ 같은 글 — 어느 자리가 스무 사람·여섯 고민에 겹치나
@@ -127,6 +128,7 @@ switch ($Task) {
   "crosscheck" { Need-Venv; Push-Location $Root; & $Py tools\crosscheck.py @Rest; Pop-Location }
   "screens" { Need-Venv; Push-Location $Root; & $Py tools\screen_graph.py; Pop-Location }
   "subject" { Need-Venv; Push-Location $Root; & $Py tools\subject_audit.py @Rest; Pop-Location }
+  "entry"   { Need-Venv; Push-Location $Root; & $Py tools\entry_audit.py @Rest; Pop-Location }
   "worth"   { Need-Venv; Push-Location $Root; & $Py tools\worth_score.py @Rest; Pop-Location }
   "skim"    { Need-Venv; Push-Location $Root; & $Py tools\skim_audit.py @Rest; Pop-Location }
   "same"    { Need-Venv; Push-Location $Root; & $Py tools\same_audit.py @Rest; Pop-Location }
@@ -170,6 +172,9 @@ switch ($Task) {
     # ★ 훑어읽기 — 강조만 읽어도 말이 되는가. 값이 오르면 훑어읽기도
     #   늘어야 합니다 (19,900원 21줄 · 0원 9.8줄).
     & $Py tools\skim_audit.py;         if ($LASTEXITCODE) { Pop-Location; exit 1 }
+    # ★ 진입부 — 값을 치르기 전에 보는 전부. 이 구간만 여태 어떤 자에도
+    #   안 걸려서, 숫자 0개짜리 480자가 몇 달을 돌았습니다 (docs/45).
+    & $Py tools\entry_audit.py;        if ($LASTEXITCODE) { Pop-Location; exit 1 }
     Pop-Location
     Write-Host "engine-check 통과" -ForegroundColor Green
     Write-Host "※ 회귀 50건은 독립 계산(crosscheck)으로 채워 잠갔습니다." -ForegroundColor Yellow

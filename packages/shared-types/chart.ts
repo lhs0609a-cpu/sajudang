@@ -199,6 +199,7 @@ export interface ChartResponse {
 
 /* ── 훅 ─────────────────────────────────────────────────── */
 export interface HookSegment {
+  response_mode?: "experience" | "continue";
   stage: string;              // "0" | "1" | "2" | "2.5" | "3"
   label: string;
   source: string | null;
@@ -215,6 +216,16 @@ export interface HookSegment {
   question: string;
   yes: string;
   no: string;
+  /**
+   * 장 이름(단계 표시용)과 다음 버튼 글. **서버가 셉니다.**
+   *
+   * ★ 화면이 `["나의 장면", "반복의 이유", "오늘의 행동"]` 을 손으로
+   *   들고 있었습니다. 장이 셋에서 넷으로 늘자 네 번째 장의 이름이
+   *   `undefined` 가 됐습니다 — 분량·컷 수를 화면이 적지 않는 것과
+   *   같은 규칙입니다.
+   */
+  nav?: string;
+  next_label?: string;
   statement_id: string;       // 응답 기록의 단위
 }
 
@@ -301,6 +312,10 @@ export interface WantRow {
 }
 
 export interface ReportResponse {
+  reading_offer?: {
+    question: string; free_ids: string[]; core_id: string | null;
+    paid_ids: string[]; free_only: boolean;
+  } | null;
   editorial?: { id:string;version:number;title:string;perspective:string;observation:string;question:string;scene:string;action:string;boundary:string;source_kind:string } | null;
   practice?: { id: string; version: number; source_kind: string; source: string; title: string; scene: string; action: string } | null;
   report_id: string;

@@ -30,6 +30,7 @@ export type EventName =
   | "web_lcp" | "web_inp" | "web_cls"
   | "flow_started" | "practice_saved" | "chart_completed"
   | "screen" | "hook_shown" | "hook_answer" | "free_shown" | "free_beat"
+  | "concern_pick" | "hour_help"
   | "topic_ask"
   | "tier_view" | "tier_pick" | "pay_start" | "pay_done" | "pay_fail"
   | "relay_take" | "relay_skip" | "share_click" | "share_land" | "drop_guess";

@@ -21,6 +21,7 @@ import NextSeats from "@/components/NextSeats";
 import PracticeCard from "@/components/PracticeCard";
 import ReadingGuide from '@/components/ReadingGuide';
 import NextReading from '@/components/NextReading';
+import CharacterReadingOffer from '@/components/CharacterReadingOffer';
 import { READING_QUESTIONS, freeRevelation } from '@/lib/reading-journey';
 import CompanionCat from "@/components/CompanionCat";
 import Scene from "@/components/scene/Scene";
@@ -461,7 +462,8 @@ function PayInner() {
               }}
             />
           )}
-          {(lens?.price ?? 0) > 0 && <div className="reading-next">
+          {free.reading_offer && <CharacterReadingOffer report={free} showFree onContinue={openPrice} />}
+          {!free.reading_offer && (lens?.price ?? 0) > 0 && <div className="reading-next">
             {rejected.length === 0 && <NextReading cuts={free.locked} />}
             <p>{rejected.length ? "맞지 않았던 해석은 접어 두고, 추가로 다루는 질문을 먼저 살펴보시오." : <>방금 읽은 패턴을 <strong>지금의 흐름</strong>과 함께 살피는 것이 다음 해석이오. 실제 내용과 가격을 확인하시오.</>}</p>
             {!SELLABLE && <p className="conversion-note">현재 유료 판매를 준비하고 있소. 무료 해석은 계속 읽을 수 있소.</p>}
@@ -470,7 +472,7 @@ function PayInner() {
           <details className="conversion-details reading-evidence" open onToggle={e => {if(e.currentTarget.open) track("reading_expand", "d0");}}>
             <summary>{rejected.length ? "원래 해석과 계산 근거" : "무료 해석의 자세한 근거"} · {cuts.length}개 항목</summary>
             {rejected.length > 0 && <p className="conversion-note">아래는 응답 전 생년월일과 고민으로 만든 원래 해석이오. 아니라고 답한 대목이 맞는 것으로 바뀐 것은 아니오.</p>}
-            {cuts.map(c => <section className="blk" key={c.id}>
+            {cuts.filter(c => !free.reading_offer?.free_ids.includes(c.id)).map(c => <section className="blk" key={c.id}>
               <CutArtwork id={c.id} title={c.title} /><ServerText as="p" className="src" html={`근거 · ${c.source}`} />
               {c.id === "sinsal" ? <SinsalSlots html={c.html} /> : <div dangerouslySetInnerHTML={{__html:c.html}} />}
             </section>)}

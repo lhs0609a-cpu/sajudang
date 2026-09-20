@@ -91,12 +91,12 @@ def test_an_ordinary_birth_is_not_flagged():
 
 def test_the_other_answer_is_shown_too():
     """감추면 숨긴 것이 된다 — 저쪽 답까지 낸다."""
-    src = (ROOT / "apps" / "web" / "app" / "page.tsx").read_text(
+    src = (ROOT / "apps" / "web" / "components" / "EntryFlow.tsx").read_text(
         encoding="utf-8")
     assert "divergence" in src, "화면이 안 받는다"
-    assert "c.alt" in src, "저쪽 답을 안 보여 준다"
+    assert ".alt" in src, "저쪽 답을 안 보여 준다"
     assert "이 서비스는 위의 첫 번째 명식으로 해석하오" in src, "어느 쪽을 쓰는지 안 밝힌다"
-    assert "c.mine" in src
+    assert ".mine" in src
 
 
 def test_doubts_has_an_answer_ready():
@@ -109,7 +109,8 @@ def test_doubts_has_an_answer_ready():
 
 def test_we_never_claim_the_other_house_is_wrong():
     """어느 쪽도 상대를 못 이긴다. 틀렸다고 하면 그건 거짓이다."""
-    for f in ("apps/web/app/page.tsx", "apps/web/components/Doubts.tsx"):
+    for f in ("apps/web/components/EntryFlow.tsx",
+              "apps/web/components/Doubts.tsx"):
         src = (ROOT / f).read_text(encoding="utf-8")
         i = src.find("만세력")
         if i < 0:
