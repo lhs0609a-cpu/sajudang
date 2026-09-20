@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from engine import entry_hook, guard, reading_offer
+from engine import entry_hook, guard, reading_offer, topic
 from engine.calendar import build_chart
 from engine.features import build_features
 from engine.report import build_report
@@ -127,8 +127,17 @@ def test_every_character_has_a_real_free_and_paid_contract(features, lens):
     if not lens["price"]:
         assert offer["free_only"] and offer["core_id"] is None and not free["locked"]
         return
-    assert 1 < len(offer["free_ids"]) <= 3
+    # ★ 무료로 여는 컷의 계약은 **개수가 아니라 관련성**입니다 (docs/45).
+    #
+    #   전에는 「둘에서 셋」이라 세었는데, 그 수를 맞추느라 물은 자리와
+    #   무관한 긴 컷이 맛보기로 나갔습니다 — 돈을 물은 사람에게
+    #   「뿌리가 있는가」(620자)가 공짜로 얹혔습니다. 양이 아니라
+    #   소음이고, 「무료와 유료가 같다」는 말이 거기서 나옵니다.
+    assert 1 <= len(offer["free_ids"]) <= 3
     assert all(any(c["id"] == cid and c["html"] for c in free["cuts"]) for cid in offer["free_ids"])
+    for cid in offer["free_ids"]:
+        body = _plain(next(c["html"] for c in free["cuts"] if c["id"] == cid))
+        assert topic.mentions(body, concern), (lens["id"], cid, "물은 자리를 안 부르오")
     assert offer["core_id"] == f"lc_{lens['id']}_ask2"
     core = next(c for c in free["locked"] if c["id"] == offer["core_id"])
     assert "html" not in core

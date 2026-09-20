@@ -1502,8 +1502,8 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     #   ★ 어느 컷을 여는가 — **물은 자리를 딛는 컷**입니다. 맨 앞엣것을
     #     열었더니 돈을 물은 사람에게 「뿌리가 있는가」 가 맛보기로
     #     나갔습니다 (tests/test_topic_reach). 없으면 맨 앞엣것으로.
-    # Free preview now includes up to three complete chapters; ask2 stays paid.
-    free_lc = reading_offer.free_character_ids(lens_id, lc_built)
+    # 무료 맛보기는 **물은 자리를 딛는 컷**만 엽니다 (docs/45). ask2 는 유료.
+    free_lc = reading_offer.free_character_ids(lens_id, lc_built, concern)
     lens_say = topic_mod.lens_line(lens_id, concern)
     for nth, lc in enumerate(lc_built):
         html = lc["html"]
