@@ -1,18 +1,50 @@
 body .phone .companion-cat {align-items:center;gap:14px}
-body .phone .companion-cat svg {width:80px;height:80px;min-width:80px;flex:0 0 80px;overflow:visible;filter:drop-shadow(0 5px 6px #0002)}
+/* ★ 안내묘가 SVG 에서 **그림(동글 달묘)** 으로 바뀌었습니다.
+   그림은 둥글게 잘라 크림색 바탕에 얹습니다 — 배경이 어두워서
+   네모난 그림을 그냥 놓으면 그 자리만 밝은 판으로 떠 보입니다. */
+body .phone .companion-cat .dalmyo-portrait {width:104px;height:104px;min-width:104px;flex:0 0 104px;object-fit:contain;border-radius:50%;background:#f5ead6;border:1px solid #ddc49365;box-shadow:0 3px 12px #0002}
+.companion-cat--welcome .dalmyo-portrait,.companion-cat--selected .dalmyo-portrait,.companion-cat--saved .dalmyo-portrait {animation:dalmyo-greet .7s ease-out 1;transform-origin:50% 90%}
+@keyframes dalmyo-greet {0%,100%{transform:rotate(0)}35%{transform:rotate(-5deg)}70%{transform:rotate(3deg)}}
 .hamyo-speech {position:relative;min-width:0;flex:1;padding:13px 15px;background:#ddc4930b;border:1px solid #ddc49323;border-radius:16px 16px 16px 4px}
 .hamyo-name {display:block;font:500 11px/1.5 var(--sans);color:#d0bd9a;letter-spacing:.03em;margin-bottom:5px}
+/* ★ 폰에서 11px 로 그려져 안 읽혔습니다 (tools/mobile_render.py).
+   atelier.css 에서 올려 봤자 이 파일이 뒤에 실려 덮습니다 —
+   덮는 자리에서 고쳐야 합니다 (globals.css 의 @import 차례). */
+@media(max-width:600px){.hamyo-name {font-size:12px}}
 body .phone .hamyo-speech p {font:400 14px/1.75 var(--sans);color:var(--paper);margin:0;word-break:keep-all;overflow-wrap:break-word}
-.hamyo-paw {transform-box:fill-box;transform-origin:50% 95%}
-.companion-cat--welcome .hamyo-paw {animation:hamyo-wave .55s ease-in-out 2}
-.companion-cat--saved .hamyo-heart {animation:hamyo-love .7s ease-out 1}
-@keyframes hamyo-wave {0%,100%{transform:rotate(0)}50%{transform:rotate(-18deg)}}
-@keyframes hamyo-love {0%{opacity:0;transform:translateY(4px)}100%{opacity:1;transform:translateY(0)}}
 @media(max-width:767px) {
   body .phone .companion-cat {gap:10px}
-  body .phone .companion-cat svg {width:72px;height:72px;min-width:72px;flex-basis:72px}
+  body .phone .companion-cat .dalmyo-portrait {width:88px;height:88px;min-width:88px;flex-basis:88px}
   .hamyo-speech {padding:11px 12px}
 }
 @media(prefers-reduced-motion:reduce) {
-  .companion-cat .hamyo-paw,.companion-cat .hamyo-heart,.companion-cat--selected svg,.companion-cat--saved svg {animation:none!important}
+  .companion-cat .dalmyo-portrait {animation:none!important}
 }
+
+
+/* ══════════ 폰에서 12px 아래로 그려지던 글 ══════════
+   (2026-09-15 · tools/mobile_render.py)
+
+   ★ 처음에는 **한 줄로 바닥을 깔았습니다** — 폰의 모든 글에
+     `font-size:max(12px,1em)`. 그랬더니 캐릭터 카드 글이 넓어져
+     360px 화면에서 **365px 로 삐져나왔습니다.** 바닥을 까는 것은
+     쉽지만, 좁은 칸에 든 글까지 같이 키우면 칸이 터집니다.
+
+     그래서 자리를 짚어 올립니다. 카드 안(.op.face)은 이미 12px 로
+     맞춰져 있으니 건드리지 않습니다. */
+@media(max-width:600px){
+  /* 화면 이름 줄 · 캐릭터 별명 · 브랜드 곁말 — 칸이 넉넉한 자리들 */
+  .hamyo-name {font-size:12px}
+  /* ★ `.arch`(캐릭터 별명)는 **안 올립니다.** 11 → 12px 로 올렸더니
+     얼굴 카드 글이 넓어져 360px 화면에서 365px 로 삐져나왔습니다
+     (삐짐 0 → 6). 좁은 칸에 든 글은 키우면 칸이 터집니다 —
+     여기서는 읽히는 것보다 안 깨지는 것이 먼저입니다. */
+  .brand-rail small,.brand-signature small {font-size:12px}
+  .phone .top .tt,.phone .top .tb {font-size:12px}
+}
+
+
+/* 오늘의 일진 다섯 줄 — 사이를 띄웁니다.
+   ★ 전에는 화면이 `style={{marginTop:8}}` 로 손으로 줬는데, 그 줄을
+     `ServerText` 로 바꾸면서 자리를 잃었습니다. 간격은 원래 CSS 몫이오. */
+.phone .say p + p { margin-top: 8px; }

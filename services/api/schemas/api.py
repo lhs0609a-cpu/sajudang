@@ -110,7 +110,6 @@ class ReportRequest(BaseModel):
 
 
 class ReportResponse(BaseModel):
-    reading: Optional[dict] = None
     editorial: Optional[dict] = None
     practice: Optional[dict] = None
     report_id: str
@@ -190,8 +189,6 @@ class FeedbackResponse(BaseModel):
 
 
 class DailyResponse(BaseModel):
-    plain: list[str] = Field(default_factory=list)
-    practice: Optional[dict] = None
     date: str
     gz: str
     gan: str

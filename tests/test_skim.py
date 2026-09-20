@@ -160,9 +160,18 @@ def test_underline_is_only_a_prescription():
 
       말투 층을 지난 뒤라 어미는 캐릭터마다 다릅니다. 그래서 여기서는
       **시키는 말의 꼴**만 봅니다 — 어느 말투든 이 중 하나로 끝납니다.
+
+    ★ 반말은 꼬리로 못 셉니다 (2026-09-17).
+
+      반말 시키는 말은 **해체**라 어간에 아/어가 붙습니다 — 둬 · 적어 ·
+      끊어 · 봐. 꼴이 정해져 있지 않으니 목록으로는 못 셉니다. 밑줄
+      자리는 말투 층 **앞에서** 잡으므로(skim.find_do), 반말 캐릭터는
+      「하오체로 잡혔는가」 를 대신 봅니다.
     """
     ok = ("시오", "십시오", "세요", "게", "지", "게나", "거라", "오")
     for lens, rep in _reports():
+        if lens_mod.view(lens["id"])["voice"] == "banmal":
+            continue
         for c in rep["cuts"]:
             for u in U.findall(c["html"] or ""):
                 body = TAG.sub("", u).strip().rstrip(".!? ")

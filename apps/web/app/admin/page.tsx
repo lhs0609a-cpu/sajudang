@@ -1,5 +1,4 @@
 "use client";
-import ValueAuditPanel from '@/components/ValueAuditPanel';
 
 /**
  * /admin — 주인 화면.
@@ -19,7 +18,7 @@ import ValueAuditPanel from '@/components/ValueAuditPanel';
  *   유저 모드로 넘기면 레일이 사라지고 손님이 보는 그대로가 됩니다.
  *   되돌아오는 길은 이 화면 주소를 아는 사람에게만 있습니다.
  */
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SCREEN_GROUPS, useSession } from "@/lib/store";
@@ -112,9 +111,6 @@ type WorthAxis = {
   score: number; parts?: WorthPart[]; why?: string; source?: string;
 };
 type Worth = {
-  interpretation_checks?: { cases: number; reports: number; claims: number; empty_reports: number; passed: boolean;
-    rejection_checks: number; rejection_passed: number; rules_covered: string[]; rules_total: number;
-    errors: { case: string; error: string }[]; note: string };
   at: string;
   total: number;
   /** 돈 번 느낌 · 안 아깝다 · 돈값은 한다 · 아깝다 · 못 판다 */
@@ -199,11 +195,6 @@ export default function AdminPage() {
   const [drama, setDrama] = useState<Drama | null>(null);
   /* 값값 점수 — 치른 값이 아깝지 않은가 (engine/worth.py). */
   const [worth, setWorth] = useState<Worth | null>(null);
-  const [readerFeedback, setReaderFeedback] = useState<{
-    samples: number; limited: boolean; note: string;
-    editions: Record<string, { samples: number; paid_samples: number;
-      dimensions: Record<string, { yes: number; partly: number; no: number }> }>;
-  } | null>(null);
   const [openRow, setOpenRow] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -255,12 +246,8 @@ export default function AdminPage() {
       .catch(() => setGate({ login: false, key: true }));
   }, []);
 
-  const pendingLoads = useRef(new Set<string>());
   const load = useCallback(async (k: string, t: string, quiet = false) => {
     if (!k && !t) return;
-    const requestKey = JSON.stringify([k, t]);
-    if (pendingLoads.current.has(requestKey)) return;
-    pendingLoads.current.add(requestKey);
     // 되풀이해 묻는 자리에서는 「세는 중이오…」 를 안 띄웁니다.
     // 5초마다 글자가 바뀌면 읽고 있는 표가 흔들립니다.
     if (!quiet) setBusy(true);
@@ -302,10 +289,6 @@ export default function AdminPage() {
       } catch {
         setWorth(null);
       }
-      try {
-        const feedback = await fetch(BASE + "/v1/admin/reading-evaluation", { headers: head(k, t) });
-        setReaderFeedback(feedback.ok ? await feedback.json() : null);
-      } catch { setReaderFeedback(null); }
     } catch (e) {
       setErr(e instanceof Error ? e.message : "가져오지 못했소.");
       // ★ 되풀이해 묻다 한 번 실패했다고 표를 지우지 않소.
@@ -313,7 +296,6 @@ export default function AdminPage() {
       //   잃습니다. 이미 받아 둔 것은 그대로 두고 오류만 적습니다.
       if (!quiet) setData(null);
     } finally {
-      pendingLoads.current.delete(requestKey);
       setBusy(false);
     }
   }, []);
@@ -496,32 +478,8 @@ export default function AdminPage() {
       {/* ── 값값 ─────────────────────────────────────────
           ★ 「돈」 위에 둡니다. 매출은 어제 일이고 이건 **지금 파는
             물건의 상태**라, 주인이 열자마자 봐야 하는 것이 이쪽입니다. */}
-      <ValueAuditPanel adminKey={key} token={token}/>
-      {readerFeedback && <section className="conversion-card">
-        <h2>실제 독자의 풀이 평가</h2>
-        <p>{readerFeedback.samples === 0 ? "아직 접수된 평가가 없습니다." : `접수된 평가 ${readerFeedback.samples}건`}</p>
-        {Object.entries(readerFeedback.editions).map(([version, edition]) => <div key={version}>
-          <h3>풀이 버전 {version} · {edition.samples}건 · 결제 확인 {edition.paid_samples}건</h3>
-          <table className="tbl"><thead><tr><th>항목</th><th>그렇다</th><th>일부</th><th>아니다</th></tr></thead>
-            <tbody>{Object.entries(edition.dimensions).map(([key, count]) => <tr key={key}>
-              <th>{({clarity:"쉬운 이해", recognition:"개인적 공감", comfort:"위로", usefulness:"실행 가능성"} as Record<string, string>)[key] ?? key}</th>
-              <td>{count.yes}</td><td>{count.partly}</td><td>{count.no}</td>
-            </tr>)}</tbody></table>
-        </div>)}
-        <p className="sm">{readerFeedback.note}</p>
-        {readerFeedback.limited && <p>조회 상한 5,000건에 도달했습니다. 전체 응답 수와 다를 수 있습니다.</p>}
-      </section>}
       {worth && (
         <section>
-          {worth.interpretation_checks && <div className="conversion-card">
-            <h2>해석 근거·답변 반영 검사</h2>
-            <p>{worth.interpretation_checks.passed ? "자동 검사 통과" : "검토가 필요한 항목 있음"} · 합성 명식 {worth.interpretation_checks.cases}건 / 풀이 {worth.interpretation_checks.reports}건</p>
-            <p>근거를 연결한 결론 {worth.interpretation_checks.claims}개 · 사용된 관계 규칙 {worth.interpretation_checks.rules_covered.length}/{worth.interpretation_checks.rules_total}</p>
-            <p>핵심 가설을 선택하지 못한 풀이 {worth.interpretation_checks.empty_reports}건 · 규칙과 실제 사례를 더 검토할 대상입니다.</p>
-            <p>경험과 다른 결론 제외 {worth.interpretation_checks.rejection_passed}/{worth.interpretation_checks.rejection_checks}</p>
-            <p className="sm">{worth.interpretation_checks.note}</p>
-            {worth.interpretation_checks.errors.map((error, index) => <p key={index}>{error.case} · {error.error}</p>)}
-          </div>}
           <h2>자동 문장 검사 · v2</h2>
           <p className="sm">문장 중복·출처 표기·분량을 검사하는 내부 지표이오. 실제 고객 만족도, 사주 정확도, 결제율을 뜻하지 않소.</p>
           <p className="sm">문장 표본: 고정 명식 6개 × 고민 6개, 월하 렌즈. 가격·분량 축은 같은 명식의 유료 캐릭터를 비교하오. 전체 사용자나 모든 해석의 품질을 대표하지 않소.</p>
@@ -802,7 +760,6 @@ export default function AdminPage() {
               ★ 표는 **낮은 것부터**. 좋은 것부터 보여 주면 고칠 자리가
                 아래로 밀려 안 봅니다.
             */}
-            <div style={{overflowX: "auto", maxWidth: "100%"}} tabIndex={0} role="region" aria-label="화면별 연출 점수표 · 좌우로 이동">
             <table className="admt drama">
               <thead>
                 <tr>
@@ -850,7 +807,6 @@ export default function AdminPage() {
                 ))}
               </tbody>
             </table>
-            </div>
             <p className="sm">
               줄을 누르면 <b>무엇이 모자란지</b> 나오오.
               점수는 지어낸 값이 아니라 <b>지금 나가는 글</b>을 그 자리에서
@@ -867,7 +823,7 @@ export default function AdminPage() {
         <h2>어디서 나가는가 · 진입 동선 v2</h2>
         {data?.funnel?.goal && <div className="conversion-card">
           <h3>구매율 목표 {data.funnel.goal.target_percent}% · 1만 유입당 500구매</h3>
-          <p>{data.funnel.goal.conversion === null ? "7일 관찰이 끝난 방문이 아직 없소." : `관찰 완료 ${data.funnel.goal.visitors.toLocaleString()}개 브라우저 중 서버 승인 ${data.funnel.goal.buyers.toLocaleString()}개 · 실제 전환 ${data.funnel.goal.conversion}%`}</p>
+          <p>{data.funnel.goal.conversion === null ? "7일 관찰이 끝난 방문이 아직 없소." : `관찰 완료 ${data.funnel.goal.visitors.toLocaleString()}개 · 서버 승인 ${data.funnel.goal.buyers.toLocaleString()}개 · 실제 전환 ${data.funnel.goal.conversion}%`}</p>
           {data.funnel.goal.conversion !== null && <p className="sm">이 관찰 집단에서 목표까지 {data.funnel.goal.additional_buyers_needed.toLocaleString()}개 구매가 더 필요하오. 미래 구매율 예측이나 달성 보장은 아니오.</p>}
           <p className="sm">중간 화면 이벤트가 누락돼도 서버 승인이 확인되면 목표 집계에는 포함하오. 아래 순차 동선 표와 구매 수가 다를 수 있소. 익명 브라우저 기준이며 같은 사람의 여러 기기는 구분되오.</p>
         </div>}

@@ -21,15 +21,15 @@ from .constants import ELEMENT_OF_GAN
 
 ILGAN_ONE = {
     "甲": "방향을 정하면 되돌리지 않는 사람",
-    "乙": "벽을 만나면 타고 오르는 사람",
-    "丙": "숨기려 해도 표면으로 올라오는 사람",
-    "丁": "넓게 대신 깊이 비추는 사람",
+    "乙": "막히면 돌아서라도 끝내 올라가는 사람",
+    "丙": "숨기려 해도 겉으로 다 드러나는 사람",
+    "丁": "넓게보다 깊게 비추는 사람",
     "戊": "먼저 나서지 않고 끝까지 남는 사람",
     "己": "맡으면 결국 자라게 하는 사람",
-    "庚": "애매한 상태를 못 견디는 사람",
+    "庚": "이도 저도 아닌 걸 못 견디는 사람",
     "辛": "남들이 넘기는 1mm가 보이는 사람",
-    "壬": "흐르고 있을 때 가장 자기다운 사람",
-    "癸": "알아챘을 땐 이미 안에 있는 사람",
+    "壬": "움직이고 있을 때 가장 자기다운 사람",
+    "癸": "모르는 새 스며들어 곁에 와 있는 사람",
 }
 ILGAN_NAME = {
     "甲": "거목의 수호기사", "乙": "덩굴의 책사", "丙": "태양의 성기사",
@@ -84,7 +84,7 @@ def three_lines(f, concern: str) -> list:
     return [
         "%s %s밖에 없소. %s." % (element_word(f.weak_el),
                               f.elements[f.weak_el], rs["t"]),
-        "힘은 %s 쪽으로 나가오. %s." % (f.flow, fl["t"].rstrip(",")),
+        "그대 힘은 주로 %s에 쓰이오. %s." % (f.flow, fl["t"].rstrip(",")),
         name,
     ]
 
@@ -111,12 +111,12 @@ def build_summary(chart, f, concern: str = "love",
             "".join('<div class="p"><span class="lb">%s</span><b>%s</b></div>'
                     % (p["label"], p["gz"]) for p in f.pillars),
             "" if f.hour_known else
-            '<p class="sm">때를 모르셔서 세 기둥으로 셈했소. 시주는 비워 두었소.</p>')))
+            '<p class="sm">태어난 시각을 모르셔서 세 기둥(여섯 글자)으로 셈했소. 시주는 비워 두었소.</p>')))
 
     # ② 저울 — 오행
     order = sorted(f.elements.items(), key=lambda x: -x[1])
     secs.append(_sec(
-        "balance", "저울",
+        "balance", "많은 것과 모자란 것",
         "가장 강한 것 %s · 가장 약한 것 %s"
         % (element_word(f.strong_el), " · ".join(element_word(x) for x in f.weak_els)),
         '<div class="scale">%s</div><p class="tale">%s</p>' % (
@@ -124,7 +124,7 @@ def build_summary(chart, f, concern: str = "love",
                     '<span class="v">%s</span></div>'
                     % (element_word(k), min(100, int(v / max(1.0, order[0][1]) * 100)), v)
                     for k, v in order),
-            "%s %s밖에 없는 것이 이 사주의 중심이오."
+            "%s %s밖에 없다는 것 — 이것이 이 사주에서 가장 중요한 점이오."
             % (josa(element_word(f.weak_el), "이", "가"), f.elements[f.weak_el]))))
 
     # ③ 순서 — 훅 2단을 그대로
@@ -136,12 +136,12 @@ def build_summary(chart, f, concern: str = "love",
 
     # ④ 지금 어디에 — 대운
     d = f.daeun[f.daeun_now]
-    lead = ("지금은 <b>%s</b> 대운이오. %d세부터." % (d["gz"], d["start_age"])
+    lead = ("지금은 <b>%s</b> 대운이오. %d세에 시작했소." % (d["gz"], d["start_age"])
             if f.daeun_started else
-            "아직 첫 대운에 들지 않았소. <b>%s</b> 대운은 %d세부터요."
+            "아직 첫 대운이 시작되지 않았소. <b>%s</b> 대운은 %d세부터요."
             % (d["gz"], d["start_age"]))
     secs.append(_sec(
-        "when", "지금 어디에",
+        "when", "지금은 어느 십 년인가",
         "대운 %s · %s · %s" % (d["gz"], f.daeun_ten_god,
                              "순행" if f.forward else "역행"),
         '<p class="tale">%s</p><div class="dmap">%s</div>' % (
@@ -165,17 +165,18 @@ def build_summary(chart, f, concern: str = "love",
                         % (" · ".join(names), h["pillar"], h["who"], h["kind"]))
         body = "".join(rows)
     else:
-        body = '<p class="tale">길신이 앉은 자리가 없소. 사람 손을 덜 타는 배치요.</p>'
+        body = ('<p class="tale">좋게 보던 이름이 붙은 기둥이 없소. '
+                '남의 손을 덜 빌리고 제 힘으로 가는 사주라는 말이오.</p>')
     secs.append(_sec("helper", "누가 돕는가",
                      "신살 %d · 공망 %s" % (len(f.sinsal), f.gongmang), body))
 
     # ⑥ 뿌리 — 조상 자리
     a = f.ancestor
     secs.append(_sec(
-        "root", "뿌리",
+        "root", "집안에서 물려받은 것",
         "년주 %s · %s" % (a["pillar"], a["stance"]),
-        '<p class="tale">년주 <b>%s</b> — 위는 %s, 아래는 %s요.</p>'
-        '<p class="tale">물려받은 결이라 보던 것은 <b>%s</b> 쪽이오.</p>'
+        '<p class="tale">태어난 해의 두 글자 <b>%s</b> — 윗글자는 %s, 아랫글자는 %s요.</p>'
+        '<p class="tale">옛사람들이 집안에서 물려받았다고 보던 글자는 <b>%s</b>에 드오.</p>'
         % (a["pillar"], a["gan_ten_god"], a["ji_ten_god"], a["inherited"])))
 
     # ⑦ 필요한 것
@@ -198,7 +199,14 @@ def build_summary(chart, f, concern: str = "love",
         #   이름은 사람이 기억하는 한 줄이고, 수는 남에게 옮길 거리입니다.
         "name_word": name_word(f),
         "rarity": rarity_bit(f, "full"),
-        "three_lines": lines,
+        # ★ 훑어읽기 — 셋째 줄이 결론이오 (2026-09-16).
+        #
+        #   세 줄은 ①없는 것 ②힘이 나가는 곳 ③**그래서 붙는 이름**
+        #   으로 지어져 있습니다(`three_lines` 머리말). 셋째가 앞의
+        #   둘을 받는 자리라, 한 줄만 읽는 손님이 가져갈 것은 그것이오.
+        #   짐작이 아니라 **지어진 차례**입니다.
+        "three_lines": ([lines[0], lines[1], "<mark>%s</mark>" % lines[2]]
+                        if len(lines) >= 3 else lines),
         "strength": f.strength,
         "flow": f.flow,
         "weak_el": f.weak_el,
@@ -218,16 +226,17 @@ def _caveats(f) -> list:
     """
     out = []
     if not f.hour_known:
-        out.append("때를 몰라 세 기둥으로 셈했소. 시주가 들어가면 결과가 달라지오.")
+        out.append("태어난 시각을 몰라 세 기둥으로 셈했소. 시각을 알면 결과가 달라지오.")
     if f.top_ten_god_tied:
-        out.append("주도 십신이 다른 것과 개수가 같았소. 월지에 뿌리를 둔 쪽으로 잡았소.")
+        out.append("가장 많은 십신이 둘 이상 개수가 같았소. "
+                   "그중 태어난 달의 아랫글자와 이어진 것을 골랐소.")
     if len(f.weak_els) > 1:
-        out.append("가장 약한 오행이 둘이오: %s."
+        out.append("가장 약한 것이 둘이오 — %s."
                    % " · ".join(element_word(x) for x in f.weak_els))
     if f.correction.get("boundary_note"):
         out.append(f.correction["boundary_note"])
-    out.append("이 글은 전통 명리 해석에 기반한 자기이해용이오. "
-               "무엇이 일어난다고 말하지 않소.")
+    out.append("이 글은 옛날부터 내려온 사주 풀이로 그대를 돌아보라고 쓴 것이오. "
+               "앞으로 무엇이 일어난다고 말하지 않소.")
     return out
 
 

@@ -4,7 +4,7 @@ POST /v1/review   — 별점·후기. '결제 확인됨' 은 **주문 기록이*
 
 ★ 이게 쌓여야 공감률을 화면에 띄울 수 있습니다. 100건 미만이면 안 띄웁니다.
 """
-from typing import Optional, Literal
+from typing import Optional
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
@@ -15,61 +15,6 @@ from routers.chart import load_features
 from schemas.api import FeedbackRequest, FeedbackResponse
 
 router = APIRouter(prefix="/v1", tags=["feedback"])
-
-
-class PageEvaluationRequest(BaseModel):
-    model_config = {'extra':'forbid'}
-    session_id: str = Field(min_length=8,max_length=128)
-    page_id: str = Field(min_length=1,max_length=64)
-    ease: int = Field(ge=1,le=7)
-    success: Literal['yes','partly','no']
-
-
-@router.post('/page-evaluation')
-def page_evaluation(req:PageEvaluationRequest):
-    from engine import page_evaluation as evaluation
-    if req.page_id not in evaluation.PAGE_IDS:
-        raise HTTPException(422,'평가할 수 없는 화면입니다.')
-    evaluation.record(req.session_id,req.page_id,req.ease,req.success)
-    return {'ok':True}
-
-
-class ReadingEvaluationRequest(BaseModel):
-    model_config = {'extra': 'forbid'}
-    chart_id: str = Field(min_length=1, max_length=128)
-    session_id: str = Field(min_length=8, max_length=128)
-    lens_id: str = Field(min_length=1, max_length=32)
-    version: int = Field(ge=1)
-    clarity: Literal['yes', 'partly', 'no']
-    recognition: Literal['yes', 'partly', 'no']
-    comfort: Literal['yes', 'partly', 'no']
-    usefulness: Literal['yes', 'partly', 'no']
-    concern: Literal['work','money','love','people','dir','health'] = 'dir'
-    scope: Literal['book','focus'] = 'focus'
-    result_key: str = Field(default='legacy',pattern=r'^(legacy|[a-f0-9]{20})$')
-    value_for_money: Optional[int] = Field(default=None,ge=1,le=5)
-
-
-@router.post('/reading-evaluation')
-def reading_evaluation(req: ReadingEvaluationRequest):
-    from engine import interpretation, reading_evaluation as evaluation
-    from routers.report import entitled_tier
-    load_features(req.chart_id)
-    try:
-        character = lens_mod.get(req.lens_id)
-    except lens_mod.LensError:
-        raise HTTPException(status_code=404, detail='모르는 캐릭터입니다.')
-    if not character.get('released'):
-        raise HTTPException(status_code=404, detail='공개되지 않은 캐릭터입니다.')
-    if req.version != interpretation.VERSION:
-        raise HTTPException(status_code=409, detail='풀이가 바뀌었습니다. 새 풀이를 읽은 뒤 알려주세요.')
-    verified = evaluation.purchased(req.session_id,req.lens_id)
-    if req.value_for_money is not None and not verified:
-        raise HTTPException(422,'결제 이력을 확인할 수 없습니다. 가격 대비 문항을 비우거나 구매한 브라우저에서 평가해 주세요.')
-    evaluation.record(req.session_id, req.chart_id, req.lens_id, req.version,
-        {d:getattr(req,d) for d in evaluation.DIMENSIONS}, verified,
-        dict(concern=req.concern,scope=req.scope,result_key=req.result_key,value_for_money=req.value_for_money))
-    return {'ok': True}
 
 
 @router.post("/feedback", response_model=FeedbackResponse)

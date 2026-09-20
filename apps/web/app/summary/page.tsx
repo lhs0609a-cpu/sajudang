@@ -21,8 +21,8 @@ import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/store";
 import { useScreen } from "@/lib/track";
 import type { Summary } from "@shared/chart";
-import ReadingAnalysis from '@/components/ReadingAnalysis';
-import {readingContext} from '@/lib/reading-context';
+import ServerText from "@/components/ServerText";
+import { CutArtwork, ElementArtwork } from "@/components/ReadingArtwork";
 
 const EL_WORD: Record<string, string> = {
   목: "나무", 화: "불", 토: "흙", 금: "쇠", 수: "물",
@@ -40,11 +40,6 @@ export default function SummaryPage() {
   } | null>(null);
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [copyError,setCopyError]=useState('');
-  const [extras,setExtras]=useState<Record<string,unknown>|null>(null);
-  const identity=`${s.chartId}:${s.concern}:${s.cur}`;
-  const [seenIdentity,setSeenIdentity]=useState(identity);
-  if(identity!==seenIdentity){setSeenIdentity(identity);setExtras(null);setSm(null);setErr(null);setShare(null);setCopied(false);setCopyError('');}
 
   useEffect(() => {
     if (!s.chartId) return;
@@ -52,20 +47,20 @@ export default function SummaryPage() {
     api
       .summary({
         chart_id: s.chartId, concern: s.concern, axis4: s.axis4,
-        lens_id: s.cur, name: s.name, extras:extras??readingContext(s.chartId,s.concern),
+        lens_id: s.cur, name: s.name,
       })
       .then((d) => { if (alive) setSm(d); })
       .catch((e) => {
         if (alive) setErr(e instanceof ApiError ? e.message : "분석지를 펴지 못했소.");
       });
     return () => { alive = false; };
-  }, [s.chartId, s.concern, s.axis4, s.cur, s.name, retry,extras]);
+  }, [s.chartId, s.concern, s.axis4, s.cur, s.name, retry]);
 
   if (!s.chartId) {
     return (
       <Shell screen="c7" title="분석지">
         <Narration lines={["먼저 글자를 세워야 하오."]} />
-        <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 보겠소</button>
+        <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 보겠습니다</button>
       </Shell>
     );
   }
@@ -78,6 +73,10 @@ export default function SummaryPage() {
 
   return (
     <Shell screen="c7" title="분석지" legal>
+      {/* ★ 울림 45 · 콜드 오픈 0. 지문으로 열고, 이 종이를 누가
+          무엇 때문에 들고 가는지를 한 줄로 짚습니다. */}
+      <Narration lines={["종이 한 장이 마지막으로 접혔다."]} />
+      <p className="sm">여태 참고 미뤄 둔 것을 오늘 한 번 세어 보셨소. 이 한 장은 그 셈을 접어 둔 것이오 — 주머니에 넣어 두는 자와 같은 것이오.</p>
       <header className="editorial-heading"><p className="conversion-kicker">그대의 이야기 한 장</p><h1>마음에 남은 것만<br/>가만히 챙겨 가시오.</h1><p>읽어낸 근거와 중요한 단서를 한 장에 모았소.</p></header>
       <Scene id="scroll" className="hero" />
       {/*
@@ -92,12 +91,12 @@ export default function SummaryPage() {
           여기 적는 건 전부 이 화면이 이미 아는 사실입니다.
           해석을 더 붙이지 않습니다 — 그건 아래 칸이 합니다.
       */}
-      <Narration lines={["종이 한 장이 상 위에 펴져 있소.",
-                         "먹이 아직 덜 말랐소."]} />
+      <Narration lines={["종이 한 장이 상 위에 펴져 있다.",
+                         "먹이 아직 덜 말랐다."]} />
       <Say who="도령" lens="pungun">
         이건 그대가 들고 나가는 한 장이오.
         <br />
-        여기 적힌 건 {s.hourKnown ? "기둥 4자리의 8글자" : "시주를 제외한 기둥 3자리의 6글자"}와,
+        여기 적힌 건 {s.hourKnown ? "기둥 4자리의 8글자" : "시주(태어난 시의 두 글자)를 뺀 기둥 3자리의 6글자"}와,
         그 명식에서 읽은 세 줄이오.
           <br />
         칸마다 <b>근거 줄</b>을 달아 두었소 — 무엇을 보고 한 말인지
@@ -114,21 +113,22 @@ export default function SummaryPage() {
         편지처럼, 시간이 지나면 그냥 없어지는 것이오.
       </Say>
 
-      {sm.reading&&<ReadingAnalysis reading={sm.reading} onSubmit={setExtras}/>}
-      <details className="reading-source-book"><summary>공유에 담기는 기본 분석지와 사주 근거</summary>
-      <p className="sm">상담 답변을 반영한 이야기와 직접 적은 실행 카드는 공유에 담기지 않습니다.</p>
       {/* 표지 — 카드로 잘라 나가는 부분 */}
       <div className="card sumhead">
         <p className="sm">성신당 星辰堂</p>
         <p className="gz">{sm.day_gan} · {sm.ilgan_name}</p>
+        <div className="summary-element-art"><ElementArtwork element={sm.yongsin} /><span>해석에서 살펴본 기운 · {EL_WORD[sm.yongsin] ?? sm.yongsin}</span></div>
         <p className="hl">{sm.headline}</p>
         <div className="three">
+          {/* ★ 서버 글은 **그려야** 하오. 셋째 줄에 형광펜이 붙어 오는데
+              (engine/summary) 글자로 꽂으면 손님 눈에 꺾쇠가 보입니다 —
+              근거 줄에서 한 번 겪은 자리요 (2026-09-16). */}
           {sm.three_lines.map((l, i) => (
-            <p key={i}><span className="n">{i + 1}</span>{l}</p>
+            <p key={i}><span className="n">{i + 1}</span><ServerText html={l} /></p>
           ))}
         </div>
         <p className="sm">
-          {sm.strength} · 흐름 {sm.flow} · 비교적 약한 것 {EL_WORD[sm.weak_el]} ·
+          {sm.strength} · 흐름 {sm.flow} · 없는 것 {EL_WORD[sm.weak_el]} ·
           필요한 것 {EL_WORD[sm.yongsin]}
         </p>
       </div>
@@ -136,8 +136,8 @@ export default function SummaryPage() {
       {/* 본문 */}
       {sm.sections.map((sec) => (
         <div className="blk in" key={sec.id}>
-          <div className="lab">{sec.title}</div>
-          <span className="src">근거 · {sec.source}</span>
+          <CutArtwork id={sec.id} title={sec.title} />
+          <ServerText className="src" html={`근거 · ${sec.source}`} />
           <div dangerouslySetInnerHTML={{ __html: sec.html }} />
         </div>
       ))}
@@ -156,7 +156,6 @@ export default function SummaryPage() {
         </div>
       )}
 
-      </details>
       {/* ★ 단서 — 접지 않는다 */}
       <div className="caveat">
         <div className="lab">셈에서 흐린 부분</div>
@@ -196,13 +195,12 @@ export default function SummaryPage() {
               <div className="k">링크</div>
               <p className="mono" style={{ wordBreak: "break-all" }}>{shareUrl}</p>
             </div>
-            <button className="btn mt" onClick={async () => {
-              try {await navigator.clipboard.writeText(shareUrl);setCopied(true);setCopyError('');}
-              catch {setCopied(false);setCopyError('복사하지 못했소. 표시된 링크를 직접 선택해 복사할 수 있소.');}
+            <button className="btn mt" onClick={() => {
+              void navigator.clipboard?.writeText(shareUrl);
+              setCopied(true);
             }}>
-              {copied ? "베꼈소" : "링크 베끼기"}
+              {copied ? "베꼈습니다" : "링크 베끼기"}
             </button>
-            {copyError&&<p role="alert">{copyError}</p>}
             <p className="sm mt">담기는 것 · {share.includes.join(" · ")}</p>
             <p className="sm">담기지 않는 것 · {share.excludes.join(" · ")}</p>
             <p className="sm">{share.expires_days}일이 지나면 링크가 스스로 닫히오.</p>
@@ -210,6 +208,21 @@ export default function SummaryPage() {
         )}
       </div>
 
+      {/*
+        ★ 명확 69 · 비유 52 로 값을 치른 사람이 **들고 나가는** 한 장이
+          가장 낮았습니다. 컷마다 근거는 달려 있는데(위 `sec.source`)
+          그건 서버 글이라, 화면 제 말에는 이 한 장이 무엇을 접어 둔
+          것인지가 없었습니다. 그림이 그려지는 줄도 하나뿐이었습니다.
+      */}
+      <span className="src">
+        근거 · 이 한 장은 <b>4기둥 8글자</b>에서 나온 셈만 접어 둔 것이오 ·
+        생년월일시와 고을은 한 자도 안 담기오 〔분석지 · 공유 payload〕
+      </span>
+      <p className="sm">
+        <mark>여덟 글자는 그대로 두고 <b>읽은 자리</b>만 옮겨 적은 것이오</mark> —
+        먼 길 떠나기 전에 지도에서 갈 데만 베껴 그리는 셈이오.
+        접어서 주머니에 넣고 다니다가, 마음이 걸릴 때 한 번 펴 보시오.
+      </p>
       <ActOut kind="끊긴 동작" next="이어지는 자리">
         한 장에 담기는 것은 <b>여덟 글자와 읽은 자리</b>뿐이오.
         생년월일시도, 태어난 고을도 안 담기오.<br />

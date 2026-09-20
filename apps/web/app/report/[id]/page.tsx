@@ -14,12 +14,10 @@ import Scene from "@/components/scene/Scene";
 import ExtraAsk from "@/components/ExtraAsk";
 import VisualConsultation from "@/components/VisualConsultation";
 import TopicAsk from "@/components/TopicAsk";
+import ProbeAsk, { type ProbeSpec } from "@/components/ProbeAsk";
 import Reveal from "@/components/Reveal";
-import Fold from "@/components/Fold";
 import ReadingGuide from '@/components/ReadingGuide';
-import ReadingAnalysis from '@/components/ReadingAnalysis';
-import {readingContext} from '@/lib/reading-context';
-import Link from 'next/link';
+import { CutArtwork, ReadingPath } from '@/components/ReadingArtwork';
 import ScrollHint from "@/components/ScrollHint";
 import SinsalSlots from "@/components/SinsalSlots";
 import Thinking from "@/components/Thinking";
@@ -30,6 +28,7 @@ import { LENS_BY_ID, youOf } from "@/lib/lenses";
 import { useSession } from "@/lib/store";
 import { thinkOf } from "@/lib/think";
 import type { ReportResponse } from "@shared/chart";
+import ServerText from "@/components/ServerText";
 
 type Tab = "c1" | "c2" | "c3" | "c4" | "c5" | "c6";
 
@@ -44,8 +43,11 @@ const TABS: Tab[] = ["c1", "c2", "c3", "c4", "c5", "c6"];
  */
 const OPENING_BEATS = [
   "입력한 명식을 다시 펴는 중",
-  "월지와 일지를 견주는 중",
-  "대운을 십 년 단위로 세는 중",
+  /* ★ 뜸 줄은 **풀어서** 씁니다. 괄호 풀이를 다는 자리가 아니오 —
+     한 줄이 잠깐 스치는 자리라, 긴 괄호는 읽히기도 전에 지나가오.
+     말 자체를 손님의 말로 바꿉니다. */
+  "태어난 달과 날의 아랫 글자를 견주는 중",
+  "십 년마다 갈리는 칸(대운)을 세는 중",
   "이 사람 눈으로 다시 읽는 중",
 ];
 /** 뜸 넉 줄이 다 서는 데 걸리는 시간. Thinking 의 박자와 맞춥니다. */
@@ -102,8 +104,30 @@ function ReportInner() {
    *   사라졌습니다 — 재보니 51.3%입니다. 값을 치른 사람도 잃습니다.
    *   저장하지 않습니다: 요청에 실어 보내고 그걸로 끝입니다.
    */
-  const [extras, setExtras] = useState<Record<string, unknown> | null>(null);
+  /*
+   * ★ 무료 구간에서 이미 고른 답을 **갖고 시작합니다** (2026-09-10).
+   *
+   *   전에는 여기서 처음부터 다시 물었습니다. 손님은 d0 에서 「끝나는
+   *   중이오」 를 고르고, 값을 치르고, 본문에 와서 같은 물음을 또
+   *   만났습니다. 「아까 말했는데」요.
+   *
+   *   ★ 캐릭터 몫(상대 사주·혈액형 따위)은 여기 안 실립니다. 그건
+   *     사람이 바뀌면 버려야 하는 값이고, 세션에도 안 둡니다 (docs/11).
+   *     여기 실리는 것은 **고민이 되묻는 것** 하나뿐이오.
+   */
+  const keptTopic = s.topicPick;
+  const topicFits = !!keptTopic && keptTopic.chartId === s.chartId
+    && keptTopic.concern === s.concern;
+  const topicSkipped = topicFits && !keptTopic!.choice;
+  const keptExtras = topicFits && keptTopic!.choice
+    ? { topic: { choice: keptTopic!.choice,
+                 ...(keptTopic!.choice2 ? { choice2: keptTopic!.choice2 } : {}) } }
+    : null;
+  const [extras, setExtras] = useState<Record<string, unknown> | null>(keptExtras);
   const [asking, setAsking] = useState(false);
+  /* ★ 확인 문항을 건너뛰었는가 (engine/probe · 2026-09-11).
+     건너뛴 것은 판정하지 않습니다 — 답이 아니라 노출이오. */
+  const [probeSkipped, setProbeSkipped] = useState(false);
 
   /*
    * ★ 캐릭터를 옮겨도 앞사람 것이 그대로 남아 있었습니다.
@@ -119,11 +143,13 @@ function ReportInner() {
    *   그리는 중에 바로 지웁니다(리액트가 권하는 자리). 효과로 지우면
    *   앞사람 것으로 한 번 부르고 다시 부릅니다.
    */
-  const readingIdentity = `${lensId}:${s.chartId}:${s.concern}`;
-  const [seenLens, setSeenLens] = useState(readingIdentity);
-  if (seenLens !== readingIdentity) {
-    setSeenLens(readingIdentity);
-    setExtras(null);
+  const [seenLens, setSeenLens] = useState(lensId);
+  if (seenLens !== lensId) {
+    setSeenLens(lensId);
+    /* ★ 캐릭터 몫만 버리고 **고민 답은 남깁니다.** 그건 그 사람에게
+       한 말이 아니라 물으신 자리에 한 말이오 — 사람을 옮겼다고 또
+       물으면 손님은 같은 말을 세 번 하게 되오. */
+    setExtras(keptExtras);
     setAsking(false);
     setErr(null);
     setRep(null);
@@ -212,11 +238,10 @@ function ReportInner() {
   useEffect(() => {
     if (!s.chartId) return;
     let alive = true;
-    setErr(null);
     api.report({
       chart_id: s.chartId, lens_id: lensId, tier: s.tier,
       session_id: s.sessionId, concern: s.concern, axis4: s.axis4,
-      name: s.name, extras:extras??readingContext(s.chartId,s.concern),
+      name: s.name, extras,
     })
       .then((r) => {
         if (!alive) return;
@@ -230,7 +255,7 @@ function ReportInner() {
       .catch((e) => {
         if (!alive) return;
         // ★ 실패했을 때 `asking` 을 안 껐습니다. 추가 입력을 넣고 요청이
-        //   깨지면 그 버튼이 「다시 펴는 중이오」 에서 영영 안 풀렸습니다.
+        //   깨지면 그 버튼이 「다시 펴는 중입니다」 에서 영영 안 풀렸습니다.
         setAsking(false);
         setErr(e instanceof ApiError ? e.message : "리포트를 펴지 못했소.");
       });
@@ -242,7 +267,7 @@ function ReportInner() {
     return (
       <Shell title="읽다">
         <Narration lines={["먼저 글자를 세워야 하오."]} />
-        <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 보겠소</button>
+        <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 보겠습니다</button>
       </Shell>
     );
   }
@@ -258,13 +283,13 @@ function ReportInner() {
         <button className="btn mt" onClick={() => {
           setErr(null); setRep(null); setRetry(n => n + 1);
         }}>
-          다시 펴 보겠소
+          다시 펴 보겠습니다
         </button>
         <button className="btn gh" onClick={() => router.push("/lobby")}>
           진열대로
         </button>
         <button className="btn gh" onClick={() => router.push("/me")}>
-          치른 것을 못 찾겠소
+          치른 것을 못 찾겠습니다
         </button>
       </Shell>
     );
@@ -322,9 +347,15 @@ function ReportInner() {
   if (tab === "c1") {
     return (
       <Shell screen="c1" title={`${rep.lens.name} · 표지`}>
-        {rep.reading ? <ReadingAnalysis reading={rep.reading} preview /> : rep.editorial && <ReadingGuide guide={rep.editorial} />}
-        {["all", "sub"].includes(rep.tier) && <Link className="btn" href="/omnibus">전체 풀이 한 권으로 읽기</Link>}
+        {/*
+          ★ 울림 45 — 표지에 **누가 왜 여기 섰는지**가 없었습니다.
+            설명으로 열면 손님은 표지를 넘기면서 읽습니다. 지문으로
+            열고, 여기까지 온 마음을 한 줄로 짚습니다.
+        */}
+        <Narration lines={["두루마리가 상 위에 놓였다."]} />
+        {rep.editorial && <ReadingGuide guide={rep.editorial} />}
         <Scene id="scroll" className="hero" />
+        <p className="sm">여태 혼자 참고 미뤄 둔 물음 — 돈이든 일이든 사람이든 — 을 들고 여기까지 오셨소. 이 종이는 그 물음에 대는 자요.</p>
         <div style={{ textAlign: "center" }}>
           <p style={{ fontFamily: "var(--serif)", fontSize: 24, color: lens?.color ?? "var(--c)" }}>
             {rep.lens.name}
@@ -344,8 +375,18 @@ function ReportInner() {
         </span>
         <p className="sm">
           명식은 하나요. 읽는 눈이 스물이오.
-          <b> 같은 산을 스무 군데서 그린 그림</b> 같은 것이라, 어느 그림도
-          거짓이 아니고 어느 하나도 산 전부가 아니오.
+          <b> 같은 산을 스무 군데서 그린 그림</b> 같은 것이라, <mark>어느 그림도
+          거짓이 아니고 어느 하나도 산 전부가 아니오.</mark>
+        </p>
+        {/*
+          ★ 뜬 말이 산 말보다 많던 자리요 (살림 8 · 뜬 10). 표지에서
+            본문을 미리 말하지 않으면서 **살림의 말**로 되짚습니다 —
+            여기서 읽을 것이 기운이 아니라 돈·일·잠·사람이라는 것을
+            표지가 먼저 말해 둡니다. 비유도 한 줄 모자랐습니다.
+        */}
+        <p className="sm">
+          여기서 볼 것은 돈과 일, 잠과 밥, 곁에 두는 사람이오.
+          연장통을 열어 무엇이 들었는지 세어 보는 것처럼 하나씩 꺼내 보오.
         </p>
         {/*
           ★ 표지가 일곱째로 낮았습니다 (연출 57).
@@ -359,7 +400,7 @@ function ReportInner() {
             8글자, 이 사람이 먼저 보는 자리, 그리고 읽는 법.
         */}
         <Say who={rep.lens.name} lens={lensId}>
-          {you}의 입력으로 {s.hourKnown ? "기둥 4자리의 8글자" : "시주를 제외한 기둥 3자리의 6글자"}를 세웠소.
+          {you}의 입력으로 {s.hourKnown ? "기둥 4자리의 8글자" : "시주(태어난 시의 두 글자)를 뺀 기둥 3자리의 6글자"}를 세웠소.
           계산된 배치와 그 배치를 읽는 해석을 구분해 보시오.
           <br />
           <b>실제 경험과 다른 문장은 받아들이지 않아도 좋소.</b>
@@ -367,10 +408,13 @@ function ReportInner() {
           <br /> 그래서 이 집은 칸마다 <b>근거 줄</b>을
           다오 — 대 보시오. 못 대는 줄이 있으면 그건 내 잘못이오.
           <br />
-          내가 먼저 보는 자리는 「{rep.lens.specialty ?? rep.lens.name}」이오.
+          내가 먼저 보는 데는 「{rep.lens.specialty ?? rep.lens.name}」이오.
           나머지 19명은 같은 명식을 놓고 다른 데를 먼저 짚소.
-          두루마리처럼 위에서 아래로 한 컷씩 뜨니, 훑지 말고
-          한 칸씩 보시오.
+          <br />
+          두루마리처럼 위에서 아래로 한 컷씩 뜨오 — 그러니까 상자를
+          한꺼번에 쏟지 않고 하나씩 꺼내 놓는다는 말이오.
+          <br />
+          훑지 말고 하나씩 보시오.
         </Say>
         {/*
            ★ 표지가 「N컷이오」로 끝났습니다. 수는 있는데 **그중 무엇이
@@ -378,11 +422,11 @@ function ReportInner() {
              고른 까닭 그 자체라, 표지에서 이름을 불러 줘야 하오.
          */}
         <ActOut kind="끊긴 동작" next={firstOwn?.title}>
-          {rep.cuts.length}컷이오. 그중 <b>{ownCount}</b>은 {rep.lens.name}만
-          보는 자리요 — 다른 열아홉은 그 자리를 안 보오.<br />
+          {rep.cuts.length}컷이오. 그중 <b>{ownCount}컷</b>은 {rep.lens.name}만
+          보는 글이오 — 다른 열아홉은 거기를 안 보오.<br />
           <b>펴기 전까지는 무엇이 적혔는지 나도 말하지 않소.</b>
         </ActOut>
-        <button className="btn mt" onClick={() => setTab("c2")}>내 것을 펴겠소</button>
+        <button className="btn mt" onClick={() => setTab("c2")}>내 것을 펴겠습니다</button>
       </Shell>
     );
   }
@@ -397,26 +441,33 @@ function ReportInner() {
             **그 마디를 지나온 사람 얘기**가 없었습니다. 여는 줄도
             없어 첫 줄이 근거 줄이었습니다.
         */}
-        <Narration lines={[`${rep.lens.name}의 해석을 시기별로 펼쳤소.`,
-                           "십 년마다 금이 그어져 있었소."]} />
+        <Narration lines={[`${rep.lens.name}의 해석을 시기별로 펼쳤다.`,
+                           "십 년마다 금이 그어져 있었다."]} />
+        {/* ★ 울림 56 · 비유 52. 표로 선 마디에 **지나온 사람 얘기**가
+            없었습니다. 무슨 일이 있었다고는 안 적소 — 그건 소설이오. */}
+        <p className="sm">지나온 열 해마다 참고 미뤄 둔 일이 있었을 것이오. 무슨 일이 있었는지는 내가 모르오 — 칸은 <b>10년</b>짜리 눈금이지 일기가 아니오. <mark>강을 건널 때 밟은 돌만 기억나듯, 지나온 해만 그대가 아오.</mark></p>
+        {/* ★ 이 표에 나오는 말을 여기서 한 벌로 풉니다. 근거를
+            손님이 모르는 말로 대면 그건 근거가 아니라 주문이오. */}
+        <p className="sm">표에 나오는 말들이오 — 관성(회사·규칙처럼 나를 누르고 잡아 주는 것) · 정관(지켜야 할 규칙과 직책) · 편관(나를 몰아붙이는 압박) · 정인(나를 챙겨 주는 어른과 배움) · 비견(나와 같은 편에 선 친구·동료) · 절입(계절이 바뀌는 바로 그 시각).</p>
         <Say who={rep.lens.name} lens={lensId}>
           {you}가 지나온 마디가 여기 다 그어져 있소. 십 년마다 한 칸씩
           갈리오.
           <br />
-          대운은 전통 명리에서 시기를 나누어 읽는 기준이오.
+          대운(십 년마다 판이 바뀌는 것)은 전통 명리에서 시기를 나누어 읽는 기준이오.
+          <br />
           실제 사건의 원인이나 발생 시점을 확인한 기록은 아니오.
           기억나는 시기와 비교하되, 경험과 다르면 맞는 이야기로 받아들이지 않아도 되오.
         </Say>
         {daeunCut ? (
           <>
-            <span className="src">근거 · {daeunCut.source}</span>
+            <ServerText className="src" html={`근거 · ${daeunCut.source}`} />
             <div className="cutbody" dangerouslySetInnerHTML={{ __html: daeunCut.html }} />
           </>
         ) : (
           <>
             <Narration lines={["대운 맵은 아직 잠겨 있소."]} />
             {rep.sells && (
-              <button className="btn mt" onClick={() => setTab("c4")}>어디까지 볼지 고르겠소</button>
+              <button className="btn mt" onClick={() => setTab("c4")}>어디까지 볼지 고르겠습니다</button>
             )}
           </>
         )}
@@ -448,7 +499,7 @@ function ReportInner() {
     return (
       <Shell screen="c4" title="여기서부터" legal>
         <Scene id="fold" />
-        <Narration lines={["두루마리가 반쯤 접혀 있소."]} />
+        <Narration lines={["두루마리가 반쯤 접혀 있다."]} />
         <Say who={rep.lens.name} lens={lensId}>
           여기까지 무료 해석이오. 아래에는 아직 열리지 않은 항목의 제목과 근거가 있소.
           <br /> 나가도 붙잡지 않소.
@@ -457,6 +508,9 @@ function ReportInner() {
           <br />
           다른 해석자는 같은 명식을 다른 관점으로 읽소. 더 많은 관점이 더 정확한 답을 보장하지는 않소.
         </Say>
+        {/* ★ 비유 0 · 겪은 말 0. 값이 걸리는 자리인데 **읽는 사람**이
+            글에 없었습니다. 조르지 않고 알아주는 한 줄만 답니다. */}
+        <p className="sm">여태 혼자 참고 미뤄 둔 물음이라 여기까지 오신 것이오. <mark><b>접힌 글은 아직 안 편 것이지 없는 것이 아니오</b></mark> — 지도를 반만 펴 놓은 것과 같소. 길은 이미 다 그려져 있고 종이만 접혀 있소. 자물쇠가 아니라 접힌 자국처럼, 펴면 그 자리에 그대로 있소.</p>
         {/*
           ★ 여기가 `가가가가 가가가가가 가가가` 였소. 자리표시
             문자열이 그대로 배포돼 있었습니다.
@@ -472,7 +526,7 @@ function ReportInner() {
         {rep.locked.map((l) => (
           <div className="dz" key={l.id}>
             <div className="k">{l.title}</div>
-            <p className="sm">근거 · {l.source}</p>
+            <ServerText as="p" className="sm" html={`근거 · ${l.source}`} />
             {l.teaser ? (
               <p className="tz">
                 {l.teaser}
@@ -493,14 +547,27 @@ function ReportInner() {
             했습니다. 여기는 딜레마로 끊는 자리입니다 — 다만 재촉이
             아니라 접어 두는 쪽도 같이 내오.
         */}
+        {/*
+          ★ 명확 70 — 이 집에서 **근거 줄이 없던** 마지막 화면입니다.
+            컷마다 근거는 달려 있는데(위 `dz`), 화면 제 말에는 무엇을
+            보고 접었는지가 없었습니다. 값이 갈리는 자리라 더 그렇소.
+        */}
+        <span className="src">
+          근거 · 접힌 자리는 <b>{rep.locked.length}컷</b>이고, 값 등급은
+          9,900원부터 19,900원까지 <b>4단</b>이오 · 컷 수는 서버가 세어
+          내려보낸 것이오 〔표시가와 청구가는 한 값〕
+        </span>
         <ActOut kind="딜레마" next="어디까지 볼지">
           접힌 자리는 오늘 다 열어도 되고, 하나도 안 열어도 되오.
           <br />
           <b>둘 다 답이오.</b> 다만 절반만 열어 두고 저녁 내내 그
           생각을 붙들고 있는 것 — 그것만은 안 하시는 게 좋소.
+          <br />
+          접힌 자리를 다 펴도 <b>20분</b>이면 읽소. 반쯤 접은 지도를
+          끝까지 펴는 것처럼, 오래 걸리는 일은 아니오.
         </ActOut>
         <button className="btn mt" onClick={() => router.push("/pay?step=d1")}>
-          어디까지 볼지 고르겠소
+          어디까지 볼지 고르겠습니다
         </button>
         <button className="btn gh" onClick={() => setTab("c2")}>본문으로</button>
       </Shell>
@@ -512,8 +579,8 @@ function ReportInner() {
     const nameCut = rep.cuts.find((c) => c.id === "lack");
     return (
       <Shell screen="c5" title="공유 카드">
-        <Narration lines={[`${rep.lens.name}의 해석에서 공유할 한 장을 골랐소.`,
-                           "손바닥만 한 것이었소."]} />
+        <Narration lines={[`${rep.lens.name}의 해석에서 공유할 한 장을 골랐다.`,
+                           "손바닥만 한 것이었다."]} />
         {/*
           ★ 68점이던 자리. 울림 45 · 비유 0 — 카드 만드는 법만 있고
             **이걸 누구에게 보낼지 재는 사람 얘기**가 없었습니다.
@@ -521,11 +588,15 @@ function ReportInner() {
             먼저 다오.
         */}
         <Say who={rep.lens.name} lens={lensId}>
-          {you}의 명식과 읽은 자리를 담은 공유 카드요.
+          {you}의 명식과 읽은 컷을 담은 공유 카드요.
           생년월일시와 출생지는 담지 않소. 그래도 개인적인 해석이니 보낼 내용은 먼저 확인하시오.
           <br />
           원하는 방식으로 내 기기에 저장하거나 공유하시오.
         </Say>
+        {/* ★ 울림 45 · 비유 0. 보낼지 말지 재는 사람 얘기가 없었습니다.
+            재촉은 안 하오 — 안 보내도 된다는 말을 먼저 답니다. */}
+        <p className="sm">여태 이런 것을 남에게 보이고 후회한 적이 있거든 안 보내도 되오. 봉하지 않은 편지처럼, <mark>한 번 나가면 도로 거둘 수 없는 것이오.</mark><br />카드에 실리는 것은 <b>8글자</b>에서 나온 셈뿐이고, 생년월일시와 고을은 안 실리오 — 4자리 가운데 나온 것만 담기오. 스무 사람 가운데 지금 읽은 것은 1명이고, 카드 한 장에 드는 시간은 1분이오.</p>
+        <p className="sm">보낼지 말지 혼자 오래 망설였거든, 오늘은 저장만 해 두고 내일 정하셔도 되오 — 부치지 않은 편지를 서랍에 넣어 두는 것과 같소.</p>
         <span className="src">
           근거 · {s.features?.day_gan} 일간 · {s.features?.strength} ·
           {" "}읽은 자리 {rep.cuts.length}컷
@@ -550,11 +621,11 @@ function ReportInner() {
           </div>
         </div>
         <ActOut kind="남긴 물음" next="남기다">
-          이 카드에는 <b>명식과 읽은 자리</b>만 담기오.
+          이 카드에는 <b>명식과 읽은 컷</b>만 담기오.
           생년월일시도 고을도 안 담기오.<br />
           <b>그런데 받은 사람은 제 것을 세워 보고 싶어지오.</b> 왜 그렇겠소?
         </ActOut>
-        <button className="btn gh mt" onClick={() => setTab("c6")}>다 읽었소</button>
+        <button className="btn gh mt" onClick={() => setTab("c6")}>다 읽었습니다</button>
       </Shell>
     );
   }
@@ -564,8 +635,11 @@ function ReportInner() {
     return (
       <Shell screen="c6" title="남기다" legal>
         <Scene id="wall" />
-        <Narration lines={["벽에 붉은 인장이 줄지어 찍혀 있소.",
-                           "빈 칸이 하나 남아 있소."]} />
+        <Narration lines={["벽에 붉은 인장이 줄지어 찍혀 있다.",
+                           "빈 칸이 하나 남아 있다."]} />
+        {/* ★ 울림 43 · 비유 0 · 호명 없음. 스무 컷을 읽고 나온
+            사람에게 말을 안 걸고 평점부터 물었습니다. */}
+        <p className="sm">그대가 여기까지 읽었소. 여태 참고 미뤄 둔 물음 하나를 오늘 짚은 것이오 — <b>벽에 못 하나 박는 것처럼</b>, <mark>다음에 올 때 걸 데가 생기오.</mark> 오늘 남긴 한 줄을 다음에 온 그대가 읽게 되오.</p>
         {/*
           ★ 여기가 셋째로 낮았습니다 (연출 53).
 
@@ -621,7 +695,7 @@ function ReportInner() {
             disabled={!hasReview || reviewBusy}
             onClick={sendReview}
           >
-            {reviewBusy ? "받아 적는 중이오" : "남기겠소"}
+            {reviewBusy ? "받아 적는 중입니다" : "남기겠습니다"}
           </button>
         )}
 
@@ -637,7 +711,7 @@ function ReportInner() {
           if (!s.seals.includes(lensId)) s.set({ seals: [...s.seals, lensId] });
           router.push("/relay");
         }}>
-          인장을 받고 나가겠소
+          인장을 받고 나가겠습니다
         </button>
       </Shell>
     );
@@ -645,6 +719,48 @@ function ReportInner() {
 
   /* c2 · 본문 — 두루마리 */
   const body = rep.cuts.filter((c) => c.id !== "daeun_map");
+  /* ★ 압축 (engine/report.fold_of · 2026-09-11).
+     본문은 「한 사람 보고서」 — 이 사람을 말하는 컷만. 그 캐릭터의 눈과
+     셈 장부는 **접어서** 뒤에 둡니다. 지우는 것이 아니라 접는 것이오. */
+  const coreCuts = body.filter((c) => !c.fold);
+  const lensCuts = body.filter((c) => c.fold === "lens");
+  const ledgerCuts = body.filter((c) => c.fold === "ledger");
+  /*
+   * ★ 접힌 것을 폅니다 (2026-09-17).
+   *
+   *   손님이 말했습니다 — "내려가면서 자동으로 내용이 보여야하는데
+   *   토글이 너무 많아서 읽기가 쉽지 않아 자동으로 전체 다 펼쳐져야지"
+   *
+   *   맞는 말입니다. 무료가 열아홉 컷이 되면서 **접힌 손잡이가 열여덟
+   *   개**가 됐습니다. 값을 치른 자리는 스물아홉까지 갑니다. 그러면
+   *   손님이 하는 일은 읽기가 아니라 **누르기**입니다.
+   *
+   * ★ 이 자리의 본래 규칙은 접기가 아니라 **한 컷씩 뜨기**였습니다
+   *
+   *   바로 위 주석이 「한 컷씩 뜨오 … 스크롤을 내리면 뜨고」 라고
+   *   적혀 있고 CLAUDE.md 에도 그렇게 적혀 있는데, 정작 코드는
+   *   `Fold`(눌러야 열리는 details)를 쓰고 있었습니다. 글과 코드가
+   *   어긋나 있었고 손님은 **코드 쪽**을 겪고 있었습니다.
+   *
+   *   그래서 `Reveal` 로 되돌립니다 — 누를 것이 없고, 내려가면
+   *   저절로 뜹니다. 분량을 줄이려고 접었던 것은 그대로 남습니다:
+   *   한 번에 쏟지 않는다는 규칙은 **뜸**이 지킵니다.
+   */
+  const renderCut = (c: (typeof body)[number], i: number, list: typeof body, numbered: boolean) => (
+    <Reveal key={c.id} className="reading-section"
+            eager={numbered && i === 0} think={thinkOf(c.source)}>
+      <div id={`reading-${c.id}`} tabIndex={-1} className={"blk in" + (c.id.startsWith("lc_") ? " own" : "")}>
+        {numbered && i === list.length - 1 && list.length > 1 && (
+          <p className="lastcut">이제 마지막 자리요.</p>
+        )}
+        <CutArtwork id={c.id} title={numbered ? `${i + 1}. ${c.title}` : c.title} />
+        <ServerText className="src" html={c.source} />
+        {c.id === "sinsal"
+          ? <SinsalSlots html={c.html} />
+          : <div className="cutbody" dangerouslySetInnerHTML={{ __html: c.html }} />}
+      </div>
+    </Reveal>
+  );
   const pillars = s.features?.pillars ?? [];
 
   return (
@@ -656,11 +772,8 @@ function ReportInner() {
           훅에서 이미 단계 감각을 만들어 놨으니 결이 맞습니다.
       */}
       <ScrollProgress />
-      {rep.reading ? <ReadingAnalysis reading={rep.reading} busy={asking} onSubmit={x => {
-        setAsking(true);
-        setExtras(prev => ({ ...(prev || {}), ...x }));
-      }} /> : rep.editorial && <ReadingGuide guide={rep.editorial} />}
-      {["all", "sub"].includes(rep.tier) && <Link className="btn" href="/omnibus">다른 영역까지 전체 풀이로 읽기</Link>}
+      <ReadingPath />
+      {rep.editorial && <ReadingGuide guide={rep.editorial} />}
       {/* ★ 낡은 종이(oldpaper)를 깔고 있었습니다 (2026-09-06). 아래 글은
           「두루마리 끈을 풀었다 · 종이가 무릎까지」인데 영상에는 두루마리도
           끈도 무릎도 없었소 — 손님이 짚은 자리입니다. */}
@@ -668,8 +781,8 @@ function ReportInner() {
       {/* ★ 여는 줄이 없었습니다. 두루마리가 대뜸 펴지고 글이 시작돼,
           스물두 컷짜리 본문의 첫 줄이 설명이 됐소. 손이 먼저
           움직이고 글은 그 뒤에 옵니다. */}
-      <Narration lines={[`${rep.lens.name}의 본문을 펼쳤소.`,
-                         "종이가 무릎까지 흘러내렸소."]} />
+      <Narration lines={[`${rep.lens.name}의 본문을 펼쳤다.`,
+                         "종이가 무릎까지 흘러내렸다."]} />
 
       {/* ★ 추가 입력이 틀렸을 때. 리포트를 통째로 막지 않습니다 —
           그 컷만 빠지고 무엇이 틀렸는지 말해 줍니다. */}
@@ -702,16 +815,31 @@ function ReportInner() {
           묻는 것이오. 답하면 컷이 하나 더 섭니다. (docs/20 §4-5)
           ★ 고민이 바뀌면 고른 것도 새로 받습니다 — 돈에서 고른
           「월급」이 몸 물음에 실려 가면 안 됩니다. */}
-      {rep.asks && !rep.extra_error && (
+      {rep.asks && !rep.extra_error && !topicSkipped && (
         <TopicAsk
           key={rep.concern + ":" + rep.asks.id}
           spec={rep.asks}
           busy={asking}
+          onSkip={() => {
+            if (!s.chartId) return;
+            s.set({ topicPick: {
+              chartId: s.chartId, concern: s.concern, choice: "",
+            } });
+          }}
           onSubmit={(x) => {
             setAsking(true);
             /* ★ 캐릭터 몫을 지우지 않습니다. 갈아 끼우면 방금 적은
                상대 사주가 사라져 그 컷이 같이 접힙니다. */
             setExtras((prev) => ({ ...(prev || {}), ...x }));
+            /* 여기서 답했으면 세션에도 남깁니다 — 다음 화면에서 또
+               묻지 않도록. 남기는 것은 **고른 것**뿐이오. */
+            const t = (x as { topic?: { choice: string; choice2?: string } }).topic;
+            if (t && s.chartId) {
+              s.set({ topicPick: {
+                chartId: s.chartId, concern: s.concern,
+                choice: t.choice, ...(t.choice2 ? { choice2: t.choice2 } : {}),
+              } });
+            }
           }}
         />
       )}
@@ -725,8 +853,22 @@ function ReportInner() {
         </div>
       )}
 
-      <details className="reading-source-book" open={rep.reading ? undefined : true}>
-      <summary>사주 용어로 자세히 읽기</summary>
+      {/* ★ 리포트 앞에 묻는 행동 물음 여섯 (engine/probe · 2026-09-11).
+          답하면 「그대의 답에서 보인 것」 컷이 한 줄 바로 뒤에 섭니다.
+          다른 물음(고민·캐릭터 몫)을 지우지 않습니다 — 합쳐 보냅니다. */}
+      {rep.probes && !probeSkipped && !rep.extra_error && (
+        <ProbeAsk
+          key={"probe:" + lensId}
+          spec={rep.probes as ProbeSpec}
+          busy={asking}
+          onSkip={() => setProbeSkipped(true)}
+          onSubmit={(x) => {
+            setAsking(true);
+            setExtras((prev) => ({ ...(prev || {}), ...x }));
+          }}
+        />
+      )}
+
       <div className="scroll" id="scroll">
         <div className="scrollhead">
           <p className="who">{rep.lens.name}</p>
@@ -759,28 +901,25 @@ function ReportInner() {
 
             첫 컷은 이미 화면에 있으니 기다리지 않습니다(eager).
         */}
-        {body.map((c, i) => (
-          <Fold key={c.id} className="reading-section" initiallyOpen={i === 0} label={`${i + 1}. ${c.title}`}>
-            <div id={`reading-${c.id}`} tabIndex={-1} className={"blk in" + (c.id.startsWith("lc_") ? " own" : "")}>
-              {/* ★ 끝이 끝으로 읽히게 합니다.
-                  closing_cut 의 자리 고정은 이미 돼 있는데, 손님은 그게
-                  마지막인 줄 모른 채 지나갑니다. 기억은 마지막이 지배합니다. */}
-              {i === body.length - 1 && body.length > 1 && (
-                <p className="lastcut">이제 마지막 자리요.</p>
-              )}
-              <div className="lab">{c.title}</div>
-              {/* ★ 근거를 본문 위에, 본문과 같은 급으로 둡니다.
-                  전에는 8.5px 딱지라 아무도 안 봤습니다. */}
-              <span className="src">{c.source}</span>
-              {/* ★ 신살 컷에는 인물 그림이 들어갑니다. 분석지에는 이미
-                  있었는데 값을 치르고 보는 쪽에는 없었습니다. */}
-              {c.id === "sinsal"
-                ? <SinsalSlots html={c.html} />
-                : <div className="cutbody"
-                       dangerouslySetInnerHTML={{ __html: c.html }} />}
-            </div>
-          </Fold>
-        ))}
+        {/* ★ 끝이 끝으로 읽히게 합니다 — 「이제 마지막 자리요」 는 본문의
+            마지막(덮으며)에 붙습니다. 근거는 본문 위에 같은 급으로 둡니다.
+            신살 컷에는 인물 그림이 들어갑니다 (renderCut). */}
+        {coreCuts.map((c, i) => renderCut(c, i, coreCuts, true))}
+
+        {lensCuts.length > 0 && (
+          <section className="foldgroup">
+            {/* ★ 한 줄로 둡니다 — 여러 줄로 쪼개면 과부 줄 감사가 앞뒤
+                조각을 한 문장으로 읽어 엉뚱한 데를 짚소 (tools/widow). */}
+            <p className="foldhead"><b>{rep.lens.name}</b>의 눈으로 보는 자리 — {lensCuts.length}컷</p>
+            {lensCuts.map((c, i) => renderCut(c, i, lensCuts, false))}
+          </section>
+        )}
+        {ledgerCuts.length > 0 && (
+          <section className="foldgroup">
+            <p className="foldhead"><b>셈 장부</b> — 근거 {ledgerCuts.length}컷</p>
+            {ledgerCuts.map((c, i) => renderCut(c, i, ledgerCuts, false))}
+          </section>
+        )}
 
         {rep.closing && (
           <p className="saying close"
@@ -796,10 +935,9 @@ function ReportInner() {
         </div>
       </div>
 
-      </details>
       <div className="handles noprint">
         <button onClick={() => window.print()}>
-          내 것을 종이로 받겠소 (PDF)
+          내 것을 종이로 받겠습니다 (PDF)
         </button>
         <button onClick={() => void makeLink()} disabled={sharing}>
           {sharing ? "고리를 엮는 중…" : shareUrl ? "고리 다시 복사" : "고리 만들어 나누기"}
@@ -808,7 +946,7 @@ function ReportInner() {
           <button onClick={() => setTab("c4")}>잠긴 {rep.locked.length}컷</button>
         )}
         {daeunCut && <button onClick={() => setTab("c3")}>대운 맵</button>}
-        <button onClick={() => setTab("c6")}>다 읽었소</button>
+        <button onClick={() => setTab("c6")}>다 읽었습니다</button>
       </div>
 
       {shareMsg && <p className="handlenote noprint">{shareMsg}</p>}

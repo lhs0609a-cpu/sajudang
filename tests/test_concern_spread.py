@@ -42,12 +42,18 @@ sys.path.insert(0, str(ROOT / "services" / "api"))
 from engine import topic                                   # noqa: E402
 from engine.calendar import build_chart                    # noqa: E402
 from engine.features import build_features                 # noqa: E402
+from engine.bank import build_hook                          # noqa: E402
 from engine.report import build_report                     # noqa: E402
 
 CONCERNS = ("money", "work", "love", "people", "dir", "health")
 
 # 물음에 따라 바뀌면 **안 되는** 컷
 FIXED = {"chart"}
+
+# ★ 이 사람을 한 줄로 세우는 컷 (engine/spine · 2026-09-11).
+#   무엇을 물었든 **같은 사람**이라, 명식처럼 물음이 바꿀 것이 아니오.
+#   물으신 고민은 바로 뒤의 장면(spine_scene)과 이번 주 한 가지가 받습니다.
+PERSON = {"spine", "spine_depth", "lens_bridge"}
 
 PEOPLE = [
     ((1993, 7, 14, 5, 20), "F"),
@@ -103,7 +109,7 @@ def test_the_chart_cut_never_moves(reports):
 def test_most_of_the_report_moves_with_the_question(reports):
     """컷 스물일곱 중 대부분이 갈려야 합니다."""
     for f, rep in reports:
-        ids = [x["id"] for x in rep["love"]]
+        ids = [x["id"] for x in rep["love"] if x["id"] not in PERSON]
         same = 0
         for cid in ids:
             texts = {_flat(x["html"]) for c in CONCERNS for x in rep[c]
@@ -131,6 +137,26 @@ def test_statement_ids_split_when_the_words_split(reports):
                 % (cid, len(texts), len(sids)))
 
 
+def test_hook_answers_use_each_stage_response_and_split_by_concern():
+    """훅에서 선택한 고민과 단에 맞는 답변을 실제로 보여 줍니다."""
+    f = build_features(build_chart(*PEOPLE[0][0], PEOPLE[0][1], city="서울"))
+    hooks = {c: build_hook(f, c, axis4="INFP") for c in CONCERNS}
+
+    # 각 단의 yes/no는 호출부가 만든 단별 문구여야 합니다. 과거에는
+    # _seg가 이를 공통 문장으로 덮어써서 어떤 고민을 골라도 같은 답이
+    # 노출됐습니다.
+    for c, segments in hooks.items():
+        assert segments
+        assert all(seg["yes"] and seg["no"] for seg in segments), c
+        assert len({seg["yes"] for seg in segments}) >= 3, c
+        assert len({seg["no"] for seg in segments}) >= 3, c
+
+    # 같은 단의 응답도 관심사에 따라 달라져야 합니다.
+    for i in range(min(len(v) for v in hooks.values())):
+        assert len({hooks[c][i]["yes"] for c in CONCERNS}) >= 3
+        assert len({hooks[c][i]["no"] for c in CONCERNS}) >= 3
+
+
 # ══════════════════════════════════════════════════════════
 # 캐릭터가 제 자리인지 말하는가
 # ══════════════════════════════════════════════════════════
@@ -151,8 +177,10 @@ def test_a_lens_speaks_differently_on_and_off_its_seat():
     on = topic.lens_line("wolha", "love")
     off = topic.lens_line("wolha", "money")
     assert on != off
-    assert "내 자리가 아니" in off, off
-    assert "내 자리가 아니" not in on, on
+    # 「내 자리가 아니오」 → 「내가 맡은 일이 아니오」 (2026-09-11 · docs/21)
+    NOT_MINE = ("내 자리가 아니", "맡은 일이 아니")
+    assert any(w in off for w in NOT_MINE), off
+    assert not any(w in on for w in NOT_MINE), on
 
 
 def test_the_lens_line_never_opens_with_self_introduction():

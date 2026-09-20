@@ -26,6 +26,7 @@ from typing import Optional
 
 from . import guard
 from . import terms
+from . import skim as _skim
 from . import voice as _voice
 from . import why as _why
 from .constants import ELEMENT_OF_GAN
@@ -100,8 +101,8 @@ def amount_adj(v: float) -> str:
       「물이 아주 짙음인 게 아니오」 가 되어 사람 말이 아닙니다.
       뜻은 같고 꼴만 다릅니다 — 문턱은 amount_word 와 한 벌입니다.
     """
-    return {"거의 없음": "거의 없는", "옅음": "옅은", "보통": "어슷한",
-            "짙음": "짙은", "아주 짙음": "아주 짙은"}[amount_word(v)]
+    return {"거의 없음": "거의 없는", "옅음": "옅은", "보통": "보통인",
+            "짙음": "많은", "아주 짙음": "아주 많은"}[amount_word(v)]
 
 
 def count_word(n: int) -> str:
@@ -134,7 +135,34 @@ def count_phrase(n: int) -> str:
 
 def josa(word: str, with_batchim: str, without: str) -> str:
     """`josa("나무", "이", "가")` → "나무가"."""
+    # ★ 「너가」는 비문이오 (2026-09-17). 주격에서만 '네' 로 섭니다 —
+    #   `voice.address` 는 이미 이 자리를 막고 있었는데, 조립하는
+    #   쪽에서 부르는 이 함수는 안 막고 있었습니다. 그래서 반말을
+    #   쓰는 사람의 고민 컷이 「너가 물으러 오신 고민은」 으로
+    #   나갔습니다 (tests/test_voice).
+    if word == "너" and without == "가":
+        return "네가"
     return word + (with_batchim if has_batchim(word) else without)
+
+
+# 숫자의 읽는 소리에 받침이 있는가 — 영·일·삼·육·칠·팔 은 있고
+#   이·사·오·구 는 없습니다. 열쇠는 **끝자리**입니다 (13 → 삼).
+_NUM_BATCHIM = {"0": True, "1": True, "2": False, "3": True, "4": False,
+                "5": False, "6": True, "7": True, "8": True, "9": False}
+
+
+def josa_num(num, with_batchim: str, without: str) -> str:
+    """
+    숫자 뒤의 조사·맺음. **읽는 소리**로 고릅니다 — `josa_hanja` 와 같은
+    자리요. 「0」 은 영이라 받침이 있어 「0이오」 고, 「4」 는 사라
+    「4요」 입니다.
+
+    ★ 스무 명이 다 하오체일 때는 안 드러났습니다 (2026-09-17).
+      「불은 0요」 가 하오체에서는 그럭저럭 읽혔는데, 하게체로 갈리자
+      「불은 0네」 가 되었습니다 — 「0이네」 라야 하오.
+    """
+    d = str(num).strip()[-1:]
+    return str(num) + (with_batchim if _NUM_BATCHIM.get(d, False) else without)
 
 
 def josa_hanja(hanja: str, with_batchim: str, without: str) -> str:
@@ -321,8 +349,15 @@ def _seg(stage, label, source, body, question, yes, no, sid,
         "source_below": bool(source_below),
         "html": guard.enforce(body, {"stage": stage, "statement_id": sid}),
         "question": question,
-        "yes": "맞는 경험이 있다면 그 장면을 기준으로 다음 해석을 비교해 보시오.",
-        "no": "맞지 않는 해석으로 남기겠소. 그대의 경험을 이 문장에 맞출 필요는 없소.",
+        # 호출부가 단마다 만든 응답을 그대로 내려보냅니다. 여기서
+        # 공통 문구로 덮어쓰면 고민별·단계별 답이 모두 같은 말이 되어
+        # 화면에서 선택한 고민이 반영되지 않은 것처럼 보입니다.
+        # 예전 응답을 집계·편집하는 규칙이 쓰던 핵심 표현은 남기되,
+        # 호출부의 단계별 문장을 우선합니다.
+        "yes": yes.replace("그럴 줄 알았소", "그럴 법했소"),
+        "no": ("맞지 않는 해석으로 두겠소. " + no
+               if "맞지 않는 해석" not in no else no).replace(
+                   "아직 안 터진", "아직 드러나지 않은"),
         "statement_id": sid + ":copy2",
     }
 
@@ -371,15 +406,15 @@ def _concern_axis_seg(f, concern: str, esc_you: str) -> dict:
     loud = f.flow                              # 글자가 가장 센 자리
     same = grp == loud
 
-    lead = ('<p class="ask">%s <b>%s</b>이 걸려 오셨소. '
-            '%s 여덟 글자에서 <b>%s</b>으로 보오 — %s <b>%s</b>이오.</p>'
+    lead = ('<p class="ask">%s <b>%s</b> 걱정으로 오셨소. '
+            '%s 여덟 글자에서 <b>%s</b>을 보고 읽소 — %s <b>%s</b>개요.</p>'
             % (josa(esc_you, "은", "는"), word,
                josa(word, "은", "는"), grp,
                josa("%s %s" % (esc_you, grp), "은", "는"), asked))
 
     if asked == 0:
         body = lead + '<p class="hit">%s</p>' % (B["CONCERN_EMPTY"] % grp)
-        q, yes, no = ("…짚이오?",
+        q, yes, no = ("…마음에 짚이는 것이 있소?",
                       "그럴 것이오. 없는 자리는 애써도 안 늘어나오 — 빌려 쓰는 법을 봐야 하오.",
                       "그럼 다른 데서 메우고 계신 것이오. 그것도 공짜는 아니오.")
     elif same:
@@ -389,19 +424,28 @@ def _concern_axis_seg(f, concern: str, esc_you: str) -> dict:
                       "그럼 아직 안 터진 것이오. 센 자리는 늦게 터지오.")
     else:
         body = (lead
-                + '<p class="hit">헌데 %s</p>' % B["CONCERN_ELSE"][loud]
+                + '<p class="hit">그런데 %s</p>' % B["CONCERN_ELSE"][loud]
                 + '<p class="tale">%s</p>' % B["WHY_TAIL"][loud])
-        q, yes, no = ("…물으신 자리가 거기가 맞소?",
+        q, yes, no = ("…정말 걱정인 것이 물으신 그 일이 맞소?",
                       "그럴 것이오. 물음은 %s에서 났는데 걸린 데는 딴 자리요." % word,
                       "그럼 물으신 자리가 맞소. 그건 그것대로 보겠소.")
 
     return _seg(
-        stage="2.5", label="2.5 · 물은 자리와 센 자리",
+        stage="2.5", label="2.5 · 물은 것과 가장 센 것",
         source=_why.line(
-            "%s → %s %s · 가장 센 자리 %s"
+            "%s → %s %s · 가장 센 것 %s"
             % (word, josa(grp, "이", "가"), count_word(asked), loud),
             grp, "십신"),
-        body='<div class="cax">%s</div>' % body,
+        body=('<div class="cax">'
+              '<p class="ask">물으러 온 자리와 글자가 가장 세게 '
+              '가리키는 자리가 같겠소?</p>%s'
+              # ★ 넉 자를 안 적은 16.4% 가 보는 마디입니다. 위의
+              #   넉 자 마디와 같은 몫을 해야 하므로 겪은 일·비유를
+              #   같이 답니다 — 한쪽만 고치면 그 사람들만 얇아집니다.
+              '<p class="lived">여태 그 자리를 혼자 붙들고 있었을 '
+              '것이오. 8글자에서 가장 센 자리와 물으러 온 자리가 '
+              '어긋나면, 엉뚱한 문을 오래 두드린 것처럼 되오.</p>'
+              '</div>' % body),
         question=q, yes=yes, no=no,
         sid="cax:%s:%s:%s:%s" % (concern, grp, min(asked, 4), loud))
 
@@ -533,8 +577,13 @@ def count_blade(f, concern: Optional[str] = None) -> str:
             if n == 1 else
             "<b>%s</b> 일간에 <b>%s</b>도 <b>%s</b>도 없소."
             % (f.day_gan, empty[0], empty[1]))
-    more = ("" if n <= 2 else
-            " 열 자리 가운데 <b>%d 자리</b>가 비었소." % n)
+    # ★ 셈을 **늘 냅니다** (2026-09-15).
+    #
+    #   전에는 세 칸 넘게 빈 사람에게만 냈습니다. 그래서 0단에 셀 수
+    #   있는 값이 하나도 없는 사람이 표본의 전부였고, 손님이 처음
+    #   읽는 글이 대 볼 수 없는 말로만 채워졌습니다. 한 칸이 비었어도
+    #   「열 개 가운데 하나」 는 셈이오 — 만세력을 펴고 맞춰 볼 수 있소.
+    more = " 십신 10개 가운데 <b>%d개</b>가 비었소." % n
     # ★ 세 박자로 냅니다 — 뼈 때리고, 알아주고, 풀어준다.
     #
     #   찌르고 끝내면 손님은 찔린 채로 남습니다. 찔린 사람은 창을 닫지
@@ -543,9 +592,35 @@ def count_blade(f, concern: Optional[str] = None) -> str:
     relief = relief_tbl.get(empty[0], "")
     return ('<p class="blade">%s%s <span class="cnt">세어 보시오.</span></p>'
             '<p class="blademean">%s</p>'
-            '<p class="bladerelief">%s</p>'
+            # ★ 「여태 … 혼자」 는 넷째 박자가 아니라 셋째 박자의 머리요.
+            #   찌르기를 넷 겹치면 넷 다 죽지만, 풀어주는 줄 앞에
+            #   **지난 일을 짚는 한 마디**를 두면 손님이 제 기억에서
+            #   답을 찾소. 밖에서 준 말보다 그게 오래 남습니다.
+            '<p class="bladerelief">여태 그 자리 없이 혼자 해 왔소 — '
+            '연장 하나가 빠진 채로 집을 지어 온 것처럼. %s</p>'
             % (lead, more, seats[empty[0]], relief))
 
+
+
+def _asked_count(f, concern, top) -> str:
+    """물으신 자리에서 **이 사람에게 실제로 센 값** 한 줄.
+
+    ★ 없으면 옛 줄로 돌아갑니다 — 지어내지 않습니다.
+      고민을 안 물었거나(`concern` 없음) 그 자리에서 셀 것이 안 걸린
+      사람에게는 여덟 글자의 일반 셈을 그대로 냅니다.
+    """
+    if concern:
+        try:
+            from . import topic as _topic
+            rows = _topic.scale(f, concern) or []
+        except Exception:                               # noqa: BLE001
+            rows = []
+        for r in rows:
+            ev = (r.get("ev") or "").strip()
+            if ev:
+                return "8글자에서 물으신 자리를 세면 <b>%s</b>요." % ev
+    return "8글자에 %s %s 들었고 일간은 <b>%s</b>요." % (
+        josa(top, "이", "가"), count_word(f.ten_gods[top]), f.day_gan)
 
 def build_hook(f, concern: str, axis4: Optional[str] = None,
                name: str = "", you: str = "그대", misses: int = 0) -> list:
@@ -643,7 +718,7 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     m2 = _pick("MYTH_ST", strength, concern)
     truth = _pick("PATT", top, "b")
     segs.append(_seg(
-        stage="1", label="1 · 먼저, 아닌 것부터",
+        stage="1", label="1 · 먼저, 사주로 못 정하는 것",
         # ★ 근거는 보이되 **내부 척도는 감춥니다.**
         #   여기 신강약 점수(strength_score)가 그대로 나가고 있었습니다 —
         #   '중화 16' 은 사람이 읽을 수 있는 값이 아닙니다. 관점 컷에는
@@ -654,10 +729,68 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
             % (josa(top, "이", "가"), count_word(f.ten_gods[top]), strength),
             strength if strength in ("신강", "신약", "중화") else top,
             "강약" if strength in ("신강", "신약", "중화") else "십신"),
-        body=('<p class="neg">명식만으로 %s를 <span class="strk">%s</span>고 정할 수 없소. '
-              '<span class="strk d2">%s</span>는 평가도 마찬가지요.<br><br>'
-              '전통 해석에서는 <b>%s는 모습</b>으로 읽기도 하오. 실제 경험과 비교해 보시오.</p>')
-             % (esc_you, m1, m2, truth),
+        # ★ 훅에서 가장 약한 마디였습니다 (2026-09-10 · dropout_sim)
+        #
+        #   0단이 뼈를 때린 **바로 다음**에 오는 마디인데 재 보니
+        #   울림 25 · 쉬움 0 · 비유 0 이었습니다. 다섯 마디 중 꼴찌고,
+        #   1만 명 시늉에서 이 자리가 가장 많이 떨어졌습니다.
+        #
+        #   까닭은 글이 **부정문 두 줄뿐**이었기 때문입니다. 아니라고만
+        #   하고 아무것도 안 세고, 겪은 일을 안 짚고, 그림이 없었습니다.
+        #   「~라 정할 수 없소」 는 옳은 말이지만 아무것도 안 줍니다.
+        #
+        #   뱅크(MYTH_TG · MYTH_ST · PATT)는 그대로 둡니다. 조립하는
+        #   이 자리에서 넷을 답니다 —
+        #
+        #     숨 끊는 짧은 줄   막을 여는 한 마디 (열네 자 아래)
+        #     셈               일간 글자와 십신 개수. 손님이 대 볼 수 있소
+        #     겪은 일          「~했을 것이오」 — 제 기억에서 답을 찾게
+        #     비유             자와 값매김은 다르다는 그림
+        #
+        #   ★ 「게요」 「듯」 은 안 씁니다. 물러서는 말이라 팩폭이 깎입니다
+        #     (dramaturgy.HEDGE). 같은 뜻은 「것이오」 로 냅니다.
+        # ★ 마디를 **물음으로 엽니다** (2026-09-15).
+        #
+        #   재 보니 다섯 마디 중 넷이 콜드 오픈 0점이었습니다 —
+        #   첫 줄이 전부 설명이었소. 설명으로 열면 손님은 그 앞에서
+        #   이미 훑기 시작하오. 그리고 이 집의 훅은 **손님이 맞다·
+        #   아니다를 누르는 자리**라, 그 마디가 무엇을 답할 것인지
+        #   먼저 묻는 것이 꼴에 맞소. 빈칸이 구체적이고 곧 메워질
+        #   것을 알 때 호기심이 서오 (Loewenstein 1994).
+        body=('<p class="ask">사주로는 못 정하는 것이 있소. 무엇이겠소?</p>'
+              '<p class="neg">먼저 그것부터 말하겠소.</p>'
+              '<p class="neg">사주만 보고 %s를 <span class="strk">%s</span>고 '
+              '정할 수 없소. <span class="strk d2">%s</span>는 말도 '
+              '마찬가지요.</p>'
+              # ★ 이 마디는 비유 9점 · 셀 수 있는 값 0 이었습니다.
+              #   「여덟 자」 를 「8글자」 로 적으면 손님이 만세력을 펴고
+              #   대 볼 수 있고, 자 비유를 「처럼」 으로 세우면 그림이
+              #   그려집니다. 뜻은 그대로 두고 꼴만 바꿉니다.
+              # ★ 「센 것」 은 **물으신 자리의 값**이라야 하오 (2026-09-17).
+              #
+              #   손님이 두 번째로 짚었습니다 — 「돈을 선택했는데 왜
+              #   돈에 대한걸 말안해」. 재보니 이 마디는 고민이 바뀌어도
+              #   **97%가 글자 그대로 같았습니다.** 갈리는 것은 낱말
+              #   둘뿐이었소 — 「잘난 척한다/제멋대로다/튄다」.
+              #
+              #   그런데 여기서 대는 셈이 「8글자에 상관이 둘 들었고
+              #   일간은 庚요」 였습니다. 그건 무엇을 물었든 같은 수요.
+              #   CLAUDE.md 가 금한 「고민을 낱말로만 가르기」 그대로였소.
+              #
+              #   `engine/topic.scale` 이 고민마다 **완전히 다른 다섯
+              #   줄**을 이미 내고 있었습니다 — 돈이면 쥐는 자리·드는
+              #   힘·드러남, 사랑이면 짝을 보는 글자·앉은 자리. 컷을
+              #   새로 만들 것이 없소. 있는 것을 여기서 쓰면 되오.
+              '<p class="cnt">%s '
+              '여기까지는 센 것이오. 그래서 어떤 사람인지는 세어서 나오지 않소 — '
+              '키를 재는 자처럼, 8글자도 치수는 내되 「크다·작다」를 '
+              '정하지는 않소.</p>'
+              '<p class="lived">%s 그런 말을 듣고 아니라 하고 싶었던 적이 '
+              '있었을 것이오. 그러고도 말은 못 했을 것이오.</p>'
+              '<p>옛 풀이에서는 <b>%s는 모습</b>으로 읽기도 하오. '
+              '겪은 일과 맞춰 보시오.</p>')
+             % (esc_you, m1, m2, _asked_count(f, concern, top),
+                josa(esc_you, "은", "는"), truth),
         question="이 말은 어떻소?",
         yes="그럴 줄 알았소. 그럼 순서를 짚어드리리다.",
         no="그 말이 나올 자리라 넣어 둔 것이오. 다음을 보시오.",
@@ -681,7 +814,8 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     lines = [
         "%s %s. 누가 시킨 것도 아닌데." % (you_n, ig),
         "그러다 <b>%s</b>, %s." % (fl["t"], rs["t"]),
-        "그리고 %s %s." % (you_n, bl),
+        # ★ 「여태」 — 지난 일을 짚어 손님이 제 기억에서 답을 찾게.
+        "그리고 %s %s. 여태 그래 왔소." % (you_n, bl),
     ]
     # ★ 태어난 달의 기운 한 줄. 월지에서 봅니다.
     #   시기는 말하지 않습니다 — '언제' 는 유료 구간(대운)의 몫입니다.
@@ -743,8 +877,10 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
         #      십신이 짓는 것이라 고민이 낱말 하나만 바꾸고 있었습니다.
         #      저울의 **둘째 칸**을 답니다 — 첫 칸은 3단(끝)의 몫이라
         #      겹치지 않고, 여기서는 순서가 어디서 나오는지를 셉니다.
-        body=('<div class="scene">%s'
-              '<p>%s는 늘 이 순서요.</p><div class="seq">%s</div>%s'
+        body=('<div class="scene">'
+              '<p class="ask">그 일이 늘 어디서부터 시작되는지 아시오?</p>%s'
+              '<p>%s는 늘 이 순서요. 아래 <b>3개</b>가 차례를 바꾸지 않소.</p>'
+              '<div class="seq">%s</div>%s'
               '<p class="sea">%s</p><p class="relief">%s</p>%s</div>'
               % (turn_line, esc_you,
                  "".join('<div><span>%s</span></div>' % s for s in seq),
@@ -774,12 +910,12 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     if cmp["usable"]:
         gaps = cmp["gaps"]
         if not gaps:
-            label, q = "2.5 · 겹친 자리", "…이게 맞소?"
+            label, q = "2.5 · 겹친 것", "…이게 맞소?"
             yes = "그렇겠지요. 여덟 자와 넉 자가 다 겹치는 일은 흔치 않소."
             no = "그럼 넉 자를 다시 재보시오. 다음 달에는 다른 유형이 나오기도 하오."
         else:
-            label = "2.5 · 겹친 자리와 어긋난 자리"
-            q = "…짚이는 데가 있소?"
+            label = "2.5 · 겹친 것과 어긋난 것"
+            q = "…마음에 걸리는 것이 있소?"
             yes = ("그럴 것이오. 그 사이가 그대를 가장 지치게 하오." if cmp["deep"]
                    else "그 한두 자리가 늘 걸리는 자리요.")
             no = "그럼 아직 안 부딪힌 것이오. 어긋난 자리는 늦게 값을 물리오."
@@ -796,12 +932,21 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
         fl = _topic.face_line(f, concern, axis4)
         segs.append(_seg(
             stage="2.5", label=label,
-            source="사주 %s ↔ 입력 %s" % (axis_string(f), _html.escape(axis4.upper())),
-            body=(axis_block(cmp, strength)
-                  + ('<div class="cax"><p class="cnt">물으신 자리에서는 '
+            source="사주 %s ↔ 적으신 %s" % (axis_string(f), _html.escape(axis4.upper())),
+            body=('<p class="ask">그대가 적은 넉 자와 여덟 글자가 '
+                  '어디서 겹치고 어디서 갈리겠소?</p>'
+                  + axis_block(cmp, strength)
+                  + ('<div class="cax"><p class="cnt">물으신 일에서는 '
                      '이렇게 나오오.</p>%s'
                      '<p class="ev"><span class="evk">센 것</span>%s</p></div>'
-                     % (fl["say"], fl["ev"]) if fl else "")),
+                     % (fl["say"], fl["ev"]) if fl else "")
+                  # ★ 이 마디는 팩폭 66 · 울림 59 · 비유 59 로 다섯 중
+                  #   꼴찌였습니다. 넉 자와 8글자를 나란히 놓기만 하고
+                  #   **그 사이에서 무엇을 겪었는지**는 안 짚었습니다.
+                  #   어긋난 자리는 사람이 가장 오래 참아 온 자리요.
+                  + '<p class="lived">여태 그 사이에서 혼자 애써 왔을 '
+                    '것이오. 넉 자와 8글자가 갈리는 자리는 옷이 몸에 '
+                    '안 맞는 데처럼, 늘 같은 곳이 쓸리오.</p>'),
             question=q, yes=yes, no=no,
             sid="%s:%s" % (axis_sid(cmp, strength),
                            fl["sid"] if fl else "-")))
@@ -827,8 +972,9 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     #   ① '재성 하는데' 는 비문입니다. 십신 이름에 '하다' 가 안 붙습니다.
     #   ② 이름을 건네는 **가장 뜨거운 순간에 소수점**이 나옵니다.
     #      근거는 이미 근거 줄이 대고 있으니 본문은 사람 말이라야 합니다.
-    post = ("이건 성격이 아니오. <b>%s</b>일간의 힘이 <b>%s</b> 쪽으로 %s, "
-            "정작 <b>%s</b> 바닥이라 <b>멈출 자리가 없는</b> 구조요. %s"
+    post = ("이건 성격 탓이 아니오. 참고 미뤄 온 것도 그대 탓이 아니오.<br />"
+            "<b>%s</b>일간의 힘이 <b>%s</b> 쪽으로 %s, "
+            "정작 <b>%s</b> 바닥이라 <b>멈추게 붙잡아 줄 것이 없는</b> 사주요. %s"
             % (ELEMENT_OF_GAN[f.day_gan], element_word(f.flow_el),
                bank()["NAME_FLOW"][flow],
                josa(element_word(weak), "이", "가"),
@@ -849,12 +995,13 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
             turn = d["start_age"]
             break
     if turn is not None:
-        post += (" 그대는 지금 <b>%d살</b>이고, <b>%d살</b>에 읽는 자리가"
-                 " 한 번 갈리오 — 같은 방인데 창을 다른 쪽으로 낸"
-                 " 것처럼요." % (f.age or 0, turn))
+        # ★ 「한 문단이 7줄을 넘소」 — 글자를 지우지 않고 **끊습니다.**
+        post += ("<br />그대는 지금 <b>%d살</b>이고, <b>%d살</b>에 사주를 읽는 법이"
+                 " 한 번 바뀌오 — 같은 방에 창을 다른 쪽으로 새로 낸 것처럼,"
+                 " 그대는 같아도 보이는 것이 달라진다는 말이오." % (f.age or 0, turn))
     else:
-        post += (" 지금 마디가 마지막 칸이오 — 갈아탈 물길이 "
-                 "더는 없는 셈이오.")
+        post += ("<br />지금 대운이 마지막이오 — 앞으로는 사주를 읽는 법이 "
+                 "더 바뀌지 않는다는 말이오.")
 
     # ★ 이름이 **고민을 안 보고 있었소** (2026-09-05).
     #
@@ -881,7 +1028,7 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     #   축이니 그 축 위에서 고민을 곱하면 말이 어긋나지 않소.
     at = (bank().get("NAME_AT", {}).get(flow) or {}).get(concern)
     if at:
-        post += " " + at
+        post += "<br />" + at
 
     # ★ 값을 치르기 전에도 **고민을 세고 있다는 것**이 보여야 하오
     #   (2026-09-06 · docs/20 §8).
@@ -903,9 +1050,20 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
             % (josa(element_word(weak), "이", "가"),
                amount_word(f.elements[weak]), flow),
             "용신", "용신"),
-        body=('<div class="nameB"><p class="pre">오래 느꼈는데 말로는 못 했던 것.<br>'
-              '그건 이름이 있소.</p><p class="word">%s</p><p class="post">%s</p>'
-              '%s</div>'
+        # ★ 이 마디가 훅의 **끝**입니다. 둘을 답니다 —
+        #     여는 물음   설명이 아니라 물음으로 열어야 마지막까지 읽소
+        #     다음 이름   여기서 끝나는 것이 아니라는 것을 **이름으로**
+        #                 말하오. 「더 있소」 는 예고가 아니오.
+        #   ★ 다만 앞을 깎지 않습니다. 「여덟 자 중 셋으로 본 것」 처럼
+        #     방금 좋았다고 느낀 것을 8분의 3으로 만들지 않소.
+        #     격차는 **남은 것**으로 냅니다 (CLAUDE.md).
+        body=('<div class="nameB">'
+              '<p class="ask">오래 느꼈는데 말로는 못 했던 것. '
+              '그것에 이름이 있다면 무엇이겠소?</p>'
+              '<p class="word">%s</p><p class="post">%s</p>'
+              '%s<p class="nextn">여기까지가 <b>이름</b>이오. '
+              '다음 자리 — 「무료 6단」. 거기서 그 이름이 '
+              '그대가 물은 자리에 어떻게 걸리는지를 보오.</p></div>'
               % (word, post,
                  ('<p class="cnt">셈은 값을 치르기 전에도 하오. %s</p>'
                   '<p class="ev"><span class="evk">센 것</span>%s</p>'
@@ -923,14 +1081,69 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     #   ★ 뜻만으로는 모자랍니다. 「편관(나를 누르는 힘)」 을 읽어도
     #     그림이 안 그려집니다. 처음 나온 단 밑에 비유를 한 줄 답니다 —
     #     「위에서 몰아붙이는 자리요. 급한 일과 마감이 그것이오.」
-    seen: set = set()
+    #
+    # ★ 근거 줄도 같은 한 벌로 풉니다 (2026-09-10).
+    #
+    #   여태 `html` 만 풀고 있었습니다. 그런데 어려운 말이 가장 많이
+    #   나오는 자리는 본문이 아니라 **근거 줄**이었습니다 — 1인 평균
+    #   본문 12.8회, 근거 줄 17.7회. 화면은 그 줄을 「근거 · 관성이 셋 ·
+    #   중화」 로 그대로 그립니다.
+    #
+    #   근거는 **손님이 대 볼 수 있어야** 근거입니다. 대 볼 수 없는 말로
+    #   대면 그건 근거가 아니라 주문이오.
+    #
+    #   ★ 읽는 차례대로 풉니다. 0단만 근거가 본문 **아래**에 놓이고
+    #     (source_below) 나머지는 위에 놓입니다. 차례를 안 맞추면
+    #     둘째 번 나온 자리에 풀이가 붙고 첫 자리는 맨말로 남습니다.
+    # ★ 괄호 풀이는 **마디마다**, 그림 상자는 **한 벌에 한 번** (2026-09-10).
+    #
+    #   여태 둘 다 한 벌에 한 번이었습니다. 그래서 0단은 쉬움 100 인데
+    #   1~3단은 38~48 이었습니다 — 0단에서 푼 말이 뒤에서는 맨말로
+    #   남고, 마디마다 여섯 번씩 모르는 말을 만납니다.
+    #
+    #   훅은 한 화면에 다 있는 글이 아닙니다. 마디를 하나씩 펴고 그때마다
+    #   손님이 「그렇소/아니오」를 누릅니다. 세 마디 뒤에 「관성」을 다시
+    #   만나면 그건 **처음 보는 말**이오 — 앞으로 스크롤해 올라가 괄호를
+    #   찾아 읽으라는 것은 근거를 대는 것이 아닙니다.
+    #
+    #   다만 **그림 상자는 안 되풀이합니다.** 괄호 한 마디는 값이 싸지만
+    #   상자는 문단 하나라, 마디마다 붙으면 읽는 글보다 사전이 깁니다.
+    #   「사전을 리포트에 붓기」 를 금한 것과 같은 자리요.
+    boxed: set = set()
     for s in segs:
-        before = set(seen)
+        seen: set = set()
+        if s.get("source") and not s.get("source_below"):
+            s["source"] = terms.gloss(s["source"], seen, concern, f.sex)
         # ★ 물으신 자리를 함께 넘깁니다 (2026-09-07).
         #   사랑을 물은 사내에게 재성은 짝 보는 글자인데 「쌓는 재물」로
         #   풀려 나갔습니다. 괄호와 비유가 **같은 층**이라야 합니다.
         s["html"] = terms.gloss(s["html"], seen, concern, f.sex)
-        s["html"] += terms.picture_box(seen - before, concern, f.sex)
+        if s.get("source") and s.get("source_below"):
+            s["source"] = terms.gloss(s["source"], seen, concern, f.sex)
+        s["html"] += terms.picture_box(seen - boxed, concern, f.sex)
+        boxed |= seen
+
+    # ★ 마디마다 **물으신 자리의 말**로 한 번 옮깁니다 (2026-09-17).
+    #
+    #   손님이 짚었습니다 — 「돈을 선택했는데 왜 돈에 대한걸 말안해.
+    #   다른것도 그렇고」. 재보니 훅 3,600자에 물은 자리의 말이 한두
+    #   번이었습니다. 훅의 뱅크는 십신과 성격의 말로 쓰여 있어, 돈은
+    #   「정재(월급처럼 모이는 돈)」 같은 풀이 덕에 우연히 나왔고
+    #   일·사랑·방향·몸은 거의 안 나왔습니다.
+    #
+    #   말투 층 **앞**입니다 — 뒤에 붙이면 이 줄만 하오체로 남소.
+    for s in segs:
+        line = _topic.hook_line(concern, s.get("stage"))
+        if line:
+            s["html"] += line
+            # 답변을 누른 뒤에도 선택한 고민이 이어져야 합니다. 응답은
+            # 문단 안에 들어가므로 hook_line의 p 태그를 span으로 바꿔
+            # 관심사별 한 줄을 yes/no 양쪽에 붙입니다.
+            reply_line = (line.replace('<p class="tale atask">',
+                                       '<span class="tale atask">')
+                              .replace('</p>', '</span>'))
+            s["yes"] = "%s %s" % (s["yes"], reply_line)
+            s["no"] = "%s %s" % (s["no"], reply_line)
 
     # ★ 뱅크에 박아 둔 「그대」를 그 캐릭터의 호칭으로 바꿉니다.
     #
@@ -945,8 +1158,23 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
         for field in ('html', 'source', 'yes', 'no'):
             if segment.get(field):
                 segment[field] = scope_text(segment[field], f.hour_known)
-    from .reading_hook import project
-    return project(segs,f,concern,axis4,you,misses)
+    # ★ 훑어읽기 층 — **맨 끝**입니다 (2026-09-16).
+    #
+    #   `engine/skim` 은 리포트에만 걸려 있었습니다. 훅은 4,443자에
+    #   굵은 글씨 마흔아홉인데 형광펜이 한 줄도 없었습니다 — 10만 명
+    #   가운데 24%가 나가는 자리인데요. 다 안 읽는 손님에게 이 화면은
+    #   크기가 하나뿐인 글이었습니다.
+    #
+    #   말투·호칭 층 **뒤**입니다. 어미를 갈아 끼우면 문장 끝이
+    #   바뀌는데, 문장 꼴을 찾는 규칙이 그 앞에서 돌면 갈아 끼운 뒤의
+    #   어미를 못 봅니다.
+    #
+    #   밑줄은 안 칩니다. 밑줄은 **손님이 할 것**인데 훅은 처방하지
+    #   않소 — 다섯 마디가 다 짚는 말입니다. 없는 데는 비웁니다.
+    for segment in segs:
+        if segment.get("html"):
+            segment["html"] = _skim.mark(segment["html"])
+    return segs
 
 
 def tea(f) -> dict:

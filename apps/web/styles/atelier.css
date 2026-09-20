@@ -50,7 +50,7 @@ body .phone .fld {width:100%;min-height:56px;padding:14px 16px;border:1px solid 
 body .phone .op {border:1px solid var(--line);border-radius:12px;background:#1c211a;color:var(--paper2);padding:16px;min-height:58px;font:400 15px/1.7 var(--sans);box-shadow:none;transition:border-color .2s,background .2s}
 .phone .op:hover {border-color:#7e8969;background:#242c21}
 body .phone .op.on,body .phone .op[aria-pressed="true"] {border-color:var(--gold);background:#30372b;color:var(--paper);box-shadow:inset 0 0 0 1px #ddc49322}
-.phone .op b {font-weight:500}
+.phone .op b,.phone .op .nm {font-weight:500}
 .phone .op span {color:var(--paper2)}
 .phone .og {gap:12px}
 body .phone .conversion-card,body .phone .conversion-product,body .phone .dz,body .phone .ask {padding:24px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(135deg,#262d2255,transparent 80%),var(--bg2);box-shadow:0 10px 30px #00000012}
@@ -150,6 +150,33 @@ body .phone[data-screen="a1"] .gatedoubt {background:var(--bg);padding:32px 36px
   .gate-promise>div {grid-template-columns:repeat(3,1fr);gap:18px}
   .gate-promise article {display:block}
   .gate-promise h2 {margin-top:10px;margin-bottom:8px}
+}
+/* ★ 폰에서 **12px 아래로 그려지던 글** (2026-09-15 · tools/mobile_render.py)
+
+     실제로 그려 놓고 재 보니 표제 곁말이 10~11px 였습니다. 넓은 화면
+     에서는 조판으로 읽히지만 폰에서는 그냥 안 읽힙니다 — 손님이
+     화면 이름과 브랜드를 못 읽는 자리였습니다.
+
+     폰에서만 12px 로 올립니다. 넓은 화면의 조판은 건드리지 않습니다. */
+@media(max-width:600px){
+  .folio-label {font-size:12px}
+  .folio-label i {font-size:12px}
+  .brand-signature small,.gate-wordmark small {font-size:12px}
+  .phone .conversion-kicker {font-size:12px}
+  .phone .guide-intro .conversion-kicker {font-size:12px}
+  .brand-overline {font-size:12px}
+  /* ★ `.topics i`(얼굴 카드 안의 주제 딱지)는 10px 그대로 둡니다.
+     폰에서 작은 건 맞는데, 12px 로 키우면 얼굴 카드가 360px 화면에서
+     365px 로 삐져나옵니다 (배포본 0 → 6). `flex-wrap` 과 `min-width:0`
+     을 붙여 줄바꿈을 열어 줘도 마찬가지였습니다 — 카드가 한 줄에
+     담을 수 있는 양이 정해져 있어서입니다.
+
+     여기는 **CSS 한 줄로 될 자리가 아닙니다.** 카드 짜임(딱지 수를
+     줄이거나 한 줄로 접거나)을 다시 잡아야 하는 자리라, 지금은
+     깨지지 않는 쪽을 택하고 남겨 둡니다. */
+  .hamyo-name {font-size:12px}
+  /* 되돌아가는 길도 손가락이 닿아야 합니다 (59×24 였습니다). */
+  .legalpg .back a,.legalpg .back {display:inline-block;padding:11px 4px;min-height:44px;box-sizing:border-box}
 }
 @media(max-width:600px){
   .adm {margin:16px;padding:20px;border-radius:12px}

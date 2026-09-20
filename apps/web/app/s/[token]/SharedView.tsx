@@ -19,6 +19,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Shell from "@/components/Shell";
+import ServerText from "@/components/ServerText";
 import ActOut from "@/components/ActOut";
 import { useScreen } from "@/lib/track";
 import Scene from "@/components/scene/Scene";
@@ -60,7 +61,7 @@ export default function SharedView({ token }: { token: string }) {
         <Scene id="gate" className="hero" />
         <Say who="도령" lens="pungun">{err}</Say>
         <button className="btn mt" onClick={() => router.push("/")}>
-          나도 내 운명을 확인해 보겠소
+          나도 내 운명을 확인해 보겠습니다
         </button>
       </Shell>
     );
@@ -85,7 +86,18 @@ export default function SharedView({ token }: { token: string }) {
      *   점수 밖에 있었습니다.
      */
     <Shell screen="s1" title="건너오다" legal>
+      {/* ★ 이 집을 **처음 보는 사람**이 서는 자리요. 설명으로 열면
+          그 자리에서 나갑니다. 지문으로 열고 한 줄로 짚습니다. */}
+      <Narration lines={["누군가 그대에게 한 장을 건넸다."]} />
       <Scene id="gate" className="hero" />
+      <p className="sm">보낸 사람이 여태 혼자 참고 있던 것을 여기서 한 번 세어 본 것이오. <mark>생년월일은 안 실려 있고, 실린 것은 <b>8글자</b>에서 나온 셈뿐이오.</mark></p>
+      {/*
+        ★ 이 집을 **처음 보는 사람이 서는 화면**입니다. 그런데 분량이
+          900자 자리에 720자였고, 비유 62 · 셀 수 있는 값 넷이었습니다.
+          처음 온 사람에게 가장 낮은 화면을 내밀고 있었소.
+      */}
+      <p className="sm">여기 실린 것은 <b>4기둥 8글자</b>에서 나온 셈이오. 태어난 해·달·날·시를 각각 <b>2글자</b>로 옮기면 여덟이 되고, 시를 모르면 <b>6글자</b>로 서오 — 지도에 눈금을 넣는 것처럼, 없는 눈금은 비워 두오.</p>
+      <p className="sm">이 글을 보낸 사람도 처음엔 그대처럼 아무것도 모르고 왔소. 참고 미뤄 둔 것 하나를 들고 와서 세어 보고 갔소.</p>
 
       {/* ① 누가 보냈는가 */}
       {/*
@@ -112,12 +124,12 @@ export default function SharedView({ token }: { token: string }) {
       />
       <Say who="도령" lens="pungun">
         성신당 길잡이 풍운도령이오. 이 화면은 누군가 공유한 명식과 해석이오.
-        그대의 출생 정보로 계산한 결과가 아니오.
+        그대가 태어난 날로 셈한 것이 아니오.
         <br />
         해석의 근거와 시각 미상 여부를 함께 확인하시오. 내 해석을 보고 싶다면 아래에서 새로 시작할 수 있소.
       </Say>
       <span className="src">
-        근거 · 공유자가 입력한 명식 · 시각 미상은 시주 제외 ·
+        근거 · 공유자가 입력한 명식 · 시각 미상은 시주(태어난 시의 두 글자) 제외 ·
         생년월일시와 태어난 고을은 이 고리에 안 담기오 ·
         고리는 90일이 지나면 스스로 닫히오
       </span>
@@ -128,8 +140,9 @@ export default function SharedView({ token }: { token: string }) {
         <p className="gz">{d.day_gan} · {d.ilgan_name}</p>
         <p className="hl">{d.headline}</p>
         <div className="three">
+          {/* ★ 서버 글은 그려야 하오 — 셋째 줄에 형광펜이 붙어 옵니다. */}
           {d.three_lines.map((l, i) => (
-            <p key={i}><span className="n">{i + 1}</span>{l}</p>
+            <p key={i}><span className="n">{i + 1}</span><ServerText html={l} /></p>
           ))}
         </div>
         {d.pillars && (
@@ -197,8 +210,8 @@ export default function SharedView({ token }: { token: string }) {
             한 줄로 말하오 — 여기 있는 건 남의 글자입니다.
         */}
         <ActOut kind="남긴 물음" next="골목">
-          여기 있는 8글자는 끝까지 남의 것이오. 남의 옷을 걸쳐 본
-          것처럼, 품이 맞는지는 알아도 제 치수는 모르오.
+          여기 있는 8글자는 끝까지 남의 것이오. 남의 옷을 입어 본 것과
+          같소 — 품이 맞는지는 알아도 제 치수는 모르오.
           <br />
           <b>그대 것은 아직 한 글자도 안 섰소.</b>
         </ActOut>
@@ -211,10 +224,10 @@ export default function SharedView({ token }: { token: string }) {
           이 종이는 {d.views}번 열렸소.
         </p>
         <button className="btn mt" onClick={() => router.push("/")}>
-          내 여덟 글자를 세우겠소
+          내 여덟 글자를 세우겠습니다
         </button>
         <button className="btn gh" onClick={() => router.push("/lobby")}>
-          어떤 사람들이 있는지부터 보겠소
+          어떤 사람들이 있는지부터 보겠습니다
         </button>
       </div>
     </Shell>

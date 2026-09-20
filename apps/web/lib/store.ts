@@ -65,6 +65,26 @@ export interface SessionState {
   tier: Tier;
   paid: boolean;
   hookReview: { chartId: string; concern: string; lensId: string; answers: Record<string, boolean | null> } | null;
+  /**
+   * 물으신 자리가 되묻는 것에 **한 번** 고른 답.
+   *
+   * ★ 화면을 넘으면 사라져 **또 묻고 있었습니다** (2026-09-10).
+   *   무료 구간(d0)에서 고르고, 값을 치르고, 리포트로 가면 같은 것을
+   *   다시 물었습니다 — `extras` 가 화면마다 따로 사는 값이라서요.
+   *   손님 눈에는 「아까 말했는데」 입니다.
+   *
+   * ★ 고민이나 명식이 바뀌면 **버립니다.** 돈에서 고른 답이 몸 물음에
+   *   실려 가면 안 되오.
+   *
+   * ★ 상대 사주·현재 상황은 여기 안 둡니다. 그건 제3자의 생년월일이라
+   *   본인 동의가 없고, 계산하고 버리는 값입니다 (docs/11).
+   *   여기 두는 것은 **고른 것 한둘**뿐이오.
+   *
+   * ★ **건너뛴 것도 기억합니다.** `choice: ""` 가 「물었고 안 답했다」요.
+   *   안 남기면 화면을 옮길 때마다 또 뜹니다 — 건너뛴 사람에게
+   *   같은 물음을 세 번 내미는 셈이오.
+   */
+  topicPick: { chartId: string; concern: string; choice: string; choice2?: string } | null;
   relayUsed: number;
   visits: number;
   visitDate: string | null;
@@ -90,6 +110,8 @@ export interface SessionState {
   screen: string | null;
 
   set: (patch: Partial<SessionState>) => void;
+  /** 오늘 몇 번째 왔는지 센다. 어느 화면에서 들어와도 한 번만 오른다. */
+  countVisit: () => void;
   markRead: (id: string) => void;
   markSkipped: (id: string) => void;
   reset: () => void;
@@ -115,6 +137,7 @@ const initial = {
   city: "서울",
   axis4: null as string | null,
   concern: "love" as Concern,
+  topicPick: null as SessionState["topicPick"],
   /*
    * ── 손님이 **실제로 고른** 것인가 ──────────────────────
    *
@@ -169,6 +192,21 @@ export const useSession = create<SessionState>()(
     (set) => ({
       ...initial,
       set: (patch) => set(patch),
+      /*
+       * ★ 방문을 세는 자리가 일진 화면 **한 곳뿐**이었습니다 (2026-09-16).
+       *   — 주석 안에 별 둘 뒤 빗금을 쓰면 그 자리에서 주석이
+       *     닫힙니다. 「/daily」 를 굵게 쓰려다 파일이 깨졌소.
+       *
+       *   그래서 훅에서 하루 세 번 되풀이해 읽는 사람은 아무도
+       *   안 세고 있었습니다 — 그 사람이 가장 오래 이 집을
+       *   붙들고 있는 사람인데요. 어느 문으로 들어와도 셉니다.
+       */
+      countVisit: () => set((st) => {
+        const day = new Intl.DateTimeFormat('en-CA', {timeZone:'Asia/Seoul', year:'numeric', month:'2-digit', day:'2-digit'}).format(new Date());
+        return st.visitDate === day
+          ? { visits: st.visits + 1 }
+          : { visits: 1, visitDate: day };
+      }),
       markRead: (id) =>
         set((s) => (s.read.includes(id) ? s : { read: [...s.read, id] })),
       markSkipped: (id) =>
@@ -188,6 +226,7 @@ export const useSession = create<SessionState>()(
         admin: s.admin, adminSet: s.adminSet, seasonOverride: s.seasonOverride,
         ilganOverride: s.ilganOverride,
         hookReview: s.hookReview,
+        topicPick: s.topicPick,
       }),
     },
   ),

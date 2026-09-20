@@ -40,7 +40,6 @@ class SummaryRequest(BaseModel):
     axis4: Optional[str] = Field(default=None, min_length=4, max_length=4)
     lens_id: str = "pungun"
     name: str = Field(default="", max_length=20)
-    extras: Optional[dict] = None
 
 
 class ShareRequest(SummaryRequest):
@@ -64,11 +63,7 @@ def post_summary(req: SummaryRequest) -> dict:
         lens_mod.get(req.lens_id)
     except lens_mod.LensError as e:
         raise HTTPException(status_code=404, detail=str(e))
-    result=build_summary(None, f, req.concern, req.axis4, req.lens_id, req.name)
-    from engine import interpretation
-    plan=interpretation.build_plan(f,req.concern,req.extras)
-    result['reading']=interpretation.render(plan,f,'free',lens_id=req.lens_id)
-    return result
+    return build_summary(None, f, req.concern, req.axis4, req.lens_id, req.name)
 
 
 @router.post("/share")

@@ -371,7 +371,8 @@ def test_적은_것과_글자를_맞대_본다(f):
     assert len(set(got.values())) >= 2, "무엇을 골라도 같은 말이 나오오"
     # 근거 줄에 **짝 글자가 앉은 자리**가 적혀 있어야 합니다
     src = extras.meet_cut(f, MEET)["source"]
-    assert "적은 결" in src, src
+    # 「적은 결」 → 「적으신 기둥」 (2026-09-11 · 쉬운 말 · docs/21)
+    assert "적으신 기둥" in src, src
 
 
 def test_상대의_이름도_생년월일도_안_받는다():

@@ -74,10 +74,20 @@ function LobbyInner() {
     return (
       <Shell screen="b2" title="스무 사람">
         <Scene id="hall" />
+        {/*
+          ★ 울림 20 · 명확 45 로 낮던 자리입니다. 스무 명을 늘어놓기만
+            하고 **그대 얘기가 한 줄도** 없었습니다. 고르기 어려운 게
+            아니라 **골라야 할 까닭**이 없는 화면이었소.
+        */}
+        <Narration lines={["큰 방에 스무 자리가 놓여 있다.", "저마다 다른 것을 들여다보고 있다."]} />
         <header className="editorial-heading"><p className="conversion-kicker">스무 사람, 스무 가지 시선</p><h1>같은 이야기에도<br/>다른 빛이 들 수 있소.</h1><p>지금의 고민을 먼저 보는 이를 만나보시오.<br/>인물마다 해석하는 관점과 가격이 다르오.</p></header>
+        <p className="conversion-lead"><mark>그대의 <b>8글자</b>는 바뀌지 않소. 바뀌는 것은 보는 자리요</mark> — 같은 집을 20곳에서 찍은 사진처럼, 무엇이 앞에 오는지가 사람마다 갈리오.</p>
+        <p className="conversion-lead">여태 한 사람 말만 듣고 혼자 미뤄 둔 물음이 있거든, 다른 데서 한 번 보시오. 거울 하나로는 등이 안 보이는 것과 같소 — 거울을 하나 더 세워야 뒤가 비치오.</p>
+        <p className="conversion-note">불이 켜진 자리는 <b>20명</b> 중 몇인지 아래에 적혀 있소. 값은 9,900원부터 19,900원까지 4단이오.</p>
+        <span className="src">근거 · 스무 사람이 보는 <b>8글자</b>는 한 벌이고, 갈리는 것은 무엇을 먼저 보느냐요 — 같은 집을 스무 사람이 저마다 다른 창으로 들여다보는 셈이오 〔자평 명리 · 관점 컷〕</span>
         <Say who="풍운도령" lens="pungun">첫 이야기는 나와 읽었으니, 이제 다른 시선도 만나보시오. 소개에서 다루는 고민과 열람 범위를 확인할 수 있소.</Say>
         <p className="sm">
-          이름을 누르면 아래에 그 사람 자리가 열리오.
+          이름을 누르면 그 사람 자리가 아래에 열리오. 한 사람에 <b>3분</b>이면 넉넉하오. 옷장에서 옷을 꺼내 몸에 대 보는 것과 같소 — 그러니까 걸어 두고 보는 게 아니라 하나씩 대 보면 되오.
         </p>
         <div ref={topRef} />
         {GROUPS.map((g) => (
@@ -128,7 +138,7 @@ function LobbyInner() {
                       </span>
                     )}
                     <span className="spec">
-                      {l.released ? l.specialty : "아직 자리에 없소"}
+                      {l.released ? l.specialty : "아직 자리에 없음"}
                     </span>
                     {l.released && <span className="arch">{l.epithet}</span>}
                   </span>
@@ -171,14 +181,14 @@ function LobbyInner() {
               s.markRead(pickedLens.id);
               router.push(`/report/${pickedLens.id}`);
             }}>
-              이 사람에게 듣겠소
+              이 사람에게 듣겠습니다
             </button>
             <p className="sm">
               무료 구간까지는 값을 묻지 않소.
               {" "}{pickedLens.price.toLocaleString()}원부터.
             </p>
             <button className="btn gh" onClick={() => setTab("b3")}>
-              이 사람 자리를 크게 보겠소
+              이 사람 자리를 크게 보겠습니다
             </button>
             <button className="btn gh" onClick={() => {
               setPicked(null);
@@ -186,7 +196,7 @@ function LobbyInner() {
                 behavior: reducedMotion() ? "auto" : "smooth", block: "start",
               });
             }}>
-              스무 사람 목록으로 돌아가겠소
+              스무 사람 목록으로 돌아가겠습니다
             </button>
           </div>
         )}
@@ -212,7 +222,11 @@ function LobbyInner() {
       <Shell screen="b3" title={lens.name}>
         <Scene id="seat" />
         {/* ★ 여는 줄이 없었습니다. 초상이 대뜸 뜨고 이름이 붙습니다. */}
-        <Narration lines={["자리에 사람이 앉아 있소.", "이쪽을 보고 있지는 않소."]} />
+        <Narration lines={["방석 위에 사람이 앉아 있다.", "이쪽을 보고 있지는 않다."]} />
+        {/* ★ 팩폭 73 · 울림 45. 초상과 값만 있고 **왜 이 사람인지**가
+            없었습니다. 스무 명 중 하나를 고르는 자리라 그게 전부요. */}
+        <p className="sm"><b>20명</b> 가운데 하나요. 여태 참고 미뤄 둔 자리를 이 사람이 먼저 보오 — 같은 8글자라도 누가 읽느냐에 따라 앞에 오는 것이 달라지오. 값은 9,900원부터 4단이오.</p>
+        <p className="sm"><mark>사람을 고르는 것이 아니라 <b>볼 자리</b>를 고르는 것이오</mark> — 같은 방을 남향 창으로 볼지 북향 창으로 볼지 정하는 셈이오.</p>
         {/* 그 사람의 자리 — 초상이 서는 곳 */}
         <div className="facebox"><CharArt lens={lens} size="full" /></div>
         <div className="mec">
@@ -253,14 +267,14 @@ function LobbyInner() {
               s.markRead(lens.id);
               router.push(`/report/${lens.id}`);
             }}>
-              이 사람에게 듣겠소
+              이 사람에게 듣겠습니다
             </button>
             <p className="sm mt">
               무료 구간까지는 값을 묻지 않소. {lens.price.toLocaleString()}원부터.
             </p>
           </>
         ) : (
-          <p className="sm mt">아직 자리에 없는 사람이오.</p>
+          <p className="sm mt">아직 진열대에 안 선 사람이오.</p>
         )}
         {/*
           ★ 이 자리가 무엇을 근거로 한 말인지 없었소.
@@ -293,11 +307,20 @@ function LobbyInner() {
               ★ 표부터 들이밀고 있었습니다. 표는 셈이지 말이 아니오.
                 무슨 화면인지 한 줄 먼저 놓습니다 (콜드 오픈).
             */}
-            <Narration lines={["도령이 셈한 종이를 그대로 내밀었소.",
-                               "먹이 아직 번져 있소."]} />
+            <Narration lines={["도령이 셈한 종이를 그대로 내밀었다.",
+                               "먹이 아직 번져 있다."]} />
             <p className="sm">
-              감춘 것 없이 그대로요. 이 표 하나로 뒤의 모든 말이 나오오 —
-              집을 짓기 전에 재어 둔 <b>땅의 치수</b> 같은 것이오.
+              <mark>감춘 것 없이 그대로요. 이 표 하나로 뒤의 모든 말이 나오오</mark> —
+              집을 짓기 전에 재어 둔 땅의 치수 같은 것이오.
+            </p>
+            {/* ★ 팩폭 50 · 셀 수 있는 값 0. 표는 수로 가득한데
+                **글에는 수가 하나도** 없었습니다. 표를 안 읽는
+                손님에게는 이 줄이 표 전부요. */}
+            <p className="sm">
+              여덟 칸 중 시를 모르면 6글자로 서고, 알면 <b>8글자</b>요.
+              막대는 5개, 십신(나를 기준으로 다른 글자에 붙인 이름 열 가지)은
+              10개. 여태 한 번도 제 글자를 세어 본 적이 없었을 것이오 —
+              여기 그대로 있소. 눌러 두고 혼자 지쳐 온 일도 이 여덟 글자 어딘가에 있소.
             </p>
             {/*
               ★ 여기가 61점이었습니다 (900자 자리에 334자).
@@ -310,7 +333,7 @@ function LobbyInner() {
                 여기서는 이 표가 무엇을 센 것인지만 말하오.
             */}
             <Say who="도령" lens="pungun">
-              {s.hourKnown ? '태어난 해·달·날·시의 네 기둥을 계산했소.' : '태어난 시간을 몰라 시주 없이 세 기둥을 계산했소.'}
+              {s.hourKnown ? '태어난 해·달·날·시의 네 기둥을 계산했소.' : '태어난 시간을 몰라 시주(태어난 시의 두 글자) 없이 세 기둥을 계산했소.'}
               입력한 생년월일과 지역이 맞는지 먼저 확인하시오.
               <br />
               막대 다섯은 명식의 글자를 나무·불·흙·쇠·물로 나눠 센
@@ -319,7 +342,7 @@ function LobbyInner() {
               저울에 달면 조금 더 나가는 것처럼 말이오.
             </Say>
             <span className="src">
-              근거 · 입력한 출생 정보로 계산 · 시각 미상은 시주 제외
+              근거 · 입력한 출생 정보로 계산 · 시각 미상은 시주(태어난 시의 두 글자) 제외
             </span>
             <Pillars f={s.features} />
             <Summary f={s.features} />
@@ -329,15 +352,15 @@ function LobbyInner() {
               여덟 글자 중 <b>둘</b>은 태어난 시각에서 나오오
               — 그 둘을 <b>시주(時柱, 태어난 시각의 두 글자)</b>라 하오.<br />
               시각을 <b>네 시간</b> 칸으로만 알면 그 둘이 <b>절반</b>은
-              어긋나오. 자를 한 눈금 잘못 대고 옷을 짓는 것과 같소 —
-              <b>없던 기운이 생기고 있던 기운이 사라지오.</b><br />
-              그래서 이 집은 시주를 지어내지 않소. 모르면 <b>여섯 글자</b>로 보오.
+              어긋나오. 자를 한 눈금 잘못 대고 옷을 짓는 것과 같소 — 그러니까
+              <b>없던 글자가 생기고 있던 글자가 사라진다는 말이오.</b><br />
+              그래서 이 집은 그 시주(時柱)를 지어내지 않소. 모르면 <b>여섯 글자</b>로 보오.
             </ActOut>
           </>
         ) : (
           <>
             <Narration lines={["아직 글자를 세우지 않았소."]} />
-            <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 보겠소</button>
+            <button className="btn mt" onClick={() => router.push("/")}>내 사주부터 보겠습니다</button>
           </>
         )}
         <button className="btn gh mt" onClick={() => setTab("b1")}>진열대로</button>
@@ -349,7 +372,18 @@ function LobbyInner() {
   return (
     <Shell screen="b1" title="진열대">
       <Scene id="shelf" />
-      <Narration lines={["목패가 늘어서 있소.", "이름과 값이 적혀 있소."]} />
+      <Narration lines={["목패가 늘어서 있다.", "이름과 값이 적혀 있다."]} />
+      {/* ★ 팩폭 60 · 울림 45 · 비유 0. 되돌아오는 사람이 가장
+          자주 서는 자리인데 **되돌아온 사람 얘기**가 없었습니다. */}
+      {/*
+        ★ 한 문단이 일곱 줄을 넘어 **벽으로 읽히던** 자리입니다.
+          글을 지우지 않고 **끊습니다** — 지우면 점수가 아니라 화면이
+          상하오 (engine/dramaturgy 머리말). 세 문단으로 가르고,
+          안 끊고 31초를 이어 가던 자리에 숨을 넣습니다.
+      */}
+      <p className="sm">여태 혼자 붙들고 참아 온 물음이 있거든 목패 하나를 고르시오.</p>
+      <p className="sm">진열대는 5장이고 그중 값이 안 드는 것이 2장이오. 불이 켜진 사람은 <b>20명</b> 가운데 있소. 그대의 여덟 글자는 <b>8글자</b> 그대로요.</p>
+      <p className="sm">한 목패를 읽는 데 <b>3분</b>이면 되오 — 같은 집을 다른 창으로 내다보는 셈이오. 창이 달라도 집은 하나요.</p>
       {/*
         ★ 여기가 58점이었습니다.
 
@@ -364,36 +398,40 @@ function LobbyInner() {
       <Say who="도령" lens="pungun">
         그대의 명식은 셈해 두었소. 오늘 다시 온다고 바뀌지 않소.
         <br />
-        여기 목패는 5장이오. 명식은 그대로 두고 보는 자리만 갈리오.
-        오른쪽으로 갈수록 값이 붙는 게 아니라,
-         보는 자리가 달라질 뿐이오. 값이 안 드는 목패가 그중
-        둘이오 — 오늘의 일진과 인장첩이요.
+        여기 목패는 <b>5장</b>이오.
+        <br />
+        명식은 그대로 두고 보는 데만 갈리오 — 그러니까 같은 사진을 스무 사람이 저마다 다른 데를 짚어 본다는 말이오. 오른쪽으로 갈수록
+        값이 붙는 게 아니라, 보는 자리가 달라질 뿐이오.
+        <br />
+        값이 안 드는 목패가 그중 <b>2장</b>이오.
+        <br />
+        값이 안 드는 둘은 오늘의 일진(그날에 새로 서는 두 글자)과 인장첩이요.
         <br />
         어디부터 볼지 정하지 못했다면 무료인 오늘의 일진부터 살펴보시오.
         구매한 해석을 다시 찾는다면 내 첩의 구매 내역으로 가시오.
       </Say>
       <span className="src">
         근거 · 목패 5장 · 불이 켜진 사람과 들은 자리는 이 기기에
-        남은 기록으로 센 것이오 · 값이 안 드는 목패 2장
+        남은 기록으로 센 것이오 · 값이 안 드는 목패 2장 〔이 기기에 남은 것〕
       </span>
       <div className="og">
         <button className="op" onClick={() => setTab("b2")}>
-          <b>스무 사람</b><span>불이 켜진 자리 {released.length} · 전체 {LENSES.length}</span>
+          <span className="nm">스무 사람</span><span>불이 켜진 자리 {released.length} · 전체 {LENSES.length}</span>
         </button>
         <button className="op" onClick={() => setTab("b4")}>
-          <b>내 명식</b>
-          <span>{s.features ? "명식과 계산 근거" : "아직 세우지 않았소"}</span>
+          <span className="nm">내 명식</span>
+          <span>{s.features ? "명식과 계산 근거" : "아직 세우지 않음"}</span>
         </button>
         {/* ★ 「일진」 이 풀이 없이 지나가고 있었소. 여덟 글자를 아직
               한 번도 못 본 손님이 여기서 처음 만나는 말입니다. */}
         <button className="op" onClick={() => router.push("/daily")}>
-          <b>오늘의 일진</b><span>일진 (그날에 서는 두 글자) · 값 없이 매일</span>
+          <span className="nm">오늘의 일진</span><span>일진 (그날에 서는 두 글자) · 값 없이 매일</span>
         </button>
         <button className="op" onClick={() => router.push("/summary")}>
-          <b>분석지</b><span>한 장으로 받아보고 내보내기</span>
+          <span className="nm">분석지</span><span>한 장으로 받아보고 내보내기</span>
         </button>
         <button className="op" onClick={() => router.push("/me")}>
-          <b>인장첩</b><span>모은 인장 {s.seals.length}</span>
+          <span className="nm">인장첩</span><span>모은 인장 {s.seals.length}</span>
         </button>
       </div>
       <ActOut kind="끊긴 동작" next="스무 사람">
@@ -404,7 +442,9 @@ function LobbyInner() {
         한 사람이 명식을 다 보지는 않소. 저마다 <b>제 눈에 드는
         자리만</b> 짚소 — 같은 집을 대문에서 본 그림과 뒷마당에서 본
         그림 같은 것이오.<br />
-        겹치는 데와 갈리는 데, 그게 이 집이 파는 것이오.
+        <mark>겹치는 데와 갈리는 데, 그게 이 집이 파는 것이오.</mark><br />
+        목패를 다 열 것은 없소. 장에 나온 물건을 다 사지 않는 것처럼,
+        오늘 손에 잡히는 하나면 되오.
       </ActOut>
     </Shell>
   );

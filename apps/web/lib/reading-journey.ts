@@ -6,7 +6,7 @@ export const READING_QUESTIONS: Record<string,string> = {
   love:'마음을 줬는데, 왜 같은 곳에서 서운하오?',
   people:'좋은 사람이 되려다 내 몫을 놓치지는 않소?',
   dir:'선택 앞에서 늘 같은 이유로 멈추는 것이오?',
-  health:'하루를 버티는 힘과 회복하는 틈은 다르오.',
+  health:'하루를 버티는 힘과 회복하는 틈은 왜 다르오?',
 };
 
 /** Use actual free report text; never invent a personalized claim for the teaser. */

@@ -61,14 +61,36 @@ OK_TAIL = ("습니다", "ㅂ니다", "십시오", "니다", "습니까", "ㅂ니
 BAD_TAIL = ("소", "오", "다", "지", "네", "요", "군", "구려")
 
 
+def strip_expr(raw: str) -> str:
+    """`{...}` 를 **짝을 맞춰** 걷는다.
+
+    ★ 전에는 정규식 한 벌이라 중괄호가 겹친 자리를 못 걷었습니다.
+      `onClick={async () => { … }}` 안의 **주석**이 버튼 글자로 남아,
+      화면에 찍힐 때 진짜 버튼 글자를 밀어내고 앞자리를 차지했습니다 —
+      같은 버튼의 「인장을 받고 나가겠소」가 그렇게 가려져 있었습니다.
+      숫자가 1 이라고 다 고친 게 아니었습니다.
+    """
+    out, depth = [], 0
+    for ch in raw:
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth = max(0, depth - 1)
+        elif depth == 0:
+            out.append(ch)
+    return "".join(out)
+
+
 def labels(src: str):
     """버튼 하나가 실제로 보여 주는 글자들."""
     for m in BTN.finditer(src):
         raw = m.group(1)
         line = src[:m.start()].count("\n") + 1
         # 삼항으로 갈리는 글도 각각 봅니다 — 한쪽만 고치면 나머지가 샙니다.
+        # ★ 문자열은 **중괄호 안에서도** 봅니다 (`{busy ? "…" : "…"}`).
+        #   걷는 것은 손으로 쓴 식과 주석이지 화면에 찍히는 글이 아닙니다.
         parts = [t.strip() for t in STR.findall(raw)]
-        plain = TAGS.sub(" ", EXPR.sub(" ", raw))
+        plain = TAGS.sub(" ", strip_expr(raw))
         plain = re.sub(r"\s+", " ", plain).strip()
         if plain:
             parts.append(plain)

@@ -23,11 +23,11 @@ BONUS_SAME_JI = 8
 FLOOR, CEIL = 12, 96
 
 RELATION_TEXT = {
-    "같은 기운이 겹치는": "같은 기운이 하나 더 놓이는 날이오. 밀어붙이기는 쉽고, 물러서기는 어렵소.",
-    "기운이 빠져나가는": "내놓는 쪽으로 기울어지는 날이오. 쏟고 나면 비는 걸 염두에 두시오.",
-    "눌리는": "위에서 누르는 기운이 있는 날이오. 굳이 맞서지 않아도 되오.",
-    "내가 다스리는": "손에 잡히는 쪽으로 도는 날이오. 벌이는 것보다 정리가 낫소.",
-    "기운을 받는": "받는 쪽으로 도는 날이오. 도움을 청하기 어렵지 않은 날이지.",
+    "같은 기운이 겹치는": "오늘은 그대와 같은 편 글자가 하나 더 드는 날이오. 밀고 나가기는 쉽고, 한발 물러서기는 어렵소.",
+    "기운이 빠져나가는": "오늘은 그대 힘을 밖으로 내어 쓰는 날이오. 다 쏟고 나면 지치니 조금 남겨 두시오.",
+    "눌리는": "오늘은 그대를 위에서 누르는 글자가 드는 날이오. 굳이 맞서지 않아도 되오.",
+    "내가 다스리는": "오늘은 그대가 손에 쥐고 다룰 수 있는 글자가 드는 날이오. 새 일을 벌이기보다 있는 것을 정리하는 게 낫소.",
+    "기운을 받는": "오늘은 그대를 돕는 글자가 드는 날이오. 남에게 도움을 청하기 어렵지 않은 날이오.",
 }
 
 
@@ -97,37 +97,37 @@ def build_daily(f, on: date | None = None,
     #   여기는 근거 대는 집이니 방어가 아니라 **셈법 공개**로 처리합니다.
     #   무엇이 몇 점을 올리고 내렸는지 그대로 내려보냅니다.
     score = BASE
-    why = [{"k": "기준", "v": BASE, "t": "누구나 여기서 시작하오"}]
+    why = [{"k": "기준", "v": BASE, "t": "누구나 이 점수에서 시작하오"}]
     if el == f.yongsin:
         score += BONUS_YONGSIN
         why.append({"k": "용신", "v": BONUS_YONGSIN,
-                    "t": "오늘 천간이 그대에게 드는 %s요" % element_word(f.yongsin)})
+                    "t": "오늘 날의 윗글자가 그대에게 모자란 것을 채워 주는 %s요" % element_word(f.yongsin)})
     if el == f.strong_el:
         score += PENALTY_STRONG
-        why.append({"k": "넘치는 기운", "v": PENALTY_STRONG,
-                    "t": "이미 많은 %s가 오늘 또 드오" % element_word(f.strong_el)})
+        why.append({"k": "넘치는 것", "v": PENALTY_STRONG,
+                    "t": "그대에게 이미 많은 %s — 오늘 또 하나 들어오오" % element_word(f.strong_el)})
     if ji == CHUNG[f.day_ji]:
         score += PENALTY_CHUNG
         why.append({"k": "충", "v": PENALTY_CHUNG,
-                    "t": "일지 %s와 오늘 지지가 부딪히오" % f.day_ji})
+                    "t": "그대 일지 %s와 오늘 날의 아랫글자가 부딪히오" % f.day_ji})
     if ji == f.day_ji:
         score += BONUS_SAME_JI
         why.append({"k": "겹침", "v": BONUS_SAME_JI,
-                    "t": "일지 %s와 오늘 지지가 같소" % f.day_ji})
+                    "t": "그대 일지 %s와 오늘 날의 아랫글자가 같소" % f.day_ji})
     raw = score
     score = max(FLOOR, min(CEIL, score))
     if score != raw:
-        why.append({"k": "한도", "v": score - raw,
-                    "t": "%d~%d 밖으로는 안 나가오" % (FLOOR, CEIL)})
+        why.append({"k": "점수 범위", "v": score - raw,
+                    "t": "점수는 %d에서 %d 사이로만 매기오" % (FLOOR, CEIL)})
 
     # 한자 뒤 조사는 읽는 법에 따라 갈린다. 조사가 붙지 않는 형태로 쓴다.
     notes = []
     if el == f.yongsin:
-        notes.append("오늘 천간이 용신 %s에 해당하오." % element_word(f.yongsin))
+        notes.append("오늘 날의 윗글자가 그대 용신 %s에 해당하오." % element_word(f.yongsin))
     if ji == CHUNG[f.day_ji]:
-        notes.append("일지 %s — 오늘 지지와 부딪히는 날이오." % f.day_ji)
+        notes.append("그대 일지 %s — 오늘 날의 아랫글자와 부딪히는 날이오." % f.day_ji)
     elif ji == f.day_ji:
-        notes.append("일지 %s — 오늘 지지와 겹치오." % f.day_ji)
+        notes.append("그대 일지 %s — 오늘 날의 아랫글자와 같소." % f.day_ji)
 
     # ── 본문을 곱한다 ────────────────────────────────────
     #
@@ -135,8 +135,10 @@ def build_daily(f, on: date | None = None,
     #   놓고 비교하기 가장 쉬운 자리입니다. 전에는 관계 5가지가 상한이라
     #   같은 날 다섯 명 중 한 명꼴로 글자 하나 안 틀리고 같았습니다.
     #
-    #   같은 계산 구조에서 반복되는 문장을 개인의 경험을 알아낸 것처럼
-    #   제시하지 않습니다. 명식과 오늘의 관계를 확인할 질문으로 옮깁니다.
+    #   반복 자체가 위험한 게 아닙니다 — Barnum 효과 연구가 말하듯 사람은
+    #   여럿이 받은 문장도 제 얘기로 느낍니다. **다만 개인화되었다고 믿을
+    #   때만** 그렇습니다. 진짜 위험은 반복이 들통나는 것입니다.
+    #   알림 채널을 붙이기 전에 손봐야 하는 이유가 이것입니다.
     #
     #   곱하는 축: 관계(5) × 내 일간(10) × 신강약(3) × 태어난 계절(4)
     B = bank()
@@ -156,19 +158,23 @@ def build_daily(f, on: date | None = None,
         if ask_line:
             body.append(ask_line)
 
-    from .constants import ten_god
-    from .reading_storyline import SCENES, DOMAINS
-    from .reading_practice import FALLBACK
-    from .reading_narrator import say
-    domain=concern if concern in DOMAINS else 'dir'
-    scene=SCENES[ten_god(gan,f.day_gan)][DOMAINS.index(domain)]
-    plain=[say(line,'pungun') for line in scene]
-    practice={'trigger':'오늘 비슷한 장면이 생길 때','action':plain[2],
-        'observe':'해본 일과 그 뒤에 달라진 점을 한 줄씩 나누어 보시오.',
-        'fallback':FALLBACK[domain],'remember':'오늘의 한 장면으로 그대 전체를 정할 필요는 없소.',
-        'source':'daily_reflection'}
+    # ★ 훑어읽기 — 이 화면의 결론 한 줄 (2026-09-16).
+    #
+    #   `engine/skim` 이 다는 강조 넷이 여태 **리포트에만** 걸려
+    #   있었습니다. 일진은 1,415자에 굵은 글씨 열셋인데 형광펜이
+    #   한 줄도 없었습니다 — 다 안 읽는 손님에게는 크기가 하나뿐인
+    #   글이오.
+    #
+    #   그렇다고 아무 줄에나 칠하지 않습니다. 이 화면의 결론은
+    #   **구조로 정해져 있습니다** — 물으신 자리가 있으면 그 줄이고
+    #   (`ask_line`), 없으면 오늘과 여덟 글자의 관계 줄(`body[0]`)
+    #   입니다. 관점 컷의 `key` 문단 마지막 문장을 쓰는 것과 같은
+    #   까닭이오. 짐작이 아니라 **지어진 자리**입니다.
+    key = len(body) - 1 if ask_line else 0
+    body = list(body)
+    body[key] = "<mark>%s</mark>" % body[key]
+
     return {
-        'plain':plain,'practice':practice,
         "date": on.isoformat(),
         "gz": gan + ji,
         "gan": gan,
@@ -178,8 +184,8 @@ def build_daily(f, on: date | None = None,
         "score": score,
         # 이 점수가 무엇을 센 것인가. 화면이 그대로 펼쳐 보입니다.
         "score_why": why,
-        "score_says": ("오늘 일진과 그대 여덟 글자가 맞물린 자리를 센 것이오. "
-                       "좋고 나쁨이 아니라 부딪히는 수요."),
+        "score_says": ("오늘 일진이 그대 여덟 글자와 몇 군데서 돕고 부딪히는지 센 점수요. "
+                       "좋은 날·나쁜 날을 정하는 점수가 아니오."),
         "text": " ".join(body),
         "lines": body,
         "notes": notes,

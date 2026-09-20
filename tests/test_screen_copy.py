@@ -107,8 +107,9 @@ from engine.report import build_report, _plain     # noqa: E402
 
 def test_a_hard_word_is_explained_the_first_time_it_appears():
     out = T.gloss("자네 격은 편관이 잡았소.")
-    assert "편관<i class=\"gl\">(나를 누르는 힘)</i>" in out
-    assert "격<i class=\"gl\">(이 사주를 읽는 틀)</i>" in out
+    # 풀이 말은 쉬운 말로 바꿨소 (2026-09-11 · docs/21) — 풀이가 **붙는지**를 보오.
+    assert "편관<i class=\"gl\">(%s)</i>" % T.MEANING["편관"] in out
+    assert "격<i class=\"gl\">(%s)</i>" % T.MEANING["격"] in out
 
 
 def test_it_is_explained_only_once():

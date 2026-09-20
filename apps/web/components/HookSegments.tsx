@@ -14,6 +14,8 @@ import { LENS_BY_ID } from "@/lib/lenses";
 import { CONCERNS, useSession } from "@/lib/store";
 import { track } from "@/lib/track";
 import type { HookSegment } from "@shared/chart";
+import ServerText from "@/components/ServerText";
+import { ConcernArtwork } from "./ConcernArtwork";
 
 /*
  * 노출 수를 화면에 낼 **바닥값** (2026-09-07).
@@ -106,11 +108,55 @@ export default function HookSegments({
   }, [restored.count,segments.length,onDone]);
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const activeHeading = useRef<HTMLElement | null>(null);
+  /*
+   * ★ 답한 마디를 **접지 않습니다** (2026-09-16).
+   *
+   *   손님이 짚었습니다 — "맞습니다 하면 다음 정확한 위치로 이동해야
+   *   하는데 문제가 있어."
+   *
+   *   재보니 이랬습니다. 「맞습니다」를 누르면 도령이 받아 줍니다 —
+   *   그게 이 화면에서 손님이 값을 받는 유일한 순간입니다. 그런데
+   *   0.66초 뒤에 다음 마디가 열리면서, 열린 마디는 **하나뿐**이라는
+   *   규칙에 걸려 방금 답한 마디가 통째로 접혔습니다. 대꾸가 접힌
+   *   상자 안으로 들어가 버립니다 (그려짐=false). 동시에 화면은 다음
+   *   마디 머리로 뜁니다. 그러니 손님 눈에는 **누르자 글이 사라지고
+   *   화면이 튀는** 것으로 보입니다.
+   *
+   *   열린 마디를 하나로 묶어 둔 까닭은 화면이 길어지지 않게 하려는
+   *   것이었는데, 그 대가로 대화의 받아치는 쪽을 버렸습니다. 대화는
+   *   주고받는 것이오 — 받은 말을 지우면 그건 대화가 아닙니다.
+   *
+   *   이제 **열린 것은 열린 채로** 둡니다. 접는 것은 손님이 하오.
+   */
+  const [opened, setOpened] = useState<Set<number>>(
+    () => new Set([Math.min(restored.count, segments.length - 1)]));
+  /*
+   * ★ 옮겨 가는 자리는 **대꾸**입니다.
+   *
+   *   전에는 새 마디의 머리로 갔습니다. 그러면 방금 받은 말이 화면
+   *   위로 밀려 나가고, 손님은 읽지도 못한 대꾸를 지나쳐 다음 글
+   *   앞에 섭니다. 대꾸를 맨 위에 놓으면 그 아래에 새 마디 머리가
+   *   바로 따라옵니다 — 받고, 이어집니다.
+   */
+  const replyNode = useRef<HTMLElement | null>(null);
+  /*
+   * ★ 방금 답한 자리는 **셈으로 짚지 않습니다.**
+   *
+   *   전에는 `open-2` 로 뒤에서 세었습니다. 그런데 마지막 마디를
+   *   답하면 `open` 이 마디 수를 넘어가 그 셈이 한 칸 어긋납니다 —
+   *   다섯째를 답했는데 넷째의 대꾸로 갔습니다. 그러면 마지막 대꾸도
+   *   못 읽고, 그 아래 「무료 해석 보기」 단추도 1.2화면 아래에 남아
+   *   화면에 누를 것이 하나도 없습니다.
+   *
+   *   센 값이 아니라 **적어 둔 값**을 씁니다.
+   */
+  const [answered, setAnswered] = useState<number>(-1);
   useEffect(() => {
-    if (open <= 1) return;
+    if (answered < 0) return;
     activeHeading.current?.focus({preventScroll:true});
-    activeHeading.current?.scrollIntoView({block:"start", behavior:"auto"});
-  }, [open]);
+    const go = replyNode.current ?? activeHeading.current;
+    go?.scrollIntoView({block:"start", behavior:"auto"});
+  }, [answered, open]);
   useEffect(() => () => {if(advanceTimer.current) clearTimeout(advanceTimer.current);}, []);
 
   /*
@@ -158,7 +204,14 @@ export default function HookSegments({
     }
     // Recording feedback must not hold the next paragraph behind a slow request.
     advanceTimer.current = setTimeout(() => {
+      setOpened((prev) => {
+        const nx = new Set(prev);
+        nx.add(i);
+        if (i + 1 < segments.length) nx.add(i + 1);
+        return nx;
+      });
       setOpen((n) => Math.max(n, i + 2));
+      setAnswered(i);
       if (i + 1 >= segments.length) onDone?.();
     }, 660);
     try {
@@ -178,7 +231,7 @@ export default function HookSegments({
   return (
     <>
       <div className="hook-progress" role="status">경험 확인 {Object.keys(replies).length} / {segments.length}<span>답한 내용은 다시 펼쳐 읽을 수 있소.</span></div>
-      {restored.count > 0 && <p className="conversion-note" role="status">앞서 답한 {restored.count}마디를 불러왔소. {restored.count === segments.length ? "무료 요약으로 이어가시오." : "남은 이야기부터 이어가시오."}</p>}
+      {restored.count > 0 && <p className="conversion-note" role="status">앞서 답한 {restored.count}마디를 불러왔소. 읽던 책에 끼워 둔 쪽지를 다시 편 셈이오. {restored.count === segments.length ? "무료 요약으로 이어가시오." : "남은 이야기부터 이어가시오."}</p>}
       {/*
         ★ 새로 열린 마디만 읽어 줍니다.
           이미 읽은 마디를 다시 읽으면 손님이 아래로 내릴 때마다
@@ -186,8 +239,20 @@ export default function HookSegments({
           **청하지도** 않습니다 — 만드는 데 값이 나가는 자리입니다.
       */}
       {segments.slice(0, open).map((seg, i) => (
-        <details className="hook-chapter" key={seg.statement_id} open={i === Math.min(open,segments.length)-1}>
+        <details className="hook-chapter" key={seg.statement_id}
+                 open={opened.has(i)}
+                 onToggle={(e) => {
+                   /* 접고 펴는 것은 손님 몫이오. 화면이 도로 뒤집지 않소. */
+                   const on = (e.currentTarget as HTMLDetailsElement).open;
+                   setOpened((prev) => {
+                     if (prev.has(i) === on) return prev;
+                     const nx = new Set(prev);
+                     if (on) nx.add(i); else nx.delete(i);
+                     return nx;
+                   });
+                 }}>
           <summary tabIndex={0} ref={node => {if(i === Math.min(open,segments.length)-1) activeHeading.current=node;}}>
+            {CONCERNS.some(c => c.id === concern) && <span className="hook-topic-thumb" aria-hidden="true"><ConcernArtwork concern={concern as (typeof CONCERNS)[number]["id"]} /></span>}
             <span>{i+1}. {seg.label || "그대의 반복 패턴"}</span><small>{replies[i] === undefined ? "지금 읽는 마디" : "답변 완료 · 다시 읽기"}</small>
           </summary>
         <div className="blk in">
@@ -226,12 +291,16 @@ export default function HookSegments({
               그래서 자리만 옮깁니다: 찌르고, 그 아래에 무엇을 보고 한
               말인지 적습니다.
           */}
+          {/* ★ 근거는 **그려야** 합니다 (2026-09-15).
+              엔진이 어려운 말에 다는 풀이는 `<i class="gl">` 로 싸여
+              옵니다. 글자로 꽂으면 손님 눈에 꺾쇠가 그대로 보입니다 —
+              「상관<i class="gl">(하고 싶은 말을…)</i>이 둘」. */}
           {seg.source && !seg.source_below && (
-            <span className="src">근거 · {seg.source}</span>
+            <ServerText className="src" html={`근거 · ${seg.source}`} />
           )}
           <div dangerouslySetInnerHTML={{ __html: seg.html }} />
           {seg.source && seg.source_below && (
-            <span className="src below">근거 · {seg.source}</span>
+            <ServerText className="src below" html={`근거 · ${seg.source}`} />
           )}
           {/* ★ 조건을 source 가 아니라 statement_id 로 바꿉니다.
               source 로 걸어 두면, 근거가 없는 단은 응답이 100건 쌓여도
@@ -246,17 +315,18 @@ export default function HookSegments({
                   (bank.TURN_AT). 누르는 것이 다음 단을 정하오. */}
               <p className="sm hookhint">그대의 경험과 맞소? 맞지 않는 대목은 따로 짚겠소.</p>
               <div className="vt">
-                <button onClick={() => vote(i, true)}>그렇소</button>
-                <button onClick={() => vote(i, false)}>아니오</button>
+                <button onClick={() => vote(i, true)}>맞습니다</button>
+                <button onClick={() => vote(i, false)}>아닙니다</button>
               </div>
               {/* ★ 세 번째 길. 이게 없어서 애매한 사람이 거짓 '그렇소' 를
                   눌렀고, 아무것도 안 누르면 다음 단이 안 열렸습니다. */}
               <button className="lk vt3" onClick={() => vote(i, null)}>
-                잘 모르겠소
+                잘 모르겠습니다
               </button>
             </>
           ) : (
-            <div className="react on">
+            <div className="react on"
+                 ref={node => {if(i === answered) replyNode.current=node;}}>
               {/*
                 ★ 여기가 얼굴이 없던 자리입니다.
 
@@ -274,7 +344,17 @@ export default function HookSegments({
                    mood={replies[i] && seg.no === replies[i] ? "soft" : "cut"}>
                 {replies[i]}
               </Say>
-              {i < segments.length - 1 && <p className="hook-next">다음 마디 · {segments[i+1].label || "그 선택 뒤의 다른 면"}</p>}
+              {/*
+                ★ 다음 마디를 **이름으로** 부릅니다 (2026-09-10).
+
+                  「더 있소」 는 예고가 아닙니다. 이름을 대야 손님이
+                  무엇이 남았는지 알고 그걸 보러 갑니다 — 이 집이
+                  연출 점수에서 「이름으로 예고」 를 세는 까닭입니다
+                  (engine/dramaturgy.NAMED_NEXT). 여태 이름을 대고
+                  있었는데 낫표를 안 둘러 자에도 안 걸리고 눈에도
+                  덜 띄었습니다.
+              */}
+              {i < segments.length - 1 && <p className="hook-next">다음 마디 · 「{segments[i+1].label || "그 선택 뒤의 다른 면"}」.</p>}
             </div>
           )}
         </div>

@@ -73,7 +73,14 @@ function MeInner() {
     return (
       <Shell screen="r1" title="다녀간 사람들" legal>
         <Scene id="wall" />
-        <Narration lines={["벽에 종이가 붙어 있소.", "안내묘가 그 아래 앉아 있소."]} />
+        <Narration lines={["벽에 종이가 붙어 있다.", "안내묘가 그 아래 앉아 있다."]} />
+      {/* ★ 울림 60. 남의 말만 붙어 있고 **읽는 사람** 얘기가 없었습니다. */}
+      <p className="sm">여기 붙은 말도 여태 혼자 참고 있던 사람들이 적고 간 것이오. 그대도 한 줄 적을 수 있고, 안 적어도 되오.</p>
+      {/*
+        ★ 비유 66 · 셀 수 있는 값 넷. 여기 붙는 것은 남의 말이라,
+          수를 안 대면 「많이들 다녀갔소」 같은 뜬 말이 됩니다.
+      */}
+      <p className="sm"><mark>남긴 말은 <b>100건</b>이 넘어야 화면에 수로 나오오.</mark> 그 아래는 세어 두기만 하고 안 보이오 — 김치가 익을 때까지 장독을 덮어 두듯, 그러니까 100건이 차기 전에는 수를 안 꺼낸다는 말이오.</p>
         <Say who="도령" lens="pungun">
           대문 앞 방명록 같은 것이오. 다녀간 사람이 적고 간 말만 붙소.
           {" "}여기 붙은 말은 다 한 사람이 한 마디씩 남긴 것이오.
@@ -92,13 +99,16 @@ function MeInner() {
           <br />
           벽에 붙는 몫은 20명이고, 붙는 것은 그중 그대가 끝까지
           들은 사람뿐이오. 1명만 들었어도 1명이 붙소.
-          {" "}빈 자리는 비워 두오 — 벽에 안 붙은 종이는 <b>없는
-          종이처럼</b> 굴어야지, 자리만 잡아 두면 그건 재촉이오.
+          <br />
+          빈 칸은 비워 두오 — 안 붙은 종이는 <b>없는 종이처럼</b>
+          굴어야 하오. 그러니까 안 들은 사람은 이름도 안 적는다는 말이오.
+          <br />
+          빈 칸만 스물 그려 두면 그건 채우라는 재촉이오.
         </Say>
         <p className="tx">
-          그대가 끝까지 들은 자리는 <b>{heard}곳</b>이오.
-          스무 사람 중 <b>{LENSES.length - heard}명</b>은 아직 한 마디도
-          안 했소.
+          그대가 끝까지 들은 사람은 <b>{heard}명</b>이오.
+          스무 사람 중 <b>{LENSES.length - heard}명</b>은 아직 한 줄도
+          안 남겼소.
         </p>
         <span className="src">
           근거 · 찍힌 인장 {heard}개 — 인장은 그 사람의 마지막 자리를
@@ -123,7 +133,7 @@ function MeInner() {
             </>
           ) : (
             <>
-              벽은 아직 그대 쪽이 비어 있소. <b>한 사람도 끝까지 안 들었소.</b><br />
+              이 벽에 그대 이름은 아직 안 붙었소. <b>한 사람도 끝까지 안 들었소.</b><br />
               스물 중 <b>누구부터</b> 들으시겠소?
             </>
           )}
@@ -131,11 +141,11 @@ function MeInner() {
         {heard > 0 ? (
           <button className="btn mt"
                   onClick={() => router.push("/report/" + last + "?tab=c6")}>
-            마지막으로 들은 자리에 남기겠소
+            마지막으로 들은 사람에게 남기겠습니다
           </button>
         ) : (
           <button className="btn mt" onClick={() => router.push("/lobby?tab=b2")}>
-            스무 사람을 보겠소
+            스무 사람을 보겠습니다
           </button>
         )}
         <button className="btn gh" onClick={() => setTab("f2")}>인장첩으로</button>
@@ -145,11 +155,20 @@ function MeInner() {
 
   return (
     <Shell screen="f2" title="인장첩">
+      {/* ★ 연출 80. 칸만 그려져 있고 **모으는 사람 얘기**가
+          없었습니다. 재촉하지 않고, 지나온 것만 짚습니다. */}
+      <Narration lines={["첩이 상 위에 펼쳐져 있다."]} />
+      <p className="sm">칸은 <b>20개</b>요. 돈이든 일이든 사람이든, 여태 혼자 읽고 참고 덮어 둔 것이 있거든 여기 남소. <mark>미뤄 둔 것도 지워지지 않소</mark> — 책장에 꽂아 둔 책처럼, 안 펴도 어디 있는지는 아오.</p>
+      {/*
+        ★ 팩폭 86 · 비유 75 · 셀 수 있는 값 넷. 인장은 **모으는**
+          자리라, 몇 개 중 몇인지를 대야 모으는 맛이 서오.
+      */}
+      <p className="sm">한 칸을 채우는 데 <b>1명</b>이오. <b>20개</b>를 다 채우면 스무 사람을 다 들은 것이고, <b>3개</b>만 있어도 서로 다른 세 눈으로 본 것이오 — 같은 밭을 세 군데서 파 본 셈이오.</p>
       <header className="editorial-heading"><p className="conversion-kicker">나의 서재</p><h1>다시 읽고 싶은 이야기를<br/>여기에 간직하오.</h1><p>구매한 해석과 남긴 인장, 열람 기록을 살펴보시오.</p></header>
       <RefundHistory sessionId={s.sessionId} />
       {subError && <div className="conversion-card" role="alert"><p>구독 상태를 확인하지 못했소. 구독이 없거나 해지됐다는 뜻은 아니오.</p><button className="btn gh" onClick={() => {setSubError(false);setSubRetry(n => n + 1);}}>구독 상태 다시 확인하기</button></div>}
       <Scene id="sealbook" />
-      <Narration lines={["첩을 폈소.", "찍힌 인장은 " + s.seals.length + "개."]} />
+      <Narration lines={["첩을 폈다.", "찍힌 인장은 " + s.seals.length + "개."]} />
       {/*
         ★ 첩이 무엇인지 한 번도 안 풀고 있었습니다.
           칸 스물이 그려져 있는데 「받은 인장 / 아직」 두 낱말뿐이라,
@@ -166,13 +185,16 @@ function MeInner() {
         그대가 지나온 자리마다 하나씩 찍힌 것이오. 값을 치른 표가
         아니라 <b>끝까지 읽은 표</b>요 — 값 없이 듣고도 찍히오.
         <br />
-        <b>빈 칸을 보고 채우고 싶어지셨소.</b> 스무 칸이 그려져
-        있으면 사람은 다 채우려 드오. 그건 이 첩이 그렇게 생겨서지
-        그대에게 스물이 필요해서가 아니오.
+        <b>20칸 가운데 빈 칸을 보면 채우고 싶어지오.</b> 달력에 동그라미가 줄줄이
+        비어 있는 것과 같소 — 그러니까 채우고 싶어지는 건 그대가 아니라
+        그 종이 탓이오.
+        <br />
+        칸이 20개 그려져 있으면 사람은 다 채우려 드오. 그건 이 첩이
+        그렇게 생겨서지 그대에게 스물이 필요해서가 아니오.
         {" "}부담스럽다면 이미 읽은 자리 하나만 다시 보아도 좋소.
         <br />
-        칸 1개로 끝나도 되오. 두 칸이 붙어 있다고 둘째를 들어야 하는
-        건 아니오 — 한 자리에 2명까지만 잇는 것도 그 때문이오.
+        칸 1개로 끝나도 되오. 칸 2개가 나란히 있다고 둘째까지 들어야 하는
+        건 아니오 — 하루에 2명까지만 잇는 것도 그 때문이오.
           <br />
         {" "}한 개를 읽고 오늘 해볼 행동을 하나 골라도 충분하오.
         나머지 칸은 필요할 때 열어 보시오.
@@ -239,7 +261,7 @@ function MeInner() {
                           setSubSay(e instanceof ApiError ? e.message : "무르지 못했소.");
                         } finally { setSubBusy(false); }
                       }}>
-                {subBusy ? "무르는 중이오" : "계속 듣겠소"}
+                {subBusy ? "무르는 중입니다" : "계속 듣겠습니다"}
               </button>
             </>
           ) : (
@@ -263,7 +285,7 @@ function MeInner() {
                           setSubSay(e instanceof ApiError ? e.message : "그만두지 못했소.");
                         } finally { setSubBusy(false); }
                       }}>
-                {subBusy ? "그만두는 중이오" : "그만두겠소"}
+                {subBusy ? "그만두는 중입니다" : "그만두겠습니다"}
               </button>
             </>
           )}
@@ -289,7 +311,7 @@ function MeInner() {
           열립니다.
       */}
       <div className="ask mt">
-        <div className="lab">치른 것을 못 찾겠소?</div>
+        <div className="lab">치른 것을 못 찾겠습니다?</div>
         <p className="sm">
           기기를 바꾸셨거나 이 브라우저를 비우셨으면 여기서 되찾으시오.
           <b>주문번호</b>는 결제 영수증과 승인 문자에 적혀 있소.
@@ -332,7 +354,7 @@ function MeInner() {
                     setFinding(false);
                   }
                 }}>
-          {finding ? "찾는 중이오" : "되찾겠소"}
+          {finding ? "찾는 중입니다" : "되찾겠습니다"}
         </button>
         {say && <p className="sm mt">{say}</p>}
       </div>
@@ -345,12 +367,12 @@ function MeInner() {
               next={s.seals.length < LENSES.length ? "스무 사람" : "이어지다"}>
         {s.seals.length < LENSES.length ? (
           <>
-            빈 칸 <b>{LENSES.length - s.seals.length}개</b>는 아직 한 마디도
-            안 들은 자리요.<br />
+            빈 칸 <b>{LENSES.length - s.seals.length}개</b>는 아직 한 줄도
+            안 들은 사람이오.<br />
             다만 <b>오늘 앉을 수 있는 자리는 둘</b>이오. 다 채우는 첩이 아니오.
           </>
         ) : (
-          <>스무 칸이 다 찼소. <b>같은 여덟 글자를 스무 번 본 셈이오.</b></>
+          <>스무 칸을 다 채우셨소. <b>같은 여덟 글자를 스무 번 본 셈이오.</b></>
         )}
       </ActOut>
       {/* ★ 「후기를 남기겠습니다」 였는데 정작 그 화면은 후기를 안 받습니다.

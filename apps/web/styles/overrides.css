@@ -2689,10 +2689,29 @@ body.has-rail .beatskip-hint { left: calc(50% + 116px); }
 .legalpg .biz dd em { font-style: normal; color: var(--paper3); opacity: .6; }
 .legalpg .back { margin-top: 22px; }
 
-/* 하단 고지의 링크 */
-.legal .llinks { margin-top: 9px; }
-.legal .llinks a { color: var(--paper3); text-decoration: underline; }
+/* 하단 고지의 링크
+   ★ 폰에서 **손가락이 안 닿았습니다** (2026-09-15 · tools/mobile_render.py).
+     글자만 12px 라 실제로 그려진 높이가 17px 였습니다. 애플·구글이
+     둘 다 44px 를 최소로 잡습니다. 그런데 이건 전자상거래법 제10조가
+     **상시** 닿을 수 있어야 한다고 적어 둔 링크들입니다 — 못 누르면
+     안 걸어 둔 것과 같습니다.
+
+     글자 크기는 안 올립니다(고지는 작게 두는 자리). 대신 여백으로
+     닿는 자리를 넓힙니다 — 보이는 것은 그대로고 손가락만 커집니다. */
+.legal .llinks { margin-top: 9px; line-height: 1; }
+.legal .llinks a {
+  display: inline-block; padding: 14px 6px; min-height: 44px;
+  box-sizing: border-box; color: var(--paper3); text-decoration: underline;
+}
 .legal .llinks a:hover { color: var(--gold); }
+
+/* 본문 안에 홀로 선 고지 링크도 같은 자리입니다 —
+   「개인정보 처리 안내」(a3) · 「판매자 정보 확인하기」(d1). */
+.phone .conversion-note > a,
+.phone .conversion-status > a {
+  display: inline-block; padding: 13px 4px; min-height: 44px;
+  box-sizing: border-box;
+}
 
 /* ══════════ 뜸과 한 컷씩 뜨기 ══════════
    ★ 손님이 2026-09-02 에 짚은 둘입니다.
@@ -2775,6 +2794,22 @@ body.has-rail .beatskip-hint { left: calc(50% + 116px); }
 
 @media (prefers-reduced-motion: reduce) {
   .seatnow { animation: none; }
+}
+
+/* ★ 고른 자리가 한 화면에 안 들어왔습니다 (2026-09-16).
+
+     손님이 사람을 고르면 화면이 그 자리로 데려갑니다. 그런데 그
+     상자가 1,015px 이고 폰 화면은 844px 이라, 데려다 놓으면 정작
+     **누를 단추 셋이 전부 화면 밖**이었습니다 — 고르고 나서 화면에
+     할 수 있는 일이 하나도 없습니다. 훅에서 겪은 것과 같은 자리요.
+
+     자리의 38%가 초상 한 장(384px)이었습니다. 손님은 방금 목록에서
+     그 얼굴을 보고 고른 참입니다 — 여기서 다시 크게 볼 까닭이 적소.
+     큰 초상은 「이 사람 자리를 크게 보겠습니다」 가 따로 엽니다. */
+@media (max-width: 767px) {
+  .seatnow .facebox { max-height: 232px; overflow: hidden; }
+  .seatnow .facebox img,
+  .seatnow .facebox svg { max-height: 232px; width: auto; }
 }
 
 /* ══════════ 상담 분야 · 이어지는 자리의 얼굴 ══════════
@@ -3597,3 +3632,59 @@ u {
 @media (max-width: 520px) {
   .worthbig b { font-size: 32px; }
 }
+
+/* ══════════ 도움 받을 곳 ══════════
+   처마에 늘 걸어 둡니다. 눈에 띄되 튀지 않게 — 「당신 위험해 보여요」
+   로 읽히면 도리어 문을 닫습니다 (components/Shell 머리말). */
+.sitefoot .lk.carehead { margin-top: 8px; color: var(--paper3); }
+.sitefoot ul.lk.care {
+  list-style: none; margin: 2px 0 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 0 14px; justify-content: center;
+}
+.sitefoot ul.lk.care li { margin: 0; }
+.sitefoot .lk.care a { color: var(--paper2); }
+.sitefoot .lk.care a:hover,
+.sitefoot .lk.care a:focus-visible { color: var(--gold); }
+
+/* ══════════ 쉬어 가는 자리 ══════════
+   ★ 경고처럼 보이면 안 됩니다. 붉은 띠를 두르면 「당신 위험해요」 로
+     읽혀 도리어 문을 닫습니다 (components/RestHere 머리말).
+     글의 끝에 조용히 서는 한 자리요 — 종이 한 장 접어 둔 꼴. */
+.resthere {
+  margin: 28px 0 8px; padding: 18px 16px 14px;
+  border: 1px solid var(--line); border-radius: 14px;
+  background: var(--bg2);
+}
+.resthere .lab { color: var(--paper3); margin-bottom: 8px; }
+.resthere .rest-head {
+  font-family: var(--serif); font-size: var(--fs-5); margin-bottom: 8px;
+}
+.resthere .rest-body { line-height: 1.75; margin-bottom: 10px; }
+.resthere .rest-limit {
+  color: var(--paper2); font-size: var(--fs-2); line-height: 1.7;
+  margin-bottom: 12px;
+}
+.resthere .rest-lines { list-style: none; margin: 0; padding: 0; }
+.resthere .rest-lines li { margin: 0; }
+.resthere .rest-lines a {
+  display: inline-flex; align-items: center; min-height: 44px;
+  color: var(--gold); text-underline-offset: 4px;
+}
+.resthere .rest-lines small { color: var(--paper3); margin-left: 8px; }
+
+/* ══════════ 값 화면에서 다른 사람으로 ══════════
+   값을 더 권하는 자리가 아니라 **바꿔 볼 수 있다고 알리는** 자리요.
+   그래서 목패보다 조용하게 둡니다 (app/pay/page 머리말). */
+.otherseats { margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--line); }
+.otherseats .lab { color: var(--gold); margin-bottom: 6px; }
+.otherseats .sm { line-height: 1.75; margin-bottom: 12px; }
+.otherseats .og { margin-bottom: 12px; }
+
+/* ══════════ 이어지는 자리 (무료 끝) ══════════
+   목록이 아니라 추천이오 — 근거를 같이 냅니다. 값 카드보다 조용하게
+   두되, 나가는 길밖에 없던 자리를 메웁니다. */
+.nextseats { margin-top: 26px; padding-top: 18px; border-top: 1px solid var(--line); }
+.nextseats .lab { color: var(--gold); margin-bottom: 6px; }
+.nextseats .sm { line-height: 1.75; margin-bottom: 12px; }
+.nextseats .dz { margin-bottom: 14px; }
+.nextseats .nsname { font-family: var(--serif); font-size: var(--fs-5); }

@@ -31,6 +31,17 @@ from engine.features import build_features    # noqa: E402
 CONCERNS = ["money", "work", "love", "people", "dir", "health"]
 
 
+# ★ 손님이 **눈으로 읽는 글자**만 봅니다 (2026-09-10).
+#
+#   근거 줄에도 어려운 말 풀이를 달기 시작하면서(`terms.gloss`)
+#   `<i class="gl">…</i>` 가 섞입니다. 태그의 `<` 와 `=` 가 연산자 검사에
+#   걸려 이 자리가 붉어졌는데, 손님 눈에 연산자는 하나도 없습니다.
+#
+#   이 자가 잡으려는 것은 **분기표가 새는 것**이지 마크업이 아닙니다.
+#   태그를 걷고 봅니다 — 「상관 2」 도 「≥」 도 그대로 잡힙니다.
+_TAG = re.compile(r"<[^>]*>")
+
+
 def _sources(n=200):
     rng = random.Random(20260901)
     for _ in range(n):
@@ -41,7 +52,7 @@ def _sources(n=200):
         for seg in build_hook(f, rng.choice(CONCERNS)):
             s = seg.get("source")
             if s:
-                yield s
+                yield _TAG.sub("", s)
 
 
 def test_no_number_in_source():

@@ -164,7 +164,7 @@ function Empty({ text }: { text: string | null }) {
           void navigator.clipboard?.writeText(text);
           setCopied(true);
           setTimeout(() => setCopied(false), 1600);
-        }}>{copied ? "베꼈소" : "복사"}</button>
+        }}>{copied ? "베꼈습니다" : "복사"}</button>
       </div>
       <pre>{text}</pre>
     </div>

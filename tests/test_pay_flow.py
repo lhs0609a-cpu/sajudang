@@ -89,8 +89,12 @@ def test_tier_stays_locked_when_payment_fails(app):
         "tier": "free", "concern": "love",
     }).json()
     locked = {c["id"] for c in r["locked"]}
-    assert "daeun_now" in locked and "yongsin" in locked
+    # ★ 컷 이름을 박지 않습니다 — 무료 구성은 바뀝니다 (2026-09-17).
+    #   지키는 것은 「잠긴 것은 본문이 안 내려간다」 입니다.
+    assert locked, "잠긴 것이 하나도 없으면 무료가 전부요"
+    opened = {c["id"] for c in r["cuts"]}
     for c in r["locked"]:
+        assert c["id"] not in opened, "%s 가 잠겼는데 무료로도 나갔소" % c["id"]
         assert "html" not in c or not c.get("html")
 
 

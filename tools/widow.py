@@ -87,7 +87,15 @@ def strip_tags(s: str) -> str:
                          + "([^`" + chr(34) + chr(39) + "]*)"
                          + chr(91) + "`" + chr(34) + chr(39) + chr(93),
                          m.group(1))
-        return " " + " ".join(g for g in got if re.search("[가-힣]", g)) + " "
+        # * 한 {} 안의 글 여럿은 **갈래**지 이어지는 글이 아닙니다
+        #   (2026-09-10). `{busy ? "A" : locked ? "B" : "C"}` 는 화면에
+        #   셋 중 하나만 나오는데, 이어 붙여 재니 넉 줄짜리 글이 되어
+        #   **없는 과부**가 잡혔습니다. 갈래를 따로 보면 셋 다 멀쩡했습니다.
+        #
+        #   가장 긴 갈래로 봅니다 — 감기는지 보는 자리라 가장 나쁜
+        #   갈래가 통과하면 나머지도 통과합니다.
+        ko = [g for g in got if re.search("[가-힣]", g)]
+        return " " + (max(ko, key=len) if ko else "") + " "
 
     # 값이 끼어드는 자리는 두 글자쯤으로 봅니다 (숫자가 들어옵니다)
     s = re.sub(chr(92) + "$" + chr(92) + "{[^{}]*" + chr(92) + "}", "00", s)
@@ -95,25 +103,68 @@ def strip_tags(s: str) -> str:
     s = re.sub("<[^>]*>", "", s)
     s = s.replace("&nbsp;", chr(160))
     s = re.sub("[ " + chr(9) + chr(13) + chr(10) + "]+", " ", s)
+    # * 식을 글로 바꿀 때 앞뒤에 빈칸을 넣습니다(낱말이 붙지 않게).
+    #   그런데 뒤가 마침표면 화면에 없는 빈칸이 생겨 「…상황 .」 이 되고,
+    #   그 한 칸 때문에 줄이 밀려 없는 과부가 잡힙니다. 문장부호 앞은 붙입니다.
+    #   가운뎃점(·)은 「A · B」 처럼 양옆에 빈칸을 두는 것이 이 집의 꼴이라
+    #   건드리지 않습니다. 문장 끝 부호만 붙입니다.
+    s = re.sub(r"\s+([.,!?…])", r"\1", s)
     return s.strip()
 
 
-def _branches(seg: str) -> list:
-    """
-    `{a ? "갑" : "을"}` 은 화면에 **둘 중 하나**만 나갑니다.
+# 손님이 보는 **줄** 단위로 자릅니다.
+#
+# * <br /> 는 손님 화면에서 줄이 실제로 끊기는 자리입니다. 그런데 태그만
+#   지우고 이어 붙이면 두 줄이 한 줄이 되고, 사이에 빈칸이 없어 낱말까지
+#   붙습니다 - 「눌러<br />세 곳까지」 가 「눌러세 곳까지」 가 됐습니다.
+#   있지도 않은 긴 줄을 재고, 없는 낱말을 만들었습니다.
+#
+#   lines={[...]} 자리는 이미 이렇게 자르고 있었습니다. 문단과 버튼도
+#   같은 자로 봅니다.
+_BR = re.compile(r"<br\s*/?>", re.I)
 
-    strip_tags 는 식 안의 글을 이어 붙이니, 갈래가 있으면 갈래마다
-    따로 셉니다. 이어 붙이면 한 번도 안 나가는 긴 문단이 생겨 없는
-    과부를 짚습니다.
-    """
-    m = re.search(r"\{([^{}]*\?[^{}]*:[^{}]*)\}", seg)
-    if m:
-        lits = [g for g in re.findall(r"[`\"']([^`\"']*)[`\"']", m.group(1))
-                if re.search("[가-힣]", g)]
-        if len(lits) >= 2:
-            return [t for lit in lits
-                    for t in _branches(seg[:m.start()] + lit + seg[m.end():])]
-    return [strip_tags(seg)]
+
+def _pieces(raw):
+    """한 덩이에서 **줄로 끊긴 글**들을 낸다."""
+    for seg in _BR.split(raw):
+        t = strip_tags(seg)
+        if len(t) >= 8 and re.search("[가-힣]", t):
+            yield t
+
+
+# JSX 여는 표의 **진짜 끝**을 찾습니다.
+#
+# * <button[^>]*> 로 잡으면 onClick={() => ...} 안의 > 에서 멈춥니다.
+#   그러면 남은 코드가 글로 딸려 나와 「setTab("b4")}> 내 명식 …」 같은
+#   글줄이 생기고, 그 군더더기 때문에 한 줄짜리 버튼이 두 줄로 감겨
+#   **없는 과부**가 잡힙니다. <p 가 <path 를 물던 것과 같은 병입니다.
+#
+#   중괄호 깊이와 따옴표를 세면서 걷습니다.
+def _tag_end(code, at):
+    depth, quote, i = 0, "", at
+    while i < len(code):
+        c = code[i]
+        if quote:
+            if c == quote:
+                quote = ""
+        elif c in ("'", '"', "`"):
+            quote = c
+        elif c == "{":
+            depth += 1
+        elif c == "}":
+            depth -= 1
+        elif c == ">" and depth <= 0:
+            return i + 1
+        i += 1
+    return -1
+
+
+# 한 상자 안에서도 **자식 표마다 줄이 갈립니다** — <b>내 명식</b><span>…</span>
+#   는 두 줄로 그려집니다. 이어 붙여 재면 있지도 않은 긴 줄이 됩니다.
+def _chunks(inner):
+    for seg in re.split(r"<[^>]*>", inner):
+        for t in _pieces(seg):
+            yield t
 
 
 def harvest():
@@ -145,21 +196,38 @@ def harvest():
                             out.append((rel, line, kind, t))
 
         # 버튼에 적힌 말 — 폭이 좁아 두 줄이 되면 티가 크게 납니다
-        for m in re.finditer(r"<button[^>]*>(.{6,200}?)</button>", code, re.S):
-            t = strip_tags(m.group(1))
-            if len(t) >= 8 and re.search("[가-힣]", t):
-                out.append((rel, code.count(chr(10), 0, m.start()) + 1, "btn", t))
+        for m in re.finditer(r"<button\b", code):
+            head = _tag_end(code, m.start())
+            if head < 0:
+                continue
+            shut = code.find("</button>", head)
+            if shut < 0 or shut - head > 400:
+                continue
+            for t in _chunks(code[head:shut]):
+                out.append((rel, code.count(chr(10), 0, m.start()) + 1,
+                            "btn", t))
 
         # 그 밖의 문단 — 안내·경고·풀이
-        # ★ `<p` 뒤에 공백이나 `>` 가 와야 문단입니다. 안 그러면 SVG 의
-        #   `<path` 에 걸려 그림 뒤의 글까지 한 덩이로 셉니다.
-        for m in re.finditer(r"<p(?=[\s>])(?![^>]*className=\"sm)[^>]*>(.{8,400}?)</p>",
-                             code, re.S):
-            line = code.count(chr(10), 0, m.start()) + 1
-            for seg in re.split(r"<br\s*/?>", m.group(1)):
-                for t in _branches(seg):
-                    if len(t) >= 8 and re.search("[가-힣]", t):
-                        out.append((rel, line, "nr", t))
+        #
+        # * <p 가 <path 를 물고 있었습니다 (2026-09-10).
+        #
+        #   여는 표를 <p[^>]*> 로 잡으면 SVG 의 <path d="..."> 가 그대로
+        #   걸립니다. 그러면 글이 <path> 안에서 시작해 진짜 문단의 </p>
+        #   까지 이어져 **코드 조각이 글에 섞입니다.** BodyMap.tsx 에서
+        #   「} 그림이나 아래 이름을...」 이라는 있지도 않은 글줄이 나왔고,
+        #   그 } 때문에 한 줄에 들어가는 문장이 두 줄로 감겨 **없는 과부**가
+        #   잡혔습니다. 자가 부풀면 진짜 조각이 그 안에 묻힙니다.
+        # ★ 스스로 닫는 표(<p ... />)는 문단을 **열지 않습니다** (2026-09-17).
+        #
+        #   `<p className="saying" dangerouslySetInnerHTML={...} />` 를 여는
+        #   표로 읽으면, 글이 거기서 시작해 **한참 아래의** </p> 까지
+        #   이어집니다. 그 사이의 `)}` `{lensCuts.length > 0 && (` 같은
+        #   코드 조각이 글에 섞여, 있지도 않은 「— 컷」 이라는 과부 줄이
+        #   잡혔습니다. <path> 를 물었던 것과 같은 자리요.
+        for m in re.finditer(r"<p(?![A-Za-z])(?![^>]*className=\"sm)"
+                             r"[^>]*[^/]>(.{8,400}?)</p>", code, re.S):
+            for t in _pieces(m.group(1)):
+                out.append((rel, code.count(chr(10), 0, m.start()) + 1, "nr", t))
 
         # <Say> 와 <p className="sm"> 안의 글
         for rx, kind in ((r"<Say[^>]*>\s*([^<{][^<]{7,})<", "say"),

@@ -70,7 +70,13 @@ def test_every_choice_says_press_me():
     말해 줘야 누른다.
     """
     entry = _src("app/page.tsx")
-    for prompt in ("하나를 골라주시오", "하나를 선택해 주시오", "성향 4글자 선택"):
+    # ★ 성향 넉 자는 곁문에서 **본길로** 돌아왔습니다 (2026-09-16).
+    #   곁문일 때는 「성향 4글자 선택」 이라는 단추 이름이 「누르는
+    #   것」 이라고 말해 주었는데, 본길에 서면 그 단추가 없습니다.
+    #   그러면 열여섯 칸이 읽는 것처럼 보이오 — 화면이 직접 말해야
+    #   합니다. 검사는 **이름이 아니라 그 일**을 셉니다.
+    for prompt in ("하나를 골라주시오", "하나를 선택해 주시오",
+                   "열여섯 칸"):
         assert prompt in entry
     assert "aria-pressed" in entry
     assert "aria-pressed" in _src("app/pay/page.tsx")

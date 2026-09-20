@@ -18,8 +18,12 @@ def post_hook(req: HookRequest) -> HookResponse:
     # ★ 캐시 열쇠에 misses 를 넣습니다. 안 넣으면 방향을 튼 훅이
     #   안 튼 훅을 덮어써서, 다음 손님이 남의 응답으로 고쳐진 훅을
     #   받습니다.
+    # ★ 꼬리표는 **글이 바뀌면 같이 바꿉니다.** 안 바꾸면 하루(TTL) 동안
+    #   옛 글이 그대로 나갑니다 — 말투를 다섯 결로 가른 날(2026-09-17)
+    #   「copy4-hao」 가 박힌 채였으면 고친 말투가 안 나갔습니다.
     key = store.k_hook(req.chart_id, req.concern, req.axis4 or "",
-                       req.lens_id or "", "%s#%d#copy5-story" % (req.name, req.misses))
+                       req.lens_id or "",
+                       "%s#%d#copy5-voice5" % (req.name, req.misses))
     cached = store.get_json(key)
     if cached is not None:
         return HookResponse(chart_id=req.chart_id, segments=cached, cached=True)

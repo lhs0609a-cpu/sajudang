@@ -33,6 +33,29 @@ class Features:
     hour_known: bool
     sex: str
     saju_year: int
+    # ★ 세운 — **그 해**의 두 글자 (2026-09-10)
+    #
+    #   시간 축이 하루(일진)와 십 년(대운) 둘뿐이었습니다. 그 사이
+    #   **한 해**가 비어 있었습니다 — `terms` 에 「세운 = 그 해의
+    #   기운」이 정의돼 있고 근거 줄에도 찍히는데 세우는 자리가
+    #   없었습니다. `saju_year` 는 **태어난 해**지 올해가 아닙니다.
+    #
+    #   해가 바뀌는 자리는 설이 아니라 **입춘**입니다. 그래서
+    #   `solar_terms.saju_year_of` 를 그대로 씁니다 — 명식의 년주를
+    #   세우는 그 식이오. 두 벌로 두면 한쪽만 고쳤을 때 어긋납니다.
+    year_gz: str          # 올해의 두 글자 (예: 丙午)
+    year_ten_god: str     # 그 해 천간이 나에게 무슨 자리인가
+    year_num: int         # 입춘으로 가른 올해
+    # ★ 양력 생년 — 대운 나이를 **해로** 바꿀 때 쓰는 기준 (2026-09-10)
+    #
+    #   `age` 와 대운 `start_age` 는 둘 다 **양력 해**로 셉니다
+    #   (`올해 - 태어난 해`). 그런데 그 나이를 해로 바꿀 때
+    #   `saju_year + 나이` 를 쓰고 있었습니다 — saju_year 는 **입춘**
+    #   기준이라 1월·2월 초생은 한 해 앞입니다. 그래서 그 사람들에게
+    #   「2062년에 드오」 (바른 해 2063) 가 나갔습니다.
+    #
+    #   `_birth_year` 도우미는 이미 있었는데 **한 번도 안 쓰였습니다.**
+    birth_year: int
 
     # ── 오행·강약 ──
     elements: dict                   # {"목":..,"화":..,"토":..,"금":..,"수":..}
@@ -82,9 +105,6 @@ class Features:
 
     # ── 투명성 ──
     correction: dict
-    # Optional for stored feature snapshots created before interpretation v1.
-    as_of: str = ""
-    hour_sensitivity: dict = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -264,6 +284,20 @@ def build_features(chart: Chart, as_of: Optional[date] = None) -> Features:
     # 첫 대운에 아직 들어가지 않은 사람 — '지금 그 대운' 이라고 말하면 거짓말
     daeun_started = age >= chart.daeun[0].start_age
 
+    # ── 세운 — 올해의 두 글자 ─────────────────────────────
+    #
+    # ★ 입춘으로 가릅니다. 설이 아닙니다.
+    #   `as_of` 가 1월이나 2월 초면 **앞 해**가 올해입니다.
+    #   명식의 년주를 세우는 그 식(`year_ganji`)을 그대로 씁니다.
+    #   ★ `ipchun_utc` 는 **깬 시각(naive UTC)** 을 냅니다. tz 를 붙여
+    #     넘기면 비교에서 터집니다 — `build_chart` 가 넘기는 것과 같은 꼴로.
+    from datetime import datetime as _dt
+    from . import solar_terms as _st
+    from .calendar import year_ganji as _year_ganji
+    _noon = _dt(as_of.year, as_of.month, as_of.day, 3, 0)   # 서울 정오 ≒ UTC 03:00
+    year_num = _st.saju_year_of(_noon)
+    ygan, yji = _year_ganji(year_num)
+
     # 일지 충·합 — 일주 자신은 제외
     others = [p.ji for p in cp if p.label != "일주"]
     ilji_chung = CHUNG[day_ji] in others
@@ -275,6 +309,8 @@ def build_features(chart: Chart, as_of: Optional[date] = None) -> Features:
         day_gan=day_gan, day_ji=day_ji,
         hour_known=chart.hour_known, sex=chart.sex,
         saju_year=chart.saju_year,
+        year_gz=ygan + yji, year_ten_god=ten_god(ygan, day_gan),
+        year_num=year_num, birth_year=_birth_year(chart),
         elements=el,
         strength=strength, strength_score=score,
         deuk_ryeong=dr, deuk_ji=dj,
@@ -297,7 +333,6 @@ def build_features(chart: Chart, as_of: Optional[date] = None) -> Features:
         gongmang=sinsal_mod.gongmang(day_gan, day_ji),
         helpers=[], ancestor={}, palaces=sinsal_mod.palaces(chart),
         correction=_correction_dict(chart),
-        as_of=as_of.isoformat(),
     )
     # 조상 해석은 용신을 쓰므로 Features 가 다 채워진 뒤에 붙인다
     feats.helpers = sinsal_mod.helpers(chart, feats)

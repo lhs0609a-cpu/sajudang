@@ -125,7 +125,7 @@ export function Say({ who, children, html, lens, mood }: {
 
 /** 근거 칩 — 보조 정보. 필수 정보를 여기 두지 말 것. (docs/09 §7) */
 export function Source({ children }: { children: React.ReactNode }) {
-  return <span className="src">근거 · {children}</span>;
+  return <span className="src">근거 · {children}</span>;   // 이 자리는 화면이 손으로 적는 글이라 그대로 둡니다
 }
 
 export function Progress({ step, total }: { step: number; total: number }) {

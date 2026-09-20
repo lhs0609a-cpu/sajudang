@@ -8,6 +8,7 @@
  */
 import { useEffect, useState } from "react";
 import { batchim } from "@/lib/josa";
+import { ElementArtwork } from "./ReadingArtwork";
 import type { Features } from "@shared/chart";
 
 const EL_WORD: Record<string, string> = {
@@ -103,24 +104,19 @@ export function ElementBar({ f }: { f: Features }) {
       {/* ★ 목·화·토·금·수 다섯 글자와 숫자만 있었습니다. 손님은
           이게 무엇을 센 것인지 모릅니다. */}
       <p className="barhead">
-        <b>다섯 기운(오행)</b> — 여덟 글자를 나무·불·흙·쇠·물로 나눠 센 것이오.
-        많다고 좋고 적다고 나쁜 게 아니라, <b>치우친 자리</b>를 보오.
+        <b>다섯 기운(오행)</b> — {f.hour_known ? "여덟" : "여섯"} 글자와 지지 속에 숨은 글자까지 반영한 기운의 무게요.
+        그림으로 이름을 익히고, 막대와 수치로 <b>치우친 자리</b>를 보오. 많고 적음이 좋고 나쁨을 뜻하지는 않소.
       </p>
-    <div className="elbar">
-      {entries.map(([k, v], i) => (
-        <div key={k}>
+    <div className="element-visuals" aria-label="오행별 기운의 무게 비교">
+      {entries.map(([k, v]) => (
+        <div key={k} className="element-row">
+          <ElementArtwork element={k} />
+          <div className="element-row-name"><b>{EL_WORD[k] ?? k}</b><small>{k}</small></div>
           {/* 막대 자리를 고정 높이로 잡아야 라벨이 한 줄로 선다.
               안 잡으면 막대 길이만큼 라벨이 위아래로 흩어지고
               아래 글씨를 덮는다. */}
-          <span className="bar">
-            <i style={{
-              ["--h" as string]: `${Math.max(3, (v / max) * 48)}px`,
-              animationDelay: `${i * 0.11}s`,
-            }} />
-          </span>
-          <div className="lb">{k}</div>
-          <div className="ko">{EL_WORD[k] ?? ""}</div>
-          <div className="vv">{v}</div>
+          <meter min={0} max={max} value={v} aria-label={`${EL_WORD[k] ?? k} 기운의 무게`} />
+          <b className="element-value">{v}</b>
         </div>
       ))}
     </div>
@@ -272,8 +268,9 @@ export function CalcPanel({ f }: { f: Features }) {
       ? <><s>{c.before}</s> → <b>{c.after}</b>{c.day_shift
           ? <b> ({c.day_shift > 0 ? "익" : "전"}일)</b> : null}</>
       : "시각 미상 — 보정 없음"],
-    ["절기", <>{c.jieqi_name} 절입 {c.jieqi_at_kst} 기준 <em className="fork">집마다 다름</em>
-      <i className="gl">(계절이 바뀌는 마디 스물넷 · 넘어가는 시각까지 세오)</i></>],
+    /* ★ 풀이는 **그 말 바로 뒤**에 답니다. 표 끝에 몰아 두면 손님이
+       읽을 때 이미 그 말을 지나간 뒤요 (tools/hard_words.py). */
+    ["절기", <>절기<i className="gl">(계절이 바뀌는 마디 스물넷)</i> {c.jieqi_name} · 절입<i className="gl">(그 마디로 넘어가는 시각)</i> {c.jieqi_at_kst} 기준 <em className="fork">집마다 다름</em></>],
     ["자시", <>{c.zi_policy} <em className="fork">집마다 다름</em>
       <i className="gl">(밤 11시부터 다음 날로 보는가)</i></>],
     ["시주", c.hour_used
@@ -309,8 +306,8 @@ export function CalcPanel({ f }: { f: Features }) {
           그게 이 화면에서 가장 안심되는 한 줄입니다.
       */}
       <p className="sm dim" style={{ marginTop: 9 }}>
-        위 둘(<b>절기 기준</b> · <b>자시</b>)은 집마다 다르게 정하오.
-        이 집은 <b>진태양시로 고친 시각</b>과 견주고, 밤 11시는
+        위 둘(<b>절기</b><i className="gl">(계절이 바뀌는 마디)</i> 기준 · <b>자시</b>)은 집마다 다르게 정하오.
+        이 집은 <b>진태양시</b><i className="gl">(해가 남중하는 때)</i><b>로 고친 시각</b>과 견주고, 밤 11시는
         <b> 다음 날</b>로 보오. 다르게 정한 집도 정식이오 —
         틀린 게 아니라 <b>고른 것이 다른</b> 것이오.
         {" "}
@@ -352,6 +349,27 @@ function elWords(n: Record<string, number>, dec = false) {
     .map(([k, v]) => `${EL_KO[k] ?? k} ${v === 0 ? "없음"
       : dec ? v.toFixed(1).replace(/\.0$/, "") : v}`)
     .join(" · ");
+}
+
+/**
+ * 여덟 글자에서 **가장 두터운 기운과 가장 얇은 기운** — 실제로 센 개수로.
+ *
+ * ★ `f.elements` 를 쓰면 안 됩니다.
+ *
+ *   그건 지장간까지 얹은 **무게**라 나무가 0개인 사람에게 0.3 이 나옵니다.
+ *   손님은 여덟 글자를 눈으로 셉니다. 세어서 0인데 화면이 0.3 이라 하면
+ *   그 자리에서 신뢰가 깨집니다 (같은 파일 Summary 의 머리말과 같은 까닭).
+ *   그래서 `countPlain` — 글자를 그대로 센 값 — 으로 냅니다.
+ */
+export function elementBrief(f: Features) {
+  const n = countPlain(f.pillars);
+  const rows = Object.entries(n).sort((a, b) => b[1] - a[1]);
+  const [sk, sv] = rows[0];
+  const [wk, wv] = rows[rows.length - 1];
+  return {
+    strongWord: EL_KO[sk] ?? sk, strongN: sv,
+    weakWord: EL_KO[wk] ?? wk, weakN: wv,
+  };
 }
 
 export function Summary({ f }: { f: Features }) {

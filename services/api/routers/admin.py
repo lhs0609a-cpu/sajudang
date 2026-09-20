@@ -43,21 +43,6 @@ import store
 router = APIRouter(prefix="/v1/admin", tags=["admin"])
 
 
-@router.get('/value-audit')
-def value_audit(x_funnel_key: str | None = Header(default=None), x_admin_token: str | None = Header(default=None)):
-    _guard(x_funnel_key, x_admin_token)
-    from engine import value_audit, page_evaluation, reading_evaluation
-    return {'audit':value_audit.snapshot(),'pages':page_evaluation.stats(),'readings':reading_evaluation.stats()}
-
-
-@router.get('/reading-evaluation')
-def reading_evaluation_stats(x_funnel_key: str | None = Header(default=None),
-                             x_admin_token: str | None = Header(default=None)):
-    _guard(x_funnel_key, x_admin_token)
-    from engine.reading_evaluation import stats
-    return stats()
-
-
 @router.get("/refund-reviews")
 def refund_reviews(x_funnel_key: str | None = Header(default=None),
                    x_admin_token: str | None = Header(default=None)):

@@ -72,7 +72,40 @@ def days_in(y: int, m: int) -> int:
     return DAYS_IN[m - 1]
 
 # 성향 4글자를 적는 사람 비율 — 선택 입력이라 전원이 적지는 않습니다.
-AXIS4_SHARE = 0.55
+#
+# ★ 이 수는 **화면이 어디 있느냐**에 달렸습니다 (2026-09-16).
+#
+#   손님이 물었습니다 — "엠비티아이 처음에 파악하는 칸은 어디로 갔어."
+#   재 보니 그 칸이 본길에서 빠져 접힌 자리 안의 유령 단추로 물러나
+#   있었습니다. 그런데 이 수는 **0.55 그대로**였습니다.
+#
+#   그러면 셈이 화면보다 후합니다. 아무도 못 보는 칸을 절반이 넘게
+#   채운다고 치고 훅 2.5단을 재는 것이니까요 — 그 마디는 넉 자가
+#   있으면 694자, 없으면 241자입니다. 자가 없는 글을 재고 있었소.
+#
+#   그래서 **살아 있는 길을 보고** 정합니다. 본길에 서 있으면 절반쯤
+#   적고, 접힌 자리로 물러나 있으면 열에 하나도 안 적습니다.
+#   길이 바뀌면 이 수도 따라 바뀝니다 — 손으로 안 적습니다.
+AXIS4_ON_PATH = 0.55        # 본길에 서 있을 때
+AXIS4_OFF_PATH = 0.08       # 접힌 자리 안의 유령 단추일 때
+
+
+def axis4_share() -> float:
+    """성향 넉 자를 적는 비율. 화면 차례를 보고 정합니다."""
+    try:
+        import sys
+        from pathlib import Path
+        api = Path(__file__).resolve().parents[1] / "services" / "api"
+        if str(api) not in sys.path:
+            sys.path.insert(0, str(api))
+        from engine import screenscan as _S
+        return (AXIS4_ON_PATH if "a4b" in _S.live_path() else AXIS4_OFF_PATH)
+    except Exception:                                   # noqa: BLE001
+        # 화면을 못 읽는 자리(배포 이미지)에서는 본길로 봅니다.
+        return AXIS4_ON_PATH
+
+
+AXIS4_SHARE = axis4_share()
 # 캐릭터가 요구하는 추가 입력을 실제로 채워 주는 비율.
 EXTRA_FILL_SHARE = 0.70
 
@@ -90,20 +123,33 @@ def people(n: int, seed: int = SEED) -> list:
     rng = random.Random(seed)
     cities = list(CITY_LON)
     out = []
+    # ★ 한 사람이 두 번 들어오면 안 됩니다. 같은 생년월일시는 같은 여덟 글자라
+    #   유일성(최다 점유)을 재는 자를 그만큼 무디게 만듭니다. 겹치면 다시 뽑습니다.
+    seen = set()
     for i in range(n):
-        known = rng.random() >= share
-        m = rng.randint(1, 12)
-        y = rng.randint(*BIRTH_YEARS)
+        for _ in range(1000):
+            known = rng.random() >= share
+            m = rng.randint(1, 12)
+            y = rng.randint(*BIRTH_YEARS)
+            d = rng.randint(1, days_in(y, m))
+            hh = rng.randint(0, 23) if known else None
+            mm = rng.randint(0, 59) if known else None
+            sex = rng.choice("FM")
+            city = rng.choice(cities)
+            who = (y, m, d, hh, mm, sex, city)
+            if who not in seen:
+                seen.add(who)
+                break
         out.append({
             "i": i,
             "year": y,
             "month": m,
-            "day": rng.randint(1, days_in(y, m)),
-            "hour": rng.randint(0, 23) if known else None,
-            "minute": rng.randint(0, 59) if known else None,
-            "sex": rng.choice("FM"),
+            "day": d,
+            "hour": hh,
+            "minute": mm,
+            "sex": sex,
             "hour_known": known,
-            "city": rng.choice(cities),
+            "city": city,
             "concern": rng.choice(CONCERNS),
             "axis4": ("".join(rng.choice(p) for p in AXIS_LETTERS)
                       if rng.random() < AXIS4_SHARE else None),

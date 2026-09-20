@@ -125,7 +125,12 @@
 .op{background:var(--bg2);border:1px solid var(--line);color:var(--paper);padding:13px 11px;
  cursor:pointer;font-family:var(--sans);font-size:var(--fs-4);text-align:left;transition:.16s}
 .op:hover,.op.on{border-color:var(--gold);color:var(--gold)}
-.op b{display:block;font-family:var(--serif);font-size:var(--fs-5);font-weight:700;margin-bottom:2px}
+/* 목패 이름표는 **표지판**이오 — 강조가 아니라 이름입니다.
+   `<b>` 로 적으면 연출 자가 굵은 글씨로 세어, 진열대처럼
+   목패가 여럿인 화면이 「다 굵어 아무것도 안 굵소」 가 됩니다
+   (engine/dramaturgy 강조 축). 보이는 모양은 그대로 두고
+   이름표에만 쓰는 자리를 하나 더 둡니다. */
+.op b,.op .nm{display:block;font-family:var(--serif);font-size:var(--fs-5);font-weight:700;margin-bottom:2px}
 .op span{font-size:var(--fs-2);color:var(--paper3)}
 .prog{display:flex;gap:4px;margin-bottom:20px}
 .prog i{height:2px;flex:1;background:var(--line)}
@@ -371,6 +376,29 @@
 @keyframes grow{to{height:var(--h)}}
 .elbar .lb{font-family:var(--serif);font-size:var(--fs-3);margin-top:5px}
 .elbar .vv{font-family:var(--mono);font-size:var(--fs-1);color:var(--paper3)}
+
+/* 접힌 무리 — 그 캐릭터의 눈 · 셈 장부 (engine/report.fold_of · 2026-09-11) */
+.foldgroup{margin-top:26px;padding-top:14px;border-top:1px dashed var(--line2)}
+.foldhead{font-family:var(--serif);font-size:var(--fs-3);color:var(--paper3);margin:0 0 8px;cursor:pointer}
+.foldhead b{color:var(--c);font-weight:400}
+
+/* 한 줄 · 같은 힘의 앞과 뒤 (engine/spine · 2026-09-11) */
+.spname{font-family:var(--serif);color:var(--gold);font-size:var(--fs-2);letter-spacing:.08em}
+.spine{font-family:var(--serif);font-size:calc(var(--fs-6) * 1.22);line-height:1.62;color:var(--paper);margin:4px 0 12px}
+.spine b{color:var(--c);font-weight:400}
+.chain{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:12px 0}
+.chain .st{display:flex;flex-direction:column;align-items:center;text-align:center;min-width:72px;
+ border:1px solid var(--line2);border-radius:8px;padding:8px 12px;background:var(--bg2)}
+.chain .st b{font-family:var(--serif);font-size:20px;color:var(--c);font-weight:400}
+.chain .st small{font-size:var(--fs-1);color:var(--paper3);line-height:1.5}
+.chain .ar{color:var(--gold)}
+.pair,.vs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.pair>.tale,.vs>.tale{margin:0}
+.pair>.tale{border:1px solid var(--line);border-radius:8px;padding:8px 12px}
+.pair>.sh{border-color:rgba(201,112,122,.45)}
+.tale .k{display:block;font-family:var(--mono);font-size:var(--fs-1);color:var(--paper3)}
+.vs .m{color:var(--paper3)}
+@media(max-width:560px){.pair,.vs{grid-template-columns:1fr}}
 
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}
  .blk,.nr .l,.seq div span{opacity:1;transform:none}.pil{transform:none;opacity:1}}

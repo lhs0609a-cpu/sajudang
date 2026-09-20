@@ -353,7 +353,10 @@ def test_the_teaser_shows_what_the_customer_asked(client, chart_id):
     for concern in ("love", "money", "health", "work"):
         rep = build_report(f, chart_id, "baegun", "free", concern)
         for l in rep.get("locked") or []:
-            if l["id"].endswith("_ask") and l.get("teaser"):
+            # ★ 첫 고민 컷은 이제 **무료로 열립니다** (2026-09-17).
+            #   그래서 잠긴 쪽에 남는 것은 둘째 고민 컷(_ask2)입니다.
+            #   보는 것은 그대로요 — 페이월 맛보기가 고른 칸마다 갈리는가.
+            if l["id"].rsplit("_", 1)[-1].startswith("ask") and l.get("teaser"):
                 got[concern] = _plain(_bare(l["teaser"]))
     assert len(got) == 4, got
     assert len(set(got.values())) == 4, (

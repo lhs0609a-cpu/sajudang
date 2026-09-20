@@ -231,6 +231,14 @@ export interface ReportCut {
   source: string;
   html: string;
   statement_id: string | null;
+  /**
+   * 접는 자리 (engine/report.fold_of · 2026-09-11).
+   *   null/없음  본문 — 이 사람을 말하는 핵심 (한 줄 · 앞뒤 · 답 · 장면 · 때 · 처방)
+   *   "lens"    그 캐릭터의 눈 — 관점 컷 · 캐릭터가 받은 추가 입력
+   *   "ledger"  셈 장부 — 명식 · 신살 · 희소도 · 대운 맵 · 용어 …
+   * 지우는 것이 아니라 접는 것입니다. 펼치면 다 있습니다.
+   */
+  fold?: "lens" | "ledger" | null;
 }
 
 /**
@@ -293,7 +301,6 @@ export interface WantRow {
 }
 
 export interface ReportResponse {
-  reading?: IntegratedReading | null;
   editorial?: { id:string;version:number;title:string;perspective:string;observation:string;question:string;scene:string;action:string;boundary:string;source_kind:string } | null;
   practice?: { id: string; version: number; source_kind: string; source: string; title: string; scene: string; action: string } | null;
   report_id: string;
@@ -334,6 +341,19 @@ export interface ReportResponse {
     q2?: string;
     options2?: { id: string; label: string }[];
   } | null;
+  /**
+   * 리포트 앞에 묻는 행동 물음 여섯 — 답했으면 null. (engine/probe.py)
+   *
+   * ★ 물음과 보기만 옵니다. 여덟 글자가 어느 쪽을 가리키는지(판정 규칙)는
+   *   안 내려옵니다 — 분기표입니다. 답은 `extras.probe = {answers:{…}}`
+   *   로 실어 보내고, 서버는 계산하고 버립니다.
+   */
+  probes?: {
+    id: string;
+    title: string;
+    why: string;
+    items: { id: string; q: string; options: { id: string; label: string }[] }[];
+  } | null;
   /** 받은 추가 입력이 틀렸을 때 그 사유. 그 컷만 빠지고 리포트는 나옵니다. */
   extra_error: string | null;
   /**
@@ -346,51 +366,6 @@ export interface ReportResponse {
    *   거짓이면 페이월도, 목패로 가는 버튼도 그리지 않습니다.
    */
   sells: boolean;
-}
-
-export interface ReadingSection {
-  id: string;
-  title: string;
-  html: string;
-  status?: string;
-}
-
-export interface ConsultationSpec {
-  concern: string;
-  title: string;
-  note: string;
-  answers: Record<string, string>;
-  questions: { id: string; question: string; reason: string; options: { id: string; label: string }[] }[];
-}
-
-export interface IntegratedReading {
-  access_tier?: string;
-  practice?: { trigger: string; action: string; observe: string; fallback: string; remember: string; source: string };
-  narrator?: { id: string; name: string };
-  journey?: { version: number; source: string; mode: string; steps: string[]; context_label: string | null };
-  version: number;
-  fingerprint: string;
-  basis: string;
-  headline: string;
-  summary: ReadingSection[];
-  sections: ReadingSection[];
-  consultation: ConsultationSpec;
-  scope: string;
-  as_of: string;
-  boundary: string;
-  input_error: string | null;
-  empty_reason: string | null;
-}
-
-export interface OmnibusResponse {
-  chart_id: string;
-  tier: string;
-  concern: string;
-  reading: IntegratedReading;
-  head: { title: string; subtitle: string; headline: string; lens_count: number; hour_known: boolean; pillars: { label: string; gz: string }[] };
-  consensus: { html: string; unit: string; counts: { cut: string; label: string; n: number; of: number }[] };
-  split: { html: string };
-  chapters: { lens_id: string; name: string; archetype: string; needs_input: string | null; cuts: ReportCut[] }[];
 }
 
 /* ── 릴레이 ─────────────────────────────────────────────── */
@@ -408,6 +383,16 @@ export interface RelayPick {
   /** 화면에 그대로 그려도 되는 근거 한 줄. 문턱값은 들어 있지 않습니다. */
   reason: string;
   quote: string | null;
+  /**
+   * 이 사람이 **값을 치른 뒤에 더 묻는 것**. 없으면 바로 열립니다.
+   *
+   * ★ 목패에 미리 적습니다. 값은 적혀 있는데 「적을 것이 더 있다」 는
+   *   말이 없어서, 손님이 값을 치르고 나서야 「상대의 날을 아시오?」 를
+   *   만났습니다. 표시가와 청구가를 같게 두는 것과 같은 자리요.
+   *
+   * ★ 열쇳말(partner·blood)이 아니라 **손님의 말**로 옵니다.
+   */
+  asks: string | null;
 }
 
 export interface RelayBreaks {
@@ -427,8 +412,6 @@ export interface RelayResponse {
 
 /* ── 일진 ───────────────────────────────────────────────── */
 export interface DailyResponse {
-  plain?: string[];
-  practice?: IntegratedReading['practice'];
   date: string;
   gz: string;
   gan: string;
@@ -483,7 +466,6 @@ export interface SinsalBrief {
 }
 
 export interface Summary {
-  reading?: IntegratedReading;
   name: string | null;
   lens: LensPublic;
   concern: string;
