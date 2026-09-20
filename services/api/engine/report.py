@@ -77,7 +77,7 @@ def _rarity_text() -> dict:
     p = _Path(__file__).resolve().parents[3] / "seed" / "rarity_text.json"
     return {k: v for k, v in _json.loads(p.read_text("utf-8")).items()
             if k != "_"}
-from .constants import ELEMENT_OF_GAN, ten_god
+from .constants import ELEMENT_OF_GAN, TEN_GOD_GROUP, ten_god
 
 TIERS = ("free", "one", "all", "sub")
 # ★ sub 이 all 과 같은 층(2)이었습니다. 그래서 9,900원/월이 24,900원과
@@ -278,6 +278,16 @@ _P_TAG = _re.compile(r'(<p\b[^>]*>)(.*?)(</p>)', _re.S)
 _SENT = _re.compile(
     r'.*?[.?!](?:\s*</(?:b|mark|u|span|em|i)>)*(?=\s|$)|.+$', _re.S)
 LEDGER_MIN = 8
+
+# ★ 풀이를 **다시 거는 거리** (2026-09-19).
+#
+#   어려운 말은 「한 장에 한 번」 푸는 것이 규칙입니다. 그런데 한 장이
+#   13,000자로 늘어나자, 처음 한 번이 손님에게는 **없는 것**이 됐습니다.
+#   이 거리를 지나 다시 만나면 처음 만나는 말로 칩니다.
+#
+#   900자 = 컷 하나 남짓 · 눈으로 한 화면 반쯤. 줄이면 사전이 길어지고,
+#   늘리면 다시 못 찾습니다.
+GLOSS_AGAIN = 900
 
 
 # ── 한자·숫자 뒤의 조사 · 이다 (2026-09-11) ─────────────────
@@ -938,12 +948,74 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     #
     #   ★ 「그때 무슨 일이 난다」 는 말은 여전히 안 합니다. 바뀌는 때만
     #     셉니다 (docs/11). 여기 적는 것은 전부 이미 셈이 끝난 값입니다.
+    # ★ 표가 **무엇을 물었든 같았습니다** (2026-09-19).
+    #
+    #   재보니 이 컷이 고민 축에서 96% 겹쳤습니다. 까닭은 표가 십신을
+    #   그대로 적어 놓고 「칸마다 다르오」 라고만 했기 때문이오. 손님이
+    #   돈을 물었는데, 어느 칸이 돈 칸인지는 제가 십신표를 외워서
+    #   찾아야 했소.
+    #
+    #   ★ 새로 점치지 않습니다. `CONCERN_AXIS` 는 물으신 자리를 어느
+    #     십신 묶음으로 보는지 이미 정해 두었고, 대운 칸마다 십신은
+    #     이미 세어져 있습니다. **켜기만** 하면 되오.
+    #
+    #   ★ 그 해에 무슨 일이 난다고는 말하지 않습니다. 「그 십 년은 이
+    #     자리로 읽는다」 까지요 (docs/11 · 시점 확정 금지).
+    _grp = bank_mod.concern_group(concern, f.sex) if concern else ""
+    _mine = [d for d in f.daeun
+             if _grp and bank_mod.GROUP_TOTAL.get(_grp)
+             and TEN_GOD_GROUP.get(d["ten_god"]) == _grp]
     dm_grid = "".join(
-        '<div class="d%s"><span class="age">%d</span>'
+        '<div class="d%s%s"><span class="age">%d</span>'
         '<b>%s</b><span class="tg">%s</span></div>'
         % (" now" if d["index"] == f.daeun_now else "",
+           " lit" if d in _mine else "",
            d["start_age"], d["gz"], d["ten_god"])
         for d in f.daeun)
+    def _dm_next(ages: list, age: int) -> str:
+        """켜진 칸 가운데 **아직 안 온 것**을 한 마디로.
+
+        ★ 그 해에 무슨 일이 난다고는 안 적습니다. 읽는 자리가 바뀌는
+          나이만 셉니다 (docs/11 · 시점 확정 금지).
+        """
+        later = [a for a in ages if a > age]
+        if not later:
+            return "그 칸들은 이미 지나왔소."
+        nxt = min(later)
+        if len(ages) == 1:
+            # 하나뿐인데 또 나이를 대면 방금 적은 수를 되풀이합니다.
+            return ("아직 안 온 칸이오. 그때 무슨 일이 난다는 말이 아니라, "
+                    "그 십 년은 이 자리로 읽는다는 말이오.")
+        return ("다음은 <b>%d살</b>이오. 그때 무슨 일이 난다는 말이 아니라, "
+                "그 십 년은 이 자리로 읽는다는 말이오." % nxt)
+
+    # ★ 켜진 칸을 **말로** 냅니다 — 나이를 박습니다.
+    #
+    #   「대운 칸마다 주인공이 다르오」 는 틀릴 수가 없는 말이오.
+    #   「그대가 물은 돈 자리가 켜지는 칸은 43살·73살 둘이오」 는
+    #   손님이 만세력을 펴고 대 볼 수 있는 말이오 (CLAUDE.md
+    #   「틀릴 수 없는 말만 쓰기」).
+    #
+    #   그 해에 무슨 일이 난다고는 안 적습니다. **읽는 자리가
+    #   바뀌는 나이**만 셉니다.
+    if concern and _mine:
+        _ages = [int(d["start_age"]) for d in _mine]
+        _now_lit = any(d["index"] == f.daeun_now for d in _mine)
+        dm_lit = (
+            '<p class="tale lit"><b>%s</b>을 물으셨으니 그 자리가 켜지는 칸만 '
+            '짚겠소 — <b>%s</b>요. 모두 <b>%d칸</b> 가운데 <b>%d칸</b>이오. %s</p>'
+            % (bank_mod.concern_word(concern),
+               " · ".join("%d살" % a for a in _ages),
+               len(f.daeun), len(_mine),
+               ("<b>지금 그 칸에 있소.</b>" if _now_lit else
+                (_dm_next(_ages, f.age or 0)))))
+    elif concern:
+        dm_lit = ('<p class="tale lit"><b>%s</b>을 물으셨는데, 그 자리가 '
+                  '주인공이 되는 칸은 <b>열 칸에 하나도 없소</b>. 드문 일이 '
+                  '아니오 — 그 자리는 대운이 아니라 여덟 글자에서 봐야 하오.</p>'
+                  % bank_mod.concern_word(concern))
+    else:
+        dm_lit = ""
     dm_where = (
         '그대는 <b>%d살</b>에 첫 대운에 들었고, 지금은 표에서 <b>%d살</b>이라 '
         '적힌 칸에 있소.'
@@ -974,11 +1046,18 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
          '칸마다 다르오.</p>'
          '<p class="tale">위에서 말한 그 칸이 <b>지금 그대가 사는 십 년</b>'
          '이오.</p>'
-         '<div class="dmap">%s</div>'
+         '<div class="dmap">%s</div><!--ATCUT-->%s'
+         # ★ 물으신 자리의 말은 **표 바로 아래**요 (2026-09-19).
+         #
+         #   여태 컷 맨 끝, 셈법 주석 뒤에 붙었습니다. 손님이 제
+         #   칸을 눈으로 짚고 있는 순간과 그 줄 사이에 「달력을
+         #   앞으로 세는 것이오」 「날수 ÷ 3」 두 줄이 끼어 있었소.
+         #   재보니 이 컷이 고민 축에서 **97% 겹쳤습니다** — 컷
+         #   스물이 `CUT_AT` 을 다 달고도 그랬소.
          '<p class="note">칸은 %s으로 이어지오 — 달력을 %s 세는 것이오.</p>'
          '<p class="note">대운수는 태어난 날부터 절입까지의 실제 '
          '날수 ÷ 3 으로 셈했소.</p>'
-         % (len(f.daeun), dm_where, dm_grid,
+         % (len(f.daeun), dm_where, dm_grid, dm_lit,
             "순행" if f.forward else "역행",
             "앞으로" if f.forward else "거꾸로")),
         2))
@@ -1760,8 +1839,35 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         # ★ 붙이는 글도 가드를 거칩니다. `_cut` 안에서만 거르면 뒤에
         #   붙는 것이 그냥 새 나갑니다 — 전 응답 검사(guard_middleware)가
         #   있다 해도 여기서 먼저 막는 것이 맞습니다.
-        c["html"] += guard.enforce(line, {"cut": c["id"], "at": concern})
+        # ★ 꼬리에 얹으면 **낱말 치환으로 읽힙니다** (2026-09-19).
+        #
+        #   훅에서 겪은 것과 같은 자리입니다. 마디 맨 끝에 한 줄
+        #   붙이니 손님 눈에는 「고민이 바뀌었다」가 아니라 「같은 글
+        #   끝에 한 줄 덧댔다」로 읽혔습니다 — 그래서 컷 스물이
+        #   `CUT_AT` 을 다 달고도 고민 축에서 91~97% 겹쳤습니다.
+        #
+        #   컷이 제 자리를 정해 두었으면(`<!--ATCUT-->`) 그 자리에
+        #   끼우고, 안 정해 두었으면 예전처럼 끝에 답니다.
+        line = guard.enforce(line, {"cut": c["id"], "at": concern})
+        if "<!--ATCUT-->" in c["html"]:
+            c["html"] = c["html"].replace("<!--ATCUT-->", line, 1)
+        else:
+            # 자리를 안 정해 둔 컷은 **첫 문단 뒤**에 끼웁니다.
+            #
+            # 주장 → 물으신 자리 → 풀이. 맨 끝에 두면 손님은 컷을 다
+            # 읽고 나서야 제가 무엇을 물었는지 만납니다. 컷 하나가
+            # 천 자를 넘는 자리도 있소.
+            at = c["html"].find("</p>")
+            if at >= 0:
+                at += 4
+                c["html"] = c["html"][:at] + line + c["html"][at:]
+            else:
+                c["html"] += line
         c["statement_id"] = "%s@%s" % (c["statement_id"], concern)
+    # 자리를 정해 두고 고민을 안 물은 사람은 자리표만 걷습니다.
+    for c in cuts:
+        if "<!--ATCUT-->" in c["html"]:
+            c["html"] = c["html"].replace("<!--ATCUT-->", "")
 
     # ★ 물으신 자리의 **살림** 한 줄 (2026-09-17 · real.FLOW_TOPIC)
     #
@@ -2134,6 +2240,26 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
     #   리포트 끝에 몰아 두지 않습니다 — 모르는 말을 만난 그 자리에
     #   있어야 봅니다.
     seen: set = set()
+    # ★ 「한 장에 한 번」 이 **한 장이 너무 길어져서** 깨졌습니다
+    #   (2026-09-19).
+    #
+    #   재보니 무료 한 장 13,426자에 어려운 말이 **96번** 풀이 없이
+    #   나옵니다 — 대운 12.0 · 재성 9.2 · 신살 6.8 · 일지 6.7 · 관성 6.2.
+    #   규칙은 지켜지고 있었습니다. 처음 한 번은 풀었으니까요.
+    #
+    #   헌데 손님이 「대운」 을 여섯째 컷에서 처음 눈에 담았다면, 둘째
+    #   컷에 달아 둔 괄호는 그에게 **없는 것**입니다. 앞으로 스크롤을
+    #   올려 괄호를 찾아 읽으라는 것은 근거를 대는 것이 아니오.
+    #
+    #   그래서 **읽는 거리**로 셉니다. 한 컷 분량쯤 지나 다시 만나면
+    #   그건 처음 만나는 말입니다. 훅이 「마디마다」 푸는 것과 같은
+    #   셈법이오 — 훅은 마디를 하나씩 펴니 마디가 그 거리였습니다.
+    #
+    #   ★ 다만 **그림 상자는 안 되풀이합니다.** 괄호 한 마디는 값이
+    #     싸지만 상자는 문단 하나라, 거리마다 붙으면 읽는 글보다
+    #     사전이 깁니다 (CLAUDE.md 「사전을 리포트에 붓기」).
+    boxed: set = set()          # 그림 상자 — 한 장에 한 번. 절대 안 비웁니다
+    gloss_run = 0               # 풀이를 건 뒤 흐른 글자
     tone = view.get("voice")
     # ★ 말버릇은 **어미를 갈아 끼운 뒤**에 답니다.
     #
@@ -2154,6 +2280,11 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
                 + len(f.strength or "")) % 4
     lc_nth = 0                  # 몇 번째 관점 컷인가
     for c in cuts:
+        # 한 컷 분량쯤 흘렀으면 그 뒤의 말은 **처음 만나는 말**이오.
+        if gloss_run >= GLOSS_AGAIN:
+            seen.clear()
+            gloss_run = 0
+        gloss_run += len(_plain(c.get("html") or ""))
         before = set(seen)
         # ★ 그림 층은 **말투 층보다 먼저**입니다.
         #
@@ -2241,8 +2372,10 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
         c["html"] = _flavor.ask(c["html"], lens_id, asked, tone)
         c["html"] += voice_mod.speak(
             voice_mod.address(
-                terms_mod.picture_box(seen - before, concern, f.sex), you),
+                terms_mod.picture_box((seen - before) - boxed,
+                                      concern, f.sex), you),
             tone)
+        boxed |= (seen - before)
         # ★ 훑어읽기 층 — **맨 끝**입니다 (2026-09-07).
         #
         #   손님이 짚었습니다 — "전체 글 다 안 읽을거니까 … 그것만

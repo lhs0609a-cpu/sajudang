@@ -1336,6 +1336,52 @@ def hook_line(concern, stage) -> str:
     return '<p class="tale atask">%s</p>' % t if t else ""
 
 
+def ask_line(concern, stage) -> str:
+    """그 단을 **여는 물음**. 물으신 자리에서 묻습니다.
+
+    ★ 여태 `bank.build_hook` 안에 박혀 있어 고민축이 닿을 자리가
+      없었습니다 (2026-09-19). 재보니 2.5단·3단은 여는 물음을 머리에
+      이고 **앞 280자가 통째로 고정**이었습니다 — 손님이 그 단을 열고
+      280자를 읽을 때까지 자기가 무엇을 물었는지 흔적을 못 봤습니다.
+
+    ★ 낱말만 갈아 끼우지 않습니다. 1단은 「부정확인」 단이라, 그
+      고민에서 손님이 사주에 품고 온 기대를 그대로 겨눕니다 —
+      돈이면 「얼마를 버는지」, 사랑이면 「이 사람이 인연인지」.
+
+    ★ 없으면 빈 글자입니다. 부르는 자리가 예전 문구를 답니다.
+    """
+    if not concern:
+        return ""
+    row = (table().get("ASK_AT", {}) or {}).get(str(stage)) or {}
+    return row.get(concern) or ""
+
+
+def q_line(concern, stage) -> str:
+    """손님이 그렇소/아니오를 누르기 **직전의 한 마디**.
+
+    ★ 재보니 이 줄이 90.4% 고정이었습니다 — 무엇을 물었든 「이 말은
+      어떻소?」 「이제 알겠소?」 였습니다. 누르는 자리라 짧게 둡니다.
+      길어지면 누르는 자리가 아니라 읽는 자리가 됩니다.
+    """
+    if not concern:
+        return ""
+    row = (table().get("Q_AT", {}) or {}).get(str(stage)) or {}
+    return row.get(concern) or ""
+
+
+def next_line(concern) -> str:
+    """훅의 **마지막 줄**. 다음 자리로 가는 다리.
+
+    ★ 앞을 깎지 않습니다. 「여덟 자 중 셋으로 본 것」 처럼 방금 좋았다고
+      느낀 것을 8분의 3으로 만들지 않소 — 격차는 **남은 물음**으로 냅니다.
+    ★ `HOOK_AT["3"]` 과 뜻이 겹치면 안 됩니다. 그 줄은 이름이 **어디서
+      나오는가** 고, 이 줄은 이름만으로 **안 풀리는 것**입니다.
+    """
+    if not concern:
+        return ""
+    return (table().get("NEXT_AT", {}) or {}).get(concern) or ""
+
+
 def lens_line(lens_id: Optional[str], concern: Optional[str]) -> str:
     """
     **이 사람이 그 자리를 보는가** — 관점 컷 앞에 한 번 답니다.

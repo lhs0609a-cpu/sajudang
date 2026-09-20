@@ -23,7 +23,7 @@ def post_hook(req: HookRequest) -> HookResponse:
     #   「copy4-hao」 가 박힌 채였으면 고친 말투가 안 나갔습니다.
     key = store.k_hook(req.chart_id, req.concern, req.axis4 or "",
                        req.lens_id or "",
-                       "%s#%d#copy5-voice5" % (req.name, req.misses))
+                       "%s#%d#copy6-voice5" % (req.name, req.misses))
     cached = store.get_json(key)
     if cached is not None:
         return HookResponse(chart_id=req.chart_id, segments=cached, cached=True)

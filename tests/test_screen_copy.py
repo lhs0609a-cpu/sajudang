@@ -157,7 +157,18 @@ def test_a_real_report_explains_its_hard_words():
         #   따로 지킵니다.
         if len(term) < 2 or term not in body:
             continue
-        i = body.index(term)
+        # ★ 이 검사도 **같은 자를 써야** 합니다 (2026-09-19).
+        #
+        #   여태 `body.index(term)` 으로 맨 앞 것을 집었습니다. 그러니
+        #   「가지지 못한 채」 의 '지지' 를 용어로 집어, 풀이 층이
+        #   올바르게 건너뛴 자리를 「안 풀어 준다」 고 적었습니다.
+        #   자와 풀이가 다른 표를 보면 고칠 수 없는 데를 가리킵니다
+        #   (`terms.used_here` 머리말과 같은 자리요).
+        i = next((j for j in range(len(body))
+                  if body.startswith(term, j)
+                  and T.used_here(body, term, j, j + len(term))), None)
+        if i is None:
+            continue
         assert "(" in body[i:i + 34], ("%s 을(를) 안 풀어 줍니다: %r"
                                        % (term, body[i:i + 34]))
         checked += 1

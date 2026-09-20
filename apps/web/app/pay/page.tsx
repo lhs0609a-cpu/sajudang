@@ -416,6 +416,22 @@ function PayInner() {
     const openPrice = () => {track("price_view", "d0"); router.push("/pay?step=d1");};
     return (
       <Shell screen="d0" title="무료 요약과 오늘의 행동">
+        {/*
+          ★ 이 화면만 **장면이 없었습니다** (2026-09-19).
+
+            conversion.css 56행이 `[data-screen="d0"] .scr > .sceneart`
+            를 180px 로 잡아 두고 있는데, 정작 장면을 그리는 컴포넌트가
+            없었습니다. 자리는 있고 그림만 빠진 것이오.
+
+            들어가는 길(a1 골목 · a6 글자가 서다 · a7 훅)은 전부 클립이
+            도는데, 손님이 **가장 오래 머무는 화면**(재보니 1,766초)에만
+            그림이 없었습니다.
+
+            `desk`(붓·벼루·빈 종이)는 이미 클립이 들어와 있고 읽고 적는
+            자리라 뜻이 맞습니다. 자리는 CSS 가 이미 180px 로 잡아 두었으니
+            목패가 아래로 밀리지 않습니다.
+        */}
+        <Scene id="desk" />
         <p className="conversion-kicker">{charName}의 해석 · 무료</p>
         <h1 className="conversion-title reading-title">{READING_QUESTIONS[s.concern] ?? "그대는 어디서 자꾸 같은 선택을 하오?"}</h1>
         {err && <><Say who={charName} lens={s.cur}>{err}</Say><button className="btn" onClick={() => {setErr(null);setRetry(n => n + 1);}}>무료 해석 다시 불러오기</button></>}

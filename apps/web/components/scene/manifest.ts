@@ -11,8 +11,21 @@
 export type Preset = "Static" | "Dolly In" | "Dolly Right";
 export type Ratio = "9:16" | "16:9" | "3:4" | "1:1";
 
-/** 입력·결제 화면 통합으로 사용을 멈춘 장면. 관리자 에셋 목록과 원본은 보존한다. */
-export const ARCHIVED_SCENES = ["coin", "desk", "door", "fork", "ink", "mirror", "room", "tray"] as const;
+/**
+ * 입력·결제 화면 통합으로 사용을 멈춘 장면. 관리자 에셋 목록과 원본은 보존한다.
+ *
+ * ★ `desk` 를 다시 씁니다 (2026-09-19) — d0 무료 6단.
+ *
+ *   통합으로 d0·d1·d2 세 화면에서 장면이 한꺼번에 빠졌습니다. 그런데
+ *   d0 은 손님이 **가장 오래 머무는 화면**입니다 (1만 명 시늉 1,766초).
+ *   conversion.css 가 그 자리를 180px 로 아직 잡아 두고 있어, 자리는
+ *   있고 그림만 빠진 꼴이었습니다.
+ *
+ *   d1(어디까지)에는 **안 되돌립니다.** 거기는 머리글이 이미 폰 한
+ *   화면을 채워 목패가 1,168px 에서 시작하던 자리요 — 위에 장면을
+ *   얹으면 값이 더 아래로 밀립니다. 이탈 1위 화면에서 그건 손해요.
+ */
+export const ARCHIVED_SCENES = ["coin", "door", "fork", "ink", "mirror", "room", "tray"] as const;
 
 /**
  * 일간 색을 입히는 방식. (docs/10 §4)

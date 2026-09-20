@@ -98,8 +98,18 @@ def test_report_does_not_claim_an_unentered_daeun():
     assert f.daeun_started is False
     rep = build_report(f, "cid", "pungun", "all", "love")
     cut = next(x for x in rep["cuts"] if x["id"] == "daeun_now")
-    assert "아직 첫 대운에 들지 않았소" in cut["html"]
-    assert "지금은" not in cut["html"]
+    # ★ **태그를 걷고** 봅니다 (2026-09-19).
+    #
+    #   원문 그대로 보면 괄호 풀이가 낱말 사이에 끼어들 때 깨집니다 —
+    #   「대운<i class="gl">(십 년마다 바뀌는 삶의 계절)</i>에」. 화면에
+    #   나가는 글은 「대운(십 년마다 바뀌는 삶의 계절)에 들지 않았소」로
+    #   멀쩡한데 검사만 넘어지오. 검사가 보는 것은 손님이 읽는 글이라야
+    #   하오 (tests/test_screen_copy 에서 겪은 것과 같은 자리).
+    import re as _re2
+    plain = _re2.sub(r"<[^>]+>", "", cut["html"])
+    plain = _re2.sub(r"\([^)]*\)", "", plain)
+    assert "아직 첫 대운에 들지 않았소" in plain
+    assert "지금은" not in plain
 
 
 # ══════════════════════════════════════════════════════════

@@ -688,9 +688,21 @@ def figure(html: str, cut_id: str, pick: int) -> str:
     need = _fig_short(html)
     if need <= 0:
         return html
-    out = html
-    for k in range(min(need, 2)):
-        out += wrap_fig(rows[(pick + k) % len(rows)])
+    # ★ 둘을 **나란히 붙이지 않습니다** (2026-09-19).
+    #
+    #   신살 컷에서 「지도에 찍힌 옛 지명 같은 것이오」 와 「낡은
+    #   이정표를 읽는 셈이오」 가 붙어 나왔습니다. 한 표에서 뽑으니
+    #   둘이 **같은 말**이고, 잇달아 서면 손님은 둘째 줄을 첫째 줄의
+    #   되풀이로 읽고 **둘 다 흘립니다** — 뜻이 겹치는 표시를 둘 다는
+    #   자리에서 겪은 것과 같습니다 (CLAUDE.md).
+    #
+    #   그래서 둘째 그림은 **첫 문단 뒤**로 올려 떼어 놓습니다. 글은
+    #   하나도 안 지우고 자리만 바꿉니다.
+    out = html + wrap_fig(rows[pick % len(rows)])
+    if need > 1 and len(rows) > 1:
+        second = wrap_fig(rows[(pick + 1) % len(rows)])
+        at = out.find("</p>")
+        out = (out[:at + 4] + second + out[at + 4:]) if at >= 0 else out + second
     return out
 
 

@@ -7,6 +7,7 @@
     engine-check   ★ 2주차 관문 — 테스트 + 분포 + 중복률
     dist           분포 검증 (3,000명)
     dup            훅 중복률
+    hook-concern   ★ 훅이 고른 고민을 보는가 — 글자로 잽니다 (--show)
     ladder         ★ 값 사다리 — 값이 오르면 실제로 더 주는가
     reach          릴레이 규칙 도달률 재기 (--write 로 규칙 파일에 기록)
     crosscheck     ★ sxtwl 없는 독립 계산과 절입·여덟 글자 대조
@@ -122,6 +123,7 @@ switch ($Task) {
   "test"    { Need-Venv; Push-Location $Root; & $Py -m pytest tests -q; Pop-Location }
   "dist"    { Need-Venv; Push-Location $Root; & $Py tools\distribution.py; Pop-Location }
   "dup"     { Need-Venv; Push-Location $Root; & $Py tools\dup_rate.py; Pop-Location }
+  "hook-concern" { Need-Venv; Push-Location $Root; & $Py tools\hook_concern.py @Rest; Pop-Location }
   "ladder"  { Need-Venv; Push-Location $Root; & $Py tools\price_ladder.py; Pop-Location }
   "reach"   { Need-Venv; Push-Location $Root; & $Py tools\relay_reach.py @Rest; Pop-Location }
   "crosscheck" { Need-Venv; Push-Location $Root; & $Py tools\crosscheck.py @Rest; Pop-Location }
@@ -165,6 +167,9 @@ switch ($Task) {
     & $Py tools\crosscheck.py 300;     if ($LASTEXITCODE) { Pop-Location; exit 1 }
     & $Py tools\distribution.py;       if ($LASTEXITCODE) { Pop-Location; exit 1 }
     & $Py tools\dup_rate.py;           if ($LASTEXITCODE) { Pop-Location; exit 1 }
+    # ★ 훅이 **고른 고민을 보는가**. 갈래가 아니라 글자를 셉니다 —
+    #   한 줄만 갈려도 「갈린 마디」로 세면 58%가 같은 채로 통과합니다.
+    & $Py tools\hook_concern.py;      if ($LASTEXITCODE) { Pop-Location; exit 1 }
     & $Py tools\subject_audit.py;      if ($LASTEXITCODE) { Pop-Location; exit 1 }
     & $Py tools\text_audit.py;         if ($LASTEXITCODE) { Pop-Location; exit 1 }
     # ★ 훑어읽기 — 강조만 읽어도 말이 되는가. 값이 오르면 훑어읽기도
