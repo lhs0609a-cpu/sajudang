@@ -301,7 +301,6 @@ export const SCREEN_GROUPS: { group: string; label: string; items: ScreenLink[] 
       { id: "c6", name: "피드백", href: "/report/pungun?tab=c6" },
       { id: "c7", name: "분석지", href: "/summary" },
       { id: "c8", name: "내보내기", href: "/summary#share" },
-      { id: "omnibus", name: "종합 분석", href: "/omnibus" },
     ],
   },
   {
