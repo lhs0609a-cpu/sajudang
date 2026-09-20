@@ -262,6 +262,7 @@ export const SCREEN_GROUPS: { group: string; label: string; items: ScreenLink[] 
       { id: "c6", name: "피드백", href: "/report/pungun?tab=c6" },
       { id: "c7", name: "분석지", href: "/summary" },
       { id: "c8", name: "내보내기", href: "/summary#share" },
+      { id: "omnibus", name: "종합 분석", href: "/omnibus" },
     ],
   },
   {
@@ -269,8 +270,6 @@ export const SCREEN_GROUPS: { group: string; label: string; items: ScreenLink[] 
     items: [
       { id: "d0", name: "무료 6단", href: "/pay?step=d0" },
       { id: "d1", name: "어디까지", href: "/pay?step=d1" },
-      { id: "d1b", name: "엿보기", href: "/pay?step=d1b" },
-      { id: "d2", name: "결제", href: "/pay?step=d2" },
       { id: "d3", name: "완료", href: "/pay?step=d3" },
     ],
   },
@@ -284,7 +283,7 @@ export const SCREEN_GROUPS: { group: string; label: string; items: ScreenLink[] 
     ],
   },
   {
-    group: "S", label: "건너오다 (공유 유입)",
-    items: [{ id: "s1", name: "받은 분석지", href: "/summary" }],
+    group: "안내", label: "서비스 안내",
+    items: [{ id: "legal", name: "약관 · 개인정보 · 환불", href: "/legal" }],
   },
 ];

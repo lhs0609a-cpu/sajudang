@@ -446,12 +446,16 @@ export default function AdminPage() {
         <h1>성신당 · 주인 자리</h1>
         <div className="admmode">
           <span className="on">관리자</span>
+          <button onClick={() => {
+            s.set({ admin: true, adminSet: true });
+            router.push("/?step=a1");
+          }}>유저 화면 전체 보기</button>
           {/*
             ★ 유저 모드 — 레일을 끄고 손님이 보는 그대로 넘어갑니다.
               돌아오는 길은 이 주소(/admin)를 아는 사람에게만 있습니다.
           */}
           <button onClick={() => {
-            s.set({ admin: false });
+            s.set({ admin: false, adminSet: true });
             router.push("/");
           }}>
             유저 모드로
@@ -936,7 +940,7 @@ export default function AdminPage() {
             <div className="admscr">
               {g.items.map((it) => (
                 <Link key={it.id} href={it.href}
-                      onClick={() => s.set({ admin: true })}>
+                      onClick={() => s.set({ admin: true, adminSet: true })}>
                   <b>{it.id}</b> {it.name}
                 </Link>
               ))}

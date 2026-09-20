@@ -212,6 +212,31 @@ export default function DevRail() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [open, setOpen] = useState(true);
+  const [search, setSearch] = useState("");
+  const [hash, setHash] = useState("");
+
+  useEffect(() => {
+    const sync = () => setHash(window.location.hash);
+    sync();
+    window.addEventListener("hashchange", sync);
+    return () => window.removeEventListener("hashchange", sync);
+  }, [path, params]);
+
+  useEffect(() => {
+    document.body.classList.toggle("has-rail-closed", s.admin && !open);
+    return () => document.body.classList.remove("has-rail-closed");
+  }, [s.admin, open]);
+
+  const afterNavigate = () => {
+    if (window.matchMedia("(max-width: 900px)").matches) setOpen(false);
+  };
+  const go = (href: string) => { setHash(new URL(href, window.location.origin).hash); router.push(href); afterNavigate(); };
+  const leaveAdmin = () => {
+    s.set({ admin: false, adminSet: true });
+    const next = new URLSearchParams(params.toString());
+    next.delete("admin");
+    router.replace(path + (next.size ? `?${next}` : "") + window.location.hash);
+  };
 
   /*
    * 켜고 끄는 규칙 — 사람이 정한 것이 빌드 기본값을 이깁니다.
@@ -230,11 +255,14 @@ export default function DevRail() {
   if (!s.admin) return null;
 
   const here = (href: string) => {
-    const [p, q] = href.split("?");
+    const [address, anchor = ""] = href.split("#");
+    if ((anchor ? `#${anchor}` : "") !== hash) return false;
+    const [p, q] = address.split("?");
     if (p !== path) return false;
     if (!q) return true;
     const [k, v] = q.split("=");
-    return (params.get(k) ?? (k === "step" ? "a1" : "b1")) === v;
+    const defaults: Record<string, string> = { "/": "a1", "/lobby": "b1", "/pay": "d1", "/me": "f2" };
+    return (params.get(k) ?? defaults[path] ?? "c1") === v;
   };
 
   /*
@@ -243,6 +271,11 @@ export default function DevRail() {
    */
   const FLAT = SCREEN_GROUPS.flatMap((g) => g.items);
   const navAt = FLAT.findIndex((it) => here(it.href));
+  const visibleGroups = SCREEN_GROUPS.map((group) => ({
+    ...group,
+    items: group.items.filter((item) =>
+      `${item.id} ${item.name} ${group.label}`.toLowerCase().includes(search.trim().toLowerCase())),
+  })).filter((group) => group.items.length);
 
 
   const recalc = async () => {
@@ -272,25 +305,54 @@ export default function DevRail() {
   const f = s.features;
 
   return (
-    <aside className={"rail" + (open ? "" : " closed")}>
+    <aside aria-label="관리자 페이지 레일" className={"rail" + (open ? " open" : " closed")}
+      onKeyDown={(event) => { if (event.key === "Escape") setOpen(false); }}>
       <button className="railtog" onClick={() => setOpen(!open)}
+              aria-expanded={open} aria-controls="admin-rail-content"
               title={open ? "레일 접기" : "레일 펴기"}>
-        {open ? "◀" : "▶"}
+        {open ? "◀" : "화면 목록"}
       </button>
 
       {open && (
-        <div className="railin">
+        <div className="railin" id="admin-rail-content">
           <h1>星辰堂</h1>
           <div className="v">
             관리자 · 전체 플로우
             <button
               className="railoff"
-              onClick={() => s.set({ admin: false, adminSet: true })}
+              onClick={leaveAdmin}
               title="레일을 끄오. 다시 켜려면 주소 끝에 ?admin=1">
               숨기기
             </button>
           </div>
 
+          <nav aria-label="유저 화면 전체 이동">
+            <span className="gh">유저 화면 · {FLAT.length}개</span>
+            <div className="nav">
+              <button disabled={navAt <= 0} onClick={() => go(FLAT[navAt - 1].href)}>← 이전</button>
+              <b>{navAt < 0 ? "페이지 선택" : `${navAt + 1} / ${FLAT.length}`}</b>
+              <button disabled={navAt < 0 || navAt >= FLAT.length - 1}
+                onClick={() => go(FLAT[navAt + 1].href)}>다음 →</button>
+            </div>
+            <p className="rail-current" aria-live="polite">{navAt < 0 ? "확인할 화면을 선택하세요" : FLAT[navAt].name}</p>
+            <input className="rail-search" type="search" value={search} aria-label="유저 화면 검색"
+              placeholder="화면 이름 · 번호 검색" onChange={(event) => setSearch(event.target.value)} />
+            <div className="rail-pages">
+              {visibleGroups.map((group) => {
+                return <div key={group.group}>
+                  <span className="gh">{group.group} · {group.label}</span>
+                  {group.items.map((item) => <Link key={item.id} href={item.href} prefetch={false}
+                    onClick={() => { setHash(new URL(item.href, window.location.origin).hash); afterNavigate(); }} aria-current={here(item.href) ? "page" : undefined}
+                    className={here(item.href) ? "on" : ""}><b>{item.id}</b> {item.name}</Link>)}
+                </div>;
+              })}
+              {!visibleGroups.length &&
+                <p role="status">일치하는 화면이 없습니다.</p>}
+            </div>
+          </nav>
+          <details className="rail-tools">
+            <summary>미리보기 설정 · 연출 점수</summary>
+            <p className="sm">해석 화면은 생년월일 입력 후 다시 계산하면 확인할 수 있습니다.</p>
           <RailScore screen={s.screen} />
 
           {/* ── 생년월일시 ── */}
@@ -406,47 +468,6 @@ export default function DevRail() {
             ))}
           </select>
 
-          {/*
-            ── 지금 어디인가 · 이전 · 다음 ──────────────────────
-
-            ★ 화면이 32개인데 목록에서 매번 눈으로 찾아 눌러야 했습니다.
-              흐름을 확인하려면 순서대로 지나가 봐야 하는데, 그 순서가
-              레일 어디에도 없었습니다.
-
-              여기서 **한 줄로 펴서** 이전·다음으로 바로 넘깁니다.
-              지금 자리는 이름으로 찍습니다.
-          */}
-          <span className="gh">지금 자리</span>
-          <div className="nav">
-            <button disabled={navAt <= 0}
-                    onClick={() => navAt > 0 && router.push(FLAT[navAt - 1].href)}>
-              ← 이전
-            </button>
-            <b>{navAt < 0 ? "목록 밖" :
-                `${FLAT[navAt].id} · ${FLAT[navAt].name}`}</b>
-            <button disabled={navAt < 0 || navAt >= FLAT.length - 1}
-                    onClick={() => navAt >= 0 && navAt < FLAT.length - 1 &&
-                                   router.push(FLAT[navAt + 1].href)}>
-              다음 →
-            </button>
-          </div>
-          <div className="fx">
-            <div>{navAt < 0 ? "—" : `${navAt + 1} / ${FLAT.length}`}</div>
-          </div>
-
-          {/* ── 화면 ── */}
-          {SCREEN_GROUPS.map((g) => (
-            <div key={g.group}>
-              <span className="gh">{g.group} · {g.label}</span>
-              {g.items.map((it) => (
-                <Link key={it.id} href={it.href}
-                      className={here(it.href) ? "on" : ""}>
-                  <b>{it.id}</b> {it.name}
-                </Link>
-              ))}
-            </div>
-          ))}
-
           {/* ── 상태 ── */}
           <span className="gh">상태</span>
           <div className="fx">
@@ -456,13 +477,14 @@ export default function DevRail() {
           <button className="mini gh2" onClick={() => { s.reset(); router.push("/"); }}>
             세션 초기화
           </button>
+          </details>
           {/*
             ★ 유저 모드 — 레일을 끄면 손님이 보는 그대로가 됩니다.
               전에는 "?admin=1 로 다시" 라고만 적혀 있었는데, 그건 주소를
               손으로 고치라는 말입니다. 돌아오는 길을 **버튼으로** 둡니다.
           */}
           <div className="nav">
-            <button onClick={() => { s.set({ admin: false }); router.push("/"); }}>
+            <button onClick={leaveAdmin}>
               유저 모드로
             </button>
             <b>관리자</b>

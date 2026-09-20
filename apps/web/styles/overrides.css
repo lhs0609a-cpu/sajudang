@@ -551,7 +551,7 @@ body:has(.gatehero) .stage { padding-bottom: 0; }
 
 /* ══════════ 관리자 레일 ══════════
    참조 구현체의 좌측 개발 레일. 프로덕션 화면이 아닙니다 (docs/08 §5).
-   ?admin=1 로 켜고 ?admin=0 으로 끕니다. 좁은 화면에서는 숨깁니다.
+   ?admin=1 로 켜고 ?admin=0 으로 끕니다. 좁은 화면에서는 접어 둡니다.
    ------------------------------------------------------ */
 .rail {
   position: fixed; left: 0; top: 0; bottom: 0; width: 232px; z-index: 90;
@@ -638,11 +638,23 @@ body:has(.gatehero) .stage { padding-bottom: 0; }
 body.has-rail .stage { margin-left: 232px; }
 body.has-rail-closed .stage { margin-left: 26px; }
 
-/* 좁은 화면에서는 레일을 쓰지 않는다 (docs/08 §5) */
+/* 모바일에서는 목록을 겹쳐 열고, 이동 후 접어 본문을 보여준다. */
 @media (max-width: 900px) {
-  .rail { display: none; }
+  .rail { display: block; transform: none; width: min(320px, 88vw); box-shadow: 12px 0 40px #0008; }
+  .rail.closed { width: 0; border: 0; }
+  .rail.closed .railtog { position: fixed; left: 8px; right: auto; top: auto; bottom: calc(16px + env(safe-area-inset-bottom)); }
   body.has-rail .stage, body.has-rail-closed .stage { margin-left: 0; }
 }
+
+.rail-search { width: 100%; box-sizing: border-box; padding: 10px; background: var(--bg2); color: var(--paper); border: 1px solid var(--line); border-radius: 6px; }
+.rail-current { color: var(--gold); margin: 10px 0; }
+.rail-pages { max-height: 58svh; overflow-y: auto; overscroll-behavior: contain; }
+.rail-pages a { min-height: 36px; align-items: center; border-radius: 5px; }
+.rail-pages a.on { background: rgba(229,184,122,.12); box-shadow: inset 2px 0 var(--gold); }
+.rail-tools { border-top: 1px solid var(--line); margin-top: 16px; padding-top: 12px; }
+.rail-tools summary { cursor: pointer; min-height: 36px; color: var(--paper2); }
+.rail.closed .railtog { white-space: nowrap; right: auto; left: 0; border: 1px solid var(--line); padding: 10px; border-radius: 6px; }
+.rail :is(button, a, input, summary):focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
 
 /* ── 명식 기둥 · 오행 막대 바로잡기 ★ 실제로 났던 버그 ────
    .pil 은 opacity:0 으로 시작해 .flip 이 붙어야 보입니다.
