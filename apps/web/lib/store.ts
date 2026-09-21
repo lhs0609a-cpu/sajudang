@@ -64,7 +64,7 @@ export interface SessionState {
   seals: string[];
   tier: Tier;
   paid: boolean;
-  hookReview: { chartId: string; concern: string; lensId: string; answers: Record<string, boolean | null> } | null;
+  hookReview: { chartId: string; concern: string; lensId: string; edition?: string; answers: Record<string, boolean | null> } | null;
   /**
    * 물으신 자리가 되묻는 것에 **한 번** 고른 답.
    *

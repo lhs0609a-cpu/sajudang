@@ -236,7 +236,13 @@ def _after_lead(html: str, cut_id: str) -> str:
 
 def _teaser(html: str, cut_id: str = "") -> Optional[str]:
     """잠긴 컷의 첫 줄. 본문이 아니라 **맛보기**입니다."""
-    text = _plain(_after_lead(html, cut_id))
+    source = _after_lead(html, cut_id)
+    if cut_id == "concern_pattern":
+        # Start with the actual matched pattern, not the counting preamble.
+        bite = _re.search(r'<p\b[^>]*class="bite"[^>]*>', source)
+        if bite:
+            source = source[bite.start():]
+    text = _plain(source)
     mark = _marked(html)
     # 표를 붙이다 길이가 틀어지면(공백이 줄어드는 자리) 세는 것만 물러섭니다.
     if len(mark) != len(text):
@@ -1919,6 +1925,14 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
                 say, {"cut": cut_id, "at": concern})
             break
 
+    # The free report is a short introduction, not a complete reading for every
+    # character. Apply the floor here so report, pricing and previews agree.
+    # Keep the calculated chart, one core observation and the answer to the
+    # optional free questionnaire. Free-only characters retain their full scope.
+    if lens_id and _lens_price(lens_id) > 0:
+        for cut in cuts:
+            if cut["id"] not in {"chart", "spine", "topic_ask"}:
+                cut["min_level"] = max(1, cut["min_level"])
     return cuts, extra_error
 
 

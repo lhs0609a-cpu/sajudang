@@ -16,10 +16,14 @@ export function readingText(html: string) {
     .replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/\s+/g,' ').trim();
 }
 export function freeRevelation(cuts: ReportCut[]) {
-  const cut=cuts.find(c=>c.id==='why');
+  const cut=cuts.find(c=>c.id==='why') ?? cuts.find(c=>c.id==='spine');
   if (!cut) return null;
   const bite=cut.html.match(/<p\b[^>]*class=["'][^"']*\bbite\b[^"']*["'][^>]*>([\s\S]*?)<\/p>/i)?.[1];
-  if (!bite) return null;
+  if (!bite) {
+    const paragraph = cut.html.match(/<p\b[^>]*>([\s\S]*?)<\/p>/i)?.[1];
+    if (!paragraph) return null;
+    return {title:readingText(paragraph),body:'',source:readingText(cut.source)};
+  }
   const marked=bite.match(/<mark\b[^>]*>([\s\S]*?)<\/mark>/i);
   const title=readingText(marked?.[1] ?? bite);
   const body=marked ? readingText(bite.replace(marked[0],'')) : '';

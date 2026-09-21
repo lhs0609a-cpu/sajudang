@@ -30,6 +30,7 @@ import { api } from "@/lib/api";
 import CharArt from "@/components/CharArt";
 import ServerText from "@/components/ServerText";
 import { LENS_BY_ID } from "@/lib/lenses";
+import { CHARACTER_QUESTIONS } from "@/lib/curiosity";
 import { useSession } from "@/lib/store";
 
 type Row = { lens_id: string; name: string; reason: string;
@@ -78,7 +79,7 @@ export default function NextSeats() {
         return (
           <div className="dz face" key={r.lens_id}>
             <div className="dzhead">
-              {l && <CharArt lens={l} size="card" />}
+              {l && <CharArt lens={l} size="chip" />}
               <div>
                 <p className="nsname" style={{ color: l?.color }}>{r.name}</p>
                 {l && (
@@ -88,6 +89,7 @@ export default function NextSeats() {
                 )}
               </div>
             </div>
+            <h3 className="reading-next-question">{CHARACTER_QUESTIONS[r.lens_id]}</h3>
             {/* 근거는 서버 글이라 **그려야** 하오 — 풀이가 붙어 옵니다. */}
             <ServerText className="src" html={`근거 · ${r.reason}`} />
             <button className="btn mt" onClick={() => void go(r.lens_id)}>

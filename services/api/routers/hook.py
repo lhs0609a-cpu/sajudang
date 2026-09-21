@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException
 
 import store
 from engine import bank, lens as lens_mod, voice as voice_mod
+from engine.first_reading import build_first_reading, VERSION as READING_VERSION
 from engine.features import Features
 from routers.chart import load_features
 from schemas.api import HookRequest, HookResponse
@@ -23,14 +24,14 @@ def post_hook(req: HookRequest) -> HookResponse:
     #   「copy4-hao」 가 박힌 채였으면 고친 말투가 안 나갔습니다.
     key = store.k_hook(req.chart_id, req.concern, req.axis4 or "",
                        req.lens_id or "",
-                       "%s#%d#copy6-voice5" % (req.name, req.misses))
+                       "%s#%d#%s" % (req.name, req.misses, READING_VERSION))
     cached = store.get_json(key)
     if cached is not None:
         return HookResponse(chart_id=req.chart_id, segments=cached, cached=True)
 
     f = Features(**raw)
     try:
-        segs = bank.build_hook(
+        segs = build_first_reading(
             f, req.concern, req.axis4, name=req.name,
             you=lens_mod.you_word(req.lens_id, req.name, raw.get("sex")),
             misses=req.misses)

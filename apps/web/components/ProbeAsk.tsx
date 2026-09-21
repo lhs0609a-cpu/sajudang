@@ -60,14 +60,14 @@ export default function ProbeAsk({
         </div>
       ))}
 
-      <button className="go" disabled={n === 0 || busy}
+      <button className="btn go" disabled={n === 0 || busy}
               onClick={() => onSubmit({ probe: { answers: picks } })}>
         {busy ? "맞대 보는 중입니다"
               : n < spec.items.length
                 ? `고른 ${n}가지로 보겠습니다`
                 : "이걸로 보겠습니다"}
       </button>
-      <button className="lk" disabled={busy} onClick={() => onSkip?.()}>
+      <button className="btn gh lk" disabled={busy} onClick={() => onSkip?.()}>
         잘 모르겠습니다 · 건너뛰겠습니다
       </button>
     </section>

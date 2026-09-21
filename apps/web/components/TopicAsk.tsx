@@ -89,7 +89,8 @@ export default function TopicAsk({
         </>
       )}
 
-      <button className="go" disabled={!ready || busy}
+      <p className="ask-status" role="status">{busy ? "선택하신 답으로 해석을 다시 읽고 있습니다." : ready ? "선택을 마쳤습니다. 아래 버튼을 눌러 내 답과 해석을 맞춰 보세요." : "각 질문에서 하나씩 고르면 다음 해석을 볼 수 있습니다."}</p>
+      <button className="btn go" disabled={!ready || busy}
               onClick={() => onSubmit({
                 topic: { choice: pick, ...(pick2 ? { choice2: pick2 } : {}) },
               })}>
@@ -109,7 +110,7 @@ export default function TopicAsk({
         ★ 버튼은 손님의 말(합쇼체)로 적습니다. 집의 말투로 적으면
           손님은 그게 자기 말인 줄 모릅니다.
       */}
-      <button className="lk" disabled={busy} onClick={() => onSkip?.()}>
+      <button className="btn gh lk" disabled={busy} onClick={() => onSkip?.()}>
         잘 모르겠습니다 · 건너뛰겠습니다
       </button>
     </section>

@@ -81,9 +81,10 @@ export default function HookSegments({
   onMiss?: (misses: number) => void;
   onDone?: () => void;
 }) {
+  const edition = segments[0]?.statement_id.split(':')[0] ?? '';
   const [restored] = useState(() => {
     const review = useSession.getState().hookReview;
-    const answers = review?.chartId === chartId && review.concern === concern && review.lensId === lensId ? review.answers : {};
+    const answers = review?.chartId === chartId && review.concern === concern && review.lensId === lensId && review.edition === edition ? review.answers : {};
     const replies: Record<number,string> = {};
     let count=0, misses=0;
     for (const seg of segments) {
@@ -187,8 +188,8 @@ export default function HookSegments({
     voted.current.add(i);
     const session = useSession.getState();
     const prev = session.hookReview;
-    const same = prev?.chartId === chartId && prev.concern === concern && prev.lensId === lensId;
-    session.set({ hookReview: { chartId, concern, lensId,
+    const same = prev?.chartId === chartId && prev.concern === concern && prev.lensId === lensId && prev.edition === edition;
+    session.set({ hookReview: { chartId, concern, lensId, edition,
       answers: { ...(same ? prev.answers : {}), [segments[i].stage]: yes } } });
     track("hook_answer", "a7", { stage: i, yes: yes === null ? 2 : yes ? 1 : 0 });
     const seg = segments[i];
@@ -253,7 +254,7 @@ export default function HookSegments({
                  }}>
           <summary tabIndex={0} ref={node => {if(i === Math.min(open,segments.length)-1) activeHeading.current=node;}}>
             {CONCERNS.some(c => c.id === concern) && <span className="hook-topic-thumb" aria-hidden="true"><ConcernArtwork concern={concern as (typeof CONCERNS)[number]["id"]} /></span>}
-            <span>{i+1}. {seg.label || "그대의 반복 패턴"}</span><small>{replies[i] === undefined ? "지금 읽는 마디" : "답변 완료 · 다시 읽기"}</small>
+            <span>{i+1}. {seg.label || "그대의 반복 패턴"}</span><small>{opened.has(i) ? "읽는 중 · 접기 −" : "펼쳐서 다시 읽기 +"}</small>
           </summary>
         <div className="blk in">
           {/* ★ 몇 번째 마디인지. 0단은 label 이 비어 있어서 손님이
@@ -281,7 +282,6 @@ export default function HookSegments({
             {i + 1} / {segments.length}
             {concernWord && <em> · {concernWord}</em>}
           </div>
-          {seg.label && <div className="lab">{seg.label}</div>}
           {/*
             ★ 0단만 근거가 본문 **아래**로 갑니다 (seg.source_below).
               전에는 0단에 근거가 아예 없었습니다 — 손님이 이 집에서
@@ -295,12 +295,11 @@ export default function HookSegments({
               엔진이 어려운 말에 다는 풀이는 `<i class="gl">` 로 싸여
               옵니다. 글자로 꽂으면 손님 눈에 꺾쇠가 그대로 보입니다 —
               「상관<i class="gl">(하고 싶은 말을…)</i>이 둘」. */}
-          {seg.source && !seg.source_below && (
-            <ServerText className="src" html={`근거 · ${seg.source}`} />
-          )}
           <div dangerouslySetInnerHTML={{ __html: seg.html }} />
-          {seg.source && seg.source_below && (
-            <ServerText className="src below" html={`근거 · ${seg.source}`} />
+          {seg.source && (
+            <details className="hook-evidence"><summary>이 해석은 어디서 나왔소?</summary>
+              <ServerText className="src" html={seg.source} />
+            </details>
           )}
           {/* ★ 조건을 source 가 아니라 statement_id 로 바꿉니다.
               source 로 걸어 두면, 근거가 없는 단은 응답이 100건 쌓여도

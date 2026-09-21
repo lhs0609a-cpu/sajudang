@@ -2,7 +2,7 @@ import { CONCERNS, type Concern } from "@/lib/store";
 
 /** Labels live in HTML so these illustrations never carry essential text. */
 export function ConcernArtwork({ concern }: { concern: Concern }) {
-  return <img src={`/images/concerns/${concern}-v1.webp`} alt="" width={480} height={480} decoding="async" />;
+  return <img src={`/images/concerns/${concern}-v2.webp`} alt="" width={480} height={480} decoding="async" />;
 }
 
 export function ConcernReminder({ concern }: { concern: Concern }) {

@@ -319,7 +319,7 @@ export default function Scene({ id, className, bleed, figure }: {
            onPlaying={() => setPlayingBase(base)} onFailure={() => setPlayingBase(null)}
            tintClass={spec.tint ? `scene-video ${mediaTint}` : undefined} />
   ) : (
-    <Placeholder id={id} season={season} />
+    id === "desk" ? <img src="/images/entry-v2/desk.webp" alt="등불 아래 펼쳐진 사주 풀이 책상" /> : <Placeholder id={id} season={season} />
   );
 
   /*

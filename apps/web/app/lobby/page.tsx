@@ -1,4 +1,5 @@
 "use client";
+import { CHARACTER_QUESTIONS } from "@/lib/curiosity";
 
 /**
  * @screen b1 b2 b3 b4
@@ -73,22 +74,13 @@ function LobbyInner() {
   if (tab === "b2") {
     return (
       <Shell screen="b2" title="스무 사람">
-        <Scene id="hall" />
         {/*
           ★ 울림 20 · 명확 45 로 낮던 자리입니다. 스무 명을 늘어놓기만
             하고 **그대 얘기가 한 줄도** 없었습니다. 고르기 어려운 게
             아니라 **골라야 할 까닭**이 없는 화면이었소.
         */}
-        <Narration lines={["큰 방에 스무 자리가 놓여 있다.", "저마다 다른 것을 들여다보고 있다."]} />
-        <header className="editorial-heading"><p className="conversion-kicker">스무 사람, 스무 가지 시선</p><h1>같은 이야기에도<br/>다른 빛이 들 수 있소.</h1><p>지금의 고민을 먼저 보는 이를 만나보시오.<br/>인물마다 해석하는 관점과 가격이 다르오.</p></header>
-        <p className="conversion-lead"><mark>그대의 <b>8글자</b>는 바뀌지 않소. 바뀌는 것은 보는 자리요</mark> — 같은 집을 20곳에서 찍은 사진처럼, 무엇이 앞에 오는지가 사람마다 갈리오.</p>
-        <p className="conversion-lead">여태 한 사람 말만 듣고 혼자 미뤄 둔 물음이 있거든, 다른 데서 한 번 보시오. 거울 하나로는 등이 안 보이는 것과 같소 — 거울을 하나 더 세워야 뒤가 비치오.</p>
-        <p className="conversion-note">불이 켜진 자리는 <b>20명</b> 중 몇인지 아래에 적혀 있소. 값은 9,900원부터 19,900원까지 4단이오.</p>
-        <span className="src">근거 · 스무 사람이 보는 <b>8글자</b>는 한 벌이고, 갈리는 것은 무엇을 먼저 보느냐요 — 같은 집을 스무 사람이 저마다 다른 창으로 들여다보는 셈이오 〔자평 명리 · 관점 컷〕</span>
-        <Say who="풍운도령" lens="pungun">첫 이야기는 나와 읽었으니, 이제 다른 시선도 만나보시오. 소개에서 다루는 고민과 열람 범위를 확인할 수 있소.</Say>
-        <p className="sm">
-          이름을 누르면 그 사람 자리가 아래에 열리오. 한 사람에 <b>3분</b>이면 넉넉하오. 옷장에서 옷을 꺼내 몸에 대 보는 것과 같소 — 그러니까 걸어 두고 보는 게 아니라 하나씩 대 보면 되오.
-        </p>
+        <header className="editorial-heading"><p className="conversion-kicker">스무 사람, 스무 가지 질문</p><h1>읽는 순간 마음에 걸린<br/>그 질문부터.</h1><p>같은 명식에서도 먼저 짚는 대목은 다르오.<br/>계속 생각나는 질문을 가진 사람을 골라보시오.</p></header>
+        <p className="conversion-note">인물을 누르면 소개가 열리오. 짧은 분석은 무료로, 이어지는 심층 해석은 구매 후 읽을 수 있소.</p>
         <div ref={topRef} />
         {GROUPS.map((g) => (
           <div key={g}>
@@ -140,7 +132,7 @@ function LobbyInner() {
                     <span className="spec">
                       {l.released ? l.specialty : "아직 자리에 없음"}
                     </span>
-                    {l.released && <span className="arch">{l.epithet}</span>}
+                    {l.released && <span className="character-question">{CHARACTER_QUESTIONS[l.id]}</span>}
                   </span>
                 </button>
               ))}
@@ -155,7 +147,7 @@ function LobbyInner() {
         {pickedLens && (
           <div className="seatnow" ref={seatRef}>
             <div className="lab">고른 자리</div>
-            <div className="facebox"><CharArt lens={pickedLens} size="full" /></div>
+            <div className="consultant-intro"><CharArt lens={pickedLens} size="chip" /><h2>{CHARACTER_QUESTIONS[pickedLens.id]}</h2></div>
             <div className="mec">
               <div>
                 <div className="gz" style={{ color: pickedLens.color }}>
@@ -175,17 +167,15 @@ function LobbyInner() {
             </div>
             {/* ★ 말하는 사람을 못박습니다. 안 넘기면 얼굴은 **지금 고른
                 사람**이 나와, 이름과 얼굴이 어긋납니다. */}
-            <p className="conversion-note">캐릭터 말투 예시 · 내 명식의 해석은 다음 화면에서 확인하오.</p>
-            <Say who={pickedLens.name} lens={pickedLens.id}>{pickedLens.quote}</Say>
+            <p className="conversion-note">먼저 짧은 분석으로 내 이야기와 맞는지 확인하시오. 이어지는 이유와 심층 해석은 범위와 가격을 본 뒤 선택할 수 있소.</p>
             <button className="btn mt" onClick={() => {
-              s.markRead(pickedLens.id);
-              router.push(`/report/${pickedLens.id}`);
+              s.set({cur:pickedLens.id}); s.markRead(pickedLens.id);
+              router.push(s.chartId ? `/report/${pickedLens.id}?tab=c2` : '/?step=a5');
             }}>
-              이 사람에게 듣겠습니다
+              {s.chartId ? '이 사람의 첫 분석 무료로 읽기' : '내 고민으로 무료 분석 시작하기'}
             </button>
             <p className="sm">
-              무료 구간까지는 값을 묻지 않소.
-              {" "}{pickedLens.price.toLocaleString()}원부터.
+              {pickedLens.price > 0 ? `첫 분석 무료 · 심층 해석 ${pickedLens.price.toLocaleString()}원` : '이 인물의 해석은 무료요.'}
             </p>
             <button className="btn gh" onClick={() => setTab("b3")}>
               이 사람 자리를 크게 보겠습니다
@@ -220,80 +210,25 @@ function LobbyInner() {
   if (tab === "b3") {
     return (
       <Shell screen="b3" title={lens.name}>
-        <Scene id="seat" />
-        {/* ★ 여는 줄이 없었습니다. 초상이 대뜸 뜨고 이름이 붙습니다. */}
-        <Narration lines={["방석 위에 사람이 앉아 있다.", "이쪽을 보고 있지는 않다."]} />
-        {/* ★ 팩폭 73 · 울림 45. 초상과 값만 있고 **왜 이 사람인지**가
-            없었습니다. 스무 명 중 하나를 고르는 자리라 그게 전부요. */}
-        <p className="sm"><b>20명</b> 가운데 하나요. 여태 참고 미뤄 둔 자리를 이 사람이 먼저 보오 — 같은 8글자라도 누가 읽느냐에 따라 앞에 오는 것이 달라지오. 값은 9,900원부터 4단이오.</p>
-        <p className="sm"><mark>사람을 고르는 것이 아니라 <b>볼 자리</b>를 고르는 것이오</mark> — 같은 방을 남향 창으로 볼지 북향 창으로 볼지 정하는 셈이오.</p>
-        {/* 그 사람의 자리 — 초상이 서는 곳 */}
-        <div className="facebox"><CharArt lens={lens} size="full" /></div>
-        <div className="mec">
-          <div>
-            <div className="gz" style={{ color: lens.color }}>{lens.name} · {lens.hanja}</div>
-            <div className="nm">
-              <b className="spec">{lens.specialty}</b> · {lens.epithet}
-            </div>
-            <div className="tr">{lens.group}</div>
-          </div>
+        <p className="conversion-kicker">상담 전에 · 이 사람이 먼저 보는 질문</p>
+        <h1 className="reading-title">{CHARACTER_QUESTIONS[lens.id] ?? lens.specialty}</h1>
+        <div className="consultant-intro">
+          <CharArt lens={lens} size="chip" />
+          <div><h2>{lens.name}</h2><p>{lens.specialty}</p><p className="conversion-note">{lens.topics}</p></div>
         </div>
-        {lens.released && (
-          <div className="topicrow">
-            <span className="k">이런 걸 들고 오시오</span>
-            <span className="topics">
-              {lens.topics.split(" · ").map((t) => <i key={t}>{t}</i>)}
-            </span>
-          </div>
-        )}
-        <p className="conversion-note">캐릭터 말투 예시 · 아래 대사는 내 명식을 계산한 결과가 아니에요.</p>
-        <Say who={lens.name} lens={lens.id}>{lens.quote}</Say>
-        {/*
-          ★ 80점이던 자리. 초상과 이름표와 한마디 인용이 전부라
-            **이 사람 앞에 선 손님 얘기**가 없었습니다. 울림 45 ·
-            팩폭 60. 파는 말을 더하는 대신, 이 사람이 **안 보는
-            자리**를 적소 — 고르는 데 쓸 수 있는 말이오.
-        */}
-        <Say who="도령" lens="pungun">
-          이 사람이 먼저 보는 자리는 「{lens.specialty}」 하나요.
-          나머지 19명은 같은 명식를 놓고 다른 데를 짚소.
-          <br />
-          지금의 고민과 이 관점이 맞는지 무료 본문부터 확인하시오.
-          다른 해석자를 골라도 출생 정보가 바뀌지는 않소. 결제 전 상품 범위와 가격을 따로 안내하오.
-        </Say>
-        {lens.released ? (
-          <>
-            <button className="btn mt" onClick={() => {
-              s.markRead(lens.id);
-              router.push(`/report/${lens.id}`);
-            }}>
-              이 사람에게 듣겠습니다
-            </button>
-            <p className="sm mt">
-              무료 구간까지는 값을 묻지 않소. {lens.price.toLocaleString()}원부터.
-            </p>
-          </>
-        ) : (
-          <p className="sm mt">아직 진열대에 안 선 사람이오.</p>
-        )}
-        {/*
-          ★ 이 자리가 무엇을 근거로 한 말인지 없었소.
-            「먼저 보는 자리」 는 취향이 아니라 이 집이 스무 사람에게
-            **하나씩 나눠 준 자리**입니다. 그걸 밝혀야 스물이 왜
-            스물인지가 섭니다.
-        */}
-        <span className="src">
-          근거 · 먼저 보는 자리 「{lens.specialty}」 — 스무 사람이 하나씩
-          나눠 가진 것이오
-        </span>
-        <ActOut kind="남긴 물음" next="무료 구간">
-          {lens.name}이 먼저 보는 자리는 <b>「{lens.specialty}」</b>요.
-          같은 명식인데 다른 <b>열아홉</b>은 거기를 안 보오 —
-          명식에 <b>돋보기를 한 자리에만</b> 대는 셈이오.<br />
-          그럼 {lens.name}은 그대 글자에서 <b>무엇을 먼저 짚겠소?</b>
-          여기까지는 값이 안 드오.
-        </ActOut>
-        <button className="btn gh" onClick={() => setTab("b2")}>스무 사람으로</button>
+        <p className="conversion-lead">지금 마음에 걸린 일이 이 질문과 닿아 있소? 태어난 정보와 고른 고민을 놓고, {lens.name}이 먼저 짚는 대목부터 읽어보시오.</p>
+        <section className="consultation-scope" aria-label="상담 전에 확인할 내용">
+          <div><span>먼저, 무료로</span><strong>내 고민을 짚는 짧은 분석</strong><p>명식의 근거를 보고, 내 경험과 맞는지 살펴보오.</p></div>
+          {lens.price > 0 ? <div><span>마음에 남는다면</span><strong>왜 그렇게 읽었는지, 이어지는 심층 해석</strong><p>실제 풀이의 앞부분과 가림막을 확인한 뒤 선택하오.</p><b>{lens.price.toLocaleString()}원 · 이 인물의 해석</b></div>
+            : <div><span>이 자리의 해석</span><strong>값 없이 읽을 수 있소.</strong><p>오늘 마음에 남길 한 가지를 골라보시오.</p></div>}
+        </section>
+        {lens.released ? <button className="btn mt" onClick={() => {
+          s.set({cur:lens.id}); s.markRead(lens.id);
+          router.push(s.chartId ? `/report/${lens.id}?tab=c2` : '/?step=a5');
+        }}>{s.chartId ? `${lens.name}의 첫 분석 무료로 읽기` : '내 고민과 태어난 정보 입력하기'}</button>
+          : <p className="conversion-note">아직 자리에 앉지 않은 사람이오.</p>}
+        <p className="conversion-note">무료 분석을 읽는 것만으로 결제되지 않소.</p>
+        <button className="btn gh" onClick={() => setTab("b2")}>다른 질문을 가진 사람 살펴보기</button>
       </Shell>
     );
   }
@@ -371,49 +306,9 @@ function LobbyInner() {
   /* b1 · 진열대 */
   return (
     <Shell screen="b1" title="진열대">
-      <Scene id="shelf" />
-      <Narration lines={["목패가 늘어서 있다.", "이름과 값이 적혀 있다."]} />
-      {/* ★ 팩폭 60 · 울림 45 · 비유 0. 되돌아오는 사람이 가장
-          자주 서는 자리인데 **되돌아온 사람 얘기**가 없었습니다. */}
-      {/*
-        ★ 한 문단이 일곱 줄을 넘어 **벽으로 읽히던** 자리입니다.
-          글을 지우지 않고 **끊습니다** — 지우면 점수가 아니라 화면이
-          상하오 (engine/dramaturgy 머리말). 세 문단으로 가르고,
-          안 끊고 31초를 이어 가던 자리에 숨을 넣습니다.
-      */}
-      <p className="sm">여태 혼자 붙들고 참아 온 물음이 있거든 목패 하나를 고르시오.</p>
-      <p className="sm">진열대는 5장이고 그중 값이 안 드는 것이 2장이오. 불이 켜진 사람은 <b>20명</b> 가운데 있소. 그대의 여덟 글자는 <b>8글자</b> 그대로요.</p>
-      <p className="sm">한 목패를 읽는 데 <b>3분</b>이면 되오 — 같은 집을 다른 창으로 내다보는 셈이오. 창이 달라도 집은 하나요.</p>
-      {/*
-        ★ 여기가 58점이었습니다.
-
-          목패 다섯 개와 버튼이 전부였습니다. 진열대는 손님이 가장
-          자주 되돌아오는 자리인데 **되돌아온 사람 얘기가 없어서**,
-          메뉴판 한 장이 됐소. 울림 45 · 명확 45.
-
-          여기서 파는 말을 얹으면 안 됩니다. 그래서 적는 건 이
-          화면이 이미 세고 있는 수뿐입니다 — 목패 5장, 들은 자리,
-          모은 인장.
-      */}
-      <Say who="도령" lens="pungun">
-        그대의 명식은 셈해 두었소. 오늘 다시 온다고 바뀌지 않소.
-        <br />
-        여기 목패는 <b>5장</b>이오.
-        <br />
-        명식은 그대로 두고 보는 데만 갈리오 — 그러니까 같은 사진을 스무 사람이 저마다 다른 데를 짚어 본다는 말이오. 오른쪽으로 갈수록
-        값이 붙는 게 아니라, 보는 자리가 달라질 뿐이오.
-        <br />
-        값이 안 드는 목패가 그중 <b>2장</b>이오.
-        <br />
-        값이 안 드는 둘은 오늘의 일진(그날에 새로 서는 두 글자)과 인장첩이요.
-        <br />
-        어디부터 볼지 정하지 못했다면 무료인 오늘의 일진부터 살펴보시오.
-        구매한 해석을 다시 찾는다면 내 첩의 구매 내역으로 가시오.
-      </Say>
-      <span className="src">
-        근거 · 목패 5장 · 불이 켜진 사람과 들은 자리는 이 기기에
-        남은 기록으로 센 것이오 · 값이 안 드는 목패 2장 〔이 기기에 남은 것〕
-      </span>
+      <p className="conversion-kicker">다시 마음에 남은 질문</p>
+      <h1 className="reading-title">오늘은 어떤 이야기가<br />궁금하오?</h1>
+      <p className="conversion-lead">다른 시선이 필요하다면 사람을 고르고, 이미 읽은 이야기는 내 첩에서 이어보시오.</p>
       <div className="og">
         <button className="op" onClick={() => setTab("b2")}>
           <span className="nm">스무 사람</span><span>불이 켜진 자리 {released.length} · 전체 {LENSES.length}</span>
@@ -434,18 +329,7 @@ function LobbyInner() {
           <span className="nm">인장첩</span><span>모은 인장 {s.seals.length}</span>
         </button>
       </div>
-      <ActOut kind="끊긴 동작" next="스무 사람">
-        목패는 {LENSES.length}개요. 그대가 들은 자리는{" "}
-        <b>{s.read.length}곳</b>이오.<br />
-        {/* ★ 스물이 왜 스물인지가 없었소. 「관점이 여럿」 은 뜬 말이라,
-              같은 집을 어디서 보느냐로 바꿔 말합니다. */}
-        한 사람이 명식을 다 보지는 않소. 저마다 <b>제 눈에 드는
-        자리만</b> 짚소 — 같은 집을 대문에서 본 그림과 뒷마당에서 본
-        그림 같은 것이오.<br />
-        <mark>겹치는 데와 갈리는 데, 그게 이 집이 파는 것이오.</mark><br />
-        목패를 다 열 것은 없소. 장에 나온 물건을 다 사지 않는 것처럼,
-        오늘 손에 잡히는 하나면 되오.
-      </ActOut>
+      <p className="conversion-note">{released.length}명의 질문을 살펴볼 수 있소. 짧은 분석부터 무료로 읽고, 마음에 남는 해석을 고르시오.</p>
     </Shell>
   );
 }

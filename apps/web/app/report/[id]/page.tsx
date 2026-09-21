@@ -29,6 +29,9 @@ import { useSession } from "@/lib/store";
 import { thinkOf } from "@/lib/think";
 import type { ReportResponse } from "@shared/chart";
 import ServerText from "@/components/ServerText";
+import NextReading from "@/components/NextReading";
+import { CHARACTER_QUESTIONS } from "@/lib/curiosity";
+import { freeRevelation } from "@/lib/reading-journey";
 
 type Tab = "c1" | "c2" | "c3" | "c4" | "c5" | "c6";
 
@@ -84,6 +87,7 @@ function ReportInner() {
   const s = useSession();
   const lensId = params.id;
   const lens = LENS_BY_ID[lensId];
+  const openPrice = () => { s.set({ cur: lensId }); router.push("/pay?step=d1"); };
   /* 이 사람이 손님을 부르는 말 (engine/lens.you_of 와 같은 규칙). */
   const you = youOf(lensId, s.name, s.sex);
 
@@ -345,90 +349,23 @@ function ReportInner() {
 
   /* c1 · 표지 */
   if (tab === "c1") {
-    return (
-      <Shell screen="c1" title={`${rep.lens.name} · 표지`}>
-        {/*
-          ★ 울림 45 — 표지에 **누가 왜 여기 섰는지**가 없었습니다.
-            설명으로 열면 손님은 표지를 넘기면서 읽습니다. 지문으로
-            열고, 여기까지 온 마음을 한 줄로 짚습니다.
-        */}
-        <Narration lines={["두루마리가 상 위에 놓였다."]} />
-        {rep.editorial && <ReadingGuide guide={rep.editorial} />}
-        <Scene id="scroll" className="hero" />
-        <p className="sm">여태 혼자 참고 미뤄 둔 물음 — 돈이든 일이든 사람이든 — 을 들고 여기까지 오셨소. 이 종이는 그 물음에 대는 자요.</p>
-        <div style={{ textAlign: "center" }}>
-          <p style={{ fontFamily: "var(--serif)", fontSize: 24, color: lens?.color ?? "var(--c)" }}>
-            {rep.lens.name}
-          </p>
-          <p className="sm">{rep.lens.hanja} · {rep.lens.group}</p>
-          <p className="sm mt">
-            {s.name ? `${s.name}의 ` : ""}명식을 {rep.lens.name}의 눈으로 본 것
-          </p>
-          <p className="sm">
-            읽는 자리 {rep.cuts.length}컷
-            {rep.locked.length > 0 && ` · 잠긴 자리 ${rep.locked.length}컷`}
-          </p>
-        </div>
-        <span className="src">
-          근거 · 입력한 명식 · {rep.lens.name}의 관점 · 읽는 자리
-          {" "}{rep.cuts.length}컷
-        </span>
-        <p className="sm">
-          명식은 하나요. 읽는 눈이 스물이오.
-          <b> 같은 산을 스무 군데서 그린 그림</b> 같은 것이라, <mark>어느 그림도
-          거짓이 아니고 어느 하나도 산 전부가 아니오.</mark>
-        </p>
-        {/*
-          ★ 뜬 말이 산 말보다 많던 자리요 (살림 8 · 뜬 10). 표지에서
-            본문을 미리 말하지 않으면서 **살림의 말**로 되짚습니다 —
-            여기서 읽을 것이 기운이 아니라 돈·일·잠·사람이라는 것을
-            표지가 먼저 말해 둡니다. 비유도 한 줄 모자랐습니다.
-        */}
-        <p className="sm">
-          여기서 볼 것은 돈과 일, 잠과 밥, 곁에 두는 사람이오.
-          연장통을 열어 무엇이 들었는지 세어 보는 것처럼 하나씩 꺼내 보오.
-        </p>
-        {/*
-          ★ 표지가 일곱째로 낮았습니다 (연출 57).
+    return <Shell screen="c1" title={`${rep.lens.name} · 첫 대목`}>
+      <p className="conversion-kicker">{rep.lens.name}이 먼저 짚는 이야기</p>
+      <h1 className="reading-title">{rep.tier === "free" ? CHARACTER_QUESTIONS[lensId] ?? rep.lens.name : `${rep.lens.name}의 풀이`}</h1>
+      {rep.editorial && <ReadingGuide preview={rep.tier === "free" && rep.sells} guide={rep.editorial} revelation={freeRevelation(rep.cuts)} />}
+      <button className="btn mt" onClick={() => setTab("c2")}>{rep.tier === "free" ? '무료 핵심 분석과 근거 이어 읽기' : '내 해석 이어 읽기'}</button>
+      <p className="conversion-note">{rep.tier === "free" && rep.sells ? '무료로 읽은 뒤, 더 알고 싶은 질문의 심층 해석을 선택할 수 있소.' : '열람할 수 있는 해석과 근거를 함께 읽어보시오.'}</p>
+    </Shell>;
+  }
 
-            이름과 컷 수와 「같은 산」 비유가 전부였습니다. 여는
-            자리인데 **읽으러 온 사람 얘기가 없어서**, 책 표지에
-            제목만 적힌 꼴이었습니다. 울림 20 · 팩폭 43.
-
-            표지에서 본문을 미리 말하면 안 됩니다. 그래서 여기
-            적는 건 **이 화면이 이미 아는 것**뿐이오 — 기둥 4자리
-            8글자, 이 사람이 먼저 보는 자리, 그리고 읽는 법.
-        */}
-        <Say who={rep.lens.name} lens={lensId}>
-          {you}의 입력으로 {s.hourKnown ? "기둥 4자리의 8글자" : "시주(태어난 시의 두 글자)를 뺀 기둥 3자리의 6글자"}를 세웠소.
-          계산된 배치와 그 배치를 읽는 해석을 구분해 보시오.
-          <br />
-          <b>실제 경험과 다른 문장은 받아들이지 않아도 좋소.</b>
-          {" "}명식만으로 그대가 겪은 일을 알 수는 없소.
-          <br /> 그래서 이 집은 칸마다 <b>근거 줄</b>을
-          다오 — 대 보시오. 못 대는 줄이 있으면 그건 내 잘못이오.
-          <br />
-          내가 먼저 보는 데는 「{rep.lens.specialty ?? rep.lens.name}」이오.
-          나머지 19명은 같은 명식을 놓고 다른 데를 먼저 짚소.
-          <br />
-          두루마리처럼 위에서 아래로 한 컷씩 뜨오 — 그러니까 상자를
-          한꺼번에 쏟지 않고 하나씩 꺼내 놓는다는 말이오.
-          <br />
-          훑지 말고 하나씩 보시오.
-        </Say>
-        {/*
-           ★ 표지가 「N컷이오」로 끝났습니다. 수는 있는데 **그중 무엇이
-             그대만의 것인지**가 없었소. 관점 컷(lc_)은 이 사람을
-             고른 까닭 그 자체라, 표지에서 이름을 불러 줘야 하오.
-         */}
-        <ActOut kind="끊긴 동작" next={firstOwn?.title}>
-          {rep.cuts.length}컷이오. 그중 <b>{ownCount}컷</b>은 {rep.lens.name}만
-          보는 글이오 — 다른 열아홉은 거기를 안 보오.<br />
-          <b>펴기 전까지는 무엇이 적혔는지 나도 말하지 않소.</b>
-        </ActOut>
-        <button className="btn mt" onClick={() => setTab("c2")}>내 것을 펴겠습니다</button>
-      </Shell>
-    );
+  if (tab === "c3" && !daeunCut) {
+    const timeCuts = rep.locked.filter(c => ['daeun_map', 'concern_turn', 'daeun_now'].includes(c.id));
+    return <Shell screen="c3" title="지금과 다음 흐름">
+      <h1 className="reading-title">다음 흐름에서는<br />무엇을 다르게 읽을까?</h1>
+      <p className="conversion-lead">지금의 고민을 시기와 함께 살펴보는 자리요. 실제 풀이에서 첫 대목을 먼저 확인하시오.</p>
+      {timeCuts.length ? <NextReading lensId={lensId} cuts={timeCuts} onOpen={openPrice} /> : <p className="conversion-note">이 해석에는 추가로 열리는 시기별 풀이가 없소.</p>}
+      <button className="btn gh" onClick={() => setTab("c2")}>읽던 해석으로 돌아가기</button>
+    </Shell>;
   }
 
   /* c3 · 대운 맵 */
@@ -498,19 +435,10 @@ function ReportInner() {
   if (tab === "c4") {
     return (
       <Shell screen="c4" title="여기서부터" legal>
-        <Scene id="fold" />
-        <Narration lines={["두루마리가 반쯤 접혀 있다."]} />
-        <Say who={rep.lens.name} lens={lensId}>
-          여기까지 무료 해석이오. 아래에는 아직 열리지 않은 항목의 제목과 근거가 있소.
-          <br /> 나가도 붙잡지 않소.
-          <br />
-          제목을 보고 지금 필요한 내용인지 먼저 고르시오. 다음 화면에서 가격과 열리는 범위를 확인한 뒤 결제할 수 있소.
-          <br />
-          다른 해석자는 같은 명식을 다른 관점으로 읽소. 더 많은 관점이 더 정확한 답을 보장하지는 않소.
-        </Say>
+        <h1 className="reading-title">{rep.lens.name}이 짚은 말,<br />그 뒤가 남아 있소.</h1>
         {/* ★ 비유 0 · 겪은 말 0. 값이 걸리는 자리인데 **읽는 사람**이
             글에 없었습니다. 조르지 않고 알아주는 한 줄만 답니다. */}
-        <p className="sm">여태 혼자 참고 미뤄 둔 물음이라 여기까지 오신 것이오. <mark><b>접힌 글은 아직 안 편 것이지 없는 것이 아니오</b></mark> — 지도를 반만 펴 놓은 것과 같소. 길은 이미 다 그려져 있고 종이만 접혀 있소. 자물쇠가 아니라 접힌 자국처럼, 펴면 그 자리에 그대로 있소.</p>
+        <p className="sm">나를 알아보는 문장이 있었다면, 이제 그 뒤의 이유를 볼 차례요. <mark><b>왜 반복되는지, 지금의 흐름에서는 어떻게 읽히는지.</b></mark> 아래 질문은 그대의 전체 풀이로 이어지오.</p>
         {/*
           ★ 여기가 `가가가가 가가가가가 가가가` 였소. 자리표시
             문자열이 그대로 배포돼 있었습니다.
@@ -523,24 +451,7 @@ function ReportInner() {
             읽히는 것은 맛보기까지. 그 뒤에 흐려진 자락을 이어 붙여
             **이 아래로 더 있다**는 것만 보이오.
         */}
-        {rep.locked.map((l) => (
-          <div className="dz" key={l.id}>
-            <div className="k">{l.title}</div>
-            <ServerText as="p" className="sm" html={`근거 · ${l.source}`} />
-            {l.teaser ? (
-              <p className="tz">
-                {l.teaser}
-                <span className="bl">그 다음은 값을 치른 뒤에 보이오</span>
-              </p>
-            ) : (
-              <p className="bl">가려 둔 자리요</p>
-            )}
-            {/* 분량은 서버가 셉니다. 화면이 적지 않습니다. */}
-            <p className="sm">
-              {l.need_tier_name}부터 열리오 · {l.chars.toLocaleString()}자
-            </p>
-          </div>
-        ))}
+        <NextReading lensId={lensId} cuts={rep.locked} onOpen={openPrice} />
         {/*
           ★ 막이 그냥 끝나고 있었습니다. 접힌 목록 다음에 곧바로
             버튼 둘이라, 값을 치를지 말지를 **목록만 보고** 정하게
@@ -558,16 +469,14 @@ function ReportInner() {
           내려보낸 것이오 〔표시가와 청구가는 한 값〕
         </span>
         <ActOut kind="딜레마" next="어디까지 볼지">
-          접힌 자리는 오늘 다 열어도 되고, 하나도 안 열어도 되오.
+          방금 읽은 문장 뒤에 무엇이 이어질지 마음에 걸리오?
           <br />
-          <b>둘 다 답이오.</b> 다만 절반만 열어 두고 저녁 내내 그
-          생각을 붙들고 있는 것 — 그것만은 안 하시는 게 좋소.
+          <b>내가 반복하는 선택과 그 선택을 읽는 근거.</b>
           <br />
-          접힌 자리를 다 펴도 <b>20분</b>이면 읽소. 반쯤 접은 지도를
-          끝까지 펴는 것처럼, 오래 걸리는 일은 아니오.
+          다음 화면에서 이어지는 해석의 범위와 가격을 확인하시오.
         </ActOut>
-        <button className="btn mt" onClick={() => router.push("/pay?step=d1")}>
-          어디까지 볼지 고르겠습니다
+        <button className="btn mt" onClick={openPrice}>
+          이어지는 해석과 가격 확인하기
         </button>
         <button className="btn gh" onClick={() => setTab("c2")}>본문으로</button>
       </Shell>
@@ -773,7 +682,7 @@ function ReportInner() {
       */}
       <ScrollProgress />
       <ReadingPath />
-      {rep.editorial && <ReadingGuide guide={rep.editorial} />}
+      {rep.editorial && <ReadingGuide preview={rep.tier === "free" && rep.sells} guide={rep.editorial} />}
       {/* ★ 낡은 종이(oldpaper)를 깔고 있었습니다 (2026-09-06). 아래 글은
           「두루마리 끈을 풀었다 · 종이가 무릎까지」인데 영상에는 두루마리도
           끈도 무릎도 없었소 — 손님이 짚은 자리입니다. */}
@@ -935,6 +844,9 @@ function ReportInner() {
         </div>
       </div>
 
+      {rep.tier === "free" && rep.sells && rep.locked.length > 0 && <div className="noprint">
+        <NextReading lensId={lensId} cuts={rep.locked} onOpen={openPrice} />
+      </div>}
       <div className="handles noprint">
         <button onClick={() => window.print()}>
           내 것을 종이로 받겠습니다 (PDF)
