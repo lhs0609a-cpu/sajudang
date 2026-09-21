@@ -1412,9 +1412,21 @@ def lens_line(lens_id: Optional[str], concern: Optional[str]) -> str:
     return '<p class="tale %s">%s</p>' % ("hit" if on else "sm", say)
 
 
-def face_line(f, concern: str, axis4: Optional[str] = None) -> Optional[dict]:
+def face_line(f, concern: str, axis4: Optional[str] = None,
+              slot: int = 0) -> Optional[dict]:
     """
-    훅 2.5단에 붙는 **한 줄.** 넉 자가 물으신 자리에서 내는 얼굴.
+    훅에 붙는 **한 줄.** 넉 자가 물으신 자리에서 내는 얼굴.
+
+    slot  몇 번째 축을 낼 것인가. `AXIS_OF[concern]` 은 축을 **둘**
+          주는데 여태 첫 칸만 쓰고 있었습니다 (2026-09-21).
+
+          재보니 넉 자를 열여섯 칸 중 무엇으로 골라도 **훅 0·1·2·3단은
+          한 글자도 안 갈렸습니다** (17칸 → 1가지). 갈리는 것은 2.5단
+          하나뿐이었소. 그런데 표(`AXIS_FACE` 48칸 · `AXIS_GAP` 48칸)는
+          이미 다 차 있었고, 쓰이는 것은 **그 절반**이었습니다.
+
+          표를 늘리기 전에 어느 칸이 안 쓰이는지부터 셉니다 (CLAUDE.md
+          「표를 만들고 한 군데만 꽂아 두기」).
 
     ★ 왜 한 줄인가 (2026-09-07)
 
@@ -1431,6 +1443,14 @@ def face_line(f, concern: str, axis4: Optional[str] = None) -> Optional[dict]:
     axes = table()["AXIS_OF"].get(concern)
     if not axes:
         return None
+    # 2026-09-21: 물으신 자리의 축을 먼저, 그 다음 남은 축.
+    #
+    #   `AXIS_OF` 는 고민마다 축 둘을 고릅니다 - 돈이면 TF.JP. 그 둘이
+    #   그 자리에서 가장 크게 움직이는 축이라 먼저 냅니다. 허나
+    #   `AXIS_FACE`.`AXIS_GAP` 은 여덟 글자 곱하기 여섯 고민을 다 들고
+    #   있소 (마흔여덟 칸씩). 훅 다섯 마디에 나눠 걸려면 칸이 넷은
+    #   있어야 하니, 남은 축도 뒤에 잇습니다.
+    axes = list(axes) + [k for k, _ in AXES if k not in axes]
     idx = dict(AXES)
     mine_all = saju_axis(f)
     said = (axis4 or "").upper()
@@ -1443,10 +1463,12 @@ def face_line(f, concern: str, axis4: Optional[str] = None) -> Optional[dict]:
         if not ch or ch not in key:
             ch = mine
         (same_rows if ch == mine else gap_rows).append((key, ch, mine))
-    row = (gap_rows or same_rows or [None])[0]
-    if not row:
+    # ★ 어긋난 축을 먼저, 그 다음 겹친 축. 칸을 돌려 가며 냅니다 —
+    #   한 훅 안에서 같은 축을 두 번 내면 그건 되풀이지 갈린 것이 아니오.
+    rows = gap_rows + same_rows
+    if not rows:
         return None
-    key, ch, mine = row
+    key, ch, mine = rows[slot % len(rows)]
 
     if ch == mine:
         say = ('<p class="hit"><b>%s</b> %s</p>'

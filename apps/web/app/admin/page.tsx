@@ -428,6 +428,12 @@ export default function AdminPage() {
         <h1>성신당 · 주인 자리</h1>
         <div className="admmode">
           <span className="on">관리자</span>
+          {/*
+            ★ 항해 관제탑 — 제품이 어디까지 준비되었는가 (SHIP OS §17).
+              현황판은 **오늘 가게가 어떤가**를 보고, 관제탑은
+              **무엇이 아직 안 됐는가**를 봅니다. 다른 물음입니다.
+          */}
+          <Link className="admlink" href="/admin/tower">항해 관제탑</Link>
           <button onClick={() => {
             s.set({ admin: true, adminSet: true });
             router.push("/?step=a1");

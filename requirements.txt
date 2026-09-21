@@ -14,5 +14,9 @@ httpx>=0.27
 # ★ 라이브 키로 도는데 이게 없으면 구독을 아예 안 엽니다.
 cryptography>=42.0
 python-dotenv>=1.0
+# SHIP OS 레지스트리(product-os/*.yaml)를 관제탑이 런타임에 읽습니다.
+# ★ uvicorn[standard] 가 딸려 들여오지만 **여기 적어 둡니다** —
+#   딸려 오는 것에 기대면 그쪽이 빠지는 날 관제탑이 조용히 빕니다.
+pyyaml>=6.0
 pytest>=8.0
 pytest-asyncio>=0.24

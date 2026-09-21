@@ -7,11 +7,32 @@ from routers import subscription
 
 router=APIRouter(prefix='/v1/jobs',tags=['jobs'])
 
-@router.post('/renew-subscriptions')
-def renew_subscriptions(x_job_key:str|None=Header(default=None)):
+
+def _job_guard(x_job_key:str|None)->None:
+    """예약 작업 문. ★ 열쇠가 없으면 **닫습니다** — 여는 쪽이 기본이면
+    언젠가 그대로 배포됩니다 (keyguard 와 같은 결)."""
     expected=os.getenv('RENEW_JOB_KEY','')
     if not expected or not x_job_key or not hmac.compare_digest(expected.encode(),x_job_key.encode()):
         raise HTTPException(status_code=403,detail='예약 작업 인증이 필요합니다.')
+
+
+@router.post('/backup')
+def backup_now(x_job_key:str|None=Header(default=None)):
+    """곳간을 뜹니다 (§29). 볼륨이 날아가도 자격이 안 사라지게."""
+    _job_guard(x_job_key)
+    import backup
+    got=backup.run()
+    store.set_json('job:backup-status',got)
+    if not got.get('ok'):
+        # ★ 조용히 200 을 주지 않습니다. 안 떠졌는데 떠진 줄 알면
+        #   그게 백업이 없는 것보다 나쁩니다.
+        raise HTTPException(status_code=500,detail=got.get('why') or '백업을 뜨지 못했소.')
+    return got
+
+
+@router.post('/renew-subscriptions')
+def renew_subscriptions(x_job_key:str|None=Header(default=None)):
+    _job_guard(x_job_key)
     result={'examined':0,'renewed':0,'failed':0,'retired':0,'more':False}
     started=time.monotonic()
     now=datetime.now(timezone.utc)

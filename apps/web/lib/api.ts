@@ -335,7 +335,10 @@ export const api = {
     tier: string; concern?: string; analytics_sid?: string | null;
   }) => post<{
     order_id: string; amount: number; tier: string;
-    client_key: string | null; enabled: boolean; refund_notice: string;
+    client_key: string | null; enabled: boolean;
+    /** 토스에 보낼 손님 열쇠. 서버가 셉니다 — 세션 아이디를 날것으로 PG 에 보내지 않소. */
+    customer_key: string;
+    refund_notice: string;
     /** 같은 약속을 이 집의 말로. 결제 버튼 **바로 위**에 놓습니다. */
     refund_say: string;
     purchases_today: number; per_day_limit: number;

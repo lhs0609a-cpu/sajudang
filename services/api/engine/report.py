@@ -396,6 +396,23 @@ def _ledger(cuts: list) -> int:
     return dropped
 
 
+def _asked_word(f, concern: str) -> str:
+    """
+    물으신 자리를 세는 글자가 몇인가 — 「재성 3개」 처럼 사람 말로.
+
+    ★ 세는 값은 이미 다 있었습니다 (`concern_group` · `GROUP_TOTAL`).
+      `concern_scale` 의 근거 줄에만 쓰이고 본문에는 안 나오던 값이오.
+    """
+    try:
+        grp = bank_mod.concern_group(concern, getattr(f, "sex", None))
+        n = getattr(f, bank_mod.GROUP_TOTAL[grp])
+    except Exception:
+        return ""
+    if n is None:
+        return ""
+    return "%s %s" % (grp, bank_mod.count_word(int(n)))
+
+
 def _cut(cid, title, source, body, min_level, sid=None):
     return {
         "id": cid,
@@ -1703,7 +1720,8 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
                      element_word(f.yongsin) if f.yongsin else "없음",
                      _visible(f, f.yongsin) if f.yongsin else 0, int(f.age)),
                   "용신", "용신"),
-        heart_mod.hope(f, you, bank_mod.concern_word(concern), _visible)
+        heart_mod.hope(f, you, bank_mod.concern_word(concern), _visible,
+                       asked=_asked_word(f, concern))
         + ('<p class="tale">%s</p>' % _live("strong_el", f.strong_el).strip()
            if _live_has("strong_el", f.strong_el) else ""),
         0, sid="hope:%s:%s:%s:%d"
@@ -1931,7 +1949,9 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     # optional free questionnaire. Free-only characters retain their full scope.
     if lens_id and _lens_price(lens_id) > 0:
         for cut in cuts:
-            if cut["id"] not in {"chart", "spine", "topic_ask"}:
+            if cut["id"] in {"spine_depth", "spine_scene", "lens_bridge"}:
+                cut["min_level"] = 0
+            elif cut["id"] not in {"chart", "spine", "topic_ask"}:
                 cut["min_level"] = max(1, cut["min_level"])
     return cuts, extra_error
 

@@ -63,8 +63,14 @@ export async function generateMetadata(
       siteName: "성신당 星辰堂",
       type: "article",
       locale: "ko_KR",
+      images: [{ url: "/og.jpg", width: 1200, height: 630, alt: "성신당" }],
     },
-    twitter: { card: "summary_large_image", title, description },
+    // ★ 그림을 같이 보냅니다.
+    //   전에는 `summary_large_image` 라 적어 놓고 그림을 안 줬습니다.
+    //   그러면 큰 카드가 아니라 **작은 카드**로 내려앉고, 어떤 곳에서는
+    //   아예 안 뜹니다. 적은 대로 주어야 적은 것이 참이 됩니다.
+    twitter: { card: "summary_large_image", title, description,
+               images: ["/og.jpg"] },
   };
 }
 

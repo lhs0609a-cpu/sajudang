@@ -25,7 +25,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { BIZ, BIZ_READY } from "@/lib/biz";
+import { BIZ } from "@/lib/biz";
 import Shell, { Legal } from "@/components/Shell";
 
 const TABS = ["이용약관", "개인정보처리방침", "환불정책"] as const;
@@ -82,7 +82,13 @@ export default function LegalPage() {
 // ★ 페이지 파일에서는 default 말고 아무것도 내보내면 안 됩니다.
 //   Next 라우터가 그 이름을 라우트 설정으로 읽어 빌드가 터집니다.
 function BizBlock() {
-  const rows: [string, string][] = [
+  // ★ 채워진 칸만 폅니다.
+  //   전에는 빈 칸마다 「아직 없음」 을 찍고, 위에 「채워지기 전에는
+  //   값을 받지 않소」 를 걸었습니다. 값은 밖(NEXT_PUBLIC_BIZ_*)에서
+  //   들어오는데 그동안 손님에게는 **닫힌 가게**로 보였습니다.
+  //   없는 줄은 지어내지 않고 **안 적습니다** — 계산이 없으면
+  //   「모른다」고 쓰는 것과 같은 규칙이오.
+  const rows: [string, string][] = ([
     ["상호", BIZ.name],
     ["대표", BIZ.owner],
     ["사업자등록번호", BIZ.regNo],
@@ -91,20 +97,16 @@ function BizBlock() {
     ["전화", BIZ.tel],
     ["전자우편", BIZ.email],
     ["개인정보 보호책임자", BIZ.privacyOfficer],
-  ];
+  ] as [string, string][]).filter(([, v]) => !!v);
+  if (!rows.length) return null;
   return (
     <section className="biz">
       <h2>사업자 정보</h2>
-      {!BIZ_READY && (
-        <p className="warn">
-          아직 다 채워지지 않았소. 채워지기 전에는 값을 받지 않소.
-        </p>
-      )}
       <dl>
         {rows.map(([k, v]) => (
           <div key={k}>
             <dt>{k}</dt>
-            <dd>{v || <em>아직 없음</em>}</dd>
+            <dd>{v}</dd>
           </div>
         ))}
       </dl>

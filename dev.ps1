@@ -161,8 +161,27 @@ switch ($Task) {
   "fixtures"{ Need-Venv; Push-Location $Root; & $Py tools\make_fixtures.py @Rest; Pop-Location }
   "sheet"   { Need-Venv; Push-Location $Root; & $Py tools\fixture_sheet.py 대조표.md; Pop-Location }
 
+  "shipos" {
+    # SHIP OS 관제탑 — 준비도 · 끊긴 배선 · 릴리스 게이트 · 다음 할 일
+    Need-Venv; Push-Location $Root
+    $env:PYTHONPATH = "services/api"
+    & $Py tools\shipos_report.py $Rest
+    $code = $LASTEXITCODE; Pop-Location; exit $code
+  }
+
+  "shipos-scan" {
+    # 코드에서 사실을 긁어 seed 에 찍습니다. 소스를 고쳤으면 다시 돌리세요.
+    Need-Venv; Push-Location $Root
+    & $Py tools\shipos_scan.py $Rest
+    $code = $LASTEXITCODE; Pop-Location; exit $code
+  }
+
   "engine-check" {
     Need-Venv; Push-Location $Root
+    # ★ 찍어 둔 사실이 소스와 같은가 — **제일 먼저** 봅니다.
+    #   어긋난 채로 아래 검사를 돌리면 관제탑만 옛말을 하는 것이
+    #   아니라, 그 옛말을 근거로 「다 됐다」고 배포합니다.
+    & $Py tools\shipos_scan.py --check; if ($LASTEXITCODE) { Pop-Location; exit 1 }
     & $Py -m pytest tests -q;          if ($LASTEXITCODE) { Pop-Location; exit 1 }
     & $Py tools\crosscheck.py 300;     if ($LASTEXITCODE) { Pop-Location; exit 1 }
     & $Py tools\distribution.py;       if ($LASTEXITCODE) { Pop-Location; exit 1 }

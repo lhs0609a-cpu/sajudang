@@ -1,0 +1,119 @@
+# SHIP OS · 제품 정의 (MASTER_BUILD_SHIP_OS.md §2 · §3)
+#
+# ★ 이 파일은 **판단**만 답니다.
+#   화면·API·이벤트·표 같은 **사실**은 코드에서 긁어 옵니다
+#   (`services/api/shipos.py`). 사실을 여기 또 적으면 두 벌이 되어
+#   어긋납니다 — 이 저장소가 값·목패 이름·분량에서 이미 겪은 사고입니다.
+#
+# ★ 완료율은 여기서 계산하지 않습니다. `shipos.selectors` 한 곳입니다 (§35 · C12).
+
+product:
+  name: 성신당 (星辰堂)
+  one_liner: >-
+    스무 명의 캐릭터가 같은 사주를 각자의 관점으로 해석하고,
+    사주 조건이 다음 캐릭터를 추천하는 연쇄 구조의 사주 해석 서비스.
+  category: B2C 콘텐츠 커머스 (운세·자기이해)
+  target_market: 한국 · 모바일 웹 우선
+  target_users: 지금 구체적인 고민(돈·몸·일·사랑·사람·방향)을 안고 검색해 들어온 성인
+  problem: >-
+    기존 사주 서비스는 근거 없이 단정하거나(적중률 마케팅), 반대로
+    누구에게나 맞는 말만 한다. 손님은 "맞다"고는 해도 "내 얘기"라고는
+    느끼지 못한다.
+  existing_alternative: 오프라인 점집 · 무료 만세력 앱 · 타로/운세 앱
+  core_value: >-
+    맞히는 집이 아니라 **근거 대는 집**. 여덟 글자에서 센 값을 그대로
+    보여 주고, 손님이 만세력을 펴고 대 볼 수 있는 말만 한다.
+  unique_advantage: >-
+    ① sxtwl 절입 시각까지 계산하는 정식 만세력(근사식 없음)
+    ② 스무 렌즈 × 여섯 고민축으로 갈리는 문장 엔진
+    ③ 릴레이 — 사주 조건이 다음 캐릭터를 고르는 연쇄
+  business_model: 단건 판매 + 월 구독
+  payer: 최종 사용자 본인
+  pricing_model:
+    one: 9,900 / 12,900 / 15,900 / 19,900원 — 캐릭터마다 다름 (이 자리 하나)
+    all: 99,000원 — 한 번 치르고 영구 (스무 사람 전부)
+    sub: 14,900원/월 자동갱신 (한 달 듣기)
+  north_star_metric: 값을 치른 손님 수 (paid conversion)
+  aha_moment: >-
+    훅 2단에서 "내가 한 번도 말한 적 없는 것을 이 집이 먼저 말했다"고
+    느끼는 순간. 측정 대리지표는 `hook_answer` 의 '그렇소' 응답.
+  core_loop: 고민 고르기 → 명식 → 훅 5단 → 무료 6단 → 페이월 → 리포트
+  retention_loop: 오늘의 일진 → 회고 루프 → 리텐션 5층 알림
+  growth_loop: 리포트 → 분석지 한 장 → 공유 링크(/s/[token]) → 새 손님 진입
+  revenue_loop: 리포트 → 릴레이 추천 → 다음 캐릭터 결제 → 구독 전환
+
+# ── 역할 (§3) ─────────────────────────────────────────────
+# 채택한 것만 적습니다. 안 쓰는 역할은 아래 not_adopted 에 까닭과 함께.
+roles:
+  - id: visitor
+    title: 손님 (익명)
+    note: 계정이 없습니다. 자격은 브라우저의 난수 세션에 매입니다.
+  - id: customer
+    title: 값을 치른 손님
+    note: 주문(orders:{sid})과 인장(seals:{…})이 자격을 정합니다.
+  - id: subscriber
+    title: 달삯 손님
+    note: 빌링키로 서른 날마다 갱신. 해지해도 치른 달은 끝까지 봅니다.
+  - id: admin
+    title: 주인
+    note: ADMIN_EMAIL + ADMIN_PASSWORD_HASH 또는 FUNNEL_KEY.
+
+not_adopted:
+  lead:      {reason: 리드 수집(뉴스레터·데모)이 없습니다. 첫 방문이 곧 무료 해석입니다.}
+  member:    {reason: 계정 개념이 없습니다. visitor 와 customer 로 충분합니다.}
+  operator:  {reason: 운영자가 주인 한 사람입니다. 역할 분리가 아직 필요 없습니다.}
+  owner:     {reason: admin 과 같은 사람입니다.}
+  partner:   {reason: 제휴·리셀러가 없습니다.}
+  seller:    {reason: 마켓플레이스가 아닙니다. 판매자는 이 집 하나입니다.}
+  creator:   {reason: 손님이 콘텐츠를 만들지 않습니다. 문장 뱅크는 서버 전용입니다.}
+  manager:   {reason: 조직·팀 개념이 없습니다.}
+
+# ── 여정 (§3) ─────────────────────────────────────────────
+journeys:
+  visitor:
+    - {id: acquire,   title: 유입,       screens: [a1, s1, s2]}
+    - {id: explore,   title: 탐색,       screens: [a2, a3]}
+    - {id: input,     title: 입력,       screens: [a4, a4b, a5]}
+    - {id: chart,     title: 명식,       screens: [a6, a7]}
+    - {id: hook,      title: 훅 5단,     screens: [b1, b2, b3, b4]}
+    - {id: free,      title: 무료 6단,   screens: [d0]}
+    - {id: aha,       title: 아하,       screens: [c1, c2]}
+    - {id: paywall,   title: 값 고르기,  screens: [d1, d1b]}
+  customer:
+    - {id: checkout,  title: 결제,       screens: [d2, d3]}
+    - {id: read,      title: 읽기,       screens: [c1, c2, c3, c4, c5, c6]}
+    - {id: relay,     title: 릴레이,     screens: [h1]}
+    - {id: share,     title: 전파,       screens: [c7, c8]}
+    - {id: retain,    title: 다시 오기,  screens: [g1, g2, g3]}
+    - {id: account,   title: 내 서재,    screens: [f2, r1]}
+  subscriber:
+    - {id: subscribe, title: 카드 걸기,  screens: [d2]}
+    - {id: renew,     title: 갱신,       screens: [f2]}
+    - {id: cancel,    title: 그만두기,   screens: [f2]}
+  admin:
+    - {id: signin,    title: 로그인,     screens: [adm-login]}
+    - {id: watch,     title: 현황 파악,  screens: [adm-overview]}
+    - {id: tower,     title: 관제탑,     screens: [adm-tower]}
+    - {id: act,       title: 조치,       screens: [adm-refund]}
+
+# ── 핵심 플로우 (§28 Critical Flow) ───────────────────────
+# 여기 적힌 것은 Release Gate 가 직접 셉니다.
+critical_flows:
+  - id: CF-FREE
+    title: 방문 → 명식 → 훅 → 무료 해석
+    why: 제품이 존재하는 이유. 이게 깨지면 나머지는 의미가 없습니다.
+  - id: CF-PAY
+    title: 페이월 → 결제 → 자격 부여 → 리포트 열람
+    why: 수익. 자격이 안 열리면 돈만 받고 물건을 안 준 것입니다.
+  - id: CF-REFUND
+    title: 환불 요청 → 판정 → 환불/재발행
+    why: 전자상거래법. 그리고 "셈이 틀리면 돌려준다"는 이 집의 약속.
+  - id: CF-SUB
+    title: 카드 등록 → 첫 달 청구 → 갱신 → 해지
+    why: 자동결제는 손님이 없는 자리에서 돈이 나갑니다.
+  - id: CF-RESTORE
+    title: 기기 변경 → 주문번호로 자격 되찾기
+    why: 계정이 없으므로 이것이 유일한 복구 경로입니다.
+  - id: CF-ADMIN
+    title: 주인 로그인 → 현황 → 조치 → 감사기록
+    why: 운영할 수 없는 제품은 운영 가능한 제품이 아닙니다.

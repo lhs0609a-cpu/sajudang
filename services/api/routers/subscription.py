@@ -34,6 +34,7 @@ from pydantic import BaseModel, Field
 
 import payments
 import store
+import throttle
 from engine.relay import BREAKS
 
 log = logging.getLogger(__name__)
@@ -82,9 +83,13 @@ def _customer_key(session_id: str) -> str:
     ★ 세션 아이디를 그대로 보내지 않소. 그건 우리 쪽 자격의
       열쇠라, 밖으로 나가면 안 되오. 해시를 쓰오 — 같은 브라우저면
       늘 같은 값이 나와야 카드가 겹쳐 등록되지 않소.
+
+    ★ 셈은 `payments.customer_key` 에 **한 벌만** 둡니다.
+      결제창도 같은 값을 써야 토스 쪽에서 한 사람으로 이어지오.
+      여기서 다시 셈하면 두 길이 갈리오 — 값이 두 벌이 되어 어긋났던
+      자리와 같은 종류요.
     """
-    return "sjd_" + hashlib.sha256(
-        ("customer:" + session_id).encode()).hexdigest()[:24]
+    return payments.customer_key(session_id)
 
 
 def _load(session_id: str) -> Optional[dict]:
@@ -399,6 +404,10 @@ class RestoreRequest(BaseModel):
 @router.post("/restore")
 def restore(req: RestoreRequest) -> dict:
     from contextlib import ExitStack
+    # ★ 한 번 치르기와 **같은 문**입니다 (pay._restore_throttle).
+    #   여기는 카드가 걸린 구독의 주인까지 옮기므로 더 무겁습니다.
+    from routers.pay import _restore_throttle
+    _restore_throttle(req.session_id)
     initial = store.get_json("order:" + req.order_id)
     if not initial:
         raise HTTPException(status_code=404, detail="그런 주문번호가 없소.")

@@ -2,9 +2,46 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import WebVitals from '@/components/WebVitals';
 
+/*
+ * ★ 공유되는 링크가 **카드로 서야** 합니다.
+ *
+ *   이 집의 성장 루프는 공유입니다 — 분석지 한 장을 받아 건네는 것.
+ *   그런데 미리보기가 붙어 있던 곳은 공유 화면(`/s/[token]`) 하나뿐이고,
+ *   정작 가장 많이 도는 주소인 **첫 화면에는 og 가 한 줄도** 없었습니다.
+ *   제목 없는 맨 주소로 뜨는 링크는 눌리지 않습니다.
+ *
+ * ★ metadataBase 가 없으면 상대 주소가 깨집니다.
+ *   og:image 는 절대 주소라야 크롤러가 받아 갑니다.
+ */
+const SITE =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://sajudang-three.vercel.app";
+
+const OG_DESC =
+  "사주로 읽는 나의 반복 패턴. 지금의 고민에 맞는 해석과 오늘 해볼 행동을 만나보시오.";
+
 export const metadata: Metadata = {
-  title: "성신당 星辰堂",
-  description: "사주로 읽는 나의 반복 패턴. 지금의 고민에 맞는 해석과 오늘 해볼 행동을 만나보시오.",
+  metadataBase: new URL(SITE),
+  title: { default: "성신당 星辰堂", template: "%s · 성신당 星辰堂" },
+  description: OG_DESC,
+  applicationName: "성신당 星辰堂",
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: "성신당 星辰堂",
+    locale: "ko_KR",
+    url: "/",
+    title: "성신당 星辰堂 — 맞히는 집이 아니라, 근거 대는 집",
+    description: OG_DESC,
+    images: [{ url: "/og.jpg", width: 1200, height: 630,
+               alt: "밤의 성신당" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "성신당 星辰堂 — 맞히는 집이 아니라, 근거 대는 집",
+    description: OG_DESC,
+    images: ["/og.jpg"],
+  },
+  robots: { index: true, follow: true },
 };
 
 export const viewport: Viewport = {

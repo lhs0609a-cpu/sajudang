@@ -18,6 +18,7 @@
 from __future__ import annotations
 
 import base64
+import hashlib
 import logging
 import os
 from dataclasses import dataclass
@@ -312,6 +313,29 @@ def client_config() -> dict:
     return {"enabled": ENABLED, "client_key": TOSS_CLIENT_KEY or None,
             "live": LIVE, "reason": DISABLED_REASON,
             "refund_notice": REFUND_NOTICE}
+
+
+def customer_key(session_id: str) -> str:
+    """
+    토스에 보내는 손님 열쇠 — ★ 표를 **한 벌만** 둡니다.
+
+    ★ 세션 아이디를 그대로 보내지 않습니다.
+      그건 우리 쪽 **자격의 열쇠**입니다 — `orders:{sid}` 와
+      `seals:{…}` 가 그 값으로 열립니다. 밖으로 나가면 그걸 쥔 쪽이
+      값을 치른 사람 행세를 할 수 있습니다. 화면이 보낸 tier 를 안
+      믿는 것과 같은 자리입니다.
+
+    ★ 결제창과 카드 등록이 **같은 값**을 써야 합니다.
+      토스 쪽에서 한 사람으로 이어지고, 카드가 겹쳐 등록되지 않습니다.
+      전에는 구독만 해시하고 결제창(`openCheckout`)은 `s.sessionId` 를
+      날것으로 보내고 있었습니다 — 같은 규칙이 한쪽에만 걸려 있었습니다.
+
+    ★ 이 꼴을 바꾸지 마세요.
+      이미 등록된 카드가 이 값으로 토스에 걸려 있습니다. 바꾸면 그
+      카드를 못 긁습니다 (SUB_SECRET 을 바꾸면 안 되는 것과 같은 이유).
+    """
+    return "sjd_" + hashlib.sha256(
+        ("customer:" + session_id).encode()).hexdigest()[:24]
 
 
 def price_of(tier: str, lens_id: Optional[str] = None) -> int:

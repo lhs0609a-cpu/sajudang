@@ -287,8 +287,18 @@ def test_confirmation_requires_owner_even_after_payment(app, monkeypatch):
         result = app.post("/v1/pay/confirm", json={"session_id": "different-session-1234",
                           "order_id": order["order_id"], "payment_key": "pk"})
         assert result.status_code == 403
-    public = app.get("/v1/pay/order/" + order["order_id"]).json()
-    assert not {"session_id", "chart_id", "payment_key", "analytics_sid"} & public.keys()
+    # ★ 주문 조회도 **산 사람만** 봅니다.
+    #   주문번호는 결제 뒤 주소에 실려 다녀(`?order=…`) 방문기록과
+    #   로그에 남습니다. 그것 하나로 열리는 문을 두면 안 됩니다.
+    stranger = app.get("/v1/pay/order/" + order["order_id"],
+                       params={"session_id": "different-session-1234"})
+    assert stranger.status_code == 403, stranger.text
+    assert app.get("/v1/pay/order/" + order["order_id"]).status_code == 422
+
+    mine = app.get("/v1/pay/order/" + order["order_id"],
+                   params={"session_id": "owner-session-1234"})
+    assert mine.status_code == 200, mine.text
+    assert not {"session_id", "chart_id", "payment_key", "analytics_sid"} & mine.json().keys()
 
 
 def test_concurrent_confirmations_charge_and_count_once(app, monkeypatch):
@@ -368,11 +378,21 @@ def test_frontend_uses_the_real_sdk_not_a_prompt():
 
 
 def test_frontend_never_sends_personal_data_to_the_pg():
-    """customerKey 에 이름·생년월일을 넣으면 PG 로 넘어갑니다."""
+    """
+    customerKey 에 이름·생년월일을 넣으면 PG 로 넘어갑니다.
+
+    ★ 세션 아이디도 날것으로 보내지 않습니다.
+      그건 우리 쪽 **자격의 열쇠**입니다 — `orders:{sid}` 와 `seals:{…}`
+      가 그 값으로 열립니다. 구독 쪽은 진작 해시해 보내면서
+      (`subscription._customer_key`) 결제창만 `s.sessionId` 를 그대로
+      넘기고 있었습니다. 같은 규칙이 한쪽에만 걸려 있던 자리입니다.
+      이제 서버가 셈해 준 값(`order.customer_key`)을 그대로 씁니다.
+    """
     page = (WEB / "app" / "pay" / "page.tsx").read_text(encoding="utf-8")
     block = page[page.index("openCheckout({"):]
     block = block[:block.index("});")]
-    assert "customerKey: s.sessionId" in block
+    assert "customerKey: order.customer_key" in block
+    assert "s.sessionId" not in block, "세션 아이디가 PG 로 넘어가오"
     for banned in ["s.name", "s.year", "s.month", "s.day", "s.city"]:
         assert banned not in block, banned
 
@@ -852,3 +872,55 @@ def test_restore_refuses_an_order_that_was_never_paid(app):
     assert r.status_code == 409, r.text
     assert app.post("/v1/pay/restore", json={
         "session_id": "새-세션-0002", "order_id": "없는번호"}).status_code == 404
+
+
+# ══════════════════════════════════════════════════════════
+# 손님 열쇠 — 세션 아이디를 PG 로 보내지 않는다
+# ══════════════════════════════════════════════════════════
+def test_prepare_hands_over_a_hashed_customer_key(app):
+    """
+    ★ 세션 아이디는 **우리 쪽 자격의 열쇠**입니다.
+
+      `orders:{sid}` 와 `seals:{…}` 가 그 값으로 열립니다. 밖으로
+      나가면 그걸 쥔 쪽이 값을 치른 사람 행세를 할 수 있습니다.
+      구독은 진작 해시해 보내면서 결제창만 날것으로 넘기고 있었습니다.
+    """
+    sid = "sess-pay-0001"
+    body = _prepare(app, sid=sid).json()
+    key = body["customer_key"]
+    assert sid not in key, "세션 아이디가 그대로 PG 로 가오"
+    assert key.startswith("sjd_")
+
+    # 결제창과 카드 등록이 **같은 값**이라야 토스에서 한 사람으로 이어지오.
+    from routers.subscription import _customer_key
+    assert key == _customer_key(sid), "두 길이 서로 다른 손님으로 가오"
+
+    # 같은 사람은 늘 같게, 다른 사람은 다르게.
+    assert key == _prepare(app, sid=sid).json()["customer_key"]
+    assert key != _prepare(app, sid="sess-pay-0002").json()["customer_key"]
+
+
+# ══════════════════════════════════════════════════════════
+# 못 파는 목패는 안 내놓는다
+# ══════════════════════════════════════════════════════════
+def test_the_monthly_plank_is_hidden_while_billing_is_closed(app, monkeypatch):
+    """
+    ★ 고르게 해 놓고 못 파는 것은 진열이 아니라 미끼입니다.
+
+      자동결제는 토스와 따로 계약해야 열립니다. 계약 전에도 「한 달
+      듣기」 목패는 그대로 서 있어서, 손님이 그걸 고르면
+      `sub/prepare` 가 503 을 내는 막다른 길이 됐습니다.
+    """
+    import payments
+    chart_id = _chart(app)
+    ask = {"chart_id": chart_id, "lens_id": "yeondam", "concern": "love"}
+
+    monkeypatch.setattr(payments, "subscriptions_problem",
+                        lambda: "정기결제는 아직 이용할 수 없습니다.")
+    ids = [t["id"] for t in app.post("/v1/pay/tiers", json=ask).json()["tiers"]]
+    assert "sub" not in ids, "못 여는 목패가 서 있소"
+    assert "one" in ids and "all" in ids, "한 번 치르는 값까지 닫혔소"
+
+    monkeypatch.setattr(payments, "subscriptions_problem", lambda: None)
+    ids = [t["id"] for t in app.post("/v1/pay/tiers", json=ask).json()["tiers"]]
+    assert "sub" in ids, "열렸는데 목패가 안 서오"

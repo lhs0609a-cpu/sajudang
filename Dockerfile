@@ -17,6 +17,9 @@ RUN pip install --no-cache-dir -r requirements.txt \
 
 # 런타임에 필요한 것만. 문서·프론트·참조구현체는 넣지 않습니다.
 COPY seed/          ./seed/
+# SHIP OS 레지스트리 — 관제탑이 읽습니다 (services/api/shipos.py).
+# 없으면 관제탑이 빈 채로 떠서 "다 됐다"고 말합니다.
+COPY product-os/    ./product-os/
 COPY services/api/  ./services/api/
 # 마이그레이션을 컨테이너 안에서 돌립니다 (entrypoint.sh)
 COPY alembic.ini    ./alembic.ini

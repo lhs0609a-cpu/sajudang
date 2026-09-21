@@ -44,7 +44,7 @@ def require_key(key: str | None) -> None:
         raise HTTPException(401, "열쇠가 맞지 않습니다.")
 
 
-def require_admin(key: str | None, token: str | None = None) -> None:
+def require_admin(key: str | None, token: str | None = None) -> str:
     """
     주인 자리 — 문이 **둘**입니다.
 
@@ -61,14 +61,23 @@ def require_admin(key: str | None, token: str | None = None) -> None:
 
       어느 쪽도 안 걸어 두었으면 503 입니다. 열린 쪽이 기본이면
       언젠가 그대로 배포됩니다.
+
+    ★ 들어온 사람이 **누구인지 돌려줍니다** (§43 감사기록).
+
+      돈이 움직이는 자리(환불 승인·자격 손질)는 누가 눌렀는지 남겨야
+      합니다. 지키는 자리가 이미 사람을 알고 있으니 여기서 그대로
+      건네줍니다 — 부르는 쪽이 다시 알아내면 두 벌이 됩니다.
+      기계 문으로 들어온 것은 이름이 없으므로 `key` 라 적습니다.
     """
     import adminauth
 
-    if token and adminauth.session_of(token):
-        return
+    if token:
+        sess = adminauth.session_of(token)
+        if sess:
+            return sess.get("email") or "admin"
     if FUNNEL_KEY:
         if key and hmac.compare_digest(key, FUNNEL_KEY):
-            return
+            return "key"
         raise HTTPException(401, "열쇠가 맞지 않습니다.")
     if adminauth.configured():
         # 열쇠는 안 걸었고 아이디 문만 걸린 집. 쪽지가 있어야 합니다.

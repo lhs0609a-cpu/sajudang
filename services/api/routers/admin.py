@@ -37,6 +37,7 @@ from keyguard import require_admin as _guard
 
 import adminauth
 import analytics
+import audit
 import payments
 import store
 
@@ -61,7 +62,7 @@ class RefundDecision(BaseModel):
 @router.post("/refund-reviews")
 def decide_refund(req: RefundDecision, x_funnel_key: str | None = Header(default=None),
                   x_admin_token: str | None = Header(default=None)):
-    _guard(x_funnel_key, x_admin_token)
+    who = _guard(x_funnel_key, x_admin_token)
     from routers.pay import RefundRequest, _refund_locked
     review=store.get_json("refund-review:"+req.order_id)
     order=store.get_json("order:"+req.order_id)
@@ -82,9 +83,16 @@ def decide_refund(req: RefundDecision, x_funnel_key: str | None = Header(default
                                       reason=req.note,calc_error=True),check)
             else:
                 result={"ok":True,"status":"declined"}
+            was = review.get("status")
             review.update(status="approved" if req.approve else "declined",note=req.note,
                           decided_at=datetime.now(timezone.utc).isoformat())
             store.set_json("refund-review:"+req.order_id,review)
+            # ★ 돈이 움직인 자리입니다. 누가 언제 무엇을 왜 했는지 남깁니다.
+            audit.record(actor=who, type="refund.decide", target=req.order_id,
+                         before={"review": was, "order": order.get("status")},
+                         after={"review": review["status"],
+                                "order": (store.get_json("order:"+req.order_id) or {}).get("status")},
+                         reason=req.note)
             return result
     except store.LeaseBusy as e:
         raise HTTPException(status_code=409,detail=str(e))
@@ -346,6 +354,192 @@ def ping(x_funnel_key: str | None = Header(default=None),
     """열쇠가 맞는지만 봅니다 — 화면이 문을 열기 전에 묻는 자리."""
     _guard(x_funnel_key, x_admin_token)
     return {"ok": True}
+
+
+# ══════════════════════════════════════════════════════════
+# 주문 운영 (§13 필수 관리자 기능)
+# ══════════════════════════════════════════════════════════
+#
+# ★ 여태 주인이 할 수 있는 일은 **환불 확인 요청 판정 하나**였습니다.
+#   값을 치렀는데 자격이 안 열린 손님이 오면 —
+#   실제로 그런 일이 있습니다: 승인은 됐는데 정산 중에 서버가 죽거나,
+#   손님이 브라우저를 지우고 주문번호도 잃은 경우 —
+#   주인이 들여다볼 자리도, 고쳐 줄 자리도 없었습니다.
+#   운영할 수 없는 제품은 운영 가능한 제품이 아닙니다 (§48-11).
+#
+# ★ 여기서도 **누구인지는 안 봅니다.** 다루는 것은 주문이지 사람이
+#   아닙니다. 세션 아이디는 응답에 안 싣습니다 (준식별자).
+@router.get("/orders")
+def find_orders(q: str = "", status: str = "", limit: int = 50,
+                x_funnel_key: str | None = Header(default=None),
+                x_admin_token: str | None = Header(default=None)) -> dict:
+    """
+    주문 찾기. `q` 는 주문번호 조각, `status` 는 우리 장부의 말.
+
+    ★ 세션 아이디로는 못 찾습니다. 찾게 해 두면 그 값이 주인 화면과
+      로그에 흐르고, 그건 자격의 열쇠입니다.
+    """
+    _guard(x_funnel_key, x_admin_token)
+    rows = []
+    for k, v in store.scan("order:"):
+        if not isinstance(v, dict):
+            continue
+        oid = k.split(":", 1)[1]
+        if q and q not in oid:
+            continue
+        if status and v.get("status") != status:
+            continue
+        review = store.get_json("refund-review:" + oid) or {}
+        rows.append({
+            "order_id": oid,
+            **{f: v.get(f) for f in ("amount", "tier", "lens_id", "status",
+                                     "created_at", "paid_at", "opened_at",
+                                     "refunded_at", "expires_at", "reissued_from")},
+            "has_payment_key": bool(v.get("payment_key")),
+            "review_status": review.get("status"),
+            # 자격이 붙어 있는 기기 수 — 누구인지는 안 세고 몇인지만
+            "devices": _device_count(oid, v.get("session_id")),
+        })
+    rows.sort(key=lambda r: r.get("created_at") or r.get("paid_at") or "", reverse=True)
+    return {"orders": rows[:max(1, min(limit, 200))], "total": len(rows)}
+
+
+def _device_count(order_id: str, owner: str | None) -> int:
+    """이 주문이 몇 군데에 붙어 있나. 되찾기 남용이 보이는 자리."""
+    n = 0
+    for k, v in store.scan("orders:"):
+        if isinstance(v, list) and order_id in v:
+            n += 1
+    return n or (1 if owner else 0)
+
+
+class GrantRequest(BaseModel):
+    order_id: str
+    session_id: str = Field(min_length=8, max_length=64)
+    note: str = Field(min_length=5, max_length=300)
+
+
+@router.post("/orders/grant")
+def grant_order(req: GrantRequest,
+                x_funnel_key: str | None = Header(default=None),
+                x_admin_token: str | None = Header(default=None)) -> dict:
+    """
+    치렀는데 안 열린 손님에게 **손으로** 자격을 붙입니다.
+
+    ★ 치른 주문에만 붙입니다. 안 치른 주문을 열어 주는 길은 만들지
+      않습니다 — 그게 있으면 그건 자격 검사가 아니라 장식입니다.
+    ★ 반드시 까닭을 적습니다. 감사기록에 남습니다.
+    """
+    who = _guard(x_funnel_key, x_admin_token)
+    order = store.get_json("order:" + req.order_id)
+    if not order:
+        raise HTTPException(404, "모르는 주문이오.")
+    if order.get("status") not in payments.ORDER_PAID:
+        raise HTTPException(409, "치르지 않은 주문에는 자격을 붙이지 않소.")
+
+    okey = "orders:" + req.session_id
+    orders = store.get_json(okey) or []
+    already = req.order_id in orders
+    if not already:
+        store.set_json(okey, [*orders, req.order_id])
+    if order.get("lens_id"):
+        import hashlib
+        skey = "seals:" + hashlib.sha256(req.session_id.encode()).hexdigest()[:16]
+        seals = store.get_json(skey) or []
+        if order["lens_id"] not in seals:
+            store.set_json(skey, [*seals, order["lens_id"]], ttl=365 * 86400)
+
+    audit.record(actor=who, type="order.grant", target=req.order_id,
+                 before={"attached": already},
+                 after={"attached": True, "tier": order.get("tier"),
+                        "lens_id": order.get("lens_id")},
+                 reason=req.note)
+    return {"ok": True, "already": already, "tier": order.get("tier"),
+            "lens_id": order.get("lens_id")}
+
+
+# ══════════════════════════════════════════════════════════
+# 문의 · 터진 자리 (§4.11 · §30 · §41)
+# ══════════════════════════════════════════════════════════
+@router.get("/support")
+def support_queue(status: str = "open", limit: int = 100,
+                  x_funnel_key: str | None = Header(default=None),
+                  x_admin_token: str | None = Header(default=None)) -> dict:
+    """손님이 건 말. ★ 누구인지는 안 내려보냅니다 — 해시한 열쇠까지입니다."""
+    _guard(x_funnel_key, x_admin_token)
+    rows = []
+    for _, v in store.scan("support:"):
+        if isinstance(v, dict) and (not status or v.get("status") == status):
+            rows.append({k: b for k, b in v.items() if k != "user_key"})
+    rows.sort(key=lambda r: r.get("at", ""), reverse=True)
+    return {"threads": rows[:max(1, min(limit, 300))]}
+
+
+class SupportReply(BaseModel):
+    id: str
+    reply: str = Field(min_length=2, max_length=1000)
+    close: bool = True
+
+
+@router.post("/support")
+def support_reply(req: SupportReply,
+                  x_funnel_key: str | None = Header(default=None),
+                  x_admin_token: str | None = Header(default=None)) -> dict:
+    """답합니다. 한쪽으로만 흐르면 그건 창구가 아니라 건의함입니다."""
+    who = _guard(x_funnel_key, x_admin_token)
+    row = store.get_json("support:" + req.id)
+    if not row:
+        raise HTTPException(404, "그런 문의가 없소.")
+    was = row.get("status")
+    row.update(reply=req.reply, status=("closed" if req.close else "open"),
+               replied_at=datetime.now(timezone.utc).isoformat())
+    store.set_json("support:" + req.id, row, ttl=365 * 86400)
+    audit.record(actor=who, type="support.reply", target=req.id,
+                 before={"status": was}, after={"status": row["status"]},
+                 reason=req.reply[:200])
+    return {"ok": True, "status": row["status"]}
+
+
+@router.get("/errors")
+def error_list(limit: int = 50,
+               x_funnel_key: str | None = Header(default=None),
+               x_admin_token: str | None = Header(default=None)) -> dict:
+    """
+    터진 자리 (§30).
+
+    ★ 요청 본문도 스택트레이스도 안 남깁니다. 이 집의 요청 본문에는
+      생년월일시가 들어 있습니다. 남기는 것은 길·예외 이름·횟수입니다.
+    """
+    _guard(x_funnel_key, x_admin_token)
+    import errors
+    return {"summary": errors.summary(), "rows": errors.recent(limit)}
+
+
+@router.get("/audit")
+def audit_log(limit: int = 100, target: str = "",
+              x_funnel_key: str | None = Header(default=None),
+              x_admin_token: str | None = Header(default=None)) -> dict:
+    """주인이 무엇을 했는가 (§43)."""
+    _guard(x_funnel_key, x_admin_token)
+    return {"rows": audit.recent(limit=max(1, min(limit, 500)), target=target)}
+
+
+# ══════════════════════════════════════════════════════════
+# 항해 관제탑 (§17 · §39 · §40)
+# ══════════════════════════════════════════════════════════
+@router.get("/tower")
+def control_tower(x_funnel_key: str | None = Header(default=None),
+                  x_admin_token: str | None = Header(default=None)) -> dict:
+    """
+    제품이 **어디까지 준비되었는가**.
+
+    ★ 여기서 세지 않습니다. `shipos` 한 자리가 셉니다 (§45 C12).
+      화면도 여기서 받아 적기만 합니다 — 완료율이 두 벌이 되면
+      값·목패 이름이 두 벌이 되어 어긋났던 그 사고가 되풀이됩니다.
+    """
+    _guard(x_funnel_key, x_admin_token)
+    import shipos
+    return shipos.tower()
 
 
 # ══════════════════════════════════════════════════════════

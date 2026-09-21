@@ -544,13 +544,12 @@ def test_hook_turns_the_axis_after_two_misses(client, chart_id):
     after = _hook(client, chart_id, bank.TURN_AT)["2"]
 
     assert before["html"] != after["html"], "방향을 안 틀었습니다"
-    assert "십신으로 짚던 것을 접고" in _bare(after["html"])
+    assert "맞지 않는 부분" in _bare(after["html"])
     # 튼 단은 다른 문장으로 집계돼야 합니다 — 어긋난 축을 버리는 신호입니다
     assert after["statement_id"] != before["statement_id"]
-    assert "@turn" in after["statement_id"]
-    # 근거도 바뀐 축을 말해야 합니다. 십신을 접었다면서 근거에 십신이
-    # 그대로 있으면 손님이 바로 알아봅니다.
-    assert "생 ·" in after["source"]
+    # 경험 확인으로 바꾼 이유를 설명하고 계산값을 바꿨다고 말하지 않는다.
+    assert "앞선 두 응답" in after["source"]
+    assert "사주 계산값은 바뀌지 않았소" in after["source"]
 
 
 def test_hook_does_not_turn_before_the_threshold(client, chart_id):
@@ -775,11 +774,13 @@ def test_the_extra_input_is_asked_for_not_silently_dropped(client, chart_id):
         "concern": "love"}).json()
     if not r["needs_input"]:
         return                      # 이 캐릭터가 안 물으면 여기서 끝
-    before = len(r["cuts"])
+    before = len(r["cuts"]) + len(r["locked"])
     filled = client.post("/v1/report", json={
         "chart_id": chart_id, "lens_id": "jeokhyeol", "tier": "free",
         "concern": "love", "extras": {"blood": {"type": "A"}}}).json()
-    assert len(filled["cuts"]) > before, "채워 줬는데 컷이 안 늘었습니다"
+    assert len(filled["cuts"]) + len(filled["locked"]) > before, "채워 줬는데 컷이 안 늘었습니다"
+    assert {c["id"] for c in filled["cuts"]} <= {"chart", "spine", "topic_ask"}
+    assert all("html" not in c for c in filled["locked"])
     assert filled["needs_input"] is None
 
 

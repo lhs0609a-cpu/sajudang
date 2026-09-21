@@ -1,0 +1,974 @@
+# SHIP OS · 공통 기능 레지스트리 전수 판정 (§4 · §33)
+#
+# ★ 모든 항목은 required / conditional / na 중 하나입니다.
+#   na 에는 **반드시 까닭**이 있습니다 (§1.3). 까닭 없이 빠진 것은 누락입니다.
+#
+# ★ status 는 **판단이 아니라 사실**이어야 합니다.
+#     live    실제로 동작하고, 배선이 끝났고, 검사가 있습니다
+#     partial 일부만. 무엇이 빠졌는지 gap 에 적습니다
+#     none    아직 없음
+#     broken  있는데 끊겼습니다 (BROKEN_WIRE)
+#   여기 적은 status 는 `tools/shipos_check.py` 가 코드와 대조합니다.
+#   코드에 없는 것을 live 라 적으면 검사가 잡습니다.
+
+features:
+
+# ══════════════════════════════════════════════════════════
+# 4.1 Public / Marketing
+# ══════════════════════════════════════════════════════════
+- id: PUB-LANDING
+  title: 랜딩 — 진입 여정
+  group: public
+  applicability: required
+  status: live
+  screens: [a1, a2, a3]
+  apis: []
+  events: [screen, flow_started, entry_context]
+  note: 소개 페이지가 아니라 **무료 해석으로 바로 들어가는 깔때기**입니다.
+
+- id: PUB-PRICING
+  title: 값 안내
+  group: public
+  applicability: required
+  status: live
+  screens: [d1]
+  apis: ["POST /v1/pay/tiers"]
+  events: [tier_view, price_view]
+  note: 값과 분량을 **서버가 세어** 내려보냅니다. 화면이 제 손으로 안 적습니다.
+
+- id: PUB-FAQ
+  title: 의심 풀기 (FAQ)
+  group: public
+  applicability: required
+  status: live
+  screens: [a3, s2]
+  components: [Doubts.tsx]
+
+- id: PUB-CONTACT
+  title: 연락처 표시
+  group: public
+  applicability: required
+  status: partial
+  screens: [/legal]
+  gap: >-
+    전화·전자우편 칸은 있으나 NEXT_PUBLIC_BIZ_* 가 배포에 안 들어가 있어
+    실제로는 비어 있습니다. 전자상거래법 제10조 표시 의무.
+  blocker: BIZ-ENV
+
+- id: PUB-LEGAL-FOOTER
+  title: 법정 고지 (약관·개인정보·환불)
+  group: public
+  applicability: required
+  status: live
+  screens: [/legal]
+  qa: [tests/test_launch.py]
+
+- id: PUB-SEO-META
+  title: SEO 메타 · OpenGraph · 소셜 프리뷰
+  group: public
+  applicability: required
+  status: live
+  screens: ["/", "/s/[token]"]
+  # ★ 처음 판정이 틀렸습니다 — 공유 화면(`/s/[token]`)에는 진작
+  #   generateMetadata 로 og·twitter 가 붙어 있었습니다. 안 보고 적었습니다.
+  #   실제로 빠져 있던 것은 셋이고, 그것만 채웠습니다 —
+  #     ① 첫 화면(`/`)에 og 가 한 줄도 없었음 (가장 많이 도는 주소)
+  #     ② metadataBase 가 없어 og:image 상대 주소가 깨짐
+  #     ③ twitter 가 `summary_large_image` 라 적고 그림을 안 줌
+  #        → 큰 카드가 작은 카드로 내려앉음. /og.jpg (1200×630) 를 답니다
+  note: 카카오 호환을 위해 og 그림은 webp 가 아니라 JPG 입니다.
+
+- id: PUB-ROBOTS-SITEMAP-X
+  title: (자리 유지용 — 아래 PUB-ROBOTS-SITEMAP 참고)
+  group: public
+  applicability: na
+  reason: 중복 항목을 지우지 않고 한 자리로 모았습니다.
+
+- id: PUB-ROBOTS-SITEMAP
+  title: robots.txt · sitemap.xml
+  group: public
+  applicability: required
+  status: live
+  # ★ 여는 곳과 닫는 곳을 가릅니다. 리포트·공유 링크·내 서재는
+  #   주소만 알면 열리는 자리라, 검색에 실리면 건네받은 사람만 보라고
+  #   만든 것이 아무나 보는 것이 됩니다.
+  note: app/robots.ts · app/sitemap.ts
+
+- id: PUB-COOKIE-CONSENT
+  title: 쿠키 동의 배너
+  group: public
+  applicability: na
+  reason: >-
+    쿠키를 안 씁니다. 세션은 localStorage 난수이고 계측은 1st-party
+    이벤트라 제3자 추적 쿠키가 없습니다. 개인정보 수집 고지는
+    /legal 개인정보처리방침이 맡습니다.
+
+- id: PUB-MARKETING-CONSENT
+  title: 마케팅 수신 동의
+  group: public
+  applicability: conditional
+  condition: 알림 채널(이메일·SMS·푸시)을 실제로 붙일 때
+  status: none
+  reason: 지금은 발송 채널이 안 붙어 있어 동의받을 대상이 없습니다.
+  depends_on: [NOTIF-CHANNEL]
+
+- id: PUB-ATTRIBUTION
+  title: 유입 출처 추적 (source/medium/campaign)
+  group: public
+  applicability: required
+  status: partial
+  screens: [a1]
+  events: [entry_context]
+  gap: >-
+    지금은 referrer 를 네 칸(직접·검색·소셜·기타)으로만 셉니다.
+    캠페인·매체·landing_page 가 없어 **"어느 캠페인이 매출을 냈나"에
+    답할 수 없습니다** (§5 최소 추적 미달).
+    ★ 자유 문자열은 못 받습니다 — CLAUDE.md 가 계측 문자열을 금합니다.
+    등록된 캠페인 id 만 받는 화이트리스트로 풀어야 합니다.
+
+- id: PUB-REFERRAL
+  title: 공유 유입 (분석지 한 장)
+  group: public
+  applicability: required
+  status: live
+  screens: [c7, c8, s1, s2]
+  apis: ["POST /v1/share", "GET /v1/share/{token}", "POST /v1/share/{token}/open"]
+  events: [share_click, share_land]
+  note: 공유 payload 에 생년월일시·고을이 안 들어갑니다.
+
+- id: PUB-LEAD-FORMS
+  title: 리드폼 · 뉴스레터 · 데모 · 대기자
+  group: public
+  applicability: na
+  reason: >-
+    B2C 즉시구매 제품입니다. 첫 방문이 곧 무료 해석이라 리드를 따로
+    모을 단계가 없습니다. 이메일을 받으면 안 받아도 될 개인정보를
+    받는 것입니다.
+
+- id: PUB-BLOG
+  title: 블로그 · 콘텐츠 마케팅
+  group: public
+  applicability: na
+  reason: 콘텐츠 마케팅을 안 합니다. 문장 뱅크는 서버 전용이라 공개 글이 아닙니다.
+
+# ══════════════════════════════════════════════════════════
+# 4.2 Authentication
+# ══════════════════════════════════════════════════════════
+# ★★ 이 제품에는 **손님 계정이 없습니다.** 의도적 설계입니다.
+#
+#   까닭 셋 —
+#     ① 받는 개인정보를 최소화합니다. 사주를 보려면 이미 생년월일시를
+#        받습니다. 거기에 이메일·비밀번호까지 받으면 유출 시 피해가
+#        곱해집니다.
+#     ② 강제 가입은 첫 가치까지의 거리를 늘립니다 (§6.10).
+#     ③ 이 집이 파는 것은 **읽을거리 한 벌**이지 계속 로그인해 쓰는
+#        도구가 아닙니다.
+#
+#   계정이 맡던 일(자격 복구)은 **주문번호 되찾기**가 맡습니다
+#   (CF-RESTORE). 그래서 그 자리는 계정만큼 단단해야 합니다.
+#
+#   ※ 이 판정은 제품 결정입니다. 뒤집으려면 DECISION_REQUIRED 입니다.
+
+- id: AUTH-SIGNUP
+  title: 회원가입
+  group: auth
+  applicability: na
+  reason: 익명 설계. 위 ★★ 참고. 자격은 세션 난수 + 주문번호가 집니다.
+  substitute: AUTH-RESTORE
+
+- id: AUTH-LOGIN
+  title: 로그인 (손님)
+  group: auth
+  applicability: na
+  reason: 계정이 없으므로 로그인할 대상이 없습니다.
+  substitute: AUTH-RESTORE
+
+- id: AUTH-LOGOUT
+  title: 로그아웃 (손님)
+  group: auth
+  applicability: na
+  reason: 위와 같음. 세션 초기화는 store.reset() 이 맡습니다.
+
+- id: AUTH-EMAIL-VERIFY
+  title: 이메일 인증
+  group: auth
+  applicability: na
+  reason: 이메일을 안 받습니다.
+
+- id: AUTH-PHONE-VERIFY
+  title: 휴대폰 인증
+  group: auth
+  applicability: na
+  reason: 전화번호를 안 받습니다. 본인확인이 필요한 거래가 없습니다(결제는 PG가 맡음).
+
+- id: AUTH-PASSWORD
+  title: 비밀번호 재설정·변경
+  group: auth
+  applicability: na
+  reason: 손님 비밀번호가 없습니다. 주인 비밀번호는 환경변수 해시로만 바꿉니다.
+
+- id: AUTH-SOCIAL
+  title: 소셜 로그인
+  group: auth
+  applicability: na
+  reason: 계정이 없습니다. 소셜 로그인을 붙이면 그 자체가 계정 도입입니다.
+
+- id: AUTH-MAGIC-LINK
+  title: 매직링크
+  group: auth
+  applicability: na
+  reason: 이메일을 안 받습니다.
+
+- id: AUTH-MFA
+  title: 다중 인증
+  group: auth
+  applicability: conditional
+  condition: 주인 자리에 한해, 매출 규모가 커지면
+  status: none
+  reason: >-
+    손님은 계정이 없어 해당 없음. 주인 문은 지금 비밀번호 + 5분 10회
+    잠금입니다. 매출이 커지면 주인 문에만 TOTP 를 답니다.
+
+- id: AUTH-SESSION
+  title: 세션 관리 (손님)
+  group: auth
+  applicability: required
+  status: live
+  note: >-
+    `sessionId` = crypto.randomUUID(), localStorage 지속.
+    서버는 sha256 앞 16자(`_user_key`)로만 셉니다 — 원문을 안 적습니다.
+  stores: [order, orders, seals, sub]
+
+- id: AUTH-SESSION-REVOKE
+  title: 세션·기기 해제
+  group: auth
+  applicability: conditional
+  condition: 한 주문이 여러 기기로 퍼졌을 때 주인이 끊을 수 있어야 하면
+  status: none
+  reason: >-
+    지금은 restore 로 붙은 기기를 떼는 길이 없습니다. 주문 하나가
+    몇 기기에 붙었는지도 안 셉니다. 남용이 보이면 그때 답니다.
+  depends_on: [AUTH-RESTORE]
+
+- id: AUTH-RESTORE
+  title: 자격 되찾기 (주문번호)
+  group: auth
+  applicability: required
+  status: partial
+  screens: [f2]
+  apis: ["POST /v1/pay/restore", "POST /v1/pay/sub/restore"]
+  security: [throttled_20per1h, paid_orders_only]
+  gap: >-
+    속도 제한은 붙였습니다. 남은 것은 **계측** — 되찾기가 몇 번
+    일어나고 몇 번 실패하는지 세는 자리가 없어, 남용이 시작돼도
+    주인이 모릅니다. 주문 하나가 몇 기기에 붙었는지는 이제
+    주인 화면(ADMIN-ORDERS)에서 보입니다.
+  qa: [tests/test_pay_flow.py]
+
+- id: AUTH-ADMIN-LOGIN
+  title: 주인 로그인
+  group: auth
+  applicability: required
+  status: live
+  screens: [adm-login]
+  apis: ["GET /v1/admin/gate", "POST /v1/admin/login", "POST /v1/admin/logout", "GET /v1/admin/me"]
+  security: [pbkdf2_sha256_210k, compare_digest, throttle_5min_10try, token_ttl_1d]
+  qa: [tests/test_admin_auth.py, tests/test_admin_gate.py]
+
+- id: AUTH-RATE-LIMIT
+  title: 속도 제한 · 무차별 대입 방어
+  group: auth
+  applicability: required
+  status: live
+  security: [admin_login_10per5min, restore_20per1h, no_ip_stored]
+  qa: [tests/test_shipos.py]
+  note: >-
+    주인 로그인 5분 10회 · 되찾기 한 시간 20회.
+    세는 열쇠는 해시한 세션입니다 — IP 를 안 씁니다(개인정보).
+
+- id: AUTH-TERMS-AGREEMENT
+  title: 약관·개인정보 동의
+  group: auth
+  applicability: required
+  status: partial
+  screens: [a4, /legal]
+  gap: >-
+    만 14세 미만은 막고 있고 약관 문서는 있으나, 생년월일을 받기 전에
+    **동의를 받은 기록이 없습니다**(consent history). 언제 어느 판에
+    동의했는지 못 댑니다.
+
+# ══════════════════════════════════════════════════════════
+# 4.3 Onboarding
+# ══════════════════════════════════════════════════════════
+- id: ONB-FIRST-VALUE
+  title: 첫 가치까지의 길
+  group: onboarding
+  applicability: required
+  status: live
+  screens: [a4, a4b, a5, a6, a7, b1]
+  note: 고민 고르기 → 생년월일 → 명식 → 훅. 가입 단계가 없어 최단경로입니다.
+
+- id: ONB-TIME-UNKNOWN
+  title: 시각 미상 갈래
+  group: onboarding
+  applicability: required
+  status: live
+  screens: [a4b]
+  note: 시·분 → 모르면 대강 칸 → 그것도 모르면 세 기둥. **순서가 전부**입니다.
+  qa: [tests/test_api.py]
+
+- id: ONB-PROGRESS-RESUME
+  title: 진행 저장 · 이어하기
+  group: onboarding
+  applicability: required
+  status: live
+  note: zustand persist. 새로고침해도 입력과 고른 것이 남습니다.
+
+- id: ONB-EMPTY-STATE
+  title: 빈 상태 안내
+  group: onboarding
+  applicability: required
+  status: live
+  note: 명식이 없으면 "생년월일부터" 로 돌려보냅니다 (pay d0 · me).
+
+- id: ONB-CHECKLIST
+  title: 온보딩 체크리스트
+  group: onboarding
+  applicability: required
+  status: live
+  screens: [f2]
+  apis: ["GET /v1/journey"]
+  note: TOWER-USER 가 이 자리를 맡습니다 — 같은 기능을 두 벌로 만들지 않습니다.
+
+- id: ONB-WORKSPACE
+  title: 워크스페이스 생성 · 팀 초대 · 데이터 가져오기
+  group: onboarding
+  applicability: na
+  reason: 조직·팀 개념이 없는 1인 소비자 제품입니다.
+
+# ══════════════════════════════════════════════════════════
+# 4.4 Account / Member
+# ══════════════════════════════════════════════════════════
+- id: ACC-LIBRARY
+  title: 내 서재 (구매·인장·열람)
+  group: account
+  applicability: required
+  status: live
+  screens: [f2, r1]
+  apis: ["GET /v1/pay/history", "GET /v1/pay/sub"]
+
+- id: ACC-PROFILE
+  title: 프로필 · 아바타 · 연락처 · 언어 · 시간대
+  group: account
+  applicability: na
+  reason: >-
+    계정이 없습니다. 이름은 호칭에만 쓰고 저장하지 않으며, 언어는
+    한국어 하나, 시간대는 Asia/Seoul 고정입니다(사주 계산이 그 표준시에
+    묶여 있습니다).
+
+- id: ACC-NOTIFY-SETTINGS
+  title: 알림 설정
+  group: account
+  applicability: conditional
+  condition: 알림 채널을 붙일 때
+  status: none
+  depends_on: [NOTIF-CHANNEL]
+
+- id: ACC-DATA-EXPORT
+  title: 내 자료 열람 (제35조)
+  group: account
+  applicability: required
+  status: live
+  apis: ["GET /v1/me/data"]
+  security: [throttled_20per1h, no_payment_key, no_billing_key]
+  qa: [tests/test_privacy.py]
+  note: >-
+    맡긴 것 전부를 냅니다. 승인 키·카드 열쇠는 본인에게도 안 냅니다 —
+    그건 PG 와 우리 사이의 것입니다. 생년월일시는 애초에 세션에
+    매어 저장하지 않습니다.
+
+- id: ACC-DELETE
+  title: 자료 삭제 (제36조)
+  group: account
+  applicability: required
+  status: live
+  apis: ["POST /v1/me/forget"]
+  security: [throttled, confirm_step, live_sub_blocked, txn_record_kept]
+  qa: [tests/test_privacy.py]
+  note: >-
+    지우기 전에 **무엇이 지워지고 무엇이 남는지** 먼저 말합니다.
+    거래 기록은 법이 5년 보관하라 하므로 남기되 세션을 뗍니다.
+    도는 구독이 있으면 거절합니다 — 카드만 걸린 채 남으면 안 됩니다.
+
+- id: ACC-LOGIN-HISTORY
+  title: 로그인 기록
+  group: account
+  applicability: na
+  reason: 손님 로그인이 없습니다. 주인 로그인은 감사기록(ADMIN-AUDIT)이 맡습니다.
+
+# ══════════════════════════════════════════════════════════
+# 4.5 Workspace / Organization
+# ══════════════════════════════════════════════════════════
+- id: ORG-ALL
+  title: 워크스페이스 · 팀 · 역할 · 좌석 · 소유권 이전
+  group: org
+  applicability: na
+  reason: >-
+    1인 소비자 제품입니다. 조직도, 팀도, 좌석도 없습니다.
+    권한은 손님/주인 둘뿐이고 RBAC 은 PERM-* 가 맡습니다.
+
+# ══════════════════════════════════════════════════════════
+# 4.6 Billing / Subscription
+# ══════════════════════════════════════════════════════════
+- id: BILL-PLANS
+  title: 목패 셋 (값 · 분량)
+  group: billing
+  applicability: required
+  status: live
+  apis: ["POST /v1/pay/tiers"]
+  qa: [tests/test_pay_flow.py, tests/test_lens_cuts.py]
+
+- id: BILL-CHECKOUT
+  title: 결제창 (한 번 긁기)
+  group: billing
+  applicability: required
+  status: live
+  screens: [d2, d3]
+  apis: ["GET /v1/pay/config", "POST /v1/pay/prepare", "POST /v1/pay/confirm"]
+  events: [pay_start, pay_done, pay_fail, payment_approved]
+  security: [server_side_amount, idempotency_key, day_limit_2, ownership_check]
+  qa: [tests/test_pay_flow.py]
+
+- id: BILL-ENTITLEMENT
+  title: 자격 부여 (치른 것만 열림)
+  group: billing
+  applicability: required
+  status: live
+  apis: ["POST /v1/report"]
+  note: >-
+    `routers/report.entitled_tier` 가 **치른 주문**을 보고 낮춰서 냅니다.
+    화면이 보낸 tier 를 안 믿습니다.
+  qa: [tests/test_api.py, tests/test_refund_access.py]
+
+- id: BILL-SUBSCRIPTION
+  title: 달삯 (빌링키 자동결제)
+  group: billing
+  applicability: required
+  status: partial
+  screens: [d2, f2]
+  apis: ["POST /v1/pay/sub/prepare", "POST /v1/pay/sub/register", "GET /v1/pay/sub",
+         "POST /v1/pay/sub/cancel", "POST /v1/pay/sub/resume", "POST /v1/pay/sub/restore"]
+  gap: >-
+    코드는 다 있고 검사도 통과하지만 **자동결제 계약이 없어 꺼져 있습니다**
+    (TOSS_BILLING_APPROVED 미설정). 실거래 미검증.
+  blocker: PG-BILLING-CONTRACT
+  qa: [tests/test_subscription.py]
+
+- id: BILL-RENEWAL
+  title: 갱신 · 유예 · 연체
+  group: billing
+  applicability: required
+  status: live
+  apis: ["POST /v1/jobs/renew-subscriptions"]
+  schedule: .github/workflows/renew-subscriptions.yml (매일 03:20 KST)
+  note: 서른 날 주기 · 사흘 유예 · 4회 실패면 중단. 두 번 돌아도 두 번 안 긁습니다.
+
+- id: BILL-CANCEL-RESUME
+  title: 해지 · 무르기
+  group: billing
+  applicability: required
+  status: live
+  screens: [f2]
+  note: 버튼 하나로 해지. 이미 치른 달은 끝까지 엽니다 (docs/11 §5).
+
+- id: BILL-REFUND
+  title: 환불 · 계산오류 재발행
+  group: billing
+  applicability: required
+  status: live
+  apis: ["POST /v1/pay/refund", "GET /v1/admin/refund-reviews", "POST /v1/admin/refund-reviews"]
+  events: [payment_refunded]
+  qa: [tests/test_refund_access.py]
+
+- id: BILL-RECEIPT
+  title: 영수증 · 거래명세
+  group: billing
+  applicability: required
+  status: partial
+  screens: [f2]
+  gap: >-
+    구매 내역은 보이지만 **영수증(거래 증빙)을 받아 갈 길이 없습니다.**
+    토스가 발급한 영수증 URL(`receipt.url`)이 승인 응답에 오는데
+    저장하지 않고 버립니다.
+
+- id: BILL-HISTORY
+  title: 결제 내역
+  group: billing
+  applicability: required
+  status: live
+  screens: [f2]
+  apis: ["GET /v1/pay/history"]
+
+- id: BILL-WEBHOOK
+  title: PG 웹훅 (상태 변경 알림)
+  group: billing
+  applicability: required
+  status: live
+  apis: ["GET /v1/pay/webhook", "POST /v1/pay/webhook"]
+  security: [body_not_trusted, verified_by_lookup]
+
+- id: BILL-COUPON
+  title: 쿠폰 · 프로모션 · 무료체험
+  group: billing
+  applicability: na
+  reason: >-
+    값 사다리가 "보이는 값이 청구되는 값" 하나로 서 있습니다. 할인을
+    넣으면 목패 셋의 순서가 무너지고(§값 지배 검사), 무료체험은
+    이 제품에 맞지 않습니다 — 무료 구간이 이미 체험입니다.
+
+- id: BILL-UPGRADE-PRORATION
+  title: 업그레이드 · 다운그레이드 · 비례정산
+  group: billing
+  applicability: na
+  reason: >-
+    달삯이 한 종류(14,900)뿐이라 오르내릴 등급이 없습니다.
+    단건(one/all)은 구독이 아니라 비례정산 대상이 아닙니다.
+
+- id: BILL-PAUSE
+  title: 구독 일시정지
+  group: billing
+  applicability: na
+  reason: 해지하면 치른 달 끝까지 보고 다시 걸 수 있어 일시정지와 결과가 같습니다.
+
+- id: BILL-TAX
+  title: 세금계산서 · VAT 칸
+  group: billing
+  applicability: na
+  reason: >-
+    B2C 이고 값이 부가세 포함 표시가입니다. 사업자 대상 판매가 없어
+    세금계산서 발행 대상이 없습니다. (B2B 가 생기면 required 로 바뀝니다.)
+
+# ══════════════════════════════════════════════════════════
+# 4.7 Core Product — 이 집의 본체
+# ══════════════════════════════════════════════════════════
+- id: CORE-CHART
+  title: 만세력 (명식 산출)
+  group: core
+  applicability: required
+  status: live
+  apis: ["POST /v1/chart", "GET /v1/chart/{chart_id}"]
+  entities: [charts]
+  events: [chart_completed]
+  security: [range_1900_2100, no_guessing]
+  qa: [tests/test_calendar.py, tests/test_manse_table.py, tools/crosscheck.py]
+
+- id: CORE-HOOK
+  title: 훅 5단
+  group: core
+  applicability: required
+  status: live
+  screens: [b1, b2, b3, b4]
+  apis: ["POST /v1/hook"]
+  entities: [hooks, statement_log]
+  events: [hook_shown, hook_answer, hook_skip]
+  qa: [tests/test_bank.py, tests/test_hook_concern.py]
+
+- id: CORE-REPORT
+  title: 리포트 (컷 · tier 잠금)
+  group: core
+  applicability: required
+  status: live
+  # d0 — 값 치르기 전 무료 6단도 이 함수가 짓습니다. 안 적어 두면
+  # 관제탑의 「무료 6단」 칸이 비어, 가장 많이 읽히는 자리가 안 보입니다.
+  screens: [d0, c1, c2, c3, c4, c5, c6]
+  apis: ["POST /v1/report", "GET /v1/report/choices", "POST /v1/omnibus"]
+  entities: [reports, report_cuts]
+  events: [free_shown, free_beat, reading_expand]
+  qa: [tests/test_api.py, tests/test_lens_cuts.py]
+
+- id: CORE-RELAY
+  title: 릴레이 (다음 캐릭터 추천)
+  group: core
+  applicability: required
+  status: live
+  screens: [h1]
+  apis: ["POST /v1/relay", "POST /v1/relay/consume"]
+  entities: [relay_rules, relay_log, cooldowns]
+  events: [relay_take, relay_skip]
+  qa: [tests/test_relay_concern.py]
+
+- id: CORE-DAILY
+  title: 오늘의 일진
+  group: core
+  applicability: required
+  status: live
+  screens: [g1, g2, g3]
+  apis: ["GET /v1/daily"]
+
+- id: CORE-PEEK
+  title: 엿보기 (값 치르기 전)
+  group: core
+  applicability: required
+  status: live
+  screens: [d1b]
+  apis: ["POST /v1/pay/peek"]
+  note: 블러가 아니라 **서버가 본문을 안 보냅니다.**
+
+- id: CORE-SUMMARY
+  title: 분석지 한 장
+  group: core
+  applicability: required
+  status: live
+  screens: [c7, c8]
+  apis: ["POST /v1/summary"]
+
+- id: CORE-VOICE
+  title: 목소리 (TTS)
+  group: core
+  applicability: conditional
+  condition: 곳간 값이 감당되면
+  status: partial
+  apis: ["POST /v1/voice", "GET /v1/voice/{key}.mp3"]
+  gap: 배포에서 꺼져 있습니다 (`/health` voice.enabled=false).
+
+- id: CORE-GUARD
+  title: 금지어 가드 (이중)
+  group: core
+  applicability: required
+  status: live
+  note: 조합 시점(engine/guard) + 전 응답 미들웨어(guard_middleware). 끄지 말 것.
+  qa: [tests/test_safety.py, tests/test_claims.py]
+
+# ══════════════════════════════════════════════════════════
+# 4.8 Search / Discovery
+# ══════════════════════════════════════════════════════════
+- id: DISC-LOBBY
+  title: 진열대 (스무 사람 고르기)
+  group: discovery
+  applicability: required
+  status: live
+  screens: [b1, b2, b3, b4]
+
+- id: SEARCH-ALL
+  title: 검색 · 자동완성 · 필터 · 정렬 · 저장검색 · 페이지네이션
+  group: discovery
+  applicability: na
+  reason: >-
+    고를 것이 스무 명뿐이고 그 고르기는 **릴레이가 대신**합니다
+    (사주 조건이 다음 사람을 고름). 검색창을 놓으면 이 제품의
+    핵심 구조를 손님이 직접 우회하게 됩니다.
+
+# ══════════════════════════════════════════════════════════
+# 4.9 Notification
+# ══════════════════════════════════════════════════════════
+- id: NOTIF-SCHEDULE
+  title: 리텐션 5층 · 예약 생성
+  group: notification
+  applicability: required
+  status: partial
+  entities: [notifications]
+  gap: 예약은 만들지만 보내는 곳이 없습니다.
+  depends_on: [NOTIF-CHANNEL]
+
+- id: NOTIF-CHANNEL
+  title: 발송 채널 (이메일·SMS·푸시)
+  group: notification
+  applicability: conditional
+  condition: 손님 연락처를 받기로 결정할 때
+  status: none
+  reason: >-
+    **이 제품은 연락처를 안 받습니다** (AUTH-* 참고). 그래서 밖으로
+    밀어낼 채널이 아예 없습니다. 지금 가능한 것은 **다시 왔을 때
+    보여 주는 것**(in-app)뿐입니다.
+  decision_required: >-
+    이메일을 받아 밀어낼지, in-app 으로만 둘지는 제품 결정입니다.
+    받기로 하면 AUTH-* 의 익명 설계가 흔들립니다.
+
+- id: NOTIF-INAPP
+  title: 다시 왔을 때 보여 주기 (in-app)
+  group: notification
+  applicability: required
+  status: partial
+  screens: [g1, f2]
+  gap: >-
+    일진은 1년에 352일 걸립니다. 다 보여 주면 알림이 아니라 배경이
+    됩니다. `retention._daily_hits` 가 거르지만 **읽음/안읽음 상태와
+    알림함이 없습니다.**
+
+- id: NOTIF-TEMPLATE
+  title: 템플릿 관리 · 발송 상태 · 재시도
+  group: notification
+  applicability: conditional
+  condition: NOTIF-CHANNEL 이 붙을 때
+  status: none
+  depends_on: [NOTIF-CHANNEL]
+
+# ══════════════════════════════════════════════════════════
+# 4.10 Content / CMS
+# ══════════════════════════════════════════════════════════
+- id: CMS-BANK
+  title: 문장 뱅크 (서버 전용)
+  group: content
+  applicability: required
+  status: live
+  note: >-
+    seed/*.json 이 원본이고 **클라이언트 번들에 절대 안 들어갑니다.**
+    API 는 렌더된 HTML 만 내려보냅니다.
+  qa: [tests/test_bank.py, tests/test_no_overlap.py]
+
+- id: CMS-EDITOR
+  title: 관리자 콘텐츠 편집 · 초안 · 발행 · 예약 · 버전 · 승인
+  group: content
+  applicability: na
+  reason: >-
+    문장 뱅크는 **코드와 함께 배포되는 자산**입니다. 검사(중복률·분포·
+    쉬운말·팩폭·말투)가 배포 관문에서 돌아야 품질이 지켜지는데,
+    관리자 화면에서 고치면 그 관문을 우회하게 됩니다. 편집은 저장소에서.
+
+# ══════════════════════════════════════════════════════════
+# 4.11 Customer Support
+# ══════════════════════════════════════════════════════════
+- id: CS-REFUND-REVIEW
+  title: 계산오류 확인 요청 → 주인 판정
+  group: support
+  applicability: required
+  status: live
+  apis: ["POST /v1/pay/refund", "GET /v1/admin/refund-reviews", "POST /v1/admin/refund-reviews"]
+  screens: [f2, adm-refund]
+
+- id: CS-CONTACT
+  title: 문의 창구
+  group: support
+  applicability: required
+  status: live
+  apis: ["POST /v1/support", "GET /v1/support/mine", "GET /v1/support/topics",
+         "GET /v1/admin/support", "POST /v1/admin/support"]
+  admin: [adm-overview]
+  security: [throttled_5per1h, body_capped_1000, no_contact_collected]
+  qa: [tests/test_support.py]
+  note: >-
+    양쪽으로 흐릅니다 — 주인이 답하면 손님이 「내 서재」에서 봅니다.
+    갈래는 고른 칸이고 자유 낱말이 아닙니다. 이 글은 문장 엔진
+    근처에 가지 않습니다(가드 우회 방지).
+
+- id: CS-TICKET
+  title: 티켓 · 우선순위 · 배정 · SLA · 내부메모 · 첨부
+  group: support
+  applicability: na
+  reason: >-
+    운영자가 한 사람이고 문의량이 티켓 시스템을 필요로 하는 규모가
+    아닙니다. 환불 확인 요청은 전용 큐(CS-REFUND-REVIEW)가 맡습니다.
+    ★ 문의량이 늘면 conditional 로 올립니다.
+
+- id: CS-FAQ-KB
+  title: FAQ · 지식베이스
+  group: support
+  applicability: required
+  status: live
+  screens: [a3, s2, /legal]
+
+# ══════════════════════════════════════════════════════════
+# 4.12 Safety / Trust
+# ══════════════════════════════════════════════════════════
+- id: TRUST-GUARD
+  title: 출력 가드레일 (금지어 필터)
+  # ★ 제목에 금지어 자체를 적지 않습니다.
+  #   관제탑은 이 글을 API 로 내려보내고, 그 응답도 가드를 지납니다.
+  #   무엇을 막는지는 seed/guard.json 과 engine/guard.py 가 들고 있습니다.
+  group: safety
+  applicability: required
+  status: live
+  qa: [tests/test_safety.py, tests/test_claims.py]
+
+- id: TRUST-BRAKES
+  title: 브레이크 (하루 2건 · 릴레이 2명 · 쿨다운)
+  group: safety
+  applicability: required
+  status: live
+  qa: [tests/test_pay_flow.py]
+
+- id: TRUST-ADMIN-AUDIT
+  title: 주인 행동 감사기록
+  group: safety
+  applicability: required
+  status: live
+  apis: ["GET /v1/admin/audit"]
+  stores: [audit]
+  admin: [adm-overview]
+  security: [redact_pii, actor_recorded, two_year_ttl]
+  note: >-
+    환불 판정과 자격 손질이 남습니다 — 누가·언제·무엇을·왜, before/after
+    까지. 손님이 누구인지는 안 적습니다(준식별자).
+
+- id: TRUST-MODERATION
+  title: 신고 · 차단 · 정지 · 이의제기 · 위험점수
+  group: safety
+  applicability: na
+  reason: >-
+    손님끼리 주고받는 것이 없습니다(UGC 없음, 메시지 없음, 공개
+    프로필 없음). 조정할 대상이 존재하지 않습니다.
+
+# ══════════════════════════════════════════════════════════
+# 권한 · 관리자 · 분석 · 관제탑 (§12 §16 §17 §18)
+# ══════════════════════════════════════════════════════════
+- id: PERM-SERVER-SIDE
+  title: 서버측 권한 검사
+  group: permission
+  applicability: required
+  status: live
+  security: [entitled_tier_server_side, order_ownership, admin_guard_all_doors]
+  qa: [tests/test_api.py, tests/test_pay_flow.py, tests/test_shipos.py]
+  note: >-
+    자격은 **치른 주문**이 정합니다 — 화면이 보낸 tier 를 안 믿습니다.
+    주문 조회도 산 사람만 봅니다(전에는 번호만 알면 열렸습니다).
+
+- id: ADMIN-OVERVIEW
+  title: 주인 현황 (매출·이탈·훅·집)
+  group: admin
+  applicability: required
+  status: live
+  screens: [adm-overview]
+  apis: ["GET /v1/admin/overview"]
+
+- id: ADMIN-QUALITY
+  title: 품질 계기판 (연출·값값)
+  group: admin
+  applicability: required
+  status: live
+  apis: ["GET /v1/admin/screens", "GET /v1/admin/worth"]
+
+- id: ADMIN-USERS
+  title: 회원 관리
+  group: admin
+  applicability: na
+  reason: >-
+    회원이 없습니다. 주인이 다룰 대상은 **주문**이지 사람이 아닙니다.
+    그리고 이 집은 누가 누구인지 일부러 모릅니다(준식별자 금지).
+    주문 다루기는 ADMIN-ORDERS 가 맡습니다.
+
+- id: ADMIN-ORDERS
+  title: 주문 조회 · 조치
+  group: admin
+  applicability: required
+  status: live
+  apis: ["GET /v1/admin/orders", "POST /v1/admin/orders/grant"]
+  admin: [adm-overview]
+  security: [admin_guard, no_session_search, paid_only_grant, audited]
+  note: >-
+    주문번호로 찾고, 치렀는데 안 열린 손님에게 손으로 자격을 붙입니다.
+    안 치른 주문은 못 엽니다. 붙인 일은 감사기록에 남습니다.
+
+- id: ADMIN-REVENUE
+  title: 매출 지표 (MRR · ARPU · churn)
+  group: admin
+  applicability: required
+  status: partial
+  gap: >-
+    오늘 매출·건수·환불은 셉니다. 달삯이 붙었는데 **MRR·해지율·
+    ARPU·재구매율이 없습니다** (§13 · §15).
+
+- id: ANALYTICS-EVENTS
+  title: 행동 계측
+  group: analytics
+  applicability: required
+  status: live
+  apis: ["POST /v1/events", "GET /v1/funnel"]
+  entities: [events]
+  security: [whitelist_names, whitelist_screens, numeric_props_only, no_pii]
+  qa: [tests/test_analytics.py]
+
+- id: ANALYTICS-RETENTION
+  title: 리텐션 지표 (D1 · D7 · D30)
+  group: analytics
+  applicability: required
+  status: none
+  gap: >-
+    퍼널(한 번의 방문 안)은 있는데 **돌아온 손님을 세는 자리가 없습니다.**
+    리텐션 루프(일진·회고)를 만들어 놓고 그게 듣는지 못 잽니다.
+
+- id: EXPERIMENTS
+  title: 실험 (A/B)
+  group: analytics
+  applicability: conditional
+  condition: 트래픽이 유의미해지면
+  status: live
+  apis: ["GET /v1/experiments"]
+  events: [experiment_exposed]
+
+- id: TOWER-ADMIN
+  title: 관리자 항해 관제탑 (§17)
+  group: tower
+  applicability: required
+  status: live
+  screens: [adm-tower]
+  apis: ["GET /v1/admin/tower"]
+  admin: [adm-tower]
+  qa: [tests/test_shipos.py]
+  note: >-
+    역할 × 여정 × 구현축 · 끊긴 배선 · 릴리스 게이트 · 다음 할 일.
+    **화면은 세지 않습니다** — shipos 한 자리가 셉니다 (§45 C12).
+
+- id: TOWER-USER
+  title: 유저 항해 관제탑 (§18)
+  group: tower
+  applicability: required
+  status: live
+  screens: [f2]
+  apis: ["GET /v1/journey"]
+  components: [Voyage.tsx]
+  qa: [tests/test_shipos.py]
+  note: >-
+    일곱 자리 · 지금 여기 · **다음 한 걸음 하나** · 쌓인 것.
+    값이 걸린 칸은 화면 말을 안 듣고 치른 주문만 봅니다.
+
+# ══════════════════════════════════════════════════════════
+# 운영 · 배포 (§29 §30)
+# ══════════════════════════════════════════════════════════
+- id: OPS-HEALTH
+  title: 헬스체크
+  group: ops
+  applicability: required
+  status: live
+  apis: ["GET /health"]
+
+- id: OPS-ERROR-TRACKING
+  title: 오류 추적
+  group: ops
+  applicability: required
+  status: live
+  apis: ["GET /v1/admin/errors"]
+  admin: [adm-overview]
+  security: [no_request_body, no_stacktrace, no_pii, self_hosted]
+  qa: [tests/test_errors.py]
+  note: >-
+    길·예외 이름·횟수만 셉니다. 밖(센트리 등)에 안 보냅니다 —
+    이 집의 요청 본문에는 생년월일시가 들어 있습니다.
+    손님에게는 번호(traceId)를 함께 내어 주인이 같은 자리를 찾습니다.
+
+- id: OPS-MIGRATION
+  title: 마이그레이션 · 롤백
+  group: ops
+  applicability: required
+  status: partial
+  gap: SQLite 로 왕복 검증됨. Postgres 실행 검증은 아직.
+
+- id: OPS-SECRETS
+  title: 비밀 관리
+  group: ops
+  applicability: required
+  status: live
+  note: 저장소에 키가 없습니다. fly secrets / Vercel env 로만.
+
+- id: OPS-BACKUP
+  title: 백업
+  group: ops
+  applicability: required
+  status: live
+  apis: ["POST /v1/jobs/backup"]
+  schedule: .github/workflows/backup.yml (매일 04:10 KST)
+  security: [job_key_guarded, no_pii_in_snapshot_names]
+  qa: [tests/test_backup.py]
+  note: >-
+    /data 볼륨 하나에 주문과 자격이 삽니다. 날아가면 값을 치른
+    손님의 자격이 사라집니다. SQLite 온라인 백업 API 로 뜨고
+    이레 치를 굴립니다.

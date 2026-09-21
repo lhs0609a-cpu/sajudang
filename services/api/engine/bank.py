@@ -654,6 +654,37 @@ def _asked_count(f, concern, top) -> str:
     return "8글자에 %s %s 들었고 일간은 <b>%s</b>요." % (
         josa(top, "이", "가"), count_word(f.ten_gods[top]), f.day_gan)
 
+def _axis_aside(f, concern: str, axis4: Optional[str],
+                slot: int = 0) -> str:
+    """
+    넉 자 한 줄을 **다른 마디에도** 붙이는 자리.
+
+    ★ 왜 생겼나 (2026-09-21)
+
+      `tools/person_axis.py` 로 재 보니 넉 자를 열여섯 칸 중 무엇으로
+      골라도 훅 0·1·2·3단은 **한 글자도 안 갈렸습니다** (17칸 → 1가지).
+      리포트도 서른일곱 컷 중 다섯만 갈렸소 (3,621자 · 16.3%).
+
+      손님은 a4b 에서 열여섯 칸을 보고 하나를 고릅니다. 그 화면은
+      「어긋난 데가 있거든 그게 여태 그대를 지치게 한 곳이오」 라고
+      적어 두었소. 그 약속에 견주면 한 마디는 너무 적소.
+
+    ★ 넉 자를 안 적었으면 **아무것도 안 냅니다.** 없는 것을 지어내지
+      않는다는 규칙이 여기서도 같습니다.
+    """
+    if not axis4 or len(axis4) != 4:
+        return ""
+    from . import topic as _topic
+    fl = _topic.face_line(f, concern, axis4, slot=slot)
+    if not fl:
+        return ""
+    return ('<div class="cax"><p class="cnt">적으신 <b>%s</b>로 보면 '
+            '<b>%s</b> 자리는 이렇게 나오오.</p>%s'
+            '<p class="ev"><span class="evk">센 것</span>%s</p></div>'
+            % (_html.escape(axis4.upper()), concern_word(concern),
+               fl["say"], fl["ev"]))
+
+
 def build_hook(f, concern: str, axis4: Optional[str] = None,
                name: str = "", you: str = "그대", misses: int = 0) -> list:
     """
@@ -833,6 +864,23 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
               #   「고민이 바뀌었다」가 아니라 「낱말이 치환됐다」로
               #   읽혔습니다. 셈을 댄 **바로 뒤**가 그 줄의 자리요.
               '<!--ATASK-->'
+              # ★ 넉 자가 **이 마디에도** 닿게 합니다 (2026-09-21).
+              #
+              #   재보니 넉 자를 열여섯 칸 중 무엇으로 골라도 훅
+              #   0·1·2·3단은 한 글자도 안 갈렸습니다 (17칸 → 1가지).
+              #   갈리는 것은 2.5단 하나뿐이었소. 손님은 a4b 에서
+              #   열여섯 칸을 보고 하나를 고르는데, 그 고름이 훅
+              #   다섯 마디 중 **한 마디**만 움직였다는 뜻이오.
+              #
+              #   새 글을 짓지 않습니다 — `AXIS_OF[고민]` 이 축을 둘
+              #   주는데 여태 **첫 칸만** 쓰고 있었소. 2.5단이 첫
+              #   칸(slot 0)을 쓰니 여기는 **둘째 칸**을 씁니다.
+              #   한 훅 안에서 같은 축을 두 번 내지 않기 위함이오.
+              #
+              #   ★ 자리는 셈을 댄 **바로 뒤**입니다. 마디 꼬리에
+              #     얹으면 「고민이 바뀌었다」가 아니라 「낱말이
+              #     치환됐다」로 읽힙니다 (CLAUDE.md).
+              '%s'
               # ★ 「내 얘기 같다」를 만드는 줄은 셈이 아니라 **겪은 일**
               #   입니다 (「~했을 것이오」). 그런데 그 줄이 여섯 고민에
               #   글자 그대로 같았습니다 — 가장 내 얘기 같아야 할 줄이
@@ -842,6 +890,7 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
               '겪은 일과 맞춰 보시오.</p>')
              % (ask("1", "사주로는 못 정하는 것이 있소. 무엇이겠소?"),
                 esc_you, m1, m2, _asked_count(f, concern, top),
+                _axis_aside(f, concern, axis4, slot=1),
                 (bank().get("MYTH_LIVED", {}) or {}).get(concern)
                 or ("%s 그런 말을 듣고 아니라 하고 싶었던 적이 있었을 "
                     "것이오. 그러고도 말은 못 했을 것이오."
@@ -948,7 +997,8 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
               # ★ 순서 상자를 보자마자 그 자리의 말로 한 번 옮깁니다.
               #   맨 끝에 붙이면 손님은 상자 셋을 먼저 읽고 넘어갑니다.
               '<div class="seq">%s</div><!--ATASK-->%s'
-              '<p class="sea">%s</p><p class="relief">%s</p>%s%s</div>'
+              # 2026-09-21: 넉 자가 이 마디에도 닿게. 넷째 축(slot 3)이오.
+              '<p class="sea">%s</p><p class="relief">%s</p>%s%s%s</div>'
               % (ask("2", "그 일이 늘 어디서부터 시작되는지 아시오?"),
                  turn_line, esc_you,
                  "".join('<div><span>%s</span></div>' % s for s in seq),
@@ -977,7 +1027,8 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
                  #   가방 · 한 칸 밀려 끼운 단추.
                  ('<p class="fig">%s</p>'
                   % bank()["SEQ_FIG"][concern])
-                 if bank().get("SEQ_FIG", {}).get(concern) else "")),
+                 if bank().get("SEQ_FIG", {}).get(concern) else "",
+                 _axis_aside(f, concern, axis4, slot=3))),
         question=qq("2", "…이 순서가 맞소?"),
         yes="그럴 줄 알았소. 그럼 이름을 붙여드리리다.",
         no="순서가 틀렸다 하시니, 이름을 붙여 보고 다시 말하시오.",
@@ -1185,10 +1236,15 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
               '%s'
               '<p class="word">%s</p><!--ATASK-->'
               '<p class="post">%s</p>'
+              # 2026-09-21: 넉 자가 이 마디에도 닿게. 셋째 축(slot 2)이오 -
+              #   2.5단이 첫 칸, 1단이 둘째 칸을 쓰니 여기는 셋째요.
+              #   한 훅 안에서 같은 축을 두 번 내지 않습니다.
+              '%s'
               '%s<p class="nextn">%s</p></div>'
               % (ask("3", "오래 느꼈는데 말로는 못 했던 것. "
                           "그것에 이름이 있다면 무엇이겠소?"),
                  word, post,
+                 _axis_aside(f, concern, axis4, slot=2),
                  ('<p class="cnt">셈은 값을 치르기 전에도 하오. %s</p>'
                   '<p class="ev"><span class="evk">센 것</span>%s</p>'
                   % (counted["say"], counted["ev"])) if counted else "",

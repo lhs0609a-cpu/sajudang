@@ -67,10 +67,26 @@ def test_사업자_정보를_코드에_박지_않는다():
         assert k in t, "%s 를 밖에서 받지 않소" % k
 
 
-def test_표시가_없으면_값을_안_받는다():
-    """결제 열쇠가 없으면 거절하는 것과 **같은 규칙**입니다."""
-    t = (WEB / "app" / "pay" / "page.tsx").read_text(encoding="utf-8")
-    assert "SELLABLE" in t, "사업자 표시 없이도 결제창이 열리오"
+def test_결제를_여닫는_것은_결제_열쇠_하나다():
+    """
+    ★ 판정이 두 벌이면 한쪽이 조용히 닫습니다.
+
+      전에는 사업자 표시(`SELLABLE`)가 결제 단추를 한 번 더 막았습니다.
+      그 값은 코드가 아니라 배포 환경변수(NEXT_PUBLIC_BIZ_*)라서,
+      번호를 안 넣어 둔 동안 **라이브 결제 키가 살아 있는데도** 화면은
+      단추를 아예 안 그렸습니다. 한 사람도 못 사는 자리였습니다.
+
+      이제 여닫는 것은 `/v1/pay/config` 하나이고, 화면은 그걸 본
+      `/api/sales-status` 만 봅니다.
+    """
+    pay = (WEB / "app" / "pay" / "page.tsx").read_text(encoding="utf-8")
+    assert "SELLABLE" not in pay, "판매 여부를 두 군데서 정하고 있소"
+    assert "sales?.ready" in pay, "결제 가능 판정을 아예 안 보오"
+
+    route = (WEB / "app" / "api" / "sales-status" / "route.ts").read_text(encoding="utf-8")
+    # 주석에 까닭을 적는 것은 되오. **들여와 쓰는 것**이 안 되오.
+    assert "@/lib/biz" not in route, "사업자 표시가 다시 결제를 막고 있소"
+    assert "/v1/pay/config" in route, "결제 열쇠를 안 물어보오"
 
 
 def test_만_14세_미만을_막는다():

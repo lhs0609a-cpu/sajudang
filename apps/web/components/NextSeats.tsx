@@ -70,10 +70,10 @@ export default function NextSeats() {
   if (!rows || !rows.length) return null;
   return (
     <section className="nextseats">
-      <p className="lab">이어지는 자리</p>
+      <h2>같은 고민을 다른 눈으로 짚어보면</h2>
       {/* ★ 이 줄이 「왜 다음 사람이 필요한가」 입니다. 없으면 목록이
           그냥 메뉴판이 되오. */}
-      <p className="sm">여기까지가 <b>한 사람</b>이 본 것이오. 같은 여덟 글자를 <b>20명</b>이 저마다 다른 데서 읽소 — 그대의 글자가 <b>다음 사람</b>을 골랐소.</p>
+      <p className="sm">방금 읽은 모습에서 더 궁금한 대목이 있소? 그대의 명식과 고민을 바탕으로, 다른 부분을 짚어줄 상담사를 골랐소.</p>
       {rows.slice(0, 2).map((r) => {
         const l = LENS_BY_ID[r.lens_id];
         return (
@@ -91,9 +91,9 @@ export default function NextSeats() {
             </div>
             <h3 className="reading-next-question">{CHARACTER_QUESTIONS[r.lens_id]}</h3>
             {/* 근거는 서버 글이라 **그려야** 하오 — 풀이가 붙어 옵니다. */}
-            <ServerText className="src" html={`근거 · ${r.reason}`} />
+            <ServerText className="conversion-note" html={`이 관점을 권하는 이유 · ${r.reason}`} />
             <button className="btn mt" onClick={() => void go(r.lens_id)}>
-              {r.name}에게 듣겠습니다
+              {r.name}의 무료 풀이 읽기
             </button>
           </div>
         );

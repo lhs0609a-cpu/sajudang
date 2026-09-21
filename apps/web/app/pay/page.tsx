@@ -20,6 +20,7 @@ import RestHere from "@/components/RestHere";
 import NextSeats from "@/components/NextSeats";
 import PracticeCard from "@/components/PracticeCard";
 import ReadingGuide from '@/components/ReadingGuide';
+import FreeReadingDetail, { FREE_DETAIL_IDS } from '@/components/FreeReadingDetail';
 import NextReading from '@/components/NextReading';
 import Wants from '@/components/Wants';
 import { READING_QUESTIONS, freeRevelation } from '@/lib/reading-journey';
@@ -59,6 +60,8 @@ interface Order {
   tier: string;
   client_key: string | null;
   enabled: boolean;
+  /** 토스에 보낼 손님 열쇠. 서버가 셈해 줍니다 — 세션 아이디를 날것으로 안 보내오. */
+  customer_key: string;
   refund_notice: string;
   /** 같은 약속을 이 집의 말로. 결제 버튼 **바로 위**에 놓습니다. */
   refund_say: string;
@@ -106,7 +109,7 @@ function PayInner() {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 12000);
     fetch("/api/sales-status", {signal:controller.signal}).then(r => {if (!r.ok) throw new Error(); return r.json();})
-      .then(value => {if (alive) {setSales(value); if (!value.ready) track("checkout_blocked", "d1", {n:value.reason === "seller_setup" ? 1 : value.reason === "gateway_setup" ? 2 : 3});}})
+      .then(value => {if (alive) {setSales(value); if (!value.ready) track("checkout_blocked", "d1", {n:value.reason === "gateway_setup" ? 2 : 3});}})
       .catch(() => {if(alive) setSales({ready:false,reason:"temporary"});})
       .finally(() => clearTimeout(timeout));
     return () => {alive=false;clearTimeout(timeout);controller.abort();};
@@ -496,12 +499,13 @@ function PayInner() {
               맛보기는 앞에 둡니다 — 궁금증은 읽기 **전**에 서야 하오.
               값은 뒤에서 묻습니다.
           */}
+          {(lens?.price ?? 0) > 0 && <FreeReadingDetail cuts={cuts} />}
           {(lens?.price ?? 0) > 0 && rejected.length === 0 && <NextReading cuts={free.locked} onOpen={openPrice} />}
           <section className="conversion-details reading-evidence" aria-label="무료 해석과 계산 근거">
             <h2>{rejected.length ? "원래 해석과 계산 근거" : "무료 해석과 자세한 근거"}</h2>
             <p className="conversion-note">{cuts.length}개 항목을 아래에서 바로 읽을 수 있소.</p>
             {rejected.length > 0 && <p className="conversion-note">아래는 응답 전 생년월일과 고민으로 만든 원래 해석이오. 아니라고 답한 대목이 맞는 것으로 바뀐 것은 아니오.</p>}
-            {cuts.map(c => <section className="blk" key={c.id}>
+            {cuts.filter(c => !(lens?.price && FREE_DETAIL_IDS.has(c.id))).map(c => <section className="blk" key={c.id}>
               <CutArtwork id={c.id} title={c.title} /><ServerText as="p" className="src" html={`근거 · ${c.source}`} />
               {c.id === "sinsal" ? <SinsalSlots html={c.html} /> : <div dangerouslySetInnerHTML={{__html:c.html}} />}
             </section>)}
@@ -629,7 +633,6 @@ function PayInner() {
           <p className="conversion-lead">처음 짚은 모습 뒤에 어떤 이유가 있는지, {charName}의 관점으로 더 깊이 읽어보시오.</p>
           <p className="conversion-note">상품을 고르면 실제 풀이의 앞부분과 열람 범위가 보이오. 금액과 결제 조건을 확인한 뒤 결제할 수 있소.</p>
         </div>
-        {sales?.reason === "seller_setup" && <div className="conversion-status" role="status"><strong>현재 유료 판매를 준비하고 있소.</strong><p>판매자 정보 등록이 끝나기 전에는 결제를 받지 않소. 다시 시도할 필요 없이 무료 해석을 계속 읽어도 되오.</p><a href="/legal">판매자 정보 확인하기</a></div>}
         {sales?.reason === "gateway_setup" && <p className="conversion-status" role="status">결제 서비스 연결을 준비하고 있소. 지금은 무료 해석을 이용해 주시오.</p>}
         {sales?.reason === "temporary" && <div className="conversion-status" role="alert"><p>결제 가능 상태를 확인하지 못했소. 입력과 선택은 그대로 남아 있소.</p><button className="btn gh" onClick={() => {setSales(null);setRetry(n => n + 1);}}>결제 연결 다시 확인하기</button></div>}
         {!sales && <p role="status">결제 가능 상태를 확인하고 있소…</p>}
@@ -706,7 +709,7 @@ function PayInner() {
               <p className="conversion-note">오늘 구매 {order.purchases_today} / {order.per_day_limit}건</p>
               {order.enabled && order.client_key && sales?.ready ? <button className="btn" disabled={busy} onClick={async () => {
                 setBusy(true); setErr(null); track("pay_start", "d1");
-                try { await openCheckout({ clientKey: order.client_key!, orderId: order.order_id, amount: order.amount, orderName: tier.name, customerKey: s.sessionId }); }
+                try { await openCheckout({ clientKey: order.client_key!, orderId: order.order_id, amount: order.amount, orderName: tier.name, customerKey: order.customer_key }); }
                 catch (e) { track("pay_fail", "d1"); setErr(e instanceof Error ? e.message : "결제창을 열지 못했소. 다시 시도해 주시오."); }
                 finally { setBusy(false); }
               }}>{busy ? "결제창 연결 중…" : `${order.amount.toLocaleString()}원 결제하기`}</button>
@@ -726,7 +729,6 @@ function PayInner() {
             </>}
             {sales?.ready && !order && pick !== "sub" && !err && <p role="status">결제 금액과 조건을 확인하고 있소…</p>}
             {sales?.ready && !offer && pick === "sub" && !err && <p role="status">정기결제 조건을 확인하고 있소…</p>}
-            {!sales?.ready && <p className="conversion-note">현재 결제할 수 없는 상태요. 위 안내를 확인하고 무료 해석으로 돌아갈 수 있소.</p>}
             </div>
           </div>
         </div>}

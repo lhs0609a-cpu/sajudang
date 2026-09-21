@@ -25,6 +25,7 @@ from pydantic import BaseModel, Field
 import payments
 import analytics
 import store
+import throttle
 from engine.relay import BREAKS
 from schemas.api import Tier
 
@@ -75,6 +76,9 @@ class PrepareResponse(BaseModel):
     tier: str
     client_key: Optional[str]
     enabled: bool
+    # ★ 토스에 보낼 손님 열쇠. 화면이 지어내지 않고 이걸 그대로 씁니다 —
+    #   세션 아이디를 날것으로 PG 에 보내던 자리입니다 (payments.customer_key).
+    customer_key: str
     refund_notice: str
     # ★ 같은 약속을 이 집의 말로. 결제 버튼 바로 위에 놓입니다.
     refund_say: str
@@ -161,9 +165,16 @@ def get_tiers(req: TiersRequest) -> dict:
     free_ids = {c["id"] for c in build_report(
         f, req.chart_id, req.lens_id, "free", req.concern, req.axis4)["cuts"]}
 
+    # ★ 달삯은 **열려 있을 때만** 목패에 세웁니다.
+    #   자동결제는 토스와 따로 계약해야 열립니다. 계약 전에도 목패는
+    #   그대로 서 있어서, 손님이 「한 달 듣기」를 고르면 `sub/prepare`
+    #   가 503 을 내는 **막다른 길**이 됐습니다. 고르게 해 놓고 못 파는
+    #   것은 진열이 아니라 미끼입니다 — 못 여는 목패는 안 내놓습니다.
+    on_sale = (("one", "all", "sub") if not payments.subscriptions_problem()
+               else ("one", "all"))
     out = []
     sells = int(lens_mod.get(req.lens_id).get("price") or 0) > 0
-    for tier in (("one", "all", "sub") if sells else ()):
+    for tier in (on_sale if sells else ()):
         try:
             price = payments.price_of(tier, req.lens_id)
         except payments.PaymentError:
@@ -262,6 +273,7 @@ def prepare(req: PrepareRequest) -> PrepareResponse:
     return PrepareResponse(
         order_id=order_id, amount=amount, tier=req.tier,
         client_key=cfg["client_key"], enabled=cfg["enabled"],
+        customer_key=payments.customer_key(req.session_id),
         refund_notice=cfg["refund_notice"],
         refund_say=payments.REFUND_SAY,
         purchases_today=used, per_day_limit=limit)
@@ -479,8 +491,28 @@ class RestoreRequest(BaseModel):
     order_id: str = Field(min_length=4, max_length=64)
 
 
+# 되찾기를 한 세션이 얼마나 두드릴 수 있는가.
+#   기기를 바꾼 사람은 번호를 **보고** 칩니다. 몇 번이면 됩니다.
+#   찍어 보는 사람에게는 한 시간에 스무 번이 벽입니다.
+RESTORE_TRIES = 20
+RESTORE_WINDOW = 3600
+
+
+def _restore_throttle(session_id: str) -> None:
+    try:
+        throttle.check("restore", session_id,
+                       limit=RESTORE_TRIES, window=RESTORE_WINDOW,
+                       say="되찾기를 너무 자주 시도하셨소. 한 시간 뒤에 다시 해 보시오.")
+    except throttle.TooMany as e:
+        raise HTTPException(status_code=429, detail=str(e))
+
+
 @router.post("/restore")
 def restore(req: RestoreRequest) -> dict:
+    # ★ 계정이 없는 집에서 **자격을 넘겨주는 유일한 문**입니다.
+    #   주인 문은 진작 5분 열 번으로 막고 있었는데 여기는 아무나
+    #   몇 번이든 두드릴 수 있었습니다 (§21 brute force).
+    _restore_throttle(req.session_id)
     order = store.get_json("order:" + req.order_id)
     if not order:
         raise HTTPException(status_code=404, detail="그런 주문번호가 없소.")
@@ -567,6 +599,17 @@ def _refund_locked(req: RefundRequest, check) -> dict:
     order.update(status="refunded", unlocked=[], refunded_at=datetime.now(timezone.utc).isoformat())
     # 환불된 주문도 지우지 않습니다 — 무엇을 돌려줬는지 남아야 합니다.
     store.set_json("order:" + req.order_id, order)
+    # ★ 환불도 **셉니다.**
+    #   `payment_refunded` 가 화이트리스트에 진작 있었는데 **아무도
+    #   쏘지 않고 있었습니다.** 승인만 세고 환불을 안 세면, 주인
+    #   화면의 매출은 총액만 맞고 「얼마가 돌아갔나」 는 장부를 훑어야
+    #   압니다. 들어온 것과 나간 것은 같은 자에 올라야 합니다.
+    if order.get("analytics_sid"):
+        # 화면 이름은 화이트리스트입니다 — `f2` 는 거기 없고 `me` 가
+        # 그 자리입니다. 없는 이름을 쓰면 서버가 조용히 버립니다.
+        analytics.record([{"name": "payment_refunded", "screen": "me",
+                           "sid": order["analytics_sid"],
+                           "n": int(order.get("amount") or 0)}], server=True)
     _stop_refunded_subscription(order, req.order_id)
     issued = _reissue_refunded(order, req.order_id, req.session_id)
     return {"ok": True, "status": "refunded",
@@ -618,10 +661,29 @@ def history(session_id: str) -> dict:
 
 
 @router.get("/order/{order_id}")
-def get_order(order_id: str) -> dict:
+def get_order(order_id: str, session_id: str) -> dict:
+    """
+    이 주문이 어떻게 됐는가. ★ **산 사람만** 봅니다.
+
+    ★ 전에는 주문번호만 알면 누구나 값·상품·상태를 봤습니다.
+      내부 키(session_id·chart_id·payment_key)는 가렸으니 괜찮다고
+      여겼는데, 가린 것이 아니라 **덜 흘린 것**이었습니다. 얼마를
+      치렀고 무엇을 샀는지는 그 사람의 일입니다.
+
+      주문번호는 화면 주소에 실려 다닙니다
+      (`/pay?step=d2&toss=ok&order=…`). 주소는 방문기록·리퍼러·
+      로그에 남으므로, 그것 하나로 열리는 문을 두면 안 됩니다.
+      `confirm` 이 남의 세션을 403 으로 막는 것과 같은 규칙입니다.
+    """
     order = store.get_json("order:" + order_id)
     if not order:
         raise HTTPException(status_code=404, detail="모르는 주문이오.")
+    if order.get("session_id") != session_id and \
+            order_id not in (store.get_json("orders:" + session_id) or []):
+        # ★ 404 가 아니라 403 입니다. 404 로 내면 「없는 번호」와
+        #   「남의 번호」가 갈려서, 번호를 넣어 보는 것만으로 어느 것이
+        #   진짜인지 알아낼 수 있습니다.
+        raise HTTPException(status_code=403, detail="이 주문은 산 사람만 볼 수 있소.")
     # 내부 키는 내려보내지 않는다
     return {k: v for k, v in order.items() if k in {"amount", "tier", "status", "paid_at", "expires_at", "lens_id"}}
 

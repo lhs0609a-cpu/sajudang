@@ -531,7 +531,7 @@ export default function Shell({
     // ★ 다만 **관리자는 뺍니다** (2026-09-04). 화면을 고치는 사람은 같은
     //   화면을 스무 번 엽니다. 두 번째부터 안 늦추면 고친 연출을 볼 수가
     //   없어, 손님이 「차례대로 안 뜬다」 고 한 것도 실은 이 자리였습니다.
-    if (!admin || ["a1", "a2", "a3", "a4", "a4b", "a5", "a6", "a7", "d0", "d1", "d1b", "d2"].includes(screen ?? "")
+    if (!admin || !screen?.startsWith("admin")
         || window.matchMedia("(prefers-reduced-motion: reduce)").matches
         || (!admin && seenBefore(screen))) {
       revealAll();

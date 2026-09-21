@@ -222,12 +222,27 @@ YONG_GET = {
 }
 
 
-def hope(f, you: str, concern_word_: str, visible) -> str:
+def hope(f, you: str, concern_word_: str, visible,
+         asked: str = "") -> str:
     """
     희망 — 때 뒤, 처방 앞.
 
     ★ 무엇이 생긴다고 말하지 않습니다. **가진 것**과 **바뀌는 때**만
       셉니다. 그 둘은 셀 수 있는 사실입니다.
+
+    asked  물으신 자리를 세는 글자가 몇인가. 이미 세어진 값을 받습니다.
+
+    ★ 이 컷이 두 자 모두에서 가장 많이 겹쳤습니다 (2026-09-21).
+
+      `tools/person_axis.py` 로 재 보니 다른 사람 여덟에게 **91%**가
+      글자 그대로 같았고, 여섯 고민에도 91%가 같았습니다. 까닭은
+      여기서 세는 것이 `strong_el` 하나뿐이었기 때문이오 — 고민은
+      「%s 문제에서」 라는 **낱말 한 칸**으로만 들어와 있었습니다.
+      그건 고민이 바뀐 것이 아니라 낱말이 치환된 것이오 (CLAUDE.md).
+
+      쥔 것을 셀 때 **물으신 자리의 글자도 같이 셉니다.** 새 문장을
+      짓는 것이 아니라 이미 세어진 값을 대는 것이오 — 손님이
+      만세력을 펴고 대 볼 수 있는 수요.
     """
     strong = f.strong_el
     force, place = STRONG_IS.get(strong, ("그 힘이오", "그때그때 쓰이오"))
@@ -257,6 +272,14 @@ def hope(f, you: str, concern_word_: str, visible) -> str:
         '바로 이것이오. 여태 너무 당연해서 잘하는 것으로 안 쳤을 뿐이오. '
         '<b>타고난 것은 대개 제 것인 줄 모르오.</b></p>' % concern_word_,
     ]
+    # 물으신 자리를 세는 글자. 이미 세어진 값이라 지어내지 않소.
+    if asked:
+        out.append(
+            '<p class="tale">그리고 그대가 물으신 <b>%s</b> 자리를 세는 '
+            '글자는 %s. 쥔 것이 많은 쪽과 물은 쪽이 같은 자리면 그 힘이 '
+            '바로 쓰이고, 다른 자리면 <b>한 번 옮겨 써야</b> 하오 — '
+            '그 옮기는 데서 여태 품이 더 들었을 것이오.</p>'
+            % (concern_word_, asked))
     if yong and get:
         out.append(
             '<p class="tale">다만 많은 것만으로는 잘 안 돌아가오. %s '

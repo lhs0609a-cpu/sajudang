@@ -10,7 +10,7 @@ export default function ReadingGuide({guide,revelation,preview=false}:{guide:Non
     <ServerText as="p" className="conversion-note" html={`읽은 근거 · ${revelation?.source ?? guide.observation}`} />
     <p className="conversion-note">전통 해석의 관점이오. 실제 경험과 함께 살펴보시오.</p>
     {revelation && <p className="reading-revelation"><strong>{guide.perspective}</strong><br/>{guide.question}</p>}
-    {preview ? <p className="preview-bridge">여기서 한 가지 더 보아야 하오. 이 모습이 반복되는 이유까지 같은지는, 이어지는 해석에서 따로 살펴보오.</p> : <>
+    {preview ? <p className="reading-scene">{guide.scene}</p> : <>
     <IllustratedNote art="action" title="오늘 해볼 것"><p>{guide.action}</p></IllustratedNote>
     <p className="conversion-note">{guide.boundary}</p>
     {/* ★ 접어 두지 않습니다 (2026-09-17). 이 한 줄이 「내 얘기구나」를

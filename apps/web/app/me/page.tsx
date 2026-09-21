@@ -9,6 +9,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Shell from "@/components/Shell";
 import RefundHistory from '@/components/RefundHistory';
 import Scene from "@/components/scene/Scene";
+import Voyage from "@/components/Voyage";
+import MyData from "@/components/MyData";
 import ActOut from "@/components/ActOut";
 import { Narration, Say } from "@/components/Narration";
 import { api, ApiError } from "@/lib/api";
@@ -165,6 +167,7 @@ function MeInner() {
       */}
       <p className="sm">한 칸을 채우는 데 <b>1명</b>이오. <b>20개</b>를 다 채우면 스무 사람을 다 들은 것이고, <b>3개</b>만 있어도 서로 다른 세 눈으로 본 것이오 — 같은 밭을 세 군데서 파 본 셈이오.</p>
       <header className="editorial-heading"><p className="conversion-kicker">나의 서재</p><h1>다시 읽고 싶은 이야기를<br/>여기에 간직하오.</h1><p>구매한 해석과 남긴 인장, 열람 기록을 살펴보시오.</p></header>
+      <Voyage sessionId={s.sessionId} chartId={s.chartId} />
       <RefundHistory sessionId={s.sessionId} />
       {subError && <div className="conversion-card" role="alert"><p>구독 상태를 확인하지 못했소. 구독이 없거나 해지됐다는 뜻은 아니오.</p><button className="btn gh" onClick={() => {setSubError(false);setSubRetry(n => n + 1);}}>구독 상태 다시 확인하기</button></div>}
       <Scene id="sealbook" />
@@ -385,6 +388,12 @@ function MeInner() {
       <p className="sm mt">
         지운 정보는 되돌릴 수 없소. 생년월일시는 사주 계산 목적으로만 쓰오.
       </p>
+      {/*
+        ★ 「처음부터 다시」는 **이 브라우저에서만** 지웁니다.
+          서버에 맡긴 것(구매 목록·인장·구독)은 그대로 남습니다.
+          그걸 되가져가는 자리와 이 집에 말을 거는 자리가 여기입니다.
+      */}
+      <MyData sessionId={s.sessionId} />
     </Shell>
   );
 }

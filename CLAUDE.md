@@ -369,7 +369,10 @@ false 면 브레이크가 풀린 채로 도는 것입니다. 상세는 docs/17.
   손으로 돌려야 합니다.
 
 ```powershell
-.\dev.ps1 engine-check     # 테스트 + 교차검증 + 분포 + 중복률  ← 관문
+.\dev.ps1 shipos           # ★ 항해 관제탑 — 준비도·끊긴 배선·릴리스 게이트·다음 할 일
+.\dev.ps1 shipos --all     #   의도적 제외(na)까지 전부
+.\dev.ps1 shipos-scan      #   ★ 소스를 고쳤으면 **다시 찍으시오** (seed/shipos_facts.json)
+.\dev.ps1 engine-check     # 테스트 + 교차검증 + 분포 + 중복률  ← 관문 (맨 앞에서 shipos 대조)
 .\dev.ps1 crosscheck       # sxtwl 없는 독립 계산과 대조
 .\dev.ps1 dup              # 중복률 — ★ 가짓수보다 '최다 점유' 를 보세요
 .\dev.ps1 hook-concern     # ★ 훅이 고른 고민을 보는가 — **갈래 말고 글자**를 보세요 (--show)
@@ -406,6 +409,31 @@ tools/axis_spread.py       성향 4글자 겹침 분포 · 깊은 해석 비율
 tools/second_buy.py        두 번째 결제가 진짜 다른 상품인가
 tools/population.py        도구들이 같은 인구를 보게 하는 자리
 ```
+
+---
+
+## 단일 진실 — SHIP OS (`product-os/`)
+
+무엇이 **필수이고 무엇이 의도적 제외인지**는 `product-os/features.yaml`
+한 자리에 있습니다. 코드에 무엇이 있는지는 `seed/shipos_facts.json` 에
+찍혀 있고(`tools/shipos_scan.py`), **완료율과 게이트는
+`services/api/shipos.py` 한 곳에서만** 셉니다.
+
+```
+판단   product-os/features.yaml      required / conditional / na + 까닭
+사실   seed/shipos_facts.json        문·화면·사건·표 — 코드에서 긁음
+셈     services/api/shipos.py        완료율 · 배선 · 게이트 · 다음 할 일
+화면   /admin/tower (주인) · /me 의 「내 항해」 (손님)
+검산   tests/test_shipos.py          C0~C12
+```
+
+★ **화면도 라우터도 완료율을 제 손으로 세지 마세요.** 이 집은 값·목패
+  이름·분량이 두 벌이 되어 어긋난 적이 있습니다. 완료율은 그 사고가
+  더 조용히 납니다 — 아무도 안 죽고 숫자만 틀립니다.
+  `tests/test_shipos.py::test_c12_완료율을_한_곳에서만_센다` 가 지킵니다.
+
+★ **없는 것을 live 라 적으면 검사가 잡습니다.** 레지스트리가 가리키는
+  화면·문·표·사건·검사가 코드에 없으면 그 기능은 `broken` 입니다.
 
 ## 하지 말 것
 

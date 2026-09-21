@@ -17,6 +17,7 @@ import TopicAsk from "@/components/TopicAsk";
 import ProbeAsk, { type ProbeSpec } from "@/components/ProbeAsk";
 import Reveal from "@/components/Reveal";
 import ReadingGuide from '@/components/ReadingGuide';
+import FreeReadingDetail from '@/components/FreeReadingDetail';
 import { CutArtwork, ReadingPath } from '@/components/ReadingArtwork';
 import ScrollHint from "@/components/ScrollHint";
 import SinsalSlots from "@/components/SinsalSlots";
@@ -451,6 +452,7 @@ function ReportInner() {
             읽히는 것은 맛보기까지. 그 뒤에 흐려진 자락을 이어 붙여
             **이 아래로 더 있다**는 것만 보이오.
         */}
+        {rep.tier === 'free' && <FreeReadingDetail cuts={rep.cuts} />}
         <NextReading lensId={lensId} cuts={rep.locked} onOpen={openPrice} />
         {/*
           ★ 막이 그냥 끝나고 있었습니다. 접힌 목록 다음에 곧바로

@@ -98,3 +98,12 @@ jobs:
       - name: 타입체크
         working-directory: apps/web
         run: npm run typecheck
+
+      # ★ SHIP OS — 찍어 둔 사실이 소스와 같은가, 끊긴 배선이 없는가.
+      #   어긋난 채로 배포하면 관제탑이 옛말을 하고, 사람은 그 옛말을
+      #   근거로 「다 됐다」고 내보냅니다.
+      - name: SHIP OS 사실 대조
+        run: python tools/shipos_scan.py --check
+
+      - name: SHIP OS 관제탑
+        run: python tools/shipos_report.py || true

@@ -27,7 +27,8 @@ import db                                            # noqa: E402
 import store                                         # noqa: E402
 from guard_middleware import GuardMiddleware         # noqa: E402
 from routers import (                                # noqa: E402
-    chart, daily, events, feedback, hook, pay, relay, report, share,
+    chart, daily, events, feedback, hook, journey, pay, privacy, relay, report, share,
+    support,
     subscription, voice as voice_router, admin as admin_router,
 )
 
@@ -155,8 +156,33 @@ async def _http_error(request: Request, exc: StarletteHTTPException):
                         content={"detail": detail},
                         headers=getattr(exc, "headers", None))
 
+
+@app.exception_handler(Exception)
+async def _unhandled(request: Request, exc: Exception):
+    """
+    아무도 안 받은 예외 — 손님에게는 말투로, 주인에게는 **셈으로**.
+
+    ★ 여태 500 이 나면 손님은 안내를 받았는데 **주인은 그 일이
+      있었는지 몰랐습니다.** 로그는 Fly 에 쌓일 뿐 아무도 안 봅니다.
+      운영 모니터링 없는 production 배포는 §44 가 금하는 것입니다.
+
+    ★ 번호(traceId)를 함께 냅니다.
+      손님이 그 번호를 대면 주인이 주인 화면에서 같은 자리를 찾습니다.
+      번호는 **길 + 예외 이름**의 해시라 그 사람에 대한 것이 아닙니다.
+    """
+    import errors
+    trace = errors.record(str(request.url.path), exc)
+    log.exception("unhandled %s", request.url.path)
+    return JSONResponse(
+        status_code=500,
+        content={"code": "INTERNAL", "traceId": trace,
+                 "detail": ("처리를 마치지 못했소. 결제 중이었다면 구매 내역과 "
+                            "카드 승인 내역을 먼저 확인해 주시오. "
+                            "다시 물으실 때 이 번호를 대시오 — %s" % trace)})
+
+
 for r in (chart, hook, report, relay, feedback, daily, pay, subscription,
-          share, events, voice_router, admin_router):
+          share, events, journey, privacy, support, voice_router, admin_router):
     app.include_router(r.router)
 
 

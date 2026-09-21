@@ -63,7 +63,7 @@ export default function Reveal({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   // 0 안 보임 · 1 생각중 · 2 떴음
-  const [phase, setPhase] = useState<0 | 1 | 2>(eager || !think ? 2 : 0);
+  const [phase, setPhase] = useState<0 | 1 | 2>(2);
 
   /*
    * ★ 종이로 받을 때는 다 펴 둡니다.

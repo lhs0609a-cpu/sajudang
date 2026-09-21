@@ -1,0 +1,25 @@
+name: backup
+on:
+  schedule:
+    # 매일 19:10 UTC = 04:10 KST. 갱신(18:20 UTC)이 끝난 뒤에 뜹니다 —
+    # 갱신이 돈 결과까지 담겨야 그날 판이 온전합니다.
+    - cron: '10 19 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: backup
+  cancel-in-progress: false
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Snapshot the store
+        env:
+          RENEW_JOB_KEY: ${{ secrets.RENEW_JOB_KEY }}
+        run: |
+          test -n "$RENEW_JOB_KEY"
+          curl --fail-with-body --silent --show-error --max-time 120 \
+            -X POST https://sajudang-api.fly.dev/v1/jobs/backup \
+            -H "x-job-key: $RENEW_JOB_KEY"

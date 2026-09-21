@@ -1,0 +1,1239 @@
+{
+ "apis": [
+  {
+   "admin_guard": true,
+   "file": "services/api/routers/admin.py",
+   "handler": "refund_reviews",
+   "id": "GET /v1/admin/refund-reviews",
+   "method": "GET",
+   "ownership_check": true,
+   "path": "/v1/admin/refund-reviews",
+   "session_guard": true
+  },
+  {
+   "admin_guard": true,
+   "file": "services/api/routers/admin.py",
+   "handler": "decide_refund",
+   "id": "POST /v1/admin/refund-reviews",
+   "method": "POST",
+   "ownership_check": true,
+   "path": "/v1/admin/refund-reviews",
+   "session_guard": true
+  },
+  {
+   "admin_guard": true,
+   "file": "services/api/routers/admin.py",
+   "handler": "overview",
+   "id": "GET /v1/admin/overview",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/admin/overview",
+   "session_guard": false
+  },
+  {
+   "admin_guard": true,
+   "file": "services/api/routers/admin.py",
+   "handler": "screens",
+   "id": "GET /v1/admin/screens",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/admin/screens",
+   "session_guard": false
+  },
+  {
+   "admin_guard": true,
+   "file": "services/api/routers/admin.py",
+   "handler": "worth",
+   "id": "GET /v1/admin/worth",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/admin/worth",
+   "session_guard": false
+  },
+  {
+   "admin_guard": true,
+   "file": "services/api/routers/admin.py",
+   "handler": "ping",
+   "id": "GET /v1/admin/ping",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/admin/ping",
+   "session_guard": false
+  },
+  {
+   "admin_guard": true,
+   "file": "services/api/routers/admin.py",
+   "handler": "find_orders",
+   "id": "GET /v1/admin/orders",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/admin/orders",
+   "session_guard": true
+  },
+  {
+   "admin_guard": true,
+   "file": "services/api/routers/admin.py",
+   "handler": "grant_order",
+   "id": "POST /v1/admin/orders/grant",
+   "method": "POST",
+   "ownership_check": true,
+   "path": "/v1/admin/orders/grant",
+   "session_guard": true
+  },
+  {
+   "admin_guard": true,
+   "file": "services/api/routers/admin.py",
+   "handler": "support_queue",
+   "id": "GET /v1/admin/support",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/admin/support",
+   "session_guard": false
+  },
+  {
+   "admin_guard": true,
+   "file": "services/api/routers/admin.py",
+   "handler": "support_reply",
+   "id": "POST /v1/admin/support",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/admin/support",
+   "session_guard": false
+  },
+  {
+   "admin_guard": true,
+   "file": "services/api/routers/admin.py",
+   "handler": "error_list",
+   "id": "GET /v1/admin/errors",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/admin/errors",
+   "session_guard": false
+  },
+  {
+   "admin_guard": true,
+   "file": "services/api/routers/admin.py",
+   "handler": "audit_log",
+   "id": "GET /v1/admin/audit",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/admin/audit",
+   "session_guard": false
+  },
+  {
+   "admin_guard": true,
+   "file": "services/api/routers/admin.py",
+   "handler": "control_tower",
+   "id": "GET /v1/admin/tower",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/admin/tower",
+   "session_guard": false
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/admin.py",
+   "handler": "gate",
+   "id": "GET /v1/admin/gate",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/admin/gate",
+   "session_guard": false
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/admin.py",
+   "handler": "login",
+   "id": "POST /v1/admin/login",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/admin/login",
+   "session_guard": false
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/admin.py",
+   "handler": "logout",
+   "id": "POST /v1/admin/logout",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/admin/logout",
+   "session_guard": false
+  },
+  {
+   "admin_guard": true,
+   "file": "services/api/routers/admin.py",
+   "handler": "me",
+   "id": "GET /v1/admin/me",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/admin/me",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/chart.py",
+   "handler": "get_chart",
+   "id": "GET /v1/chart/{chart_id}",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/chart/{chart_id}",
+   "session_guard": false
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/chart.py",
+   "handler": "post_chart",
+   "id": "POST /v1/chart",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/chart",
+   "session_guard": false
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/daily.py",
+   "handler": "get_daily",
+   "id": "GET /v1/daily",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/daily",
+   "session_guard": false
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/events.py",
+   "handler": "post_events",
+   "id": "POST /v1/events",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/events",
+   "session_guard": false
+  },
+  {
+   "admin_guard": true,
+   "file": "services/api/routers/events.py",
+   "handler": "clear_events",
+   "id": "DELETE /v1/events",
+   "method": "DELETE",
+   "ownership_check": false,
+   "path": "/v1/events",
+   "session_guard": false
+  },
+  {
+   "admin_guard": true,
+   "file": "services/api/routers/events.py",
+   "handler": "get_funnel",
+   "id": "GET /v1/funnel",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/funnel",
+   "session_guard": false
+  },
+  {
+   "admin_guard": true,
+   "file": "services/api/routers/events.py",
+   "handler": "get_experiments",
+   "id": "GET /v1/experiments",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/experiments",
+   "session_guard": false
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/feedback.py",
+   "handler": "post_feedback",
+   "id": "POST /v1/feedback",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/feedback",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/feedback.py",
+   "handler": "post_review",
+   "id": "POST /v1/review",
+   "method": "POST",
+   "ownership_check": true,
+   "path": "/v1/review",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/feedback.py",
+   "handler": "review_stats",
+   "id": "GET /v1/review/stats",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/review/stats",
+   "session_guard": false
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/feedback.py",
+   "handler": "get_agreement",
+   "id": "GET /v1/agreement",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/agreement",
+   "session_guard": false
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/hook.py",
+   "handler": "post_hook",
+   "id": "POST /v1/hook",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/hook",
+   "session_guard": false
+  },
+  {
+   "admin_guard": true,
+   "file": "services/api/routers/jobs.py",
+   "handler": "backup_now",
+   "id": "POST /v1/jobs/backup",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/jobs/backup",
+   "session_guard": false
+  },
+  {
+   "admin_guard": true,
+   "file": "services/api/routers/jobs.py",
+   "handler": "renew_subscriptions",
+   "id": "POST /v1/jobs/renew-subscriptions",
+   "method": "POST",
+   "ownership_check": true,
+   "path": "/v1/jobs/renew-subscriptions",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/journey.py",
+   "handler": "journey",
+   "id": "GET /v1/journey",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/journey",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/pay.py",
+   "handler": "get_config",
+   "id": "GET /v1/pay/config",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/pay/config",
+   "session_guard": false
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/pay.py",
+   "handler": "get_tiers",
+   "id": "POST /v1/pay/tiers",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/pay/tiers",
+   "session_guard": false
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/pay.py",
+   "handler": "prepare",
+   "id": "POST /v1/pay/prepare",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/pay/prepare",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/pay.py",
+   "handler": "confirm",
+   "id": "POST /v1/pay/confirm",
+   "method": "POST",
+   "ownership_check": true,
+   "path": "/v1/pay/confirm",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/pay.py",
+   "handler": "webhook_check",
+   "id": "GET /v1/pay/webhook",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/pay/webhook",
+   "session_guard": false
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/pay.py",
+   "handler": "_restore_throttle",
+   "id": "POST /v1/pay/webhook",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/pay/webhook",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/pay.py",
+   "handler": "restore",
+   "id": "POST /v1/pay/restore",
+   "method": "POST",
+   "ownership_check": true,
+   "path": "/v1/pay/restore",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/pay.py",
+   "handler": "refund",
+   "id": "POST /v1/pay/refund",
+   "method": "POST",
+   "ownership_check": true,
+   "path": "/v1/pay/refund",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/pay.py",
+   "handler": "history",
+   "id": "GET /v1/pay/history",
+   "method": "GET",
+   "ownership_check": true,
+   "path": "/v1/pay/history",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/pay.py",
+   "handler": "get_order",
+   "id": "GET /v1/pay/order/{order_id}",
+   "method": "GET",
+   "ownership_check": true,
+   "path": "/v1/pay/order/{order_id}",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/pay.py",
+   "handler": "peek",
+   "id": "POST /v1/pay/peek",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/pay/peek",
+   "session_guard": false
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/privacy.py",
+   "handler": "my_data",
+   "id": "GET /v1/me/data",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/me/data",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/privacy.py",
+   "handler": "forget",
+   "id": "POST /v1/me/forget",
+   "method": "POST",
+   "ownership_check": true,
+   "path": "/v1/me/forget",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/relay.py",
+   "handler": "post_relay",
+   "id": "POST /v1/relay",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/relay",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/relay.py",
+   "handler": "consume_relay",
+   "id": "POST /v1/relay/consume",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/relay/consume",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/report.py",
+   "handler": "post_report",
+   "id": "POST /v1/report",
+   "method": "POST",
+   "ownership_check": true,
+   "path": "/v1/report",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/report.py",
+   "handler": "get_choices",
+   "id": "GET /v1/report/choices",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/report/choices",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/report.py",
+   "handler": "post_omnibus",
+   "id": "POST /v1/omnibus",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/omnibus",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/share.py",
+   "handler": "post_summary",
+   "id": "POST /v1/summary",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/summary",
+   "session_guard": false
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/share.py",
+   "handler": "post_share",
+   "id": "POST /v1/share",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/share",
+   "session_guard": false
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/share.py",
+   "handler": "get_share",
+   "id": "GET /v1/share/{token}",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/share/{token}",
+   "session_guard": false
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/share.py",
+   "handler": "open_share",
+   "id": "POST /v1/share/{token}/open",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/share/{token}/open",
+   "session_guard": false
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/subscription.py",
+   "handler": "prepare",
+   "id": "POST /v1/pay/sub/prepare",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/pay/sub/prepare",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/subscription.py",
+   "handler": "register",
+   "id": "POST /v1/pay/sub/register",
+   "method": "POST",
+   "ownership_check": true,
+   "path": "/v1/pay/sub/register",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/subscription.py",
+   "handler": "status",
+   "id": "GET /v1/pay/sub",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/pay/sub",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/subscription.py",
+   "handler": "cancel",
+   "id": "POST /v1/pay/sub/cancel",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/pay/sub/cancel",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/subscription.py",
+   "handler": "resume",
+   "id": "POST /v1/pay/sub/resume",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/pay/sub/resume",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/subscription.py",
+   "handler": "restore",
+   "id": "POST /v1/pay/sub/restore",
+   "method": "POST",
+   "ownership_check": true,
+   "path": "/v1/pay/sub/restore",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/support.py",
+   "handler": "topics",
+   "id": "GET /v1/support/topics",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/support/topics",
+   "session_guard": false
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/support.py",
+   "handler": "ask",
+   "id": "POST /v1/support",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/support",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/support.py",
+   "handler": "mine",
+   "id": "GET /v1/support/mine",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/support/mine",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/voice.py",
+   "handler": null,
+   "id": "POST /v1/voice",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/voice",
+   "session_guard": false
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/voice.py",
+   "handler": "get_voice",
+   "id": "GET /v1/voice/{key}.mp3",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/voice/{key}.mp3",
+   "session_guard": false
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/main.py",
+   "handler": null,
+   "id": "GET /health",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/health",
+   "session_guard": false
+  }
+ ],
+ "client_calls": [
+  "/v1/admin/gate",
+  "/v1/admin/login",
+  "/v1/admin/logout",
+  "/v1/admin/overview",
+  "/v1/admin/refund-reviews",
+  "/v1/admin/screens",
+  "/v1/admin/tower",
+  "/v1/admin/worth",
+  "/v1/agreement",
+  "/v1/chart",
+  "/v1/chart/{}",
+  "/v1/daily",
+  "/v1/events",
+  "/v1/experiments",
+  "/v1/feedback",
+  "/v1/hook",
+  "/v1/journey",
+  "/v1/me/data",
+  "/v1/me/forget",
+  "/v1/pay/config",
+  "/v1/pay/confirm",
+  "/v1/pay/history",
+  "/v1/pay/peek",
+  "/v1/pay/prepare",
+  "/v1/pay/refund",
+  "/v1/pay/restore",
+  "/v1/pay/sub",
+  "/v1/pay/sub/cancel",
+  "/v1/pay/sub/prepare",
+  "/v1/pay/sub/register",
+  "/v1/pay/sub/restore",
+  "/v1/pay/sub/resume",
+  "/v1/pay/tiers",
+  "/v1/relay",
+  "/v1/relay/consume",
+  "/v1/report",
+  "/v1/report/choices",
+  "/v1/review",
+  "/v1/share",
+  "/v1/share/{}",
+  "/v1/share/{}/open",
+  "/v1/summary",
+  "/v1/support",
+  "/v1/support/mine",
+  "/v1/support/topics",
+  "/v1/voice"
+ ],
+ "entities": [
+  "charts",
+  "cooldowns",
+  "daily_limits",
+  "events",
+  "hooks",
+  "lenses",
+  "notifications",
+  "products",
+  "purchases",
+  "relay_log",
+  "relay_rules",
+  "report_cuts",
+  "reports",
+  "reviews",
+  "seals",
+  "statement_log",
+  "users"
+ ],
+ "events": {
+  "names": [
+   "chart_completed",
+   "checkout_blocked",
+   "drop_guess",
+   "entry_context",
+   "experiment_exposed",
+   "flow_started",
+   "free_beat",
+   "free_shown",
+   "hook_answer",
+   "hook_shown",
+   "hook_skip",
+   "pay_done",
+   "pay_fail",
+   "pay_start",
+   "payment_approved",
+   "payment_refunded",
+   "practice_saved",
+   "price_view",
+   "reading_expand",
+   "reading_mismatch",
+   "relay_skip",
+   "relay_take",
+   "screen",
+   "share_click",
+   "share_land",
+   "tier_pick",
+   "tier_view",
+   "topic_ask",
+   "web_cls",
+   "web_inp",
+   "web_lcp"
+  ],
+  "screens": [
+   "a1",
+   "a2",
+   "a3",
+   "a4",
+   "a4b",
+   "a5",
+   "a6",
+   "a7",
+   "b1",
+   "b2",
+   "b3",
+   "c1",
+   "c7",
+   "d0",
+   "d1",
+   "d1b",
+   "d2",
+   "d3",
+   "daily",
+   "me",
+   "relay",
+   "s1",
+   "s2",
+   "share"
+  ],
+  "server": [
+   "chart_completed",
+   "checkout_blocked",
+   "drop_guess",
+   "entry_context",
+   "experiment_exposed",
+   "flow_started",
+   "free_beat",
+   "free_shown",
+   "hook_answer",
+   "hook_shown",
+   "hook_skip",
+   "pay_done",
+   "pay_fail",
+   "pay_start",
+   "payment_approved",
+   "payment_refunded",
+   "practice_saved",
+   "price_view",
+   "reading_expand",
+   "reading_mismatch",
+   "relay_skip",
+   "relay_take",
+   "screen",
+   "share_click",
+   "share_land",
+   "tier_pick",
+   "tier_view",
+   "topic_ask",
+   "web_cls",
+   "web_inp",
+   "web_lcp"
+  ]
+ },
+ "events_emitted_server": [
+  "payment_approved",
+  "payment_refunded"
+ ],
+ "events_emitted_web": [
+  "chart_completed",
+  "checkout_blocked",
+  "drop_guess",
+  "entry_context",
+  "experiment_exposed",
+  "flow_started",
+  "hook_answer",
+  "hook_shown",
+  "pay_done",
+  "pay_fail",
+  "pay_start",
+  "practice_saved",
+  "price_view",
+  "reading_mismatch",
+  "screen",
+  "tier_pick",
+  "topic_ask",
+  "web_cls",
+  "web_inp",
+  "web_lcp"
+ ],
+ "events_known_web": [
+  "chart_completed",
+  "checkout_blocked",
+  "drop_guess",
+  "entry_context",
+  "experiment_exposed",
+  "flow_started",
+  "free_beat",
+  "free_shown",
+  "hook_answer",
+  "hook_shown",
+  "hook_skip",
+  "pay_done",
+  "pay_fail",
+  "pay_start",
+  "practice_saved",
+  "price_view",
+  "reading_expand",
+  "reading_mismatch",
+  "relay_skip",
+  "relay_take",
+  "screen",
+  "share_click",
+  "share_land",
+  "tier_pick",
+  "tier_view",
+  "topic_ask",
+  "web_cls",
+  "web_inp",
+  "web_lcp"
+ ],
+ "not_for_screens": {
+  "GET /v1/funnel": "사람이 도구로 봅니다 (tools/funnel.py). 화면에 매출·전환을 띄우는 자리는 주인 화면(/v1/admin/overview)이 따로 있습니다.",
+  "GET /v1/pay/order/{order_id}": "주문 하나의 상태를 되묻는 자리입니다. 화면은 구매 내역(/v1/pay/history)으로 한 번에 받아 갑니다.",
+  "GET /v1/review/stats": "공감률 집계입니다. 실응답 100건이 쌓이기 전에는 화면에 안 냅니다 — 지어낸 숫자를 띄우지 않기로 한 자리입니다.",
+  "POST /v1/omnibus": "스무 사람을 한 번에 짓는 자리라 화면이 아니라 도구·검사가 씁니다."
+ },
+ "ownership_required": [
+  "GET /v1/pay/history",
+  "GET /v1/pay/order/{order_id}",
+  "GET /v1/pay/sub",
+  "POST /v1/pay/confirm",
+  "POST /v1/pay/refund",
+  "POST /v1/pay/restore",
+  "POST /v1/pay/sub/cancel",
+  "POST /v1/pay/sub/register",
+  "POST /v1/pay/sub/restore",
+  "POST /v1/pay/sub/resume"
+ ],
+ "public_by_design": {
+  "GET /v1/admin/gate": "들어오기 전에 문이 어떤 꼴인지 물어봐야 화면이 로그인 칸을 그릴지 열쇠 칸을 그릴지 정합니다. 참·거짓 둘만 답하고 아이디도 열쇠도 안 흘립니다.",
+  "GET /v1/pay/webhook": "토스 개발자센터에 주소를 넣기 전에 사람이 눈으로 보는 자리입니다. 아무 일도 하지 않고 살아 있다는 것만 알립니다.",
+  "GET /v1/share/{token}": "공유 링크는 받은 사람이 여는 자리입니다. 생년월일시·고을이 payload 에 없습니다.",
+  "GET /v1/voice/{key}.mp3": "이미 렌더된 소리 조각입니다. 열쇠는 내용 해시라 맞혀서 다른 사람 것을 못 엽니다.",
+  "POST /v1/admin/login": "로그인하는 자리입니다. 여기를 잠그면 들어올 길이 없습니다. 대신 5분 10회 잠금이 있습니다 (adminauth._too_many).",
+  "POST /v1/admin/logout": "쪽지를 버리는 자리입니다. 남의 쪽지는 못 버립니다 — 자기가 든 것만 버립니다.",
+  "POST /v1/events": "손님 브라우저가 계측을 보내는 문입니다. 이름·화면이 화이트리스트이고 값은 숫자만 받습니다. 조회 문(/v1/funnel)은 잠겨 있습니다.",
+  "POST /v1/pay/webhook": "PG 가 두드리는 문이라 우리 열쇠를 줄 수 없습니다. 대신 본문을 안 믿고 시크릿 키로 토스에 되물어 확인합니다 (payments.lookup_by_order).",
+  "POST /v1/share/{token}/open": "공유 링크를 연 횟수를 세는 자리입니다."
+ },
+ "routes": [
+  "/",
+  "/admin",
+  "/admin/tower",
+  "/daily",
+  "/legal",
+  "/lobby",
+  "/me",
+  "/pay",
+  "/relay",
+  "/report/[id]",
+  "/s/[token]",
+  "/summary"
+ ],
+ "screens": [
+  {
+   "file": "apps/web/app/daily/page.tsx",
+   "id": "g1",
+   "route": "/daily"
+  },
+  {
+   "file": "apps/web/app/daily/page.tsx",
+   "id": "g2",
+   "route": "/daily"
+  },
+  {
+   "file": "apps/web/app/daily/page.tsx",
+   "id": "g3",
+   "route": "/daily"
+  },
+  {
+   "file": "apps/web/app/lobby/page.tsx",
+   "id": "b1",
+   "route": "/lobby"
+  },
+  {
+   "file": "apps/web/app/lobby/page.tsx",
+   "id": "b2",
+   "route": "/lobby"
+  },
+  {
+   "file": "apps/web/app/lobby/page.tsx",
+   "id": "b3",
+   "route": "/lobby"
+  },
+  {
+   "file": "apps/web/app/lobby/page.tsx",
+   "id": "b4",
+   "route": "/lobby"
+  },
+  {
+   "file": "apps/web/app/me/page.tsx",
+   "id": "f2",
+   "route": "/me"
+  },
+  {
+   "file": "apps/web/app/me/page.tsx",
+   "id": "r1",
+   "route": "/me"
+  },
+  {
+   "file": "apps/web/app/page.tsx",
+   "id": "a1",
+   "route": "/"
+  },
+  {
+   "file": "apps/web/app/page.tsx",
+   "id": "a2",
+   "route": "/"
+  },
+  {
+   "file": "apps/web/app/page.tsx",
+   "id": "a3",
+   "route": "/"
+  },
+  {
+   "file": "apps/web/app/page.tsx",
+   "id": "a4",
+   "route": "/"
+  },
+  {
+   "file": "apps/web/app/page.tsx",
+   "id": "a4b",
+   "route": "/"
+  },
+  {
+   "file": "apps/web/app/page.tsx",
+   "id": "a5",
+   "route": "/"
+  },
+  {
+   "file": "apps/web/app/page.tsx",
+   "id": "a6",
+   "route": "/"
+  },
+  {
+   "file": "apps/web/app/page.tsx",
+   "id": "a7",
+   "route": "/"
+  },
+  {
+   "file": "apps/web/app/pay/page.tsx",
+   "id": "d0",
+   "route": "/pay"
+  },
+  {
+   "file": "apps/web/app/pay/page.tsx",
+   "id": "d1",
+   "route": "/pay"
+  },
+  {
+   "file": "apps/web/app/pay/page.tsx",
+   "id": "d1b",
+   "route": "/pay"
+  },
+  {
+   "file": "apps/web/app/pay/page.tsx",
+   "id": "d2",
+   "route": "/pay"
+  },
+  {
+   "file": "apps/web/app/pay/page.tsx",
+   "id": "d3",
+   "route": "/pay"
+  },
+  {
+   "file": "apps/web/app/relay/page.tsx",
+   "id": "h1",
+   "route": "/relay"
+  },
+  {
+   "file": "apps/web/app/report/[id]/page.tsx",
+   "id": "c1",
+   "route": "/report/[id]"
+  },
+  {
+   "file": "apps/web/app/report/[id]/page.tsx",
+   "id": "c2",
+   "route": "/report/[id]"
+  },
+  {
+   "file": "apps/web/app/report/[id]/page.tsx",
+   "id": "c3",
+   "route": "/report/[id]"
+  },
+  {
+   "file": "apps/web/app/report/[id]/page.tsx",
+   "id": "c4",
+   "route": "/report/[id]"
+  },
+  {
+   "file": "apps/web/app/report/[id]/page.tsx",
+   "id": "c5",
+   "route": "/report/[id]"
+  },
+  {
+   "file": "apps/web/app/report/[id]/page.tsx",
+   "id": "c6",
+   "route": "/report/[id]"
+  },
+  {
+   "file": "apps/web/app/s/[token]/page.tsx",
+   "id": "s1",
+   "route": "/s/[token]"
+  },
+  {
+   "file": "apps/web/app/s/[token]/page.tsx",
+   "id": "s2",
+   "route": "/s/[token]"
+  },
+  {
+   "file": "apps/web/app/s/[token]/SharedView.tsx",
+   "id": "s1",
+   "route": "/s/[token]/SharedView.tsx"
+  },
+  {
+   "file": "apps/web/app/s/[token]/SharedView.tsx",
+   "id": "s2",
+   "route": "/s/[token]/SharedView.tsx"
+  },
+  {
+   "file": "apps/web/app/summary/page.tsx",
+   "id": "c7",
+   "route": "/summary"
+  },
+  {
+   "file": "apps/web/app/summary/page.tsx",
+   "id": "c8",
+   "route": "/summary"
+  },
+  {
+   "file": "apps/web/app/admin/page.tsx",
+   "id": "adm-login",
+   "route": "/admin"
+  },
+  {
+   "file": "apps/web/app/admin/page.tsx",
+   "id": "adm-overview",
+   "route": "/admin"
+  },
+  {
+   "file": "apps/web/app/admin/page.tsx",
+   "id": "adm-refund",
+   "route": "/admin"
+  },
+  {
+   "file": "apps/web/app/admin/tower/page.tsx",
+   "id": "adm-tower",
+   "route": "/admin/tower"
+  }
+ ],
+ "stores": [
+  "admintok",
+  "audit",
+  "chartdate",
+  "customer",
+  "entry-value-v1",
+  "err",
+  "order",
+  "orders",
+  "payment-lock",
+  "purchase-counted",
+  "refund-review",
+  "registration",
+  "relay",
+  "renew-journal",
+  "seals",
+  "sess",
+  "share",
+  "shared",
+  "sub",
+  "support",
+  "supportof",
+  "visit"
+ ],
+ "tests": [
+  "test_admin_auth.py",
+  "test_admin_gate.py",
+  "test_admin_rail.py",
+  "test_admin_sales.py",
+  "test_ambience.py",
+  "test_analytics.py",
+  "test_api.py",
+  "test_asset_prompts.py",
+  "test_assets.py",
+  "test_audit_regressions.py",
+  "test_backup.py",
+  "test_bank.py",
+  "test_bust_align.py",
+  "test_bust_assets.py",
+  "test_calendar.py",
+  "test_char_stage.py",
+  "test_chart_version.py",
+  "test_claims.py",
+  "test_concern_spread.py",
+  "test_conversion_contracts.py",
+  "test_conversion_segments.py",
+  "test_divergence.py",
+  "test_drama_axes.py",
+  "test_editorial.py",
+  "test_element_count.py",
+  "test_errors.py",
+  "test_evidence.py",
+  "test_experiments.py",
+  "test_extras.py",
+  "test_falsifiable.py",
+  "test_first_reading.py",
+  "test_flavor.py",
+  "test_fold.py",
+  "test_free_preview_scope.py",
+  "test_heart.py",
+  "test_hook_concern.py",
+  "test_hook_editorial.py",
+  "test_jobs.py",
+  "test_launch.py",
+  "test_lens_cuts.py",
+  "test_lens_sources_agree.py",
+  "test_loop_seam.py",
+  "test_manse_table.py",
+  "test_motion_generation.py",
+  "test_no_overlap.py",
+  "test_pay_flow.py",
+  "test_pay_retention.py",
+  "test_peek.py",
+  "test_pick_affordance.py",
+  "test_plain.py",
+  "test_privacy.py",
+  "test_prompt_fit.py",
+  "test_prompt_gate.py",
+  "test_provider_recovery.py",
+  "test_rarity.py",
+  "test_reading_facts.py",
+  "test_refund_access.py",
+  "test_relay_concern.py",
+  "test_safety.py",
+  "test_say_length.py",
+  "test_scene_matches_words.py",
+  "test_scene_not_shared.py",
+  "test_screen_back.py",
+  "test_screen_beat.py",
+  "test_screen_copy.py",
+  "test_screen_declares_name.py",
+  "test_screen_snapshot.py",
+  "test_screen_top.py",
+  "test_shipos.py",
+  "test_sinsal_figure.py",
+  "test_sinsal_figures.py",
+  "test_sinsal_read.py",
+  "test_sinsal_share.py",
+  "test_skim.py",
+  "test_source_hides_rules.py",
+  "test_spine.py",
+  "test_subscription.py",
+  "test_support.py",
+  "test_terms_concern.py",
+  "test_topic.py",
+  "test_topic_facts.py",
+  "test_topic_reach.py",
+  "test_topic_sub.py",
+  "test_typo.py",
+  "test_visual_consultation.py",
+  "test_voice.py",
+  "test_voice_clean.py",
+  "test_who_speaks.py",
+  "test_widow.py",
+  "test_wiring.py",
+  "test_worth.py"
+ ]
+}
