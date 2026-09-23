@@ -1985,6 +1985,21 @@ _FACTS = {
 }
 
 
+def count_of(f, concern: str, fact_id: str,
+             sub: Optional[dict] = None) -> Optional[tuple]:
+    """
+    세는 자 하나를 이름으로 부른다. `(가름, 센 값)` — 없으면 None.
+
+    ★ 표(`seed/topic.json` FACTS)를 거치지 않고 **자만** 빌려 쓰는
+      자리요. 첫 해석이 이걸 씁니다 — 같은 자를 두 벌 만들면 무료
+      구간과 유료 구간이 서로 다른 수를 대게 되오.
+    """
+    fn = _FACTS.get(fact_id)
+    if not fn:
+        return None
+    return fn(f, _fact_ctx(concern, sub))
+
+
 def fact_rows(f, concern: str, sub: Optional[dict]) -> list:
     """
     고른 갈래에 걸리는 **사실 셋**. 표에 없으면 빈 목록이오.
@@ -2035,14 +2050,10 @@ def ask_cut(f, concern: str, payload: dict) -> Optional[dict]:
         raise TopicInputError(
             "고르신 것이 목록에 없소: %r (고를 수 있는 것: %s)"
             % (pick3, " · ".join(spec["options3"].values())))
+    # choice4/choice5는 캐릭터별 전문 질문이 덮어쓸 수 있다.
+    # 여기서 기본 고민표로 검증하면 캐릭터가 제시한 유효한 답을 거부한다.
     picks = {4: str(payload.get("choice4") or ""),
              5: str(payload.get("choice5") or "")}
-    for n, value in picks.items():
-        options = spec.get("options%d" % n)
-        if options and value and value not in options:
-            raise TopicInputError(
-                "고르신 것이 목록에 없소: %r (고를 수 있는 것: %s)"
-                % (value, " · ".join(options.values())))
 
     w = _words(f)
 
@@ -2093,7 +2104,7 @@ def ask_cut(f, concern: str, payload: dict) -> Optional[dict]:
     for n in (4, 5):
         value = picks[n]
         options = spec.get("options%d" % n)
-        if value and options:
+        if value and options and value in options:
             label = options[value]
             parts.append('<p class="tale"><b>%s</b>라고 하셨소. 이 답을 이번 해석의 범위로 삼겠소.</p>' % label)
             ev.append("%s → 상담 범위" % label)
