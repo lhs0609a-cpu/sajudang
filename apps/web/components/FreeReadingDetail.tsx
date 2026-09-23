@@ -22,13 +22,13 @@ export default function FreeReadingDetail({cuts, lensId, locked = [], onOpen}: {
       const pivot = c.html.indexOf('<div class="mbti-reading">');
       const split = c.id === 'spine_scene' && pivot > 0;
       return <article key={c.id}>
-      <ReadingVoice lensId={lensId} label="그대에게 들려주는 해석">
+      <ReadingVoice lensId={lensId} label="무료 핵심 해석">
         <h2>{c.title}</h2>
         <div dangerouslySetInnerHTML={{__html:split ? c.html.slice(0,pivot) : c.html}} />
       </ReadingVoice>
       <ServerText as="p" className="conversion-note" html={`이렇게 읽은 근거 · ${c.source}`} />
       {onOpen && c.id !== 'spine_scene' && <InlinePaidReading after={c.id} cuts={locked} lensId={lensId ?? selected} onOpen={onOpen} />}
-      {split && <ReadingVoice lensId={lensId} label="고른 성향에 맞춰 행동을 다시 조정하오"><div dangerouslySetInnerHTML={{__html:c.html.slice(pivot)}} /></ReadingVoice>}
+      {split && <ReadingVoice lensId={lensId} label="고른 답을 반영한 해석"><div dangerouslySetInnerHTML={{__html:c.html.slice(pivot)}} /></ReadingVoice>}
     </article>;})}
     <p className="preview-bridge">같은 힘이 어떤 날에는 성과를 만들고, 어떤 날에는 피로만 남겼소. 아래에서는 두 날을 갈라놓은 조건과 오늘 끊을 반복 하나를 판정하오.</p>
     <FriendInvite />

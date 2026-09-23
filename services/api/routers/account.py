@@ -129,7 +129,7 @@ def library(authorization:str|None=Header(default=None)):
             seen.add(oid)
             order=store.get_json('order:'+oid)
             if order and order.get('status') in ('paid','refunded','partial_refunded'):
-                orders.append({k:order.get(k) for k in ('order_id','tier','lens_id','chart_id','amount','status','paid_at','expires_at')})
+                orders.append({k:order.get(k) for k in ('order_id','tier','lens_id','chart_id','product_id','amount','status','paid_at','expires_at','unlocked')})
     return {'user':accounts.public(account),'readings':records,'orders':orders}
 
 

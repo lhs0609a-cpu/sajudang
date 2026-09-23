@@ -106,7 +106,7 @@ METHODS = {
 }
 
 
-def plain_profile(f, *, name="풍운도령", lens_id="pungun") -> str:
+def plain_profile(f, *, name="풍운도령", lens_id="pungun", include_label=True) -> str:
     """Explain the person in ordinary language before 명리 terminology."""
     strength = {"신강": "기본 체력이 강한 편", "신약": "주변 조건의 영향을 많이 받는 편", "중화": "상황에 따라 힘을 조절하는 편"}.get(f.strength, "상황에 따라 힘을 조절하는 편")
     flow = {"비겁": "내 편을 만들고 함께 버티는 일", "식상": "생각을 말과 결과물로 꺼내는 일", "재성": "사람과 기회를 현실적인 성과로 바꾸는 일", "관성": "규칙과 책임을 맡아 구조를 세우는 일", "인성": "배우고 준비한 것을 안전하게 쌓는 일"}.get(f.flow, "현실에서 힘을 쓰는 일")
@@ -119,6 +119,18 @@ def plain_profile(f, *, name="풍운도령", lens_id="pungun") -> str:
         "monghwa": ("이름 붙이기 어려운 감정과 신호", "불안할 때 확인할 현실"),
         "hongmae": ("관계에서 주고받는 책임의 무게", "오래 가는 합의의 조건"),
         "haengsu": ("돈과 기회를 현실로 바꾸는 방식", "손에 남기는 구조"),
+        "eunbyeol": ("검사 결과처럼 원인을 좁혀 재발을 막는 방식", "문제를 감정이 아니라 증거와 순서로 정리하는 방법"),
+        "seoyeok": ("선택지의 비용과 해외·이동 변수를 따지는 관점", "결정 전에 포기할 것과 가져갈 것을 숫자로 적기"),
+        "paeseon": ("숫자와 기록에서 새는 돈과 기회를 찾는 관점", "이번 달 수입·지출의 반복 하나를 끊기"),
+        "myeonsang": ("표정과 말투보다 생활 패턴에 드러나는 신호", "사람을 판단하기 전 실제 행동 세 번을 보기"),
+        "wolha": ("만남의 타이밍과 관계가 깊어지는 속도", "호감과 약속을 같은 날 결정하지 않기"),
+        "yeondam": ("관계망에서 정보와 기회가 이동하는 경로", "도움을 청할 사람과 줄 수 있는 도움을 구분하기"),
+        "hwagyeong": ("갈등 장면에서 서로의 방어가 작동하는 방식", "이기려는 말과 해결에 필요한 말을 분리하기"),
+        "hunjang": ("시험·자격·공부의 반복을 성과로 바꾸는 구조", "하루 목표보다 주간 제출물을 먼저 정하기"),
+        "yakcho": ("몸의 회복력과 생활 리듬이 무너지는 지점", "수면·식사·통증 기록을 일주일 남기기"),
+        "ilgwan": ("사업·운영에서 책임과 권한이 엇갈리는 자리", "결정권자와 마감일을 문서로 남기기"),
+        "nopa": ("오래 붙잡은 관계와 습관을 정리하는 시점", "미련이 아니라 현재 비용으로 정리하기"),
+        "dongja": ("처음 시작할 때의 호기심과 안전한 실험", "작게 시작해 결과를 확인한 뒤 키우기"),
     }
     angle, action = angles.get(lens_id, ("이 명식에서 반복되는 삶의 패턴", "지금 바꿀 수 있는 한 가지"))
     # ★ 뱅크는 **하오체 한 벌**로 씁니다. 합쇼체로 쓰면 `voice.speak` 가
@@ -126,14 +138,16 @@ def plain_profile(f, *, name="풍운도령", lens_id="pungun") -> str:
     # ★ 조사는 **받침을 보고** 답니다 — 「풍운도령가」 「신호을」 이
     #   나가던 자리요 (`bank.josa`).
     from .bank import josa as _josa
-    return (f'<div class="plain-profile"><p class="plain-profile-label">'
-            f'{escape(name)}{_josa(name, "이", "가")} 먼저 읽은 사람의 모습</p>'
-            f'<h3>이 사람은 {strength}이오.</h3>'
-            f'<p>겉으로는 쉽게 흔들리지 않는 것처럼 보여도, 속에서는 형편을 오래 살핀 뒤 움직이오. 마음이 없는 사람이 아니라 <b>확신이 서야 몸이 따라가는 사람</b>에 가깝소.</p>'
-            f'<p><b>{angle}</b>{_josa(angle, "을", "를")} 보면 이 사람이 더 또렷해지오. 잘 풀릴 때는 {flow}에서 솜씨가 드러나고, 일이 꼬이면 혼자 붙들고 버티다가 손 내밀 때를 놓치오.</p>'
-            f'<p class="plain-profile-point"><b>{action}</b> · 재주가 모자란 사람이 아니라, 제 방식이 맞는지 재 보는 시간이 긴 사람이오.</p>'
-            f'<p class="plain-profile-point"><b>쉽게 말하면</b> · 느린 것이 아니라 <b>한 번 더 재고 드는 것</b>이오. 그래서 시작은 늦어도 시작한 뒤에는 잘 안 놓소.</p>'
-            f'<p class="plain-profile-evidence">아래 어려운 말은 이 설명을 받치는 셈이오. 사람을 먼저 말하고, 명식은 그다음에 펴 보이겠소.</p></div>')
+    label = (f'<p class="plain-profile-label">{escape(name)}{_josa(name, "이", "가")} '
+             '먼저 읽은 사람의 모습</p>') if include_label else ''
+    return (f'<div class="plain-profile">{label}'
+            f'<h3>한눈에 보면, {strength}이오.</h3>'
+            f'<p>겉으로는 쉽게 흔들리지 않지만, 속에서는 형편을 오래 살핀 뒤 움직이오. '
+            f'마음이 없는 것이 아니라 <b>확신이 서야 행동으로 옮기는 사람</b>에 가깝소.</p>'
+            f'<p class="plain-profile-point"><b>{angle}</b>에서 이 성향이 반복되오. 잘 풀릴 때는 {flow}에서 솜씨가 나고, '
+            f'막힐 때는 혼자 붙들고 버티다가 도움을 청할 시점을 놓치기 쉽소.</p>'
+            f'<p class="plain-profile-point"><b>오늘 바꿀 한 가지</b> · {action}을 정하고, 시작 전에 끝낼 범위를 한 줄로 적으시오.</p>'
+            f'<p class="plain-profile-evidence">이 설명 뒤에 계산 근거를 붙였소. 먼저 사람의 모습, 다음에 명식의 숫자를 보시오.</p></div>')
 
 
 def pungun_opening(f, concern: str, *, name="풍운도령") -> str:
@@ -158,7 +172,7 @@ def pungun_opening(f, concern: str, *, name="풍운도령") -> str:
     }
     consequence, checkpoint = concern_lines.get(concern, concern_lines["love"])
     return (
-        plain_profile(f, name=name, lens_id="pungun") +
+        plain_profile(f, name=name, lens_id="pungun", include_label=False) +
         f'<div class="specialist-opening"><p class="opening-label">{escape(name)}의 첫 판정</p>'
         f'<h3>결론: 버티는 힘은 충분하오. 다만 혼자 계속 드는 방식은 바꿔야 하오.</h3>'
         f'<p>{escape(consequence)}</p>'

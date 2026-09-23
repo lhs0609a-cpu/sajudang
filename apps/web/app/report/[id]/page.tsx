@@ -695,7 +695,7 @@ function ReportInner() {
         )}
         <CutArtwork lensId={lensId} id={c.id} title={numbered ? `${i + 1}. ${c.title}` : c.title} />
         <ServerText className="src" html={c.source} />
-        <ReadingVoice lensId={lensId} soft={['solace', 'hope', 'closing_cut'].includes(c.id)} label="그대에게 들려주는 해석">
+        <ReadingVoice lensId={lensId} soft={['solace', 'hope', 'closing_cut'].includes(c.id)} label={c.id === 'chart' ? '계산 근거' : c.id === 'spine' ? '핵심 해석' : c.id === 'spine_scene' ? '고민 속 장면' : c.id === 'closing_cut' ? '오늘의 결론' : '이 항목의 해석'}>
         {c.id === "sinsal"
           ? <SinsalSlots html={c.html} />
           : <div className="cutbody" dangerouslySetInnerHTML={{ __html: c.html }} />}

@@ -320,6 +320,10 @@ function PayInner() {
       .then((r) => {
         if (!alive) return;
         setGranted(r.granted);
+        if ((r.granted as any)?.product_id) {
+          router.replace(`/fortune/result?product=${encodeURIComponent((r.granted as any).product_id)}`);
+          return;
+        }
         s.set({
           tier: r.tier as Tier, paid: true,
           seals: s.seals.includes(r.seal) ? s.seals : [...s.seals, r.seal],
@@ -535,9 +539,9 @@ function PayInner() {
             <h2>{rejected.length ? "원래 해석과 계산 근거" : "무료 해석과 자세한 근거"}</h2>
             <p className="conversion-note">{cuts.length}개 항목을 아래에서 바로 읽을 수 있소.</p>
             {rejected.length > 0 && <p className="conversion-note">아래는 응답 전 생년월일과 고민으로 만든 원래 해석이오. 아니라고 답한 대목이 맞는 것으로 바뀐 것은 아니오.</p>}
-            {cuts.filter(c => !(lens?.price && rejected.length === 0 && FREE_DETAIL_IDS.has(c.id))).map(c => <section className="blk" key={c.id}>
-              <CutArtwork id={c.id} title={c.title} /><ServerText as="p" className="src" html={`근거 · ${c.source}`} />
-              <ReadingVoice lensId={s.cur} label={c.id === 'chart' ? '이 근거를 함께 보시오' : '그대에게 들려주는 해석'}>
+             {cuts.filter(c => !(lens?.price && rejected.length === 0 && FREE_DETAIL_IDS.has(c.id))).map(c => <section className="blk" key={c.id}>
+               <CutArtwork id={c.id} title={c.title} /><ServerText as="p" className="src" html={`근거 · ${c.source}`} />
+               <ReadingVoice lensId={s.cur} label={c.id === 'chart' ? '계산 근거' : c.id === 'spine' ? '무료 핵심 해석' : c.id === 'spine_scene' ? '고민 속 장면' : c.id === 'closing_cut' ? '오늘의 결론' : '이 항목의 해석'}>
                 {c.id === "sinsal" ? <SinsalSlots html={c.html} /> : <div dangerouslySetInnerHTML={{__html:c.html}} />}
               </ReadingVoice>
             </section>)}

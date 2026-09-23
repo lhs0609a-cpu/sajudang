@@ -43,6 +43,29 @@ from . import probe as probe_mod
 from . import terms as terms_mod
 from . import topic as topic_mod
 from . import voice as voice_mod
+
+
+_ADJACENT_REPEAT = re.compile(
+    r"(?P<word>[가-힣A-Za-z0-9·]{4,80})(?P=word)(?=[가-힣A-Za-z0-9·]|[을를이가은는의와과로])"
+)
+
+
+def _dedupe_adjacent_text(html: str) -> str:
+    """Collapse accidental adjacent phrase duplication in generated copy.
+
+    This is deliberately limited to a single text node and an exact repeated
+    phrase. It catches composition bugs such as ``풍운도령풍운도령이`` and
+    ``현실에서 반복되는 선택의 패턴현실에서 반복되는 선택의 패턴을``
+    without rewriting natural repetition across paragraphs.
+    """
+    if not html:
+        return html
+
+    def clean(m):
+        text = m.group(0)
+        return _ADJACENT_REPEAT.sub(lambda x: x.group("word"), text)
+
+    return re.sub(r"[^<>]+", clean, html)
 from .bank import (amount_adj, amount_word, count_word,
                    element_word, josa)
 
@@ -2493,6 +2516,7 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
     # 한자·숫자 뒤 조사 — 모든 층을 입힌 뒤 한 번.
     for c in cuts:
         c["html"] = _fix_particles(c["html"])
+        c["html"] = _dedupe_adjacent_text(c["html"])
     # 사실 장부 — 모든 층을 입힌 뒤, 화면에 나가는 차례대로.
     _ledger(cuts)
     for l in locked:
