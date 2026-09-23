@@ -155,7 +155,7 @@ def test_report_mentions_every_tied_weak_element():
     for c, f in people(300):
         if len(f.weak_els) <= 1:
             continue
-        rep = build_report(f, "cid", "pungun", "free", "love")
+        rep = build_report(f, "cid", "pungun", "all", "love")
         cut = next(x for x in rep["cuts"] if x["id"] == "lack")
         # 「둘 다 없는 자리요」 → 「둘 다 없다는 말이오」 (2026-09-11 · docs/21)
         assert "둘 다 없다는 말이오" in cut["html"]

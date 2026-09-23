@@ -50,7 +50,8 @@ export default function SoundToggle() {
   return (
     <button
       className={`tb snd ${on ? "on" : ""}`}
-      aria-label={on ? "소리 끄기" : "소리 켜기"}
+      aria-label={on ? "배경 음악 끄기" : "배경 음악 켜기"}
+      title={on ? "배경 음악 끄기" : "배경 음악 켜기"}
       aria-pressed={on}
       onClick={() => {
         // ★ 손짓 안에서 불러야 브라우저가 소리를 허락합니다.
@@ -59,10 +60,11 @@ export default function SoundToggle() {
         try { localStorage.setItem(HINT, "1"); } catch { /* 못 남겨도 됨 */ }
       }}
     >
-      {on ? "♪" : "♪̸"}
+      <span className="sndicon" aria-hidden="true">{on ? "♪" : "♪̸"}</span>
+      <span className="sndlabel">{on ? "음악 끄기" : "음악 켜기"}</span>
       {/* 켜져 있는 사람에게는 **끌 데**를 알려 줍니다. 껐다 켜려는
           사람에게는 켤 데를요. */}
-      {hint && <i className="sndhint">{on ? "소리 끄기" : "소리 켜기"}</i>}
+      {hint && <i className="sndhint">여기서 언제든 바꿀 수 있습니다</i>}
     </button>
   );
 }

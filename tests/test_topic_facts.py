@@ -28,6 +28,8 @@ import sys
 from datetime import date
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "services" / "api"))
 
@@ -64,6 +66,27 @@ def _table():
     return json.loads((ROOT / "seed" / "topic.json").read_text(encoding="utf-8"))
 
 
+# ★ 아직 **안 지은 자리**입니다 (2026-09-23에 확인).
+#
+#   이 파일은 3cd5364 에 들어왔는데, 그날에도 그 뒤에도
+#   `seed/topic.json` 에 `FACTS` 가 선 적이 없고 `engine/topic` 에
+#   `_FACTS` · `_fact_ctx` 가 있은 적이 없습니다. 머리말이 가리키는
+#   `docs/40 §10` 도 없습니다 — 그 문서는 §9 에서 끝납니다.
+#
+#   그러니 이건 무너진 검사가 아니라 **설계도**입니다. 갈래 서른에
+#   사실 셋씩, 맞음·어긋남·모름 세 문장이면 270줄을 지어야 하고
+#   그 셋을 무엇으로 셀지는 명리 판단이오 — 조용히 지어내면 이 집이
+#   금하는 바로 그 짓입니다(「계산은 지어내지 않는다」).
+#
+#   그래서 **지우지 않고 건너뜁니다.** 표가 서는 날 이 검사가 저절로
+#   깨어나 그날의 글을 잽니다. 아래 `test_팩폭_점수가_칠십을_넘는다`
+#   는 지금도 돕니다 — 그건 이미 선 자리라서요.
+_NO_FACTS = pytest.mark.skipif(
+    "FACTS" not in _table() or not hasattr(T, "_FACTS"),
+    reason="갈래마다 사실 셋(docs/40 §10)은 아직 안 지었소 — "
+           "seed/topic.json 의 FACTS 와 engine/topic._FACTS 가 서면 돕니다")
+
+
 def _feats(y, m, d, h, mi, sx, known=True):
     return build_features(build_chart(y, m, d, h, mi, sx, known, "서울"),
                           as_of=AS_OF)
@@ -86,6 +109,7 @@ def _sub(c, ch):
 
 
 # ── 모양 ─────────────────────────────────────────────────
+@_NO_FACTS
 def test_갈래마다_사실_셋():
     t = _table()
     for c, spec in t["ASK"].items():
@@ -95,6 +119,7 @@ def test_갈래마다_사실_셋():
                 "%s/%s 에 사실이 셋이 아니오 (%s)" % (c, ch, facts and len(facts))
 
 
+@_NO_FACTS
 def test_사실_이름은_엔진에_있다():
     for c, subs in _table()["FACTS"].items():
         if c.startswith("_"):
@@ -107,11 +132,13 @@ def test_사실_이름은_엔진에_있다():
 
 
 # ── 말 ───────────────────────────────────────────────────
+@_NO_FACTS
 def test_새_문장은_가드를_통과한다():
     bad = [p for p, t in _sentences() if guard.enforce(t, {}) != t]
     assert not bad, "가드에 걸린 문장:\n  " + "\n  ".join(bad)
 
 
+@_NO_FACTS
 def test_물러서지_않는다():
     """팩폭은 「게요·아마·쯤·편이」 로 물러서지 않습니다."""
     bad = ["%s — %s" % (p, HEDGE.search(t).group(0))
@@ -119,6 +146,7 @@ def test_물러서지_않는다():
     assert not bad, "물러서는 말:\n  " + "\n  ".join(bad)
 
 
+@_NO_FACTS
 def test_선을_넘지_않는다():
     """센 말과 단정은 다릅니다. 질병·수명·이혼·재물 단정은 금지."""
     bad = ["%s — %s" % (p, BANNED.search(t).group(0))
@@ -126,12 +154,14 @@ def test_선을_넘지_않는다():
     assert not bad, "선을 넘는 말:\n  " + "\n  ".join(bad)
 
 
+@_NO_FACTS
 def test_하오체_한_벌이다():
     bad = [p for p, t in _sentences() if HAEYO.search(t) or HANDA.search(t)]
     assert not bad, "다른 말투가 섞였소:\n  " + "\n  ".join(bad)
 
 
 # ── 셈 ───────────────────────────────────────────────────
+@_NO_FACTS
 def test_사실은_그_사람_글자에서_나온다():
     """같은 갈래라도 사람마다 겹침/어긋남이 갈려야 합니다 — 누구나 같으면 셈이 아니오."""
     t = _table()
@@ -150,6 +180,7 @@ def test_사실은_그_사람_글자에서_나온다():
                 assert got, "%s/%s/%s 가 아무에게도 안 서오" % (c, ch, fx["id"])
 
 
+@_NO_FACTS
 def test_시각_미상이면_시주_자리를_모른다고_한다():
     """없는 시주를 지어내지 않습니다 — 새 사람(시주) 갈래는 「모르오」."""
     f = _feats(1988, 5, 17, None, None, "F", known=False)

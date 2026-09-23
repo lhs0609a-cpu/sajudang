@@ -53,6 +53,7 @@ export const viewport: Viewport = {
 };
 
 import MemberSync from '@/components/MemberSync';
+import AccountBar from '@/components/AccountBar';
 import BackgroundMusic from '@/components/BackgroundMusic';
 import LiveActivity from '@/components/LiveActivity';
 import InvitationArrival from '@/components/InvitationArrival';
@@ -108,7 +109,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }
         />
       </head>
-      <body spellCheck={false}><BackgroundMusic /><MemberSync /><InvitationArrival />{children}<SeatsShortcut /><LiveActivity /><WebVitals /></body>
+      <body spellCheck={false}><BackgroundMusic /><MemberSync /><AccountBar /><InvitationArrival />{children}<SeatsShortcut /><LiveActivity /><WebVitals /></body>
     </html>
   );
 }

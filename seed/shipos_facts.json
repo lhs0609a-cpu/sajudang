@@ -393,6 +393,16 @@
   {
    "admin_guard": false,
    "file": "services/api/routers/feedback.py",
+   "handler": "recent_reviews",
+   "id": "GET /v1/review/recent",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/review/recent",
+   "session_guard": false
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/feedback.py",
    "handler": "review_stats",
    "id": "GET /v1/review/stats",
    "method": "GET",
@@ -409,6 +419,36 @@
    "ownership_check": false,
    "path": "/v1/agreement",
    "session_guard": false
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/fortune.py",
+   "handler": "products",
+   "id": "GET /v1/fortune/products",
+   "method": "GET",
+   "ownership_check": false,
+   "path": "/v1/fortune/products",
+   "session_guard": false
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/fortune.py",
+   "handler": "product",
+   "id": "GET /v1/fortune/products/{product_id}",
+   "method": "GET",
+   "ownership_check": true,
+   "path": "/v1/fortune/products/{product_id}",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/fortune.py",
+   "handler": "calculate",
+   "id": "POST /v1/fortune/calculate",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/fortune/calculate",
+   "session_guard": true
   },
   {
    "admin_guard": false,
@@ -602,6 +642,16 @@
   },
   {
    "admin_guard": false,
+   "file": "services/api/routers/referral.py",
+   "handler": "comparisons",
+   "id": "POST /v1/referral/comparisons",
+   "method": "POST",
+   "ownership_check": false,
+   "path": "/v1/referral/comparisons",
+   "session_guard": false
+  },
+  {
+   "admin_guard": false,
    "file": "services/api/routers/relay.py",
    "handler": "post_relay",
    "id": "POST /v1/relay",
@@ -618,6 +668,16 @@
    "method": "POST",
    "ownership_check": false,
    "path": "/v1/relay/consume",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
+   "file": "services/api/routers/report.py",
+   "handler": "topic_spec",
+   "id": "GET /v1/report/topic/{concern}",
+   "method": "GET",
+   "ownership_check": true,
+   "path": "/v1/report/topic/{concern}",
    "session_guard": true
   },
   {
@@ -827,6 +887,8 @@
   "/v1/events",
   "/v1/experiments",
   "/v1/feedback",
+  "/v1/fortune/calculate",
+  "/v1/fortune/products",
   "/v1/hook",
   "/v1/journey",
   "/v1/me/data",
@@ -849,7 +911,9 @@
   "/v1/relay/consume",
   "/v1/report",
   "/v1/report/choices",
+  "/v1/report/topic/{}{}",
   "/v1/review",
+  "/v1/review/recent{}",
   "/v1/share",
   "/v1/share/{}",
   "/v1/share/{}/open",
@@ -1073,6 +1137,8 @@
   "/admin",
   "/admin/tower",
   "/daily",
+  "/fortune",
+  "/fortune/result",
   "/legal",
   "/library/[id]",
   "/lobby",
@@ -1157,6 +1223,11 @@
   {
    "file": "apps/web/app/page.tsx",
    "id": "a5",
+   "route": "/"
+  },
+  {
+   "file": "apps/web/app/page.tsx",
+   "id": "a5b",
    "route": "/"
   },
   {
@@ -1284,9 +1355,11 @@
   "admintok",
   "audit",
   "chartdate",
+  "comparison",
   "customer",
   "entry-value-v1",
   "err",
+  "fortune",
   "invite",
   "invite-owner",
   "library",
@@ -1309,6 +1382,8 @@
   "referral",
   "referral-claim",
   "referral-credit",
+  "referral-pair",
+  "referral-pairs",
   "refund-review",
   "registration",
   "relay",

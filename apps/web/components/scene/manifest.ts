@@ -25,7 +25,7 @@ export type Ratio = "9:16" | "16:9" | "3:4" | "1:1";
  *   화면을 채워 목패가 1,168px 에서 시작하던 자리요 — 위에 장면을
  *   얹으면 값이 더 아래로 밀립니다. 이탈 1위 화면에서 그건 손해요.
  */
-export const ARCHIVED_SCENES = ["coin", "door", "fork", "ink", "mirror", "room", "tray"] as const;
+export const ARCHIVED_SCENES = ["altar", "coin", "door", "fork", "ink", "mirror", "room", "tray"] as const;
 
 /**
  * 일간 색을 입히는 방식. (docs/10 §4)

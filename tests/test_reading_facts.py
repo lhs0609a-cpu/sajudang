@@ -19,7 +19,7 @@ def test_display_counts_do_not_round_hidden_stem_weights_into_characters(known):
 
 def test_report_and_hook_use_known_pillars_and_actual_category_counts():
     f = build_features(build_chart(1993,11,25,None,0,'F',hour_known=False))
-    report = build_report(f,'reading-scope-regression','pungun','free','money')
+    report = build_report(f,'reading-scope-regression','dongja','free','money')
     rows = report['cuts'] + report['locked']
     assert all('여덟 글자' not in row.get('html','') for row in rows)
     assert all('여덟 자' not in (row.get('source') or '') for row in rows)

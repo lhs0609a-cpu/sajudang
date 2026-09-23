@@ -135,6 +135,7 @@ import { CARE_LINES } from "@/lib/care";
 import { api, apiMisconfigured } from "@/lib/api";
 import SoundToggle from "@/components/SoundToggle";
 import DevRail from "@/components/DevRail";
+import { useMember } from "@/lib/member";
 
 export const LEGAL = [
   "본 서비스는 전통 명리학 해석에 기반한 자기이해·오락 목적 콘텐츠이오.",
@@ -241,6 +242,8 @@ export function TopBar({ title, skipTo, onBack }: {
   const seals = useSession((s) => s.seals);
   const admin = useSession((s) => s.admin);
   const setSession = useSession((s) => s.set);
+  const member = useMember((s) => s.user);
+  const memberReady = useMember((s) => s.ready);
   return (
     <div className="top">
       {/*
@@ -278,6 +281,15 @@ export function TopBar({ title, skipTo, onBack }: {
       <span className="tt">{title}</span>
       <Link className="tb" href="/daily" aria-label="오늘의 일진">오늘</Link>
       <Link className="tb" href="/me" aria-label={`내 보관함 · 로그인과 구매 내역, 인장 ${seals.length}개`}>보관함</Link>
+      <span className="member-nav" aria-label="회원 메뉴">
+        {!memberReady ? <Link className="member-nav-link muted" href="/me">계정</Link> : member ? <>
+          <Link className="member-nav-user" href="/me">{member.username}</Link>
+          <Link className="member-nav-link" href="/">새로 시작</Link>
+        </> : <>
+          <Link className="member-nav-link" href="/me?mode=login">로그인</Link>
+          <Link className="member-nav-link signup" href="/me?mode=signup">회원가입</Link>
+        </>}
+      </span>
       <Link className="tb" href="/lobby" aria-label="해석자와 메뉴 선택">메뉴</Link>
     </div>
   );
@@ -395,6 +407,8 @@ export default function Shell({
   const chartId = useSession((s) => s.chartId);
   const hasFeatures = useSession((s) => !!s.features);
   const setSession = useSession((s) => s.set);
+  const member = useMember((s) => s.user);
+  const memberReady = useMember((s) => s.ready);
   useEffect(() => {
     if (!chartId || hasFeatures) return;
     let alive = true;

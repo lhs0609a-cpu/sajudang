@@ -13,30 +13,44 @@ export interface Practice {
   title: string; scene: string; action: string;
   steps?: string[];
   focus?: string; example?: string; decision?: string; trap?: string; review?: string; mbti?: string;
+  specialist_name?: string; specialist_axis?: string; case_summary?: string;
+  specialist_verdict?: string; specialist_action?: string; specialist_close?: string;
 }
 
 export default function PracticeCard({ practice, lensId }: { practice: Practice; lensId?: string }) {
   const [status, setStatus] = useState("");
   const [saved, setSaved] = useState(false);
-  return <CharacterSpeech lensId={lensId}><section className="conversion-card" aria-label="오늘 해볼 행동">
+  return <CharacterSpeech lensId={lensId}><section className="conversion-card" aria-label="해석을 현실에 적용하는 오늘 행동">
     <ArtImage art="action" className="practice-art" />
     <ReadingSpeaker lensId={lensId} label="오늘은 이렇게 해보시오" soft />
-    <p className="conversion-kicker">오늘 해볼 행동 하나 · 무료</p>
-    <h2>{practice.title}</h2><p>{practice.scene}</p>
-    {practice.focus && <div className="practice-focus"><h3>이번 풀이에서 먼저 살필 지점</h3><p>{practice.focus}</p></div>}
-    {practice.mbti && <div className="practice-focus"><h3>내가 고른 MBTI에 맞춘 실행법</h3><p>{practice.mbti}</p></div>}
-    <p className="conversion-lead">{practice.action}</p>
-    {practice.steps?.length ? <ol className="practice-steps">{practice.steps.map((step, i) =>
-      <li key={i}><h3>{['먼저, 한 장면만 꺼내시오', '이렇게 말하거나 적어보시오', '오늘 밤, 이것만 확인하시오'][i]}</h3><p>{step}</p></li>
-    )}</ol> : null}
-    <div className="practice-workbook">
-      {([['example','예를 들면, 이렇게 적으시오'],['decision','상황이 다르면 행동도 달라지오'],['trap','이렇게까지 애쓰지는 마시오'],['review','오늘의 행동이 끝났다는 기준']] as const).map(([key,title])=>practice[key]
-        ? <div key={key}><h3>{title}</h3><p>{practice[key]}</p></div> : null)}
+    <p className="conversion-kicker">4단계 · 해석을 현실에 적용 · 오늘 끝낼 한 가지</p>
+    <h2>{practice.specialist_axis ? `${practice.specialist_axis}부터 가르겠소` : practice.title}</h2>
+    {practice.case_summary && <p className="practice-case"><span>당신이 고른 실제 상황</span><strong>{practice.case_summary}</strong></p>}
+    {practice.specialist_verdict ? <div className="practice-verdict">
+      <span>{practice.specialist_name ?? '이 상담자'}의 날카로운 판정</span>
+      <p>{practice.specialist_verdict}</p>
+    </div> : <p>{practice.scene}</p>}
+    <div className="practice-mission">
+      <span>오늘의 QUEST 01</span>
+      <h3>{practice.specialist_action ?? practice.action}</h3>
+      <p>읽고 끝내지 말고, 오늘 가능한 가장 작은 크기로 실행하시오.</p>
     </div>
+    {practice.steps?.length ? <ol className="practice-steps">{practice.steps.map((step, i) =>
+      <li key={i}><h3>{['장면 하나만 고르기', '한 문장으로 행동하기', '오늘 밤 결과 확인하기'][i] ?? `${i + 1}단계`}</h3><p>{step}</p></li>
+    )}</ol> : null}
+    {practice.decision && <div className="practice-decision"><h3>상황이 다르면 여기서 갈립니다</h3><p>{practice.decision}</p></div>}
+    {(practice.focus || practice.mbti || practice.example || practice.trap || practice.review) && <details className="practice-deeper">
+      <summary>내 상황에 맞춘 실행 보정까지 보기</summary>
+      <div className="practice-workbook">
+        {([['focus','먼저 살필 지점'],['mbti','내 MBTI에 맞춘 실행법'],['example','실제로 적는 예시'],['trap','여기까지 애쓰지는 마시오'],['review','오늘 행동이 끝났다는 기준']] as const).map(([key,title])=>practice[key]
+          ? <div key={key}><h3>{title}</h3><p>{practice[key]}</p></div> : null)}
+      </div>
+    </details>}
+    {practice.specialist_close && <blockquote className="practice-close">{practice.specialist_close}</blockquote>}
     <ServerText as="p" className="conversion-note" html={practice.source} />
     <button className="btn gh" onClick={async () => {
       try {
-        await navigator.clipboard.writeText([practice.title, practice.focus, practice.mbti, practice.action, ...(practice.steps ?? []).map((step, i) => `${i + 1}. ${step}`),practice.example,practice.decision,practice.trap,practice.review, practice.source].filter(Boolean).join('\n\n'));
+        await navigator.clipboard.writeText([practice.specialist_axis, practice.case_summary, practice.specialist_verdict, practice.specialist_action ?? practice.action, ...(practice.steps ?? []).map((step, i) => `${i + 1}. ${step}`), practice.decision, practice.focus, practice.mbti, practice.example, practice.trap, practice.review, practice.specialist_close, practice.source].filter(Boolean).join('\n\n'));
         setSaved(true); setStatus("행동 문장을 복사했소. 원하는 메모에 붙여넣어 보시오.");
         track("practice_saved", "d0");
       } catch { setStatus("자동으로 복사하지 못했소. 위 문장을 길게 눌러 복사해 주시오."); }

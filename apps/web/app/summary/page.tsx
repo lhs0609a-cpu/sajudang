@@ -77,7 +77,7 @@ export default function SummaryPage() {
           무엇 때문에 들고 가는지를 한 줄로 짚습니다. */}
       <Narration lines={["종이 한 장이 마지막으로 접혔다."]} />
       <p className="sm">여태 참고 미뤄 둔 것을 오늘 한 번 세어 보셨소. 이 한 장은 그 셈을 접어 둔 것이오 — 주머니에 넣어 두는 자와 같은 것이오.</p>
-      <header className="editorial-heading"><p className="conversion-kicker">그대의 이야기 한 장</p><h1>마음에 남은 것만<br/>가만히 챙겨 가시오.</h1><p>읽어낸 근거와 중요한 단서를 한 장에 모았소.</p></header>
+      <header className="editorial-heading"><p className="conversion-kicker">계산 근거와 판정 한 장</p><h1>타고난 힘·반복 장면·오늘 행동을<br/>한 장에 모았소.</h1><p>각 문장 아래에 어떤 글자와 계산에서 나온 말인지 함께 적었소.</p></header>
       <Scene id="scroll" className="hero" />
       {/*
         ★ 여기가 다섯째로 낮았습니다 (연출 55).
@@ -228,8 +228,8 @@ export default function SummaryPage() {
         생년월일시도, 태어난 고을도 안 담기오.<br />
         <b>담기지 않은 것이 아직 이 집에 있소.</b>
       </ActOut>
-      <button className="btn gh mt" onClick={() => router.push("/relay")}>
-        이어서 다른 사람에게
+        <button className="btn gh mt" onClick={() => router.push("/relay")}>
+        같은 명식을 다른 기준으로 판정받기
       </button>
       <button className="btn gh" onClick={() => router.push("/lobby")}>진열대로</button>
     </Shell>

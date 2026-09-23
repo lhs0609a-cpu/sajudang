@@ -92,6 +92,7 @@ function LobbyInner() {
   if (tab === "b2") {
     return (
       <Shell screen="b2" title="스무 사람">
+        <Scene id="hall" />
         {/*
           ★ 울림 20 · 명확 45 로 낮던 자리입니다. 스무 명을 늘어놓기만
             하고 **그대 얘기가 한 줄도** 없었습니다. 고르기 어려운 게
@@ -185,11 +186,11 @@ function LobbyInner() {
             </div>
             {/* ★ 말하는 사람을 못박습니다. 안 넘기면 얼굴은 **지금 고른
                 사람**이 나와, 이름과 얼굴이 어긋납니다. */}
-            <p className="conversion-note">먼저 짧은 분석으로 내 이야기와 맞는지 확인하시오. 이어지는 이유와 심층 해석은 범위와 가격을 본 뒤 선택할 수 있소.</p>
+            <p className="conversion-note">먼저 무료 판정에서 내 실제 장면과 맞는지 대보시오. 결제 전에는 이 사람이 추가로 가를 질문·첫 문장·분량·가격을 모두 보여드리오.</p>
             <button className="btn mt" onClick={() => {
               openLens(pickedLens.id);
             }}>
-              {s.chartId ? '이 사람의 해석 읽기 · 구매한 내용 이어보기' : '내 고민으로 무료 분석 시작하기'}
+              {s.chartId ? '이 사람의 판정 바로 읽기 · 구매 본문 열기' : '내 고민을 이 사람에게 무료로 판정받기'}
             </button>
             <p className="sm">
               {pickedLens.price > 0 ? `첫 분석 무료 · 심층 해석 ${pickedLens.price.toLocaleString()}원` : '이 인물의 해석은 무료요.'}
@@ -216,7 +217,7 @@ function LobbyInner() {
         */}
         <ActOut kind="딜레마" next="그 사람의 자리">
           궁금한 자리를 자유롭게 오가시오.<br />
-          이미 입력한 정보로 다른 관점을 읽고, <b>구매한 해석도 다시 이어볼 수 있소.</b>
+          생년월일을 다시 적지 않고 다른 판정 기준으로 읽으며, <b>구매한 본문도 즉시 다시 열 수 있소.</b>
         </ActOut>
         <button className="btn gh mt" onClick={() => setTab("b1")}>진열대로</button>
       </Shell>
@@ -226,6 +227,7 @@ function LobbyInner() {
   if (tab === "b3") {
     return (
       <Shell screen="b3" title={lens.name}>
+        <Scene id="seat" />
         <p className="conversion-kicker">상담 전에 · 이 사람이 먼저 보는 질문</p>
         <h1 className="reading-title">{CHARACTER_QUESTIONS[lens.id] ?? lens.specialty}</h1>
         <div className="consultant-intro">
@@ -234,16 +236,16 @@ function LobbyInner() {
         </div>
         <p className="conversion-lead">지금 마음에 걸린 일이 이 질문과 닿아 있소? 태어난 정보와 고른 고민을 놓고, {lens.name}이 먼저 짚는 대목부터 읽어보시오.</p>
         <section className="consultation-scope" aria-label="상담 전에 확인할 내용">
-          <div><span>먼저, 무료로</span><strong>내 고민을 짚는 짧은 분석</strong><p>명식의 근거를 보고, 내 경험과 맞는지 살펴보오.</p></div>
-          {lens.price > 0 ? <div><span>마음에 남는다면</span><strong>왜 그렇게 읽었는지, 이어지는 심층 해석</strong><p>실제 풀이의 앞부분과 가림막을 확인한 뒤 선택하오.</p><b>{lens.price.toLocaleString()}원 · 이 인물의 해석</b></div>
+          <div><span>먼저, 무료로</span><strong>반복 원인 판정 + 오늘 행동 1개</strong><p>계산 근거와 내가 고른 실제 상황을 맞대어 읽소.</p></div>
+          {lens.price > 0 ? <div><span>결제 전에 공개</span><strong>추가 질문 3개 + 실제 첫 문장 + 전체 분량</strong><p>가려진 결론이 무엇인지 먼저 보고 살지 정하시오.</p><b>{lens.price.toLocaleString()}원 · 이 인물의 전체 본문</b></div>
             : <div><span>이 자리의 해석</span><strong>값 없이 읽을 수 있소.</strong><p>오늘 마음에 남길 한 가지를 골라보시오.</p></div>}
         </section>
         {lens.released ? <button className="btn mt" onClick={() => {
           openLens(lens.id);
-        }}>{s.chartId ? `${lens.name}의 해석 읽기 · 구매한 내용 이어보기` : '내 고민과 태어난 정보 입력하기'}</button>
+        }}>{s.chartId ? `${lens.name}의 판정과 구매 본문 바로 열기` : '내 고민과 태어난 정보로 무료 판정받기'}</button>
           : <p className="conversion-note">아직 자리에 앉지 않은 사람이오.</p>}
         <p className="conversion-note">무료 분석을 읽는 것만으로 결제되지 않소.</p>
-        <button className="btn gh" onClick={() => setTab("b2")}>다른 질문을 가진 사람 살펴보기</button>
+        <button className="btn gh" onClick={() => setTab("b2")}>나와 맞는 질문을 던지는 다른 해석자 고르기</button>
       </Shell>
     );
   }
@@ -321,6 +323,8 @@ function LobbyInner() {
   /* b1 · 진열대 */
   return (
     <Shell screen="b1" title="진열대">
+      <button className="btn gh" onClick={() => router.push("/fortune")}>대운·세운·월운·궁합 상세 상품 보기</button>
+      <Scene id="shelf" />
       <p className="conversion-kicker">다시 마음에 남은 질문</p>
       <h1 className="reading-title">오늘은 어떤 이야기가<br />궁금하오?</h1>
       <p className="conversion-lead">다른 시선이 필요하다면 사람을 고르고, 이미 읽은 이야기는 내 첩에서 이어보시오.</p>

@@ -15,7 +15,7 @@ export async function selectSavedReading(row:any){
 import FriendInvite from './FriendInvite';
 export default function MemberLibrary(){
   const {user,ready,saveError}=useMember(),s=useSession(),router=useRouter(),params=useSearchParams();
-  const [mode,setMode]=useState('login'),[username,setUsername]=useState(''),[password,setPassword]=useState(''),[repeat,setRepeat]=useState(''),[code,setCode]=useState(''),[recovery,setRecovery]=useState(''),[consent,setConsent]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[rows,setRows]=useState<any[]>([]),[orders,setOrders]=useState<any[]>([]),[loaded,setLoaded]=useState(false),[deleting,setDeleting]=useState(false),[deletePassword,setDeletePassword]=useState('');
+  const [mode,setMode]=useState(params.get('mode')==='signup'?'signup':params.get('mode')==='recover'?'recover':'login'),[username,setUsername]=useState(''),[password,setPassword]=useState(''),[repeat,setRepeat]=useState(''),[code,setCode]=useState(''),[recovery,setRecovery]=useState(''),[consent,setConsent]=useState(false),[busy,setBusy]=useState(false),[error,setError]=useState(''),[rows,setRows]=useState<any[]>([]),[orders,setOrders]=useState<any[]>([]),[loaded,setLoaded]=useState(false),[deleting,setDeleting]=useState(false),[deletePassword,setDeletePassword]=useState('');
   const back=params.get('returnTo');const returnTo=back?.startsWith('/')&&!back.startsWith('//')&&!back.includes('\\')?back:null;
   async function refresh(){const data=await memberCall('/library');setRows(data.readings);setOrders(data.orders);setLoaded(true);}
   useEffect(()=>{setLoaded(false);if(user)refresh().catch(e=>setError(e.message));},[user?.id]);

@@ -45,7 +45,7 @@ body .phone .want-turn {font:500 20px/1.65 var(--serif);color:var(--paper);margi
 body .phone .want .src {display:block;font-size:12px;line-height:1.8;margin-top:16px;border:0;color:var(--paper3)}
 body .phone .want .btn {margin-top:18px}
 @media(max-width:480px){body .phone .extraask,body .phone .want{padding:18px}body .phone .op.face .charart.chip{width:58px!important;height:80px!important}body .phone .op.face{gap:10px}body .phone details:not(.hook-chapter)>summary{gap:8px;padding:14px 12px}}
-@media(max-width:600px){body .phone[data-screen="b2"] .og.c2{grid-template-columns:minmax(0,1fr)}body .phone[data-screen="b2"] .op.face{width:100%;min-width:0;gap:20px}body .phone[data-screen="b2"] .op.face .charart.chip{width:76px!important;height:102px!important}body .phone[data-screen="b2"] .op.face .who{flex:1}body .phone[data-screen="b2"] .op.face .character-question{font-size:14px}}
+@media(max-width:600px){body .phone[data-screen="b2"] .og.c2{grid-template-columns:minmax(0,1fr)}body .phone[data-screen="b2"] .op.face{width:100%;min-width:0;gap:20px}body .phone[data-screen="b2"] .op.face .charart.chip{width:76px!important;height:102px!important}body .phone[data-screen="b2"] .op.face .who{flex:1;min-width:0}body .phone[data-screen="b2"] .op.face .character-question{font-size:14px}}
 /* Reading content stays visible; portraits keep their own aspect ratio. */
 body .phone .nextseats .dzhead{align-items:center;gap:24px}
 body .phone .nextseats .dzhead>.charart.chip{flex:0 0 96px;width:96px!important;height:128px!important}

@@ -29,7 +29,6 @@ import { READING_QUESTIONS, freeRevelation } from '@/lib/reading-journey';
 import { CHARACTER_QUESTIONS } from '@/lib/curiosity';
 import CompanionCat from "@/components/CompanionCat";
 import Scene from "@/components/scene/Scene";
-import LockedVeil from "@/components/LockedVeil";
 import ActOut from "@/components/ActOut";
 import { Narration, Say } from "@/components/Narration";
 import { api, ApiError } from "@/lib/api";
@@ -47,7 +46,9 @@ import type { Granted, TierCard, SubView } from "@/lib/api";
 import ServerText from "@/components/ServerText";
 import Link from 'next/link';
 import PromotionNote from '@/components/PromotionNote';
+import CheckoutReveal from '@/components/CheckoutReveal';
 import {useMember} from '@/lib/member';
+import { josa } from '@/lib/josa';
 
 /** 카드를 걸기 전에 서버가 내려보내는 것 — 손님 열쇠와 고지 문구. */
 type SubOffer = Awaited<ReturnType<typeof api.subPrepare>>;
@@ -480,6 +481,10 @@ function PayInner() {
         {err && <><Say who={charName} lens={s.cur}>{err}</Say><button className="btn" onClick={() => {setErr(null);setRetry(n => n + 1);}}>무료 해석 다시 불러오기</button></>}
         {!free && !err && <p role="status">해석과 근거를 정리하고 있소…</p>}
         {free && <>
+          <nav className="reading-stage-map" aria-label="무료 해석 진행 순서">
+            <span>지금 읽는 순서</span><ol><li className="on"><b>1</b>해석</li><li><b>2</b>추가 질문</li><li><b>3</b>반영 해석</li><li><b>4</b>오늘 행동</li></ol>
+            <p>위 단계는 역할이 다릅니다. 2단계에 답하면 3단계의 장면과 판정이 바뀝니다.</p>
+          </nav>
           {rejected.length > 0 ? <section className="conversion-card" aria-label="맞지 않았던 해석 다시 보기">
             <h2>맞지 않았던 {rejected.length}마디는 접어 두겠소.</h2>
             <p>그대가 아니라고 답한 해석을 성격으로 단정하지 않겠소. 생년월일에서 계산한 기둥은 그대로지만, <strong>그 해석이 실제 경험과 같다는 뜻은 아니오.</strong></p>
@@ -487,8 +492,8 @@ function PayInner() {
             {free.editorial && <ServerText as="p" className="conversion-note" html={`계산에서 확인한 근거 · ${free.editorial.observation}`} />}
             <p><strong>오늘은 이것부터 해보시오.</strong><br />맞지 않았던 문장 하나와 실제로 겪은 장면 하나를 나란히 적으시오. 다른 점이 무엇인지 먼저 살피는 것으로 충분하오.</p>
             <button className="btn gh" onClick={() => {track("reading_mismatch", "d0", {n: 1}); router.push("/?step=a3");}}>태어난 정보 다시 확인하기</button>
-            <button className="btn gh" onClick={() => {track("reading_mismatch", "d0", {n: 2}); router.push("/lobby");}}>다른 해석자의 관점 살펴보기</button>
-          </section> : free.editorial ? <ReadingGuide preview={(lens?.price ?? 0) > 0} guide={free.editorial} revelation={freeRevelation(cuts)} /> :
+            <button className="btn gh" onClick={() => {track("reading_mismatch", "d0", {n: 2}); router.push("/lobby");}}>다른 기준으로 판정하는 해석자 고르기</button>
+          </section> : free.editorial ? <ReadingGuide preview={(lens?.price ?? 0) > 0} guide={free.editorial} revelation={freeRevelation(cuts)} lensId={s.cur} /> :
             <div className="conversion-card"><p>기둥과 해석 근거를 아래에서 확인할 수 있소. 맞는 부분만 경험에 대입해 보시오. 영수증을 같이 건네는 셈이오 — 그러니까 <b>여덟 글자</b> 가운데 어느 글자에서 나온 말인지 줄마다 적어 두었다는 말이오.</p></div>}
           {/*
             ★ 되묻는 자리. 목패 **앞**에 둡니다 — 답이 무료 구간 안에서
@@ -525,6 +530,7 @@ function PayInner() {
           )}
           {/* 상세 해석과 실천을 먼저 전달하고, 이어지는 질문과 가격을 뒤에 둡니다. */}
           {(lens?.price ?? 0) > 0 && rejected.length === 0 && <FreeReadingDetail cuts={cuts} locked={free.locked} lensId={s.cur} onOpen={openPrice} />}
+          {!rejected.length && free.practice && <PracticeCard key={free.practice.id} practice={free.practice} lensId={s.cur} />}
           <section className="conversion-details reading-evidence" aria-label="무료 해석과 계산 근거">
             <h2>{rejected.length ? "원래 해석과 계산 근거" : "무료 해석과 자세한 근거"}</h2>
             <p className="conversion-note">{cuts.length}개 항목을 아래에서 바로 읽을 수 있소.</p>
@@ -535,7 +541,6 @@ function PayInner() {
                 {c.id === "sinsal" ? <SinsalSlots html={c.html} /> : <div dangerouslySetInnerHTML={{__html:c.html}} />}
               </ReadingVoice>
             </section>)}
-            {!rejected.length && free.practice && <PracticeCard key={free.practice.id} practice={free.practice} />}
           </section>
           {(lens?.price ?? 0) > 0 && rejected.length === 0 && <NextReading cuts={free.locked} onOpen={openPrice} />}
           {/*
@@ -574,8 +579,8 @@ function PayInner() {
           {(lens?.price ?? 0) > 0 && rejected.length === 0 &&
             <Wants rows={free.wants ?? []} onOpen={openPrice} />}
           {(lens?.price ?? 0) > 0 && <div className="reading-next">
-            <p>{rejected.length ? "맞지 않았던 해석은 접어 두고, 추가로 다루는 질문을 먼저 살펴보시오." : <>여기까지가 값 없이 보는 데까지요. 방금 읽은 되풀이를 <strong>지금의 흐름</strong>과 함께 짚는 것이 다음 해석이오.</>}</p>
-            <button className="btn" onClick={openPrice}>추가 해석과 가격 보기</button>
+            <p>{rejected.length ? "맞지 않았던 문장은 버리고, 결제 후 어떤 질문에 답하는지 먼저 보시오." : <>무료에서는 반복 장면과 오늘 행동까지 드렸소. 결제 후에는 <strong>반복 원인·선택 분기·다시 확인할 때</strong>를 제목별로 가릅니다.</>}</p>
+            <button className="btn" onClick={openPrice}>결제 후 열리는 질문·첫 문장·가격 보기</button>
           </div>}
           <NextSeats />
           <button className="btn gh" onClick={() => router.push("/summary")}>오늘은 여기까지 · 본 것을 한 장으로 받겠습니다</button>
@@ -610,9 +615,9 @@ function PayInner() {
         {!!t.base_price && t.base_price>t.price && <span><s>{t.base_price.toLocaleString()}원</s> → {t.referral?`함께 보기 ${t.referral.percent}% 할인`:`기간 ${t.promotion?.percent}% 할인`}</span>}
         <PromotionNote value={t.promotion} />
         <span>{t.per_month ? `${t.days ?? 30}일마다 자동 결제` : "한 번 결제 · 영구 열람"}</span>
-        <span>{t.lenses > 1 ? `${t.lenses}명의 해석을 함께 읽소.` : "이 인물의 추가 해석과 근거를 읽소. 다른 인물은 포함하지 않소."}</span>
-        <span>전체 {t.cuts}개 항목 · 약 {t.minutes}분 분량 · 무료 내용 포함</span>{t.needs_extra_input && <span>일부 항목은 추가 정보가 있어야 열리오. 선택 후 필요한 정보를 확인하시오.</span>}
-        <span className="product-action">{pick === t.id ? "선택했소 · 아래에서 본문과 조건 확인" : "이 상품의 본문·결제 조건 보기 →"}</span>
+        <span>{t.lenses > 1 ? `${t.lenses}명이 같은 명식을 서로 다른 기준으로 판정하오.` : `${charName}${josa(charName,'이','가')} 반복 원인·결정 기준·오늘 행동을 끝까지 가릅니다. 다른 인물은 포함하지 않소.`}</span>
+        <span>{t.cuts}개 질문의 답 · {t.chars.toLocaleString()}자 · 약 {t.minutes}분 · 무료 판정 포함</span>{t.needs_extra_input && <span>선택 입력이 필요한 항목은 무엇을 더 적어야 하는지 결제 전에 밝힙니다.</span>}
+        <span className="product-action">{pick === t.id ? "선택 완료 · 아래에서 실제 질문과 첫 문장 보기" : "결제 후 받는 답을 먼저 보기 →"}</span>
       </button>
     );
     if (settling || carding) return (
@@ -657,11 +662,11 @@ function PayInner() {
     return (
       <Shell screen="d1" title="추가 해석과 결제" legal onBack={() => router.push("/pay?step=d0")}>
         <div className="conversion-intro consultation-offer">
-          <p className="conversion-kicker">{charName}의 이어지는 해석</p>
+          <p className="conversion-kicker">{charName}이 아직 끝내지 않은 판정</p>
           <h1 className="conversion-title">{readingIntent?.question ?? CHARACTER_QUESTIONS[s.cur] ?? READING_QUESTIONS[s.concern]}</h1>
-          {readingIntent && <p className="checkout-reading-intent">이어 읽으려던 「{readingIntent.title}」 · {readingIntent.tier}부터 열리는 내용이오. 아래에서 포함 범위를 확인하시오.</p>}
-          <p className="conversion-lead">처음 짚은 모습 뒤에 어떤 이유가 있는지, {charName}의 관점으로 더 깊이 읽어보시오.</p>
-          <p className="conversion-note">{directCheckout?'고른 풀이가 포함된 상품이오. 아래 금액과 조건을 확인하고 결제하면 읽던 질문으로 바로 이어지오.':'상품을 고르면 실제 풀이의 앞부분과 열람 범위가 보이오. 금액과 결제 조건을 확인한 뒤 결제할 수 있소.'}</p>
+          {readingIntent && <p className="checkout-reading-intent">방금 멈춘 질문은 「{readingIntent.title}」이오. 결제하면 그 질문의 원인·갈림길·행동 판정부터 바로 열립니다.</p>}
+          <p className="conversion-lead">무료에서 본 결과 뒤에는 왜 반복됐는지, 무엇을 멈출지, 언제 다시 판단할지가 남아 있소.</p>
+          <p className="conversion-note">{directCheckout?'아래에 실제 질문 3개와 본문 첫 문장, 전체 제목, 금액을 모두 공개했소. 읽어 본 뒤 결제하시오.':'상품을 누르면 실제 질문 3개·본문 첫 문장·전체 제목·정확한 분량·가격이 나타납니다.'}</p>
         </div>
         {sales?.reason === "gateway_setup" && <p className="conversion-status" role="status">결제 서비스 연결을 준비하고 있소. 지금은 무료 해석을 이용해 주시오.</p>}
         {sales?.reason === "temporary" && <div className="conversion-status" role="alert"><p>결제 가능 상태를 확인하지 못했소. 입력과 선택은 그대로 남아 있소.</p><button className="btn gh" onClick={() => {setSales(null);setRetry(n => n + 1);}}>결제 연결 다시 확인하기</button></div>}
@@ -697,7 +702,7 @@ function PayInner() {
                 목패가 서고, 값은 저마다 제 값입니다 (price_of).
           */}
           <details className="otherseats conversion-details">
-            <summary>이 관점이 맞지 않소? 다른 해석자 살펴보기</summary>
+            <summary>이 판정 기준이 안 맞소? 다른 전문가 고르기</summary>
             <p className="lab">이 사람이 아니어도 되오</p>
             <p className="sm">같은 <b>8글자</b>를 <b>20명</b>이 저마다 다른 자리에서 읽소. <mark>값도 저마다 다르오 — 창을 어느 쪽에 내느냐에 따라 방에 드는 햇빛이 달라지는 것과 같소.</mark></p>
             <div className="og c2">
@@ -720,6 +725,7 @@ function PayInner() {
           <PromotionNote value={tier.promotion} />
           <div className="conversion-card">
             <h2>{tier.id === "one" ? `${charName} 해석` : tier.name}</h2>
+            <CheckoutReveal lensId={s.cur} name={charName} peek={peek} cuts={tier.cuts} chars={tier.chars} minutes={tier.minutes} />
             <div id="checkout-terms" className="checkout-terms" tabIndex={-1}>
               {!member&&<p className="sm">결제 후 다른 기기에서도 다시 읽으려면 <Link href={'/me?returnTo='+encodeURIComponent('/pay?step=d1&direct=1&tier='+tier.id)}>로그인·회원가입하고 이어가기</Link>. 비회원 결제 후에도 같은 브라우저에서 가입하면 구매를 연결할 수 있습니다.</p>}
             {pick !== "sub" && order && <>
@@ -757,12 +763,12 @@ function PayInner() {
             {tier.id === "all" && <p className="conversion-note">이미 읽은 내용도 포함되오. 전체 상품은 다른 인물의 관점을 함께 읽는 방식이며, 모든 인물에서 한 명 상품보다 본문이 길어지는 것은 아니오.</p>}
             {!peek && !peekError && <p role="status">선택한 상품의 실제 본문을 불러오고 있소…</p>}
             {peekError && <div className="conversion-status" role="alert"><p>{peekError}</p><button className="btn gh" onClick={() => setPeekRetry(n => n+1)}>본문 미리보기 다시 불러오기</button></div>}
-            {peek && peek.length > 0 && <details open={directCheckout?undefined:true} className="conversion-details"><summary>결제 전에 실제 본문 미리보기</summary><section className="paid-preview"><h3>다음 해석에서 풀어볼 질문</h3><p className="conversion-note">무료에서는 기둥·핵심 해석·오늘의 행동을 읽었소. 아래는 선택한 상품에서 추가로 열리는 해석의 실제 앞부분이오.</p>
-              {peek.slice(0, 3).map((r, i) => <ReadingVoice key={r.lens_id+i} lensId={r.lens_id} label="이 질문을 이어 읽는 사람"><h3>{r.ask}</h3><p>{r.head}…</p><LockedVeil />{r.source && <ServerText as="p" className="conversion-note" html={`해석 근거 · ${r.source}`} />}</ReadingVoice>)}
-            </section></details>}
-            <details className="conversion-details"><summary>전체 분량과 열람 범위 · {tier.cuts}개 항목 확인</summary>
-              <p className="conversion-note">현재 명식 기준 {tier.cuts}개 내용 · {tier.chars.toLocaleString()}자 · 약 {tier.minutes}분. {tier.lenses}명의 관점으로 읽소.</p>
-              {tier.opens.length > 0 && <ul>{tier.opens.map(title => <li key={title}>{title}</li>)}</ul>}
+            <details className="conversion-details checkout-open-list" open>
+              <summary>결제하면 열리는 {tier.cuts}개 답의 제목 보기</summary>
+              <p><strong>어떤 내용인지 모른 채 결제하지 않도록, 실제로 열리는 제목을 먼저 공개합니다.</strong></p>
+              <p className="conversion-note">{tier.chars.toLocaleString()}자 · 약 {tier.minutes}분 · {tier.lenses > 1 ? `${tier.lenses}명의 서로 다른 관점` : `${charName} 한 사람의 집중 해석`}</p>
+              {tier.opens.length > 0 && <ol>{tier.opens.map((title,index) => <li key={title}><span>{String(index+1).padStart(2,'0')}</span><strong>{title}</strong></li>)}</ol>}
+              {tier.opens.length < tier.cuts && <p className="checkout-more-count">위 제목 뒤로 <strong>{tier.cuts-tier.opens.length}개 답</strong>이 더 열립니다.</p>}
             </details>
 
           </div>

@@ -162,6 +162,31 @@ def test_hook_response_carries_no_bank_internals(client, chart_id):
         assert leak not in raw, leak
 
 
+def test_a_stale_situation_does_not_break_the_hook(client, chart_id):
+    """
+    ★ 손님이 돈을 물으며 「사업·장사」 를 골라 두고, 사랑만 보는
+      적혈도사를 골랐습니다 (2026-09-23).
+
+      고민은 그 사람이 보는 자리로 갈리는데(`lens.concern_for`) 고른
+      갈래는 돈에서 고른 것이라, 훅이 422 로 넘어졌습니다 — 화면에는
+      「훅을 만들지 못했소」 만 뜨고, 까닭은 **손님이 본 적도 없는**
+      사랑 갈래 목록이오. 리포트는 이미 같은 자리에서 갈래를
+      내려놓고 있었습니다. 두 자리가 갈리면 한쪽만 터집니다.
+    """
+    stale = client.post("/v1/hook", json={
+        "chart_id": chart_id, "concern": "money", "lens_id": "jeokhyeol",
+        "topic": {"choice": "biz"}})
+    assert stale.status_code == 200, stale.text
+    stages = [s["stage"] for s in stale.json()["segments"]]
+    assert "topic" not in stages, "안 맞는 갈래를 그대로 폈소"
+    # 맞는 갈래는 그대로 섭니다.
+    ok = client.post("/v1/hook", json={
+        "chart_id": chart_id, "concern": "love", "lens_id": "jeokhyeol",
+        "topic": {"choice": "alone"}})
+    assert ok.status_code == 200, ok.text
+    assert "topic" in [s["stage"] for s in ok.json()["segments"]]
+
+
 # ── /v1/report ─────────────────────────────────────────────
 def _mark_paid(session_id, tier, lens_id="pungun"):
     """이 세션이 값을 치른 것으로 기록한다. pay/confirm 이 쓰는 그 모양."""
@@ -844,8 +869,15 @@ def test_the_extra_input_is_asked_for_not_silently_dropped(client, chart_id):
         "chart_id": chart_id, "lens_id": "jeokhyeol", "tier": "free",
         "concern": "love", "extras": {"blood": {"type": "A"}}}).json()
     assert len(filled["cuts"]) + len(filled["locked"]) > before, "채워 줬는데 컷이 안 늘었습니다"
-    # Supplying a paid extra must not unlock it; the expanded free workbook stays.
-    assert {c["id"] for c in filled["cuts"]} <= {c["id"] for c in r["cuts"]}
+    # ★ 답한 값이 **문을 여는 열쇠가 되면** 안 됩니다 — 적어 보냈다고
+    #   값 치른 자리가 열리면 그건 값이 아니오.
+    #   다만 **제가 적어 보낸 그 컷 하나**는 보여야 합니다. 묻고 나서
+    #   답을 값 뒤에 두면 그건 받아 내는 것이오 (report._all_cuts 의
+    #   `answered`). 무료로 서는지 아닌지는 그 컷이 제 손으로 적어 둔
+    #   `min_level` 이 정하고(혈액형 0 · 상대 사주 1), 짧은 무료 구간이
+    #   그걸 덮어쓰지 않습니다.
+    opened = {c["id"] for c in filled["cuts"]} - {c["id"] for c in r["cuts"]}
+    assert opened <= {"blood"}, opened
     assert all("html" not in c for c in filled["locked"])
     assert filled["needs_input"] is None
 

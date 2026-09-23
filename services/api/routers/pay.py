@@ -69,6 +69,8 @@ class PrepareRequest(BaseModel):
     lens_id: str
     tier: Tier
     concern: str = "love"
+    # Optional catalog product. The server resolves its authoritative price.
+    product_id: Optional[str] = None
 
 
 class PrepareResponse(BaseModel):
@@ -262,11 +264,22 @@ def prepare(req: PrepareRequest) -> PrepareResponse:
     # ★ 값은 캐릭터마다 다릅니다 — 카드에 보인 값이 그대로 청구됩니다.
     try:
         import referrals
-        quote = referrals.quote(payments.price_of(req.tier, req.lens_id), req.tier, req.session_id)
-        amount = quote['price']
+        if req.product_id:
+            from fortune_products import get_offer
+            product = get_offer(req.product_id)
+            if product is None:
+                raise HTTPException(status_code=422, detail="상품을 찾을 수 없습니다.")
+            # Product prices are server-owned; never trust the browser amount.
+            price = int(product['price'] if isinstance(product, dict) else product.price)
+            quote = {"base_price": price, "price": price,
+                     "promotion": None, "referral": None, "tier": "fortune"}
+            amount = price
+        else:
+            quote = referrals.quote(payments.price_of(req.tier, req.lens_id), req.tier, req.session_id)
+            amount = quote['price']
     except payments.PaymentError as e:
         raise HTTPException(status_code=422, detail=str(e))
-    resumed = referrals.pending(req.session_id, req.chart_id, req.lens_id, req.tier)
+    resumed = None if req.product_id else referrals.pending(req.session_id, req.chart_id, req.lens_id, req.tier)
     if resumed:
         oid, existing = resumed
         cfg = payments.client_config()
@@ -279,6 +292,7 @@ def prepare(req: PrepareRequest) -> PrepareResponse:
     store.set_json("order:" + order_id, {
         "session_id": req.session_id, "chart_id": req.chart_id,
         "lens_id": req.lens_id, "tier": req.tier, "concern": req.concern,
+        "product_id": req.product_id,
         "amount": amount, "status": "pending", "payment_key": None,
         "price_quote": quote,
         "analytics_sid": req.analytics_sid,
@@ -308,8 +322,10 @@ def _settle_paid(order_id: str, order: dict, payment_key: str, check) -> dict:
     """Recoverable settlement journal. Indexes are sets; counter has a receipt."""
     check()
     now = datetime.now(timezone.utc)
+    unlocked = (["fortune:" + order["product_id"]] if order.get("product_id")
+                else payments.unlocks_for(order["tier"], order.get("lens_id")))
     order.update(status="settling", payment_key=payment_key,
-                 unlocked=payments.unlocks_for(order["tier"], order.get("lens_id")),
+                 unlocked=unlocked,
                  paid_at=order.get("paid_at") or now.isoformat())
     order["expires_at"] = ((now + timedelta(days=SUB_DAYS)).isoformat()
                             if order["tier"] == "sub" else None)
@@ -385,6 +401,12 @@ def _granted(order: dict) -> dict:
     from routers.chart import load_features
 
     tier, lens_id = order["tier"], order.get("lens_id")
+    if order.get("product_id"):
+        from fortune_products import get_offer
+        product = get_offer(order["product_id"])
+        return {"counted": True, "product_id": order["product_id"],
+                "tier_name": (product.get("name") if isinstance(product, dict) else product.name) if product else order["product_id"],
+                "amount": order.get("amount", 0), "lenses": 1}
     try:
         f = Features(**load_features(order["chart_id"]))
     except Exception:

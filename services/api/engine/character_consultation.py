@@ -164,3 +164,28 @@ def brief(lens_id, topic, *, name="이 상담자"):
             "html": (f'<p>말씀하신 장면은 <strong>{escape(fourth)}</strong>, '
                      f'그리고 <strong>{escape(fifth)}</strong> 쪽이오.</p>'
                      f'<p>{escape(row[5])}</p>'), "close": row[7]}
+
+
+def enrich_practice(practice, lens_id, topic, *, name="이 상담자"):
+    """Attach the selected specialist's concrete judgement to today's action.
+
+    These are intentionally separate fields: clients can make the sharp verdict
+    prominent while folding generic workbook material away, avoiding twenty
+    characters that all feel like the same checklist.
+    """
+    row = INTERVIEWS.get(lens_id)
+    if not row or not topic or not topic.get("choice4") or not topic.get("choice5"):
+        return practice
+    fourth, fifth = _picked(row, topic, 4), _picked(row, topic, 5)
+    enriched = deepcopy(practice)
+    enriched.update({
+        "id": f"{practice.get('id', 'practice')}:{lens_id}",
+        "version": max(3, int(practice.get("version", 1))),
+        "specialist_name": name,
+        "specialist_axis": row[0],
+        "case_summary": f"{fourth} / {fifth}",
+        "specialist_verdict": row[5],
+        "specialist_action": row[6],
+        "specialist_close": row[7],
+    })
+    return enriched

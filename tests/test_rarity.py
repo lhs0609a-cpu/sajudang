@@ -33,7 +33,7 @@ def _people():
 
 
 def _report(f, tier="all"):
-    return build_report(f, "t", "nopa", tier, "work", None)
+    return build_report(f, "t", "dongja", tier, "work", None)
 
 
 # ══════════════════════════════════════════════════════════

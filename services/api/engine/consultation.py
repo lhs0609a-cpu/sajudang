@@ -106,6 +106,69 @@ METHODS = {
 }
 
 
+def plain_profile(f, *, name="풍운도령", lens_id="pungun") -> str:
+    """Explain the person in ordinary language before 명리 terminology."""
+    strength = {"신강": "기본 체력이 강한 편", "신약": "주변 조건의 영향을 많이 받는 편", "중화": "상황에 따라 힘을 조절하는 편"}.get(f.strength, "상황에 따라 힘을 조절하는 편")
+    flow = {"비겁": "내 편을 만들고 함께 버티는 일", "식상": "생각을 말과 결과물로 꺼내는 일", "재성": "사람과 기회를 현실적인 성과로 바꾸는 일", "관성": "규칙과 책임을 맡아 구조를 세우는 일", "인성": "배우고 준비한 것을 안전하게 쌓는 일"}.get(f.flow, "현실에서 힘을 쓰는 일")
+    angles = {
+        "pungun": ("현실에서 반복되는 선택의 패턴", "오늘의 행동으로 바꾸는 방법"),
+        "baegun": ("몸과 생활 리듬이 보내는 신호", "무리하지 않고 균형을 되찾는 방법"),
+        "cheongam": ("타고난 판단 기준과 고집이 쓰이는 자리", "결정 전에 확인할 한 가지"),
+        "sigye": ("언제 움직이고 언제 기다려야 하는지", "시기를 놓치지 않는 기준"),
+        "jeokhyeol": ("끌림과 거리감이 생기는 순간", "관계를 망치지 않는 선"),
+        "monghwa": ("이름 붙이기 어려운 감정과 신호", "불안할 때 확인할 현실"),
+        "hongmae": ("관계에서 주고받는 책임의 무게", "오래 가는 합의의 조건"),
+        "haengsu": ("돈과 기회를 현실로 바꾸는 방식", "손에 남기는 구조"),
+    }
+    angle, action = angles.get(lens_id, ("이 명식에서 반복되는 삶의 패턴", "지금 바꿀 수 있는 한 가지"))
+    # ★ 뱅크는 **하오체 한 벌**로 씁니다. 합쇼체로 쓰면 `voice.speak` 가
+    #   손댈 어미가 없어 이 글만 스무 명에게 똑같이 나가오.
+    # ★ 조사는 **받침을 보고** 답니다 — 「풍운도령가」 「신호을」 이
+    #   나가던 자리요 (`bank.josa`).
+    from .bank import josa as _josa
+    return (f'<div class="plain-profile"><p class="plain-profile-label">'
+            f'{escape(name)}{_josa(name, "이", "가")} 먼저 읽은 사람의 모습</p>'
+            f'<h3>이 사람은 {strength}이오.</h3>'
+            f'<p>겉으로는 쉽게 흔들리지 않는 것처럼 보여도, 속에서는 형편을 오래 살핀 뒤 움직이오. 마음이 없는 사람이 아니라 <b>확신이 서야 몸이 따라가는 사람</b>에 가깝소.</p>'
+            f'<p><b>{angle}</b>{_josa(angle, "을", "를")} 보면 이 사람이 더 또렷해지오. 잘 풀릴 때는 {flow}에서 솜씨가 드러나고, 일이 꼬이면 혼자 붙들고 버티다가 손 내밀 때를 놓치오.</p>'
+            f'<p class="plain-profile-point"><b>{action}</b> · 재주가 모자란 사람이 아니라, 제 방식이 맞는지 재 보는 시간이 긴 사람이오.</p>'
+            f'<p class="plain-profile-point"><b>쉽게 말하면</b> · 느린 것이 아니라 <b>한 번 더 재고 드는 것</b>이오. 그래서 시작은 늦어도 시작한 뒤에는 잘 안 놓소.</p>'
+            f'<p class="plain-profile-evidence">아래 어려운 말은 이 설명을 받치는 셈이오. 사람을 먼저 말하고, 명식은 그다음에 펴 보이겠소.</p></div>')
+
+
+def pungun_opening(f, concern: str, *, name="풍운도령") -> str:
+    """A decisive, non-question opening for the first free reading.
+
+    The old opening mixed chart explanation, metaphor, and follow-up prompts in
+    one paragraph. This keeps the first screen to four jobs: verdict, counted
+    evidence, concern-specific consequence, and one observable checkpoint.
+    """
+    from . import spine as spine_mod
+    sp = spine_mod.read(f)
+    flow_count = spine_mod.count(f, f.flow)
+    next_group = spine_mod.NEXT[f.flow]
+    next_count = spine_mod.count(f, next_group)
+    concern_lines = {
+        "money": ("돈은 들어오는 양보다 남기는 짜임에서 갈리오.", "받은 돈·직접 비용·쓴 시간을 한 거래에 같이 적으시오."),
+        "work": ("일은 버티는 시간보다 맡은 범위가 끝나는 선에서 갈리오.", "내가 맡은 일과 추가로 떠안은 일을 두 줄로 나누시오."),
+        "love": ("사랑은 마음의 크기보다 혼자 떠안은 몫과 함께 맞추는 몫에서 갈리오.", "서운했던 사실과 다음에 원하는 행동을 각각 한 문장으로 적으시오."),
+        "people": ("관계는 좋은 사람이 되는 양보다 내가 맡을 범위에서 갈리오.", "이번 부탁에서 할 수 있는 만큼과 하지 않을 만큼을 숫자나 시간으로 정하시오."),
+        "dir": ("방향은 확신이 설 때까지 기다리는 일이 아니라 되돌릴 수 있는 시험을 정하는 일이오.", "선택을 바꿀 사실 하나와 끝까지 지킬 기준 하나만 남기시오."),
+        "health": ("회복은 의지로 더 버티는 일이 아니라 멈출 기준을 먼저 정하는 일이오.", "오늘 끝낼 시각과 내일 다시 볼 시각을 적으시오."),
+    }
+    consequence, checkpoint = concern_lines.get(concern, concern_lines["love"])
+    return (
+        plain_profile(f, name=name, lens_id="pungun") +
+        f'<div class="specialist-opening"><p class="opening-label">{escape(name)}의 첫 판정</p>'
+        f'<h3>결론: 버티는 힘은 충분하오. 다만 혼자 계속 드는 방식은 바꿔야 하오.</h3>'
+        f'<p>{escape(consequence)}</p>'
+        f'<p class="opening-evidence"><strong>계산 근거</strong> · {escape(sp["source"])} · '
+        f'{escape(f.flow)} {flow_count}개 → {escape(next_group)} {next_count}개</p>'
+        f'<p><strong>오늘 확인할 한 가지</strong> · {escape(checkpoint)}</p>'
+        f'<p class="opening-boundary">이 네 줄이 지금까지 본 것의 결론이오. 아래 물음에 답하시면 같은 자로 그대의 장면을 더 좁혀 다시 세겠소.</p></div>'
+    )
+
+
 def preview(lens_id, concern):
     from .editorial_questions import question
     row = METHODS.get(lens_id)

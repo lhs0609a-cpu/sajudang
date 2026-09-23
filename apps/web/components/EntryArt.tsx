@@ -9,7 +9,7 @@ export const ENTRY_QUESTIONS: Record<Concern, { question: string; promise: strin
   love: { question: '사랑 앞에서, 나는 왜 이럴까.', promise: '마음을 주는 방식과 편안해지는 관계를 보오.', next: '내 사랑의 반복과 이유 읽기' },
   people: { question: '좋은 사람으로 지내는 게 지치오?', promise: '가까워지는 방식과 지켜야 할 경계를 보오.', next: '내 관계의 거리와 기준 읽기' },
   dir: { question: '다른 길을 골랐다면, 달랐을까.', promise: '선택할 때 지키고 싶은 기준부터 찾아보오.', next: '나에게 맞는 선택의 기준 읽기' },
-  health: { question: '쉬는 날에도, 마음은 일하고 있소?', promise: '기운을 쓰는 습관과 일상의 쉼을 살펴보오.', next: '내 일상의 쉼과 리듬 읽기' },
+  health: { question: '쉬는 날에도, 마음은 일하고 있소?', promise: '쉼을 깨우는 책임과 오늘 멈춰도 되는 기준을 가르오.', next: '내 쉼을 막는 원인 판정받기' },
 };
 
 export default function EntryArt({ scene, caption, priority = false }: {

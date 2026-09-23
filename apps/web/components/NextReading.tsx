@@ -58,8 +58,8 @@ export default function NextReading({ cuts, onOpen, lensId: readingLens }: { cut
   if (!rows.length) return null;
   const rest = cuts.length - rows.length;
   const chars = cuts.reduce((n, c) => n + (c.chars ?? 0), 0);
-  return <CharacterSpeech lensId={lensId}><section className="next-reading" aria-label="이어지는 실제 해석">
-    <p className="conversion-kicker">여기서 한 걸음 더</p>
+  return <CharacterSpeech lensId={lensId}><section className="next-reading" aria-label="결제 후 열리는 실제 질문과 첫 문장">
+    <p className="conversion-kicker">무료 판정 뒤에 남은 결정적 질문</p>
     <h2>{CHARACTER_QUESTIONS[lensId] ?? '왜 같은 자리에서 다시 마음이 걸리는 것이오?'}</h2>
     <p className="conversion-note">지금 가장 마음에 걸리는 질문을 골라보시오. 그대의 실제 풀이에서 첫 대목을 꺼내 두었소.</p>
     <div className="preview-questions" role="group" aria-label="더 알아보고 싶은 질문">
@@ -70,7 +70,7 @@ export default function NextReading({ cuts, onOpen, lensId: readingLens }: { cut
     <article className="preview-focus" id={panelId} aria-live="polite" aria-atomic="true">
       <div>
         <ReadingSpeaker lensId={lensId} label="이어서 들려줄 이야기" />
-        <p className="conversion-kicker">그 질문에 이어지는 실제 풀이</p>
+        <p className="conversion-kicker">결제 후 열리는 답의 실제 첫 문장</p>
         <h3>{question(active)}</h3>
         <p>{readingText(active.teaser ?? '')}</p>
         <LockedVeil />

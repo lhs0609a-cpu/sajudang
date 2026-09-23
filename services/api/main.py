@@ -28,6 +28,7 @@ import store                                         # noqa: E402
 from guard_middleware import GuardMiddleware         # noqa: E402
 from member_middleware import MemberSessionMiddleware
 from routers import account as member_router
+from routers import fortune as fortune_router
 from routers import activity as activity_router
 from routers import referral as referral_router
 from routers import (                                # noqa: E402
@@ -194,7 +195,7 @@ async def _unhandled(request: Request, exc: Exception):
 
 
 for r in (chart, hook, report, relay, feedback, daily, pay, subscription,
-          share, events, journey, privacy, support, voice_router, admin_router, activity_router, referral_router):
+          share, events, journey, privacy, support, voice_router, admin_router, activity_router, referral_router, fortune_router):
     app.include_router(r.router)
 
 

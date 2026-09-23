@@ -93,7 +93,7 @@ export default function EntryGreeting() {
           : (!music || (ready && !seen)) && <button type="button" onClick={start}>
             {ready && !seen ? "목소리와 함께 인사 듣기" : "배경음 켜기"}
           </button>}
-        {music && !playing && <span className="conversion-note">소리는 위쪽 ♪에서 끌 수 있소.</span>}
+        {music && !playing && <span className="conversion-note">음악은 화면에 떠 있는 버튼에서 언제든 끌 수 있소.</span>}
       </div>
       {error && <p role="status" className="conversion-note">{error}</p>}
     </div>

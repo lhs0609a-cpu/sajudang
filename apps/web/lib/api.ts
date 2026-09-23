@@ -334,6 +334,10 @@ export const api = {
    *   블러가 아니라 서버가 안 보내는 것이라, 개발자도구로 벗겨도
    *   나올 게 없습니다 (docs/02 §7).
    */
+  fortuneCalculate: (req: {session_id:string; chart_id:string; product_id:string; year?:number; month?:number; partner_chart_id?:string; dates?:string[]}) => post<any>("/v1/fortune/calculate", req),
+
+  fortuneProducts: () => call<{products: {id: string; name: string; price: number; kind: string; summary: string; requires_partner?: boolean}[]; bundles: {id: string; name: string; price: number; includes: string[]}[]; currency: string}>("/v1/fortune/products"),
+
   payPeek: (req: {
     chart_id: string; lens_id: string; tier: string;
     concern?: string; axis4?: string | null;
@@ -348,7 +352,7 @@ export const api = {
 
   payPrepare: (req: {
     session_id: string; chart_id: string; lens_id: string;
-    tier: string; concern?: string; analytics_sid?: string | null;
+    tier: string; concern?: string; analytics_sid?: string | null; product_id?: string | null;
   }) => post<{
     order_id: string; amount: number; tier: string;
     client_key: string | null; enabled: boolean;
@@ -375,6 +379,8 @@ export const api = {
    *   정합니다 (서버가 session_id 로 봅니다). 화면이 paid 를 실어
    *   보내면 그건 광고 문구를 손님이 스스로 다는 것과 같습니다.
    */
+  recentReviews: (lensId?: string) => call<{reviews: {lens_id: string; rating: number | null; body: string; verified: boolean; created_at: string | null}[]}>(`/v1/review/recent${lensId ? `?lens_id=${encodeURIComponent(lensId)}` : ""}`),
+
   review: (req: {
     lens_id: string; rating?: number | null; body?: string;
     session_id?: string; chart_id?: string;

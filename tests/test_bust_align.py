@@ -119,6 +119,36 @@ def test_머리_위가_비어_있다():
     assert not bad, "머리가 잘린 초상: %s" % bad
 
 
+def test_한_사람의_모든_얼굴이_같은_높이에_앉았다():
+    """
+    ★ 한 상자 안에서 얼굴이 **바뀝니다** (2026-09-23).
+
+      `CharArt` 는 결에 따라 얼굴을 갈아 답니다 — 찌르는 자리는
+      `bust_cut`, 만류·마무리는 `bust_soft` 요. `ReadingVoice` 는 한
+      상자 안에서 둘을 오갑니다. 기본 한 장만 내려 맞췄더니 얼굴이
+      바뀔 때마다 머리가 30px 튀어 올랐습니다 — 고친 자리가 새 버그를
+      만든 꼴이오.
+
+      맞추는 것은 한 장이 아니라 **한 사람의 모든 얼굴**입니다.
+    """
+    bad = []
+    for d in sorted(CHAR.iterdir()):
+        for face in ("bust", "bust_cut", "bust_soft"):
+            p = next((d / (face + ext) for ext in (".webp", ".png")
+                      if (d / (face + ext)).exists()), None)
+            if p is None:
+                continue
+            size, bb = _measure(p)
+            if size != (W, H) or not bb:
+                continue
+            if abs(bb[1] - TOP) > SLACK:
+                bad.append("%s/%s — 머리 위 %dpx (%dpx 라야 하오)"
+                           % (d.name, face, bb[1], TOP))
+    assert not bad, ("한 사람 안에서 얼굴 높이가 갈리오 — "
+                     "python tools/bust_align.py --write · "
+                     + " · ".join(bad))
+
+
 def test_맞추는_도구가_할_일이_없다():
     """도구를 다시 돌려도 옮길 것이 없어야 하오 — 이미 맞았다는 뜻이오."""
     from tools.bust_align import TOP as T, measure

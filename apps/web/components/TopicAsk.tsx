@@ -64,12 +64,13 @@ export default function TopicAsk({
     && (!spec.options4 || !!pick4) && (!spec.options5 || !!pick5);
 
   return (
-    <section className="extraask noprint">
+    <section className="extraask noprint" aria-label="추가 질문에 답하면 아래 해석이 바뀝니다">
       <ConcernReminder concern={concern} />
-      <p className="ttl">{spec.title}</p>
+      <p className="ttl">2단계 · 추가 질문 · 여기에 답하면 아래 판정을 다시 계산합니다</p>
+      <h2 className="ask-heading">{spec.title}</h2>
       <p className="why">
-        고르신 것을 여덟 글자와 <b>맞대 보오</b>. 맞히려는 것이 아니라
-        겹치는지 어긋나는지를 보는 것이오. 적으신 것은 남기지 않소.
+        지금 고르는 답은 해석 자체가 아니오. 그대의 상황을 좁혀서
+        <b> 아래 3단계 해석의 장면·판정·행동을 바꾸는 입력</b>이오. 적으신 것은 남기지 않소.
       </p>
 
       <p className="q">{spec.q}</p>
@@ -125,7 +126,7 @@ export default function TopicAsk({
           <div className="og c2">{spec.options5.map(o => <button key={o.id} className={`op ${pick5===o.id?'on':''}`} aria-pressed={pick5===o.id} onClick={()=>setPick5(o.id)}><b>{o.label}</b></button>)}</div></>
       )}
 
-      <p className="ask-status" role="status">{busy ? "선택하신 답으로 해석을 다시 읽고 있습니다." : ready ? "선택을 마쳤습니다. 아래 버튼을 눌러 내 답과 해석을 맞춰 보세요." : "각 질문에서 하나씩 고르면 다음 해석을 볼 수 있습니다."}</p>
+      <p className="ask-status" role="status">{busy ? "고른 답을 반영해 3단계 해석을 다시 만드는 중이오." : ready ? "답을 모두 골랐소. 아래 버튼을 누르면 고른 상황에 맞춘 해석이 나옵니다." : "각 질문에서 하나씩 고르시오. 아직 해석 결과가 바뀐 것은 아니오."}</p>
       <button className="btn go" disabled={!ready || busy}
               onClick={() => onSubmit({
                 topic: { choice: pick, ...(pick2 ? { choice2: pick2 } : {}),
@@ -133,7 +134,7 @@ export default function TopicAsk({
                          ...(pick4 ? { choice4: pick4 } : {}),
                          ...(pick5 ? { choice5: pick5 } : {}) },
               })}>
-        {busy ? "맞대 보는 중입니다" : "이걸로 보겠습니다"}
+        {busy ? "이 답으로 해석 다시 만들기" : "답을 반영해 해석 보기"}
       </button>
 
       {/*

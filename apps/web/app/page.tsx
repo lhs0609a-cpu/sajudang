@@ -1,6 +1,6 @@
 "use client";
 
-/** @screen a1 a2 a3 a4 a4b a5 a6 a7 */
+/** @screen a1 a2 a3 a4 a4b a5 a5b a6 a7 */
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -15,6 +15,7 @@ import Scene from "@/components/scene/Scene";
 import { Narration, Progress } from "@/components/Narration";
 import { CalcPanel, ManseTable, Pillars } from "@/components/Chart";
 import HookSegments from "@/components/HookSegments";
+import Doubts from "@/components/Doubts";
 import SituationAsk from "@/components/SituationAsk";
 import type {TopicAskSpec} from "@/components/TopicAsk";
 import { api, ApiError } from "@/lib/api";
@@ -218,8 +219,11 @@ if (step === "a1") {
         <div className="entry-benefits"><span>고민에 맞는 해석</span><span>확인할 수 있는 근거</span><span>오늘 해볼 일 하나</span></div>
       </section>
       <details className="entry-faq"><summary>무엇을 알려주면 되오?</summary><p>생년월일과 성별, 태어난 지역을 알려주시오. 시간과 별칭, 성향은 아는 만큼만 적어도 되오. 전통 사주를 바탕으로 자신을 돌아보는 해석이오.</p></details>
-      <details className="entry-faq"><summary>무료로 어디까지 볼 수 있소?</summary><p>첫 해석과 고민에 대한 무료 풀이를 볼 수 있소. 더 깊이 읽고 싶을 때, 포함된 내용과 가격을 확인하고 선택하시오.</p></details>
+      <details className="entry-faq"><summary>무료에서 정확히 무엇을 받소?</summary><p>타고난 힘, 반복되는 장면, 오늘 끝낼 행동까지 받소. 결제 전에는 추가로 열리는 질문·실제 첫 문장·글자 수·가격을 먼저 보여드리오.</p></details>
       <details className="entry-faq"><summary>읽고 나면 무엇이 남소?</summary><p>반복되는 모습, 그 해석의 근거, 오늘 해볼 행동을 함께 가져가오. 맞지 않는 문장은 아니라고 답해도 좋소. 그 차이부터 다시 짚겠소.</p></details>
+      {/* ★ 가장 센 설득 자산을 공유 화면에만 두지 않습니다 — 검색·광고로
+            직접 들어온 사람이 의심을 안은 채 일곱 화면을 지나게 됩니다. */}
+      <div className="gatedoubt"><Doubts compact first={null} /></div>
     </Shell>;
   }
   if (step === "a2") {
@@ -277,20 +281,20 @@ if (step === "a1") {
         </div>
         <p className="entry-input-note" id="birth-date-help" aria-live="polite">{s.year!==null && s.month!==null
           ? `${s.year}년 ${s.month}월은 ${daysInMonth(s.year,s.month)}일까지 있소. 날짜를 골라주시오.`
-          : '태어난 해와 월을 고르면 그 달에 있는 날짜만 고를 수 있소.'}</p>
+          : '태어난 해와 월을 고르면<br/>그 달에 있는 날짜만 고를 수 있소.'}</p>
         {bad && <p className="warn" id="birth-error" role="alert">{bad}</p>}
         {minor && <p className="warn" role="alert">만 14세 미만은 보호자 동의 절차가 필요해 현재 서비스를 이용할 수 없소.</p>}
         <fieldset className="entry-fieldset"><legend>성별</legend><div className="og c2">
           {([['F','여성'],['M','남성']] as const).map(([value,label]) => <button type="button" key={value} className={`op ${s.sexSet && s.sex===value?'on':''}`} aria-pressed={s.sexSet && s.sex===value} onClick={() => s.set({sex:value,sexSet:true,features:null,chartId:null})}>{label}</button>)}
-        </div><p className="entry-input-note">전통 사주에서 십 년 단위의 흐름을 계산하는 데 쓰오.</p></fieldset>
+        </div><p className="entry-input-note">전통 사주에서 십 년 단위의<br/>흐름을 계산하는 데 쓰오.</p></fieldset>
         <label htmlFor="birth-city">태어난 지역</label>
         <select id="birth-city" className="fld" value={s.city} onChange={e => s.set({city:e.target.value,features:null,chartId:null})}>
           {CITY_GROUPS.map(([g,cs]) => <optgroup key={g} label={g}>{cs.map(c => <option key={c} value={c}>{c}</option>)}</optgroup>)}
         </select>
         <button type="submit" className="btn mt" disabled={!filled || !!bad || !!minor || !s.sexSet}>태어난 시간으로 이어가기</button>
-        {filled && !bad && !minor && !s.sexSet && <p className="entry-input-note" role="status">위에서 성별을 선택하면 다음으로 이어갈 수 있소.</p>}
+        {!s.sexSet && <p className="entry-input-note" role="status">여성·남성 중 하나를 선택해 주시오.</p>}
       </form>
-      <p className="entry-footnote">입력 정보는 사주 계산에 사용하오. <a href="/legal">개인정보 처리 안내</a></p>
+      <p className="entry-footnote">입력 정보는 사주 계산에 사용하오.<br/><a href="/legal">개인정보 처리 안내</a></p>
     </Shell>;
   }
   if (step === "a4") {
@@ -318,11 +322,11 @@ if (step === "a1") {
       <EntryArt scene="night" caption="내가 아는 나, 새롭게 읽는 나" priority />
       <p className="entry-eyebrow">선택 · 나를 보는 또 하나의 시선</p>
       <h1 className="conversion-title">내가 생각하는 나와<br/>어디가 닮았을까.</h1>
-      <p className="conversion-lead">알고 있는 성향이 있다면 골라주시오.<br/>사주 해석과 나란히 놓고 함께 읽겠소.</p>
+      <p className="conversion-lead">아래 <b>열여섯 칸</b>에서 하나를 골라주시오.<br/>사주 해석과 나란히 놓고 함께 읽겠소.</p>
       <button className="btn gh entry-skip" onClick={() => {s.set({axis4:null,hookReview:null});go("a6");}}>잘 모르오 · 사주만으로 보기</button>
       <div className="entry-axis-grid" role="group" aria-label="성향 네 글자 선택">{AXIS4.map(t => <button key={t} className={`op ${s.axis4===t?'on':''}`} aria-pressed={s.axis4===t} onClick={() => s.set({axis4:t,hookReview:null})}>{t}</button>)}</div>
       <button className="btn mt" disabled={!s.axis4} onClick={() => go("a6")}>선택한 성향으로 무료 해석 보기</button>
-      <p className="entry-footnote">성향 선택은 사주 계산을 바꾸지 않소.<br/>둘 중 어느 쪽이 진짜 그대인지 판정하는 검사도 아니오.</p>
+      <p className="entry-footnote">성향 선택은 사주 계산을 바꾸지 않소.<br/>둘 중 어느 쪽이 진짜 그대인지<br/>판정하는 검사도 아니오.</p>
     </Shell>;
   }
   if (step === "a5") {
@@ -368,7 +372,7 @@ if (step === "a1") {
         <p className="entry-personal-promise">{ENTRY_QUESTIONS[s.concern].promise}</p>
         <button className="btn" onClick={() => go("a7")}>내 고민의 무료 해석 읽기 <span aria-hidden="true">↗</span></button>
         <details className="entry-faq"><summary>계산 근거와 보정 내역</summary><ManseTable f={s.features}/><CalcPanel f={s.features}/>
-          {s.divergence?.cases?.map((c,i)=><div className="conversion-note" key={i}><p>{c.why}</p><p>{c.ours}<br/>{c.mine}</p><p>다른 계산 방식: {c.theirs}<br/>{c.alt}</p></div>)}
+          {s.divergence?.cases?.map((c,i)=><div className="conversion-note" key={i}><p>{c.why}</p><p>{c.ours}<br/>{c.mine}</p><p>다른 계산 방식: {c.theirs}<br/>{c.alt}</p><p>이 서비스는 위의 첫 번째 명식으로 해석하오.</p></div>)}
         </details>
       </>}
     </Shell>;
@@ -383,10 +387,10 @@ if (step === "a1") {
     {segments && s.chartId && <HookSegments key={`${s.chartId}:${s.cur}:${s.concern}:${s.topicPick?.choice??''}:${s.topicPick?.choice2??''}:${s.topicPick?.choice3??''}:${s.topicPick?.choice4??''}:${s.topicPick?.choice5??''}`} segments={segments} chartId={s.chartId} lensId={s.cur} concern={s.concern} charName={lens.name} onMiss={onMiss} onDone={() => setHookDone(true)}/>}
     {hookDone && <section className="entry-afterword">
       <p className="entry-eyebrow">이야기는 여기서 이어지오</p><h2>마음에 남은 한마디,<br/>그 이유까지 읽어보시오.</h2>
-      <p>{ENTRY_QUESTIONS[s.concern].promise}<br/>다음 무료 풀이에서 핵심 근거를 확인하고, 더 궁금한 질문을 골라보오.</p>
+      <p>{ENTRY_QUESTIONS[s.concern].promise}<br/>다음 무료 풀이에서 어떤 글자 때문에 그렇게 읽었는지 보고, 가장 아픈 질문 하나를 고르시오.</p>
       <button className="btn" onClick={() => router.push('/pay?step=d0')}>{ENTRY_QUESTIONS[s.concern].next}</button>
-      <p className="entry-footnote">다음 요약까지 무료요. 심층 해석은 내용을 확인한 뒤 선택할 수 있소.</p>
-      <button className="btn gh" onClick={() => router.push('/summary')}>여기까지 본 내용 간직하기</button>
+      <p className="entry-footnote">타고난 힘·반복 장면·오늘 행동까지 무료요. 유료 본문의 질문과 첫 문장은 결제 전에 공개하오.</p>
+      <button className="btn gh" onClick={() => router.push('/summary')}>지금까지 나온 판정 한 장으로 저장하기</button>
     </section>}
     <RestHere visits={s.visits} hookMisses={misses} hour={new Date().getHours()} concern={s.concern} returning={s.visits>1}/>
   </Shell>;

@@ -6,6 +6,7 @@ import type {ReportResponse} from '@shared/chart';
 export type Member={id:string;username:string;session_id:string};
 export const useMember=create<{user:Member|null;ready:boolean;saveError:string|null}>(()=>({user:null,ready:false,saveError:null}));
 const BASE='/api/backend/v1/account';
+let hydratePromise:Promise<void>|null=null;
 export async function memberCall<T=any>(path:string,body?:unknown,method?:string):Promise<T>{
   const response=await fetch(BASE+path,{method:method??(body?'POST':'GET'),headers:{'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined,cache:'no-store'});
   const data=await response.json();
@@ -24,6 +25,14 @@ export function clearMember(){
   Object.keys(sessionStorage).filter(key=>key.startsWith('sd.checkout')).forEach(key=>sessionStorage.removeItem(key));
   useSession.getState().reset();useMember.setState({user:null,ready:true,saveError:null});
   saved.clear();
+}
+export function hydrateMember(){
+  if (hydratePromise) return hydratePromise;
+  hydratePromise=memberCall<{user:Member}>('/me')
+    .then(data=>acceptMember(data.user))
+    .catch(()=>useMember.setState({ready:true}))
+    .finally(()=>{hydratePromise=null;});
+  return hydratePromise;
 }
 const saved=new Map<string,Promise<unknown>>();
 export async function saveCurrentReading(report?:ReportResponse){

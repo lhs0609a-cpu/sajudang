@@ -75,20 +75,36 @@ def _f(b):
                           as_of=TODAY)
 
 
+# 용어 풀이 — 「재성(돈·살림 같은 재물…)」 은 **사전**이오. 무엇을
+# 물었든 같은 글자가 나오니, 이걸 세면 누구나 돈 얘기를 한 것이 됩니다.
+#   <i class="gl">(…)</i>      낱말 옆 괄호 풀이
+#   <div class="gls">…</div>   「이게 무슨 말인가」 상자
+# 같은 컷이라도 앞에 선 컷이 적으면 풀이가 **다시** 붙으므로
+# (`report.GLOSS_AGAIN`), 안 걷으면 무료 구간에서만 수가 튑니다.
+_GLOSSARY = re.compile(r'<i class="gl">.*?</i>|<div class="gls">.*?</div>',
+                       re.S)
+
+
 def _hits(text: str, concern: str) -> int:
     return len(re.findall(WORDS[concern], text))
+
+
+def _read(cuts, ids) -> str:
+    """손님이 읽는 글 — 사전은 뺍니다."""
+    return D.plain(_GLOSSARY.sub(" ", " ".join(c["html"] for c in cuts
+                                               if c["id"] in ids)))
 
 
 @pytest.mark.parametrize("b", BIRTHS)
 @pytest.mark.parametrize("concern", CONCERNS)
 def test_긴_컷에_물은_말이_한_번은_나온다(b, concern):
     f = _f(b)
-    rep = build_report(f, "t", "pungun", "free", concern, "INTJ")
+    rep = build_report(f, "t", "dongja", "free", concern, "INTJ")
     thin = []
     for c in rep["cuts"]:
         if c["id"] in FREE_OF_TOPIC:
             continue
-        t = D.plain(c["html"])
+        t = _read([c], {c["id"]})
         if len(t) >= LONG and _hits(t, concern) == 0:
             thin.append("%s(%d자)" % (c["id"], len(t)))
     assert not thin, (
@@ -143,9 +159,8 @@ def test_물은_자리의_말이_가장_많다(b, concern):
       꼴로는 못 속입니다.
     """
     f = _f(b)
-    rep = build_report(f, "t", "pungun", "free", concern, "INTJ")
-    txt = D.plain(" ".join(x["html"] for x in rep["cuts"]
-                           if x["id"] in FACING))
+    rep = build_report(f, "t", "dongja", "free", concern, "INTJ")
+    txt = _read(rep["cuts"], FACING)
     mine = _hits(txt, concern)
     others = {c: _hits(txt, c) for c in CONCERNS if c != concern}
     top = max(others, key=lambda k: others[k])

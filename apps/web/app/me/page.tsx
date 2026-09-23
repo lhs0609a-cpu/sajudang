@@ -170,7 +170,7 @@ function MeInner() {
           자리라, 몇 개 중 몇인지를 대야 모으는 맛이 서오.
       */}
       <p className="sm">한 칸을 채우는 데 <b>1명</b>이오. <b>20개</b>를 다 채우면 스무 사람을 다 들은 것이고, <b>3개</b>만 있어도 서로 다른 세 눈으로 본 것이오 — 같은 밭을 세 군데서 파 본 셈이오.</p>
-      <header className="editorial-heading"><p className="conversion-kicker">나의 서재</p><h1>다시 읽고 싶은 이야기를<br/>여기에 간직하오.</h1><p>구매한 해석과 남긴 인장, 열람 기록을 살펴보시오.</p></header>
+      <header className="editorial-heading"><p className="conversion-kicker">구매·보관·복원</p><h1>내가 연 본문과 결제 내역을<br/>여기서 다시 여시오.</h1><p>구매한 캐릭터, 남은 이용권, 열람 기록, 환불 상태를 한곳에서 확인하오.</p></header>
       <Voyage sessionId={s.sessionId} chartId={s.chartId} />
       <RefundHistory sessionId={s.sessionId} />
       {subError && <div className="conversion-card" role="alert"><p>구독 상태를 확인하지 못했소. 구독이 없거나 해지됐다는 뜻은 아니오.</p><button className="btn gh" onClick={() => {setSubError(false);setSubRetry(n => n + 1);}}>구독 상태 다시 확인하기</button></div>}

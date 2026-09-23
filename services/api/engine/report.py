@@ -444,6 +444,9 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     # character. Keep that contract deterministic now that free scene/bridge
     # cuts need a character perspective.
     lens_id = lens_id or "jeokhyeol"
+    # ★ 손님이 **제 손으로 적어 보낸 것**으로 선 컷. 값 뒤에 두지
+    #   않습니다 — 묻고 나서 답을 값 뒤에 두면 그건 받아 내는 것이오.
+    answered: set = set()
     B = bank_mod.bank()
     top, weak, strong = f.top_ten_god, f.weak_el, f.strong_el
     # ★ 살림의 말 — **공통 컷에도** 답니다 (2026-09-07).
@@ -578,9 +581,15 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     #   글자와 자리를 짚습니다. 명식 바로 뒤, 물은 자리보다 앞입니다.
     #   (여기 「척추」 는 한 사람의 한 줄이오. 아래 「척추 열 컷」 과 다르오.)
     sp = spine_mod.read(f)
+    spine_html = spine_mod.head_html(sp)
+    if lens_id == "pungun":
+        spine_html = consultation.pungun_opening(f, concern)
+    else:
+        specialist_name = lens_mod.public(lens_id).get("name", "해석자")
+        spine_html = consultation.plain_profile(f, name=specialist_name, lens_id=lens_id) + spine_html
     cuts.append(_cut(
         "spine", "한 줄", _why.line(sp["source"], "흐름", "십신"),
-        spine_mod.head_html(sp), 0,
+        spine_html, 0,
         sid="spine:%s:%s:%s" % (sp["key"], sp["empty"] or "-", f.strength)))
     # ★ 답이 한 줄을 틀면 **장면과 처방도 따라 틉니다** (2026-09-11 · 평가 2번).
     #   「그대의 답을 먼저 믿으시오」 라 해 놓고 아무것도 안 바꾸면 말뿐이오.
@@ -598,6 +607,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     pc = probe_mod.cut(f, (extras or {}).get("probe"), sp)
     if pc:
         cuts.append(pc)
+        answered.add(pc["id"])
     # ★ 장면 — 이 사람이 **물으신 고민 속에서** 실제로 하는 모습 (2026-09-11).
     #   바깥 글의 「일반 사람은 X, 당신은 Y」 자리입니다. 척추 서른 칸 ×
     #   고민 여섯 칸 (seed/scene.json). 틀릴 수 있는 장면이라야 합니다.
@@ -1656,6 +1666,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         cuts.append(_cut(extra["id"], extra["title"], extra["source"],
                          extra["html"], extra["min_level"],
                          sid=extra["statement_id"]))
+        answered.add(extra["id"])
 
     try:
         scene_cut = visual_mod.scene_cut(lens_id, (extras or {}).get("scene"))
@@ -1664,6 +1675,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     if scene_cut:
         cuts.append(_cut(scene_cut["id"], scene_cut["title"], scene_cut["source"],
                          scene_cut["html"], scene_cut["min_level"], sid=scene_cut["statement_id"]))
+        answered.add(scene_cut["id"])
 
     # ── 9a-2 · 고민이 묻는 것 ─────────────────────────────
     #
@@ -1679,6 +1691,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     if tk:
         cuts.append(_cut(tk["id"], tk["title"], tk["source"], tk["html"],
                          tk["min_level"], sid=tk["statement_id"]))
+        answered.add(tk["id"])
 
     # ── 9b · 이번 주 한 가지 ──────────────────────────────
     #
@@ -1967,11 +1980,21 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     # character. Apply the floor here so report, pricing and previews agree.
     # Keep the calculated chart, one core observation and the answer to the
     # optional free questionnaire. Free-only characters retain their full scope.
+    # ★ 위로와 마감은 **값 뒤에 두지 않습니다** (2026-09-23).
+    #
+    #   짧게 줄이고 보니 무료 구간이 「아픈 말 → 진단 → 끝」 이 됐습니다.
+    #   이 집의 감정 곡선은 아픈 말 뒤에 반드시 알아주는 자리가 오고
+    #   (`engine/heart`), 끝은 앞을 보는 자리로 닫습니다 — 기억은
+    #   마지막이 지배하니 마지막이 진단이면 그 장은 진단서요.
+    #   무료로 왔다 나가는 사람이 가장 많은 구간이라 더 그렇습니다.
+    #   둘 다 깊은 풀이가 아니라 **손잡이**라, 값을 가리지도 않소
+    #   (tests/test_safety).
+    FREE_FLOOR = {"chart", "spine", "topic_ask", "solace", "closing_cut"}
     if lens_id and _lens_price(lens_id) > 0:
         for cut in cuts:
             if cut["id"] in {"spine_depth", "spine_scene", "lens_bridge"}:
                 cut["min_level"] = 0
-            elif cut["id"] not in {"chart", "spine", "topic_ask"}:
+            elif cut["id"] not in FREE_FLOOR and cut["id"] not in answered:
                 cut["min_level"] = max(1, cut["min_level"])
     return cuts, extra_error
 
@@ -2426,8 +2449,16 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
         # 제 몫이 **한 컷**뿐이라, 공통 컷이 안 갈리면 서로 같은
         # 상품이 됩니다. 컷을 더 주면 값 사다리가 무너지니 대신
         # 같은 자리를 **그 사람 눈으로** 보게 합니다.
-        c["html"] = _flavor.side(c["html"], lens_id, c["id"], you, tone)
-        c["html"] = _flavor.ask(c["html"], lens_id, asked, tone)
+        # 풍운도령의 첫 컷은 위에서 만든 전문 판정만 남깁니다. 기존
+        # 공통 감정 문장을 덧붙이면 「돈·직책」 같은 한 줄이 첫 해석과
+        # 다시 반복되어, 판정인지 장식인지 구분되지 않았습니다.
+        if not (lens_id == "pungun" and c.get("id") == "spine"):
+            c["html"] = _flavor.side(c["html"], lens_id, c["id"], you, tone)
+        # The opening is already a complete verdict. Appending the character's
+        # generic question here made the first screen look like a question
+        # instead of an interpretation (and duplicated the topic sentence).
+        if not (lens_id == "pungun" and c.get("id") == "spine"):
+            c["html"] = _flavor.ask(c["html"], lens_id, asked, tone)
         c["html"] += voice_mod.speak(
             voice_mod.address(
                 terms_mod.picture_box((seen - before) - boxed,
@@ -2527,12 +2558,15 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
             return [spoken(item) for item in value]
         return value
     practice = build_practice(concern, f.flow)
+    practice = character_consultation_mod.enrich_practice(
+        practice, lens_id, (extras or {}).get("topic"), name=lens_mod.public(lens_id).get("name", "이 상담자"))
     from .mbti_reading import build as build_mbti
     mbti=build_mbti(f,axis4,concern)
     if mbti:
         practice['mbti']=guard.enforce(mbti['code']+' · '+mbti['action']+' '+mbti['process'])
         practice['steps']=[guard.enforce(step+' '+extra) for step,extra in zip(practice['steps'],[mbti['evidence'],mbti['dialogue'],mbti['process']])]
-    for field in ('title','scene','action','steps','source','focus','example','decision','trap','review','mbti'):
+    for field in ('title','scene','action','steps','source','focus','example','decision','trap','review','mbti',
+                  'specialist_axis','case_summary','specialist_verdict','specialist_action','specialist_close'):
         if field in practice:
             practice[field] = spoken(practice[field])
     if editorial:

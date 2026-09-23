@@ -314,6 +314,49 @@ def test_no_consonant_ending_address_breaks_the_josa(f):
                 assert not m, (l["id"], name, m.group(0))
 
 
+def test_one_report_calls_you_by_one_name(f):
+    """
+    ★ 한 장 안에서 부르는 사람이 둘이 되면 안 됩니다 (2026-09-23).
+
+      청동자는 성별로 부릅니다(아저씨·아주머니). 그런데 곁말
+      (`engine/flavor.SIDE`) 석 줄이 **아저씨로 박혀** 있어서, 여인이
+      읽는 한 장 안에 「아주머니」 열두 번과 「아저씨」 세 번이 같이
+      섰습니다. 홍매파(그쪽)·훈장(이름)도 곁말은 「자네」 였습니다.
+
+      뱅크는 호칭을 **「그대」 한 벌**로 적고 `voice.address` 가 갈아
+      끼웁니다. 손으로 박으면 그 줄만 딴 사람을 부릅니다.
+
+    ★ 「그쪽」 과 「손님」 은 안 셉니다 — 부르는 말이기도 하지만
+      「그쪽으로 가면」 처럼 **방향·사람 일반**으로도 쓰는 낱말이라,
+      세면 늘 붉은 자가 됩니다. 애매하지 않은 것만 봅니다.
+    ★ 낱말 경계를 봅니다 — 하게체 어미 「글자네」 의 끝을 「자네」 로
+      세면 하게체 캐릭터가 전부 걸립니다.
+    """
+    from engine.report import build_report as br
+    others = ("그대", "자네", "당신", "아저씨", "아주머니")
+    bad = []
+    for sex in ("F", "M"):
+        ff = build_features(build_chart(1978, 2, 4, 0, 20, sex, True, "서울"))
+        for l in lens_mod.released():
+            you = lens_mod.you_of(l["id"], "", sex)
+            rep = br(ff, "t", l["id"], "all", "love", None)
+            text = " ".join(_plain(c["html"]) for c in rep["cuts"])
+            for w in others:
+                if w == you:
+                    continue
+                # 낱말로 선 것만 봅니다 — 앞은 **띄어쓰기나 따옴표**,
+                # 뒤는 조사거나 낱말 끝. 그래야 하게체 어미가 안 걸립니다
+                # (「글자네」 「불 3자네」 의 끝은 어미이지 호칭이 아니오).
+                pat = (r"(?:^|(?<=[\s\"'“‘(]))%s"
+                       r"(?![가-힣])" % w)
+                m = re.search(pat, text)
+                if m:
+                    at = text[max(0, m.start() - 20):m.end() + 20]
+                    bad.append("%s(%s) ← %s … %s" % (l["id"], you, w, at))
+    assert not bad, "한 장에서 부르는 사람이 둘이오: " + " · ".join(
+        sorted(set(bad)))
+
+
 def test_the_house_uses_more_than_one_way_to_address_you():
     """
     ★ 스무 명 중 **열여섯이 똑같이 「그대」** 였습니다. 관점은 스무 개 다

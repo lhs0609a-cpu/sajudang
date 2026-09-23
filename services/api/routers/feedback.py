@@ -81,6 +81,11 @@ def post_review(req: ReviewRequest) -> ReviewResponse:
                           visible=r["visible"], say=say)
 
 
+@router.get("/review/recent")
+def recent_reviews(lens_id: Optional[str] = None, limit: int = 6) -> dict:
+    return {"reviews": repo.recent_reviews(lens_id, limit)}
+
+
 @router.get("/review/stats")
 def review_stats(lens_id: Optional[str] = None) -> dict:
     """

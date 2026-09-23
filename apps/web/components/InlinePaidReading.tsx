@@ -36,7 +36,7 @@ export default function InlinePaidReading({after, cuts, lensId, onOpen}: {after:
   const rejected = review?.chartId === chartId && review.concern === concern && review.lensId === lensId
     && Object.values(review.answers).some(answer => answer === false);
   const cut = selectPreviewCuts(cuts, concern)[index];
-  const enabled = index >= 0 && lensId !== 'pungun' && !!lens?.price && !rejected && !!cut?.teaser;
+  const enabled = index >= 0 && !!lens?.price && !rejected && !!cut?.teaser;
   const node = useRef<HTMLElement | null>(null);
   useEffect(() => {
     if (!enabled || !node.current) return;
@@ -55,13 +55,17 @@ export default function InlinePaidReading({after, cuts, lensId, onOpen}: {after:
   const chapterQuestion = CHAPTER_QUESTIONS[cut.id.replace(/^lc_/, '')]
     ?? (cut.id === 'concern_pattern' ? READING_QUESTIONS[concern]
       : ['concern_turn', 'daeun_map'].includes(cut.id) ? '지금과 다음 흐름을 나란히 읽으면 무엇이 달라질까?' : cut.title);
-  return <CharacterSpeech lensId={lensId}><aside ref={node} className="inline-paid-reading" data-lens={lensId} data-chapter={cut.id} aria-label={`${lens.name}의 이어지는 유료 해석`}>
-    <ReadingSpeaker lensId={lensId} label={['강점 뒤에 남은 질문', '그 장면에서 한 걸음 더', '선택 앞에서 더 짚을 대목'][index]} />
+  return <CharacterSpeech lensId={lensId}><aside ref={node} className="inline-paid-reading" data-lens={lensId} data-chapter={cut.id} aria-label={`${lens.name}의 결제 후 공개되는 판정`}>
+    <ReadingSpeaker lensId={lensId} label={['강점이 짐으로 바뀐 정확한 조건', '반복된 장면에서 놓친 결정적 차이', '계속할 것과 멈출 것을 가르는 기준'][index]} />
     <p className="inline-paid-context">{PAIN_POINTS[concern]?.[index] ?? CHARACTER_QUESTIONS[lensId]}</p>
     <h3>{chapterQuestion}</h3>
-    <p className="inline-paid-perspective">{lens.name}의 관점 · {CHARACTER_QUESTIONS[lensId]}</p>
-    <blockquote><span>이어지는 실제 풀이의 첫 대목</span><p>{readingText(cut.teaser ?? '')}</p></blockquote>
-    <p className="inline-paid-scope">「{cut.title}」에서 더 읽을 수 있소. {cut.need_tier_name}부터 열리는 유료 내용이오.</p>
+    <p className="inline-paid-perspective">{lens.name}의 판정 기준 · {CHARACTER_QUESTIONS[lensId]}</p>
+    <blockquote><span>결제 후 열리는 본문의 실제 첫 문장</span><p>{readingText(cut.teaser ?? '')}</p></blockquote>
+    <div className="inline-paid-mask" aria-label="결론이 갈리는 다음 해석은 결제 후 공개됩니다">
+      <p><strong>여기서 결론이 갈립니다.</strong> 지금 보이는 말 뒤에는 ‘왜 반복되는지’, ‘어느 선택을 멈출지’, ‘언제 다시 확인할지’가 이어집니다.</p>
+      <span aria-hidden="true"><i/><i/><i/></span>
+    </div>
+    <p className="inline-paid-scope">「{cut.title}」의 원인·분기·행동 판정 · 약 {cut.chars.toLocaleString()}자 · {cut.need_tier_name}부터 열립니다.</p>
     <button className="btn" onClick={() => {
       if (chartId) saveReadingIntent({chartId,lensId,concern,question:chapterQuestion,title:cut.title,tier:cut.need_tier_name,tierId:cut.need_tier,chapterId:cut.id});
       track('inline_offer_click', location.pathname === '/pay' ? 'd0' : 'c2', {stage:index+1});

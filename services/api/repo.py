@@ -314,3 +314,25 @@ def agreement(statement_id: str) -> Optional[dict]:
         "answer_rate": round(100.0 * total / shown, 1) if shown else None,
         "basis": "Wilson 하한 95%",
     }
+
+
+def recent_reviews(lens_id: Optional[str] = None, limit: int = 6) -> list[dict]:
+    """Return safe, public, high-signal reviews for the hesitation moment."""
+    rows = []
+    if db.HAS_DB:
+        import models
+        from sqlalchemy import select
+        with db.session() as session:
+            q = select(models.Review).where(models.Review.visible.is_(True), models.Review.body.isnot(None)).order_by(models.Review.created_at.desc()).limit(limit * 3)
+            if lens_id: q = q.where(models.Review.lens_id == lens_id)
+            for r in session.execute(q).scalars():
+                rows.append({"lens_id": r.lens_id, "rating": r.rating, "body": r.body, "verified": bool(r.verified), "created_at": r.created_at.isoformat() if r.created_at else None})
+    elif REVIEW_PATH.exists():
+        with REVIEW_PATH.open(encoding="utf-8") as fp:
+            for line in fp:
+                try: r = json.loads(line)
+                except ValueError: continue
+                if not r.get("visible") or not r.get("body") or (lens_id and r.get("lens_id") != lens_id): continue
+                rows.append({"lens_id": r.get("lens_id"), "rating": r.get("rating"), "body": r.get("body"), "verified": bool(r.get("verified")), "created_at": r.get("created_at")})
+        rows = list(reversed(rows[-limit * 3:]))
+    return rows[:max(1, min(limit, 12))]

@@ -66,8 +66,10 @@ def test_actout_belongs_to_its_own_screen():
     S._screens.cache_clear()
     pairs = S._screens()
     src = (WEB / "app" / "page.tsx").read_text(encoding="utf-8")
-    # The new result finishes with a concrete free-content CTA.
-    next_step = "다음 무료 풀이에서 핵심 근거"
+    # ★ 예고는 **다음 자리를 이름으로 부르는가**를 봅니다. 뒤에 붙는
+    #   말은 글을 고칠 때마다 바뀌니(핵심 근거 → 어떤 글자 때문에)
+    #   자를 거기 대면 글 한 줄 고칠 때마다 붉어집니다.
+    next_step = "다음 무료 풀이에서"
     assert next_step in src
     assert next_step in pairs["a7"][0], "a7 이 제 다음 행동을 못 든다"
     assert next_step not in pairs["a6"][0], "a6 가 a7 의 예고를 훔쳤다"

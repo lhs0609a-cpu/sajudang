@@ -5,7 +5,7 @@ export function chapter(screen?: string) {
   if (["a2","a3","a4","a4b","a5","a6"].includes(screen)) return {number:"一",name:"그대의 이야기를 듣다",line:"태어난 순간에서, 지금의 고민으로."};
   if (["a7","d0"].includes(screen)) return {number:"二",name:"마음의 결을 읽다",line:"익숙한 패턴에, 새로운 질문 하나."};
   if (screen.startsWith("b") || screen === "h1") return {number:"三",name:"다른 시선을 만나다",line:"같은 여덟 글자. 저마다 다른 스무 시선."};
-  if (screen.startsWith("d")) return {number:"四",name:"한 겹 더 깊이 읽다",line:"무엇이 열리는지 살펴보고 결정하시오."};
+  if (screen.startsWith("d")) return {number:"四",name:"아직 가려진 답을 열다",line:"열리는 질문·본문·가격을 보고 결정하시오."};
   if (screen.startsWith("f")) return {number:"藏",name:"그대의 이야기를 간직하다",line:"다시 펼치고 싶은 문장을 모아 두었소."};
   if (screen.startsWith("g")) return {number:"日",name:"오늘의 한 줄을 읽다",line:"먼 훗날보다, 오늘의 작은 선택부터."};
   return {number:"讀",name:"나를 읽는 시간",line:"답을 서두르지 말고, 한 장씩 펼쳐 보시오."};

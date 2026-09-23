@@ -53,8 +53,30 @@ _TRACK_NOT_EVENTS = {"screen"}       # 이름이 겹쳐 잡히는 것들
 
 
 def _norm(path: str) -> str:
-    """`/v1/pay/order/{order_id}` 와 `/v1/pay/order/{x}` 를 같게 봅니다."""
-    return re.sub(r"\{[^}]*\}", "{}", path.rstrip("/")) or "/"
+    """
+    `/v1/pay/order/{order_id}` 와 `/v1/pay/order/{x}` 를 같게 봅니다.
+
+    ★ **빗금으로 안 갈린 자리표시는 마디가 아닙니다** (2026-09-23).
+
+      화면이 이렇게 부릅니다 —
+
+          `/v1/report/topic/${concern}${lensId ? `?lens_id=…` : ''}`
+          `/v1/review/recent${lensId ? `?lens_id=…` : ''}`
+
+      뒤엣것은 길의 마디가 아니라 **물음표 뒤**입니다. 그대로 두면
+      `/v1/report/topic/{}{}` · `/v1/review/recent{}` 가 되어, 멀쩡히
+      열려 있는 문과 안 맞습니다 — 그러면 도구가 「화면이 부르는데
+      서버에 없다」는 **없는 사고**를 냅니다. 진짜 끊긴 배선이 그
+      소음에 묻히오.
+
+      길의 마디는 **빗금으로 갈립니다.** 그러니 앞이 빗금이 아닌
+      자리표시는 마디가 아니라 꼬리요 — 걷어냅니다.
+    """
+    one = re.sub(r"\{[^}]*\}", "{}", path.rstrip("/"))
+    prev = None
+    while prev != one:                     # }{} 처럼 잇달아 붙은 것도
+        prev, one = one, re.sub(r"(?<=[^/])\{\}", "", one)
+    return one or "/"
 
 
 @lru_cache(maxsize=1)

@@ -55,9 +55,9 @@ export default function Wants({ rows, onOpen }: { rows: WantRow[]; onOpen?: () =
           <span aria-hidden="true"> …</span>
         </p>
         <LockedVeil />
-        <p className="want-len">{TURNS[r.want]?.reveal ?? '이 질문에 이어지는 해석과 근거'}</p>
+        <p className="want-len">{TURNS[r.want]?.reveal ?? '이 질문의 원인·갈림길·오늘 행동은 결제 뒤에 이어서 열립니다'}</p>
         {r.source && <ServerText as="span" className="src" html={`근거 · ${r.source}`} />}
-        {onOpen && <button className="btn" onClick={onOpen}>{r.want}의 이어지는 해석 · 구성과 가격 보기</button>}
+        {onOpen && <button className="btn" onClick={onOpen}>{r.want}에서 아직 가려진 답·첫 문장·가격 보기</button>}
       </article>
     ))}
   </section></CharacterSpeech>;

@@ -52,12 +52,30 @@ TOP = 30
 MOVE_WARN = 60
 
 
-def _load(d: Path):
-    for name in ("bust.webp", "bust.png"):
-        p = d / name
+# 한 사람이 **같은 상자에서 바꿔 다는** 얼굴들.
+#
+# ★ 기본만 맞추면 안 됩니다 (2026-09-23).
+#
+#   `CharArt` 는 결에 따라 얼굴을 갈아 답니다 — 찌르는 자리는
+#   `bust_cut`, 만류·마무리는 `bust_soft` 요 (`ReadingVoice` 는 한
+#   상자 안에서 둘을 오갑니다). 기본 한 장만 내려 맞추면 얼굴이
+#   바뀔 때마다 **머리가 30px 튀어 오르오.** 맞추는 것은 한 장이
+#   아니라 **한 사람의 모든 얼굴**이오.
+FACES = ("bust", "bust_cut", "bust_soft")
+
+
+def _load(d: Path, face: str = "bust"):
+    for ext in (".webp", ".png"):
+        p = d / (face + ext)
         if p.exists():
             return p
     return None
+
+
+def _faces(d: Path):
+    """그 사람의 얼굴 파일 전부. 없는 결은 건너뜁니다."""
+    return [(face, p) for face in FACES
+            for p in [_load(d, face)] if p]
 
 
 def measure(im):
@@ -92,32 +110,33 @@ def main(argv=None) -> int:
         return 1
 
     print("초상 머리 맞추기 — 머리 위 %dpx 로" % TOP)
-    print("%-11s %7s %7s %7s  %s" % ("id", "머리위", "세로옮김", "가로옮김", ""))
+    print("%-11s %-10s %7s %7s %7s  %s"
+          % ("id", "얼굴", "머리위", "세로옮김", "가로옮김", ""))
     n = moved = 0
     for d in sorted(ROOT.iterdir()):
-        p = _load(d)
-        if not p:
-            continue
-        im = Image.open(p).convert("RGBA")
-        if im.size != (W, H):
-            print("%-11s  규격이 %d×%d 요 — 건너뛰오" % (d.name, *im.size))
-            continue
-        top, cx = measure(im)
-        dy, dx = TOP - top, W // 2 - cx
-        n += 1
-        flag = ""
-        if abs(dy) >= MOVE_WARN:
-            flag = "  ← 많이 옮기오"
-        if dy or dx:
-            moved += 1
-        print("%-11s %7d %+7d %+7d%s" % (d.name, top, dy, dx, flag))
-        if a.write and (dy or dx):
-            out, _, _ = aligned(im)
-            # 원본이 webp 면 webp 로, png 면 png 로 되돌려 넣습니다.
-            if p.suffix == ".webp":
-                out.save(p, "WEBP", quality=92, method=6, exact=True)
-            else:
-                out.save(p, "PNG", optimize=True)
+        for face, p in _faces(d):
+            im = Image.open(p).convert("RGBA")
+            if im.size != (W, H):
+                print("%-11s %-10s  규격이 %d×%d 요 — 건너뛰오"
+                      % (d.name, face, *im.size))
+                continue
+            top, cx = measure(im)
+            dy, dx = TOP - top, W // 2 - cx
+            n += 1
+            flag = ""
+            if abs(dy) >= MOVE_WARN:
+                flag = "  ← 많이 옮기오"
+            if dy or dx:
+                moved += 1
+            print("%-11s %-10s %7d %+7d %+7d%s"
+                  % (d.name, face, top, dy, dx, flag))
+            if a.write and (dy or dx):
+                out, _, _ = aligned(im)
+                # 원본이 webp 면 webp 로, png 면 png 로 되돌려 넣습니다.
+                if p.suffix == ".webp":
+                    out.save(p, "WEBP", quality=92, method=6, exact=True)
+                else:
+                    out.save(p, "PNG", optimize=True)
 
     print()
     print("초상 %d장 · 옮길 것 %d장%s"

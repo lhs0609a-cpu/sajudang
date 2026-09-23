@@ -55,7 +55,7 @@ DRAWS_DIRECT = (
 def _sinsal_html() -> str:
     f = build_features(build_chart(1993, 11, 25, 15, 55, "M", city="서울"),
                        as_of=date.today())
-    rep = build_report(f, "t", "pungun", "free", "work", "INTJ")
+    rep = build_report(f, "t", "dongja", "free", "work", "INTJ")
     got = [c for c in rep["cuts"] if c["id"] == "sinsal"]
     assert got, "무료 구간에 신살 컷이 없소"
     return got[0]["html"]

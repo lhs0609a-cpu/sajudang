@@ -33,6 +33,7 @@ import { thinkOf } from "@/lib/think";
 import type { ReportResponse } from "@shared/chart";
 import ServerText from "@/components/ServerText";
 import NextReading from "@/components/NextReading";
+import ReviewWall from "@/components/ReviewWall";
 import { CHARACTER_QUESTIONS } from "@/lib/curiosity";
 import { freeRevelation } from "@/lib/reading-journey";
 
@@ -369,11 +370,13 @@ function ReportInner() {
     return nx && typeof nx.start_age === "number" ? nx.start_age : null;
   })();
 
+  const tocRows = [["본질","이 명식이 어떤 사람인지"],["성격과 내면","겉과 속이 어떻게 다른지"],["연애·배우자운","어떤 관계에서 끌리고 부딪히는지"],["재물운","돈을 버는 방식과 새는 지점"],["직업과 성공","어떤 환경에서 성과가 나는지"],["건강과 체질","무리할 때 먼저 흔들리는 자리"],["귀인과 도움","누가 어떤 방식으로 돕는지"],["운명을 바꾸는 방법","바로 바꿀 수 있는 행동"],["월별 상세 운세","올해 달마다 움직일 시기"],["앞으로의 10년","대운과 세운의 큰 전환점"]] as const;
   /* c1 · 표지 */
   if (tab === "c1") {
     return <Shell screen="c1" title={`${rep.lens.name} · 첫 대목`}>
       <p className="conversion-kicker">{rep.lens.name}이 먼저 짚는 이야기</p>
       <h1 className="reading-title">{rep.tier === "free" ? CHARACTER_QUESTIONS[lensId] ?? rep.lens.name : `${rep.lens.name}의 풀이`}</h1>
+      <section className="report-toc" aria-label="전체 해석 목차"><p className="report-toc-label">CONTENTS</p><h2>목차</h2><p className="report-toc-lead">이 해석에서 가장 궁금한 10가지를 순서대로 확인합니다.</p><ol>{tocRows.map(([title,desc], i) => <li key={title}><span>{String(i+1).padStart(2,"0")}</span><b>{title}</b><small>{desc}</small></li>)}</ol></section>
       {rep.editorial && <ReadingGuide preview={rep.tier === "free" && rep.sells} guide={rep.editorial} revelation={freeRevelation(rep.cuts)} />}
       <button className="btn mt" onClick={() => setTab("c2")}>{rep.tier === "free" ? '무료 핵심 분석과 근거 이어 읽기' : '내 해석 이어 읽기'}</button>
       <p className="conversion-note">{rep.tier === "free" && rep.sells ? '무료로 읽은 뒤, 더 알고 싶은 질문의 심층 해석을 선택할 수 있소.' : '열람할 수 있는 해석과 근거를 함께 읽어보시오.'}</p>
@@ -384,7 +387,7 @@ function ReportInner() {
     const timeCuts = rep.locked.filter(c => ['daeun_map', 'concern_turn', 'daeun_now'].includes(c.id));
     return <Shell screen="c3" title="지금과 다음 흐름">
       <h1 className="reading-title">다음 흐름에서는<br />무엇을 다르게 읽을까?</h1>
-      <p className="conversion-lead">지금의 고민을 시기와 함께 살펴보는 자리요. 실제 풀이에서 첫 대목을 먼저 확인하시오.</p>
+      <p className="conversion-lead">지금 고민이 반복된 원인과 다음 판단 시점을 가르는 자리요. 아래 첫 문장부터 실제 판정이 시작됩니다.</p>
       {timeCuts.length ? <NextReading lensId={lensId} cuts={timeCuts} onOpen={openPrice} /> : <p className="conversion-note">이 해석에는 추가로 열리는 시기별 풀이가 없소.</p>}
       <button className="btn gh" onClick={() => setTab("c2")}>읽던 해석으로 돌아가기</button>
     </Shell>;
@@ -408,6 +411,7 @@ function ReportInner() {
         {/* ★ 이 표에 나오는 말을 여기서 한 벌로 풉니다. 근거를
             손님이 모르는 말로 대면 그건 근거가 아니라 주문이오. */}
         <p className="sm">표에 나오는 말들이오 — 관성(회사·규칙처럼 나를 누르고 잡아 주는 것) · 정관(지켜야 할 규칙과 직책) · 편관(나를 몰아붙이는 압박) · 정인(나를 챙겨 주는 어른과 배움) · 비견(나와 같은 편에 선 친구·동료) · 절입(계절이 바뀌는 바로 그 시각).</p>
+        <ReviewWall lensId={lensId} />
         <Say who={rep.lens.name} lens={lensId}>
           {you}가 지나온 마디가 여기 다 그어져 있소. 십 년마다 한 칸씩
           갈리오.
@@ -457,10 +461,14 @@ function ReportInner() {
   if (tab === "c4") {
     return (
       <Shell screen="c4" title="여기서부터" legal>
+        <Scene id="fold" />
         <h1 className="reading-title">{rep.lens.name}이 짚은 말,<br />그 뒤가 남아 있소.</h1>
+        {/* ★ 만류 — 브레이크는 매출보다 앞섭니다. 접거나 지우면 안 본
+            것과 같고, 그건 브레이크를 푸는 것이오 (tests/test_fold). */}
+        <p className="sm">여기까지가 무료 해석이오. 나가도 붙잡지 않소.</p>
         {/* ★ 비유 0 · 겪은 말 0. 값이 걸리는 자리인데 **읽는 사람**이
             글에 없었습니다. 조르지 않고 알아주는 한 줄만 답니다. */}
-        <p className="sm">나를 알아보는 문장이 있었다면, 이제 그 뒤의 이유를 볼 차례요. <mark><b>왜 반복되는지, 지금의 흐름에서는 어떻게 읽히는지.</b></mark> 아래 질문은 그대의 전체 풀이로 이어지오.</p>
+        <p className="sm">나를 알아보는 문장이 있었다면,<br/>이제 그 뒤의 이유를 볼 차례요. <mark><b>왜 반복되는지, 지금의 흐름에서는 어떻게 읽히는지.</b></mark> 아래 질문은 그대의 전체 풀이로 이어지오.</p>
         {/*
           ★ 여기가 `가가가가 가가가가가 가가가` 였소. 자리표시
             문자열이 그대로 배포돼 있었습니다.
@@ -496,10 +504,10 @@ function ReportInner() {
           <br />
           <b>내가 반복하는 선택과 그 선택을 읽는 근거.</b>
           <br />
-          다음 화면에서 이어지는 해석의 범위와 가격을 확인하시오.
+          다음 화면에서 결제 후 열리는 질문·첫 문장·전체 제목·가격을 먼저 보시오.
         </ActOut>
         <button className="btn mt" onClick={openPrice}>
-          이어지는 해석과 가격 확인하기
+          열리는 답의 제목·첫 문장·가격 보기
         </button>
         <button className="btn gh" onClick={() => setTab("c2")}>본문으로</button>
       </Shell>

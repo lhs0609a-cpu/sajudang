@@ -80,3 +80,19 @@ def test_character_answers_change_the_delivered_consultation(features):
     first = {"choice4": row[2][0]["id"], "choice5": row[4][0]["id"]}
     second = {"choice4": row[2][-1]["id"], "choice5": row[4][-1]["id"]}
     assert consultation.render('wolha', 'love', features, first) != consultation.render('wolha', 'love', features, second)
+
+
+def test_all_twenty_characters_make_today_action_distinct():
+    base = practice('love')
+    actions = set()
+    for character, row in character_consultation.INTERVIEWS.items():
+        topic = {"choice4": row[2][0]["id"], "choice5": row[4][0]["id"]}
+        result = character_consultation.enrich_practice(base, character, topic, name=character)
+        assert result["specialist_axis"] == row[0]
+        assert row[2][0]["label"] in result["case_summary"]
+        assert result["specialist_verdict"] == row[5]
+        assert result["specialist_action"] == row[6]
+        assert result["specialist_close"] == row[7]
+        assert result["version"] >= 3
+        actions.add((result["specialist_verdict"], result["specialist_action"], result["specialist_close"]))
+    assert len(actions) == 20

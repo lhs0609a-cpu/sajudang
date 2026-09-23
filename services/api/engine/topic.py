@@ -1597,14 +1597,320 @@ def _ask_hit(f, concern: str, slot: str, choice: str) -> Optional[bool]:
     if concern == "people" and slot == "from":
         seat = {"home": "년주", "work": "월주", "old": "일주", "new": "시주"}
         lb = seat.get(choice)
-        return None if lb is None else any(
-            s.get("pillar") == lb for s in (f.helpers or []))
+        if lb is None:
+            return None
+        # ★ 시주는 **태어난 시를 알아야** 서는 기둥이오 (2026-09-23).
+        #   모르는 사람에게 「시주에 받쳐 주는 글자가 없소」 라고 하면
+        #   그건 없는 기둥을 채운 것이오 — 이 집이 금하는 바로 그것이오.
+        if lb == "시주" and not f.hour_known:
+            return None
+        return any(s.get("pillar") == lb for s in (f.helpers or []))
     if concern == "dir" and slot == "from":
         return {"stay": not has_sinsal(f, "yeokma"),
                 "move": has_sinsal(f, "yeokma")}.get(choice)
     if concern == "love":
         return None
     return None
+
+
+# ══════════════════════════════════════════════════════════
+# 갈래마다 **사실 셋** — 세고 나서 짚는다 (docs/40 §10)
+# ══════════════════════════════════════════════════════════
+#
+# ★ 왜 셋인가 (2026-09-23)
+#
+#   되물음의 판정이 **갈래마다 사실 하나, 문장 하나** 였습니다.
+#
+#       방향 · 옮긴다   → 역마가 있나?      사실 하나 → 문장 하나
+#       돈 · 굴린다     → 편재가 있나?      사실 하나 → 문장 하나
+#
+#   여덟 글자는 고민마다 수백 갈래를 가를 줄 아는데(docs/40 §9-2 —
+#   사랑만 해도 실효 177갈래) 판정은 한 자릿수만 썼습니다. 그래서
+#   갈래가 달라도 답이 비슷하게 읽혔습니다.
+#
+# ★ 무엇을 새로 세는가 — **아무것도 새로 안 셉니다.**
+#
+#   아래 자들은 전부 이 파일과 `features` 가 **이미 세고 있던 값**입니다
+#   (투출·뿌리·공망·충·일지 합·신살·대운·세운·귀인 자리·재고·오행 수).
+#   새로 점치는 것이 아니라, 세어 둔 것을 갈래에 대 보는 것뿐이오.
+#
+# ★ 자 하나는 (가름, 센 값) 둘을 돌려줍니다.
+#
+#       가름   True 겹침 · False 어긋남 · None 판정 안 함
+#       센 값  손님이 만세력을 펴고 **대 볼 수 있는 말**
+#
+#   못 세는 자리는 **None** 을 냅니다. 시주를 모르는 사람에게
+#   「시주에 귀인이 없소」 라고 하면 그건 지어내는 것이오
+#   (절대 규칙 1 — 계산이 없으면 「모른다」).
+def _fact_ctx(concern: str, sub: Optional[dict] = None) -> dict:
+    """자들이 함께 보는 자리. 고민이 바뀌면 보는 묶음이 바뀌오."""
+    from . import bank as _bank
+    sub = sub or {}
+    row = _bank.bank()["CONCERN_AXIS"][concern]
+    return {"concern": concern,
+            "choice": str(sub.get("choice") or ""),
+            "choice2": str(sub.get("choice2") or ""),
+            "grp": row["g"],
+            "grpF": row.get("gF") or row["g"]}
+
+
+def _ctx_group(f, ctx: dict) -> str:
+    """물은 자리의 십신 묶음. 사랑은 남녀가 갈리오 (bank.CONCERN_AXIS)."""
+    return ctx["grpF"] if f.sex == "F" else ctx["grp"]
+
+
+def _n_say(n: int, name: str) -> str:
+    """
+    「재성 2자」 — 센 값은 **재는 말**로 냅니다.
+
+    ★ 「있소·없소」 를 여기 넣지 마시오. 바로 뒤에 오는 문장이 그
+      말을 또 하게 되어, 손님은 같은 말을 두 번 읽습니다. 앞은
+      **수**이고 뒤는 **뜻**이오.
+    """
+    return "%s %d자" % (name, n)
+
+
+def _group_n(f, grp: str) -> int:
+    from .bank import GROUP_TOTAL
+    return int(getattr(f, GROUP_TOTAL[grp]))
+
+
+# ── 물은 자리를 세는 자 ──────────────────────────────────
+def _fx_group_count(f, ctx):
+    grp = _ctx_group(f, ctx)
+    return (_group_n(f, grp) >= 1, _n_say(_group_n(f, grp), grp))
+
+
+def _fx_group_tuchul(f, ctx):
+    grp = _ctx_group(f, ctx)
+    gans = _group_gans(f, grp)
+    return (bool(gans),
+            "천간 %s %d자%s"
+            % (grp, len(gans), ("(%s)" % "·".join(gans)) if gans else ""))
+
+
+def _fx_group_root(f, ctx):
+    grp = _ctx_group(f, ctx)
+    gans, jis = _group_gans(f, grp), _group_jis(f, grp)
+    return (bool(gans) and bool(jis),
+            "%s 천간 %d자 · 지지 %d자" % (grp, len(gans), len(jis)))
+
+
+def _fx_group_gongmang(f, ctx):
+    grp = _ctx_group(f, ctx)
+    return (gongmang_hit(f, grp),
+            "공망 %s · 물은 자리 %s" % (f.gongmang or "없음", grp))
+
+
+def _fx_group_chung(f, ctx):
+    grp = _ctx_group(f, ctx)
+    return (chung_hit(f, grp),
+            "여덟 글자에 부딪히는 짝 %d쌍" % chung_pairs(f))
+
+
+# ── 곁자리(일지) ────────────────────────────────────────
+def _fx_ilji_hap(f, ctx):
+    return (bool(f.ilji_hap),
+            "일지 %s · 묶이는 글자 %d자%s"
+            % (f.day_ji, len(f.ilji_hap or []),
+               ("(%s)" % "·".join(f.ilji_hap)) if f.ilji_hap else ""))
+
+
+def _fx_ilji_chung(f, ctx):
+    return (bool(f.ilji_chung),
+            "일지 %s · 부딪히는 글자 %d자"
+            % (f.day_ji, 1 if f.ilji_chung else 0))
+
+
+# ── 신살 ────────────────────────────────────────────────
+def _sinsal_fact(key: str, name: str):
+    def fn(f, ctx):
+        at = _sinsal_at(f, key)
+        return (bool(at), "%s %d곳%s"
+                % (name, len(at), ("(%s)" % "·".join(at)) if at else ""))
+    return fn
+
+
+# ── 때 ──────────────────────────────────────────────────
+def _fx_daeun_group(f, ctx):
+    grp = _ctx_group(f, ctx)
+    now = GROUP_OF.get(f.daeun_ten_god, f.daeun_ten_god)
+    d = (f.daeun or [{}])[f.daeun_now] if f.daeun else {}
+    return (now == grp,
+            "지금 %d살 · 대운 %s %s"
+            % (int(f.age), d.get("gz", ""), f.daeun_ten_god))
+
+
+def _fx_daeun_left(f, ctx):
+    nx = _next_daeun(f)
+    if not nx:
+        return (None, "다음 대운 · 표에 없어 안 세오")
+    return (int(nx[0]) - int(f.age) <= 3,
+            "다음 대운 %d살 · %d해 남음"
+            % (int(nx[0]), int(nx[0]) - int(f.age)))
+
+
+def _fx_sewoon_group(f, ctx):
+    grp = _ctx_group(f, ctx)
+    yg = GROUP_OF.get(f.year_ten_god, f.year_ten_god)
+    return (yg == grp,
+            "올해 %s %s · 물은 자리 %s" % (f.year_gz, f.year_ten_god, grp))
+
+
+# ── 얼굴 ────────────────────────────────────────────────
+def _fx_strength(f, ctx):
+    return (f.strength == "신약",
+            "신강약 %s · 점수 %d" % (f.strength, int(f.strength_score)))
+
+
+def _fx_weak_here(f, ctx):
+    grp = _ctx_group(f, ctx)
+    el = el_of_group(f.day_gan, grp)
+    if not el:
+        return (None, "물은 자리의 오행을 못 잡았소")
+    return (el in f.weak_els,
+            "%s의 오행은 %s — 겉에 %d자" % (grp, el, visible(f, el)))
+
+
+# ── 십신 낱낱 ───────────────────────────────────────────
+def _ten_fact(name: str):
+    def fn(f, ctx):
+        n = int(f.ten_gods.get(name, 0))
+        return (n >= 1, _n_say(n, name))
+    return fn
+
+
+def _group_fact(grp: str):
+    def fn(f, ctx):
+        return (_group_n(f, grp) >= 1, _n_say(_group_n(f, grp), grp))
+    return fn
+
+
+# ── 오행 ────────────────────────────────────────────────
+#
+# ★ 「겉에 몇 자」 는 손님이 만세력을 펴고 그대로 셀 수 있는 수요.
+#   가름은 **치우쳤는가** 입니다 — 없거나(0) 몰렸거나(3 이상).
+def _el_fact(el: str):
+    def fn(f, ctx):
+        n = visible(f, el)
+        return (n == 0 or n >= 3, "겉에 %s %d자" % (el, n))
+    return fn
+
+
+# ── 짜임 ────────────────────────────────────────────────
+def _fx_sik_jae(f, ctx):
+    return (f.sik >= 1 and f.jae >= 1,
+            "식상 %d자 · 재성 %d자" % (int(f.sik), int(f.jae)))
+
+
+def _fx_jae_da(f, ctx):
+    return (f.jae >= 2 and f.strength == "신약",
+            "재성 %d자 · 신강약 %s" % (int(f.jae), f.strength))
+
+
+def _fx_gun_geop(f, ctx):
+    return (f.bi >= 2 and f.jae >= 1,
+            "비겁 %d자 · 재성 %d자" % (int(f.bi), int(f.jae)))
+
+
+def _fx_jaego(f, ctx):
+    go = jaego(f)
+    return (go is not None, "담기는 칸 %s" % (go or "0"))
+
+
+# ── 자리 ────────────────────────────────────────────────
+def _helper_fact(pillar: str, need_hour: bool = False):
+    def fn(f, ctx):
+        # ★ 시주를 모르면 **모른다고 합니다.** 없다고 하면 지어내기요.
+        if need_hour and not f.hour_known:
+            return (None, "시주 귀인 · 안 세오")
+        at = [s.get("sinsal") or s.get("name") or ""
+              for s in (f.helpers or []) if s.get("pillar") == pillar]
+        at = sorted({x for x in at if x})
+        return (bool(at), "%s 귀인 %d%s"
+                % (pillar, len(at), ("(%s)" % "·".join(at)) if at else ""))
+    return fn
+
+
+def _fx_hour_known(f, ctx):
+    return (f.hour_known,
+            "기둥 %d · 글자 %d" % (len(f.pillars), len(f.pillars) * 2))
+
+
+# ★ 이름은 **표가 부르는 열쇠**입니다. 여기 없는 이름을 표에 적으면
+#   `tests/test_topic_facts` 가 「셀 자가 없소」 라고 잡습니다.
+_FACTS = {
+    "group_count": _fx_group_count,
+    "group_tuchul": _fx_group_tuchul,
+    "group_root": _fx_group_root,
+    "group_gongmang": _fx_group_gongmang,
+    "group_chung": _fx_group_chung,
+    "ilji_hap": _fx_ilji_hap,
+    "ilji_chung": _fx_ilji_chung,
+    "dohwa": _sinsal_fact("dohwa", "도화"),
+    "yeokma": _sinsal_fact("yeokma", "역마"),
+    "wonjin": _sinsal_fact("wonjin", "원진"),
+    "munchang": _sinsal_fact("munchang", "문창"),
+    "hwagae": _sinsal_fact("hwagae", "화개"),
+    "daeun_group": _fx_daeun_group,
+    "daeun_left": _fx_daeun_left,
+    "sewoon_group": _fx_sewoon_group,
+    "strength": _fx_strength,
+    "weak_here": _fx_weak_here,
+    "jeongjae": _ten_fact("정재"),
+    "pyeonjae": _ten_fact("편재"),
+    "jeonggwan": _ten_fact("정관"),
+    "pyeongwan": _ten_fact("편관"),
+    "jeongin": _ten_fact("정인"),
+    "pyeonin": _ten_fact("편인"),
+    "sangwan": _ten_fact("상관"),
+    "siksin": _ten_fact("식신"),
+    "gyeopjae": _ten_fact("겁재"),
+    "bigyeon": _ten_fact("비견"),
+    "jae_group": _group_fact("재성"),
+    "gwan_group": _group_fact("관성"),
+    "sik_group": _group_fact("식상"),
+    "bi_group": _group_fact("비겁"),
+    "inn_group": _group_fact("인성"),
+    "el_mok": _el_fact("목"),
+    "el_hwa": _el_fact("화"),
+    "el_to": _el_fact("토"),
+    "el_geum": _el_fact("금"),
+    "el_su": _el_fact("수"),
+    "sik_jae": _fx_sik_jae,
+    "jae_da": _fx_jae_da,
+    "gun_geop": _fx_gun_geop,
+    "jaego": _fx_jaego,
+    "helper_year": _helper_fact("년주"),
+    "helper_month": _helper_fact("월주"),
+    "helper_day": _helper_fact("일주"),
+    "helper_hour": _helper_fact("시주", need_hour=True),
+    "hour_known": _fx_hour_known,
+}
+
+
+def fact_rows(f, concern: str, sub: Optional[dict]) -> list:
+    """
+    고른 갈래에 걸리는 **사실 셋**. 표에 없으면 빈 목록이오.
+
+    돌려주는 것: [{"id", "label", "count", "verdict", "say"}]
+    """
+    pick = str((sub or {}).get("choice") or "")
+    rows = ((table().get("FACTS") or {}).get(concern) or {}).get(pick) or []
+    ctx = _fact_ctx(concern, sub)
+    out = []
+    for row in rows:
+        fn = _FACTS.get(row.get("id"))
+        if not fn:
+            continue
+        verdict, count = fn(f, ctx)
+        key = "hit" if verdict else ("miss" if verdict is False else "unk")
+        say = row.get(key) or row.get("unk") or row.get("miss")
+        if not say:
+            continue
+        out.append({"id": row["id"], "label": row.get("label") or row["id"],
+                    "count": count, "verdict": verdict, "say": say})
+    return out
 
 
 def ask_cut(f, concern: str, payload: dict) -> Optional[dict]:
@@ -1650,6 +1956,20 @@ def ask_cut(f, concern: str, payload: dict) -> Optional[dict]:
     ev = ["%s → %s" % (spec["options"][pick],
                        "글자와 겹침" if hit else
                        ("글자는 다른 것을 가리킴" if hit is False else "판정 안 함"))]
+    # ★ 사실 셋 — 센 값을 앞에 세우고 살림의 말로 짚습니다 (docs/40 §10).
+    #
+    #   전에는 갈래마다 **사실 하나 · 문장 하나** 였습니다. 그러면
+    #   갈래를 아무리 갈라도 답이 한 줄이라 비슷하게 읽힙니다.
+    #   센 값은 손님이 만세력을 펴고 대 볼 수 있는 말이라야 하오 —
+    #   그래서 문장 앞에 굵게 세웁니다 (근거 줄에도 같이 적습니다).
+    facts = fact_rows(f, concern, payload)
+    fmark = ""
+    for fx in facts:
+        parts.append('<p class="cnt"><b>%s</b> — %s</p>'
+                     % (fx["count"], _fmt(fx["say"], w)))
+        ev.append("%s · %s" % (fx["label"], fx["count"]))
+        fmark += ("h" if fx["verdict"] else
+                  ("m" if fx["verdict"] is False else "u"))
     hit2 = None
     if pick2:
         parts.append(said(spec["lead2"], spec["options2"][pick2]))
@@ -1683,8 +2003,11 @@ def ask_cut(f, concern: str, payload: dict) -> Optional[dict]:
         #   짜임(concern_pattern) · 때(concern_turn) · 얼굴(concern_face)
         #   넷은 안 건드립니다. 무료는 **적은 것과 글자가 겹치는가**까지요.
         "min_level": 0,
-        "statement_id": "ask:%s:%s:%s:%s:%s"
+        # ★ 사실 셋의 가름까지 번호에 넣습니다. 안 넣으면 「뿌리가 있는
+        #   사람」과 「없는 사람」의 공감률이 한 통에 섞이오.
+        "statement_id": "ask:%s:%s:%s:%s%s:%s"
                         % (concern, pick, pick2 or "-", pick3 or "-",
+                           (":f=" + fmark) if fmark else "",
                            "%s%s" % ("h" if hit else ("m" if hit is False else "u"),
                                      "h" if hit2 else
                                      ("m" if hit2 is False else "u"))),

@@ -62,7 +62,7 @@ export default function DailyPage() {
 
   return (
     <Shell screen="g1" title="오늘의 일진">
-      <header className="editorial-heading"><p className="conversion-kicker">오늘의 한 장</p><h1>오늘은 어떤 마음으로<br/>하루를 열겠소?</h1><p>오늘의 기운을 읽고, 작은 행동 하나를 골라보시오.</p></header>
+      <header className="editorial-heading"><p className="conversion-kicker">오늘 날짜의 두 글자</p><h1>내 여덟 글자와 오늘 두 글자는<br/>어디서 부딪히고 돕는가?</h1><p>맞물리는 글자와 이유를 보고, 오늘 줄일 행동 하나를 고르시오.</p></header>
       <Scene id="banner" />
       {/* ★ 여는 줄이 없어 첫 줄이 「일진이란…」 이라는 뜻풀이였습니다.
           매일 오는 자리라 더 그렇습니다 — 같은 설명을 매일 읽습니다. */}
@@ -85,7 +85,7 @@ export default function DailyPage() {
       <Say who="도령" lens="pungun">
         입력한 명식은 그대로 두고, 오늘 자 두 글자만 그 위에 얹는 것이오.
         <br />
-        오늘의 두 글자가 입력한 명식과 어떻게 놓이는지 전통 해석으로 살펴보오.
+        오늘의 두 글자가 입력한 명식과 합·충·오행에서 어디에 놓이는지 계산하오.
         오늘 일어날 사건이나 하루의 좋고 나쁨을 확정하는 결과는 아니오.
         <br />
         날마다 다른 손님이 상에 앉는 것처럼, 두 글자가 매일 바뀌오.

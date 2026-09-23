@@ -71,7 +71,7 @@ def reports():
     out = []
     for birth, sex in PEOPLE:
         f = build_features(build_chart(*birth, sex, city="서울"))
-        out.append((f, {c: build_report(f, "cid", "wolha", "all", c,
+        out.append((f, {c: build_report(f, "cid", "dongja", "all", c,
                                         axis4="INFP")["cuts"]
                         for c in CONCERNS}))
     return out

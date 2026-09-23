@@ -18,6 +18,15 @@ HOOK_TTL = 24 * 3600
 def post_hook(req: HookRequest) -> HookResponse:
     raw = load_features(req.chart_id)
     concern = lens_mod.concern_for(req.lens_id, req.concern)
+    # ★ 이 사람이 안 보는 고민이면 **고른 갈래도 같이 내려놓습니다.**
+    #
+    #   고민이 사랑으로 갈렸는데 갈래는 돈에서 고른 「사업·장사」 인
+    #   채로 두면 `topic.ask_cut` 이 목록에 없다고 422 를 냅니다 —
+    #   손님 화면에는 「훅을 만들지 못했소」 만 뜨고, 까닭은 자기가
+    #   본 적도 없는 사랑 갈래 목록이오. `report.build_report` 는
+    #   이미 같은 자리에서 내려놓고 있었습니다. 두 자리가 갈리면
+    #   한쪽만 터집니다.
+    topic = req.topic if concern == req.concern else None
     # ★ 캐시 열쇠에 misses 를 넣습니다. 안 넣으면 방향을 튼 훅이
     #   안 튼 훅을 덮어써서, 다음 손님이 남의 응답으로 고쳐진 훅을
     #   받습니다.
@@ -43,8 +52,8 @@ def post_hook(req: HookRequest) -> HookResponse:
             f, concern, req.axis4, name=req.name,
             you=lens_mod.you_word(req.lens_id, req.name, raw.get("sex")),
             misses=req.misses)
-        if req.topic:
-            focused = topic_mod.ask_cut(f, concern, req.topic)
+        if topic:
+            focused = topic_mod.ask_cut(f, concern, topic)
             if focused:
                 segs.insert(0, {
                     'stage':'topic', 'label':focused['title'],
@@ -56,7 +65,7 @@ def post_hook(req: HookRequest) -> HookResponse:
                     'no':'다르게 느껴지는 부분은 억지로 맞추지 않겠소. 다음 관점에서 다시 보시오.',
                 })
             specialist = (character_consultation_mod.brief(
-                req.lens_id, req.topic,
+                req.lens_id, topic,
                 name=lens_mod.public(req.lens_id)["name"])
                 if req.lens_id else None)
             if specialist:
@@ -65,7 +74,7 @@ def post_hook(req: HookRequest) -> HookResponse:
                     'html':specialist['html'], 'source':'선택한 상황 · 이 상담자의 전문 판단 기준',
                     'source_below':True,
                     'statement_id':'first-reading-v3-specialist:%s:%s:%s' % (
-                        req.lens_id, req.topic.get('choice4'), req.topic.get('choice5')),
+                        req.lens_id, topic.get('choice4'), topic.get('choice5')),
                     'question':'이 관점이 지금 놓인 문제의 중심을 제대로 가르고 있소?',
                     'yes':specialist['close'],
                     'no':'이 관점이 전부는 아니오. 맞지 않는 대목은 버리고 다른 상담자의 눈으로 다시 보겠소.',

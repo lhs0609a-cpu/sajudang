@@ -31,7 +31,7 @@ def chart_features():
 def test_commercial_character_stops_before_deep_reading(chart_features, lens_id, concern):
     free = build_report(chart_features, 'scope-test', lens_id, 'free', concern, 'INTJ')
     paid = build_report(chart_features, 'scope-test', lens_id, 'all', concern, 'INTJ')
-    assert {c['id'] for c in free['cuts']} <= {'chart', 'spine', 'topic_ask', 'spine_depth', 'spine_scene', 'lens_bridge'}
+    assert {c['id'] for c in free['cuts']} <= {'chart', 'spine', 'topic_ask', 'spine_depth', 'spine_scene', 'lens_bridge', 'solace', 'closing_cut'}
     assert {'spine_depth', 'spine_scene'} <= {c['id'] for c in free['cuts']}
     assert sum(len(_plain(c['html'])) for c in free['cuts'] if c['id'] in {'spine_depth', 'spine_scene'}) > 200
     assert free['cuts'] and free['locked']

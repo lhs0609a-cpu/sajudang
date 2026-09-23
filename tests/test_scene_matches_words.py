@@ -127,6 +127,14 @@ def _pairs():
 
     ★ 다음 `<Scene` 앞에서 끊습니다. 안 끊으면 c4 의 안 파는 갈래가
       바로 아래 갈래의 글을 제 것인 양 끌어옵니다.
+
+    ★ 다음 `<Shell` 앞에서도 끊습니다 (2026-09-23).
+
+      장면은 **제 화면의 것**입니다. 화면 경계를 안 보면, 장면이
+      마지막인 화면이 다음 화면의 나레이션을 제 것인 양 끌어옵니다 —
+      진열대의 자리(seat)가 「내 명식」의 먹과 종이를 끌어왔고,
+      대문(a7 facing)이 대기 화면의 「대문을 여는 중이오」 를
+      끌어왔습니다. 둘 다 그 화면에 없는 글입니다.
     """
     for p in sorted((WEB / "app").rglob("*.tsx")):
         code = re.sub(r"/\*.*?\*/", " ", p.read_text(encoding="utf-8"),
@@ -134,8 +142,9 @@ def _pairs():
         code = re.sub(r"//[^\n]*", " ", code)
         for m in re.finditer(r'<Scene\s+id="(\w+)"([^/>]*)/>', code):
             rest = code[m.end():]
-            nxt = rest.find("<Scene ")
-            block = rest[:nxt if nxt >= 0 else len(rest)]
+            cuts = [i for i in (rest.find("<Scene "), rest.find("<Shell"))
+                    if i >= 0]
+            block = rest[:min(cuts)] if cuts else rest
             nar = re.search(r"<Narration[^>]*lines=\{\[(.*?)\]\}", block, re.S)
             lines = re.findall(r'"([^"]{2,80})"', nar.group(1)) if nar else []
             yield (str(p.relative_to(WEB).as_posix()), m.group(1), lines,
