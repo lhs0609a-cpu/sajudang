@@ -12,7 +12,7 @@ const INITIAL:GuideState = {
 };
 
 function usable(element:Element): element is HTMLElement {
-  if (!(element instanceof HTMLElement) || element.closest(".sound-float,.journey-guide,.seats-shortcut,.live-activity,.top,.devrail")) return false;
+  if (!(element instanceof HTMLElement) || element.closest(".sound-float,.journey-guide,.seats-shortcut,.fortune-shortcut,.live-activity,.top,.devrail")) return false;
   const rect=element.getBoundingClientRect();
   const style=getComputedStyle(element);
   return rect.width>8&&rect.height>8&&style.display!=="none"&&style.visibility!=="hidden";

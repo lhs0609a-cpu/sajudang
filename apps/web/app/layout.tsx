@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import WebVitals from '@/components/WebVitals';
 import SeatsShortcut from '@/components/SeatsShortcut';
+import FortuneShortcut from '@/components/FortuneShortcut';
 
 /*
  * ★ 공유되는 링크가 **카드로 서야** 합니다.
@@ -109,7 +110,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }
         />
       </head>
-      <body spellCheck={false}><BackgroundMusic /><MemberSync /><AccountBar /><InvitationArrival />{children}<SeatsShortcut /><LiveActivity /><WebVitals /></body>
+      <body spellCheck={false}><BackgroundMusic /><MemberSync /><AccountBar /><InvitationArrival />{children}<FortuneShortcut /><SeatsShortcut /><LiveActivity /><WebVitals /></body>
     </html>
   );
 }
