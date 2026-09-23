@@ -254,6 +254,62 @@ def table() -> dict:
             "contract": "계약 조건",
         },
     }
+    # 모든 고민은 「무슨 분야인가」에서 멈추지 않고,
+    # 지금 실제로 어느 단계인지와 이번 상담에서 얻고 싶은 결론까지
+    # 확인해야 같은 말의 반복을 피할 수 있다. 기존 ASK 표를 깨지 않도록
+    # 공통 표에 두 단계만 덧붙인다. 프론트는 q4/q5를 이미 지원한다.
+    detail_asks = {
+        "money": {
+            "q4": "지금 돈 문제는 어느 단계까지 와 있소?",
+            "options4": {"notice": "문제를 막 알아차림", "plan": "계획을 세우는 중", "action": "이미 실행 중", "debt": "빚·연체를 정리 중", "repeat": "같은 문제가 반복됨"},
+            "q5": "이번 상담에서 반드시 숫자로 확인하고 싶은 것은 무엇이오?",
+            "options5": {"income": "수입을 늘릴 지점", "leak": "새는 돈의 원인", "debt": "빚을 줄이는 순서", "choice": "지금 선택의 우선순위", "habit": "반복되는 소비 습관"},
+        },
+        "work": {
+            "q4": "일에서 지금 실제로 막힌 장면은 무엇이오?",
+            "options4": {"entry": "시작·이직 전", "load": "업무가 몰림", "boss": "상사·조직과 충돌", "result": "성과·평가가 안 나옴", "exit": "그만둘지 고민 중"},
+            "q5": "이번 해석에서 가장 먼저 정하고 싶은 결과는 무엇이오?",
+            "options5": {"role": "내가 맡을 일의 범위", "move": "이직·이동 여부", "skill": "키울 능력 한 가지", "pay": "연봉·수입의 방향", "rest": "번아웃을 막는 기준"},
+        },
+        "love": {
+            "q4": "두 사람 사이에서 마지막으로 실제로 벌어진 일은 무엇이오?",
+            "options4": {"start": "고백·관계 시작 전", "silence": "연락·대화가 끊김", "fight": "같은 이유로 다툼", "future": "결혼·동거를 의논 중", "break": "이별 후 재회 고민"},
+            "q5": "이번 상담에서 상대와 나 사이 무엇을 가장 분명히 알고 싶소?",
+            "options5": {"heart": "상대의 현재 마음", "cause": "반복되는 다툼의 원인", "choice": "계속할지 멈출지", "future": "결혼·장기 가능성", "talk": "지금 꺼낼 대화의 순서"},
+        },
+        "people": {
+            "q4": "그 관계에서 최근 실제로 일어난 장면은 무엇이오?",
+            "options4": {"message": "답장·말투가 달라짐", "request": "부탁·금전 문제가 생김", "conflict": "선 넘는 말·행동", "group": "가족·직장 안의 문제", "cut": "거리를 두려는 중"},
+            "q5": "이번 상담에서 관계의 어느 선을 정하고 싶소?",
+            "options5": {"trust": "믿을 수 있는지", "boundary": "어디까지 받아줄지", "talk": "어떻게 말할지", "distance": "얼마나 거리를 둘지", "repair": "다시 회복할 수 있는지"},
+        },
+        "dir": {
+            "q4": "두 선택지 중 지금 실제로 먼저 해야 하는 일은 무엇이오?",
+            "options4": {"apply": "지원·신청부터", "talk": "누군가와 상의부터", "number": "돈·조건 계산부터", "date": "마감·시한 확인부터", "pause": "일단 멈추고 관찰 중"},
+            "q5": "결정이 났다고 느끼려면 무엇이 분명해야 하오?",
+            "options5": {"money": "감당할 비용", "people": "함께할 사람의 동의", "risk": "잃을 수 있는 것", "proof": "확인해야 할 정보", "date": "움직일 날짜"},
+        },
+        "health": {
+            "q4": "불편함이 일상에서 가장 먼저 드러나는 때는 언제오?",
+            "options4": {"morning": "아침에 일어날 때", "work": "일·집중할 때", "meal": "먹고 난 뒤", "night": "잠들기 전", "stress": "긴장·감정이 커질 때"},
+            "q5": "이번 상담에서 생활의 무엇부터 바꾸고 싶소?",
+            "options5": {"sleep": "수면 시간", "meal": "식사 리듬", "move": "움직임·운동", "rest": "쉬는 방식", "check": "검사를 받을 기준"},
+        },
+        "real_estate": {
+            "q": "지금 가장 가까운 부동산 고민은 무엇인가요?",
+            "options": {"buy": "내 집 매수·분양", "sell": "매도·갈아타기", "move": "전세·월세·이사", "invest": "상가·토지 투자", "auction": "경매·공매", "inherit": "상속·증여·공동명의"},
+            "q2": "결정을 늦추게 만드는 현실 조건은 무엇인가요?",
+            "options2": {"price": "가격·대출 부담", "timing": "시기·시장 판단", "family": "가족·공동명의", "contract": "계약·권리 조건", "region": "지역·입지 선택", "tax": "세금·자금 계획"},
+            "q3": "그 부동산으로 최종적으로 이루려는 목적은 무엇인가요?",
+            "options3": {"live": "직접 거주", "rent": "임대 수익", "capital": "시세 차익", "rebuild": "재건축·개발", "commercial": "사업장 운영", "inheritance": "가족에게 이전"},
+            "q4": "현재 거래는 실제로 어느 단계까지 진행됐나요?",
+            "options4": {"research": "정보를 모으는 중", "viewed": "현장을 보고 비교 중", "loan": "대출·자금 심사 중", "negotiate": "가격·조건을 협의 중", "contract": "계약서·잔금을 확인 중", "owned": "이미 보유한 집을 다시 판단 중"},
+            "q5": "이번 상담에서 반드시 확인하고 싶은 한 가지는 무엇인가요?",
+            "options5": {"afford": "내 자금으로 감당 가능한 범위", "timing": "지금 움직일지 기다릴지", "risk": "계약·권리의 위험", "return": "수익·보유 가치", "family": "가족 간 지분·갈등", "next": "당장 할 다음 행동"},
+        },
+    }
+    for concern, detail in detail_asks.items():
+        out.setdefault("ASK", {}).setdefault(concern, {}).update(detail)
     def fill(node):
         if isinstance(node, dict):
             for value in list(node.values()):
@@ -1540,14 +1596,12 @@ def ask_spec(concern: str) -> Optional[dict]:
     out = {"id": concern, "title": spec["title"], "q": spec["q"],
            "options": [{"id": k, "label": v}
                        for k, v in spec["options"].items()]}
-    if spec.get("q2"):
-        out["q2"] = spec["q2"]
-        out["options2"] = [{"id": k, "label": v}
-                           for k, v in spec["options2"].items()]
-    if spec.get("q3"):
-        out["q3"] = spec["q3"]
-        out["options3"] = [{"id": k, "label": v}
-                           for k, v in spec["options3"].items()]
+    for n in (2, 3, 4, 5):
+        qkey, okey = "q%d" % n, "options%d" % n
+        if spec.get(qkey):
+            out[qkey] = spec[qkey]
+            out[okey] = [{"id": k, "label": v}
+                         for k, v in spec[okey].items()]
     return out
 
 
@@ -1981,6 +2035,14 @@ def ask_cut(f, concern: str, payload: dict) -> Optional[dict]:
         raise TopicInputError(
             "고르신 것이 목록에 없소: %r (고를 수 있는 것: %s)"
             % (pick3, " · ".join(spec["options3"].values())))
+    picks = {4: str(payload.get("choice4") or ""),
+             5: str(payload.get("choice5") or "")}
+    for n, value in picks.items():
+        options = spec.get("options%d" % n)
+        if options and value and value not in options:
+            raise TopicInputError(
+                "고르신 것이 목록에 없소: %r (고를 수 있는 것: %s)"
+                % (value, " · ".join(options.values())))
 
     w = _words(f)
 
@@ -2028,6 +2090,13 @@ def ask_cut(f, concern: str, payload: dict) -> Optional[dict]:
         say3 = spec["say3"][pick3]
         parts.append('<p class="hit">%s</p>' % _fmt(say3["dunno"], w))
         ev.append("%s → 사용자가 원하는 판단" % spec["options3"][pick3])
+    for n in (4, 5):
+        value = picks[n]
+        options = spec.get("options%d" % n)
+        if value and options:
+            label = options[value]
+            parts.append('<p class="tale"><b>%s</b>라고 하셨소. 이 답을 이번 해석의 범위로 삼겠소.</p>' % label)
+            ev.append("%s → 상담 범위" % label)
     parts.append('<p class="tale">%s</p>' % spec["tail"])
 
     body = "".join(parts)
@@ -2047,8 +2116,9 @@ def ask_cut(f, concern: str, payload: dict) -> Optional[dict]:
         "min_level": 0,
         # ★ 사실 셋의 가름까지 번호에 넣습니다. 안 넣으면 「뿌리가 있는
         #   사람」과 「없는 사람」의 공감률이 한 통에 섞이오.
-        "statement_id": "ask:%s:%s:%s:%s%s:%s"
+        "statement_id": "ask:%s:%s:%s:%s:%s:%s%s:%s"
                         % (concern, pick, pick2 or "-", pick3 or "-",
+                           picks[4] or "-", picks[5] or "-",
                            (":f=" + fmark) if fmark else "",
                            "%s%s" % ("h" if hit else ("m" if hit is False else "u"),
                                      "h" if hit2 else

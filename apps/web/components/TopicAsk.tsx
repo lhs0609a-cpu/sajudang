@@ -70,7 +70,7 @@ export default function TopicAsk({
       <h2 className="ask-heading">{spec.title}</h2>
       <p className="why">
         지금 고르는 답은 해석 자체가 아니오. 그대의 상황을 좁혀서
-        <b> 아래 3단계 해석의 장면·판정·행동을 바꾸는 입력</b>이오. 적으신 것은 남기지 않소.
+        <b> 아래 해석의 장면·판정·행동을 바꾸는 입력</b>이오. 적으신 것은 남기지 않소.
       </p>
 
       <p className="q">{spec.q}</p>
@@ -126,7 +126,7 @@ export default function TopicAsk({
           <div className="og c2">{spec.options5.map(o => <button key={o.id} className={`op ${pick5===o.id?'on':''}`} aria-pressed={pick5===o.id} onClick={()=>setPick5(o.id)}><b>{o.label}</b></button>)}</div></>
       )}
 
-      <p className="ask-status" role="status">{busy ? "고른 답을 반영해 3단계 해석을 다시 만드는 중이오." : ready ? "답을 모두 골랐소. 아래 버튼을 누르면 고른 상황에 맞춘 해석이 나옵니다." : "각 질문에서 하나씩 고르시오. 아직 해석 결과가 바뀐 것은 아니오."}</p>
+      <p className="ask-status" role="status">{busy ? "고른 답을 반영해 해석을 다시 만드는 중이오." : ready ? "답을 모두 골랐소. 아래 버튼을 누르면 고른 상황에 맞춘 해석이 나옵니다." : "각 질문에서 하나씩 고르시오. 아직 해석 결과가 바뀐 것은 아니오."}</p>
       <button className="btn go" disabled={!ready || busy}
               onClick={() => onSubmit({
                 topic: { choice: pick, ...(pick2 ? { choice2: pick2 } : {}),
