@@ -107,9 +107,9 @@ METHODS = {
 
 
 def plain_profile(f, *, name="풍운도령", lens_id="pungun", include_label=True) -> str:
-    """Explain the person in ordinary language before 명리 terminology."""
-    strength = {"신강": "기본 체력이 강한 편", "신약": "주변 조건의 영향을 많이 받는 편", "중화": "상황에 따라 힘을 조절하는 편"}.get(f.strength, "상황에 따라 힘을 조절하는 편")
-    flow = {"비겁": "내 편을 만들고 함께 버티는 일", "식상": "생각을 말과 결과물로 꺼내는 일", "재성": "사람과 기회를 현실적인 성과로 바꾸는 일", "관성": "규칙과 책임을 맡아 구조를 세우는 일", "인성": "배우고 준비한 것을 안전하게 쌓는 일"}.get(f.flow, "현실에서 힘을 쓰는 일")
+    """첫 화면에서 캐릭터마다 다른 사람 모습을 먼저 말한다."""
+    strength = {"신강": "혼자 밀고 갈 체력이 있는 편", "신약": "주변 조건에 따라 컨디션이 크게 달라지는 편", "중화": "상황을 보고 힘의 세기를 조절하는 편"}.get(f.strength, "상황을 보고 힘의 세기를 조절하는 편")
+    flow = {"비겁": "사람을 모아 함께 버티는 일", "식상": "생각을 말과 결과물로 내놓는 일", "재성": "사람과 기회를 실제 성과로 바꾸는 일", "관성": "규칙과 책임으로 일을 정리하는 일", "인성": "배우고 준비해 실수를 줄이는 일"}.get(f.flow, "지금 맡은 일을 현실에서 처리하는 일")
     angles = {
         "pungun": ("현실에서 반복되는 선택의 패턴", "오늘의 행동으로 바꾸는 방법"),
         "baegun": ("몸과 생활 리듬이 보내는 신호", "무리하지 않고 균형을 되찾는 방법"),
@@ -133,6 +133,50 @@ def plain_profile(f, *, name="풍운도령", lens_id="pungun", include_label=Tru
         "dongja": ("처음 시작할 때의 호기심과 안전한 실험", "작게 시작해 결과를 확인한 뒤 키우기"),
     }
     angle, action = angles.get(lens_id, ("이 명식에서 반복되는 삶의 패턴", "지금 바꿀 수 있는 한 가지"))
+    profiles = {
+        "pungun": ("맡은 일은 끝까지 책임지지만, 도움을 청하기 전에 혼자 해결하려는 사람", "일이 끝난 뒤에도 다음 부탁까지 미리 걱정하는 장면"),
+        "baegun": ("몸이 약해서가 아니라 회복할 틈 없이 일정을 이어 붙이는 사람", "쉬는 날에도 밀린 일을 계산하며 제대로 쉬지 못하는 장면"),
+        "cheongam": ("대충 고르기 싫어서 기준을 세우고도 마지막 결정을 오래 미루는 사람", "정보는 충분한데 새 자료를 하나 더 찾아 결정을 뒤로 미루는 장면"),
+        "sigye": ("노력의 양보다 시기와 조건이 맞는지를 먼저 보는 사람", "예전에는 되던 방법을 지금도 그대로 반복하다 결과가 달라지는 장면"),
+        "jeokhyeol": ("끌리면 빠르게 가까워지지만, 약속의 무게는 뒤늦게 계산하는 사람", "좋다는 말은 쉬운데 실제 시간과 책임을 정할 때 멈칫하는 장면"),
+        "monghwa": ("새 가능성을 잘 발견하지만, 떠나고 싶은 마음과 정말 원하는 마음을 구분해야 하는 사람", "새 선택을 앞두고 현재의 불편만 크게 보이는 장면"),
+        "seoyeok": ("남의 성공에서 힌트를 얻되, 내 조건에 맞는지 다시 계산해야 하는 사람", "추천받은 방법을 바로 적용했다가 시간과 비용이 맞지 않는 장면"),
+        "paeseon": ("더 열심히 하기보다 무엇을 덜어낼지 정해야 속도가 나는 사람", "새 계획을 세우면서 기존 일정은 하나도 줄이지 않는 장면"),
+        "myeonsang": ("겉으로는 참고 지나가지만 가장 가까운 사람에게 피로가 새어 나오는 사람", "밖에서 삼킨 말을 집에 와서 날카롭게 꺼내는 장면"),
+        "wolha": ("서운함을 참아 관계를 지키려다 정작 원하는 행동을 말하지 못하는 사람", "괜찮다고 말한 뒤 상대가 알아서 바뀌길 기다리는 장면"),
+        "hongmae": ("관계를 오래 지키려고 내 몫을 먼저 더 가져가는 사람", "도와주기로 한 일이 당연한 의무처럼 굳어지는 장면"),
+        "yeondam": ("상대의 반응을 기다리기보다 내 하루의 기준을 먼저 세워야 편해지는 사람", "답장이 올 때까지 일정과 기분을 모두 멈춰 두는 장면"),
+        "hwagyeong": ("내 의도를 정확히 설명하려다 정작 바꿀 행동을 뒤로 미루는 사람", "대화는 길었지만 다음에 무엇을 다르게 할지는 남지 않는 장면"),
+        "haengsu": ("많이 움직이는 것보다 실제로 남는 돈과 시간이 얼마인지 봐야 하는 사람", "매출은 늘었는데 비용과 시간을 빼고 나면 남는 것이 적은 장면"),
+        "hunjang": ("아는 것은 많지만 평가받을 결과물을 내놓는 순간에 가장 오래 머무는 사람", "자격증과 자료는 늘어나는데 제출하거나 지원하는 일은 미루는 장면"),
+        "yakcho": ("쉬는 시간을 확보하지 않으면 몸보다 먼저 집중력이 무너지는 사람", "잠깐 쉬면서도 못 끝낸 일을 계속 떠올리는 장면"),
+        "ilgwan": ("계산과 책임의 범위를 분명히 해야 팀을 안정시키는 사람", "결정권은 없는데 결과 책임만 떠안는 장면"),
+        "nopa": ("오래 버틴 것을 쉽게 버리지는 않지만, 지금의 비용을 따져야 다음으로 가는 사람", "고마운 관계와 계속 유지해야 할 관계를 구분하지 못하는 장면"),
+        "dongja": ("처음에는 호기심으로 빠르게 시작하고, 작게 시험할 때 가장 잘 배우는 사람", "완벽한 계획을 세우느라 첫 실험을 시작하지 못하는 장면"),
+    }
+    person, scene = profiles.get(lens_id, ("맡은 일을 현실의 조건에 맞춰 처리하는 사람", "해야 할 일과 실제로 한 일을 나눠 보아야 하는 장면"))
+    direct_actions = {
+        "pungun": "맡은 일과 추가로 떠안은 일을 두 줄로 나누는 것",
+        "baegun": "오늘 끝낼 시각과 다시 시작할 시각을 정하는 것",
+        "cheongam": "선택을 바꿀 사실 하나만 적는 것",
+        "sigye": "예전과 달라진 조건을 한 줄로 적는 것",
+        "jeokhyeol": "마음과 실제로 지킬 수 있는 약속을 나누는 것",
+        "monghwa": "얻고 싶은 것과 피하고 싶은 것을 따로 적는 것",
+        "seoyeok": "남의 조건과 내 조건을 숫자로 비교하는 것",
+        "paeseon": "새로 시작할 일 대신 줄일 일 하나를 고르는 것",
+        "myeonsang": "감정이 생긴 곳과 말을 꺼낸 곳을 나누는 것",
+        "wolha": "상대가 해주길 바라는 행동 하나를 말하는 것",
+        "hongmae": "내 몫과 상대 몫을 다시 적는 것",
+        "yeondam": "답이 없어도 지킬 오늘 일정을 정하는 것",
+        "hwagyeong": "설명 대신 바꿀 행동 하나를 정하는 것",
+        "haengsu": "받은 돈·비용·쓴 시간을 한 줄에 적는 것",
+        "hunjang": "지금 아는 것으로 제출할 가장 작은 결과를 정하는 것",
+        "yakcho": "오늘의 일을 멈출 시각을 정하는 것",
+        "ilgwan": "결정권자와 마감일을 문서로 남기는 것",
+        "nopa": "계속할 이유와 놓을 비용을 따로 적는 것",
+        "dongja": "완벽한 계획 대신 일주일짜리 실험을 시작하는 것",
+    }
+    direct_action = direct_actions.get(lens_id, action)
     # ★ 뱅크는 **하오체 한 벌**로 씁니다. 합쇼체로 쓰면 `voice.speak` 가
     #   손댈 어미가 없어 이 글만 스무 명에게 똑같이 나가오.
     # ★ 조사는 **받침을 보고** 답니다 — 「풍운도령가」 「신호을」 이
@@ -141,13 +185,11 @@ def plain_profile(f, *, name="풍운도령", lens_id="pungun", include_label=Tru
     label = (f'<p class="plain-profile-label">{escape(name)}{_josa(name, "이", "가")} '
              '먼저 읽은 사람의 모습</p>') if include_label else ''
     return (f'<div class="plain-profile">{label}'
-            f'<h3>한눈에 보면, {strength}이오.</h3>'
-            f'<p>겉으로는 쉽게 흔들리지 않지만, 속에서는 형편을 오래 살핀 뒤 움직이오. '
-            f'마음이 없는 것이 아니라 <b>확신이 서야 행동으로 옮기는 사람</b>에 가깝소.</p>'
-            f'<p class="plain-profile-point"><b>{angle}</b>에서 이 성향이 반복되오. 잘 풀릴 때는 {flow}에서 솜씨가 나고, '
-            f'막힐 때는 혼자 붙들고 버티다가 도움을 청할 시점을 놓치기 쉽소.</p>'
-            f'<p class="plain-profile-point"><b>오늘 바꿀 한 가지</b> · {action}을 정하고, 시작 전에 끝낼 범위를 한 줄로 적으시오.</p>'
-            f'<p class="plain-profile-evidence">이 설명 뒤에 계산 근거를 붙였소. 먼저 사람의 모습, 다음에 명식의 숫자를 보시오.</p></div>')
+            f'<h3>{escape(person)}이오.</h3>'
+            f'<p><b>이 장면이 반복되오.</b> {escape(scene)} 잘 풀릴 때는 {flow}에서 힘이 드러나고, '
+            f'막힐 때는 문제를 혼자 정리하느라 다음 행동이 늦어지기 쉽소.</p>'
+            f'<p class="plain-profile-point"><b>오늘 바꿀 한 가지</b> · {escape(direct_action)}을 먼저 하시오.</p>'
+            f'<p class="plain-profile-evidence">여기까지는 사람의 모습이오. 아래에서 이 판단이 나온 글자와 수를 확인하시오.</p></div>')
 
 
 def pungun_opening(f, concern: str, *, name="풍운도령") -> str:
@@ -172,14 +214,14 @@ def pungun_opening(f, concern: str, *, name="풍운도령") -> str:
     }
     consequence, checkpoint = concern_lines.get(concern, concern_lines["love"])
     return (
-        plain_profile(f, name=name, lens_id="pungun", include_label=False) +
         f'<div class="specialist-opening"><p class="opening-label">{escape(name)}의 첫 판정</p>'
-        f'<h3>결론: 버티는 힘은 충분하오. 다만 혼자 계속 드는 방식은 바꿔야 하오.</h3>'
+         f'<h3>결론: 버티는 힘은 충분하오. 다만 혼자 계속 드는 방식은 바꿔야 하오.</h3>'
         f'<p>{escape(consequence)}</p>'
         f'<p class="opening-evidence"><strong>계산 근거</strong> · {escape(sp["source"])} · '
         f'{escape(f.flow)} {flow_count}개 → {escape(next_group)} {next_count}개</p>'
         f'<p><strong>오늘 확인할 한 가지</strong> · {escape(checkpoint)}</p>'
-        f'<p class="opening-boundary">이 네 줄이 지금까지 본 것의 결론이오. 아래 물음에 답하시면 같은 자로 그대의 장면을 더 좁혀 다시 세겠소.</p></div>'
+         f'<p class="opening-boundary">여기까지가 첫 판정이오. 다음 장면에서 실제 경험과 맞는지 대조하시오.</p></div>'
+        + plain_profile(f, name=name, lens_id="pungun", include_label=False)
     )
 
 

@@ -2482,11 +2482,12 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
         # instead of an interpretation (and duplicated the topic sentence).
         if not (lens_id == "pungun" and c.get("id") == "spine"):
             c["html"] = _flavor.ask(c["html"], lens_id, asked, tone)
-        c["html"] += voice_mod.speak(
-            voice_mod.address(
-                terms_mod.picture_box((seen - before) - boxed,
-                                      concern, f.sex), you),
-            tone)
+        if not (lens_id == "pungun" and c.get("id") == "spine"):
+            c["html"] += voice_mod.speak(
+                voice_mod.address(
+                    terms_mod.picture_box((seen - before) - boxed,
+                                          concern, f.sex), you),
+                tone)
         boxed |= (seen - before)
         # ★ 훑어읽기 층 — **맨 끝**입니다 (2026-09-07).
         #
@@ -2517,6 +2518,10 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
     for c in cuts:
         c["html"] = _fix_particles(c["html"])
         c["html"] = _dedupe_adjacent_text(c["html"])
+        if c.get("id") == "spine":
+            c["html"] = re.sub(
+                r'<p class="tale">\s*이 한 줄이 일에서는.*?</p>',
+                '', c["html"])
     # 사실 장부 — 모든 층을 입힌 뒤, 화면에 나가는 차례대로.
     _ledger(cuts)
     for l in locked:
