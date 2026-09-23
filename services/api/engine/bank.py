@@ -184,7 +184,10 @@ class BankError(KeyError):
 
 def _pick(table: str, *keys: str) -> str:
     node = bank()[table]
-    for k in keys:
+    lookup_keys = list(keys)
+    if lookup_keys and lookup_keys[-1] == "real_estate":
+        lookup_keys[-1] = "money"
+    for k in lookup_keys:
         if not isinstance(node, dict) or k not in node:
             raise BankError("bank.%s[%s] 없음" % (table, "][".join(keys)))
         node = node[k]
