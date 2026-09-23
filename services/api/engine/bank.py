@@ -701,7 +701,11 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     ★ 공감률(“몇 명 중 몇 %”)은 여기서 만들지 않습니다.
       실응답 100건 이상 쌓인 문장만 화면에 노출합니다. (CLAUDE.md 절대 규칙 2)
     """
-    if concern != "real_estate" and concern not in meta()["concerns"]:
+    if concern == "real_estate":
+        # 은행 원문은 기존 재물 축을 계산 근거로 재사용하고,
+        # 부동산 전용 문장·질문은 topic/editorial에서 덧붙인다.
+        concern = "money"
+    if concern not in meta()["concerns"]:
         raise BankError("모르는 고민 축: %r" % (concern,))
 
     from . import topic as _topic
