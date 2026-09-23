@@ -2108,6 +2108,22 @@ def ask_cut(f, concern: str, payload: dict) -> Optional[dict]:
             label = options[value]
             parts.append('<p class="tale"><b>%s</b>라고 하셨소. 이 답을 이번 해석의 범위로 삼겠소.</p>' % label)
             ev.append("%s → 상담 범위" % label)
+    # 세부 답변이 실제 판정의 초점을 바꾸는 문장. 단순히 답을
+    # 나열하지 않고, 고른 상황에서 무엇을 먼저 가를지 명시한다.
+    focus_templates = {
+        "money": "돈의 크기보다 <b>%s</b> 단계에서 <b>%s</b>를 먼저 가르겠소. 수입·지출을 한데 묶지 않고, 지금 바꿀 수 있는 숫자부터 보오.",
+        "work": "직업의 좋고 나쁨보다 <b>%s</b> 장면에서 <b>%s</b>를 먼저 가르겠소. 능력 부족으로 단정하지 않고 범위·성과·보상의 연결을 보오.",
+        "love": "사랑의 결론을 서두르지 않고 <b>%s</b> 장면에서 <b>%s</b>를 먼저 가르겠소. 상대의 마음을 추측하기보다 실제 대화와 선택을 기준으로 보오.",
+        "people": "관계의 옳고 그름보다 <b>%s</b> 장면에서 <b>%s</b>의 선을 먼저 가르겠소. 참는 양이 아니라 반복되는 행동과 경계를 보오.",
+        "dir": "두 길의 정답을 단정하지 않고 <b>%s</b>부터 확인해 <b>%s</b>가 충족되는 쪽을 가르겠소.",
+        "health": "병명을 붙이지 않고 <b>%s</b> 때에 <b>%s</b> 리듬이 무너지는지를 먼저 보오. 심하거나 악화되면 해석보다 의료 도움을 우선하시오.",
+        "real_estate": "부동산을 한 덩어리로 보지 않고 <b>%s</b> 단계에서 <b>%s</b> 위험을 먼저 가르겠소. 자금·권리·목적을 분리해 판단하오.",
+    }
+    focus = focus_templates.get(concern)
+    options4, options5 = spec.get("options4") or {}, spec.get("options5") or {}
+    if focus and picks[4] in options4 and picks[5] in options5:
+        parts.append('<p class="precision"><strong>이번 답으로 좁힌 판정</strong> · %s</p>'
+                     % (focus % (options4[picks[4]], options5[picks[5]])))
     parts.append('<p class="tale">%s</p>' % spec["tail"])
 
     body = "".join(parts)
