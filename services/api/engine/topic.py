@@ -254,6 +254,16 @@ def table() -> dict:
             "contract": "계약 조건",
         },
     }
+    def fill(node):
+        if isinstance(node, dict):
+            for value in list(node.values()):
+                fill(value)
+            if "money" in node and "real_estate" not in node:
+                node["real_estate"] = node["money"]
+        elif isinstance(node, list):
+            for value in node:
+                fill(value)
+    fill(out)
     return out
 
 
