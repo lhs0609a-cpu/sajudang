@@ -11,7 +11,7 @@ from typing import Literal, Optional
 from pydantic import BaseModel, Field, model_validator
 
 Sex = Literal["M", "F"]
-Concern = Literal["money", "work", "love", "people", "dir", "health"]
+Concern = Literal["money", "work", "love", "people", "dir", "health", "real_estate"]
 Tier = Literal["free", "one", "all", "sub"]
 
 

@@ -44,7 +44,7 @@ from . import topic as _topic
 from .constants import GENERATED_BY, HIDDEN, ten_god as ten_god_of
 
 # 고민 → 이 자리를 보는 짜임을 고를 때 쓰는 열쇠
-CONCERNS = ("money", "work", "love", "people", "dir", "health")
+CONCERNS = ("money", "work", "love", "people", "dir", "health", "real_estate")
 
 
 # ══════════════════════════════════════════════════════════

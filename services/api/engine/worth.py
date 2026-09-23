@@ -65,7 +65,7 @@ PEOPLE = [
     (1996, 9, 30, 23, 50, "F"),
     (1969, 6, 5, 11, 35, "M"),
 ]
-CONCERNS = ("money", "work", "love", "people", "dir", "health")
+CONCERNS = ("money", "work", "love", "people", "dir", "health", "real_estate")
 LENS = "wolha"
 
 WEIGHT = {

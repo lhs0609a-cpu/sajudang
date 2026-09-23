@@ -117,6 +117,22 @@ READINGS = {
     ],
 }
 
+READINGS['real_estate'] = [
+    ('계약서보다 먼저 이 집을 왜 사려는지부터 적어 보시오.',
+     '실거주·투자·가족 지원의 목적을 한 문장에 섞으면 가격이 조금만 움직여도 판단 전체가 흔들리오. 목적과 보유 기간을 나누어야 하오.',
+     '사주가 매수·매도의 안전을 보증하지는 않소. 등기·대출·세금·현장 상태는 반드시 실제 전문가와 확인하시오.',
+     '후보 매물 하나에 매수 이유·총 필요자금·빠져나올 조건을 각각 한 줄로 적으시오.'),
+    ('좋은 매물을 찾기 전에 감당할 수 있는 월 부담부터 정하시오.',
+     '계약금만 보고 결정하면 이자·세금·수리비가 뒤늦게 선택을 압박하오. 보유 기간과 현금흐름을 먼저 계산해야 하오.',
+     '가격이 오를 것이라는 기대만으로 계약하지 마시오. 계산 가능한 부담과 확인해야 할 사실을 분리하시오.',
+     '대출이자·세금·관리비를 합친 월 부담 상한을 숫자로 적으시오.'),
+    ('살 때의 이유와 팔거나 나올 조건을 같이 정하시오.',
+     '부동산은 들어가는 결정만큼 나오는 결정이 중요하오. 출구가 없으면 좋은 입지도 오래 묶이는 비용이 되오.',
+     '운세를 계약 근거로 삼지 말고 등기·계약 조항·자금 계획을 실제 자료로 확인하시오.',
+     '이번 매물에서 반드시 확인할 숫자 하나와 중개인에게 물을 질문 하나를 적으시오.'),
+]
+
+
 NEXT = {
     'money': '내 사주에서 돈을 벌고 관리하는 방식은 어떻게 다르게 읽힐까?',
     'work': '나를 살리는 역할과 버겁게 만드는 책임은 어디서 갈릴까?',
@@ -128,6 +144,8 @@ NEXT = {
 
 
 def _branch(f, concern):
+    if concern == 'real_estate':
+        return 0 if f.jae >= f.inn else 1 if f.inn > f.sik else 2
     if concern == 'money':
         return 0 if f.jae > f.bi and f.jae > f.inn else 1 if f.bi > f.jae else 2
     if concern == 'work':
@@ -142,6 +160,8 @@ def _branch(f, concern):
 
 
 def _evidence(f, concern):
+    if concern == 'real_estate':
+        concern = 'money'
     count = '네 기둥' if f.hour_known else '세 기둥 · 태어난 시간 제외'
     if concern == 'love':
         facts = '일지 %s · 충 %s · 합 %s' % (f.day_ji, '있음' if f.ilji_chung else '없음', '있음' if f.ilji_hap else '없음')

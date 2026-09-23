@@ -13,7 +13,7 @@ import type { Features } from "@shared/chart";
 import { DEFAULT_LENS } from "./lenses";
 import { characterConcern } from './character-topic';
 
-export type Concern = "money" | "work" | "love" | "people" | "dir" | "health";
+export type Concern = "money" | "work" | "love" | "people" | "dir" | "health" | "real_estate";
 
 export function useCharacterSession(lensId?: string) {
   const state = useSession();
@@ -270,6 +270,7 @@ export const CONCERNS: { id: Concern; label: string; sub: string }[] = [
   { id: "people", label: "사람", sub: "관계, 배신, 외로움" },
   { id: "dir", label: "방향", sub: "이대로 맞나" },
   { id: "health", label: "몸", sub: "기운, 잠, 지침" },
+  { id: "real_estate", label: "부동산", sub: "매수, 매도, 이사, 투자" },
 ];
 
 /**

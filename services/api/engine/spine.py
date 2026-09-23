@@ -249,7 +249,7 @@ def depth_html(f, sp: dict, concern: Optional[str] = None,
                 % sp["risk"])
     # ★ 「맞는 일」 은 일·돈·방향을 물었을 때만 (평가 5번) — 사랑을 물은
     #   사람에게 「공무원·교사」 를 권하던 자리입니다.
-    if (concern or "work") in ("work", "money", "dir"):
+    if (concern or "work") in ("work", "money", "dir", "real_estate"):
         out += '<p class="tale"><span class="k">맞는 일</span> %s</p>' % sp["fit"]
     a = _chars(f, f.flow) or f.day_gan
     b = _chars(f, NEXT[f.flow])

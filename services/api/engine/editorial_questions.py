@@ -169,4 +169,6 @@ QUESTIONS = {
 
 
 def question(lens_id: str, concern: str) -> str:
+    if concern == 'real_estate':
+        return '이번 부동산 결정에서 목적·총비용·나올 조건 가운데 아직 숫자로 정하지 않은 것은 무엇인가요?'
     return QUESTIONS[lens_id][CONCERN_ORDER.index(concern)]

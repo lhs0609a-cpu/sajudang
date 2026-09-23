@@ -55,7 +55,7 @@ def element_word(el: str) -> str:
 
 
 def concern_word(concern: str) -> str:
-    return meta()["concerns"].get(concern, concern)
+    return {"real_estate": "부동산"}.get(concern) or meta()["concerns"].get(concern, concern)
 
 
 def has_batchim(word: str) -> bool:
@@ -701,7 +701,7 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     ★ 공감률(“몇 명 중 몇 %”)은 여기서 만들지 않습니다.
       실응답 100건 이상 쌓인 문장만 화면에 노출합니다. (CLAUDE.md 절대 규칙 2)
     """
-    if concern not in meta()["concerns"]:
+    if concern != "real_estate" and concern not in meta()["concerns"]:
         raise BankError("모르는 고민 축: %r" % (concern,))
 
     from . import topic as _topic

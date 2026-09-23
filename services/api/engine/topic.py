@@ -60,7 +60,7 @@ from .constants import (
 
 SEED = Path(__file__).resolve().parents[3] / "seed"
 
-CONCERNS = ("money", "work", "love", "people", "dir", "health")
+CONCERNS = ("money", "work", "love", "people", "dir", "health", "real_estate")
 
 # 한 컷에 세는 칸 수. 다섯을 넘기면 그건 저울이 아니라 명세서요.
 MAX_ROWS = 5
@@ -235,7 +235,26 @@ def gyeok(f) -> str:
 @lru_cache(maxsize=1)
 def table() -> dict:
     raw = json.loads((SEED / "topic.json").read_text("utf-8"))
-    return {k: v for k, v in raw.items() if k != "_"}
+    out = {k: v for k, v in raw.items() if k != "_"}
+    # 부동산은 별도 고민으로 운영하되 기존 명리 계산 표를 재사용한다.
+    out.setdefault("ASK", {})["real_estate"] = {
+        "title": "집·토지·상가를 움직일 때 무엇을 먼저 확인할까",
+        "q": "지금 가장 가까운 부동산 고민은 무엇인가요?",
+        "options": {
+            "buy": "매수·분양 시기",
+            "sell": "매도·갈아타기 시기",
+            "move": "전세·월세·이사",
+            "invest": "투자·상가·토지",
+        },
+        "q2": "결정을 늦추게 만드는 현실 조건은 무엇인가요?",
+        "options2": {
+            "price": "가격·대출 부담",
+            "timing": "시기 판단",
+            "family": "가족·공동명의",
+            "contract": "계약 조건",
+        },
+    }
+    return out
 
 
 def _pick(*keys) -> str:
@@ -913,8 +932,17 @@ def _years(n: int) -> str:
     return _YEAR_WORD.get(n, str(n))
 
 
+def _rows_real_estate(f):
+    return [
+        _row("estate_purpose", "real_estate", "부동산에서 먼저 볼 것은 수익률이 아니라 보유 목적과 감당 가능한 기간이오."),
+        _row("estate_cash", "real_estate", "계약금·중도금·잔금·이자까지 한 번에 적어야 실제 부담을 볼 수 있소."),
+        _row("estate_exit", "real_estate", "살 때의 이유와 팔거나 나올 조건을 함께 정해야 판단이 흔들리지 않소."),
+    ]
+
+
 _ROWS = {"money": _rows_money, "health": _rows_health, "work": _rows_work,
-         "love": _rows_love, "people": _rows_people, "dir": _rows_dir}
+         "love": _rows_love, "people": _rows_people, "dir": _rows_dir,
+         "real_estate": _rows_real_estate}
 
 
 # ══════════════════════════════════════════════════════════
