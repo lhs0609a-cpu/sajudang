@@ -492,10 +492,11 @@ def _pick(spec: dict, f, where: str,
     """(열쇠, 문장). 표에 없으면 터뜨린다 — 빈칸을 두지 않는다."""
     key = axis_value(f, spec["axis"], concern)
     text = spec["text"]
-    if key not in text:
+    lookup_key = "money" if key == "real_estate" and "money" in text else key
+    if lookup_key not in text:
         raise LensCutError("%s · %s 표에 %r 이(가) 없습니다"
                            % (where, spec["axis"], key))
-    return key, text[key]
+    return key, text[lookup_key]
 
 
 def _words(f) -> dict:
