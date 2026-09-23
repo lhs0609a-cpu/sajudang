@@ -943,11 +943,15 @@ def _years(n: int) -> str:
 
 
 def _rows_real_estate(f):
-    return [
-        _row("estate_purpose", "real_estate", "부동산에서 먼저 볼 것은 수익률이 아니라 보유 목적과 감당 가능한 기간이오."),
-        _row("estate_cash", "real_estate", "계약금·중도금·잔금·이자까지 한 번에 적어야 실제 부담을 볼 수 있소."),
-        _row("estate_exit", "real_estate", "살 때의 이유와 팔거나 나올 조건을 함께 정해야 판단이 흔들리지 않소."),
+    rows = _rows_money(f)
+    prompts = [
+        "부동산에서 먼저 볼 것은 수익률이 아니라 보유 목적과 감당 가능한 기간이오.",
+        "계약금·중도금·잔금·이자까지 한 번에 적어야 실제 부담을 볼 수 있소.",
+        "살 때의 이유와 팔거나 나올 조건을 함께 정해야 판단이 흔들리지 않소.",
     ]
+    for row, prompt in zip(rows[:3], prompts):
+        row["ev"] = prompt
+    return rows[:3]
 
 
 _ROWS = {"money": _rows_money, "health": _rows_health, "work": _rows_work,
