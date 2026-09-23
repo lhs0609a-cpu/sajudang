@@ -7,11 +7,28 @@
 "use client";
 
 import { create } from "zustand";
+import { useEffect } from 'react';
 import { persist } from "zustand/middleware";
 import type { Features } from "@shared/chart";
 import { DEFAULT_LENS } from "./lenses";
+import { characterConcern } from './character-topic';
 
 export type Concern = "money" | "work" | "love" | "people" | "dir" | "health";
+
+export function useCharacterSession(lensId?: string) {
+  const state = useSession();
+  const cur = lensId ?? state.cur;
+  const concern = characterConcern(cur, state.concern);
+  useEffect(() => {
+    // The first hydration render still contains SSR defaults. Read the live
+    // persisted state here so it cannot overwrite a returning reader's topic.
+    const current = useSession.getState();
+    const nextCur = lensId ?? current.cur;
+    const nextConcern = characterConcern(nextCur, current.concern);
+    if (current.cur !== nextCur || current.concern !== nextConcern) current.set({cur:nextCur,concern:nextConcern});
+  }, [lensId, cur, concern, state.cur, state.concern, state.set]);
+  return {...state,cur,concern};
+}
 export type Tier = "free" | "one" | "all" | "sub";
 export type Season = "spring" | "summer" | "autumn" | "winter";
 
@@ -84,7 +101,7 @@ export interface SessionState {
    *   안 남기면 화면을 옮길 때마다 또 뜹니다 — 건너뛴 사람에게
    *   같은 물음을 세 번 내미는 셈이오.
    */
-  topicPick: { chartId: string; concern: string; choice: string; choice2?: string } | null;
+  topicPick: { chartId?: string | null; lensId?: string; concern: string; choice: string; choice2?: string; choice3?: string; choice4?: string; choice5?: string } | null;
   relayUsed: number;
   visits: number;
   visitDate: string | null;
@@ -191,7 +208,12 @@ export const useSession = create<SessionState>()(
   persist(
     (set) => ({
       ...initial,
-      set: (patch) => set(patch),
+      set: (patch) => set(state => {
+        const lensId = patch.cur ?? state.cur;
+        const requested = patch.concern ?? state.concern;
+        const concern = characterConcern(lensId, requested);
+        return {...patch, concern, ...(concern !== state.concern ? {topicPick:null,hookReview:null} : {})};
+      }),
       /*
        * ★ 방문을 세는 자리가 일진 화면 **한 곳뿐**이었습니다 (2026-09-16).
        *   — 주석 안에 별 둘 뒤 빗금을 쓰면 그 자리에서 주석이

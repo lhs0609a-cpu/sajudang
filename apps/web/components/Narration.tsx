@@ -1,13 +1,19 @@
 "use client";
 
 import React from "react";
+import { usePathname } from 'next/navigation';
 
 import CharArt, { type Mood } from "@/components/CharArt";
 import { LENS_BY_ID } from "@/lib/lenses";
 import { useSession } from "@/lib/store";
+import { speechNodes } from './CharacterSpeech';
+import { characterText } from '@/lib/character-voice';
 
 /** 나레이션·대사·근거칩 — 참조 구현체의 nr() / say() / .src 를 옮긴 것. */
 export function Narration({ lines }: { lines: string[] }) {
+  const session = useSession();
+  const pathname = usePathname();
+  const speaker = pathname?.match(/^\/report\/([^/]+)/)?.[1] ?? session.cur;
   /*
    * ★ 줄 간격 0.72초는 너무 느렸습니다. 그리고 이건 **이 블록 안에서만**
    *   먹혀서, 대사·버튼은 첫 줄과 같이 한꺼번에 떴습니다. 화면 전체가
@@ -23,7 +29,7 @@ export function Narration({ lines }: { lines: string[] }) {
         const style = { animationDelay: `${delay}s` };
         delay += 0.2;
         return <span className="l" style={style} key={i}
-                     dangerouslySetInnerHTML={{ __html: l }} />;
+                     dangerouslySetInnerHTML={{ __html: characterText(l,speaker,session.name,session.sex) }} />;
       })}
     </div>
   );
@@ -79,6 +85,8 @@ export function Say({ who, children, html, lens, mood }: {
   mood?: Mood;
 }) {
   const cur = useSession((s) => s.cur);
+  const name = useSession((s) => s.name);
+  const sex = useSession((s) => s.sex);
   const l = LENS_BY_ID[lens ?? cur];
 
   /*
@@ -97,9 +105,9 @@ export function Say({ who, children, html, lens, mood }: {
    *   없었습니다.
    */
   const parts: React.ReactNode[] = html
-    ? htmlBeats(html).map((t, i) => (
+    ? htmlBeats(characterText(html,lens??cur,name,sex)).map((t, i) => (
         <span key={i} dangerouslySetInnerHTML={{ __html: t }} />))
-    : beats(children).map((b, i) => <span key={i}>{b}</span>);
+    : beats(speechNodes(children,lens??cur,name,sex)).map((b, i) => <span key={i}>{b}</span>);
   // 마디가 없으면(빈 대사) 예전처럼 한 덩이로 둡니다.
   const rows = parts.length ? parts : [html ? null : children];
 

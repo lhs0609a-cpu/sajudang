@@ -1,4 +1,5 @@
 "use client";
+import CharacterSpeech from './CharacterSpeech';
 
 /**
  * 확인 문항 — 리포트 앞에 묻는 행동 물음 여섯. (engine/probe.py · 2026-09-11)
@@ -40,7 +41,7 @@ export default function ProbeAsk({
   const n = Object.keys(picks).length;
 
   return (
-    <section className="extraask noprint">
+    <CharacterSpeech><section className="extraask noprint">
       <p className="ttl">{spec.title}</p>
       <p className="why" dangerouslySetInnerHTML={{ __html: spec.why }} />
 
@@ -70,6 +71,6 @@ export default function ProbeAsk({
       <button className="btn gh lk" disabled={busy} onClick={() => onSkip?.()}>
         잘 모르겠습니다 · 건너뛰겠습니다
       </button>
-    </section>
+    </section></CharacterSpeech>
   );
 }

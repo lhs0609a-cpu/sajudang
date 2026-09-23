@@ -49,7 +49,7 @@ SCREENS = {
     # 진입
     "a1", "a2", "a3", "a4", "a4b", "a5", "a6", "a7",
     # 진열대 · 리포트 · 결제
-    "b1", "b2", "b3", "c1", "c7", "d0", "d1", "d1b", "d2", "d3",
+    "b1", "b2", "b3", "c1", "c2", "c4", "c7", "d0", "d1", "d1b", "d2", "d3",
     # 그 밖
     "daily", "me", "relay", "share", "s1", "s2",
 }
@@ -57,6 +57,7 @@ SCREENS = {
 SERVER_EVENTS = {"payment_approved", "payment_refunded"}
 
 EVENTS = {
+    "inline_offer_view", "inline_offer_click",
     "entry_context", "hook_skip", "reading_expand", "price_view", "checkout_blocked", "reading_mismatch",
     "experiment_exposed",
     "web_lcp", "web_inp", "web_cls",
@@ -122,6 +123,9 @@ def _clean(ev: dict, *, server: bool = False) -> Optional[dict]:
         if screen != "a1" or out.get("n") != experiments.ID:
             return None
         out["stage"] = experiments.variant(sid)
+    if name in {"inline_offer_view", "inline_offer_click"}:
+        if screen not in {"d0", "c2", "c4"} or out.get("stage") not in {1, 2, 3}:
+            return None
     return out
 
 
@@ -298,7 +302,9 @@ def funnel() -> dict:
         for value, label in enumerate(labels):
             members = {sid for sid, row in contexts.items() if row.get(field) == value}
             mature = {sid for sid in members if now - cohorts[sid] >= timedelta(days=7)}
-            buyers = mature & reached[-1]
+            # A visitor may legitimately browse twenty seats before completing
+            # the linear onboarding. Count verified approvals for the cohort.
+            buyers = mature & approved
             segments.append({"dimension": field, "label": label, "visitors": len(members),
                              "mature": len(mature), "buyers": len(buyers),
                              "conversion": round(100 * len(buyers) / len(mature), 2) if mature else None})
@@ -308,8 +314,22 @@ def funnel() -> dict:
             "conversion": round(100 * buyers / len(mature), 2) if mature else None,
             "additional_buyers_needed": max(0, (len(mature) + 19) // 20 - buyers),
             "unit": "anonymous_browser", "approval_source": "server"}
+    offer_views, offer_clicks = defaultdict(set), defaultdict(set)
+    for _, row in timed:
+        key = row.get("stage")
+        sid = row.get("sid")
+        if key not in {1, 2, 3} or not sid:
+            continue
+        if row.get("name") == "inline_offer_view":
+            offer_views[key].add(sid)
+        elif row.get("name") == "inline_offer_click":
+            offer_clicks[key].add(sid)
+    offers = [{"position": key, "viewers": len(offer_views[key]), "clickers": len(offer_clicks[key]),
+               "observed_clickers": len(offer_views[key] & offer_clicks[key]),
+               "click_rate": round(100 * len(offer_views[key] & offer_clicks[key]) / len(offer_views[key]), 1) if offer_views[key] else None}
+              for key in (1, 2, 3)]
     return {"total_events": len(rows), "sessions": first, "steps": steps, "hook": hook, "goal": goal,
-            "segments": segments, "context_missing": len(cohorts) - len(contexts),
+            "segments": segments, "inline_offers": offers, "context_missing": len(cohorts) - len(contexts),
             "counts": dict(Counter(r.get("name") for _, r in timed)),
             "screen_totals": {key: len(value) for key,value in seen.items()},
             "version": 2, "cohort_days": 30, "conversion_days": 7,

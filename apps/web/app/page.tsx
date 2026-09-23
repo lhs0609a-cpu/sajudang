@@ -9,18 +9,21 @@ import EntryArt, { ENTRY_QUESTIONS } from "@/components/EntryArt";
 import RestHere from "@/components/RestHere";
 import { ConcernArtwork } from "@/components/ConcernArtwork";
 import { track, useScreen } from "@/lib/track";
-import { birthMessageFrom, birthProblem } from "@/lib/birth";
+import { birthMessageFrom, birthProblem, daysInMonth, YEAR_MIN, YEAR_MAX } from "@/lib/birth";
 import { needsGuardian } from "@/lib/biz";
 import Scene from "@/components/scene/Scene";
 import { Narration, Progress } from "@/components/Narration";
 import { CalcPanel, ManseTable, Pillars } from "@/components/Chart";
 import HookSegments from "@/components/HookSegments";
+import SituationAsk from "@/components/SituationAsk";
+import type {TopicAskSpec} from "@/components/TopicAsk";
 import { api, ApiError } from "@/lib/api";
 import { LENS_BY_ID } from "@/lib/lenses";
-import { CONCERNS, useSession } from "@/lib/store";
+import { characterConcerns } from '@/lib/character-topic';
+import { CONCERNS, useSession, useCharacterSession } from "@/lib/store";
 import type { HookSegment } from "@shared/chart";
 
-type Step = "a1" | "a2" | "a3" | "a4" | "a4b" | "a5" | "a6" | "a7";
+type Step = "a1" | "a2" | "a3" | "a4" | "a4b" | "a5" | "a5b" | "a6" | "a7";
 
 const AXIS4 = [
   "INTJ", "INTP", "ENTJ", "ENTP", "INFJ", "INFP", "ENFJ", "ENFP",
@@ -38,7 +41,7 @@ const CITY_GROUPS: [string, string[]][] = [
   ["제주", ["제주"]],
 ];
 
-const ORDER: Step[] = ["a1", "a5", "a3", "a4", "a4b", "a6", "a7", "a2"];
+const ORDER: Step[] = ["a1", "a5", "a5b", "a3", "a4", "a4b", "a6", "a7", "a2"];
 const STEPS: Step[] = ORDER;
 
 const PROGRESS_TOTAL = 3;
@@ -46,9 +49,10 @@ const PROGRESS_TOTAL = 3;
 function EntryInner() {
   const router = useRouter();
   const params = useSearchParams();
-  const s = useSession();
+  const s = useCharacterSession();
   // 관리자 레일이 ?step=a5 로 바로 건너뛸 수 있게 한다
   const asked = params.get("step") as Step | null;
+  const requestedNext = params.get("next");
   const [step, setStep] = useState<Step>(
     asked && STEPS.includes(asked) ? asked : "a1");
 
@@ -82,12 +86,21 @@ function EntryInner() {
   const [hookRetry, setHookRetry] = useState(0);
   const [segments, setSegments] = useState<HookSegment[] | null>(null);
   const [hookDone, setHookDone] = useState(false);
+  const [topicSpec,setTopicSpec]=useState<TopicAskSpec|null>(null);
+  const [topicError,setTopicError]=useState<string|null>(null);
 
   const [misses, setMisses] = useState(0);
   const [turned, setTurned] = useState(false);
   useEffect(() => {
     setSegments(null);setHookDone(false);setMisses(0);setTurned(false);
-  }, [s.chartId,s.concern,s.cur,s.axis4,s.name]);
+  }, [s.chartId,s.concern,s.cur,s.axis4,s.name,s.topicPick?.choice,s.topicPick?.choice2,s.topicPick?.choice3,s.topicPick?.choice4,s.topicPick?.choice5]);
+
+  useEffect(()=>{
+    if(step!=="a5b")return;
+    let alive=true;setTopicSpec(null);setTopicError(null);
+    api.topicSpec(s.concern,s.cur).then(spec=>{if(alive)setTopicSpec(spec);}).catch(e=>{if(alive)setTopicError(e instanceof ApiError?e.message:'세부 질문을 불러오지 못했소.');});
+    return()=>{alive=false;};
+  },[step,s.concern,s.cur]);
 
   // 화면 이름이 곧 step 입니다. 어디서 나가는지 이걸로 셉니다.
   useScreen(step);
@@ -159,13 +172,14 @@ function EntryInner() {
     api.hook({
       chart_id: s.chartId, concern: s.concern, axis4: s.axis4,
       name: s.name, lens_id: s.cur,
+      topic:s.topicPick?.concern===s.concern&&s.topicPick.choice?{choice:s.topicPick.choice,...(s.topicPick.choice2?{choice2:s.topicPick.choice2}:{}),...(s.topicPick.choice3?{choice3:s.topicPick.choice3}:{}),...(s.topicPick.choice4?{choice4:s.topicPick.choice4}:{}),...(s.topicPick.choice5?{choice5:s.topicPick.choice5}:{})}:null,
       misses: Math.max(misses, s.hookReview?.edition === "first-reading-v2" && s.hookReview.chartId === s.chartId && s.hookReview.concern === s.concern && s.hookReview.lensId === s.cur
         ? Object.values(s.hookReview.answers).filter(answer=>answer===false).length : 0),
     })
       .then((r) => alive && setSegments(r.segments))
       .catch((e) => alive && setError(e instanceof ApiError ? e.message : "훅을 만들지 못했소."));
     return () => { alive = false; };
-  }, [step, s.chartId, s.concern, s.axis4, s.name, s.cur, segments, misses, hookRetry]);
+  }, [step, s.chartId, s.concern, s.axis4, s.name, s.cur, s.topicPick?.choice, s.topicPick?.choice2, s.topicPick?.choice3, s.topicPick?.choice4, s.topicPick?.choice5, segments, misses, hookRetry]);
 
   const onMiss = (n: number) => {
     if (n !== 2 || turned) return;
@@ -175,6 +189,7 @@ function EntryInner() {
     api.hook({
       chart_id: s.chartId, concern: s.concern, axis4: s.axis4,
       name: s.name, lens_id: s.cur, misses: n,
+      topic:s.topicPick?.concern===s.concern&&s.topicPick.choice?{choice:s.topicPick.choice,...(s.topicPick.choice2?{choice2:s.topicPick.choice2}:{}),...(s.topicPick.choice3?{choice3:s.topicPick.choice3}:{}),...(s.topicPick.choice4?{choice4:s.topicPick.choice4}:{}),...(s.topicPick.choice5?{choice5:s.topicPick.choice5}:{})}:null,
     })
       .then((r) => setSegments((prev) =>
         // 연 데까지는 그대로 두고, 그 뒤만 새로 짚은 것으로 바꿉니다.
@@ -194,7 +209,7 @@ if (step === "a1") {
           <h1>왜 나는, 비슷한 일에<br/>마음이 걸릴까.</h1>
           <p className="entry-lead">돈, 일, 사랑, 사람.<br/>지금 그대가 품은 질문부터 읽겠소.</p>
           <button className="btn" onClick={() => { s.set({cur:"pungun"}); go("a5"); }}>내 고민으로 무료 해석 보기 <span aria-hidden="true">↗</span></button>
-          <p className="entry-footnote">첫 해석 무료 · 태어난 시간은 몰라도 되오</p>
+          <p className="entry-footnote">첫 해석 무료 · 카드 등록 없이 시작 · 태어난 시간은 몰라도 되오</p>
         </div>
       </div>
       <section className="entry-letter">
@@ -204,6 +219,7 @@ if (step === "a1") {
       </section>
       <details className="entry-faq"><summary>무엇을 알려주면 되오?</summary><p>생년월일과 성별, 태어난 지역을 알려주시오. 시간과 별칭, 성향은 아는 만큼만 적어도 되오. 전통 사주를 바탕으로 자신을 돌아보는 해석이오.</p></details>
       <details className="entry-faq"><summary>무료로 어디까지 볼 수 있소?</summary><p>첫 해석과 고민에 대한 무료 풀이를 볼 수 있소. 더 깊이 읽고 싶을 때, 포함된 내용과 가격을 확인하고 선택하시오.</p></details>
+      <details className="entry-faq"><summary>읽고 나면 무엇이 남소?</summary><p>반복되는 모습, 그 해석의 근거, 오늘 해볼 행동을 함께 가져가오. 맞지 않는 문장은 아니라고 답해도 좋소. 그 차이부터 다시 짚겠소.</p></details>
     </Shell>;
   }
   if (step === "a2") {
@@ -219,6 +235,21 @@ if (step === "a1") {
     </Shell>;
   }
   if (step === "a3") {
+    const today = new Date();
+    const lastYear = Math.min(YEAR_MAX, today.getFullYear());
+    const lastMonth = s.year === today.getFullYear() ? today.getMonth() + 1 : 12;
+    const lastDay = s.year !== null && s.month !== null ? Math.min(
+      daysInMonth(s.year, s.month),
+      s.year === today.getFullYear() && s.month === today.getMonth() + 1 ? today.getDate() : 31,
+    ) : 31;
+    const changeDate = (key: 'year'|'month'|'day', value: string) => {
+      const next = {year:s.year,month:s.month,day:s.day,[key]:value ? Number(value) : null};
+      if (key === 'year' && next.year === today.getFullYear() && next.month !== null && next.month > today.getMonth()+1) next.month = null;
+      const limit = next.year !== null && next.month !== null ? Math.min(daysInMonth(next.year,next.month),
+        next.year === today.getFullYear() && next.month === today.getMonth()+1 ? today.getDate() : 31) : 0;
+      if (next.day !== null && next.day > limit) next.day = null;
+      s.set({...next,features:null,chartId:null});setError(null);
+    };
     const filled = s.year !== null && s.month !== null && s.day !== null;
     const bad = filled ? birthProblem(s.year,s.month,s.day) : null;
     const minor = filled && !bad && needsGuardian(s.year!,s.month!,s.day!);
@@ -231,11 +262,22 @@ if (step === "a1") {
       <form onSubmit={e => {e.preventDefault();if(filled && !bad && !minor && s.sexSet)go("a4");}}>
         <p className="entry-input-note">양력 기준 · 음력 생일은 양력으로 바꿔 적어주시오.</p>
         <div className="f3">
-          {([['year','태어난 해',4,'1993'],['month','월',2,'11'],['day','일',2,'25']] as const).map(([key,label,max,placeholder]) =>
-            <div key={key}><label htmlFor={`birth-${key}`}>{label}</label><input id={`birth-${key}`} className="fld" inputMode="numeric" maxLength={max} placeholder={placeholder}
-              aria-invalid={!!bad} aria-describedby={bad ? 'birth-error' : undefined} value={s[key] ?? ''}
-              onChange={e => {const v=e.target.value.replace(/[^0-9]/g,'').slice(0,max);s.set({[key]:v===''?null:Number(v),features:null,chartId:null});setError(null);}} /></div>)}
+          {(['year','month','day'] as const).map(key => {
+            const label = key==='year'?'태어난 해':key==='month'?'월':'일';
+            const values = key==='year' ? Array.from({length:lastYear-YEAR_MIN+1},(_,i)=>lastYear-i)
+              : Array.from({length:key==='month'?lastMonth:lastDay},(_,i)=>i+1);
+            return <div key={key}><label htmlFor={`birth-${key}`}>{label}</label>
+              <select id={`birth-${key}`} className="fld" aria-invalid={!!bad} aria-describedby={bad?'birth-error':'birth-date-help'}
+                disabled={key==='day' && (s.year===null || s.month===null)}
+                value={s[key]!==null && values.includes(s[key]!) ? s[key]! : ''} onChange={e=>changeDate(key,e.target.value)}>
+                <option value="">{key==='year'?'연도 선택':`${label} 선택`}</option>
+                {values.map(value=><option key={value} value={value}>{value}{key==='year'?'년':key==='month'?'월':'일'}</option>)}
+              </select></div>;
+          })}
         </div>
+        <p className="entry-input-note" id="birth-date-help" aria-live="polite">{s.year!==null && s.month!==null
+          ? `${s.year}년 ${s.month}월은 ${daysInMonth(s.year,s.month)}일까지 있소. 날짜를 골라주시오.`
+          : '태어난 해와 월을 고르면 그 달에 있는 날짜만 고를 수 있소.'}</p>
         {bad && <p className="warn" id="birth-error" role="alert">{bad}</p>}
         {minor && <p className="warn" role="alert">만 14세 미만은 보호자 동의 절차가 필요해 현재 서비스를 이용할 수 없소.</p>}
         <fieldset className="entry-fieldset"><legend>성별</legend><div className="og c2">
@@ -246,6 +288,7 @@ if (step === "a1") {
           {CITY_GROUPS.map(([g,cs]) => <optgroup key={g} label={g}>{cs.map(c => <option key={c} value={c}>{c}</option>)}</optgroup>)}
         </select>
         <button type="submit" className="btn mt" disabled={!filled || !!bad || !!minor || !s.sexSet}>태어난 시간으로 이어가기</button>
+        {filled && !bad && !minor && !s.sexSet && <p className="entry-input-note" role="status">위에서 성별을 선택하면 다음으로 이어갈 수 있소.</p>}
       </form>
       <p className="entry-footnote">입력 정보는 사주 계산에 사용하오. <a href="/legal">개인정보 처리 안내</a></p>
     </Shell>;
@@ -289,14 +332,28 @@ if (step === "a1") {
       <h1 className="conversion-title">오늘은 어떤 답이<br/>가장 필요하오?</h1>
       <p className="conversion-lead">하나만 골라도 좋소.<br/>그 이야기부터 시작하겠소.</p>
       <div className="entry-concern-grid" role="group" aria-label="지금 가장 마음에 걸리는 고민 하나 선택">
-        {CONCERNS.map(c => <button type="button" key={c.id} className={`entry-concern ${s.concernSet && s.concern===c.id?'selected':''}`} aria-pressed={s.concernSet && s.concern===c.id}
+        {CONCERNS.filter(c => characterConcerns(s.cur).includes(c.id)).map(c => <button type="button" key={c.id} className={`entry-concern ${s.concernSet && s.concern===c.id?'selected':''}`} aria-pressed={s.concernSet && s.concern===c.id}
           onClick={() => s.set({concern:c.id,concernSet:true,topicPick:null})}>
           <span className="entry-concern-image"><ConcernArtwork concern={c.id}/><span className="entry-concern-check" aria-hidden="true">{s.concernSet && s.concern===c.id?'✓':'↗'}</span></span>
           <span className="entry-concern-text"><b>{c.label}</b><span>{ENTRY_QUESTIONS[c.id].question}</span></span>
         </button>)}
       </div>
       <p className="entry-selection" aria-live="polite">{s.concernSet?ENTRY_QUESTIONS[s.concern].promise:'지금 마음이 가는 질문을 고르시오.'}</p>
-      <button className="btn" disabled={!s.concernSet} onClick={() => go("a3")}>{s.concernSet?`${CONCERNS.find(c=>c.id===s.concern)?.label} 이야기로 이어가기`:'고민을 하나 골라주시오'}</button>
+      <button className="btn" disabled={!s.concernSet} onClick={() => go("a5b")}>{s.concernSet?`${CONCERNS.find(c=>c.id===s.concern)?.label} 상황을 더 알려주기`:'고민을 하나 골라주시오'}</button>
+    </Shell>;
+  }
+  if(step==="a5b"){
+    return <Shell screen="a5b" title="고민의 구체적인 상황" onBack={back}>
+      {topicError&&<div className="warn" role="alert"><p>{topicError}</p><button className="btn gh" onClick={()=>go("a5")}>고민 다시 고르기</button></div>}
+      {!topicSpec&&!topicError&&<p role="status" className="entry-selection">고민에 맞는 질문을 준비하고 있소.</p>}
+      {topicSpec&&<SituationAsk spec={topicSpec} current={s.topicPick?.concern===s.concern
+        ? (s.topicPick.lensId===s.cur?s.topicPick:{choice:s.topicPick.choice,choice2:s.topicPick.choice2,choice3:s.topicPick.choice3})
+        : null} onSubmit={topic=>{
+        s.set({topicPick:{concern:s.concern,lensId:s.cur,...topic},hookReview:null});
+        const safeNext = requestedNext && (/^\/report\/[a-z0-9_-]+(?:\?.*)?$/.test(requestedNext) || /^\/pay(?:\?.*)?$/.test(requestedNext));
+        if (s.chartId && safeNext) router.push(requestedNext);
+        else go("a3");
+      }} />}
     </Shell>;
   }
   if (step === "a6") {
@@ -323,7 +380,7 @@ if (step === "a1") {
     <p className="entry-reading-note">맞는 말은 마음에 담고, 다른 말은 알려주시오.</p>
     {!segments && !error && <p role="status" className="entry-selection">고른 고민에 맞는 해석을 준비하고 있소.</p>}
     {error && <div className="warn" role="alert"><p>{error}</p><button className="btn" onClick={() => {setError(null);setHookRetry(n=>n+1);}}>무료 해석 다시 불러오기</button></div>}
-    {segments && s.chartId && <HookSegments key={`${s.chartId}:${s.cur}:${s.concern}`} segments={segments} chartId={s.chartId} lensId={s.cur} concern={s.concern} charName={lens.name} onMiss={onMiss} onDone={() => setHookDone(true)}/>}
+    {segments && s.chartId && <HookSegments key={`${s.chartId}:${s.cur}:${s.concern}:${s.topicPick?.choice??''}:${s.topicPick?.choice2??''}:${s.topicPick?.choice3??''}:${s.topicPick?.choice4??''}:${s.topicPick?.choice5??''}`} segments={segments} chartId={s.chartId} lensId={s.cur} concern={s.concern} charName={lens.name} onMiss={onMiss} onDone={() => setHookDone(true)}/>}
     {hookDone && <section className="entry-afterword">
       <p className="entry-eyebrow">이야기는 여기서 이어지오</p><h2>마음에 남은 한마디,<br/>그 이유까지 읽어보시오.</h2>
       <p>{ENTRY_QUESTIONS[s.concern].promise}<br/>다음 무료 풀이에서 핵심 근거를 확인하고, 더 궁금한 질문을 골라보오.</p>

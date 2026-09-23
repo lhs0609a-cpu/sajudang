@@ -31,3 +31,13 @@ def test_missing_context_is_not_invented_and_no_referrer_is_stored(monkeypatch):
     assert all(row["conversion"] is None for row in result["segments"])
     cleaned=analytics._clean({"name":"entry_context","screen":"a1","sid":"e"*32,"n":0,"stage":1,"yes":0,"referrer":"https://private.invalid/name"})
     assert "referrer" not in cleaned
+
+
+def test_shortcut_buyer_counts_without_inventing_skipped_steps(monkeypatch):
+    rows = [r for r in journey('z'*32, 8) if r['screen'] in {'a1', 'd1', 'd3'}]
+    monkeypatch.setattr(analytics, '_rows', lambda: rows)
+    result = analytics.funnel()
+    mobile = next(r for r in result['segments'] if r['label'] == '모바일')
+    assert mobile['buyers'] == 1
+    assert result['goal']['buyers'] == 1
+    assert result['steps'][1]['sessions'] == 0

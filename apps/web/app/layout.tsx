@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import WebVitals from '@/components/WebVitals';
+import SeatsShortcut from '@/components/SeatsShortcut';
 
 /*
  * ★ 공유되는 링크가 **카드로 서야** 합니다.
@@ -50,6 +51,11 @@ export const viewport: Viewport = {
   viewportFit: "cover",
   themeColor: "#141614",
 };
+
+import MemberSync from '@/components/MemberSync';
+import BackgroundMusic from '@/components/BackgroundMusic';
+import LiveActivity from '@/components/LiveActivity';
+import InvitationArrival from '@/components/InvitationArrival';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -102,7 +108,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }
         />
       </head>
-      <body spellCheck={false}>{children}<WebVitals /></body>
+      <body spellCheck={false}><BackgroundMusic /><MemberSync /><InvitationArrival />{children}<SeatsShortcut /><LiveActivity /><WebVitals /></body>
     </html>
   );
 }

@@ -9,7 +9,8 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { Say } from "@/components/Narration";
-import CharArt from "@/components/CharArt";
+import { ReadingSpeaker } from './ReadingVoice';
+import CharacterSpeech from './CharacterSpeech';
 import { LENS_BY_ID } from "@/lib/lenses";
 import { CONCERNS, useSession } from "@/lib/store";
 import { track } from "@/lib/track";
@@ -230,7 +231,7 @@ export default function HookSegments({
   const concernWord = CONCERNS.find((c) => c.id === concern)?.label ?? "";
 
   return (
-    <>
+    <CharacterSpeech lensId={lensId}>
       <div className="hook-progress" role="status">경험 확인 {Object.keys(replies).length} / {segments.length}<span>답한 내용은 다시 펼쳐 읽을 수 있소.</span></div>
       {restored.count > 0 && <p className="conversion-note" role="status">앞서 답한 {restored.count}마디를 불러왔소. 읽던 책에 끼워 둔 쪽지를 다시 편 셈이오. {restored.count === segments.length ? "무료 요약으로 이어가시오." : "남은 이야기부터 이어가시오."}</p>}
       {/*
@@ -266,11 +267,7 @@ export default function HookSegments({
               말만 세고 얼굴이 평온하면 그 말이 안 꽂힙니다.
               마지막 단은 마무리라 누그러뜨립니다.
           */}
-          {lens && <span className="hookface">
-            <CharArt lens={lens} size="talk"
-                     mood={i === 0 ? "cut"
-                           : i >= segments.length - 1 ? "soft" : "base"} />
-          </span>}
+          {lens && <ReadingSpeaker lensId={lensId} label="그대의 이야기를 듣고 있소" soft={i >= segments.length - 1} />}
           {/*
             ★ 몇 번째인지 옆에 **무엇에 대한 말인지**를 답니다.
 
@@ -359,6 +356,6 @@ export default function HookSegments({
         </div>
         </details>
       ))}
-    </>
+    </CharacterSpeech>
   );
 }

@@ -93,6 +93,12 @@ def view(lens_id: Optional[str]) -> dict:
     return out
 
 
+def concern_for(lens_id: Optional[str], concern: str) -> str:
+    profile = view(lens_id)
+    allowed = profile.get('concerns')
+    return profile.get('default_concern', concern) if allowed and concern not in allowed else concern
+
+
 def you_of(lens_id: Optional[str], name: str = "",
            sex: Optional[str] = None) -> str:
     """

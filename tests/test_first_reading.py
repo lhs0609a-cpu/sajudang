@@ -35,6 +35,13 @@ def test_concern_changes_scene_action_and_question(chart):
         assert len({rows[index]['html'] for rows in readings}) == 6
 
 
+def test_replies_follow_each_stage_and_include_counterexample(chart):
+    rows = build_first_reading(chart, 'work')
+    assert len({row['yes'] for row in rows}) == 5
+    assert len({row['no'] for row in rows}) == 5
+    assert '업무 배분' in rows[1]['html']
+
+
 def test_features_change_the_reading_and_counts_are_real(chart):
     low = replace(chart, gwan=0, sik=3)
     high = replace(chart, gwan=3, sik=0)

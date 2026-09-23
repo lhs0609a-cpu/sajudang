@@ -71,15 +71,25 @@ export function loadToss(): Promise<TossFactory> {
 
   loading = new Promise<TossFactory>((resolve, reject) => {
     const el = document.createElement("script");
+    const fail = (message: string) => {
+      clearTimeout(timeout);
+      el.onload = null;
+      el.onerror = null;
+      el.remove();
+      loading = null;
+      reject(new Error(message));
+    };
+    const timeout = setTimeout(() => fail("결제 모듈 연결이 오래 걸리고 있소. 결제하기를 다시 눌러 주시오."), 15000);
     el.src = SDK_SRC;
     el.async = true;
     el.onload = () => {
-      if (window.TossPayments) resolve(window.TossPayments);
-      else reject(new Error("결제 모듈을 읽지 못했소."));
+      if (window.TossPayments) {
+        clearTimeout(timeout);
+        resolve(window.TossPayments);
+      } else fail("결제 모듈을 읽지 못했소. 다시 시도해 주시오.");
     };
     el.onerror = () => {
-      loading = null;               // 다음에 다시 시도할 수 있게
-      reject(new Error("결제 모듈을 불러오지 못했소. 잠시 뒤 다시 해 보시오."));
+      fail("결제 모듈을 불러오지 못했소. 잠시 뒤 다시 해 보시오.");
     };
     document.head.appendChild(el);
   });

@@ -1,8 +1,9 @@
 const {spawn}=require('node:child_process');
 const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),assert=require('node:assert/strict');
-const out=path.resolve('output/a1-a7-research-20260921/screens');
+const production=process.argv.includes('--production');
+const out=path.resolve(production?'output/funnel-10000/entry-screens':'output/a1-a7-research-20260921/screens');
 fs.mkdirSync(out,{recursive:true});
-const base='http://127.0.0.1:3038',api='http://127.0.0.1:8018',port=19389;
+const base=production?'https://saju.megaload.co.kr':'http://127.0.0.1:3038',api=production?'https://sajudang-api.fly.dev':'http://127.0.0.1:8018',port=19389;
 const browser=spawn('C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',[
   '--headless=new','--no-first-run',`--remote-debugging-port=${port}`,
   `--user-data-dir=${path.join(os.tmpdir(),'sjd-entry-v2-'+process.pid)}`,'about:blank'
@@ -18,7 +19,7 @@ const pause=ms=>new Promise(r=>setTimeout(r,ms));
  const run=async expression=>{const r=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});if(r.exceptionDetails)throw Error(JSON.stringify(r.exceptionDetails));return r.result.value;};
  const until=async expression=>{for(let i=0;i<180;i++){if(await run(`Boolean(document.body && (${expression}))`))return;await pause(200);}throw Error('Timeout '+expression);};
  const click=async text=>{await until(`[...document.querySelectorAll('button')].some(b=>b.textContent.includes(${JSON.stringify(text)})&&!b.disabled)`);await run(`[...document.querySelectorAll('button')].find(b=>b.textContent.includes(${JSON.stringify(text)})&&!b.disabled).click()`);await pause(350);};
- const fill=async(id,value)=>{await run(`(()=>{const e=document.getElementById(${JSON.stringify(id)});Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(e,${JSON.stringify(value)});e.dispatchEvent(new Event('input',{bubbles:true}));})()`);await pause(100);};
+ const fill=async(id,value)=>{await run(`(()=>{const e=document.getElementById(${JSON.stringify(id)}),select=e instanceof HTMLSelectElement;Object.getOwnPropertyDescriptor(select?HTMLSelectElement.prototype:HTMLInputElement.prototype,'value').set.call(e,${JSON.stringify(value)});e.dispatchEvent(new Event(select?'change':'input',{bubbles:true}));})()`);await pause(100);};
  const screen=step=>until(`document.querySelector('[data-screen="${step}"]')`);
  const capture=async(name,width)=>{
   await until(`[...document.querySelectorAll('.entry-art img,.entry-concern-image img')].every(i=>i.complete&&i.naturalWidth>0)`);
@@ -37,7 +38,24 @@ const pause=ms=>new Promise(r=>setTimeout(r,ms));
   await click('내 고민으로 무료 해석 보기');await screen('a5');await capture('a5',390);
   await run(`document.querySelectorAll('.entry-concern')[2].click()`);await click('이야기로 이어가기');await screen('a3');await capture('a3',390);
   await fill('birth-year','1993');await fill('birth-month','2');await fill('birth-day','31');
-  assert.ok(await run(`!!document.querySelector('#birth-error')`));
+  assert.ok(await run(`document.getElementById('birth-day').value==='' && document.querySelector('button[type="submit"]').disabled`));
+  assert.equal(await run(`document.getElementById('birth-month').options.length`),13);
+  assert.equal(await run(`document.getElementById('birth-day').options.length`),29);
+  await fill('birth-month','24');assert.equal(await run(`document.getElementById('birth-month').value`),'');
+  await fill('birth-month','2');await fill('birth-year','2000');await fill('birth-day','29');
+  assert.equal(await run(`document.getElementById('birth-day').value`),'29');
+  await fill('birth-year','2001');assert.equal(await run(`document.getElementById('birth-day').value`),'');
+  await fill('birth-year','1900');assert.equal(await run(`document.getElementById('birth-day').options.length`),29);
+  await fill('birth-month','1');await fill('birth-day','31');await fill('birth-month','4');
+  assert.equal(await run(`document.getElementById('birth-day').value`),'');
+  assert.equal(await run(`document.getElementById('birth-day').options.length`),31);
+  assert.ok(await run(`(()=>{const years=[...document.getElementById('birth-year').options].filter(o=>o.value).map(o=>Number(o.value));return Math.min(...years)===1900 && Math.max(...years)===new Date().getFullYear()})()`));
+  await fill('birth-year',String(new Date().getFullYear()));
+  assert.equal(await run(`document.getElementById('birth-month').options.length`),new Date().getMonth()+2);
+  await fill('birth-month',String(new Date().getMonth()+1));
+  assert.equal(await run(`document.getElementById('birth-day').options.length`),new Date().getDate()+1);
+  results.push({datePicker:true,month24Blocked:true,invalidDayBlocked:true,leap2000:true,nonLeap1900:true,changedDateCleared:true,futureDatesBlocked:true});
+  await fill('birth-year','1993');
   await fill('birth-month','7');await fill('birth-day','14');await click('여성');await click('태어난 시간으로');await screen('a4');await capture('a4',390);
   await run(`document.querySelector('.entry-faq').open=true`);await click('별칭 입력');await screen('a2');await capture('a2',390);await fill('entry-alias','가은');await click('이 이름으로');await screen('a4');
   await click('시간을 모르오');await screen('a4b');await capture('a4b',390);

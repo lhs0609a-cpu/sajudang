@@ -63,6 +63,9 @@ class HookRequest(BaseModel):
     #   아니라 해도 도령이 방향을 안 틀었고, 그때 손님은 이게 녹음이라는
     #   걸 압니다. 둘이 쌓이면 2단이 짚는 자리를 바꿉니다 (bank.TURN_AT).
     misses: int = Field(default=0, ge=0, le=5)
+    # 큰 고민 안의 현재 장면. 자유 입력은 받지 않고 topic.ASK의
+    # 선택지만 받아 첫 문장부터 그 상황으로 좁힙니다.
+    topic: Optional[dict] = None
 
 
 class HookSegment(BaseModel):

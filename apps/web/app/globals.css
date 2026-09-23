@@ -23,7 +23,8 @@
 .reading-next {margin:24px 0;padding:20px 0;border-top:1px solid var(--line)}
 .reading-next p,.paid-preview p {line-height:1.75}
 .reading-evidence summary {min-height:48px;display:list-item;padding:12px 0;cursor:pointer}
-.reading-evidence .blk {padding:20px 0}
+/* API-loaded evidence has no legacy .in observer; it must be readable immediately. */
+.reading-evidence .blk {padding:20px 0;opacity:1;transform:none}
 .paid-preview {margin:20px 0}
 .paid-preview>div {padding:12px 0;border-top:1px solid var(--line)}
 .paid-preview h3 {font-size:18px;line-height:1.5}
@@ -31,3 +32,38 @@
 [data-screen="d1"] .conversion-product {gap:10px;padding:20px;text-align:left}
 .conversion-details summary:focus-visible,.reading-next .btn:focus-visible {outline:2px solid var(--gold);outline-offset:4px}
 @media(max-width:359px){[data-screen="d1"] .conversion-product{padding:16px}[data-screen="d1"] .conversion-intro{padding-top:16px}}
+
+/* Available before input, after purchase, and on a fresh visit. */
+body {padding-bottom:calc(88px + env(safe-area-inset-bottom));}
+.seats-shortcut {position:fixed;z-index:80;right:max(16px,calc((100vw - 1180px)/2));bottom:calc(18px + env(safe-area-inset-bottom));}
+.seats-shortcut a {display:flex;align-items:center;gap:10px;min-height:48px;padding:0 18px;border-radius:28px;border:1px solid #dec38a;background:#e4c990;color:#22271e;font-size:15px;font-weight:700;text-decoration:none;box-shadow:0 4px 24px #0006;}
+.seats-shortcut-faces {display:flex;align-items:center;padding:5px 0;flex-shrink:0;}
+.seats-shortcut-faces img {display:block;width:36px;height:36px;object-fit:cover;object-position:50% 25%;border:2px solid #e4c990;border-radius:50%;background:#f1e7d1;box-shadow:0 1px 3px #0003;}
+.seats-shortcut-faces img + img {margin-left:-12px;}
+.practice-focus {margin:24px 0;padding:18px 20px;border-left:2px solid #bfa16a;background:#e4c99009;}
+.practice-workbook > div {margin-top:26px;padding-top:20px;border-top:1px solid #bfa16a30;}
+.practice-workbook h3,.practice-focus h3 {font-size:16px;color:var(--gold,#dec38a);margin:0 0 10px;}
+.free-depth-workbook {margin-top:28px;}
+.free-depth-workbook h3 {margin-top:28px;}
+.seats-shortcut a:focus-visible {outline:3px solid var(--paper);outline-offset:4px;}
+@media(max-width:600px){.sdown{left:20px;transform:translateY(6px);bottom:calc(18px + env(safe-area-inset-bottom));}.sdown.on{transform:translateY(0);}}
+@media print{body{padding-bottom:0}.seats-shortcut{display:none!important;}}
+/* Account forms share the reading page's existing palette and spacing. */
+.member-form{display:grid;gap:18px;margin:24px 0}.member-form label,.member-library details label{display:grid;gap:8px}.member-form input:not([type=checkbox]),.member-library details input{width:100%;min-height:48px;padding:12px;border:1px solid #706951;border-radius:12px;background:#111811;color:#f3ead7;font:inherit;box-sizing:border-box}.member-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}.member-tabs .btn{flex:1;min-width:110px}.member-form .member-consent{display:block;font-size:14px;line-height:1.8}.member-consent input{margin-right:8px}.member-library details{margin-top:24px}.member-library code{display:block;padding:16px;background:#111811}
+/* Compact, dismissible receipts; never cover the checkout or seat shortcut. */
+.live-activity {position:fixed;left:18px;bottom:24px;z-index:45;max-width:310px;padding:14px 34px 14px 17px;border:1px solid #756b48;border-radius:14px;background:#1c231df5;color:#eee5ca;box-shadow:0 8px 30px #0005;font-size:12px;line-height:1.6;}
+.live-activity p {margin:0;}
+.live-activity p + p {margin-top:8px;}
+.live-activity small {display:block;color:#b8b9a6;font-size:10px;}
+.live-activity-close {position:absolute;right:8px;top:5px;padding:3px 7px;background:none;border:0;color:inherit;font-size:22px;cursor:pointer;}
+.live-activity-dot {display:inline-block;width:6px;height:6px;margin-right:6px;border-radius:50%;background:#a6c19b;}
+@media(max-width:700px) {.live-activity {left:12px;bottom:calc(88px + env(safe-area-inset-bottom));max-width:min(290px,calc(100vw - 24px));}}
+.invitation-arrival {padding:12px 42px 12px 16px;text-align:center;background:#e4cb92;color:#202619;font-size:13px;position:relative;z-index:25;}
+.invitation-arrival a {text-decoration:underline;}
+.invitation-arrival button {position:absolute;right:10px;top:5px;background:none;border:0;font-size:25px;color:inherit;cursor:pointer;}
+.friend-invite .btn + .btn {margin-top:10px;}
+.friend-invite label {display:block;margin:14px 0 8px;color:#ddd3bd;font-size:13px;}
+.friend-invite select {display:block;width:100%;margin-top:6px;padding:11px 12px;border:1px solid #6c624f;border-radius:10px;background:#171b18;color:#f3ead5;font:inherit;}
+.together-result {margin:16px 0;padding:15px;border:1px solid #655c49;border-radius:12px;background:#141814;}
+.together-result h3 {margin:5px 0 12px;}
+.together-result p {margin:9px 0;}

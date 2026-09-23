@@ -11,6 +11,8 @@ import RefundHistory from '@/components/RefundHistory';
 import Scene from "@/components/scene/Scene";
 import Voyage from "@/components/Voyage";
 import MyData from "@/components/MyData";
+import MemberLibrary from '@/components/MemberLibrary';
+import {useMember} from '@/lib/member';
 import ActOut from "@/components/ActOut";
 import { Narration, Say } from "@/components/Narration";
 import { api, ApiError } from "@/lib/api";
@@ -23,6 +25,7 @@ function MeInner() {
   const router = useRouter();
   const params = useSearchParams();
   const s = useSession();
+  const member = useMember(state=>state.user);
   const asked = params.get("tab");
   const [tab, setTab] = useState<"f2" | "r1">(asked === "r1" ? "r1" : "f2");
   useEffect(() => { if (asked === "r1" || asked === "f2") setTab(asked); }, [asked]);
@@ -156,7 +159,8 @@ function MeInner() {
   }
 
   return (
-    <Shell screen="f2" title="인장첩">
+    <Shell screen="f2" title="내 보관함">
+      <MemberLibrary />
       {/* ★ 연출 80. 칸만 그려져 있고 **모으는 사람 얘기**가
           없었습니다. 재촉하지 않고, 지나온 것만 짚습니다. */}
       <Narration lines={["첩이 상 위에 펼쳐져 있다."]} />
@@ -393,7 +397,7 @@ function MeInner() {
           서버에 맡긴 것(구매 목록·인장·구독)은 그대로 남습니다.
           그걸 되가져가는 자리와 이 집에 말을 거는 자리가 여기입니다.
       */}
-      <MyData sessionId={s.sessionId} />
+      {!member && <MyData sessionId={s.sessionId} />}
     </Shell>
   );
 }

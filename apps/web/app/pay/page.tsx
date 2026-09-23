@@ -1,5 +1,7 @@
 "use client";
 import { CutArtwork } from "@/components/ReadingArtwork";
+import ReadingVoice from '@/components/ReadingVoice';
+import { loadReadingIntent, type ReadingIntent } from '@/lib/reading-intent';
 
 /**
  * @screen d0 d1 d1b d2 d3
@@ -33,7 +35,7 @@ import { Narration, Say } from "@/components/Narration";
 import { api, ApiError } from "@/lib/api";
 import { LENS_BY_ID, LENSES, youOf } from "@/lib/lenses";
 import CharArt from "@/components/CharArt";
-import { useSession, type Tier } from "@/lib/store";
+import { useSession, useCharacterSession, type Tier } from "@/lib/store";
 import { track, useScreen, analyticsId } from "@/lib/track";
 import { openCheckout, registerCard } from "@/lib/toss";
 import SinsalSlots from "@/components/SinsalSlots";
@@ -43,6 +45,9 @@ import type { ReportResponse } from "@shared/chart";
    서버가 필드를 늘려도 이 화면만 모릅니다. */
 import type { Granted, TierCard, SubView } from "@/lib/api";
 import ServerText from "@/components/ServerText";
+import Link from 'next/link';
+import PromotionNote from '@/components/PromotionNote';
+import {useMember} from '@/lib/member';
 
 /** 카드를 걸기 전에 서버가 내려보내는 것 — 손님 열쇠와 고지 문구. */
 type SubOffer = Awaited<ReturnType<typeof api.subPrepare>>;
@@ -70,12 +75,25 @@ interface Order {
 }
 
 function PayInner() {
+  const member=useMember(state=>state.user);
   const router = useRouter();
   const params = useSearchParams();
-  const s = useSession();
+  const s = useCharacterSession();
+  // The first hydrated render may still expose the server's temporary session.
+  // Wait one client render before approving a returning payment or billing auth.
+  const [sessionReady, setSessionReady] = useState(false);
+  useEffect(() => {
+    const unsubscribe = useSession.persist.onFinishHydration(() => setSessionReady(true));
+    if (useSession.persist.hasHydrated()) setSessionReady(true);
+    return unsubscribe;
+  }, []);
   const step = params.get("step") ?? "d1";
   const lens = LENS_BY_ID[s.cur];
   const charName = lens?.name ?? "도령";
+  const [readingIntent, setReadingIntent] = useState<ReadingIntent | null>(null);
+  useEffect(() => {
+    if (sessionReady) setReadingIntent(loadReadingIntent(s.chartId, s.cur, s.concern));
+  }, [sessionReady, step, s.chartId, s.cur, s.concern]);
   /* 이 사람이 손님을 부르는 말. 화면에 박은 대사도 서버가 짓는 글과
      같은 호칭을 써야 합니다 — 스무 명 중 「그대」는 셋뿐입니다. */
   const you = youOf(s.cur, s.name, s.sex);
@@ -99,6 +117,8 @@ function PayInner() {
    *   값을 치르는 자리에서 **안 고른 것이 골라져 있으면** 안 됩니다.
    */
   const [pick, setPick] = useState<Tier | null>(null);
+  const requestedTier = params.get('direct')==='1' ? params.get('tier') : null;
+  const directCheckout = !!requestedTier && readingIntent?.tierId===pick && requestedTier===pick;
   const selectionKey = ["sd.checkout", s.chartId, s.cur, s.concern, s.axis4].join(":");
   const [order, setOrder] = useState<Order | null>(null);
   const [busy, setBusy] = useState(false);
@@ -142,10 +162,14 @@ function PayInner() {
   useEffect(() => {
     setTiers(null); setPick(null); setOrder(null); setFree(null); setPeek(null); setOffer(null); setPeekError(null);
     try {
+      const intent = sessionReady ? loadReadingIntent(s.chartId,s.cur,s.concern) : null;
+      if ((requestedTier==='one'||requestedTier==='all') && intent?.tierId===requestedTier) {
+        setPick(requestedTier);sessionStorage.setItem(selectionKey,requestedTier);return;
+      }
       const saved = sessionStorage.getItem(selectionKey);
       if (saved === "one" || saved === "all" || saved === "sub") setPick(saved);
     } catch { /* Storage may be unavailable; explicit selection still works. */ }
-  }, [s.chartId, s.cur, s.concern, s.axis4, selectionKey]);
+  }, [s.chartId, s.cur, s.concern, s.axis4, selectionKey, sessionReady, requestedTier]);
 
   /* 목패 셋 — 서버가 센 값과 분량 */
   useEffect(() => {
@@ -153,7 +177,7 @@ function PayInner() {
     if (!["d1", "d1b", "d2"].includes(step)) return;
     let alive = true;
     api
-      .payTiers({ chart_id: s.chartId, lens_id: s.cur,
+      .payTiers({ chart_id: s.chartId, lens_id: s.cur, session_id:s.sessionId,
                   concern: s.concern, axis4: s.axis4 })
       .then((r) => {
         if (!alive) return;
@@ -220,19 +244,27 @@ function PayInner() {
    *   실려 가면 안 되오.
    */
   const kept = s.topicPick;
-  const keptFits = !!kept && kept.chartId === s.chartId && kept.concern === s.concern;
+  const keptFits = !!kept && kept.concern === s.concern && kept.lensId === s.cur;
+  const topicComplete = keptFits && !!kept!.choice && !!kept!.choice2 && !!kept!.choice3 && !!kept!.choice4 && !!kept!.choice5;
   /* 건너뛴 것(choice "")은 서버에 안 보냅니다 — 판정할 것이 없소.
      다만 **또 묻지는 않습니다.** */
   const topicSkipped = keptFits && !kept!.choice;
   const topicPick = keptFits && kept!.choice
-    ? { topic: { choice: kept!.choice, ...(kept!.choice2 ? { choice2: kept!.choice2 } : {}) } }
+    ? { topic: { choice: kept!.choice, ...(kept!.choice2 ? { choice2: kept!.choice2 } : {}),
+                 ...(kept!.choice3 ? { choice3: kept!.choice3 } : {}),
+                 ...(kept!.choice4 ? { choice4: kept!.choice4 } : {}),
+                 ...(kept!.choice5 ? { choice5: kept!.choice5 } : {}) } }
     : null;
   const [topicBusy, setTopicBusy] = useState(false);
   useEffect(() => {
     if (kept && !keptFits) s.set({ topicPick: null });
   }, [kept, keptFits, s]);
   useEffect(() => {
-    if (step !== "d0" || !s.chartId || free) return;
+    if (step !== "d0" || !s.chartId || topicComplete) return;
+    router.replace(`/?step=a5b&next=${encodeURIComponent('/pay?step=d0')}`);
+  }, [step, s.chartId, topicComplete, router]);
+  useEffect(() => {
+    if (step !== "d0" || !s.chartId || !topicComplete || free) return;
     let alive = true;
     api
       .report({
@@ -246,7 +278,7 @@ function PayInner() {
           setErr(e instanceof ApiError ? e.message : "펴지 못했소."); }
       });
     return () => { alive = false; };
-  }, [step, s.chartId, s.cur, s.concern, s.axis4, free, retry, topicPick]);
+  }, [step, s.chartId, s.cur, s.concern, s.axis4, free, retry, topicPick, topicComplete]);
 
   /*
    * 결제창에서 돌아왔다 — 토스가 ?toss=ok&paymentKey=… 로 되돌려 보냅니다.
@@ -256,6 +288,7 @@ function PayInner() {
    */
   const tossBack = params.get("toss");
   const [settling, setSettling] = useState(tossBack === "ok");
+  const [confirmRetry, setConfirmRetry] = useState(0);
   /*
    * ★ 값이 빠져나간 뒤 **나갈 문이 없었습니다** (2026-09-10).
    *
@@ -269,7 +302,7 @@ function PayInner() {
    *     말하고 결제 내역으로 가는 길을 냅니다. 거기서 상태를 봅니다.
    */
   useEffect(() => {
-    if (tossBack !== "ok") return;
+    if (tossBack !== "ok" || !sessionReady) return;
     const orderId = params.get("order") ?? params.get("orderId");
     const paymentKey = params.get("paymentKey");
     if (!orderId || !paymentKey) {
@@ -277,6 +310,8 @@ function PayInner() {
       setSettling(false);
       return;
     }
+    setSettling(true);
+    setErr(null);
     let alive = true;
     api
       .payConfirm({ session_id: s.sessionId, order_id: orderId,
@@ -289,7 +324,10 @@ function PayInner() {
           seals: s.seals.includes(r.seal) ? s.seals : [...s.seals, r.seal],
         });
         track("pay_done", "d2");
-        router.replace("/pay?step=d3");
+        const intent=loadReadingIntent(s.chartId,s.cur,s.concern);
+        if(intent?.chapterId && (r.tier==='all'||r.seal===intent.lensId)) {
+          router.replace(`/report/${encodeURIComponent(intent.lensId)}?tab=c2&chapter=${encodeURIComponent(intent.chapterId)}`);
+        } else router.replace("/pay?step=d3");
       })
       .catch((e) => {
         if (!alive) return;
@@ -299,7 +337,7 @@ function PayInner() {
       });
     return () => { alive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tossBack]);
+  }, [tossBack, confirmRetry, sessionReady, s.sessionId]);
 
   /* 결제창에서 물러섰다 */
   useEffect(() => {
@@ -326,7 +364,7 @@ function PayInner() {
     return () => clearTimeout(t);
   }, [settling, carding]);
   useEffect(() => {
-    if (subBack !== "ok") return;
+    if (subBack !== "ok" || !sessionReady) return;
     const customerKey = params.get("customerKey");
     const authKey = params.get("authKey");
     if (!customerKey || !authKey) {
@@ -355,7 +393,7 @@ function PayInner() {
       });
     return () => { alive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subBack]);
+  }, [subBack, sessionReady, s.sessionId]);
 
   useEffect(() => {
     if (subBack !== "fail") return;
@@ -470,47 +508,36 @@ function PayInner() {
                 } });
               }}
               onSubmit={(x) => {
-                const t = (x as { topic?: { choice: string; choice2?: string } }).topic;
+                const t = (x as { topic?: { choice: string; choice2?: string; choice3?: string; choice4?: string; choice5?: string } }).topic;
                 if (!t || !s.chartId) return;
                 setTopicBusy(true);
                 track("topic_ask", "d0");
                 s.set({ topicPick: {
-                  chartId: s.chartId, concern: s.concern,
+                  chartId: s.chartId, lensId: s.cur, concern: s.concern,
                   choice: t.choice, ...(t.choice2 ? { choice2: t.choice2 } : {}),
+                  ...(t.choice3 ? { choice3: t.choice3 } : {}),
+                  ...(t.choice4 ? { choice4: t.choice4 } : {}),
+                  ...(t.choice5 ? { choice5: t.choice5 } : {}),
                 } });
                 setFree(null);
               }}
             />
           )}
-          {/*
-            ★ 맛보기는 **본문 앞**, 값 묻는 자리는 **본문 뒤** (2026-09-21).
-
-              여태 이 화면의 유일한 결제 단추가 13,023자 본문 **앞**에
-              있었습니다. 순서가 이랬소 —
-
-                맛보기 2컷 → [값 보기] → 무료 본문 13,023자
-                → 다른 사람 추천 → [오늘은 여기까지] → 쉬어 가기
-
-              손님이 아직 아무것도 못 느낀 자리에서 값을 묻고, 위로 ·
-              희망 · 처방 · 마감을 다 받아 **감정이 가장 높은 자리**
-              에서는 나가는 문만 둘 내밀었습니다. 그 자리에 살 수 있는
-              길이 한 줄도 없었소.
-
-              맛보기는 앞에 둡니다 — 궁금증은 읽기 **전**에 서야 하오.
-              값은 뒤에서 묻습니다.
-          */}
-          {(lens?.price ?? 0) > 0 && <FreeReadingDetail cuts={cuts} />}
-          {(lens?.price ?? 0) > 0 && rejected.length === 0 && <NextReading cuts={free.locked} onOpen={openPrice} />}
+          {/* 상세 해석과 실천을 먼저 전달하고, 이어지는 질문과 가격을 뒤에 둡니다. */}
+          {(lens?.price ?? 0) > 0 && rejected.length === 0 && <FreeReadingDetail cuts={cuts} locked={free.locked} lensId={s.cur} onOpen={openPrice} />}
           <section className="conversion-details reading-evidence" aria-label="무료 해석과 계산 근거">
             <h2>{rejected.length ? "원래 해석과 계산 근거" : "무료 해석과 자세한 근거"}</h2>
             <p className="conversion-note">{cuts.length}개 항목을 아래에서 바로 읽을 수 있소.</p>
             {rejected.length > 0 && <p className="conversion-note">아래는 응답 전 생년월일과 고민으로 만든 원래 해석이오. 아니라고 답한 대목이 맞는 것으로 바뀐 것은 아니오.</p>}
-            {cuts.filter(c => !(lens?.price && FREE_DETAIL_IDS.has(c.id))).map(c => <section className="blk" key={c.id}>
+            {cuts.filter(c => !(lens?.price && rejected.length === 0 && FREE_DETAIL_IDS.has(c.id))).map(c => <section className="blk" key={c.id}>
               <CutArtwork id={c.id} title={c.title} /><ServerText as="p" className="src" html={`근거 · ${c.source}`} />
-              {c.id === "sinsal" ? <SinsalSlots html={c.html} /> : <div dangerouslySetInnerHTML={{__html:c.html}} />}
+              <ReadingVoice lensId={s.cur} label={c.id === 'chart' ? '이 근거를 함께 보시오' : '그대에게 들려주는 해석'}>
+                {c.id === "sinsal" ? <SinsalSlots html={c.html} /> : <div dangerouslySetInnerHTML={{__html:c.html}} />}
+              </ReadingVoice>
             </section>)}
             {!rejected.length && free.practice && <PracticeCard key={free.practice.id} practice={free.practice} />}
           </section>
+          {(lens?.price ?? 0) > 0 && rejected.length === 0 && <NextReading cuts={free.locked} onOpen={openPrice} />}
           {/*
             ★ 무료가 끝나면 **누구에게 물을지** 잇습니다 (2026-09-17).
 
@@ -580,6 +607,8 @@ function PayInner() {
         onClick={() => selectTier(t)}>
         <strong>{pick === t.id ? "✓ " : ""}{t.id === "one" ? `${charName} 해석` : t.name}</strong>
         <strong className="conversion-price">{t.price.toLocaleString()}원</strong>
+        {!!t.base_price && t.base_price>t.price && <span><s>{t.base_price.toLocaleString()}원</s> → {t.referral?`함께 보기 ${t.referral.percent}% 할인`:`기간 ${t.promotion?.percent}% 할인`}</span>}
+        <PromotionNote value={t.promotion} />
         <span>{t.per_month ? `${t.days ?? 30}일마다 자동 결제` : "한 번 결제 · 영구 열람"}</span>
         <span>{t.lenses > 1 ? `${t.lenses}명의 해석을 함께 읽소.` : "이 인물의 추가 해석과 근거를 읽소. 다른 인물은 포함하지 않소."}</span>
         <span>전체 {t.cuts}개 항목 · 약 {t.minutes}분 분량 · 무료 내용 포함</span>{t.needs_extra_input && <span>일부 항목은 추가 정보가 있어야 열리오. 선택 후 필요한 정보를 확인하시오.</span>}
@@ -600,9 +629,9 @@ function PayInner() {
             어디로 가는지.
         */}
         <div className="conversion-card" role="status">
-          <h2>돈은 건너갔소.</h2>
+          <h2>결제 결과를 확인하고 있소.</h2>
           <p>이제 무엇을 보고 있는가?</p>
-          <p>둘이오 — 결제가 <b>승인</b>됐는지, 그리고 그대에게 <b>열람 권한</b>이 붙었는지요. 둘 다 서버에서 보오. 화면이 제 손으로 정하지 않소 — 표를 받아 든 사람이 문을 여는 것과 같은 셈이오.</p>
+          <p>결제 승인과 해석을 열 수 있는지 함께 확인하고 있소. 확인이 끝나면 구매한 해석으로 안내하겠소.</p>
           {tier && <p>승인이 끝나면 <b>{tier.cuts}개 항목</b>이 열리오.</p>}
           {/*
             ★ 감동 45 — 이 흐름에서 가장 낮은 축이 여기 있었습니다.
@@ -629,19 +658,21 @@ function PayInner() {
       <Shell screen="d1" title="추가 해석과 결제" legal onBack={() => router.push("/pay?step=d0")}>
         <div className="conversion-intro consultation-offer">
           <p className="conversion-kicker">{charName}의 이어지는 해석</p>
-          <h1 className="conversion-title">{CHARACTER_QUESTIONS[s.cur] ?? READING_QUESTIONS[s.concern]}</h1>
+          <h1 className="conversion-title">{readingIntent?.question ?? CHARACTER_QUESTIONS[s.cur] ?? READING_QUESTIONS[s.concern]}</h1>
+          {readingIntent && <p className="checkout-reading-intent">이어 읽으려던 「{readingIntent.title}」 · {readingIntent.tier}부터 열리는 내용이오. 아래에서 포함 범위를 확인하시오.</p>}
           <p className="conversion-lead">처음 짚은 모습 뒤에 어떤 이유가 있는지, {charName}의 관점으로 더 깊이 읽어보시오.</p>
-          <p className="conversion-note">상품을 고르면 실제 풀이의 앞부분과 열람 범위가 보이오. 금액과 결제 조건을 확인한 뒤 결제할 수 있소.</p>
+          <p className="conversion-note">{directCheckout?'고른 풀이가 포함된 상품이오. 아래 금액과 조건을 확인하고 결제하면 읽던 질문으로 바로 이어지오.':'상품을 고르면 실제 풀이의 앞부분과 열람 범위가 보이오. 금액과 결제 조건을 확인한 뒤 결제할 수 있소.'}</p>
         </div>
         {sales?.reason === "gateway_setup" && <p className="conversion-status" role="status">결제 서비스 연결을 준비하고 있소. 지금은 무료 해석을 이용해 주시오.</p>}
         {sales?.reason === "temporary" && <div className="conversion-status" role="alert"><p>결제 가능 상태를 확인하지 못했소. 입력과 선택은 그대로 남아 있소.</p><button className="btn gh" onClick={() => {setSales(null);setRetry(n => n + 1);}}>결제 연결 다시 확인하기</button></div>}
         {!sales && <p role="status">결제 가능 상태를 확인하고 있소…</p>}
         {!s.chartId && <div className="conversion-status"><p>먼저 태어난 정보로 무료 해석을 확인해 주시오.</p><button className="btn" onClick={() => router.push("/?step=a5")}>무료 해석 시작하기</button></div>}
         {err && <div className="warn" role="alert"><p>{err}</p>{!tiers && <button className="btn" onClick={() => {setErr(null);setRetry(n => n + 1);}}>상품 다시 불러오기</button>}<button className="btn gh" onClick={() => router.push("/me")}>결제 내역·구독 확인</button>
+          {tossBack === "ok" && params.get("paymentKey") && (params.get("order") || params.get("orderId")) && <button className="btn" onClick={() => setConfirmRetry(n => n + 1)}>같은 주문 승인 다시 확인하기</button>}
           {tiers && pick && !tossBack && !subBack && <button className="btn gh" onClick={() => {setErr(null);setRetry(n => n + 1);}}>선택한 상품의 결제 조건 다시 확인하기</button>}
           {(tossBack || subBack) && <button className="btn gh" onClick={() => router.replace("/pay?step=d1")}>상품으로 돌아가기</button>}</div>}
         {s.chartId && !tiers && !err && <p role="status">이 명식에서 열리는 내용을 확인하고 있소…</p>}
-        {tiers && <>
+        {tiers && !directCheckout && <>
           <div id="pricelist" className="conversion-products">{tiers.filter(t => t.id === "one").map(product)}</div>
           <details className="conversion-details" open={pick === "all" || pick === "sub" || !tiers.some(t => t.id === "one") ? true : undefined}>
             <summary>다른 열람 방식 보기</summary><div className="conversion-products">{tiers.filter(t => t.id !== "one").map(product)}</div>
@@ -665,7 +696,8 @@ function PayInner() {
               ★ 여기서 값을 안 올립니다. 다른 사람으로 가면 그 사람
                 목패가 서고, 값은 저마다 제 값입니다 (price_of).
           */}
-          <section className="otherseats">
+          <details className="otherseats conversion-details">
+            <summary>이 관점이 맞지 않소? 다른 해석자 살펴보기</summary>
             <p className="lab">이 사람이 아니어도 되오</p>
             <p className="sm">같은 <b>8글자</b>를 <b>20명</b>이 저마다 다른 자리에서 읽소. <mark>값도 저마다 다르오 — 창을 어느 쪽에 내느냐에 따라 방에 드는 햇빛이 달라지는 것과 같소.</mark></p>
             <div className="og c2">
@@ -681,27 +713,15 @@ function PayInner() {
               ))}
             </div>
             <button className="btn gh" onClick={() => router.push("/lobby?tab=b2")}>스무 사람을 다 보겠습니다</button>
-          </section>
+          </details>
         </>}
         {tier && <div className="conversion-checkout" aria-live="polite">
-          <div className="checkout-jump"><span>{tier.price.toLocaleString()}원 · {tier.per_month ? "정기결제" : "한 번 결제"}</span><a href="#checkout-terms">결제 조건 보기 ↓</a></div>
+          <div className="checkout-jump"><span>{(order?.amount??tier.price).toLocaleString()}원 · {tier.per_month ? "정기결제" : "한 번 결제"}</span><a href="#checkout-terms">결제 조건 보기 ↓</a></div>
+          <PromotionNote value={tier.promotion} />
           <div className="conversion-card">
             <h2>{tier.id === "one" ? `${charName} 해석` : tier.name}</h2>
-            {tier.needs_extra_input && <div className="conversion-note">
-              <p>일부 해석은 추가 입력이 필요하오 — {(tier.required_inputs ?? []).map(key => (INPUT_LABELS[key] ?? '현재 상황')).join(' · ') || '상대 정보 또는 현재 상황'}.</p>
-              <p>입력은 선택이오. 생년월일로 읽는 본문은 볼 수 있고, 입력하지 않은 정보에 대한 추가 해석은 열리지 않소. 혈액형·그림·카드는 자기 성찰을 위한 보조 소재이오.</p>
-            </div>}
-            {tier.id === "all" && <p className="conversion-note">이미 읽은 내용도 포함되오. 전체 상품은 다른 인물의 관점을 함께 읽는 방식이며, 모든 인물에서 한 명 상품보다 본문이 길어지는 것은 아니오.</p>}
-            {!peek && !peekError && <p role="status">선택한 상품의 실제 본문을 불러오고 있소…</p>}
-            {peekError && <div className="conversion-status" role="alert"><p>{peekError}</p><button className="btn gh" onClick={() => setPeekRetry(n => n+1)}>본문 미리보기 다시 불러오기</button></div>}
-            {peek && peek.length > 0 && <section className="paid-preview"><h3>다음 해석에서 풀어볼 질문</h3><p className="conversion-note">무료에서는 기둥·핵심 해석·오늘의 행동을 읽었소. 아래는 선택한 상품에서 추가로 열리는 해석의 실제 앞부분이오.</p>
-              {peek.slice(0, 3).map((r, i) => <div key={r.lens_id+i}><h3>{r.ask}</h3><p>{r.head}…</p><LockedVeil />{r.source && <ServerText as="p" className="conversion-note" html={`해석 근거 · ${r.source}`} />}</div>)}
-            </section>}
-            <details className="conversion-details" open><summary>전체 분량과 열람 범위</summary>
-              <p className="conversion-note">현재 명식 기준 {tier.cuts}개 내용 · {tier.chars.toLocaleString()}자 · 약 {tier.minutes}분. {tier.lenses}명의 관점으로 읽소.</p>
-              {tier.opens.length > 0 && <ul>{tier.opens.map(title => <li key={title}>{title}</li>)}</ul>}
-            </details>
             <div id="checkout-terms" className="checkout-terms" tabIndex={-1}>
+              {!member&&<p className="sm">결제 후 다른 기기에서도 다시 읽으려면 <Link href={'/me?returnTo='+encodeURIComponent('/pay?step=d1&direct=1&tier='+tier.id)}>로그인·회원가입하고 이어가기</Link>. 비회원 결제 후에도 같은 브라우저에서 가입하면 구매를 연결할 수 있습니다.</p>}
             {pick !== "sub" && order && <>
               <p className="conversion-price">{order.amount.toLocaleString()}원 <small>한 번 결제</small></p>
               <p className="conversion-note">{pick === "all" ? "전체 인물의 해석" : `${charName}의 해석`} · 영구 열람 · 자동 결제 없음</p>
@@ -730,8 +750,24 @@ function PayInner() {
             {sales?.ready && !order && pick !== "sub" && !err && <p role="status">결제 금액과 조건을 확인하고 있소…</p>}
             {sales?.ready && !offer && pick === "sub" && !err && <p role="status">정기결제 조건을 확인하고 있소…</p>}
             </div>
+            {tier.needs_extra_input && <div className="conversion-note">
+              <p>일부 해석은 추가 입력이 필요하오 — {(tier.required_inputs ?? []).map(key => (INPUT_LABELS[key] ?? '현재 상황')).join(' · ') || '상대 정보 또는 현재 상황'}.</p>
+              <p>입력은 선택이오. 생년월일로 읽는 본문은 볼 수 있고, 입력하지 않은 정보에 대한 추가 해석은 열리지 않소. 혈액형·그림·카드는 자기 성찰을 위한 보조 소재이오.</p>
+            </div>}
+            {tier.id === "all" && <p className="conversion-note">이미 읽은 내용도 포함되오. 전체 상품은 다른 인물의 관점을 함께 읽는 방식이며, 모든 인물에서 한 명 상품보다 본문이 길어지는 것은 아니오.</p>}
+            {!peek && !peekError && <p role="status">선택한 상품의 실제 본문을 불러오고 있소…</p>}
+            {peekError && <div className="conversion-status" role="alert"><p>{peekError}</p><button className="btn gh" onClick={() => setPeekRetry(n => n+1)}>본문 미리보기 다시 불러오기</button></div>}
+            {peek && peek.length > 0 && <details open={directCheckout?undefined:true} className="conversion-details"><summary>결제 전에 실제 본문 미리보기</summary><section className="paid-preview"><h3>다음 해석에서 풀어볼 질문</h3><p className="conversion-note">무료에서는 기둥·핵심 해석·오늘의 행동을 읽었소. 아래는 선택한 상품에서 추가로 열리는 해석의 실제 앞부분이오.</p>
+              {peek.slice(0, 3).map((r, i) => <ReadingVoice key={r.lens_id+i} lensId={r.lens_id} label="이 질문을 이어 읽는 사람"><h3>{r.ask}</h3><p>{r.head}…</p><LockedVeil />{r.source && <ServerText as="p" className="conversion-note" html={`해석 근거 · ${r.source}`} />}</ReadingVoice>)}
+            </section></details>}
+            <details className="conversion-details"><summary>전체 분량과 열람 범위 · {tier.cuts}개 항목 확인</summary>
+              <p className="conversion-note">현재 명식 기준 {tier.cuts}개 내용 · {tier.chars.toLocaleString()}자 · 약 {tier.minutes}분. {tier.lenses}명의 관점으로 읽소.</p>
+              {tier.opens.length > 0 && <ul>{tier.opens.map(title => <li key={title}>{title}</li>)}</ul>}
+            </details>
+
           </div>
         </div>}
+        {directCheckout && <button className="btn gh" onClick={()=>router.replace('/pay?step=d1')}>다른 상품과 비교하기</button>}
         <p className="conversion-lead">고르지 않아도 무료 해석은 그대로 열려 있소. 다만 <b>「본문」</b>에 아직 안 연 글이 남소 — 그대가 물은 것을 세어 둔 값과 바뀌는 때가 거기 있소.</p>
         <button className="btn gh" onClick={() => router.push("/pay?step=d0")}>무료 해석으로 돌아가기</button>
         <p className="conversion-note">하루 구매는 2건까지요. 이미 구매했다면 내 첩에서 결제 내역과 복원 방법을 확인해 주시오.</p>
@@ -856,6 +892,49 @@ function PayInner() {
                 onClick={() => router.push("/report/" + s.cur + "?tab=c2")}>
           바로 읽겠습니다
         </button>
+
+        {/*
+          ★ 값을 치른 직후인데 **되찾는 길**이 한 줄도 없었습니다.
+
+            보관함·가입은 이미 다 있는데(`/me` · `member_accounts`),
+            안내가 **결제 전**에만 있었습니다(d1). 값을 치르기 전에는
+            아직 남의 얘기라 안 읽히고, 다 치르고 나면 아무도 말을
+            안 해 줍니다. 비회원 자격은 이 브라우저의 난수 하나에
+            매여 있어서, 쿠키를 지우면 치른 값이 조용히 사라집니다.
+
+            읽는 길을 먼저 내고(위 버튼) 그 아래에 매어 두는 길을
+            냅니다 — 여기서 물으면 방금 치른 주문이 그대로 붙습니다.
+        */}
+        {member ? (
+          <p className="sm mt">
+            <b>{member.username}</b>님의 계정에 이 구매가 붙어 있소.
+            펴서 읽으면 보관함에 남고, 다음부터는 로그인만 하면
+            어느 기기에서든 다시 열리오.
+            {" "}<Link href="/me">보관함 보기</Link>
+          </p>
+        ) : (
+          <div className="conversion-card mt">
+            <p className="conversion-kicker">다음에 또 펴 보시려거든</p>
+            <h2>지금 열린 자리는 이 브라우저에 매여 있소</h2>
+            <p>
+              비회원 열람 자격은 이 브라우저에 담긴 난수 하나에 붙소.
+              쿠키를 지우거나 다른 기기에서 열면 주문번호로 되찾아야 하오.
+            </p>
+            <p>
+              <mark>이 브라우저에서 가입하거나 로그인하면 방금 치른 구매가 그대로 계정에 붙소.</mark>
+              {" "}다음부터는 로그인만 하면 같은 풀이를 몇 번이든 다시 펴 볼 수 있소.
+              받는 것은 아이디와 비밀번호뿐이오 — 이메일도 전화번호도 묻지 않소.
+            </p>
+            <span className="src">근거 · 가입·로그인 어느 길로 들어와도 이 브라우저에 선 주문을 계정에 잇소 (accounts.attach) · 이미 다른 계정에 붙은 구매는 잇지 않소</span>
+            <Link className="btn" href={"/me?returnTo=" + encodeURIComponent("/report/" + s.cur + "?tab=c2")}>
+              계정에 이 구매를 보관하겠습니다
+            </Link>
+            <p className="sm">
+              나중에 가입해도 되오 — 같은 브라우저라면 그때 이어 붙소.
+              먼저 읽고 오셔도 좋소.
+            </p>
+          </div>
+        )}
       </Shell>
     );
   }

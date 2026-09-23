@@ -25,6 +25,7 @@ const FLUSH_MS = 4000;
 const MAX_QUEUE = 40;
 
 export type EventName =
+  | "inline_offer_view" | "inline_offer_click"
   | "entry_context" | "hook_skip" | "reading_expand" | "price_view" | "checkout_blocked" | "reading_mismatch"
   | "experiment_exposed"
   | "web_lcp" | "web_inp" | "web_cls"

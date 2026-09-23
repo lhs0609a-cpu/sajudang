@@ -32,3 +32,10 @@ var/
 성신당 캐릭터 및 이미지/
 *.mp4
 *.webm
+
+# Local reviews, source artwork and environment files are not runtime inputs.
+output/
+assets/
+BGM/
+.env
+.env.*

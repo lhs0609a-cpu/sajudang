@@ -23,7 +23,9 @@ export function selectPreviewCuts(cuts: LockedCut[], concern: string): LockedCut
     ?? available.find(c => c.id === 'spine_scene');
   const time = available.find(c => c.id === 'concern_turn')
     ?? available.find(c => c.id === 'daeun_map');
-  const candidates = [own[0], pattern, time, ...own, ...available];
+  // A specialist's unrelated technical chapter should not lead a money/love question.
+  const relevant = own.find(c => rank(c.id) < endings.length);
+  const candidates = [relevant ?? pattern ?? own[0], pattern, time, ...own, ...available];
   const unique = new Map<string, LockedCut>();
   for (const cut of candidates) if (cut && !unique.has(cut.id)) unique.set(cut.id, cut);
   return [...unique.values()].slice(0, 3);

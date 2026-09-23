@@ -2,6 +2,7 @@
 
 import { LENS_BY_ID } from "@/lib/lenses";
 import { useSession } from "@/lib/store";
+import CharacterSpeech from './CharacterSpeech';
 
 export const ELEMENT_ART: Record<string, string> = { 목: "wood", 화: "fire", 토: "earth", 금: "metal", 수: "water" };
 const ELEMENT_NAME: Record<string, string> = { 목: "나무", 화: "불", 토: "흙", 금: "쇠", 수: "물" };
@@ -12,7 +13,7 @@ export function ArtImage({ art, className = "", eager = false }: { art: ReadingA
 }
 
 export function IllustratedNote({ art, title, children }: { art: ReadingArt; title: string; children: React.ReactNode }) {
-  return <aside className="illustrated-note"><ArtImage art={art} /><div><strong>{title}</strong><div>{children}</div></div></aside>;
+  return <CharacterSpeech><aside className="illustrated-note"><ArtImage art={art} /><div><strong>{title}</strong><div>{children}</div></div></aside></CharacterSpeech>;
 }
 
 type Guide = { art: ReadingArt | "guide" | "people" | "direction"; title: string; text: string };
@@ -62,7 +63,7 @@ export function ScreenReadingGuide({ screen }: { screen?: string }) {
     : `/images/reading/${guide.art}-v1.webp`;
   return <aside className={`screen-reading-guide${guide.art === "guide" ? " with-portrait" : ""}`} aria-label="이 화면 읽는 법">
     <img src={src} width={112} height={112} alt="" decoding="async" />
-    <div><strong>{guide.title}</strong><p>{guide.text}</p></div>
+    <CharacterSpeech lensId={guide.art === 'guide' ? 'pungun' : undefined}><div><strong>{guide.title}</strong><p>{guide.text}</p></div></CharacterSpeech>
   </aside>;
 }
 
@@ -99,10 +100,11 @@ const CUT_ART: Record<string, ReadingArt | "concern" | "people" | "direction"> =
 };
 
 /** Images identify subject matter; only the server text provides the interpretation. */
-export function CutArtwork({ id, title }: { id: string; title: string }) {
+export function CutArtwork({ id, title, lensId: readingLens }: { id: string; title: string; lensId?: string }) {
   const concern = useSession(s => s.concern);
   const features = useSession(s => s.features);
-  const lensId = useSession(s => s.cur);
+  const currentLens = useSession(s => s.cur);
+  const lensId = readingLens ?? currentLens;
   if (id === "sinsal") return <h2 className="lab">{title}</h2>; // This section already renders its own figures.
   if (["chart", "pillars", "balance", "lack"].includes(id)) return <><h2 className="lab">{title}</h2><ElementLegend /></>;
   const el = ["yongsin", "need"].includes(id) ? features?.yongsin : null;

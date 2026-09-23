@@ -53,6 +53,18 @@ def _prepare(app, sid="sess-pay-0001", tier="all"):
     })
 
 
+def test_returning_reader_maximum_request_preserves_server_entitlements(app):
+    import store
+    chart_id = _chart(app)
+    sid = 'returning-reader-test'
+    store.set_json('orders:' + sid, ['returning-order'])
+    store.set_json('order:returning-order', {'session_id':sid, 'lens_id':'baegun', 'tier':'one', 'status':'paid'})
+    for lens_id, expected in [('baegun','one'),('cheongam','free'),('baegun','one')]:
+        response = app.post('/v1/report', json={'chart_id':chart_id,'session_id':sid,'lens_id':lens_id,'tier':'all','concern':'work'})
+        assert response.status_code == 200, response.text
+        assert response.json()['tier'] == expected
+
+
 # ══════════════════════════════════════════════════════════
 # 키가 없으면 — 성공한 척하지 않는다
 # ══════════════════════════════════════════════════════════

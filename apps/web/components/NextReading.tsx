@@ -6,6 +6,11 @@ import { readingText } from '@/lib/reading-journey';
 import LockedVeil from '@/components/LockedVeil';
 import { useState, useId } from 'react';
 import { selectPreviewCuts } from '@/lib/preview-selection';
+import { ReadingSpeaker } from './ReadingVoice';
+import CharacterSpeech from './CharacterSpeech';
+import { useRouter } from 'next/navigation';
+import { saveReadingIntent } from '@/lib/reading-intent';
+import { track } from '@/lib/track';
 
 /*
  * 접힌 자리 맛보기.
@@ -40,6 +45,8 @@ const QUESTIONS: Record<string, string> = {
 };
 
 export default function NextReading({ cuts, onOpen, lensId: readingLens }: { cuts: LockedCut[]; onOpen?: () => void; lensId?: string }) {
+  const router = useRouter();
+  const chartId = useSession(s=>s.chartId);
   const currentLens = useSession(s => s.cur);
   const concern = useSession(s => s.concern);
   const [selected, setSelected] = useState<string | null>(null);
@@ -51,7 +58,7 @@ export default function NextReading({ cuts, onOpen, lensId: readingLens }: { cut
   if (!rows.length) return null;
   const rest = cuts.length - rows.length;
   const chars = cuts.reduce((n, c) => n + (c.chars ?? 0), 0);
-  return <section className="next-reading" aria-label="이어지는 실제 해석">
+  return <CharacterSpeech lensId={lensId}><section className="next-reading" aria-label="이어지는 실제 해석">
     <p className="conversion-kicker">여기서 한 걸음 더</p>
     <h2>{CHARACTER_QUESTIONS[lensId] ?? '왜 같은 자리에서 다시 마음이 걸리는 것이오?'}</h2>
     <p className="conversion-note">지금 가장 마음에 걸리는 질문을 골라보시오. 그대의 실제 풀이에서 첫 대목을 꺼내 두었소.</p>
@@ -62,6 +69,7 @@ export default function NextReading({ cuts, onOpen, lensId: readingLens }: { cut
     </div>
     <article className="preview-focus" id={panelId} aria-live="polite" aria-atomic="true">
       <div>
+        <ReadingSpeaker lensId={lensId} label="이어서 들려줄 이야기" />
         <p className="conversion-kicker">그 질문에 이어지는 실제 풀이</p>
         <h3>{question(active)}</h3>
         <p>{readingText(active.teaser ?? '')}</p>
@@ -73,6 +81,10 @@ export default function NextReading({ cuts, onOpen, lensId: readingLens }: { cut
       </div>
     </article>
     <p className="conversion-note">전체 <b>{cuts.length}개 항목 · {chars.toLocaleString()}자</b>{rest > 0 ? ` · 이 밖에 ${rest}개 이야기가 더 이어지오.` : ''}</p>
-    {onOpen && <button className="btn" onClick={onOpen}>이 질문의 다음 내용 · 구성과 가격 보기</button>}
-  </section>;
+    {onOpen && <button className="btn" onClick={()=>{
+      if(chartId)saveReadingIntent({chartId,lensId,concern,question:question(active),title:active.title,tier:active.need_tier_name,tierId:active.need_tier,chapterId:active.id});
+      useSession.getState().set({cur:lensId});track('price_view','d1');
+      router.push(`/pay?step=d1&direct=1&tier=${encodeURIComponent(active.need_tier)}`);
+    }}>이 풀이 열기 · 결제하기</button>}
+  </section></CharacterSpeech>;
 }

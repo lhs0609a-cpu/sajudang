@@ -19,4 +19,5 @@ assert.equal(api.selectPreviewCuts([{...row('hidden'),teaser:''}], 'money').leng
 assert.equal(api.selectPreviewCuts([row('only')], 'money').length,1);
 assert.equal(api.selectPreviewCuts([row('only'),row('only')], 'money').length,1);
 assert.equal(api.selectPreviewCuts(cuts,'unknown').length,3);
+assert.equal(api.selectPreviewCuts([row('lc_ilgwan_term'),row('concern_pattern'),row('concern_turn')],'money')[0].id,'concern_pattern');
 console.log('PASS: 6 concern priorities; sparse, empty, duplicate and unknown-topic fallbacks; source immutability');

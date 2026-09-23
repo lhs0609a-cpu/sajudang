@@ -2,8 +2,9 @@
 from fastapi import APIRouter, HTTPException
 
 import store
-from engine import bank, lens as lens_mod, voice as voice_mod
-from engine.first_reading import build_first_reading, VERSION as READING_VERSION
+from engine import bank, lens as lens_mod, topic as topic_mod, voice as voice_mod
+from engine import character_consultation as character_consultation_mod
+from engine.first_reading import build_first_reading, CACHE_VERSION as READING_VERSION
 from engine.features import Features
 from routers.chart import load_features
 from schemas.api import HookRequest, HookResponse
@@ -16,15 +17,22 @@ HOOK_TTL = 24 * 3600
 @router.post("/hook", response_model=HookResponse)
 def post_hook(req: HookRequest) -> HookResponse:
     raw = load_features(req.chart_id)
+    concern = lens_mod.concern_for(req.lens_id, req.concern)
     # ★ 캐시 열쇠에 misses 를 넣습니다. 안 넣으면 방향을 튼 훅이
     #   안 튼 훅을 덮어써서, 다음 손님이 남의 응답으로 고쳐진 훅을
     #   받습니다.
     # ★ 꼬리표는 **글이 바뀌면 같이 바꿉니다.** 안 바꾸면 하루(TTL) 동안
     #   옛 글이 그대로 나갑니다 — 말투를 다섯 결로 가른 날(2026-09-17)
     #   「copy4-hao」 가 박힌 채였으면 고친 말투가 안 나갔습니다.
+    topic_key = "%s/%s/%s/%s/%s" % (
+        (req.topic or {}).get("choice", ""),
+        (req.topic or {}).get("choice2", ""),
+        (req.topic or {}).get("choice3", ""),
+        (req.topic or {}).get("choice4", ""),
+        (req.topic or {}).get("choice5", ""))
     key = store.k_hook(req.chart_id, req.concern, req.axis4 or "",
                        req.lens_id or "",
-                       "%s#%d#%s" % (req.name, req.misses, READING_VERSION))
+                       "%s#%d#%s#%s" % (req.name, req.misses, READING_VERSION, topic_key))
     cached = store.get_json(key)
     if cached is not None:
         return HookResponse(chart_id=req.chart_id, segments=cached, cached=True)
@@ -32,10 +40,38 @@ def post_hook(req: HookRequest) -> HookResponse:
     f = Features(**raw)
     try:
         segs = build_first_reading(
-            f, req.concern, req.axis4, name=req.name,
+            f, concern, req.axis4, name=req.name,
             you=lens_mod.you_word(req.lens_id, req.name, raw.get("sex")),
             misses=req.misses)
-    except bank.BankError as e:
+        if req.topic:
+            focused = topic_mod.ask_cut(f, concern, req.topic)
+            if focused:
+                segs.insert(0, {
+                    'stage':'topic', 'label':focused['title'],
+                    'html':focused['html'], 'source':focused['source'],
+                    'source_below':True,
+                    'statement_id':'first-reading-v2-topic:' + focused['statement_id'],
+                    'question':'지금 말씀하신 상황과 맞닿아 있소?',
+                    'yes':'그 장면부터 놓고 이어서 보겠소.',
+                    'no':'다르게 느껴지는 부분은 억지로 맞추지 않겠소. 다음 관점에서 다시 보시오.',
+                })
+            specialist = (character_consultation_mod.brief(
+                req.lens_id, req.topic,
+                name=lens_mod.public(req.lens_id)["name"])
+                if req.lens_id else None)
+            if specialist:
+                segs.insert(1, {
+                    'stage':'specialist', 'label':specialist['title'],
+                    'html':specialist['html'], 'source':'선택한 상황 · 이 상담자의 전문 판단 기준',
+                    'source_below':True,
+                    'statement_id':'first-reading-v3-specialist:%s:%s:%s' % (
+                        req.lens_id, req.topic.get('choice4'), req.topic.get('choice5')),
+                    'question':'이 관점이 지금 놓인 문제의 중심을 제대로 가르고 있소?',
+                    'yes':specialist['close'],
+                    'no':'이 관점이 전부는 아니오. 맞지 않는 대목은 버리고 다른 상담자의 눈으로 다시 보겠소.',
+                })
+    except (bank.BankError, topic_mod.TopicInputError,
+            character_consultation_mod.CharacterConsultationError) as e:
         # 뱅크에 없는 조합이면 지어내지 않고 알린다
         raise HTTPException(status_code=422, detail=str(e))
 
@@ -50,11 +86,11 @@ def post_hook(req: HookRequest) -> HookResponse:
     #   묻는 말과 응답 두 줄도 같이 태웁니다. 대사 세 줄 중 둘만
     #   갈면 그게 더 눈에 띕니다.
     tone = lens_mod.view(req.lens_id).get("voice")
-    if tone and tone != voice_mod.HAO:
+    if tone:
         for s in segs:
-            for k in ("html", "question", "yes", "no"):
+            for k in ("html", "question", "yes", "no", "source"):
                 if s.get(k):
-                    s[k] = voice_mod.speak(s[k], tone)
+                    s[k] = voice_mod.speak(voice_mod.address(s[k], lens_mod.you_word(req.lens_id, req.name, raw.get('sex'))), tone)
 
     store.set_json(key, segs, ttl=HOOK_TTL)
     return HookResponse(chart_id=req.chart_id, segments=segs, cached=False)

@@ -26,6 +26,10 @@ from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa
 import db                                            # noqa: E402
 import store                                         # noqa: E402
 from guard_middleware import GuardMiddleware         # noqa: E402
+from member_middleware import MemberSessionMiddleware
+from routers import account as member_router
+from routers import activity as activity_router
+from routers import referral as referral_router
 from routers import (                                # noqa: E402
     chart, daily, events, feedback, hook, journey, pay, privacy, relay, report, share,
     support,
@@ -45,11 +49,17 @@ from routers import jobs
 #   CORS_ORIGINS=https://sajudang-three.vercel.app,http://localhost:3000
 # ★ 배포 도메인을 여기 넣지 않으면 브라우저가 요청을 막습니다.
 #   서버는 200 을 주는데 화면만 조용히 비는 형태라 찾기 어렵습니다.
-CORS_ORIGINS = [
+CORS_ORIGINS = list(dict.fromkeys([
+    # Canonical production aliases must work even with an older environment
+    # allowlist. Keep exact origins: do not allow arbitrary preview domains.
+    "https://saju.megaload.co.kr",
+    "https://sajudang-three.vercel.app",
+    *[
     o.strip() for o in
     os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
     if o.strip()
-]
+    ],
+]))
 
 # ── 청소기 ────────────────────────────────────────────────
 #
@@ -90,6 +100,7 @@ async def lifespan(_app: FastAPI):
 
 app = FastAPI(title="성신당 API", version=ENGINE_VER, lifespan=lifespan)
 app.include_router(jobs.router)
+app.include_router(member_router.router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -100,6 +111,7 @@ app.add_middleware(
     expose_headers=["X-Chart-Rebuild"],
 )
 app.add_middleware(GuardMiddleware)
+app.add_middleware(MemberSessionMiddleware)
 
 
 # ══════════════════════════════════════════════════════════
@@ -182,7 +194,7 @@ async def _unhandled(request: Request, exc: Exception):
 
 
 for r in (chart, hook, report, relay, feedback, daily, pay, subscription,
-          share, events, journey, privacy, support, voice_router, admin_router):
+          share, events, journey, privacy, support, voice_router, admin_router, activity_router, referral_router):
     app.include_router(r.router)
 
 

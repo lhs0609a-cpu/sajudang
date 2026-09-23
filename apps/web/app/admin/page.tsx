@@ -61,6 +61,7 @@ type Overview = {
     context_missing?: number;
     goal?: {target_percent:number;visitors:number;buyers:number;conversion:number|null;additional_buyers_needed:number};
     segments?: {dimension:string;label:string;visitors:number;mature:number;buyers:number;conversion:number|null}[];
+    inline_offers?: {position:number;viewers:number;clickers:number;observed_clickers:number;click_rate:number|null}[];
     steps?: { screen: string; label: string; sessions: number;
               from_prev: number | null; from_top: number | null;
               lost: number | null }[];
@@ -835,7 +836,8 @@ export default function AdminPage() {
         </div>}
         <p className="sm">7일 관찰 미완료 {data?.funnel?.immature_sessions ?? 0}개 · 유입 분류 미수집 {data?.funnel?.context_missing ?? 0}개. QA 방문은 제외하며, 미도달만으로 이탈 이유를 단정하지 않소.</p>
         {!!data?.funnel?.segments?.length && <details className="conversion-details"><summary>기기·유입·재방문별 7일 결제 전환</summary><div style={{overflowX:"auto"}}><table className="admt"><thead><tr><th>구분</th><th>입장</th><th>관찰 완료</th><th>서버 승인</th><th>전환</th></tr></thead><tbody>{data.funnel.segments.map(row => <tr key={row.dimension+row.label}><td>{row.label}</td><td>{row.visitors}</td><td>{row.mature}</td><td>{row.buyers}</td><td>{row.conversion === null ? "관찰 중" : `${row.conversion}%`}</td></tr>)}</tbody></table></div><p className="sm">전환은 관찰 기간이 끝난 브라우저만 분모로 삼소. 세 분류의 방문 수를 서로 더하지 마시오. 추천 출처는 브라우저가 알려준 범위에서만 구분하오.</p></details>}
-        <p className="sm">최근 30일 개편 첫 화면 진입 브라우저를 기준으로, 7일 안의 순차 이동과 서버 승인을 세오. 실제 사람 수와 다르며, 관찰 기간이 끝나지 않은 방문이 포함되오. 직접 진입·이전 동선은 제외하오.</p>
+          {!!data?.funnel?.inline_offers?.length && <details className="conversion-details"><summary>무료 본문 중간 질문 · 노출과 가격 확인</summary><div style={{overflowX:'auto'}}><table className="admt"><thead><tr><th>위치</th><th>읽은 브라우저</th><th>가격 확인</th><th>노출 후 클릭률</th></tr></thead><tbody>{data.funnel.inline_offers.map(row => <tr key={row.position}><td>{row.position}번째</td><td>{row.viewers}</td><td>{row.clickers}</td><td>{row.click_rate === null ? '수집 중' : `${row.click_rate}%`}</td></tr>)}</tbody></table></div><p className="sm">최근 30일, 카드의 절반 이상이 1초 보이면 노출로 세오. 반복 노출·클릭은 브라우저별로 한 번만 세며, 클릭률은 노출이 확인된 브라우저 기준이오. 실제 결제율과는 다르오.</p></details>}
+          <p className="sm">최근 30일 개편 첫 화면 진입 브라우저를 기준으로, 7일 안의 순차 이동과 서버 승인을 세오. 실제 사람 수와 다르며, 관찰 기간이 끝나지 않은 방문이 포함되오. 직접 진입·이전 동선은 제외하오.</p>
         {steps.length === 0 ? (
           <p className="sm">
             아직 쌓인 게 없소. 계측은 `/v1/events` 로 들어오오.

@@ -25,6 +25,7 @@ from pydantic import BaseModel, Field
 import payments
 import analytics
 import store
+import member_accounts as accounts
 import throttle
 from engine.relay import BREAKS
 from schemas.api import Tier
@@ -117,6 +118,7 @@ def get_config() -> dict:
 #   이제 **서버가 세어서 내려보냅니다.** 화면은 받아 적기만 합니다.
 #   리포트를 만드는 그 함수로 세므로 어긋날 수가 없습니다.
 class TiersRequest(BaseModel):
+    session_id: str = ''
     chart_id: str
     lens_id: str
     concern: str = "love"
@@ -176,7 +178,9 @@ def get_tiers(req: TiersRequest) -> dict:
     sells = int(lens_mod.get(req.lens_id).get("price") or 0) > 0
     for tier in (on_sale if sells else ()):
         try:
-            price = payments.price_of(tier, req.lens_id)
+            import referrals
+            quote = referrals.quote(payments.price_of(tier, req.lens_id), tier, req.session_id)
+            price = quote['price']
         except payments.PaymentError:
             continue                      # 값 없는 캐릭터의 '이 자리 하나'
 
@@ -207,6 +211,9 @@ def get_tiers(req: TiersRequest) -> dict:
             "id": tier,
             "name": TIER_NAME[tier],
             "price": price,
+            "base_price": quote['base_price'],
+            "promotion": quote['promotion'],
+            "referral": quote.get('referral'),
             # ★ 이제 「달마다」입니다 — 자동결제를 붙였습니다
             #   (routers/subscription.py). 목패가 실제로 일어나는 일을
             #   적어야 하므로, 여기 참·거짓이 그 자리와 한 벌입니다.
@@ -254,14 +261,26 @@ def prepare(req: PrepareRequest) -> PrepareResponse:
 
     # ★ 값은 캐릭터마다 다릅니다 — 카드에 보인 값이 그대로 청구됩니다.
     try:
-        amount = payments.price_of(req.tier, req.lens_id)
+        import referrals
+        quote = referrals.quote(payments.price_of(req.tier, req.lens_id), req.tier, req.session_id)
+        amount = quote['price']
     except payments.PaymentError as e:
         raise HTTPException(status_code=422, detail=str(e))
+    resumed = referrals.pending(req.session_id, req.chart_id, req.lens_id, req.tier)
+    if resumed:
+        oid, existing = resumed
+        cfg = payments.client_config()
+        return PrepareResponse(order_id=oid, amount=existing['amount'], tier=req.tier,
+            client_key=cfg['client_key'], enabled=cfg['enabled'], customer_key=payments.customer_key(req.session_id),
+            refund_notice=cfg['refund_notice'], refund_say=payments.REFUND_SAY,
+            purchases_today=used, per_day_limit=limit)
     order_id = "sjd_" + uuid.uuid4().hex[:20]
+    referrals.reserve(req.session_id, order_id, quote)
     store.set_json("order:" + order_id, {
         "session_id": req.session_id, "chart_id": req.chart_id,
         "lens_id": req.lens_id, "tier": req.tier, "concern": req.concern,
         "amount": amount, "status": "pending", "payment_key": None,
+        "price_quote": quote,
         "analytics_sid": req.analytics_sid,
         # ★ 만든 때를 적습니다. 안 적으면 「값만 매기고 안 치른 주문」이
         #   언제 것인지 몰라, 주인 화면이 방금 것과 사흘 묵은 것을
@@ -310,6 +329,14 @@ def _settle_paid(order_id: str, order: dict, payment_key: str, check) -> dict:
     check()
     order["status"] = "paid"
     store.set_json("order:" + order_id, order)
+    import referrals
+    referrals.settle(order_id, order)
+    # An optional public notice must never interfere with a settled purchase.
+    try:
+        import activity
+        activity.record_purchase(order_id, order)
+    except Exception:
+        pass
     if order.get("analytics_sid"):
         analytics.record([{"name": "payment_approved", "screen": "d3",
                            "sid": order["analytics_sid"], "n": order["amount"]}], server=True)
@@ -650,7 +677,10 @@ def _stop_refunded_subscription(order: dict, order_id: str) -> None:
 @router.get("/history")
 def history(session_id: str) -> dict:
     rows = []
-    for oid in store.get_json("orders:" + session_id) or []:
+    # 값을 치른 난수와 지금 로그인한 난수는 다를 수 있습니다 — 이 집은
+    # 선결제가 먼저요. 계정에 묶인 난수를 다 봅니다.
+    for oid in dict.fromkeys(o for sid in accounts.sessions(session_id)
+                             for o in (store.get_json("orders:" + sid) or [])):
         order = store.get_json("order:" + oid)
         if not order: continue
         review = store.get_json("refund-review:" + oid) or {}
@@ -678,8 +708,10 @@ def get_order(order_id: str, session_id: str) -> dict:
     order = store.get_json("order:" + order_id)
     if not order:
         raise HTTPException(status_code=404, detail="모르는 주문이오.")
-    if order.get("session_id") != session_id and \
-            order_id not in (store.get_json("orders:" + session_id) or []):
+    # 회원이면 계정에 묶인 난수가 여럿이오 (선결제하고 나중에 로그인).
+    mine = accounts.sessions(session_id)
+    if order.get("session_id") not in mine and order_id not in [
+            o for sid in mine for o in (store.get_json("orders:" + sid) or [])]:
         # ★ 404 가 아니라 403 입니다. 404 로 내면 「없는 번호」와
         #   「남의 번호」가 갈려서, 번호를 넣어 보는 것만으로 어느 것이
         #   진짜인지 알아낼 수 있습니다.

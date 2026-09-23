@@ -3,6 +3,7 @@ import type { WantRow } from '@shared/chart';
 import { useSession } from '@/lib/store';
 import ServerText from '@/components/ServerText';
 import LockedVeil from '@/components/LockedVeil';
+import CharacterSpeech from './CharacterSpeech';
 
 const TURNS: Record<string, { question: string; reveal: string }> = {
   재물: { question: '다만, 돈을 좇는 힘과 내 몫으로 남기는 힘은 같지 않소.', reveal: '내 사주가 재물을 감당하는 방식과 그 이유' },
@@ -39,7 +40,7 @@ export default function Wants({ rows, onOpen }: { rows: WantRow[]; onOpen?: () =
   const category: Record<string,string> = {money:'재물',love:'사랑',people:'사람',work:'운명',dir:'운명'};
   const relevant = (rows ?? []).filter(r => r.want === category[concern]).slice(0,1);
   if (!relevant.length) return null;
-  return <section className="wants" aria-label="아직 안 편 네 자리">
+  return <CharacterSpeech><section className="wants" aria-label="아직 안 편 네 자리">
     <p className="conversion-kicker">아직 안 편 자리</p>
     <h2>여기까지 읽고도<br />마음에 남는 한 가지.</h2>
     <p className="conversion-note">보이는 글자는 시작이오. 그 글자가 그대 삶에서 어떤 뜻으로 읽히는지, 다음 풀이에서 이어지오.</p>
@@ -59,5 +60,5 @@ export default function Wants({ rows, onOpen }: { rows: WantRow[]; onOpen?: () =
         {onOpen && <button className="btn" onClick={onOpen}>{r.want}의 이어지는 해석 · 구성과 가격 보기</button>}
       </article>
     ))}
-  </section>;
+  </section></CharacterSpeech>;
 }

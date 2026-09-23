@@ -47,7 +47,16 @@
       "place": "글자가 앉은 기둥을 보면 집인지 회사인지, 어디서 그 일이 벌어지는지 보이오.",
       "sinsal": "신살 이름은 어제도 붙어 있었소. <b>그게 왜 하필 오늘 문제가 되는지</b> 보는 게 내 일이오."
     },
-    "voice": "hao"
+    "voice": "hao",
+    "concerns": [
+      "money",
+      "work",
+      "love",
+      "people",
+      "dir",
+      "health"
+    ],
+    "default_concern": "money"
   },
   "baegun": {
     "you": "당신",
@@ -66,7 +75,16 @@
       "yongsin": "채울 것은 약이 아니라 <b>날씨 같은 것</b>이오 — 그대 둘레를 바꾸라는 말이오. 계절이 바뀌듯 천천히 채우시오.",
       "sinsal": "신살 이름을 세는 대신 <b>무엇이 비었는지</b>를 보오. 이름이 여덟 개라도 빈 것은 안 채워지오."
     },
-    "voice": "hao"
+    "voice": "hao",
+    "concerns": [
+      "dir",
+      "work",
+      "love",
+      "people",
+      "money",
+      "health"
+    ],
+    "default_concern": "dir"
   },
   "cheongam": {
     "you": "자네",
@@ -82,7 +100,12 @@
       "yongsin": "격을 먼저 세워야 용신이 제 뜻을 갖소. 순서를 거꾸로 하면 헛일이오.",
       "sinsal": "신살 이름은 그릇에 그린 무늬일 뿐이오. 그릇 모양, 곧 타고난 크기는 격이 정하오 — <b>무늬를 보고 그릇 크기를 재지</b> 마시오."
     },
-    "voice": "hage"
+    "voice": "hage",
+    "concerns": [
+      "dir",
+      "work"
+    ],
+    "default_concern": "dir"
   },
   "sigye": {
     "you": "이름",
@@ -102,7 +125,12 @@
       "sinsal": "같은 신살도 <b>들어오는 때</b>가 다르면 다르게 나오오. 몇 살 때 그 대운을 지났는지를 보오."
     },
     "voice": "hapsyo",
-    "you_else": "자네"
+    "you_else": "자네",
+    "concerns": [
+      "dir",
+      "work"
+    ],
+    "default_concern": "dir"
   },
   "eunbyeol": {
     "you": "당신",
@@ -118,7 +146,12 @@
       "lack": "사주에 없는 것을 스스로 채우려 애쓴 흔적이 성향 네 글자에 남소.",
       "sinsal": "신살 이름과 성향 네 글자가 안 맞을 때가 있소. 그때는 이름이 아니라 <b>그대가 고른 네 글자</b>가 맞소."
     },
-    "voice": "haeyo"
+    "voice": "haeyo",
+    "concerns": [
+      "people",
+      "dir"
+    ],
+    "default_concern": "people"
   },
   "jeokhyeol": {
     "you": "너",
@@ -136,7 +169,11 @@
       "why": "힘이 한쪽으로만 쏠려 있소. 같은 일이 되풀이되는 까닭이 이것이오.",
       "sinsal": "신살 이름 중에 사람이 <b>붙는 것</b>과 사람을 <b>떼는 것</b>이 있소. 나는 그 둘만 보오."
     },
-    "voice": "banmal"
+    "voice": "banmal",
+    "concerns": [
+      "love"
+    ],
+    "default_concern": "love"
   },
   "monghwa": {
     "you": "이름",
@@ -152,7 +189,12 @@
       "place": "기둥마다 드나드는 사람과 일이 다르오."
     },
     "voice": "hao",
-    "you_else": "너"
+    "you_else": "너",
+    "concerns": [
+      "dir",
+      "people"
+    ],
+    "default_concern": "dir"
   },
   "seoyeok": {
     "you": "손님",
@@ -167,7 +209,11 @@
       "sinsal": "이 신살은 서쪽 별자리 풀이에도 비슷한 이름이 있소. 우연이라 하기엔 자주 겹치오.",
       "daeun_map": "긴 세월을 몇 해씩 끊어 보는 것은 동쪽이나 서쪽이나 다르지 않소."
     },
-    "voice": "hao"
+    "voice": "hao",
+    "concerns": [
+      "dir"
+    ],
+    "default_concern": "dir"
   },
   "paeseon": {
     "you": "이름",
@@ -185,7 +231,12 @@
       "sinsal": "신살 이름은 패에 적힌 글과 같소. 패가 좋아도 <b>패를 내는 솜씨</b>가 나쁘면 지오 — 이름보다 그대가 어떻게 쓰느냐가 크다는 말이오."
     },
     "voice": "hage",
-    "you_else": "자네"
+    "you_else": "자네",
+    "concerns": [
+      "dir",
+      "money"
+    ],
+    "default_concern": "dir"
   },
   "myeonsang": {
     "you": "그쪽",
@@ -201,7 +252,12 @@
       "ancestor": "윗대에서 물려받은 것이 얼굴에도 남소.",
       "sinsal": "신살 이름이 붙은 것은 <b>얼굴에 먼저</b> 나오오. 글자 표는 그다음이오."
     },
-    "voice": "hapsyo"
+    "voice": "hapsyo",
+    "concerns": [
+      "people",
+      "work"
+    ],
+    "default_concern": "people"
   },
   "wolha": {
     "you": "이름",
@@ -218,7 +274,12 @@
       "sinsal": "신살 이름 중에 인연을 <b>잇는 것</b>과 <b>끊는 것</b>이 있소. 나는 잇는 것만 세오."
     },
     "voice": "haeyo",
-    "you_else": "자네"
+    "you_else": "자네",
+    "concerns": [
+      "love",
+      "people"
+    ],
+    "default_concern": "love"
   },
   "hongmae": {
     "you": "그쪽",
@@ -234,7 +295,12 @@
       "place": "둘 다 담을 틈이 좁으면 둘 중 하나를 놓게 되오.",
       "sinsal": "신살 이름 보고 <b>사람 고르지</b> 마시오. 그건 그대 사주 얘기지 상대 얘기가 아니오."
     },
-    "voice": "banmal"
+    "voice": "banmal",
+    "concerns": [
+      "love",
+      "people"
+    ],
+    "default_concern": "love"
   },
   "yeondam": {
     "you": "당신",
@@ -253,7 +319,11 @@
       "lack": "그대에게 없는 것을 사람으로 채우려 한 흔적이 여기 있소.",
       "sinsal": "신살 이름이 붙었다고 그 사람이 온다는 뜻은 아니오. <b>곁이 비어 있다</b>는 뜻이오."
     },
-    "voice": "hapsyo"
+    "voice": "hapsyo",
+    "concerns": [
+      "love"
+    ],
+    "default_concern": "love"
   },
   "hwagyeong": {
     "you": "그대",
@@ -269,7 +339,12 @@
       "axis": "스스로 아는 모습과 비친 모습이 다르오.",
       "sinsal": "신살 이름은 누구 편도 들지 않소. <b>같은 이름이 둘에게 다</b> 있을 수도 있소."
     },
-    "voice": "hapsyo"
+    "voice": "hapsyo",
+    "concerns": [
+      "people",
+      "love"
+    ],
+    "default_concern": "people"
   },
   "haengsu": {
     "you": "손님",
@@ -288,7 +363,12 @@
       "daeun_now": "지금 대운에서 그대 힘이 쏠리는 쪽이 이렇소. 판단은 그대가 하시오.",
       "sinsal": "신살 이름으로 가계부를 쓸 수는 없소. 다만 <b>돈이 어디서 새는지</b>는 가리켜 주오."
     },
-    "voice": "hao"
+    "voice": "hao",
+    "concerns": [
+      "money",
+      "work"
+    ],
+    "default_concern": "money"
   },
   "hunjang": {
     "you": "이름",
@@ -305,7 +385,12 @@
       "sinsal": "신살 이름에 매이지 마시오. <b>이름을 외우는 데 쓴 시간</b>이 아깝소."
     },
     "voice": "hage",
-    "you_else": "너"
+    "you_else": "너",
+    "concerns": [
+      "work",
+      "dir"
+    ],
+    "default_concern": "work"
   },
   "yakcho": {
     "you": "그대",
@@ -321,7 +406,11 @@
       "yongsin": "이것이 채울 것이오. 먹는 약이 아니라 <b>생활에서 쓰는 법</b>이오.",
       "sinsal": "신살 이름으로 몸을 살피지 않소. 다만 <b>그대가 어떤 힘을 먼저 쓰는지</b>는 보이오."
     },
-    "voice": "hao"
+    "voice": "hao",
+    "concerns": [
+      "health"
+    ],
+    "default_concern": "health"
   },
   "ilgwan": {
     "you": "그쪽",
@@ -340,7 +429,12 @@
       "daeun_map": "절입 시각을 기준으로 센 것이오. 대충 어림잡으면 여기서 어긋나오.",
       "sinsal": "신살 이름으로는 날짜를 못 정하오. <b>날짜를 정하는 건 절기</b>요."
     },
-    "voice": "hao"
+    "voice": "hao",
+    "concerns": [
+      "dir",
+      "work"
+    ],
+    "default_concern": "dir"
   },
   "nopa": {
     "you": "자네",
@@ -359,7 +453,13 @@
       "lack": "없는 걸 없다고 하는 게 뭐가 어렵소. 그걸 오래 감추느라 지친 게오.",
       "sinsal": "신살 이름이 여덟 개든 하나든 <b>고를 길은 똑같이 둘</b>이오."
     },
-    "voice": "hage"
+    "voice": "hage",
+    "concerns": [
+      "dir",
+      "people",
+      "work"
+    ],
+    "default_concern": "dir"
   },
   "dongja": {
     "you": "성별",
@@ -381,6 +481,15 @@
     "voice": "haeyo",
     "you_m": "아저씨",
     "you_f": "아주머니",
-    "you_else": "그쪽"
+    "you_else": "그쪽",
+    "concerns": [
+      "dir",
+      "money",
+      "work",
+      "love",
+      "people",
+      "health"
+    ],
+    "default_concern": "dir"
   }
 }

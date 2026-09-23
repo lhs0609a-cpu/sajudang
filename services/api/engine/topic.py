@@ -1502,6 +1502,10 @@ def ask_spec(concern: str) -> Optional[dict]:
         out["q2"] = spec["q2"]
         out["options2"] = [{"id": k, "label": v}
                            for k, v in spec["options2"].items()]
+    if spec.get("q3"):
+        out["q3"] = spec["q3"]
+        out["options3"] = [{"id": k, "label": v}
+                           for k, v in spec["options3"].items()]
     return out
 
 
@@ -1555,11 +1559,17 @@ def _ask_hit(f, concern: str, slot: str, choice: str) -> Optional[bool]:
             "alone": tuchul(f, grp) or has_sinsal(f, "dohwa"),
             # 만나는 중 — 곁자리가 묶였는가(합), 부딪히는가(충)
             "dating": bool(f.ilji_hap) and not f.ilji_chung,
+            "conflict": bool(f.ilji_chung) or has_sinsal(f, "wonjin"),
+            "marriage": rooted(f, grp) and not f.ilji_chung,
+            "married": bool(f.ilji_hap) or rooted(f, grp),
             # 끝났거나 끝나는 중 — 끊기는 자리
             "broke": bool(f.ilji_chung) or gongmang_hit(f, grp)
                      or has_sinsal(f, "wonjin"),
             # 오래갈지 — 개수가 아니라 뿌리
             "long": rooted(f, grp),
+            # 재회 성사 여부는 명식으로 판정하지 않습니다. 선택한 장면에
+            # 맞춘 분석 순서만 바꾸고 맞다/틀리다는 표시하지 않습니다.
+            "reunion": None,
         }.get(choice)
     if concern == "work" and slot == "leak":
         # ★ 두 번째 물음은 **셈이 갈리는 자리에만** 둡니다 (docs/40 §9).
@@ -1618,6 +1628,11 @@ def ask_cut(f, concern: str, payload: dict) -> Optional[dict]:
         raise TopicInputError(
             "고르신 것이 목록에 없소: %r (고를 수 있는 것: %s)"
             % (pick2, " · ".join(spec["options2"].values())))
+    pick3 = str(payload.get("choice3") or "")
+    if spec.get("options3") and pick3 and pick3 not in spec["options3"]:
+        raise TopicInputError(
+            "고르신 것이 목록에 없소: %r (고를 수 있는 것: %s)"
+            % (pick3, " · ".join(spec["options3"].values())))
 
     w = _words(f)
 
@@ -1646,6 +1661,11 @@ def ask_cut(f, concern: str, payload: dict) -> Optional[dict]:
         ev.append("%s → %s" % (spec["options2"][pick2],
                                "글자와 겹침" if hit2 else
                                ("글자는 다른 것을 가리킴" if hit2 is False else "판정 안 함")))
+    if pick3:
+        parts.append(said(spec["lead3"], spec["options3"][pick3]))
+        say3 = spec["say3"][pick3]
+        parts.append('<p class="hit">%s</p>' % _fmt(say3["dunno"], w))
+        ev.append("%s → 사용자가 원하는 판단" % spec["options3"][pick3])
     parts.append('<p class="tale">%s</p>' % spec["tail"])
 
     body = "".join(parts)
@@ -1663,8 +1683,8 @@ def ask_cut(f, concern: str, payload: dict) -> Optional[dict]:
         #   짜임(concern_pattern) · 때(concern_turn) · 얼굴(concern_face)
         #   넷은 안 건드립니다. 무료는 **적은 것과 글자가 겹치는가**까지요.
         "min_level": 0,
-        "statement_id": "ask:%s:%s:%s:%s"
-                        % (concern, pick, pick2 or "-",
+        "statement_id": "ask:%s:%s:%s:%s:%s"
+                        % (concern, pick, pick2 or "-", pick3 or "-",
                            "%s%s" % ("h" if hit else ("m" if hit is False else "u"),
                                      "h" if hit2 else
                                      ("m" if hit2 is False else "u"))),

@@ -23,7 +23,7 @@
  *   돌려줍니다 — 이 집은 근거 대는 집이라 계산이 상품입니다.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { BIZ } from "@/lib/biz";
 import Shell, { Legal } from "@/components/Shell";
@@ -33,6 +33,7 @@ type Tab = (typeof TABS)[number];
 
 export default function LegalPage() {
   const [tab, setTab] = useState<Tab>("이용약관");
+  useEffect(()=>{if(new URLSearchParams(window.location.search).get('tab')==='privacy')setTab('개인정보처리방침');},[]);
 
   return (
     // 다른 화면과 같은 껍데기를 씁니다. 여기만 다르면 손님은 이 화면이
@@ -191,6 +192,7 @@ function Privacy() {
       <h2>개인정보처리방침</h2>
 
       <h3>1. 수집하는 항목과 목적</h3>
+      <p>회원가입 시 아이디, 단방향 해시로 처리한 비밀번호·복구 코드, 로그인 인증 정보를 보관합니다. 회원이 보관에 동의한 생년월일·출생 시각·성별·출생 지역, 선택 입력한 이름·MBTI, 기본 풀이와 구매 연결 정보는 다른 기기에서 다시 읽기·다운로드를 제공하기 위해 회원 탈퇴 또는 개별 풀이 삭제까지 보관합니다. 추가로 입력한 상대방 사주와 일회성 상담 내용은 보관하지 않습니다. 아래 브라우저 저장 안내는 비회원 이용에 해당합니다. 로그인 인증은 최대 30일 유지되며 로그아웃 시 해제됩니다.</p>
       <table className="ptbl">
         <thead>
           <tr>

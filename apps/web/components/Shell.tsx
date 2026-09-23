@@ -15,6 +15,7 @@
  *   /lobby 가 아니라 "이름 없이 세운다"(입력을 건너뛰고 계속)로 두세요.
  */
 import Link from "next/link";
+import CharacterSpeech from './CharacterSpeech';
 import BrandFrame, { FolioLabel } from "./BrandFrame";
 import { ScreenReadingGuide } from "./ReadingArtwork";
 import { useRouter } from "next/navigation";
@@ -276,7 +277,7 @@ export function TopBar({ title, skipTo, onBack }: {
       )}
       <span className="tt">{title}</span>
       <Link className="tb" href="/daily" aria-label="오늘의 일진">오늘</Link>
-      <Link className="tb" href="/me" aria-label={`내 첩 · 구매 내역과 인장 ${seals.length}개`}>내 첩</Link>
+      <Link className="tb" href="/me" aria-label={`내 보관함 · 로그인과 구매 내역, 인장 ${seals.length}개`}>보관함</Link>
       <Link className="tb" href="/lobby" aria-label="해석자와 메뉴 선택">메뉴</Link>
     </div>
   );
@@ -772,7 +773,7 @@ export default function Shell({
         <div className="scr" ref={scrRef}>
           {!bare && <FolioLabel screen={screen} title={title} />}
           {!bare && !["a2", "a3", "a4", "a4b", "a5", "a6", "a7", "b1", "b2", "b3", "c1", "c3", "c4", "d0", "d1", "d1b"].includes(screen ?? "") && <ScreenReadingGuide screen={screen} />}
-          {children}
+          <CharacterSpeech lensId={screen && ['a1','a2','a3','a4','a4b','a5','a6'].includes(screen) ? 'pungun' : undefined}>{children}</CharacterSpeech>
           {legal && <Legal />}
           {/* 처마는 어느 화면에나 섭니다 — 대문(bare)만 빼고.
               대문은 첫 3초를 파는 자리라 아래 띠가 시선을 나눕니다. */}

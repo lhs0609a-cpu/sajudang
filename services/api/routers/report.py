@@ -9,16 +9,34 @@ from datetime import datetime, timezone
 
 import payments
 import store
+import member_accounts as accounts
 from engine import extras as extras_mod
 from engine import lens as lens_mod
 from engine.features import Features
 from engine.omnibus import build_omnibus
 from engine import peek as peek_mod
+from engine import topic as topic_mod
+from engine import character_consultation as character_consultation_mod
 from engine.report import build_report
 from routers.chart import load_features
 from schemas.api import ReportRequest, ReportResponse
 
 router = APIRouter(prefix="/v1", tags=["report"])
+
+
+@router.get("/report/topic/{concern}")
+def topic_spec(concern: str, lens_id: str | None = None):
+    """첫 진입에서 큰 고민을 실제 장면으로 좁히는 선택지."""
+    spec = topic_mod.ask_spec(concern)
+    if not spec:
+        raise HTTPException(status_code=404, detail='이 고민의 세부 질문을 찾지 못했소.')
+    if lens_id:
+        try:
+            lens_mod.get(lens_id)
+        except lens_mod.LensError as e:
+            raise HTTPException(status_code=404, detail=str(e))
+        spec = character_consultation_mod.enrich_spec(spec, lens_id, concern)
+    return spec
 
 
 # ══════════════════════════════════════════════════════════
@@ -74,13 +92,24 @@ def _expired(order: dict) -> bool:
 
 
 def _paid_orders(session_id: str | None):
-    """이 세션이 치른 주문들. 클라이언트 말이 아니라 저장된 기록입니다."""
+    """이 세션이 치른 주문들. 클라이언트 말이 아니라 저장된 기록입니다.
+
+    ★ 한 난수만 보면 **선결제한 손님이 값을 잃습니다.** 이 집은 값을
+      먼저 치르고 나중에 들어오는 집이라, 치른 자리와 계정의 자리가
+      다릅니다. 회원이면 그 계정에 묶인 난수를 다 봅니다
+      (`member_accounts.sessions`). 비회원이면 묶음은 자기 하나요.
+    """
     if not session_id:
         return
-    for oid in store.get_json("orders:" + session_id) or []:
-        o = store.get_json("order:" + oid)
-        if o and o.get("status") == "paid" and not _expired(o):
-            yield o
+    seen: set[str] = set()
+    for sid in accounts.sessions(session_id):
+        for oid in store.get_json("orders:" + sid) or []:
+            if oid in seen:
+                continue
+            seen.add(oid)
+            o = store.get_json("order:" + oid)
+            if o and o.get("status") == "paid" and not _expired(o):
+                yield o
 
 
 def entitled_tier(session_id: str | None, lens_id: str) -> str:
@@ -160,7 +189,11 @@ def _mark_opened(session_id: str, tier: str, lens_id: str | None = None) -> None
         return purchased == "all" or (purchased == tier and
             (tier != "one" or order.get("lens_id") == lens_id))
 
-    for oid in store.get_json("orders:" + session_id) or []:
+    # ★ 여기도 난수 하나만 보고 있었습니다. `entitled_tier` 는 통과시키는데
+    #   이 자리가 402 를 냈습니다 — 선결제하고 로그인한 손님에게 「구매
+    #   내역을 확인해 주세요」 입니다. 자격을 두 군데서 세지 않습니다.
+    for oid in [o for sid in accounts.sessions(session_id)
+                for o in (store.get_json("orders:" + sid) or [])]:
         order = store.get_json("order:" + oid)
         if not qualifies(order):
             continue

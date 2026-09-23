@@ -240,7 +240,7 @@ def test_the_voice_layer_never_slips_past_the_guard(reports):
             assert ok, (lid, c["id"], hits)
 
 
-def test_the_evidence_line_keeps_its_own_voice(reports):
+def test_the_evidence_line_keeps_its_own_voice(reports, f):
     """
     ★ 근거는 캐릭터가 바꾸지 않습니다. 여덟 글자는 하나입니다 —
       말하는 순서와 어조만 다릅니다. (seed/lens_view.json 의 머리말)
@@ -264,12 +264,13 @@ def test_the_evidence_line_keeps_its_own_voice(reports):
     #   가 적혈랑에게서는 「네가」가 되어(어간까지 바뀝니다) 되돌릴 수가
     #   없습니다. 앞으로 계산해서 맞춥니다.
     assert lens_mod.you_of("pungun", "", "F") == "그대"
-    base = {c["id"]: c["source"] for c in reports["pungun"]["cuts"]}
     for lid, rep in reports.items():
+        original = build_report(f, 't', 'pungun', 'all', rep['concern'], 'INFP')
+        base = {c['id']:c['source'] for c in original['cuts']}
         you = lens_mod.you_of(lid, "", "F")
         for c in rep["cuts"]:
             if c["id"] in base and not c["id"].startswith("lc_"):
-                assert c["source"] == V.address(base[c["id"]], you), (lid, c["id"])
+                assert c["source"] == V.speak(V.address(base[c["id"]], you), lens_mod.view(lid)['voice']), (lid, c["id"])
 
 
 def test_the_evidence_line_never_says_I(reports):

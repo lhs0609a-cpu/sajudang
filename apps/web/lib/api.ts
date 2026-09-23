@@ -8,8 +8,10 @@ import type {
   ChartRequest, ChartResponse, DailyResponse, Features,
   HookResponse, RelayResponse, ReportResponse, Shared, Summary,
 } from "@shared/chart";
+import {saveCurrentReading} from './member';
 
-const BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
+const UPSTREAM = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
+const BASE = typeof window==='undefined' ? UPSTREAM : window.location.origin+'/api/backend';
 
 export const API_BASE = BASE;
 
@@ -19,7 +21,7 @@ export const API_BASE = BASE;
  */
 export function apiMisconfigured(): boolean {
   if (typeof window === "undefined") return false;
-  const localApi = /^https?:\/\/(localhost|127\.0\.0\.1)/.test(BASE);
+  const localApi = /^https?:\/\/(localhost|127\.0\.0\.1)/.test(UPSTREAM);
   const localSite = /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname);
   return localApi && !localSite;
 }
@@ -63,6 +65,9 @@ export interface TierCard {
   id: string;
   name: string;
   price: number;
+  base_price?: number;
+  promotion?: {percent:number; ends_at:string; server_now:string} | null;
+  referral?: {percent:number; expires_at:number} | null;
   /**
    * 달마다 자동으로 빠져나가는가.
    *
@@ -144,6 +149,7 @@ async function call<T>(path: string, init?: RequestInit, recover = true): Promis
     });
     if (!res.ok) {
       const url = new URL(BASE + path);
+      url.pathname=url.pathname.replace(/^\/api\/backend/,'');
       if (recover && typeof window !== "undefined" && res.headers.get("X-Chart-Rebuild") === "1" &&
           /^\/v1\/(chart\/|report$|hook$|summary$|daily$|omnibus$|pay\/(tiers|peek)$)/.test(url.pathname)) {
         let body: {chart_id?:string} = {};
@@ -183,9 +189,18 @@ export const api = {
   hook: (req: {
     chart_id: string; concern: string; axis4?: string | null;
     name?: string; lens_id?: string | null;
+    topic?: {choice:string; choice2?:string; choice3?:string; choice4?:string; choice5?:string} | null;
     /** 「아니오」가 몇 번 나왔는가. 둘이면 도령이 짚는 자리를 바꿉니다. */
     misses?: number;
   }) => post<HookResponse>("/v1/hook", req),
+
+  topicSpec: (concern:string,lensId?:string) => call<{
+    id:string; title:string; q:string; options:{id:string;label:string}[];
+    q2?:string; options2?:{id:string;label:string}[];
+    q3?:string; options3?:{id:string;label:string}[];
+    character_axis?:string; q4?:string; options4?:{id:string;label:string}[];
+    q5?:string; options5?:{id:string;label:string}[];
+  }>(`/v1/report/topic/${encodeURIComponent(concern)}${lensId?`?lens_id=${encodeURIComponent(lensId)}`:''}`),
 
   /**
    * ★ session_id 를 반드시 실어 보냅니다.
@@ -210,7 +225,7 @@ export const api = {
      * 서버가 계산하고 버립니다. (engine/extras.py · docs/11)
      */
     extras?: Record<string, unknown> | null;
-  }) => post<ReportResponse>("/v1/report", req),
+  }) => post<ReportResponse>("/v1/report", req).then(report=>{void saveCurrentReading(report).catch(()=>{});return report;}),
 
   /**
    * 추가 입력에서 고를 수 있는 것들.
@@ -305,6 +320,7 @@ export const api = {
    *   실제로는 11~12컷 · 6탭이었습니다)
    */
   payTiers: (req: {
+    session_id?: string;
     chart_id: string; lens_id: string;
     concern?: string; axis4?: string | null;
   }) =>

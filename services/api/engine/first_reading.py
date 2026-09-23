@@ -9,6 +9,24 @@ from html import escape
 from . import guard, terms, voice
 
 VERSION = 'first-reading-v2'
+CACHE_VERSION = VERSION + '-dialogue6-precision'
+
+EXCEPTIONS = {
+    'money': '이미 남길 돈과 나눌 몫을 정해두었다면, 습관보다 실제 수입과 고정 지출의 차이부터 보시오.',
+    'work': '맡을 범위를 분명히 말했는데도 일이 계속 늘어난다면, 혼자 마음을 고칠 문제가 아니라 업무 배분을 다시 의논할 자리요.',
+    'love': '바라는 행동을 이미 말했는데 같은 일이 반복된다면, 더 잘 설명할 책임까지 혼자 맡지는 마시오.',
+    'people': '가능한 범위를 말했는데도 거듭 무시된다면, 더 부드럽게 말하는 것만으로 풀리는 관계인지 다시 보시오.',
+    'dir': '선택을 막는 것이 시간이나 생활비라면, 용기부터 탓하지 마시오. 먼저 갖춰야 할 조건을 따로 적으시오.',
+    'health': '일정을 줄이기 어려운 상황이라면 쉬지 못한 자신을 탓하지 마시오. 나눠 맡을 수 있는 부담부터 보시오.',
+}
+
+REPLIES = {
+    '0': ('닮은 장면이 떠올랐소? 그때 그대가 지키려 했던 것도 있었을 것이오. 행동만 탓하기 전에, 어떤 마음에서 시작됐는지 함께 보겠소.', '맞지 않는 해석으로 남겨두겠소. 그대가 겪지 않은 장면을 억지로 떠올릴 필요는 없소. 다음 관점도 경험에 맞는 만큼만 읽으시오.'),
+    '1': ('이유가 조금 보였다면, 같은 방식으로 더 애쓰기 전에 바꿀 수 있는 조건 하나를 찾아보겠소.', '맞지 않는 해석이오. 방금 설명을 그대의 성격으로 붙이지 않겠소. 다음 행동도 그대의 상황에서 가능한지 살펴보시오.'),
+    '2': ('오늘 전부 바꾸려 하지 않아도 되오. 이 행동 하나를 해본 뒤 무엇이 편해지고 무엇이 여전히 어려운지 기억해두시오.', '맞지 않는 해석으로 두겠소. 지금 하기 어려운 행동을 숙제로 드리지는 않겠소. 막히는 조건 하나를 확인하는 것으로 충분하오.'),
+    '2.5': ('마음에 남은 한 문장을 그대의 말로 바꿔보시오. 해석을 외우는 것보다, 다음 선택에서 꺼낼 수 있는 말이 남기를 바라오.', '맞지 않는 해석으로 두겠소. 설명보다 그대가 직접 아는 모습이 먼저요. 서로 다른 부분은 뒤의 원래 해석과 비교할 수 있소.'),
+    '3': ('그 질문을 다음 무료 풀이까지 가져가겠소. 근거와 오늘의 행동을 함께 보고, 더 읽을지는 그 뒤에 정하시오.', '맞지 않는 해석으로 남기겠소. 궁금하지 않은 답을 더 권하기보다, 무료 요약에서 그대에게 남길 만한 대목부터 살펴보시오.'),
+}
 
 # scene / interpretation / permission / action. These are questions and reading
 # perspectives, never assertions that a particular event happened to the visitor.
@@ -149,9 +167,14 @@ def build_first_reading(f, concern, axis4=None, name='', you='그대', misses=0)
     source = _evidence(f, concern)
     intro = ('<p class="first-reading-name">%s, 이 질문부터 함께 보오.</p>' % escape(name.strip())) if name.strip() else ''
     compare = axis_compare(f, axis4)
+    from .mbti_reading import build as build_mbti
+    mbti=build_mbti(f,axis4,concern)
     if compare['usable']:
         comparison = '그대가 고른 %s와 사주 해석의 네 기준을 나란히 놓으니, %d곳이 닮고 %d곳이 달랐소.' % (axis4.upper(), len(compare['matches']), len(compare['gaps']))
         reflection = '다르다고 그대가 자신을 잘못 안다는 뜻은 아니오. 상황에 따라 달라지는 모습이 있는지 돌아보시오.'
+        if mbti:
+            reflection += ' '+mbti['question']+' '+mbti['action']
+            action += ' '+mbti['process']
         compare_source = '직접 선택한 성향과 서비스의 사주 해석 기준을 비교했소. 성격의 정답을 판정하는 검사는 아니오.'
     else:
         comparison = permission
@@ -163,7 +186,7 @@ def build_first_reading(f, concern, axis4=None, name='', you='그대', misses=0)
         reflection = '최근 이 고민이 가장 크게 느껴졌던 장면 하나를 떠올리시오. 누가 있었고, 무엇을 원했는지부터 다시 보오.'
     specs = [
         ('0', '문득 떠오르는 장면', intro + '<p class="first-reading-scene">%s</p><p>이 장면이 그대에게도 익숙한지 먼저 묻겠소.</p>' % escape(scene), source),
-        ('1', '그 마음을 읽는 다른 시선', '<p>%s</p><p class="first-reading-emphasis">%s</p>' % (escape(reading), escape(permission)), source),
+        ('1', '그 마음을 읽는 다른 시선', '<p>%s</p><p class="first-reading-emphasis">%s</p><p class="first-reading-exception">%s</p>' % (escape(reading), escape(permission), escape(EXCEPTIONS[concern])), source),
         ('2', '오늘, 하나만 바꿔본다면', '<p class="first-reading-action">%s</p><p>할 수 있는 만큼만 해보시오. 작은 확인 하나면 충분하오.</p>' % escape(action), source),
         ('2.5', '내가 아는 나와 나란히', '<p>%s</p><p>%s</p>' % (escape(comparison), escape(reflection)), compare_source),
         ('3', '이제 궁금해지는 다음 이야기', '<p class="first-reading-scene">%s</p><p>오늘 해볼 일은 이미 그대 손에 있소. 그 이유가 더 궁금하다면, 다음 무료 풀이에서 함께 읽어보시오.</p>' % escape(NEXT[concern]), source),
@@ -173,10 +196,10 @@ def build_first_reading(f, concern, axis4=None, name='', you='그대', misses=0)
         if misses >= 2 and stage in ('2', '2.5'):
             evidence = '앞선 두 응답에서 맞지 않는다고 알려주어, 경험을 직접 돌아보는 질문으로 바꾸었소. 사주 계산값은 바뀌지 않았소.'
         addressed = voice.address(body, escape(you))
-        sid = '%s:%s:%s:%s:copy2' % (VERSION, concern, stage, sha256((addressed + evidence).encode()).hexdigest()[:16])
+        yes_reply, no_reply = (voice.address(text, you) for text in REPLIES[stage])
+        sid = '%s:%s:%s:%s:copy2' % (VERSION, concern, stage, sha256((addressed + evidence + yes_reply + no_reply).encode()).hexdigest()[:16])
         segments.append(dict(stage=stage, label=label, html=guard.enforce(addressed, {'statement_id': sid}),
                              source=evidence, source_below=True, statement_id=sid,
                              question='이 이야기는 그대의 경험과 어떻소?',
-                             yes='마음에 남은 부분을 기억해두시오. 다음 이야기와 함께 보면 더 선명해질 것이오.',
-                             no='맞지 않는 해석으로 두겠소. 그대가 겪은 일이 먼저요. 맞추려 애쓰지 말고 이어서 보시오.'))
+                             yes=yes_reply, no=no_reply))
     return segments

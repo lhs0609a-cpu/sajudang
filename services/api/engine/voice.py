@@ -317,6 +317,10 @@ def _word(w: str, voice: str, ask: bool = False) -> str:
     """낱말 하나. 못 다루는 꼴이면 그대로 돌려준다."""
     if voice == HAO or not w:
         return w
+    # Already rendered formal commands end in the same two letters as 시오.
+    # Reapplying the layer must not turn 하십시오 into 하십십시오.
+    if w.endswith('십시오'):
+        return w
 
     # ★ 태그 밖에 어미만 남은 자리 — 「<b>庚戌</b>요.」
     #   앞의 이름은 다른 조각에 있어 받침을 못 봅니다. 다만 받침이

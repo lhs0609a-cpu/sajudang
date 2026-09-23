@@ -300,7 +300,7 @@ def build_peek(f, chart_id: str, lens_ids: list, concern: str,
                 #   「그대」 한 벌로 적어 두고 여기서 갈아 끼웁니다 —
                 #   물음은 「그대」인데 답은 「자네」면 한 상자 안에서
                 #   부르는 사람이 둘이 됩니다.
-                "ask": voice_mod.address(ask_of(cid, c.get("title") or ""), you),
+                "ask": voice_mod.speak(voice_mod.address(ask_of(cid, c.get("title") or ""), you), lens_mod.view(lid).get('voice')),
                 "head": head,
                 "mask": mask,
                 "source": c.get("source"),

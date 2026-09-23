@@ -36,6 +36,9 @@ from . import sinsal as sinsal_mod
 from . import sinsal_read
 from . import skim as skim_mod
 from . import spine as spine_mod
+from . import free_depth
+from . import consultation
+from . import character_consultation as character_consultation_mod
 from . import probe as probe_mod
 from . import terms as terms_mod
 from . import topic as topic_mod
@@ -242,8 +245,11 @@ def _teaser(html: str, cut_id: str = "") -> Optional[str]:
         bite = _re.search(r'<p\b[^>]*class="bite"[^>]*>', source)
         if bite:
             source = source[bite.start():]
+        # Custom glosses are explanations, not the promised sentence. The public
+        # terminology layer adds readable explanations after extracting the teaser.
+        source = _GLOSS.sub('', source)
     text = _plain(source)
-    mark = _marked(html)
+    mark = _marked(source)
     # 표를 붙이다 길이가 틀어지면(공백이 줄어드는 자리) 세는 것만 물러섭니다.
     if len(mark) != len(text):
         mark = text
@@ -424,10 +430,20 @@ def _cut(cid, title, source, body, min_level, sid=None):
     }
 
 
+def _mbti_free(f,axis4,concern):
+    from .mbti_reading import build
+    result=build(f,axis4,concern)
+    return result['html'] if result else ''
+
+
 def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
               lens_id: Optional[str] = None,
               extras: Optional[dict] = None) -> tuple[list, Optional[str]]:
     """돌려주는 것: (컷 목록, 추가 입력이 틀렸으면 그 사유)"""
+    # Older internal callers ask for the common cut catalog without choosing a
+    # character. Keep that contract deterministic now that free scene/bridge
+    # cuts need a character perspective.
+    lens_id = lens_id or "jeokhyeol"
     B = bank_mod.bank()
     top, weak, strong = f.top_ten_god, f.weak_el, f.strong_el
     # ★ 살림의 말 — **공통 컷에도** 답니다 (2026-09-07).
@@ -574,8 +590,8 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     cuts.append(_cut(
         "spine_depth", "같은 힘의 앞과 뒤",
         _why.line("강점과 그림자는 짝 · " + sp["source"], "흐름", "십신"),
-        spine_mod.depth_html(f, sp, concern, scn), 1,
-        sid="spine_depth:%s:%s" % (sp["key"], concern)))
+        spine_mod.depth_html(f, sp, concern, scn) + free_depth.depth_html(f.flow), 1,
+        sid="spine_depth:v2:%s:%s" % (sp["key"], concern)))
     # ★ 확인 문항 — 고른 것과 여덟 글자를 맞댄다 (engine/probe · 2026-09-11).
     #   답을 안 했으면 컷이 안 섭니다. 무료입니다 — 묻고 나서 답을 값 뒤에
     #   두면 받아 내는 것이오 (topic.ask_cut 과 같은 까닭).
@@ -585,14 +601,14 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     # ★ 장면 — 이 사람이 **물으신 고민 속에서** 실제로 하는 모습 (2026-09-11).
     #   바깥 글의 「일반 사람은 X, 당신은 Y」 자리입니다. 척추 서른 칸 ×
     #   고민 여섯 칸 (seed/scene.json). 틀릴 수 있는 장면이라야 합니다.
-    if scn:
+    if scn or concern in free_depth.CONCERNS:
         _sw = bank_mod.concern_word(concern)
         cuts.append(_cut(
             "spine_scene", ("%s에서 보이는 그대" % _sw) if not _turned
             else ("%s에서 보이는 그대 — 답으로 고쳐 읽은 모습" % _sw),
             _why.line("한 줄 「%s」 · 물으신 %s" % (sp["name"], _sw), "흐름", "십신"),
-            spine_mod.scene_html(scn), 1,
-            sid="scene:%s:%s" % (sp["id"], concern)))
+            __import__('engine.reading_precision', fromlist=['scene']).scene(f, lens_id, concern, revised=bool(_turned)) + _mbti_free(f,axis4,concern), 1,
+            sid="scene:v2:%s:%s" % (sp["id"], concern)))
     # ★ 다리 — 그 캐릭터가 한 줄을 **제 눈으로** 다시 읽는다 (2026-09-11).
     #   관점 컷이 한 줄을 모른 채 제 말만 하던 자리를 잇습니다.
     _br = spine_mod.bridge(lens_id, f.flow)
@@ -608,8 +624,9 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
             '글자는 <b>%s</b> — 모두 %d개요.</p>'
             % (_br.replace("{name}", sp["name"]), f.flow,
                spine_mod._chars(f, f.flow) or f.day_gan,
-               spine_mod.count(f, f.flow)), 0,
-            sid="bridge:%s:%s" % (lens_id, f.flow)))
+               spine_mod.count(f, f.flow)) + (consultation.preview(lens_id, concern)
+                   if lc_built else consultation.render(lens_id, concern, f)), 0,
+            sid="bridge:v2:%s:%s:%s" % (lens_id, f.flow, concern)))
 
     # ── 2 · 없는 것부터──────────────────────────────────
     if len(f.weak_els) > 1:
@@ -1609,6 +1626,9 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     for nth, lc in enumerate(lc_built):
         html = lc["html"]
         sid = lc["statement_id"]
+        if nth == 0:
+            html += consultation.render(lens_id, concern, f, (extras or {}).get("topic"))
+            sid += ':consultation-v1'
         if lens_say:
             html = html + guard.enforce(lens_say, {"cut": lc["id"]})
             sid = "%s@%s" % (sid, concern)
@@ -2197,6 +2217,10 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
     """
     if tier not in TIERS:
         raise ValueError("모르는 tier: %r" % (tier,))
+    effective_concern = lens_mod.concern_for(lens_id, concern)
+    if effective_concern != concern:
+        extras = {key:value for key,value in (extras or {}).items() if key not in {'topic','probe'}} or None
+    concern = effective_concern
     level = TIER_LEVEL[tier]
     view = lens_mod.view(lens_id)
     # ★ 부르는 말은 캐릭터마다 다르고, 어떤 캐릭터는 **손님 이름**으로
@@ -2434,7 +2458,7 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
         #   끼웁니다. **어미는 안 건드립니다** — 근거는 캐릭터가 바꾸지
         #   않습니다. 여덟 글자는 하나이고, 바뀌는 것은 부르는 말뿐입니다.
         if c.get("source"):
-            c["source"] = voice_mod.address(c["source"], you)
+            c["source"] = voice_mod.speak(voice_mod.address(c["source"], you), tone)
     # 한자·숫자 뒤 조사 — 모든 층을 입힌 뒤 한 번.
     for c in cuts:
         c["html"] = _fix_particles(c["html"])
@@ -2442,7 +2466,7 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
     _ledger(cuts)
     for l in locked:
         if l.get("source"):
-            l["source"] = voice_mod.address(l["source"], you)
+            l["source"] = voice_mod.speak(voice_mod.address(l["source"], you), tone)
         if l.get("teaser"):
             # 맛보기도 손님이 읽는 글입니다. 같은 층을 태웁니다.
             # ★ seen 을 나눠 쓰지 않습니다 — 페이월은 본문과 따로
@@ -2480,7 +2504,8 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
     #   받는」 자리가 생깁니다. 자리를 나눕니다.
     asks = None
     if not (extras or {}).get("topic"):
-        asks = topic_mod.ask_spec(concern)
+        asks = character_consultation_mod.enrich_spec(
+            topic_mod.ask_spec(concern), lens_id, concern)
     # ★ 확인 문항 — 답했으면 None. 문장·판정 규칙은 안 내려보냅니다.
     probes = None
     if not probe_mod.clean(((extras or {}).get("probe") or {}).get("answers"), f):
@@ -2495,11 +2520,28 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
     from engine.practice import build as build_practice
     from engine.editorial import build as build_editorial
     editorial = build_editorial(f, lens_id, concern)
+    def spoken(value):
+        if isinstance(value, str):
+            return voice_mod.speak(voice_mod.address(value, you), tone)
+        if isinstance(value, list):
+            return [spoken(item) for item in value]
+        return value
+    practice = build_practice(concern, f.flow)
+    from .mbti_reading import build as build_mbti
+    mbti=build_mbti(f,axis4,concern)
+    if mbti:
+        practice['mbti']=guard.enforce(mbti['code']+' · '+mbti['action']+' '+mbti['process'])
+        practice['steps']=[guard.enforce(step+' '+extra) for step,extra in zip(practice['steps'],[mbti['evidence'],mbti['dialogue'],mbti['process']])]
+    for field in ('title','scene','action','steps','source','focus','example','decision','trap','review','mbti'):
+        if field in practice:
+            practice[field] = spoken(practice[field])
+    if editorial:
+        editorial = {key:spoken(value) if key not in {'id','version','lens_id','concern'} else value for key,value in editorial.items()}
     if editorial:
         view = {**view, "open": editorial["question"], "close": editorial["action"]}
     return {
         "editorial": editorial,
-        "practice": build_practice(concern),
+        "practice": practice,
         "report_id": report_id(chart_id, lens_id, tier, concern),
         "chart_id": chart_id,
         "lens": lens_mod.public(lens_id),
@@ -2514,9 +2556,9 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
         "sells": sells,
         # 추가 입력이 틀렸을 때. 그 컷만 접고 나머지는 그대로 내려갑니다.
         "extra_error": extra_error,
-        "opening": (guard.enforce(voice_mod.speak(view["open"], view.get("voice")),
+        "opening": (guard.enforce(voice_mod.speak(voice_mod.address(view["open"], you), view.get("voice")),
                                   {"cut": "open"}) if view.get("open") else None),
-        "closing": (guard.enforce(voice_mod.speak(view["close"], view.get("voice")),
+        "closing": (guard.enforce(voice_mod.speak(voice_mod.address(view["close"], you), view.get("voice")),
                                   {"cut": "close"}) if view.get("close") else None),
         "cuts": cuts,
         "locked": locked,

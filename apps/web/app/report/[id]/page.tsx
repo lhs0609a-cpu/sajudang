@@ -1,4 +1,6 @@
 "use client";
+import ReadingVoice from '@/components/ReadingVoice';
+import InlinePaidReading from '@/components/InlinePaidReading';
 
 /**
  * @screen c1 c2 c3 c4 c5 c6
@@ -26,7 +28,7 @@ import ActOut from "@/components/ActOut";
 import { Narration, Say } from "@/components/Narration";
 import { api, ApiError } from "@/lib/api";
 import { LENS_BY_ID, youOf } from "@/lib/lenses";
-import { useSession } from "@/lib/store";
+import { useSession, useCharacterSession } from "@/lib/store";
 import { thinkOf } from "@/lib/think";
 import type { ReportResponse } from "@shared/chart";
 import ServerText from "@/components/ServerText";
@@ -85,7 +87,7 @@ function ReportInner() {
   const params = useParams<{ id: string }>();
   const query = useSearchParams();
   const router = useRouter();
-  const s = useSession();
+  const s = useCharacterSession(params.id);
   const lensId = params.id;
   const lens = LENS_BY_ID[lensId];
   const openPrice = () => { s.set({ cur: lensId }); router.push("/pay?step=d1"); };
@@ -96,6 +98,15 @@ function ReportInner() {
   const [tab, setTab] = useState<Tab>(asked && TABS.includes(asked) ? asked : "c1");
   useEffect(() => { if (asked && TABS.includes(asked)) setTab(asked); }, [asked]);
   const [rep, setRep] = useState<ReportResponse | null>(null);
+  const requestedChapter = query.get('chapter');
+  useEffect(() => {
+    if(tab!=='c2' || !rep?.cuts.some(c=>c.id===requestedChapter))return;
+    const timer=setTimeout(()=>{
+      const node=document.getElementById(`reading-${requestedChapter}`);
+      node?.scrollIntoView({block:'start'});node?.focus({preventScroll:true});
+    },300);
+    return ()=>clearTimeout(timer);
+  },[rep,tab,requestedChapter]);
   const [err, setErr] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
   const [rating, setRating] = useState(0);
@@ -121,18 +132,28 @@ function ReportInner() {
    *     여기 실리는 것은 **고민이 되묻는 것** 하나뿐이오.
    */
   const keptTopic = s.topicPick;
-  const topicFits = !!keptTopic && keptTopic.chartId === s.chartId
-    && keptTopic.concern === s.concern;
+  const topicFits = !!keptTopic && keptTopic.concern === s.concern && keptTopic.lensId === lensId;
+  const topicComplete = topicFits && !!keptTopic!.choice && !!keptTopic!.choice2 && !!keptTopic!.choice3 && !!keptTopic!.choice4 && !!keptTopic!.choice5;
   const topicSkipped = topicFits && !keptTopic!.choice;
   const keptExtras = topicFits && keptTopic!.choice
     ? { topic: { choice: keptTopic!.choice,
-                 ...(keptTopic!.choice2 ? { choice2: keptTopic!.choice2 } : {}) } }
+                 ...(keptTopic!.choice2 ? { choice2: keptTopic!.choice2 } : {}),
+                 ...(keptTopic!.choice3 ? { choice3: keptTopic!.choice3 } : {}),
+                 ...(keptTopic!.choice4 ? { choice4: keptTopic!.choice4 } : {}),
+                 ...(keptTopic!.choice5 ? { choice5: keptTopic!.choice5 } : {}) } }
     : null;
   const [extras, setExtras] = useState<Record<string, unknown> | null>(keptExtras);
   const [asking, setAsking] = useState(false);
   /* ★ 확인 문항을 건너뛰었는가 (engine/probe · 2026-09-11).
      건너뛴 것은 판정하지 않습니다 — 답이 아니라 노출이오. */
   const [probeSkipped, setProbeSkipped] = useState(false);
+
+  useEffect(() => {
+    if (!s.chartId || topicComplete) return;
+    const suffix = query.toString();
+    const returnPath = `/report/${encodeURIComponent(lensId)}${suffix ? `?${suffix}` : ''}`;
+    router.replace(`/?step=a5b&next=${encodeURIComponent(returnPath)}`);
+  }, [s.chartId, topicComplete, lensId, query, router]);
 
   /*
    * ★ 캐릭터를 옮겨도 앞사람 것이 그대로 남아 있었습니다.
@@ -208,7 +229,7 @@ function ReportInner() {
   });
 
   async function makeLink() {
-    if (!s.chartId) return;
+    if (!s.chartId || !topicComplete) return;
     if (shareUrl) {
       await copy(shareUrl);
       return;
@@ -241,7 +262,7 @@ function ReportInner() {
   }
 
   useEffect(() => {
-    if (!s.chartId) return;
+    if (!s.chartId || !topicComplete) return;
     let alive = true;
     api.report({
       chart_id: s.chartId, lens_id: lensId, tier: s.tier,
@@ -265,7 +286,7 @@ function ReportInner() {
         setErr(e instanceof ApiError ? e.message : "리포트를 펴지 못했소.");
       });
     return () => { alive = false; };
-  }, [s.chartId, lensId, s.tier, s.concern, s.axis4, s.sessionId, extras, retry]);
+  }, [s.chartId, lensId, s.tier, s.concern, s.axis4, s.sessionId, extras, retry, topicComplete]);
 
 
   if (!s.chartId) {
@@ -399,7 +420,7 @@ function ReportInner() {
         {daeunCut ? (
           <>
             <ServerText className="src" html={`근거 · ${daeunCut.source}`} />
-            <div className="cutbody" dangerouslySetInnerHTML={{ __html: daeunCut.html }} />
+            <ReadingVoice lensId={lensId} label="시간의 흐름을 함께 읽어보시오"><div className="cutbody" dangerouslySetInnerHTML={{ __html: daeunCut.html }} /></ReadingVoice>
           </>
         ) : (
           <>
@@ -452,7 +473,7 @@ function ReportInner() {
             읽히는 것은 맛보기까지. 그 뒤에 흐려진 자락을 이어 붙여
             **이 아래로 더 있다**는 것만 보이오.
         */}
-        {rep.tier === 'free' && <FreeReadingDetail cuts={rep.cuts} />}
+        {rep.tier === 'free' && <FreeReadingDetail cuts={rep.cuts} lensId={lensId} locked={rep.locked} onOpen={openPrice} />}
         <NextReading lensId={lensId} cuts={rep.locked} onOpen={openPrice} />
         {/*
           ★ 막이 그냥 끝나고 있었습니다. 접힌 목록 다음에 곧바로
@@ -664,11 +685,14 @@ function ReportInner() {
         {numbered && i === list.length - 1 && list.length > 1 && (
           <p className="lastcut">이제 마지막 자리요.</p>
         )}
-        <CutArtwork id={c.id} title={numbered ? `${i + 1}. ${c.title}` : c.title} />
+        <CutArtwork lensId={lensId} id={c.id} title={numbered ? `${i + 1}. ${c.title}` : c.title} />
         <ServerText className="src" html={c.source} />
+        <ReadingVoice lensId={lensId} soft={['solace', 'hope', 'closing_cut'].includes(c.id)} label="그대에게 들려주는 해석">
         {c.id === "sinsal"
           ? <SinsalSlots html={c.html} />
           : <div className="cutbody" dangerouslySetInnerHTML={{ __html: c.html }} />}
+        </ReadingVoice>
+        {rep.tier === 'free' && rep.sells && <InlinePaidReading after={c.id} cuts={rep.locked} lensId={lensId} onOpen={openPrice} />}
       </div>
     </Reveal>
   );
@@ -684,7 +708,7 @@ function ReportInner() {
       */}
       <ScrollProgress />
       <ReadingPath />
-      {rep.editorial && <ReadingGuide preview={rep.tier === "free" && rep.sells} guide={rep.editorial} />}
+      {rep.editorial && <ReadingGuide lensId={lensId} preview={rep.tier === "free" && rep.sells} guide={rep.editorial} />}
       {/* ★ 낡은 종이(oldpaper)를 깔고 있었습니다 (2026-09-06). 아래 글은
           「두루마리 끈을 풀었다 · 종이가 무릎까지」인데 영상에는 두루마리도
           끈도 무릎도 없었소 — 손님이 짚은 자리입니다. */}
@@ -744,11 +768,14 @@ function ReportInner() {
             setExtras((prev) => ({ ...(prev || {}), ...x }));
             /* 여기서 답했으면 세션에도 남깁니다 — 다음 화면에서 또
                묻지 않도록. 남기는 것은 **고른 것**뿐이오. */
-            const t = (x as { topic?: { choice: string; choice2?: string } }).topic;
+            const t = (x as { topic?: { choice: string; choice2?: string; choice3?: string; choice4?: string; choice5?: string } }).topic;
             if (t && s.chartId) {
               s.set({ topicPick: {
-                chartId: s.chartId, concern: s.concern,
+                chartId: s.chartId, lensId, concern: s.concern,
                 choice: t.choice, ...(t.choice2 ? { choice2: t.choice2 } : {}),
+                ...(t.choice3 ? { choice3: t.choice3 } : {}),
+                ...(t.choice4 ? { choice4: t.choice4 } : {}),
+                ...(t.choice5 ? { choice5: t.choice5 } : {}),
               } });
             }
           }}

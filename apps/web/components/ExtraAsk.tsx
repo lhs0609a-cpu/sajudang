@@ -1,4 +1,5 @@
 "use client";
+import CharacterSpeech from './CharacterSpeech';
 
 /**
  * 이 캐릭터가 따로 받는 것 — 추가 입력.
@@ -243,7 +244,7 @@ export default function ExtraAsk({
   }
 
   return (
-    <div className="ask blk in">
+    <CharacterSpeech><div className="ask blk in">
       <div className="lab">{TITLE[need] ?? "한 가지를 더 묻소"}</div>
       <p className="sm">{WHY[need] ?? ""}</p>
       {body}
@@ -255,6 +256,6 @@ export default function ExtraAsk({
         안 적으셔도 되오.
         그 자리 하나만 접히고 나머지는 그대로 있소.
       </p>
-    </div>
+    </div></CharacterSpeech>
   );
 }

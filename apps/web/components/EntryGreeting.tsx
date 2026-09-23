@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import CharArt from "./CharArt";
 import { LENS_BY_ID } from "@/lib/lenses";
 import { ENTRY_MEDIA } from "@/lib/entry-media";
-import { enableSound, onSoundChange, playBgm, setBgmDucked } from "@/lib/sound";
+import { BGM_TRACK, enableSound, onSoundChange, playBgm, setBgmDucked } from "@/lib/sound";
 
 const SEEN = "sd.entry-greeting.v1";
 
@@ -52,7 +52,7 @@ export default function EntryGreeting() {
 
   function start() {
     enableSound();
-    playBgm("outside");
+    playBgm(BGM_TRACK);
     setMusic(true);
     if (!ready || seen || !ENTRY_MEDIA.voice) return;
     setError("");

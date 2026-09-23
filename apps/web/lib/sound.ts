@@ -82,14 +82,15 @@
 // api.ts 와 **같은** 기본값이어야 합니다. 다르면 소리만 딴 데를 봅니다.
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 const KEY = "sd.sound";       // 켬/끔 — 이 기기에만 남습니다
-const VOL_BGM = 0.22;         // 배경음은 말보다 훨씬 아래로
+export const BGM_TRACK = 'moon-thread-loop';
+const VOL_BGM = 0.12;         // 전체 페이지에서 낮은 음량으로 유지
 const VOL_VOICE = 0.9;
 let bgmDucked = false;
 
 /** Keep the opening voice intelligible; restore the bed on skip, mute, or exit. */
 export function setBgmDucked(ducked: boolean) {
   bgmDucked = ducked;
-  const volume = ducked ? 0.07 : VOL_BGM;
+  const volume = ducked ? 0.035 : VOL_BGM;
   if (gain && ac) {
     gain.gain.cancelScheduledValues(ac.currentTime);
     gain.gain.setTargetAtTime(volume, ac.currentTime, 0.18);
@@ -102,6 +103,7 @@ export function enableSound() {
   if (soundState() === "off") toggleSound();
   const ctx = audioCtx();
   if (ctx?.state === "suspended") void ctx.resume().catch(() => {});
+  if (fallback) void fallback.play().catch(() => {});
 }
 
 /**
@@ -171,8 +173,9 @@ export function soundState(): State {
  *   (`useSound.playSafely`).
  */
 export function videoSoundOn(): boolean {
-  if (typeof window === "undefined") return false;
-  return soundState() === "on";
+  // Keep old music embedded in decorative clips from mixing with the shared track.
+  // Explicit character narration is played separately.
+  return false;
 }
 
 export function onSoundChange(fn: (s: State) => void) {
@@ -364,7 +367,7 @@ function playFallback(name: string) {
   }
   const el = fallback ?? new Audio();
   el.loop = true;
-  el.volume = bgmDucked ? 0.07 : VOL_BGM;
+  el.volume = bgmDucked ? 0.035 : VOL_BGM;
   el.src = src("bgm", name);
   el.onerror = () => { missing.add("bgm:" + name); playing = ""; };
   fallback = el;
@@ -379,9 +382,9 @@ async function startBgm(name: string) {
   if (!ctx) { playFallback(name); return; }
 
   if (ctx.state === "suspended") {
-    await ctx.resume().catch(() => {});
-    // 손짓 밖이라 안 열렸습니다. 손님이 화면을 처음 건드릴 때 엽니다.
-    if (ctx.state === "suspended") resumeOnGesture(ctx);
+    // Register before resume: its promise can remain pending until a gesture.
+    resumeOnGesture(ctx);
+    void ctx.resume().catch(() => {});
   }
   if (mine !== epoch) return;
   if (missing.has("bgm:" + name)) return;
@@ -395,7 +398,7 @@ async function startBgm(name: string) {
 
   const g = ctx.createGain();
   g.gain.setValueAtTime(0, ctx.currentTime);
-  g.gain.linearRampToValueAtTime(bgmDucked ? 0.07 : VOL_BGM, ctx.currentTime + FADE);
+  g.gain.linearRampToValueAtTime(bgmDucked ? 0.035 : VOL_BGM, ctx.currentTime + FADE);
   g.connect(ctx.destination);
 
   const s = ctx.createBufferSource();
@@ -432,7 +435,8 @@ function pauseBgm() {
  * ★ 소리가 꺼져 있으면 **이름만 적어 둡니다.** 파일은 켜는 순간
  *   받습니다 — 안 켤 사람에게 1MB 를 물리지 않습니다.
  */
-export function playBgm(name: string) {
+export function playBgm(_name: string = BGM_TRACK) {
+  const name = BGM_TRACK;
   if (typeof window === "undefined") return;
   if (cur === name && playing === name) return;
   cur = name;

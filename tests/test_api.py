@@ -20,6 +20,7 @@ os.environ.setdefault("STATEMENT_LOG_PATH",
 from fastapi.testclient import TestClient          # noqa: E402
 
 import store                                       # noqa: E402
+from engine import character_consultation          # noqa: E402
 from main import app                               # noqa: E402
 
 BIRTH = {"year": 1993, "month": 5, "day": 15, "hour": 10, "minute": 20,
@@ -81,6 +82,70 @@ def test_hook_returns_segments(client, chart_id):
     segs = r.json()["segments"]
     assert [s["stage"] for s in segs] == ["0", "1", "2", "2.5", "3"]
     assert all(s["statement_id"] for s in segs)
+
+
+def test_topic_spec_is_available_before_chart_and_love_is_specific(client):
+    response=client.get('/v1/report/topic/love')
+    assert response.status_code==200
+    labels={row['label'] for row in response.json()['options']}
+    assert {'짝사랑·썸','연애 중','연인과 갈등 중','결혼을 고민 중',
+            '부부 관계','이별 중·이별 후','재회를 고민 중'} <= labels
+
+
+@pytest.mark.parametrize('concern',['money','work','love','people','dir','health'])
+def test_every_concern_asks_situation_problem_and_wanted_answer(client,concern):
+    spec=client.get('/v1/report/topic/'+concern).json()
+    assert all(spec.get(key) for key in ('q','options','q2','options2','q3','options3'))
+
+
+@pytest.mark.parametrize('character', character_consultation.INTERVIEWS)
+def test_each_character_adds_two_distinct_expert_questions(client, character):
+    response=client.get('/v1/report/topic/work',params={'lens_id':character})
+    assert response.status_code==200,response.text
+    spec=response.json()
+    assert all(spec.get(key) for key in ('character_axis','q4','options4','q5','options5'))
+
+
+def test_all_three_answers_reach_the_first_reading(client,chart_id):
+    response=client.post('/v1/hook',json={
+        'chart_id':chart_id,'concern':'love','lens_id':'pungun',
+        'topic':{'choice':'married','choice2':'trust','choice3':'marry'}})
+    assert response.status_code==200,response.text
+    first=response.json()['segments'][0]
+    assert all(word in first['html'] for word in ('부부 관계','믿음·거짓말 문제','결혼 생활이 맞을지'))
+    assert ':married:trust:marry:' in first['statement_id']
+
+
+def test_character_answers_create_a_distinct_specialist_segment(client,chart_id):
+    response=client.post('/v1/hook',json={
+        'chart_id':chart_id,'concern':'love','lens_id':'pungun',
+        'topic':{'choice':'married','choice2':'trust','choice3':'marry',
+                 'choice4':'a','choice5':'b'}})
+    assert response.status_code==200,response.text
+    segments=response.json()['segments']
+    specialist=next(row for row in segments if row['stage']=='specialist')
+    assert '거의 나 혼자' in specialist['html']
+    assert '감정과 관계' in specialist['html']
+    assert '견딜 수 있다는 사실' in specialist['html']
+
+
+@pytest.mark.parametrize('choice',[
+    'alone','dating','conflict','marriage','married','broke','reunion','long'])
+def test_love_situation_changes_the_first_reading(client,chart_id,choice):
+    response=client.post('/v1/hook',json={
+        'chart_id':chart_id,'concern':'love','lens_id':'pungun',
+        'topic':{'choice':choice}})
+    assert response.status_code==200,response.text
+    segments=response.json()['segments']
+    assert segments[0]['stage']=='topic'
+    assert segments[0]['statement_id'].startswith('first-reading-v2-topic:ask:love:'+choice)
+    assert len(segments)==6
+
+
+def test_unknown_situation_is_rejected_instead_of_guessed(client,chart_id):
+    response=client.post('/v1/hook',json={
+        'chart_id':chart_id,'concern':'love','topic':{'choice':'fortune'}})
+    assert response.status_code==422
 
 
 def test_hook_unknown_chart_id(client):
@@ -779,7 +844,8 @@ def test_the_extra_input_is_asked_for_not_silently_dropped(client, chart_id):
         "chart_id": chart_id, "lens_id": "jeokhyeol", "tier": "free",
         "concern": "love", "extras": {"blood": {"type": "A"}}}).json()
     assert len(filled["cuts"]) + len(filled["locked"]) > before, "채워 줬는데 컷이 안 늘었습니다"
-    assert {c["id"] for c in filled["cuts"]} <= {"chart", "spine", "topic_ask"}
+    # Supplying a paid extra must not unlock it; the expanded free workbook stays.
+    assert {c["id"] for c in filled["cuts"]} <= {c["id"] for c in r["cuts"]}
     assert all("html" not in c for c in filled["locked"])
     assert filled["needs_input"] is None
 

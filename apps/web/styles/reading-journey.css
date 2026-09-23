@@ -7,6 +7,29 @@
 .next-reading h3 {font:500 16px/1.65 var(--sans);color:var(--paper);margin-bottom:8px}
 .next-reading article p {font:400 14px/1.8 var(--sans);color:var(--paper2);margin-bottom:8px}
 .next-reading small {font:400 12px/1.6 var(--sans);color:var(--paper3)}
+.inline-paid-reading{margin:30px 0 12px;padding:24px;border:1px solid var(--gold);border-radius:18px;background:linear-gradient(135deg,#d5be840b,transparent 70%)}
+.inline-paid-reading .inline-paid-context{font:400 15px/1.8 var(--sans);color:var(--paper2);margin:0 0 12px}
+.inline-paid-reading h3{font:500 24px/1.55 var(--serif);letter-spacing:-.025em;color:var(--paper);margin:0 0 12px;word-break:keep-all;overflow-wrap:anywhere}
+.inline-paid-reading .inline-paid-perspective,.inline-paid-reading .inline-paid-scope{font:400 13px/1.85 var(--sans);color:var(--paper2);margin:12px 0}
+.inline-paid-reading blockquote{margin:22px 0;padding:16px 18px;border-left:2px solid var(--gold);background:var(--bg2)}
+.inline-paid-reading blockquote>span{font:400 11px/1.6 var(--sans);color:var(--gold)}
+.inline-paid-reading blockquote>p{font:400 16px/1.9 var(--serif);margin:8px 0 0;word-break:keep-all;overflow-wrap:anywhere}
+.inline-paid-reading .inline-paid-continue{font:400 12px/1.7 var(--sans);color:var(--paper3);text-align:center;margin:12px 0 0}
+@media(max-width:479px){.inline-paid-reading{padding:18px 14px;margin:24px 0 12px}.inline-paid-reading h3{font-size:21px}.inline-paid-reading blockquote{padding:12px}}
+@media print{.inline-paid-reading{display:none}}
+.free-depth-essay {margin-top:28px;padding-top:22px;border-top:1px solid var(--line)}
+.free-depth-essay h3 {font:500 21px/1.65 var(--serif);margin:0 0 18px;letter-spacing:-.025em}
+.free-depth-essay p {font:400 16px/1.95 var(--sans);margin:0 0 18px;word-break:keep-all;overflow-wrap:anywhere}
+.free-depth-essay strong {font-weight:500;color:var(--paper)}
+.practice-steps {padding-left:24px;margin:24px 0}
+.practice-steps li {padding:0 0 18px 8px}
+.practice-steps li::marker {color:var(--gold)}
+.practice-steps h3 {font:500 16px/1.7 var(--sans);margin:0 0 8px}
+.practice-steps p {font:400 15px/1.9 var(--sans);margin:0;word-break:keep-all;overflow-wrap:anywhere}
+.consultation-method {margin:28px 0;padding:22px 0;border-top:1px solid var(--line)}
+.consultation-method h3 {font:500 22px/1.6 var(--serif);margin:0 0 18px}
+.consultation-method h4 {font:500 16px/1.7 var(--sans);color:var(--gold);margin:24px 0 8px}
+.consultation-method p {font:400 16px/1.95 var(--sans);margin:0 0 16px;word-break:keep-all;overflow-wrap:anywhere}
 .hook-next {padding:14px 0 0;color:var(--gold);font:400 14px/1.8 var(--serif)}
 
 /* 네 자리 — 재물 · 사랑 · 운명 · 사람 (components/Wants.tsx).
@@ -25,3 +48,20 @@
             box-decoration-break:clone;-webkit-box-decoration-break:clone;
             margin-left:2px;opacity:.65}
 .want-len {font:400 12.5px/1.7 var(--sans);color:var(--paper3);margin-bottom:6px}
+.character-case {
+  margin: 1.4rem 0;
+  padding: 1.2rem;
+  border: 1px solid color-mix(in srgb, var(--gold, #b78b52) 45%, transparent);
+  border-radius: 1rem;
+  background: linear-gradient(145deg, rgba(183, 139, 82, .12), rgba(255, 255, 255, .025));
+}
+.character-case h3 { margin-top: 0; }
+.character-case h4 { margin: 1rem 0 .35rem; color: var(--gold, #d6b276); }
+.character-case blockquote {
+  margin: 1.2rem 0 0;
+  padding: .9rem 1rem;
+  border-left: 3px solid var(--gold, #b78b52);
+  background: rgba(0, 0, 0, .12);
+  font-size: 1.04em;
+  line-height: 1.8;
+}

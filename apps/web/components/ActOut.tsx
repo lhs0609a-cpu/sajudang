@@ -1,4 +1,5 @@
 "use client";
+import CharacterSpeech from './CharacterSpeech';
 
 /*
  * 액트아웃 — 막을 끊는 한 줄.
@@ -62,7 +63,7 @@ export default function ActOut({
 }) {
   return (
     <div className="actout noprint" data-kind={kind}>
-      <p>{children}</p>
+      <CharacterSpeech><p>{children}</p></CharacterSpeech>
       {next && (
         <p className="nextname">
           다음 자리 — <b>「{next}」</b>

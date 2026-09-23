@@ -30,6 +30,7 @@ import hashlib
 from fastapi import APIRouter
 
 import store
+import member_accounts as accounts
 
 router = APIRouter(prefix="/v1", tags=["journey"])
 
@@ -40,7 +41,9 @@ def _user_key(session_id: str) -> str:
 
 def _paid(session_id: str) -> list:
     out = []
-    for oid in store.get_json("orders:" + session_id) or []:
+    # 회원이면 계정에 묶인 난수를 다 봅니다 (선결제 → 로그인).
+    for oid in dict.fromkeys(o for sid in accounts.sessions(session_id)
+                             for o in (store.get_json("orders:" + sid) or [])):
         o = store.get_json("order:" + oid)
         if isinstance(o, dict) and o.get("status") == "paid":
             out.append(o)

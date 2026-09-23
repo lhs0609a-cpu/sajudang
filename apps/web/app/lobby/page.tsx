@@ -18,6 +18,7 @@ import { CalcPanel, ElementBar, Pillars, Summary } from "@/components/Chart";
 import { LENSES, LENS_BY_ID } from "@/lib/lenses";
 import { useSession } from "@/lib/store";
 import { useScreen } from "@/lib/track";
+import { characterConcern } from "@/lib/character-topic";
 
 type Tab = "b1" | "b2" | "b3" | "b4";
 
@@ -41,6 +42,23 @@ function LobbyInner() {
   const lens = LENS_BY_ID[s.cur] ?? LENSES[0];
 
   const released = LENSES.filter((l) => l.released);
+
+  const openLens = (lensId: string) => {
+    const concern = characterConcern(lensId, s.concern);
+    const topic = s.topicPick;
+    const hasSpecificSituation = topic?.concern === concern && topic?.lensId === lensId
+      && !!topic.choice && !!topic.choice2 && !!topic.choice3 && !!topic.choice4 && !!topic.choice5;
+    s.set({ cur: lensId, concern, tier: s.chartId ? 'all' : s.tier });
+    s.markRead(lensId);
+    if (!s.chartId) {
+      router.push('/?step=a5');
+      return;
+    }
+    const reportPath = `/report/${lensId}?tab=c2`;
+    router.push(hasSpecificSituation
+      ? reportPath
+      : `/?step=a5b&next=${encodeURIComponent(reportPath)}`);
+  };
 
   /*
    * ★ 스무 사람 화면에서 고른 사람 (2026-09-02).
@@ -80,7 +98,7 @@ function LobbyInner() {
             아니라 **골라야 할 까닭**이 없는 화면이었소.
         */}
         <header className="editorial-heading"><p className="conversion-kicker">스무 사람, 스무 가지 질문</p><h1>읽는 순간 마음에 걸린<br/>그 질문부터.</h1><p>같은 명식에서도 먼저 짚는 대목은 다르오.<br/>계속 생각나는 질문을 가진 사람을 골라보시오.</p></header>
-        <p className="conversion-note">인물을 누르면 소개가 열리오. 짧은 분석은 무료로, 이어지는 심층 해석은 구매 후 읽을 수 있소.</p>
+        <p className="conversion-note">입력 전에도 자유롭게 둘러보시오. 인물을 누르면 소개가 열리오. 이미 입력한 정보는 이어 쓰고, 구매한 해석은 바로 다시 읽을 수 있소.</p>
         <div ref={topRef} />
         {GROUPS.map((g) => (
           <div key={g}>
@@ -169,10 +187,9 @@ function LobbyInner() {
                 사람**이 나와, 이름과 얼굴이 어긋납니다. */}
             <p className="conversion-note">먼저 짧은 분석으로 내 이야기와 맞는지 확인하시오. 이어지는 이유와 심층 해석은 범위와 가격을 본 뒤 선택할 수 있소.</p>
             <button className="btn mt" onClick={() => {
-              s.set({cur:pickedLens.id}); s.markRead(pickedLens.id);
-              router.push(s.chartId ? `/report/${pickedLens.id}?tab=c2` : '/?step=a5');
+              openLens(pickedLens.id);
             }}>
-              {s.chartId ? '이 사람의 첫 분석 무료로 읽기' : '내 고민으로 무료 분석 시작하기'}
+              {s.chartId ? '이 사람의 해석 읽기 · 구매한 내용 이어보기' : '내 고민으로 무료 분석 시작하기'}
             </button>
             <p className="sm">
               {pickedLens.price > 0 ? `첫 분석 무료 · 심층 해석 ${pickedLens.price.toLocaleString()}원` : '이 인물의 해석은 무료요.'}
@@ -198,9 +215,8 @@ function LobbyInner() {
             그걸 **고를 이유**로 쓰오 — 지어낸 압박이 아닙니다.
         */}
         <ActOut kind="딜레마" next="그 사람의 자리">
-          스물을 다 들을 수는 없소. <b>한 자리에서 이을 수 있는 건 둘이오.</b><br />
-          명식은 하나인데 읽는 눈이 스물이라, 누구를 고르느냐가
-          곧 <b>무엇을 볼 것인가</b>요.
+          궁금한 자리를 자유롭게 오가시오.<br />
+          이미 입력한 정보로 다른 관점을 읽고, <b>구매한 해석도 다시 이어볼 수 있소.</b>
         </ActOut>
         <button className="btn gh mt" onClick={() => setTab("b1")}>진열대로</button>
       </Shell>
@@ -223,9 +239,8 @@ function LobbyInner() {
             : <div><span>이 자리의 해석</span><strong>값 없이 읽을 수 있소.</strong><p>오늘 마음에 남길 한 가지를 골라보시오.</p></div>}
         </section>
         {lens.released ? <button className="btn mt" onClick={() => {
-          s.set({cur:lens.id}); s.markRead(lens.id);
-          router.push(s.chartId ? `/report/${lens.id}?tab=c2` : '/?step=a5');
-        }}>{s.chartId ? `${lens.name}의 첫 분석 무료로 읽기` : '내 고민과 태어난 정보 입력하기'}</button>
+          openLens(lens.id);
+        }}>{s.chartId ? `${lens.name}의 해석 읽기 · 구매한 내용 이어보기` : '내 고민과 태어난 정보 입력하기'}</button>
           : <p className="conversion-note">아직 자리에 앉지 않은 사람이오.</p>}
         <p className="conversion-note">무료 분석을 읽는 것만으로 결제되지 않소.</p>
         <button className="btn gh" onClick={() => setTab("b2")}>다른 질문을 가진 사람 살펴보기</button>

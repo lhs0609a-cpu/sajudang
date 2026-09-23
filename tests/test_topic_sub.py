@@ -157,19 +157,21 @@ def test_다른_고민에는_세운_줄이_붙는다():
 
 
 # ⑤ ───────────────────────────────────────────────────────
-def test_두번째_물음은_셈이_갈리는_자리에만():
+def test_두번째_물음은_셈과_사용자_현실을_섞지_않는다():
     """
-    일은 두 번째 물음을 둔다 — 자리·벌이·사람·버팀이 관성·재성·비겁·인성으로
-    실제로 갈린다. 사랑은 안 둔다 — 「누가 끝냈소」는 여덟 글자가 모른다.
+    일은 자리·벌이·사람·버팀을 실제 글자와 맞댄다. 사랑의 대화·신뢰·거리
+    문제는 사용자가 알려준 현실로 분석 초점만 좁히며, 여덟 글자가 맞혔다고
+    판정하지 않는다.
     """
     ask = _ask()
     assert ask["work"].get("options2"), "일에 두 번째 물음이 없소"
-    assert not ask["love"].get("options2"), \
-        "사랑에 두 번째 물음이 생겼소 — 여덟 글자가 가를 수 있는 것인지 먼저 보시오"
+    assert ask["love"].get("options2"), "사랑의 실제 문제가 무엇인지 묻지 않소"
     f = _feats(*CHARTS[0])
     for k in ("rise", "pay", "people", "hold"):
         assert T._ask_hit(f, "work", "leak", k) in (True, False), k
     assert T._ask_hit(f, "work", "leak", "dunno") is None
+    for k in ask["love"]["options2"]:
+        assert T._ask_hit(f, "love", "leak", k) is None, k
 
 
 def test_먼저_볼_자리는_있는_칸과_있는_짜임만():

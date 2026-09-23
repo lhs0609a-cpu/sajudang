@@ -20,6 +20,7 @@ var/
 # 에셋 원본(마스터). 수십 MB 라 커밋하지 않습니다.
 # public/scene/ 에 들어가는 것은 여기서 뽑은 인코딩본입니다.
 assets/master/
+/BGM/
 
 # Next.js 가 빌드 때 다시 만드는 것들.
 next-env.d.ts
@@ -39,3 +40,5 @@ voice_lines.json
 
 # 감사·배포 산출물 — 도구가 언제든 다시 만듭니다 (22,929개 · 1.5GB)
 output/
+.vercel
+.env*

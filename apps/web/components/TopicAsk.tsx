@@ -33,6 +33,13 @@ export type TopicAskSpec = {
   options: { id: string; label: string }[];
   q2?: string;
   options2?: { id: string; label: string }[];
+  q3?: string;
+  options3?: { id: string; label: string }[];
+  character_axis?: string;
+  q4?: string;
+  options4?: { id: string; label: string }[];
+  q5?: string;
+  options5?: { id: string; label: string }[];
 };
 
 export default function TopicAsk({
@@ -47,10 +54,14 @@ export default function TopicAsk({
   const [pick, setPick] = useState<string | null>(null);
   const concern = useSession(s => s.concern);
   const [pick2, setPick2] = useState<string | null>(null);
+  const [pick3, setPick3] = useState<string | null>(null);
+  const [pick4, setPick4] = useState<string | null>(null);
+  const [pick5, setPick5] = useState<string | null>(null);
 
   /* 둘째 물음이 있으면 둘 다 고른 뒤에야 보냅니다 — 하나만 보내면
      반쪽 컷이 서고, 손님은 나머지를 물어본 적도 없다고 여깁니다. */
-  const ready = !!pick && (!spec.options2 || !!pick2);
+  const ready = !!pick && (!spec.options2 || !!pick2) && (!spec.options3 || !!pick3)
+    && (!spec.options4 || !!pick4) && (!spec.options5 || !!pick5);
 
   return (
     <section className="extraask noprint">
@@ -89,10 +100,38 @@ export default function TopicAsk({
         </>
       )}
 
+      {spec.q3 && spec.options3 && (
+        <>
+          <p className="q">{spec.q3}</p>
+          <div className="og c2">
+            {spec.options3.map((o) => (
+              <button key={o.id}
+                      className={`op ${pick3 === o.id ? "on" : ""}`}
+                      aria-pressed={pick3 === o.id}
+                      onClick={() => setPick3(o.id)}>
+                <b>{o.label}</b>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
+      {spec.q4 && spec.options4 && (
+        <><p className="ttl">이 상담자만의 관점 · {spec.character_axis}</p><p className="q">{spec.q4}</p>
+          <div className="og c2">{spec.options4.map(o => <button key={o.id} className={`op ${pick4===o.id?'on':''}`} aria-pressed={pick4===o.id} onClick={()=>setPick4(o.id)}><b>{o.label}</b></button>)}</div></>
+      )}
+      {spec.q5 && spec.options5 && (
+        <><p className="q">{spec.q5}</p>
+          <div className="og c2">{spec.options5.map(o => <button key={o.id} className={`op ${pick5===o.id?'on':''}`} aria-pressed={pick5===o.id} onClick={()=>setPick5(o.id)}><b>{o.label}</b></button>)}</div></>
+      )}
+
       <p className="ask-status" role="status">{busy ? "선택하신 답으로 해석을 다시 읽고 있습니다." : ready ? "선택을 마쳤습니다. 아래 버튼을 눌러 내 답과 해석을 맞춰 보세요." : "각 질문에서 하나씩 고르면 다음 해석을 볼 수 있습니다."}</p>
       <button className="btn go" disabled={!ready || busy}
               onClick={() => onSubmit({
-                topic: { choice: pick, ...(pick2 ? { choice2: pick2 } : {}) },
+                topic: { choice: pick, ...(pick2 ? { choice2: pick2 } : {}),
+                         ...(pick3 ? { choice3: pick3 } : {}),
+                         ...(pick4 ? { choice4: pick4 } : {}),
+                         ...(pick5 ? { choice5: pick5 } : {}) },
               })}>
         {busy ? "맞대 보는 중입니다" : "이걸로 보겠습니다"}
       </button>
