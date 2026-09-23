@@ -39,6 +39,8 @@ STEPS = {
 
 
 def build(concern: str, flow: str | None = None) -> dict | None:
+    if concern == 'real_estate':
+        concern = 'money'
     row = PRACTICES.get(concern)
     if row is None:
         return None
