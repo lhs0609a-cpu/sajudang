@@ -66,16 +66,15 @@ def scene(f, lens_id, concern, *, revised=False):
     facts = _counted(f, [axis]).rstrip()
     if facts and facts[-1] not in '.!?…':
         facts += '.'
-    intro = '앞선 장면이 맞지 않았다면 그것을 그대의 모습으로 남기지 않겠소. 아래 두 경우에서도 실제 경험과 맞는 쪽만 살펴보시오.' if revised else '이런 장면이 있었는지부터 보시오. 없었다면 그대에게 억지로 맞출 필요는 없소.'
+    intro = '앞선 판정과 다르면 그 문장은 버리시오. 아래 장면은 실제 경험과 맞는 부분만 가져가시오.' if revised else '아래 장면은 최근 경험과 맞는 부분만 대조하시오. 맞지 않으면 억지로 끼워 맞추지 마시오.'
     parts = [
-        ('이번에는 이 장면을 보겠소', title + '. ' + intro),
-        ('겉으로 같은 고민, 다른 원인', distinction),
-        (perspective, diagnosis),
-        ('그대의 명식에서 짚은 근거', facts + ' 이 계산을 실제 행동의 증거로 삼지는 않소. 다음 두 장면 중 어느 쪽이 가까운지 경험과 대조하겠소.'),
+        ('지금 확인할 장면', title + '. ' + intro),
+        ('원인을 나누어 보시오', distinction),
+        ('이 캐릭터가 보는 기준', diagnosis),
+        ('계산으로 확인한 수', facts + ' 이 숫자는 행동의 증거가 아니라 해석의 출발점이오.'),
         ('이 반응이라면 먼저 조율할 일이오', a),
         ('이 반응이라면 기준을 바꿔야 하오', b),
         ('오늘 바로 꺼낼 수 있는 말', words),
         ('말한 뒤에는 이것을 확인하시오', review),
-        ('다음 해석에 가져갈 질문', question(lens_id, concern)),
     ]
     return '<div class="free-depth-essay precision-reading">' + ''.join('<h3>'+escape(h)+'</h3><p>'+escape(t)+'</p>' for h,t in parts) + '</div>'
