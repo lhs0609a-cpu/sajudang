@@ -262,3 +262,70 @@ def render(lens_id, concern, features, topic=None):
                  '해석을 외우는 것보다 내 선택의 근거를 남기는 것이 이 자리의 쓰임이오.</p></div>'
                  % (escape(scene), escape(record)))
     return ''.join(parts)
+
+
+# First reading v3: one diagnosis, one scene, one action.
+# Keep this override at the end so older editorial fragments cannot leak into
+# the first screen.  The first cut must tell the reader what is being read
+# before showing terminology or follow-up questions.
+def _pungun_first_reading_v3(f, concern: str, *, name="풍운도령") -> str:
+    from . import spine as spine_mod
+    sp = spine_mod.read(f)
+    flow_count = spine_mod.count(f, f.flow)
+    next_group = spine_mod.NEXT[f.flow]
+    next_count = spine_mod.count(f, next_group)
+
+    cases = {
+        "work": {
+            "target": "일에서 책임의 범위를 스스로 넓히고, 도움을 요청하는 시점이 늦어지는 패턴",
+            "verdict": "능력이 부족해서 지치는 것이 아니오. 맡은 일과 추가로 떠안은 일을 구분하지 않은 채 끝까지 혼자 처리하려는 방식이 문제요.",
+            "scene": "처음에는 ‘이 정도는 내가 할 수 있다’고 맡소. 중간에 일이 하나 더 붙어도 우선순위와 마감을 다시 묻지 않소. 결국 일의 양보다 책임의 범위가 커지오.",
+            "action": "오늘 받은 일을 ‘원래 맡은 일’과 ‘추가로 들어온 일’ 두 줄로 나누고, 추가 일을 받을 때 ‘A와 B 중 무엇을 먼저 끝낼까요?’라고 물으시오.",
+        },
+        "money": {
+            "target": "돈을 벌 기회보다, 번 돈이 남도록 기준을 세우는 방식",
+            "verdict": "수입을 만들 힘은 있소. 다만 부탁·할인·지출의 선을 늦게 정해 번 만큼 남기지 못하는 흐름이 보이오.",
+            "scene": "일이나 거래를 먼저 성사시키고 조건은 나중에 맞추오. 그래서 받을 금액, 마감일, 추가 비용을 뒤늦게 다시 확인하는 장면이 생기오.",
+            "action": "오늘 돈과 관련된 약속 하나에 금액·지급일·추가 범위를 문장으로 남기시오.",
+        },
+        "love": {
+            "target": "사랑에서 상대의 마음을 추측하는 시간과, 직접 원하는 것을 말하는 순간의 간격",
+            "verdict": "마음이 없는 것이 아니라 관계가 깨질까 봐 원하는 말을 늦추는 쪽에 가깝소. 그 침묵이 나중에는 서운함으로 커지오.",
+            "scene": "상대의 답장과 표정을 먼저 해석하고, 정작 원하는 연락·약속·확인은 뒤로 미루오. 그러다 혼자 결론을 내리고 거리를 두게 되오.",
+            "action": "추측으로 결론 내리기 전에 ‘나는 이번 주에 한 번은 만나고 싶어’처럼 원하는 행동 하나만 직접 말하시오.",
+        },
+        "people": {
+            "target": "관계에서 호의를 베푸는 범위와, 더 이상 맡지 않을 선을 정하는 방식",
+            "verdict": "사람을 못 끊는 것이 핵심이 아니오. 부탁을 거절하지 않은 뒤 마음속에서 비용을 계산하는 패턴이 반복되오.",
+            "scene": "그 자리에서는 괜찮다고 답하지만, 집에 돌아온 뒤 시간과 감정을 다시 계산하오. 다음 부탁부터는 답하기 전 조건을 확인해야 하오.",
+            "action": "이번 부탁에는 즉답하지 말고 ‘내가 가능한 범위는 여기까지’라고 먼저 선을 말하시오.",
+        },
+        "dir": {
+            "target": "진로에서 선택지를 늘리는 일과 실제로 하나를 실행하는 일의 차이",
+            "verdict": "정보가 부족해서 못 고르는 것이 아니오. 틀린 선택을 피하려고 비교를 계속 늘리는 방식이 발목을 잡고 있소.",
+            "scene": "자료와 조언은 충분히 모으지만, 시작 날짜와 첫 결과물은 정하지 않소. 선택지가 늘수록 오히려 첫 행동이 늦어지오.",
+            "action": "오늘 선택지 하나를 보류 목록으로 옮기고, 남은 하나의 첫 행동과 시작 시간을 정하시오.",
+        },
+        "health": {
+            "target": "몸이 보내는 피로 신호보다 해야 할 일을 먼저 처리하는 생활 패턴",
+            "verdict": "체력이 약하다는 판정이 아니오. 멈춰야 할 신호를 무시한 채 회복을 뒤로 미루는 방식이 문제요.",
+            "scene": "피곤해도 일정을 끝낸 뒤 쉬려 하오. 그 결과 하루의 피로가 다음 날까지 넘어가고 집중력이 먼저 떨어지오.",
+            "action": "오늘 가장 피곤한 시간대를 기록하고, 그 30분 전에는 일을 멈추는 규칙 하나를 정하시오.",
+        },
+    }
+    row = cases.get(concern, cases["work"])
+    return (
+        '<div class="specialist-opening first-reading-v3">'
+        f'<p class="opening-label">{escape(name)} · 첫 해석</p>'
+        f'<h3>이 해석에서 먼저 파악하는 것</h3><p class="reading-target"><strong>{escape(row["target"])}</strong>을 봅니다.</p>'
+        f'<h3>핵심 결론</h3><p>{escape(row["verdict"])}</p>'
+        f'<h3>이 사람에게 반복되는 장면</h3><p>{escape(row["scene"])}</p>'
+        f'<h3>왜 이렇게 읽었는가</h3><p class="opening-evidence">명식의 중심 흐름은 {escape(f.flow)} {flow_count}개, 다음 흐름은 {escape(next_group)} {next_count}개입니다. '
+        f'이 숫자 자체가 성격을 증명하는 것은 아니며, 위 장면을 읽는 계산상의 출발점입니다.</p>'
+        f'<h3>오늘 바꿀 한 가지</h3><p class="opening-action"><strong>{escape(row["action"])}</strong></p>'
+        '<p class="opening-boundary">여기까지가 첫 해석입니다. 아래 추가 질문은 이 장면이 실제 경험과 맞는지 확인하고, 다음 해석의 초점을 좁히기 위한 것입니다.</p>'
+        '</div>'
+    )
+
+
+pungun_opening = _pungun_first_reading_v3
