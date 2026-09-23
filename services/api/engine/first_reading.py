@@ -143,6 +143,10 @@ NEXT = {
 }
 
 
+EXCEPTIONS['real_estate'] = '부동산은 운세가 매수·매도의 안전을 보증하는 자리가 아니오. 등기·대출·세금·현장 상태를 실제 자료와 전문가에게 확인하시오.'
+NEXT['real_estate'] = '계약 전 목적·총비용·나올 조건을 숫자로 적으면 무엇이 달라질까?'
+
+
 def _branch(f, concern):
     if concern == 'real_estate':
         return 0 if f.jae >= f.inn else 1 if f.inn > f.sik else 2

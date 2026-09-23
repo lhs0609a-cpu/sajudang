@@ -48,6 +48,8 @@ def valid(value):
 
 
 def build(f, value, concern):
+    if concern == 'real_estate':
+        concern = 'money'
     code=valid(value)
     if not code or concern not in TOPIC:return None
     title,question,action=TYPES[code]

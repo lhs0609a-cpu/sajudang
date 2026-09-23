@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import html as _html
 import json
+from copy import deepcopy
 from functools import lru_cache
 from pathlib import Path
 from typing import Optional
@@ -41,7 +42,20 @@ AXIS_NAME = {"E": "드러나는", "I": "안으로 도는", "S": "현실을 딛�
 
 @lru_cache(maxsize=1)
 def bank() -> dict:
-    return json.loads((SEED / "bank.json").read_text("utf-8"))
+    data = json.loads((SEED / "bank.json").read_text("utf-8"))
+    # 전용 부동산 문장은 editorial/topic에서 제공하고, 기존 은행 근거표는
+    # 재물 축을 안전한 계산 기반으로 재사용한다.
+    def fill(node):
+        if isinstance(node, dict):
+            for value in list(node.values()):
+                fill(value)
+            if "money" in node and "real_estate" not in node:
+                node["real_estate"] = deepcopy(node["money"])
+        elif isinstance(node, list):
+            for value in node:
+                fill(value)
+    fill(data)
+    return data
 
 
 @lru_cache(maxsize=1)
