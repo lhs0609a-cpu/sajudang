@@ -280,6 +280,7 @@ export function TopBar({ title, skipTo, onBack }: {
       )}
       <span className="tt">{title}</span>
       <Link className="tb" href="/daily" aria-label="오늘의 일진">오늘</Link>
+      <Link className="tb fortune-nav" href="/fortune" aria-label="대운·세운·월운·궁합 상세 분석">운세</Link>
       <Link className="tb" href="/me" aria-label={`내 보관함 · 로그인과 구매 내역, 인장 ${seals.length}개`}>보관함</Link>
       <span className="member-nav" aria-label="회원 메뉴">
         {!memberReady ? <Link className="member-nav-link muted" href="/me">계정</Link> : member ? <>
