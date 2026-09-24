@@ -25,6 +25,11 @@ class CalculateRequest(BaseModel):
 
 
 def _entitled(session_id: str, product_id: str) -> bool:
+    # ★ 주인 자리는 다 엽니다 — 파는 물건을 눈으로 봐야 합니다.
+    #   여는 근거는 화면이 보낸 말이 아니라 서버에서 맞은 쪽지입니다.
+    import adminview
+    if adminview.on():
+        return True
     for oid in store.get_json("orders:" + session_id) or []:
         order = store.get_json("order:" + str(oid)) or {}
         if order.get("status") != "paid": continue

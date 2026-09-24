@@ -135,6 +135,31 @@ async function rebuildSavedChart(chartId: string): Promise<void> {
   try { await task; } finally { rebuilding.delete(chartId); }
 }
 
+/**
+ * 주인 쪽지 — 주인으로 로그인해 있으면 값으로 잠긴 자리가 다 열립니다.
+ *
+ * ★ 화면이 자격을 정하는 것이 **아닙니다.** 여기서 싣는 것은 주인 문에서
+ *   받은 쪽지(`x-admin-token`)와 기계 열쇠(`x-funnel-key`)뿐이고, 맞는지는
+ *   서버가 봅니다 (`services/api/adminview.py`). 쪽지가 없거나 삭았으면
+ *   그냥 손님입니다.
+ *
+ * ★ 브레이크는 이걸로 안 풀립니다 — 릴레이 2명·하루 결제 2건은 그대로요.
+ */
+function adminHead(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  const h: Record<string, string> = {};
+  try {
+    const token = localStorage.getItem("sd.admintoken");
+    if (token) h["x-admin-token"] = token;
+    const key = localStorage.getItem("sd.adminkey");
+    if (key) h["x-funnel-key"] = key;
+    // 주인도 무료 구간이 어떻게 보이는지 봐야 합니다 — 주인 자리의
+    // 「손님처럼 보기」 가 이 자리를 켭니다.
+    if (localStorage.getItem("sd.adminguest") === "1") h["x-admin-view"] = "guest";
+  } catch { /* 막힌 브라우저 */ }
+  return h;
+}
+
 async function call<T>(path: string, init?: RequestInit, recover = true): Promise<T> {
   // Bound read/calculation waits; payment mutations keep their own reconciliation flow.
   const bounded = !path.startsWith("/v1/pay/") || /^\/v1\/pay\/(tiers|peek)(?:[?]|$)/.test(path);
@@ -145,7 +170,7 @@ async function call<T>(path: string, init?: RequestInit, recover = true): Promis
     const res = await fetch(BASE + path, {
       ...init,
       signal: controller ? (init?.signal ? AbortSignal.any([init.signal,controller.signal]) : controller.signal) : init?.signal,
-      headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
+      headers: { "Content-Type": "application/json", ...adminHead(), ...(init?.headers ?? {}) },
     });
     if (!res.ok) {
       const url = new URL(BASE + path);

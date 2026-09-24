@@ -29,6 +29,16 @@ import RefundReviews from '@/components/RefundReviews';
 const BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 const KEY = "sd.adminkey";
 const TOK = "sd.admintoken";
+/*
+ * ★ 손님처럼 보기.
+ *
+ *   주인으로 들어와 있으면 값으로 잠긴 자리가 다 열립니다
+ *   (services/api/adminview.py). 그러면 주인은 **무료 구간이 어떻게
+ *   보이는지**를 못 봅니다 — 손님이 나가는 자리가 거기인데요.
+ *   이 자리를 켜면 `lib/api.ts` 가 머리표에 `x-admin-view: guest` 를
+ *   실어, 같은 쪽지를 들고도 손님과 같은 것만 받습니다.
+ */
+const GUEST = "sd.adminguest";
 
 type Overview = {
   at: string;
@@ -189,6 +199,8 @@ export default function AdminPage() {
    */
   const [token, setToken] = useState("");
   const [gate, setGate] = useState<{ login: boolean; key: boolean } | null>(null);
+  /* 손님처럼 볼 것인가. 끄면 값으로 잠긴 자리가 다 열립니다. */
+  const [guest, setGuest] = useState(false);
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [logging, setLogging] = useState(false);
@@ -227,6 +239,7 @@ export default function AdminPage() {
     try {
       setKey(localStorage.getItem(KEY) ?? "");
       setToken(localStorage.getItem(TOK) ?? "");
+      setGuest(localStorage.getItem(GUEST) === "1");
     } catch { /* 막힌 브라우저 */ }
   }, []);
 
@@ -449,8 +462,36 @@ export default function AdminPage() {
           }}>
             유저 모드로
           </button>
+          {/*
+            ★ 잠긴 자리를 열어 두는가.
+
+              주인으로 들어와 있으면 값으로 잠긴 자리가 다 열립니다 —
+              파는 물건을 제 카드로 긁어 보지 않고 볼 수 있어야 하니까요.
+              여는 근거는 화면이 아니라 **서버에서 맞은 쪽지**입니다
+              (services/api/adminview.py).
+
+              다만 무료 구간이 어떻게 보이는지도 봐야 하므로 끄는 길을
+              같은 자리에 둡니다. 브레이크(릴레이 2명 · 하루 결제 2건)는
+              이것과 무관하게 그대로 돕니다.
+          */}
+          <button onClick={() => {
+            const next = !guest;
+            setGuest(next);
+            try {
+              if (next) localStorage.setItem(GUEST, "1");
+              else localStorage.removeItem(GUEST);
+            } catch { /* 막힌 브라우저 */ }
+          }}>
+            {guest ? "잠긴 자리 다 열기" : "손님처럼 보기"}
+          </button>
         </div>
       </div>
+
+      <p className="sm">
+        {guest
+          ? "지금은 손님처럼 보고 있소 — 값으로 잠긴 자리는 잠긴 대로 보이오."
+          : "주인으로 들어와 있는 동안은 값으로 잠긴 자리가 다 열리오. 손님에게는 그대로 잠겨 있소."}
+      </p>
 
       <p className="sm">
         {busy ? "세는 중이오…" : data ? `기준 ${data.at}` : ""}

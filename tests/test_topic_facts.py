@@ -63,7 +63,15 @@ CHARTS = [
 
 
 def _table():
-    return json.loads((ROOT / "seed" / "topic.json").read_text(encoding="utf-8"))
+    """
+    **제품이 실제로 쓰는 표**를 봅니다.
+
+    ★ 전에는 `seed/topic.json` 을 그대로 읽었습니다. 그런데 부동산 갈래의
+      물음은 코드에서 얹히고(`engine/topic.table`) 사실 셋은 씨앗에 있어서,
+      한쪽만 읽으니 「ASK 에 real_estate 가 없다」 며 터졌습니다.
+      자가 제품과 다른 표를 보면 없는 흠을 세거나 있는 흠을 놓칩니다.
+    """
+    return T.table()
 
 
 # ★ 아직 **안 지은 자리**입니다 (2026-09-23에 확인).

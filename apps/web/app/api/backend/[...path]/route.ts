@@ -12,7 +12,10 @@ async function proxy(request:NextRequest,{params}:{params:{path:string[]}}){
   const base=process.env.API_BASE||process.env.NEXT_PUBLIC_API_BASE;
   if(!base)return NextResponse.json({detail:'서버 연결을 확인하고 있습니다.'},{status:503});
   const headers=new Headers();
-  for(const key of ['content-type','x-admin-key','x-admin-token']){const value=request.headers.get(key);if(value)headers.set(key,value);}
+  // 주인 문은 둘입니다 — 쪽지(x-admin-token)와 기계 열쇠(x-funnel-key).
+  // x-funnel-key 를 안 흘려보내면 열쇠로 들어온 주인은 화면에서 아무것도
+  // 못 엽니다 (services/api/keyguard.require_admin).
+  for(const key of ['content-type','x-admin-key','x-admin-token','x-funnel-key','x-admin-view']){const value=request.headers.get(key);if(value)headers.set(key,value);}
   const token=request.cookies.get(COOKIE)?.value;
   if(token)headers.set('Authorization','Bearer '+token);
   try{

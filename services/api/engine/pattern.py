@@ -208,7 +208,10 @@ def _pats() -> list:
             "그 셋이 곧 그대를 버티게 해 주던 것이오.")
 
     add(key="sisang_pyeonjae", name="시상편재(時上偏財)",
-        gloss="태어난 시각 글자에 큰돈 글자가 앉음",
+        # ★ 풀이를 짧게 (2026-09-24). 이 줄은 형광펜이 걸리는 자리인데,
+        #   어려운 말 풀이가 얹히면서 90자를 넘었습니다 — 훑어읽는 손님이
+        #   한눈에 못 담습니다 (`tools/skim_audit` PEN_CHARS_MAX).
+        gloss="시주에 큰돈 글자",
         at=("money",),
         test=lambda f: f.hour_known and len(f.pillars) >= 4
         and ten_god_of(f.pillars[3]["gan"], f.day_gan) == "편재",

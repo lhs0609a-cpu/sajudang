@@ -48,7 +48,19 @@ from engine.bank import bank, build_hook              # noqa: E402
 from engine.calendar import build_chart               # noqa: E402
 from engine.features import build_features            # noqa: E402
 
-CONCERNS = ("money", "work", "love", "people", "dir", "health")
+def _concerns() -> tuple:
+    """제품이 열어 둔 고민 칸을 그대로 받습니다.
+
+    ★ 손으로 여섯이라 적어 두었더니, 일곱째 칸(부동산)이 화면에 열린
+      뒤에도 이 자는 여섯만 셌습니다. 그 사이 부동산 훅은 돈과 **글자
+      그대로** 같았고 아무도 못 봤습니다 (2026-09-24).
+    """
+    import typing
+    from schemas.api import Concern
+    return tuple(typing.get_args(Concern))
+
+
+CONCERNS = _concerns()
 NAME_STAGE = "3"          # 이름 — 훅의 끝
 
 

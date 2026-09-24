@@ -49,14 +49,8 @@
     },
     "voice": "hao",
     "concerns": [
-      "money",
-      "work",
-      "love",
-      "people",
-      "dir",
-      "health"
-    ],
-    "default_concern": "money"
+      "work"
+    ]
   },
   "baegun": {
     "you": "당신",
@@ -78,13 +72,8 @@
     "voice": "hao",
     "concerns": [
       "dir",
-      "work",
-      "love",
-      "people",
-      "money",
       "health"
-    ],
-    "default_concern": "dir"
+    ]
   },
   "cheongam": {
     "you": "자네",
@@ -102,10 +91,8 @@
     },
     "voice": "hage",
     "concerns": [
-      "dir",
       "work"
-    ],
-    "default_concern": "dir"
+    ]
   },
   "sigye": {
     "you": "이름",
@@ -127,10 +114,8 @@
     "voice": "hapsyo",
     "you_else": "자네",
     "concerns": [
-      "dir",
       "work"
-    ],
-    "default_concern": "dir"
+    ]
   },
   "eunbyeol": {
     "you": "당신",
@@ -148,10 +133,8 @@
     },
     "voice": "haeyo",
     "concerns": [
-      "people",
-      "dir"
-    ],
-    "default_concern": "people"
+      "people"
+    ]
   },
   "jeokhyeol": {
     "you": "너",
@@ -171,9 +154,9 @@
     },
     "voice": "banmal",
     "concerns": [
-      "love"
-    ],
-    "default_concern": "love"
+      "love",
+      "people"
+    ]
   },
   "monghwa": {
     "you": "이름",
@@ -191,10 +174,8 @@
     "voice": "hao",
     "you_else": "너",
     "concerns": [
-      "dir",
       "people"
-    ],
-    "default_concern": "dir"
+    ]
   },
   "seoyeok": {
     "you": "손님",
@@ -212,8 +193,7 @@
     "voice": "hao",
     "concerns": [
       "dir"
-    ],
-    "default_concern": "dir"
+    ]
   },
   "paeseon": {
     "you": "이름",
@@ -233,10 +213,8 @@
     "voice": "hage",
     "you_else": "자네",
     "concerns": [
-      "dir",
-      "money"
-    ],
-    "default_concern": "dir"
+      "dir"
+    ]
   },
   "myeonsang": {
     "you": "그쪽",
@@ -254,10 +232,9 @@
     },
     "voice": "hapsyo",
     "concerns": [
-      "people",
-      "work"
-    ],
-    "default_concern": "people"
+      "health",
+      "people"
+    ]
   },
   "wolha": {
     "you": "이름",
@@ -276,10 +253,8 @@
     "voice": "haeyo",
     "you_else": "자네",
     "concerns": [
-      "love",
-      "people"
-    ],
-    "default_concern": "love"
+      "love"
+    ]
   },
   "hongmae": {
     "you": "그쪽",
@@ -297,10 +272,8 @@
     },
     "voice": "banmal",
     "concerns": [
-      "love",
-      "people"
-    ],
-    "default_concern": "love"
+      "love"
+    ]
   },
   "yeondam": {
     "you": "당신",
@@ -322,8 +295,7 @@
     "voice": "hapsyo",
     "concerns": [
       "love"
-    ],
-    "default_concern": "love"
+    ]
   },
   "hwagyeong": {
     "you": "그대",
@@ -343,8 +315,7 @@
     "concerns": [
       "people",
       "love"
-    ],
-    "default_concern": "people"
+    ]
   },
   "haengsu": {
     "you": "손님",
@@ -366,9 +337,9 @@
     "voice": "hao",
     "concerns": [
       "money",
-      "work"
-    ],
-    "default_concern": "money"
+      "work",
+      "real_estate"
+    ]
   },
   "hunjang": {
     "you": "이름",
@@ -387,10 +358,8 @@
     "voice": "hage",
     "you_else": "너",
     "concerns": [
-      "work",
-      "dir"
-    ],
-    "default_concern": "work"
+      "work"
+    ]
   },
   "yakcho": {
     "you": "그대",
@@ -409,8 +378,7 @@
     "voice": "hao",
     "concerns": [
       "health"
-    ],
-    "default_concern": "health"
+    ]
   },
   "ilgwan": {
     "you": "그쪽",
@@ -432,9 +400,9 @@
     "voice": "hao",
     "concerns": [
       "dir",
-      "work"
-    ],
-    "default_concern": "dir"
+      "money",
+      "real_estate"
+    ]
   },
   "nopa": {
     "you": "자네",
@@ -455,11 +423,8 @@
     },
     "voice": "hage",
     "concerns": [
-      "dir",
-      "people",
-      "work"
-    ],
-    "default_concern": "dir"
+      "dir"
+    ]
   },
   "dongja": {
     "you": "성별",
@@ -482,14 +447,6 @@
     "you_m": "아저씨",
     "you_f": "아주머니",
     "you_else": "그쪽",
-    "concerns": [
-      "dir",
-      "money",
-      "work",
-      "love",
-      "people",
-      "health"
-    ],
-    "default_concern": "dir"
+    "concerns": []
   }
 }

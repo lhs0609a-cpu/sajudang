@@ -69,7 +69,12 @@ def build(f, value, concern):
            ('나에게 물을 질문을 하나로 줄이면',question+' 답을 성격 설명으로 끝내지 마시오. 최근의 실제 장면 하나에서 어느 말 다음에 내 선택이 달라졌는지 보시오.'),
            ('먼저 확인할 사실',f'이번에는 {distinction} — 이 둘을 따로 적으시오. '+PROCESS[code[1]]),
            ('내 방식으로 말을 꺼내는 준비',PROCESS[code[0]]+' '+PROCESS[code[2]]),
-           ('상대에게 전할 말은 이만큼 구체적으로',case[4]+' 상황에 맞게 날짜·범위만 바꾸시오. 내 마음을 완벽하게 설명하려 하기보다 상대가 무엇을 하면 되는지 알아들을 수 있게 하시오.'),
+           # ★ 같은 문장을 한 컷에서 두 번 찍고 있었습니다 (2026-09-24).
+           #   위쪽 「오늘 바로 꺼낼 수 있는 말」 이 이미 `case[4]` 를
+           #   그대로 냅니다 (engine/reading_precision). 손님은 같은 줄을
+           #   두 번 읽고 **둘 다 흘립니다** — 뜻이 겹치는 표시를 둘 다는
+           #   자리에서 겪은 것과 같은 일이오. 여기서는 **가리킵니다.**
+           ('상대에게 전할 말은 이만큼 구체적으로','위에 적어 둔 그 말을 그대로 쓰되 날짜·범위만 바꾸시오. 내 마음을 완벽하게 설명하려 하기보다 상대가 무엇을 하면 되는지 알아들을 수 있게 하시오.'),
            ('이번 선택에서 지킬 한 가지',action+' '+PROCESS[code[3]])]
     html='<div class="mbti-reading">'+''.join('<h3>%s</h3><p>%s</p>'%(escape(h),escape(t)) for h,t in parts)+'<p class="note">'+escape(boundary)+'</p></div>'
     return {'code':code,'html':html,'question':question,'action':action,'process':PROCESS[code[0]]+' '+PROCESS[code[3]],'dialogue':PROCESS[code[2]],'evidence':PROCESS[code[1]],'boundary':boundary}

@@ -145,8 +145,26 @@ def _real(text: str, term: str, at: int) -> bool:
 _OPENS = re.compile(r"\s*[（(<]|\s*—\s*[가-힣]|\s*<i")
 
 
+#: 그림 상자의 머리말. 이 상자에 든 말은 **이미 풀린 것**입니다.
+_BOX = "이게 무슨 말인가"
+
+
 def glossed(text: str, term: str, meaning: str) -> bool:
-    """그 말 곁에 뜻이 있는가."""
+    """
+    그 말 곁에 뜻이 있는가.
+
+    ★ 표에 적힌 문구와 **글자가 같아야** 풀린 것으로 세고 있었습니다
+      (2026-09-24에 또 걸렸습니다). 그림 상자는 제 말로 풀어 둡니다 —
+      「용신 나한테 모자라서 채우면 좋은 것이오」. 표에는 「모자란 것을
+      채워 줄 기운」 이라 적혀 있어 글자가 다르니, 잘 풀어 둔 자리가
+      스물세 번 「안 풀림」 으로 잡혔습니다. 자가 늑대를 잘못 외치면
+      다음에는 아무도 그 목록을 안 봅니다.
+
+      상자(「이게 무슨 말인가」) 뒤에 그 말이 있으면 풀린 것입니다.
+    """
+    box = text.find(_BOX)
+    if box >= 0 and term in text[box:]:
+        return True
     key = meaning.split("·")[0].strip()[:4]
     for m in re.finditer(re.escape(term), text):
         window = text[m.start(): m.end() + NEAR]

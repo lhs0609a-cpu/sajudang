@@ -246,6 +246,43 @@ def table() -> dict:
             "move": "전세·월세·이사",
             "invest": "투자·상가·토지",
         },
+        # ★ 되물음 컷이 **터지던 자리** (2026-09-24).
+        #
+        #   `ask_cut` 은 lead·say·tail 을 그대로 씁니다. 부동산 갈래에는
+        #   그 일곱 칸이 없어서 `KeyError: 'lead'` 로 컷이 터졌습니다 —
+        #   손님이 세부 물음에 답하면 그 자리에서 끊겼소.
+        #
+        #   판정(hit/miss)은 두지 않습니다. 부동산 갈래를 여덟 글자로
+        #   맞다·아니다 가르는 유파 규칙을 이 집은 정한 바가 없으니,
+        #   **무엇을 볼지**만 말하고 센 값은 사실 셋이 냅니다.
+        "lead": "지금 가장 가까운 부동산 고민을",
+        "lead2": "결정을 늦추는 조건을",
+        "lead3": "이번 풀이에서 알고 싶은 것을",
+        "tail": "적으신 것은 여기서 계산만 하고 바로 버리오. 그리고 이 집은 <b>어느 자리가 오를지, 언제 움직일지는 말하지 않소</b> — 여덟 글자가 가리키는 것은 값이 아니라 <b>그대가 쥐고 버티는 결</b>이오.",
+        "say": {
+            "buy": {"dunno": "내 집을 잡는 쪽이라 하셨소. 여덟 글자에서는 <b>쥐는 글자와 담기는 칸</b>을 먼저 보겠소 — 값보다 <b>몇 해를 버틸 수 있는가</b>가 여기서 나오오."},
+            "sell": {"dunno": "내놓는 쪽이라 하셨소. 여덟 글자에서는 <b>쥔 자리가 부딪히는가</b>를 먼저 보겠소 — 한 번에 크게 바뀌는 결인지, 여러 달 끌리는 결인지요."},
+            "move": {"dunno": "옮기는 쪽이라 하셨소. 여덟 글자에서는 <b>옮겨 다니는 글자</b>를 먼저 보겠소 — 한자리에 오래 있어야 힘이 붙는 사람과 옮겨야 붙는 사람이 갈리오."},
+            "invest": {"dunno": "굴리는 쪽이라 하셨소. 여덟 글자에서는 <b>크게 드나드는 글자와 감당하는 손</b>을 먼저 보겠소 — 크게 걸었을 때 버티는 결이 여기서 나오오."},
+            "auction": {"dunno": "경매·공매라 하셨소. 여덟 글자에서는 <b>눌리는 자리를 받아 내는 힘</b>을 먼저 보겠소 — 값을 깎는 재주와 절차를 버티는 힘은 서로 다른 것이오."},
+            "inherit": {"dunno": "집안과 얽힌 자리라 하셨소. 여덟 글자에서는 <b>웃대 자리와 나눌 입</b>을 먼저 보겠소 — 값이 아니라 <b>몫을 정하는 말</b>이 먼저 걸리는 자리요."},
+        },
+        "say2": {
+            "price": {"dunno": "값과 대출이 걸린다 하셨소. 그러면 뒤에서는 <b>쥘 것과 쥐는 손의 무게</b>를 보겠소 — 한도를 적어 두지 않으면 견디는 힘이 먼저 바닥나오."},
+            "timing": {"dunno": "때를 못 정해 걸린다 하셨소. 이 집은 어느 해가 좋은지는 말하지 않소. 대신 <b>그대 대운에서 쥐는 자리가 켜지는 칸</b>을 나이로 내겠소."},
+            "family": {"dunno": "집안과 공동명의가 걸린다 하셨소. 그러면 뒤에서는 <b>나눌 입의 수</b>를 보겠소 — 몫을 종이에 적는 일이 값보다 먼저요."},
+            "contract": {"dunno": "계약과 권리가 걸린다 하셨소. 그러면 뒤에서는 <b>빈 칸에 걸린 자리</b>를 보겠소 — 문서로 안 남긴 약속에서 몫이 새던 결이오."},
+            "region": {"dunno": "자리를 못 골라 걸린다 하셨소. 그러면 뒤에서는 <b>옮겨 다니는 글자와 흙</b>을 보겠소 — 한자리에서 두터워지는 사람과 옮겨야 트이는 사람이 갈리오."},
+            "tax": {"dunno": "세금과 자금이 걸린다 하셨소. 그러면 뒤에서는 <b>달마다 나가는 것을 세는 결</b>을 보겠소 — 한 번에 나갈 돈과 달마다 나갈 돈은 다른 셈이오."},
+        },
+        "say3": {
+            "live": {"dunno": "직접 살 자리라 하셨소. 뒤에서는 <b>몇 해를 살 자리인가</b>로 읽겠소 — 값이 아니라 버틸 달수요."},
+            "rent": {"dunno": "세를 받을 자리라 하셨소. 뒤에서는 <b>달마다 들어오는 결</b>로 읽겠소 — 한 번에 오는 것과는 다른 글자요."},
+            "capital": {"dunno": "값을 보려는 자리라 하셨소. 다만 어느 자리가 오를지는 말하지 않소. 뒤에서는 <b>크게 드나들 때 버티는 손</b>을 보겠소."},
+            "rebuild": {"dunno": "오래 두고 볼 자리라 하셨소. 뒤에서는 <b>깔고 앉아 버티는 결</b>을 보겠소 — 기다리는 동안 나가는 것을 감당하는 힘이오."},
+            "commercial": {"dunno": "장사할 자리라 하셨소. 뒤에서는 <b>만든 것이 값으로 건너가는 다리</b>를 보겠소."},
+            "inheritance": {"dunno": "집안에 넘길 자리라 하셨소. 뒤에서는 <b>웃대 자리와 나눌 입</b>을 보겠소 — 말로 남긴 약속이 가장 자주 걸리는 데요."},
+        },
         "q2": "결정을 늦추게 만드는 현실 조건은 무엇인가요?",
         "options2": {
             "price": "가격·대출 부담",
@@ -310,17 +347,41 @@ def table() -> dict:
     }
     for concern, detail in detail_asks.items():
         out.setdefault("ASK", {}).setdefault(concern, {}).update(detail)
-    def fill(node):
-        if isinstance(node, dict):
-            for value in list(node.values()):
-                fill(value)
-            if "money" in node and "real_estate" not in node:
-                node["real_estate"] = node["money"]
-        elif isinstance(node, list):
-            for value in node:
-                fill(value)
-    fill(out)
+    fill_concern(out)
     return out
+
+
+#: 고민 이름. 이 이름**만으로** 된 dict 이 「고민 키 표」입니다.
+CONCERN_KEYS = frozenset({"money", "work", "love", "people", "dir", "health",
+                          "real_estate", "_"})
+
+
+def fill_concern(node) -> None:
+    """
+    부동산이 없는 고민 키 표에 재물 축 행을 얹는다.
+
+    ★ 「money 키가 있는 dict」 를 다 복사하면 안 됩니다 (2026-09-24).
+
+      고르는 칸의 **보기 id 도** money 입니다 —
+      `options3: {boss, people, skill, money, energy}`. 그래서 손님
+      화면의 보기가 다섯에서 여섯이 되고, 그중 둘이 **글자까지 같은
+      말**이었습니다 (「급여·자금 문제」 가 두 번 · 일과 갈 곳 · 1만 명
+      가운데 33%가 그 칸을 봤습니다).
+
+      키가 **전부 고민 이름인** 자리에만 얹습니다. 보기 표는 id 에
+      boss·skill·energy 처럼 고민이 아닌 이름이 섞여 있어 걸러집니다.
+      `engine/bank.fill_concern` 과 같은 규칙입니다 — 두 자가 갈리면
+      한쪽만 고치는 날이 옵니다.
+    """
+    if isinstance(node, dict):
+        for value in list(node.values()):
+            fill_concern(value)
+        if ("money" in node and "real_estate" not in node
+                and set(node) <= CONCERN_KEYS):
+            node["real_estate"] = node["money"]
+    elif isinstance(node, list):
+        for value in node:
+            fill_concern(value)
 
 
 def _pick(*keys) -> str:
@@ -999,15 +1060,23 @@ def _years(n: int) -> str:
 
 
 def _rows_real_estate(f):
-    rows = _rows_money(f)
-    prompts = [
-        "부동산에서 먼저 볼 것은 수익률이 아니라 보유 목적과 감당 가능한 기간이오.",
-        "계약금·중도금·잔금·이자까지 한 번에 적어야 실제 부담을 볼 수 있소.",
-        "살 때의 이유와 팔거나 나올 조건을 함께 정해야 판단이 흔들리지 않소.",
-    ]
-    for row, prompt in zip(rows[:3], prompts):
-        row["ev"] = prompt
-    return rows[:3]
+    """
+    부동산은 재물과 **같은 축**을 셉니다 (둘 다 재성). 말만 갈립니다 —
+    `SCALE.real_estate` 가 그 자리요.
+
+    ★ 전에는 여기서 `row["ev"]` 를 **글로 덮었습니다** (2026-09-24).
+
+      `ev` 는 근거 줄에 들어가는 **센 수**입니다 (「정재 1 · 편재 1」).
+      거기에 문장을 얹으니 훅 1단이 「…물으신 자리를 세면 부동산에서
+      먼저 볼 것은 … 기간이오.요.」 로 나갔습니다 — 근거에서 수가
+      사라지고 문장이 깨졌습니다. 이 집은 근거 줄에 수를 대기로 했소
+      (CLAUDE.md 「근거 줄에 수를 안 대기」).
+
+    ★ 그리고 세 줄로 잘라 내지 않습니다. 잘라 놓은 탓에 부동산 손님은
+      드러남·앉은 자리·창고·빈 자리를 한 줄도 못 봤습니다 — 값은 같은데
+      세어 주는 자리가 셋뿐이었소.
+    """
+    return _rows_money(f)
 
 
 _ROWS = {"money": _rows_money, "health": _rows_health, "work": _rows_work,
@@ -2022,6 +2091,43 @@ def fact_rows(f, concern: str, sub: Optional[dict]) -> list:
         out.append({"id": row["id"], "label": row.get("label") or row["id"],
                     "count": count, "verdict": verdict, "say": say})
     return out
+
+
+def keep_valid(concern: str, payload: Optional[dict]) -> Optional[dict]:
+    """
+    고른 갈래가 **이 고민의 목록에 있는가**. 없으면 내려놓는다.
+
+    ★ 손님이 돈에서 「사업·장사」 를 골라 두고 고민을 사랑으로 바꾸면,
+      그 갈래는 사랑 목록에 없습니다. 그대로 두면 `ask_cut` 이 422 를
+      내고 화면에는 「훅을 만들지 못했소」 만 뜹니다 — 까닭은 손님이
+      본 적도 없는 갈래 목록이오.
+
+      전에는 **캐릭터가 고민을 갈아치우는 자리**에서 같이 내려놓았는데
+      (`routers/hook`), 갈아치우기를 뺐으니 이 자리에서 봅니다.
+      리포트는 예전부터 어긋난 갈래를 접고 `extra_error` 로 말합니다.
+    """
+    if not payload:
+        return None
+    spec = (table().get("ASK") or {}).get(concern) or {}
+    if not spec:
+        return None
+    asks = table().get("ASK") or {}
+    out = dict(payload)
+    for n, key in ((1, "choice"), (2, "choice2"), (3, "choice3")):
+        okey = "options" if n == 1 else "options%d" % n
+        pick = str(out.get(key) or "")
+        if not pick or pick in (spec.get(okey) or {}):
+            continue
+        # ★ **다른 고민에서 고른 것**만 내려놓습니다 (2026-09-24).
+        #
+        #   아무 고민에도 없는 값은 손님이 고른 것이 아니오 — 지어낸
+        #   요청이니 그대로 거절합니다(`ask_cut` 이 422). 둘을 뭉개면
+        #   「모르면 거절한다」 는 이 집의 규칙이 흐려집니다.
+        elsewhere = any(pick in ((row.get(okey) or {}))
+                        for cid, row in asks.items() if cid != concern)
+        if elsewhere:
+            out.pop(key, None)
+    return out if out.get("choice") else None
 
 
 def ask_cut(f, concern: str, payload: dict) -> Optional[dict]:

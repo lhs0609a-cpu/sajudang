@@ -31,7 +31,9 @@ def chart_features():
 def test_commercial_character_stops_before_deep_reading(chart_features, lens_id, concern):
     free = build_report(chart_features, 'scope-test', lens_id, 'free', concern, 'INTJ')
     paid = build_report(chart_features, 'scope-test', lens_id, 'all', concern, 'INTJ')
-    assert {c['id'] for c in free['cuts']} <= {'chart', 'spine', 'topic_ask', 'spine_depth', 'spine_scene', 'lens_bridge', 'solace', 'closing_cut'}
+    # ★ 「어떤 사람인가」 가 무료에 섭니다 (2026-09-24) — 알아봐 준 적
+    #   없는 집에 값을 치를 까닭이 없소. 깊이는 그대로 값 뒤에 있습니다.
+    assert {c['id'] for c in free['cuts']} <= {'chart', 'portrait', 'spine', 'topic_ask', 'spine_depth', 'spine_scene', 'lens_bridge', 'solace', 'closing_cut'}
     assert {'spine_depth', 'spine_scene'} <= {c['id'] for c in free['cuts']}
     assert sum(len(_plain(c['html'])) for c in free['cuts'] if c['id'] in {'spine_depth', 'spine_scene'}) > 200
     assert free['cuts'] and free['locked']

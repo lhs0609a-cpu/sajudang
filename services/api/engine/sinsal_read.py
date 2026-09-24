@@ -73,6 +73,9 @@ FOCUS = {
     "people": {"wonjin", "hwagae", "yangin"},
     "dir": {"yeokma", "hwagae"},
     "health": {"yangin", "baekho"},
+    # ★ 부동산은 재물과 같은 축(재성)을 보되, **머무는가 옮기는가**가
+    #   더 걸리는 자리라 역마를 함께 폅니다 (2026-09-24).
+    "real_estate": {"geumyeo", "amrok", "yeokma"},
 }
 
 # ══════════════════════════════════════════════════════════

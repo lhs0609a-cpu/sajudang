@@ -49,7 +49,19 @@ sys.path.insert(0, str(ROOT / "tools"))
 
 import journey_sim as J                                   # noqa: E402
 
-CONCERNS = J.CONCERNS
+def _concerns() -> tuple:
+    """제품이 열어 둔 고민 칸을 그대로 받습니다.
+
+    ★ `journey_sim.CONCERNS` 는 여섯에서 멈춰 있었습니다. 화면에 일곱째
+      칸(부동산)이 열린 뒤에도 이 자가 그 칸을 한 번도 안 재서, 부동산
+      훅이 돈과 **글자 그대로** 같은 것을 아무도 못 봤습니다 (2026-09-24).
+    """
+    import typing
+    from schemas.api import Concern
+    return tuple(typing.get_args(Concern))
+
+
+CONCERNS = _concerns()
 BOX = "이게 무슨 말인가"          # 용어 풀이 상자의 머리말
 
 # 넘으면 빨간 불. 이 값을 올리려거든 **왜 그 자리가 고정이라야

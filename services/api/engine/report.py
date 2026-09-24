@@ -39,6 +39,8 @@ from . import spine as spine_mod
 from . import free_depth
 from . import consultation
 from . import character_consultation as character_consultation_mod
+from . import opener as opener_mod
+from . import portrait as portrait_mod
 from . import probe as probe_mod
 from . import terms as terms_mod
 from . import topic as topic_mod
@@ -533,6 +535,11 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         "concern_turn": lens_cuts_mod._daeun_phase(f),
         "concern_face": getattr(f, "strength", ""),
         "solace": rarity_mod.look(f).get("band", ""),
+        # ★ 1만 명에서 「그림도 장면도 내 수도 없는 컷」 이 가장 많이
+        #   걸린 세 자리 (2026-09-24). 표는 있었는데 안 걸려 있었소.
+        "spine_depth": getattr(f, "flow", ""),
+        "partner": "짝",
+        "context": "지금",
     }
     _scene_seen: set = set()
     for _cid, _table in _real.SCENE_AT.items():
@@ -593,7 +600,29 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
             if c["boundary_note"] else "")),
         0))
 
-    # ── 0 · 이 사람을 한 줄로 (engine/spine · 2026-09-11) ─────
+    # ── 0 · 어떤 사람인가 (engine/portrait · 2026-09-24) ──────
+    #
+    # ★ 손님이 짚었습니다 — 「사주가 추상적이다. 너는 이런 사람이야 하고
+    #   디테일하게 설명해 주는 걸로 전부 바꿀 수 없냐. 모든 캐릭터가.」
+    #
+    #   세어 보니 맞는 말이었습니다. 한 장을 펴 놓고 보면 거의 모든
+    #   문장의 주어가 **명리 용어**였습니다 — 「재성이 하나요」 「상관이
+    #   가장 세오」. 그대가 주어인 문장은 드물고, 있어도 조건문이었습니다.
+    #   「그대는 이런 사람이오」 를 끝까지 말해 주는 컷은 **없었습니다.**
+    #   가장 가까운 것이 마감 컷의 한 문장이었는데, 그건 스물세 컷을
+    #   다 읽은 맨 끝에 한 줄로 나왔습니다.
+    #
+    # ★ 명식 **바로 뒤**입니다. 글자를 보여 줬으면 그다음은 사람이오.
+    # ★ 무료입니다. 알아봐 준 적이 없는 집에 값을 치를 까닭이 없소.
+    # ★ 스무 명이 **같은 사람**을 그립니다 — 갈리는 것은 차례요
+    #   (`portrait.VIEW`). 캐릭터가 바뀐다고 그대가 다른 사람이 되면
+    #   그건 점이 아니라 소설이오.
+    port = portrait_mod.build(f, lens_id, 6, you=you)
+    if port:
+        cuts.append(_cut("portrait", port["title"], port["source"],
+                         port["html"], 0, sid=port["statement_id"]))
+
+    # ── 1 · 이 사람을 한 줄로 (engine/spine · 2026-09-11) ─────
     #
     # ★ 손님이 바깥 글을 가져왔습니다 — 「돈의 흐름을 발견해 구조로 만드는
     #   사람」. 같은 명식을 넣으니 재료(식상생재 · 편재 · 관성 0)는 다
@@ -658,7 +687,15 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
             % (_br.replace("{name}", sp["name"]), f.flow,
                spine_mod._chars(f, f.flow) or f.day_gan,
                spine_mod.count(f, f.flow)) + (consultation.preview(lens_id, concern)
-                   if lc_built else consultation.render(lens_id, concern, f)), 0,
+                   if lc_built else consultation.render(lens_id, concern, f))
+            # ★ 「이 자리가 내 자리인가」 를 **늘 보이는 컷**에 답니다
+            #   (2026-09-24). 전에는 첫 관점 컷에 붙였는데, 그 컷은 값
+            #   등급에 따라 잠기오 — 잠긴 컷은 본문이 안 내려가니 손님은
+            #   그 줄을 못 봤습니다. 안 보는 자리를 물었을 때 아니라고
+            #   말하는 것이 이 집의 방식이고(topic.LENS_OFF), 말하려면
+            #   보이는 자리에 있어야 하오.
+            + guard.enforce(topic_mod.lens_line(lens_id, concern),
+                            {"cut": "lens_bridge"}), 0,
             sid="bridge:v2:%s:%s:%s" % (lens_id, f.flow, concern)))
 
     # ── 2 · 없는 것부터──────────────────────────────────
@@ -1402,7 +1439,14 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
             body = (lead + '<p class="tale">%s</p>' % (B2["CONCERN_EMPTY"] % grp)
                     + back)
         elif grp == loud:
-            body = (lead + '<p class="tale">%s</p>' % B2["CONCERN_SAME"][grp]
+            # ★ 십신 묶음은 고민보다 **성긴 축**입니다 (2026-09-24).
+            #   돈과 부동산이 둘 다 재성이라, 부동산을 물은 손님이
+            #   「돈 생각을 안 하는 날이 없었을 것이오」 를 들었습니다.
+            #   고민으로 갈린 행이 있으면 그것이 이깁니다
+            #   (`bank.CONCERN_SAME_AT` · bank.concern_cut 과 같은 자리).
+            body = (lead + '<p class="tale">%s</p>'
+                    % ((B2.get("CONCERN_SAME_AT") or {}).get(concern)
+                       or B2["CONCERN_SAME"][grp])
                     + back)
         else:
             # ★ 몰린 곳으로 말을 돌리고 **안 돌아왔습니다** (2026-09-17).
@@ -1655,17 +1699,12 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     #     나갔습니다 (tests/test_topic_reach). 없으면 맨 앞엣것으로.
     free_lc = next((lc["id"] for lc in lc_built if lc.get("asks")),
                    lc_built[0]["id"] if lc_built else None)
-    lens_say = topic_mod.lens_line(lens_id, concern)
     for nth, lc in enumerate(lc_built):
         html = lc["html"]
         sid = lc["statement_id"]
         if nth == 0:
             html += consultation.render(lens_id, concern, f, (extras or {}).get("topic"))
             sid += ':consultation-v1'
-        if lens_say:
-            html = html + guard.enforce(lens_say, {"cut": lc["id"]})
-            sid = "%s@%s" % (sid, concern)
-            lens_say = ""
         cuts.append(_cut(lc["id"], lc["title"], lc["source"], html,
                          0 if lc["id"] == free_lc else lc["min_level"],
                          sid=sid))
@@ -2012,7 +2051,26 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     #   무료로 왔다 나가는 사람이 가장 많은 구간이라 더 그렇습니다.
     #   둘 다 깊은 풀이가 아니라 **손잡이**라, 값을 가리지도 않소
     #   (tests/test_safety).
-    FREE_FLOOR = {"chart", "spine", "topic_ask", "solace", "closing_cut"}
+    # ★ 컷마다 **사람으로 엽니다** (2026-09-24).
+    #
+    #   서른일곱 컷이 어떻게 여는지 전수로 재 보니 서른 컷이 용어·사전
+    #   으로 열고 있었습니다 — 「관성 0개 · 재성 1개」 「년주는 할아버지·
+    #   할머니 같은 윗세대를 뜻하오」. 손님은 컷을 열 때마다 사전을
+    #   먼저 읽고 나서야 제 얘기에 닿았고, 그걸 서른 번 했습니다.
+    #
+    #   ★ **한 자리에서만 겁니다.** 컷 스무 군데에 손으로 박으면
+    #     언젠가 한 군데가 빠지고 그 컷만 사전으로 열리오.
+    cuts = opener_mod.apply(cuts, f, concern, axis4, you)
+
+    # ★ 「어떤 사람인가」 도 바닥에 둡니다 (2026-09-24).
+    #
+    #   값을 치르기 전에 **알아봐 주는 자리**가 없으면 더 듣고 싶어질
+    #   까닭이 없소. 이 집이 무료에 첫 관점 컷 하나를 연 것과 같은
+    #   까닭이오 — 들어 본 적 없는 사람을 더 듣고 싶어질 수는 없소.
+    #   깊이는 그대로 값 뒤에 있습니다. 무료는 **여섯 면 가운데 앞쪽**
+    #   이고, 짜임·때·얼굴은 안 건드립니다.
+    FREE_FLOOR = {"chart", "portrait", "spine", "topic_ask", "solace",
+                  "closing_cut"}
     if lens_id and _lens_price(lens_id) > 0:
         for cut in cuts:
             if cut["id"] in {"spine_depth", "spine_scene", "lens_bridge"}:
@@ -2140,6 +2198,11 @@ def apply_view(cuts: list, view: dict) -> list:
         # ★ 한 줄은 **셈 바로 뒤, 물은 자리 앞**입니다 (2026-09-11).
         #   무엇을 물었든 먼저 「이 사람이 누구인가」 가 서야 나머지
         #   서른 컷이 그 한 줄을 증명하는 자리가 됩니다.
+        # ★ 사람이 먼저요 (2026-09-24). 글자를 보여 줬으면 그다음은
+        #   그 글자가 **누구인지**요. 여태 이 자리가 비어서, 손님은
+        #   명식 표 다음에 바로 명리 설명으로 들어갔습니다.
+        if c["id"] == "portrait":
+            return (0, 0.4)
         if c["id"] == "spine":
             return (0, 0.5)
         if c["id"] == "spine_depth":

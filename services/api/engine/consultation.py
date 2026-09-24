@@ -320,16 +320,19 @@ def _pungun_first_reading_v3(f, concern: str, *, name="풍운도령") -> str:
         },
     }
     row = cases.get(concern, cases["work"])
+    # ★ 뱅크는 하오체 한 벌 — 합쇼체로 쓰면 `voice.speak` 가 손댈 어미가
+    #   없어 이 글만 스무 명에게 똑같이 나갑니다 (이 파일 위 주석과 같은 규칙).
+    from .bank import josa as _josa
     return (
         '<div class="specialist-opening first-reading-v3">'
         f'<p class="opening-label">{escape(name)} · 첫 해석</p>'
-        f'<h3>이 해석에서 먼저 파악하는 것</h3><p class="reading-target"><strong>{escape(row["target"])}</strong>을 봅니다.</p>'
+        f'<h3>이 해석에서 먼저 파악하는 것</h3><p class="reading-target"><strong>{escape(row["target"])}</strong>{_josa(row["target"], "을", "를")} 보오.</p>'
         f'<h3>핵심 결론</h3><p>{escape(row["verdict"])}</p>'
         f'<h3>이 사람에게 반복되는 장면</h3><p>{escape(row["scene"])}</p>'
-        f'<h3>왜 이렇게 읽었는가</h3><p class="opening-evidence">명식의 중심 흐름은 {escape(f.flow)} {flow_count}개, 다음 흐름은 {escape(next_group)} {next_count}개입니다. '
-        f'이 숫자 자체가 성격을 증명하는 것은 아니며, 위 장면을 읽는 계산상의 출발점입니다.</p>'
+        f'<h3>왜 이렇게 읽었는가</h3><p class="opening-evidence">명식의 중심 흐름은 {escape(f.flow)} {flow_count}개, 다음 흐름은 {escape(next_group)} {next_count}개요. '
+        f'이 수가 성격을 증명하는 것은 아니오. 위 장면을 읽는 셈의 출발점이오.</p>'
         f'<h3>오늘 바꿀 한 가지</h3><p class="opening-action"><strong>{escape(row["action"])}</strong></p>'
-        '<p class="opening-boundary">여기까지가 첫 해석입니다. 아래 추가 질문은 이 장면이 실제 경험과 맞는지 확인하고, 다음 해석의 초점을 좁히기 위한 것입니다.</p>'
+        '<p class="opening-boundary">여기까지가 첫 해석이오. 아래 물음은 이 장면이 실제로 겪은 일과 맞는지 보고, 다음 해석에서 볼 자리를 좁히려는 것이오.</p>'
         '</div>'
     )
 

@@ -9,6 +9,63 @@
 .hook-chapter>summary small {display:block;margin-top:4px;color:var(--paper2);font-size:13px}
 .hook-chapter>summary:focus-visible {outline:2px solid var(--gold);outline-offset:3px}
 .hook-chapter>.blk {margin:0;padding:16px 0 24px;border:0}
+/* ── 사람 줄 — 컷마다 첫 문장을 사람으로 ─────────────────────
+   ★ 본문보다 조금 앞으로 내밀되 제목처럼 보이면 안 되오. 이건
+     제목이 아니라 **첫 문장**이라, 읽는 흐름이 여기서 시작하오. */
+.op-you {margin:0 0 14px;padding-left:12px;border-left:2px solid var(--gold);
+  color:var(--paper);font-size:15px;line-height:1.9}
+.op-you b {color:var(--gold);font-weight:600}
+@media(max-width:480px){.op-you{font-size:14.5px;padding-left:10px}}
+
+/* ── 어떤 사람인가 — 사람을 그리는 자리 ─────────────────────
+   ★ 서버가 새 클래스를 내려보내거든 그 클래스가 화면에 있는지 보시오.
+     한 번 겪은 자리요 — .dmap 도 .first-reading-exception 도 CSS 가
+     한 줄도 없이 나갔습니다. */
+.pt-lead {margin:0 0 16px;color:var(--paper2);font-size:14px;line-height:1.75}
+.pt-lead b {color:var(--gold);font-weight:600}
+/* 면 하나에 문단 하나. 머리말은 표지판이라 말투를 안 타오. */
+.pt-face {margin:0 0 14px;line-height:1.95;color:var(--paper)}
+.pt-face b {display:block;margin-bottom:3px;color:var(--gold);font-size:12px;
+  letter-spacing:.04em;font-weight:600}
+.pt-face:last-of-type {margin-bottom:0}
+/* 센 값 — 그림 **아래**요. 위에 두면 첫 문단이 강의가 되오. */
+.pt-count {margin:16px 0 0;color:var(--paper3);font-size:12px;line-height:1.8;
+  letter-spacing:-.01em}
+.pt-count b {color:var(--paper2);font-weight:600}
+/* 아닌 줄은 빼라고 적는 자리 — 단정문 뒤에 반드시 서야 하오. */
+.pt-close {margin:18px 0 0;padding-top:14px;border-top:1px solid var(--line);
+  color:var(--paper3);font-size:13px;line-height:1.8}
+.pt-close b {color:var(--paper2);font-weight:600}
+@media(max-width:480px){.pt-face{line-height:1.85}}
+
+/* ── 첫 해석 v3 — 가름 · 센 값 · 반증 ─────────────────────────
+   ★ 서버가 새 클래스를 내려보내거든 그 클래스가 화면에 있는지 보시오.
+     v2 의 .first-reading-exception 은 CSS 가 **한 줄도 없어서**, 손님을
+     지키려고 붙인 줄이 본문과 똑같은 꼴로 묻혀 나갔습니다.
+   ★ 여기 자리는 화면 이름(.phone[data-screen]) 에 안 매답니다.
+     훅은 진입 화면 밖에서도 열리오. */
+.hook-chapter .fr-said {margin:0 0 14px;color:var(--paper2);font-size:14px;line-height:1.7}
+.hook-chapter .fr-said b {color:var(--gold);font-weight:600}
+.hook-chapter .fr-turn {margin:0 0 14px;padding:10px 14px;border-left:2px solid var(--gold);background:#c6a66d12;color:var(--paper2);font-size:14px;line-height:1.7}
+/* 센 값 — 손님이 만세력을 펴고 그대로 댈 수 있는 줄이오. 본문과
+   결을 달리해 **재는 말**로 보이게 둡니다. */
+.hook-chapter .fr-count {margin:14px 0 0;color:var(--paper3);font-size:13px;line-height:1.85;letter-spacing:-.01em}
+.hook-chapter .fr-count b {color:var(--paper);font-weight:600}
+/* 반증 조건 — 틀릴 수 있어야 맞았을 때 값이 서오. */
+.hook-chapter .fr-wrong {margin:16px 0 0;padding:12px 14px;border:1px dashed var(--line2);border-radius:10px;color:var(--paper2);font-size:14px;line-height:1.8}
+.hook-chapter .fr-wrong b {color:var(--paper);font-weight:600}
+/* 손님을 지키는 줄 — 형편이 만든 일을 성격 탓으로 돌리지 않소. */
+.hook-chapter .fr-guard {margin:12px 0 0;color:var(--paper3);font-size:13px;line-height:1.8}
+/* 확인하는 법 — 오늘 하나 바로 아래. 시키는 말이 **아니오.** */
+.hook-chapter .fr-check {margin:12px 0 0;color:var(--paper2);font-size:14px;line-height:1.8}
+.hook-chapter .first-reading-scene {margin:14px 0 0;font:500 21px/1.6 var(--serif);letter-spacing:-.03em;color:var(--paper)}
+.hook-chapter .first-reading-scene b {color:var(--gold);font-weight:500}
+.hook-chapter .first-reading-name {margin:0 0 10px;color:var(--paper3);font-size:12px}
+.hook-chapter .first-reading-emphasis {margin:0;border-left:2px solid var(--gold);padding-left:16px;color:var(--paper);line-height:1.95}
+.hook-chapter .first-reading-action {margin:0;padding:18px;background:#75875718;border-radius:10px;color:var(--paper);line-height:1.9}
+.hook-chapter .first-reading-action b {color:var(--gold);font-weight:600}
+@media(max-width:480px){.hook-chapter .first-reading-scene{font-size:19px}.hook-chapter .first-reading-action{padding:14px}}
+
 .product-action {color:var(--gold);border-top:1px solid var(--line);padding-top:12px;font-weight:600}
 .checkout-jump {display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:10px 14px;margin:16px 0;background:var(--bg);border:1px solid var(--line);border-radius:12px;font-size:14px}
 .checkout-jump a {display:inline-flex;align-items:center;min-height:44px;color:var(--gold);text-underline-offset:4px}

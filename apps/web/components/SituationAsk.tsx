@@ -37,6 +37,6 @@ export default function SituationAsk({spec,current,onSubmit,busy}:{
       {spec.options5.map(option=><button type="button" key={option.id} className={`op ${pick5===option.id?'on':''}`} aria-pressed={pick5===option.id} onClick={()=>setPick5(option.id)}><b>{option.label}</b></button>)}
     </div></>}
     <p className="ask-status" role="status">{ready?'이 상황을 기준으로 첫 풀이부터 좁혀 보겠습니다.':'가장 가까운 상황을 하나 골라주시오.'}</p>
-    <button className="btn" disabled={!ready||busy} onClick={()=>onSubmit({choice:pick,...(pick2?{choice2:pick2}:{}),...(pick3?{choice3:pick3}:{}),...(pick4?{choice4:pick4}:{}),...(pick5?{choice5:pick5}:{})})}>{busy?'준비하고 있소…':'이 상황으로 분석하기'}</button>
+    <button className="btn" disabled={!ready||busy} onClick={()=>onSubmit({choice:pick,...(pick2?{choice2:pick2}:{}),...(pick3?{choice3:pick3}:{}),...(pick4?{choice4:pick4}:{}),...(pick5?{choice5:pick5}:{})})}>{busy?'준비하는 중':'이 상황으로 분석하기'}</button>
   </section>;
 }

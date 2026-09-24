@@ -312,7 +312,7 @@ if (step === "a1") {
       </div>
       {s.hourKnown && ((s.hour ?? 0)>23 || s.minute>59) && <p className="warn" role="alert">시는 0~23, 분은 0~59 사이로 적어주시오.</p>}
       <button className="btn mt" disabled={!s.hourKnown || s.hour===null || s.hour>23 || s.minute>59} onClick={() => go("a4b")}>이 시간으로 이어가기</button>
-      <button className="btn gh" onClick={() => {s.set({hourKnown:false,hour:null,minute:0,chartId:null,features:null});go("a4b");}}>시간을 모르오 · 그대로 이어가기</button>
+      <button className="btn gh" onClick={() => {s.set({hourKnown:false,hour:null,minute:0,chartId:null,features:null});go("a4b");}}>시간을 모르겠습니다 · 이대로 진행</button>
       <p className="entry-footnote">다음은 성향 비교요. 선택하지 않고 바로 해석을 볼 수도 있소.</p>
       <details className="entry-faq"><summary>별칭도 적고 싶소</summary><p>풀이에서 그 이름으로 부르겠소.</p><button className="btn gh" onClick={() => go("a2")}>별칭 입력</button></details>
     </Shell>;
@@ -323,7 +323,7 @@ if (step === "a1") {
       <p className="entry-eyebrow">선택 · 나를 보는 또 하나의 시선</p>
       <h1 className="conversion-title">내가 생각하는 나와<br/>어디가 닮았을까.</h1>
       <p className="conversion-lead">아래 <b>열여섯 칸</b>에서 하나를 골라주시오.<br/>사주 해석과 나란히 놓고 함께 읽겠소.</p>
-      <button className="btn gh entry-skip" onClick={() => {s.set({axis4:null,hookReview:null});go("a6");}}>잘 모르오 · 사주만으로 보기</button>
+      <button className="btn gh entry-skip" onClick={() => {s.set({axis4:null,hookReview:null});go("a6");}}>잘 모르겠습니다 · 사주만으로 보기</button>
       <div className="entry-axis-grid" role="group" aria-label="성향 네 글자 선택">{AXIS4.map(t => <button key={t} className={`op ${s.axis4===t?'on':''}`} aria-pressed={s.axis4===t} onClick={() => s.set({axis4:t,hookReview:null})}>{t}</button>)}</div>
       <button className="btn mt" disabled={!s.axis4} onClick={() => go("a6")}>선택한 성향으로 무료 해석 보기</button>
       <p className="entry-footnote">성향 선택은 사주 계산을 바꾸지 않소.<br/>둘 중 어느 쪽이 진짜 그대인지<br/>판정하는 검사도 아니오.</p>
@@ -343,7 +343,7 @@ if (step === "a1") {
         </button>)}
       </div>
       <p className="entry-selection" aria-live="polite">{s.concernSet?ENTRY_QUESTIONS[s.concern].promise:'지금 마음이 가는 질문을 고르시오.'}</p>
-      <button className="btn" disabled={!s.concernSet} onClick={() => go("a5b")}>{s.concernSet?`${CONCERNS.find(c=>c.id===s.concern)?.label} 상황을 더 알려주기`:'고민을 하나 골라주시오'}</button>
+      <button className="btn" disabled={!s.concernSet} onClick={() => go("a5b")}>{s.concernSet?`${CONCERNS.find(c=>c.id===s.concern)?.label} 상황을 더 알려주기`:'고민을 하나 고르겠습니다'}</button>
     </Shell>;
   }
   if(step==="a5b"){

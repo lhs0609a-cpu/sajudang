@@ -40,16 +40,27 @@ AXIS_NAME = {"E": "드러나는", "I": "안으로 도는", "S": "현실을 딛�
              "J": "정해두는", "P": "열어두는"}
 
 
+#: 고민 이름. 이 이름**만으로** 된 dict 이 「고민 키 표」입니다.
+#: `engine/topic.CONCERN_KEYS` 와 같은 한 벌이어야 합니다.
+CONCERN_KEYS = frozenset({"money", "work", "love", "people", "dir", "health",
+                          "real_estate", "_"})
+
+
 @lru_cache(maxsize=1)
 def bank() -> dict:
     data = json.loads((SEED / "bank.json").read_text("utf-8"))
-    # 전용 부동산 문장은 editorial/topic에서 제공하고, 기존 은행 근거표는
-    # 재물 축을 안전한 계산 기반으로 재사용한다.
+    # 부동산은 **세는 축**을 재물과 같이 씁니다(둘 다 재성). 전용 문장이
+    # 있는 자리는 그 행이 이기고, 없는 자리만 재물 행을 빌립니다.
+    #
+    # ★ 키가 전부 고민 이름인 표에만 얹습니다 — `engine/topic.fill_concern`
+    #   과 같은 규칙입니다. 보기 표의 id 가 money 라서 고르는 칸에 같은
+    #   말이 두 번 들어간 사고가 있었습니다.
     def fill(node):
         if isinstance(node, dict):
             for value in list(node.values()):
                 fill(value)
-            if "money" in node and "real_estate" not in node:
+            if ("money" in node and "real_estate" not in node
+                    and set(node) <= CONCERN_KEYS):
                 node["real_estate"] = deepcopy(node["money"])
         elif isinstance(node, list):
             for value in node:
@@ -718,10 +729,16 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     ★ 공감률(“몇 명 중 몇 %”)은 여기서 만들지 않습니다.
       실응답 100건 이상 쌓인 문장만 화면에 노출합니다. (CLAUDE.md 절대 규칙 2)
     """
-    if concern == "real_estate":
-        # 은행 원문은 기존 재물 축을 계산 근거로 재사용하고,
-        # 부동산 전용 문장·질문은 topic/editorial에서 덧붙인다.
-        concern = "money"
+    # ★ 부동산을 돈으로 **갈아치우지 않습니다** (2026-09-24).
+    #
+    #   여기서 한 줄로 바꿔 놓으니 훅 다섯 마디가 돈과 **글자 그대로**
+    #   같았습니다 (587·654·574·586·766자 전부). 화면에는 「부동산」 칸이
+    #   따로 열려 있는데, 그걸 고른 손님은 돈을 고른 사람과 같은 글을
+    #   받았습니다 — 셈이 같은 것과 **글이 같은 것**은 다릅니다.
+    #
+    #   세는 축은 그대로 재물입니다(둘 다 재성). 없는 행은 `_pick` 이
+    #   재물 행으로 물러섭니다. 다만 물으신 낱말과 부동산 전용 행이
+    #   있는 자리는 부동산으로 섭니다.
     if concern not in meta()["concerns"]:
         raise BankError("모르는 고민 축: %r" % (concern,))
 

@@ -3,127 +3,99 @@
     "voice": "hao",
     "you": "그대",
     "concerns": [
-      "money",
-      "work",
-      "love",
-      "people",
-      "dir",
-      "health"
-    ],
-    "default_concern": "money"
+      "work"
+    ]
   },
   "baegun": {
     "voice": "hao",
     "you": "당신",
     "concerns": [
       "dir",
-      "work",
-      "love",
-      "people",
-      "money",
       "health"
-    ],
-    "default_concern": "dir"
+    ]
   },
   "cheongam": {
     "voice": "hage",
     "you": "자네",
     "concerns": [
-      "dir",
       "work"
-    ],
-    "default_concern": "dir"
+    ]
   },
   "sigye": {
     "voice": "hapsyo",
     "you": "이름",
     "you_else": "자네",
     "concerns": [
-      "dir",
       "work"
-    ],
-    "default_concern": "dir"
+    ]
   },
   "eunbyeol": {
     "voice": "haeyo",
     "you": "당신",
     "concerns": [
-      "people",
-      "dir"
-    ],
-    "default_concern": "people"
+      "people"
+    ]
   },
   "jeokhyeol": {
     "voice": "banmal",
     "you": "너",
     "concerns": [
-      "love"
-    ],
-    "default_concern": "love"
+      "love",
+      "people"
+    ]
   },
   "monghwa": {
     "voice": "hao",
     "you": "이름",
     "you_else": "너",
     "concerns": [
-      "dir",
       "people"
-    ],
-    "default_concern": "dir"
+    ]
   },
   "seoyeok": {
     "voice": "hao",
     "you": "손님",
     "concerns": [
       "dir"
-    ],
-    "default_concern": "dir"
+    ]
   },
   "paeseon": {
     "voice": "hage",
     "you": "이름",
     "you_else": "자네",
     "concerns": [
-      "dir",
-      "money"
-    ],
-    "default_concern": "dir"
+      "dir"
+    ]
   },
   "myeonsang": {
     "voice": "hapsyo",
     "you": "그쪽",
     "concerns": [
-      "people",
-      "work"
-    ],
-    "default_concern": "people"
+      "health",
+      "people"
+    ]
   },
   "wolha": {
     "voice": "haeyo",
     "you": "이름",
     "you_else": "자네",
     "concerns": [
-      "love",
-      "people"
-    ],
-    "default_concern": "love"
+      "love"
+    ]
   },
   "hongmae": {
     "voice": "banmal",
     "you": "그쪽",
     "concerns": [
-      "love",
-      "people"
-    ],
-    "default_concern": "love"
+      "love"
+    ]
   },
   "yeondam": {
     "voice": "hapsyo",
     "you": "당신",
     "concerns": [
       "love"
-    ],
-    "default_concern": "love"
+    ]
   },
   "hwagyeong": {
     "voice": "hapsyo",
@@ -131,54 +103,47 @@
     "concerns": [
       "people",
       "love"
-    ],
-    "default_concern": "people"
+    ]
   },
   "haengsu": {
     "voice": "hao",
     "you": "손님",
     "concerns": [
       "money",
-      "work"
-    ],
-    "default_concern": "money"
+      "work",
+      "real_estate"
+    ]
   },
   "hunjang": {
     "voice": "hage",
     "you": "이름",
     "you_else": "너",
     "concerns": [
-      "work",
-      "dir"
-    ],
-    "default_concern": "work"
+      "work"
+    ]
   },
   "yakcho": {
     "voice": "hao",
     "you": "그대",
     "concerns": [
       "health"
-    ],
-    "default_concern": "health"
+    ]
   },
   "ilgwan": {
     "voice": "hao",
     "you": "그쪽",
     "concerns": [
       "dir",
-      "work"
-    ],
-    "default_concern": "dir"
+      "money",
+      "real_estate"
+    ]
   },
   "nopa": {
     "voice": "hage",
     "you": "자네",
     "concerns": [
-      "dir",
-      "people",
-      "work"
-    ],
-    "default_concern": "dir"
+      "dir"
+    ]
   },
   "dongja": {
     "voice": "haeyo",
@@ -186,14 +151,6 @@
     "you_else": "그쪽",
     "you_m": "아저씨",
     "you_f": "아주머니",
-    "concerns": [
-      "dir",
-      "money",
-      "work",
-      "love",
-      "people",
-      "health"
-    ],
-    "default_concern": "dir"
+    "concerns": []
   }
 }

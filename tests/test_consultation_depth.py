@@ -40,7 +40,8 @@ def test_method_is_delivered_once_and_paid_body_does_not_leak(features, characte
 
 def test_flow_and_concern_change_free_depth():
     assert len({free_depth.depth_html(flow) for flow in free_depth.FLOW}) == 5
-    assert len({free_depth.scene_html(concern) for concern in CONCERNS}) == 6
+    # 고민 칸 수를 손으로 적지 않습니다 — 표가 가진 만큼 셉니다.
+    assert len({free_depth.scene_html(concern) for concern in CONCERNS}) == len(CONCERNS)
     for flow in free_depth.FLOW:
         assert guard.check(free_depth.depth_html(flow))[0]
     for concern in CONCERNS:

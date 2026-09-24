@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException
 import store
 from engine import bank, lens as lens_mod, topic as topic_mod, voice as voice_mod
 from engine import character_consultation as character_consultation_mod
+from engine import portrait as portrait_mod
 from engine.first_reading import build_first_reading, CACHE_VERSION as READING_VERSION
 from engine.features import Features
 from routers.chart import load_features
@@ -26,7 +27,9 @@ def post_hook(req: HookRequest) -> HookResponse:
     #   본 적도 없는 사랑 갈래 목록이오. `report.build_report` 는
     #   이미 같은 자리에서 내려놓고 있었습니다. 두 자리가 갈리면
     #   한쪽만 터집니다.
-    topic = req.topic if concern == req.concern else None
+    #   ★ 2026-09-24 — 갈아치우기를 뺐으니, 어긋남은 **고민을 바꿀 때**
+    #     납니다. 목록에 없는 갈래만 골라 내려놓습니다.
+    topic = topic_mod.keep_valid(concern, req.topic)
     # ★ 캐시 열쇠에 misses 를 넣습니다. 안 넣으면 방향을 튼 훅이
     #   안 튼 훅을 덮어써서, 다음 손님이 남의 응답으로 고쳐진 훅을
     #   받습니다.
@@ -48,10 +51,15 @@ def post_hook(req: HookRequest) -> HookResponse:
 
     f = Features(**raw)
     try:
+        # ★ 손님이 고른 다섯을 **첫 해석에도 넘깁니다** (2026-09-23).
+        #
+        #   v2 는 이 인자가 아예 없어서, 객관식 다섯을 물어 놓고
+        #   다섯 마디가 한 개도 안 봤습니다. 손님이 「제대로 물어보는
+        #   것도 아니다」 한 것이 맞는 말이었소.
         segs = build_first_reading(
             f, concern, req.axis4, name=req.name,
             you=lens_mod.you_word(req.lens_id, req.name, raw.get("sex")),
-            misses=req.misses)
+            misses=req.misses, topic=topic)
         if topic:
             focused = topic_mod.ask_cut(f, concern, topic)
             if focused:
@@ -59,7 +67,7 @@ def post_hook(req: HookRequest) -> HookResponse:
                     'stage':'topic', 'label':focused['title'],
                     'html':focused['html'], 'source':focused['source'],
                     'source_below':True,
-                    'statement_id':'first-reading-v2-topic:' + focused['statement_id'],
+                    'statement_id':'first-reading-v3-topic:' + focused['statement_id'],
                     'question':'지금 말씀하신 상황과 맞닿아 있소?',
                     'yes':'그 장면부터 놓고 이어서 보겠소.',
                     'no':'다르게 느껴지는 부분은 억지로 맞추지 않겠소. 다음 관점에서 다시 보시오.',
@@ -79,6 +87,30 @@ def post_hook(req: HookRequest) -> HookResponse:
                     'yes':specialist['close'],
                     'no':'이 관점이 전부는 아니오. 맞지 않는 대목은 버리고 다른 상담자의 눈으로 다시 보겠소.',
                 })
+        # ★ **사람부터 그립니다** (2026-09-24).
+        #
+        #   손님이 짚었습니다 — 「사주가 추상적이다. 너는 이런 사람이야
+        #   하고 디테일하게 말해 줄 수 없냐」. 맞는 말이었소. 이 집의
+        #   첫 화면은 여태 **고민에 대한 판정**으로 시작했는데, 손님이
+        #   먼저 바라는 것은 판정이 아니라 **알아봐 주는 것**이오.
+        #   알아본 다음에야 판정에 값이 서오.
+        #
+        #   값을 치르기 전에 세 면을 보여 줍니다. 나머지는 풀이에 있소.
+        port = portrait_mod.build(
+            f, req.lens_id, 3,
+            you=lens_mod.you_word(req.lens_id, req.name, raw.get("sex")))
+        if port:
+            segs.insert(0, {
+                'stage': 'portrait', 'label': portrait_mod.TITLE,
+                'html': port['html'], 'source': port['source'],
+                'source_below': True,
+                'statement_id': port['statement_id'],
+                # ★ 한 물음에 호칭을 두 번 넣지 마시오. 이름으로 부르는
+                #   캐릭터에게서 「여기 적힌 서연이 서연과…」 가 됩니다.
+                'question': '여기 적힌 사람이 그대와 얼마나 닮았소?',
+                'yes': '그러면 이 사람을 놓고 물으신 일을 보겠소.',
+                'no': '맞지 않는 그림이오. 억지로 끼워 맞추지 않겠소 — 아닌 줄은 빼고 읽으시오.',
+            })
     except (bank.BankError, topic_mod.TopicInputError,
             character_consultation_mod.CharacterConsultationError) as e:
         # 뱅크에 없는 조합이면 지어내지 않고 알린다

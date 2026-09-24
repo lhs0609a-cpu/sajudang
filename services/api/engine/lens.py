@@ -94,11 +94,34 @@ def view(lens_id: Optional[str]) -> dict:
 
 
 def concern_for(lens_id: Optional[str], concern: str) -> str:
-    if concern == 'real_estate':
-        return concern
-    profile = view(lens_id)
-    allowed = profile.get('concerns')
-    return profile.get('default_concern', concern) if allowed and concern not in allowed else concern
+    """
+    손님이 고른 고민을 **그대로** 답한다.
+
+    ★ 여기서 조용히 갈아치우고 있었습니다 (2026-09-24).
+
+      캐릭터가 안 보는 고민이면 그 캐릭터의 기본 고민으로 바꿔서
+      답했습니다. 알리지도 않았습니다. 재 보니 —
+
+        · 캐릭터 스무 명 가운데 **열일곱**이 고민을 바꿨고,
+          캐릭터 20 × 고민 7 = 140짝 가운데 **51%**에서 물음이 바뀌었소.
+        · 「몸」 을 물은 손님은 스무 명 가운데 **넷**에게서만 몸 얘기를
+          들었고(20%), 「돈」 은 다섯(25%)이었소.
+        · 그래서 본문이 **다른 고민 이름을 댔습니다** — 돈을 물은 손님에게
+          「자네가 물으러 오신 고민은 갈 곳이네」.
+        · 고민만 바꿔 다시 물어도 명식 **85%**에서 유료 리포트가 글자
+          그대로 같은 짝이 나왔소. 값을 두 번 치를 까닭이 없는 것이오.
+        · 릴레이가 권한 1순위를 사면 **다섯에 하나**가 이 자리였소.
+
+      이 집은 「레이블과 결과가 어긋나는 버튼」 을 금하고 있습니다.
+      물음을 바꾸는 것은 그보다 더한 것이오 — 값을 치른 손님이 자기가
+      **무엇을 물었는지**를 화면에서 잃습니다.
+
+    ★ 캐릭터의 전문은 없애지 않습니다. 안 보는 자리를 물으면 그 사람이
+      **아니라고 말합니다** — `LENS_OFF` 가 그 줄이고, 스무 명 몫이 이미
+      적혀 있었습니다. 갈아치우는 동안 그 줄은 한 번도 안 나갔소.
+      릴레이도 맞는 사람을 앞에 세웁니다 (`relay.covers` · concern_weight).
+    """
+    return concern
 
 
 def you_of(lens_id: Optional[str], name: str = "",

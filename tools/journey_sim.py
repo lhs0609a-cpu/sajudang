@@ -56,7 +56,19 @@ SEED = 20260827
 
 # 진입 캐릭터. 화면과 같아야 합니다 — apps/web/lib/lenses.ts DEFAULT_LENS
 ENTRY_LENS = "pungun"
-CONCERNS = ("money", "work", "love", "people", "dir", "health")
+def _concerns() -> tuple:
+    """고민 칸은 **제품에서** 받습니다 — 손으로 적으면 새 칸을 못 봅니다."""
+    import typing
+    import sys as _s
+    from pathlib import Path as _P
+    api = _P(__file__).resolve().parents[1] / "services" / "api"
+    if str(api) not in _s.path:
+        _s.path.insert(0, str(api))
+    from schemas.api import Concern
+    return tuple(typing.get_args(Concern))
+
+
+CONCERNS = _concerns()
 AXIS_LETTERS = (("E", "I"), ("S", "N"), ("T", "F"), ("J", "P"))
 
 # 실제 유입 연령대. 1955~2010 은 문턱 재기용 표본이라 더 넓게 잡습니다.

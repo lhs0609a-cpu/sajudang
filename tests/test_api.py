@@ -80,7 +80,9 @@ def test_hook_returns_segments(client, chart_id):
                                       "axis4": "INFP", "lens_id": "pungun"})
     assert r.status_code == 200
     segs = r.json()["segments"]
-    assert [s["stage"] for s in segs] == ["0", "1", "2", "2.5", "3"]
+    # ★ 「어떤 사람인가」 가 맨 앞에 섭니다 (2026-09-24). 손님이 먼저
+    #   바라는 것은 판정이 아니라 **알아봐 주는 것**이오.
+    assert [s["stage"] for s in segs] == ["portrait", "0", "1", "2", "2.5", "3"]
     assert all(s["statement_id"] for s in segs)
 
 
@@ -111,9 +113,9 @@ def test_all_three_answers_reach_the_first_reading(client,chart_id):
         'chart_id':chart_id,'concern':'love','lens_id':'pungun',
         'topic':{'choice':'married','choice2':'trust','choice3':'marry'}})
     assert response.status_code==200,response.text
-    first=response.json()['segments'][0]
-    assert all(word in first['html'] for word in ('부부 관계','믿음·거짓말 문제','결혼 생활이 맞을지'))
-    assert ':married:trust:marry:' in first['statement_id']
+    asked=next(s for s in response.json()['segments'] if s['stage']=='topic')
+    assert all(word in asked['html'] for word in ('부부 관계','믿음·거짓말 문제','결혼 생활이 맞을지'))
+    assert ':married:trust:marry:' in asked['statement_id']
 
 
 def test_character_answers_create_a_distinct_specialist_segment(client,chart_id):
@@ -137,9 +139,9 @@ def test_love_situation_changes_the_first_reading(client,chart_id,choice):
         'topic':{'choice':choice}})
     assert response.status_code==200,response.text
     segments=response.json()['segments']
-    assert segments[0]['stage']=='topic'
-    assert segments[0]['statement_id'].startswith('first-reading-v2-topic:ask:love:'+choice)
-    assert len(segments)==6
+    assert [s['stage'] for s in segments][:2]==['portrait','topic']
+    assert segments[1]['statement_id'].startswith('first-reading-v3-topic:ask:love:'+choice)
+    assert len(segments)==7
 
 
 def test_unknown_situation_is_rejected_instead_of_guessed(client,chart_id):
@@ -164,17 +166,19 @@ def test_hook_response_carries_no_bank_internals(client, chart_id):
 
 def test_a_stale_situation_does_not_break_the_hook(client, chart_id):
     """
-    ★ 손님이 돈을 물으며 「사업·장사」 를 골라 두고, 사랑만 보는
-      적혈도사를 골랐습니다 (2026-09-23).
+    ★ 손님이 돈에서 「사업·장사」 를 골라 두고, 고민을 사랑으로 바꿨습니다.
 
-      고민은 그 사람이 보는 자리로 갈리는데(`lens.concern_for`) 고른
-      갈래는 돈에서 고른 것이라, 훅이 422 로 넘어졌습니다 — 화면에는
-      「훅을 만들지 못했소」 만 뜨고, 까닭은 **손님이 본 적도 없는**
-      사랑 갈래 목록이오. 리포트는 이미 같은 자리에서 갈래를
-      내려놓고 있었습니다. 두 자리가 갈리면 한쪽만 터집니다.
+      고른 갈래는 돈 목록에서 온 것이라 사랑에는 없습니다. 그때 훅이
+      422 로 넘어졌습니다 — 화면에는 「훅을 만들지 못했소」 만 뜨고,
+      까닭은 손님이 본 적도 없는 갈래 목록이오. 리포트는 이미 같은
+      자리에서 갈래를 내려놓고 있었습니다. 두 자리가 갈리면 한쪽만
+      터집니다.
+
+    ★ 2026-09-24 — 캐릭터가 고민을 갈아치우는 일은 없어졌습니다
+      (`lens.concern_for`). 그래서 어긋남은 **고민을 바꿀 때** 납니다.
     """
     stale = client.post("/v1/hook", json={
-        "chart_id": chart_id, "concern": "money", "lens_id": "jeokhyeol",
+        "chart_id": chart_id, "concern": "love", "lens_id": "jeokhyeol",
         "topic": {"choice": "biz"}})
     assert stale.status_code == 200, stale.text
     stages = [s["stage"] for s in stale.json()["segments"]]
@@ -634,12 +638,16 @@ def test_hook_turns_the_axis_after_two_misses(client, chart_id):
     after = _hook(client, chart_id, bank.TURN_AT)["2"]
 
     assert before["html"] != after["html"], "방향을 안 틀었습니다"
-    assert "맞지 않는 부분" in _bare(after["html"])
-    # 튼 단은 다른 문장으로 집계돼야 합니다 — 어긋난 축을 버리는 신호입니다
+    # ★ v3 은 포기 문구로 바꾸지 않습니다 — **둘째 후보로 다시 가릅니다.**
+    #   손님이 지운 것은 후보를 줄인 것이지 물음을 접은 것이 아닙니다.
+    assert before["statement_id"].split(":")[2] \
+        != after["statement_id"].split(":")[2], "판정이 그대로입니다"
     assert after["statement_id"] != before["statement_id"]
-    # 경험 확인으로 바꾼 이유를 설명하고 계산값을 바꿨다고 말하지 않는다.
-    assert "앞선 두 응답" in after["source"]
-    assert "사주 계산값은 바뀌지 않았소" in after["source"]
+    # 왜 바꿨는지 말하고, 계산을 바꿨다고는 말하지 않는다.
+    assert "둘째 후보" in after["source"]
+    assert "사주 셈은 안 바뀌었소" in after["source"]
+    turned = _hook(client, chart_id, bank.TURN_AT)["0"]
+    assert "다른 글자로" in _bare(turned["html"])
 
 
 def test_hook_does_not_turn_before_the_threshold(client, chart_id):

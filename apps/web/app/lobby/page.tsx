@@ -323,7 +323,7 @@ function LobbyInner() {
   /* b1 · 진열대 */
   return (
     <Shell screen="b1" title="진열대">
-      <button className="btn gh" onClick={() => router.push("/fortune")}>대운·세운·월운·궁합 상세 상품 보기</button>
+      <button className="btn gh" onClick={() => router.push("/fortune")}>대운(십 년 단위 흐름)·세운(해마다의 흐름)·월운·궁합 상세 상품 보기</button>
       <Scene id="shelf" />
       <p className="conversion-kicker">다시 마음에 남은 질문</p>
       <h1 className="reading-title">오늘은 어떤 이야기가<br />궁금하오?</h1>

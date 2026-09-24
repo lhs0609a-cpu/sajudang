@@ -38,7 +38,14 @@ from engine.features import build_features               # noqa: E402
 from engine.report import build_report                   # noqa: E402
 
 TAG = re.compile(r"<[^>]+>")
-CONCERNS = ("money", "work", "love", "people", "dir", "health")
+def _concerns() -> tuple:
+    """제품이 열어 둔 고민 칸. 손으로 적으면 새 칸이 열릴 때 못 봅니다."""
+    import typing
+    from schemas.api import Concern
+    return tuple(typing.get_args(Concern))
+
+
+CONCERNS = _concerns()
 
 
 def _f(spec=(1993, 11, 25, 15, 55, "M")):

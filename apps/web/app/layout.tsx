@@ -44,6 +44,22 @@ export const metadata: Metadata = {
     images: ["/og.jpg"],
   },
   robots: { index: true, follow: true },
+  /*
+   * 검색엔진 소유 확인 — 네이버 서치어드바이저 (2026-09-24).
+   *
+   * ★ `<head>` 에 손으로 태그를 박지 않습니다. App Router 는 이 표를 보고
+   *   `<meta name="naver-site-verification" content="…">` 를 찍습니다.
+   *   손으로 박으면 layout 과 메타가 두 벌이 되어, 다음에 고치는 사람이
+   *   한쪽만 고칩니다.
+   *
+   * ★ 이 값은 **네이버가 준 확인 문자열**이라 비밀이 아닙니다. 확인이
+   *   끝나도 지우지 마시오 — 지우면 소유 확인이 풀립니다.
+   */
+  verification: {
+    other: {
+      "naver-site-verification": "ec83b596f60365be0bfc51d163e49c134d7f6c6d",
+    },
+  },
 };
 
 export const viewport: Viewport = {

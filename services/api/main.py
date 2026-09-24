@@ -25,6 +25,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa
 
 import db                                            # noqa: E402
 import store                                         # noqa: E402
+from adminview import AdminViewMiddleware             # noqa: E402
 from guard_middleware import GuardMiddleware         # noqa: E402
 from member_middleware import MemberSessionMiddleware
 from routers import account as member_router
@@ -113,6 +114,10 @@ app.add_middleware(
 )
 app.add_middleware(GuardMiddleware)
 app.add_middleware(MemberSessionMiddleware)
+# ★ 주인 자리 — 머리표를 한 번 보고 **요청 하나 동안** 적어 둡니다.
+#   여는 것은 값으로 잠긴 자리뿐이고 브레이크는 그대로 돕니다.
+#   (services/api/adminview.py)
+app.add_middleware(AdminViewMiddleware)
 
 
 # ══════════════════════════════════════════════════════════

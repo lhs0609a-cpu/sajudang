@@ -269,7 +269,12 @@ def test_the_evidence_line_keeps_its_own_voice(reports, f):
         base = {c['id']:c['source'] for c in original['cuts']}
         you = lens_mod.you_of(lid, "", "F")
         for c in rep["cuts"]:
-            if c["id"] in base and not c["id"].startswith("lc_"):
+            # ★ 「어떤 사람인가」 도 뺍니다 (2026-09-24). 관점 컷과 같은
+            #   까닭이오 — 그 사람이 **어느 면을 먼저 보는가**가 달라서
+            #   근거에 대는 값도 달라지오. 사주가 달라진 것이 아니오.
+            if c["id"] == "portrait" or c["id"].startswith("lc_"):
+                continue
+            if c["id"] in base:
                 assert c["source"] == V.speak(V.address(base[c["id"]], you), lens_mod.view(lid)['voice']), (lid, c["id"])
 
 

@@ -16,6 +16,7 @@ from . import bank as bank_mod
 from . import guard
 from . import lens as lens_mod
 from . import rarity as rarity_mod
+from . import terms as terms_mod
 from .bank import element_word, josa
 from .constants import ELEMENT_OF_GAN
 
@@ -187,6 +188,23 @@ def build_summary(chart, f, concern: str = "love",
         '<div class="tea"><b>%s</b><p>%s</p></div>'
         % (element_word(f.yongsin), tea["name"], tea["text"])))
 
+    # ★ 분석지도 **풀이 층을 거칩니다** (2026-09-24).
+    #
+    #   리포트는 컷마다 `terms.gloss` 를 거치는데(engine/report) 이 한 장은
+    #   안 거치고 있었습니다. 그래서 대운 표의 십신(상관·정관·편인)과
+    #   「신살 6 · 공망 辰巳」 같은 근거 줄이 **풀이 없이** 나갔습니다 —
+    #   1만 명 가운데 용신·대운·공망은 95%, 십신은 70%가 그랬습니다.
+    #
+    #   이 한 장은 **공유로 처음 들어온 사람**이 보는 자리라(docs/15)
+    #   어려운 말이 가장 위험한 데입니다. 처음 만나는 자리에서 한 번만
+    #   풉니다 — `seen` 을 한 장에 한 벌로 돌려 씁니다.
+    seen: set = set()
+    for sec in secs:
+        sec["source"] = terms_mod.gloss(sec.get("source") or "", seen,
+                                        concern, getattr(f, "sex", None))
+        sec["html"] = terms_mod.gloss(sec.get("html") or "", seen,
+                                      concern, getattr(f, "sex", None))
+
     return {
         "name": display_name or None,
         "lens": lens,
@@ -216,7 +234,10 @@ def build_summary(chart, f, concern: str = "love",
         "sections": secs,
         "sinsal": [{"key": s["key"], "name": s["name"], "hanja": s["hanja"],
                     "kind": s["kind"], "at": s["at"]} for s in f.sinsal],
-        "caveats": _caveats(f),
+        # ★ 단서 줄도 풀이 층을 거칩니다 — 「망종 절입 전후」 처럼
+        #   어려운 말이 여기서 처음 나오는 사람이 있습니다.
+        "caveats": [terms_mod.gloss(x, seen, concern, getattr(f, "sex", None))
+                    for x in _caveats(f)],
     }
 
 

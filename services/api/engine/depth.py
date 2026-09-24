@@ -203,6 +203,41 @@ STRENGTH_COUNTER = {
 }
 
 
+def _weak_counter(f, weak: str) -> str:
+    """
+    「없다」고 한 것을 되짚는 줄.
+
+    ★ **없지 않은 것을 없다고 했습니다** (2026-09-24).
+
+      `weak_el` 은 「가장 적은 것」이라 하나 있어도 뽑힙니다. 그런데 이
+      줄은 「여덟 글자에 안 보인다」 고 단정했습니다. 丙戌 丙申 丙子
+      乙未 인 손님에게 「나무가 없다고 한 것도… 여덟 글자에 안 보인다는
+      말이지」 가 나갔는데, 시주 천간에 乙이 **보입니다.**
+
+      손님이 만세력을 펴고 셀 수 있는 자리에서 틀리면, 그 뒤 글은 다
+      의심받습니다. 그래서 **보이는 글자로** 세어 말을 가릅니다 —
+      0자면 「없다」, 한 자라도 보이면 「가장 얇다」.
+      (이 컷은 19,900원 자리에서만 열립니다. 값을 치른 사람입니다.)
+    """
+    from .constants import ELEMENT_OF_GAN, ELEMENT_OF_JI
+    seen = 0
+    for p in f.pillars:
+        gz = p["gz"]
+        seen += (ELEMENT_OF_GAN[gz[0]] == f.weak_el) + (ELEMENT_OF_JI[gz[1]] == f.weak_el)
+    n_word = "여덟" if len(f.pillars) == 4 else "여섯"
+    if seen == 0:
+        return ('<p class="tale">%s 없다고 한 것도 마찬가지요. %s 글자에 '
+                '안 보인다는 말이지, 그대 삶에 없다는 말이 아니오. '
+                '<b>타고나지 않은 것을 애써 길러서 쓰는 사람이 있소.</b> '
+                '그런 사람에게는 이 글의 절반이 안 맞소.</p>'
+                % (josa(weak, "이", "가"), n_word))
+    return ('<p class="tale">%s 가장 얇다고 한 것도 마찬가지요. %s 글자에 '
+            '<b>%d자</b> 있으니 아예 없는 것은 아니오 — 다른 것에 비해 '
+            '얇다는 말이오. <b>얇은 것을 애써 길러서 쓰는 사람이 있소.</b> '
+            '그런 사람에게는 이 글의 절반이 안 맞소.</p>'
+            % (josa(weak, "이", "가"), n_word, seen))
+
+
 def counter(f, concern: str, concern_word_: str) -> str:
     """
     내가 틀렸다면 — 이 읽기가 깨지는 조건.
@@ -224,11 +259,7 @@ def counter(f, concern: str, concern_word_: str) -> str:
         '그때는 %s.</p>' % (josa(top, "이", "가"), cond, then)
         + '<p class="tale">%s</p>' % STRENGTH_COUNTER.get(
             f.strength, STRENGTH_COUNTER["중화"])
-        + '<p class="tale">%s 없다고 한 것도 마찬가지요. 여덟 글자에 '
-          '안 보인다는 말이지, 그대 삶에 없다는 말이 아니오. '
-          '<b>타고나지 않은 것을 애써 길러서 쓰는 사람이 있소.</b> '
-          '그런 사람에게는 이 글의 절반이 안 맞소.</p>'
-          % josa(weak, "이", "가")
+        + _weak_counter(f, weak)
         + _counter_count(f, concern, concern_word_)
         + '<p class="bite">그러니 이 글에서 안 맞는 문장이 있거든, '
           '그 문장을 기억해 두시오. 거기가 내가 틀린 곳이오.</p>'

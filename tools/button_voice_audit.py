@@ -50,7 +50,9 @@ WEB = ROOT / "apps" / "web"
 SKIP = ("admin", "DevRail", "PromptModal")
 
 BTN = re.compile(r"<button\b[^>]*>(.*?)</button>", re.S)
-STR = re.compile(r'"([^"\\<>{}]{1,60})"')
+# 홑따옴표도 봅니다 (2026-09-24). 겹따옴표만 보던 탓에
+# 홑따옴표로 적힌 버튼 글이 감사에서 통째로 빠졌습니다.
+STR = re.compile("\"([^\"\\<>{}]{1,60})\"|'([^'\\<>{}]{1,60})'")
 TAGS = re.compile(r"<[^>]+>")
 EXPR = re.compile(r"\{[^{}]*\}")
 
@@ -89,19 +91,37 @@ def labels(src: str):
         # 삼항으로 갈리는 글도 각각 봅니다 — 한쪽만 고치면 나머지가 샙니다.
         # ★ 문자열은 **중괄호 안에서도** 봅니다 (`{busy ? "…" : "…"}`).
         #   걷는 것은 손으로 쓴 식과 주석이지 화면에 찍히는 글이 아닙니다.
-        parts = [t.strip() for t in STR.findall(raw)]
+        parts = [(a or b).strip() for a, b in STR.findall(raw)]
         plain = TAGS.sub(" ", strip_expr(raw))
         plain = re.sub(r"\s+", " ", plain).strip()
         if plain:
             parts.append(plain)
         for t in parts:
             t = t.strip()
+            # ★ 마침표로 끝나는 것은 **알림 글**이오 — 버튼 글이 아닙니다.
+            #   손잡이(onClick) 안에서 setState 로 띄우는 말이 버튼 안에
+            #   적혀 있어 라벨로 잡혔습니다 (「결제창을 열지 못했소.
+            #   다시 시도해 주시오.」). 그건 집의 말이라 하오체가 맞소.
+            if t.rstrip().endswith(".") or ". " in t:
+                continue
             if t and re.search(r"[가-힣]", t):
                 yield line, t
 
 
+# 버튼 **안쪽**에 든 도령 말투 — 꼬리만 보면 놓칩니다.
+#
+# 「시간을 모르오 · 그대로 이어가기」 가 감사를 통과하고 있었습니다
+# (2026-09-24). 꼬리가 「이어가기」 라 이름씨로 끝나서요. 손님이 누르는
+# 것은 손님의 말인데, 그 안에 「모르오」 가 들어 있었습니다.
+MIDDLE = re.compile(
+    r"(?<![가-힣])(모르오|맞소|좋소|하오|보오|주오|되오|없소|있소|겠소|겠네|겠어)"
+    r"(?![가-힣])|(?:주시오|하시오|보시오|가시오|적으시오)")
+
+
 def flagged(text: str) -> bool:
-    """동사로 끝나는데 합쇼체가 아닌가."""
+    """동사로 끝나는데 합쇼체가 아닌가. **안쪽도** 봅니다."""
+    if MIDDLE.search(text):
+        return True
     # 딱지·표지판은 끝의 기호·괄호를 떼고 봅니다
     t = re.sub(r"[\s·→←↗✕()\[\]0-9A-Za-z]+$", "", text).strip()
     if not t:

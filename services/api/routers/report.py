@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException
 
 from datetime import datetime, timezone
 
+import adminview
 import payments
 import store
 import member_accounts as accounts
@@ -113,7 +114,14 @@ def _paid_orders(session_id: str | None):
 
 
 def entitled_tier(session_id: str | None, lens_id: str) -> str:
-    """이 사람이 이 캐릭터에게서 실제로 열 수 있는 티어."""
+    """이 사람이 이 캐릭터에게서 실제로 열 수 있는 티어.
+
+    ★ 주인 자리로 들어온 요청이면 다 엽니다. 주인은 파는 물건을 눈으로
+      봐야 하는데 치른 주문이 없습니다 (`adminview`). 여는 근거는
+      화면이 보낸 말이 아니라 **서버에서 맞은 쪽지**입니다.
+    """
+    if adminview.on():
+        return "all"
     best = "free"
     for o in _paid_orders(session_id):
         t = o.get("tier")
@@ -138,6 +146,15 @@ def post_report(req: ReportRequest) -> ReportResponse:
     # 클라이언트가 부른 티어와 치른 티어 중 **낮은 쪽**으로 냅니다.
     allowed = entitled_tier(req.session_id, req.lens_id)
     tier = req.tier if TIER_RANK[req.tier] <= TIER_RANK[allowed] else allowed
+
+    # ★ 주인 자리는 **부른 것을 안 봅니다** — 다 폅니다.
+    #
+    #   낮은 쪽으로 내리는 규칙만 두면 주인에게는 아무것도 안 열립니다.
+    #   화면이 보내는 tier 는 localStorage 에서 오는 값이라 주인 브라우저
+    #   에서는 보통 "free" 이고, 그러면 자격이 all 이어도 free 가 나갑니다.
+    #   무료 구간을 보려면 머리표에 `x-admin-view: guest` 를 실으시오.
+    if adminview.on():
+        tier = "all"
 
     # ★ 「이 자리 하나」는 등급이 같아도 **그 캐릭터를 치른 사람만**입니다.
     #   one 과 sub 이 같은 등급(1)이 되면서, 달삯만 낸 사람이 tier="one"
@@ -182,6 +199,11 @@ def post_report(req: ReportRequest) -> ReportResponse:
 
 def _mark_opened(session_id: str, tier: str, lens_id: str | None = None) -> None:
     """Recheck entitlement under the refund lock before releasing paid content."""
+    # ★ 주인 자리에는 표시할 주문이 없습니다. 여기서 세면 402 가 나갑니다 —
+    #   자격은 `entitled_tier` 가 이미 봤습니다 (자격을 두 군데서 세지 않습니다).
+    if adminview.on():
+        return
+
     def qualifies(order):
         if not order or order.get("status") != "paid" or _expired(order):
             return False
@@ -251,7 +273,11 @@ def _paid_tier(session_id: str) -> str | None:
     ★ 클라이언트가 보낸 tier 를 믿지 않습니다. 그러면 요청 한 줄로
       8만 자가 빠져나갑니다. (리포트 본체도 이제 같은 기록을 봅니다 —
       `entitled_tier`)
+
+    ★ 주인 자리는 엽니다 — 여는 근거는 서버에서 맞은 쪽지입니다 (`adminview`).
     """
+    if adminview.on():
+        return "all"
     best = None
     for o in _paid_orders(session_id):
         t = o.get("tier")
