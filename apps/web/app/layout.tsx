@@ -15,18 +15,27 @@ import FortuneShortcut from '@/components/FortuneShortcut';
  * ★ metadataBase 가 없으면 상대 주소가 깨집니다.
  *   og:image 는 절대 주소라야 크롤러가 받아 갑니다.
  */
-const SITE =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://sajudang-three.vercel.app";
+// ★ 주소·이름·한 줄은 `lib/site.ts` 한 자리에서 받습니다 (2026-09-24).
+//   여기와 robots · sitemap 이 각자 예비값을 들고 있어서, 환경변수가
+//   안 걸린 배포에서 고유 도메인이 제 주소를 사본이라 말했습니다.
+import { SITE, SITE_DESC } from "@/lib/site";
 
-const OG_DESC =
-  "사주로 읽는 나의 반복 패턴. 지금의 고민에 맞는 해석과 오늘 해볼 행동을 만나보시오.";
+const OG_DESC = SITE_DESC;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
-  title: { default: "성신당 星辰堂", template: "%s · 성신당 星辰堂" },
+  // ★ 첫 화면 제목에 한 줄을 붙입니다 (2026-09-24). 이름만 있으면 검색
+  //   결과에서 무엇을 하는 집인지 안 보이고, 피드의 첫 항목 제목과도
+  //   어긋납니다 (lib/site.PUBLIC_PAGES 의 첫 줄).
+  title: { default: "성신당 星辰堂 — 별에 묻고, 나를 읽다",
+           template: "%s · 성신당 星辰堂" },
   description: OG_DESC,
   applicationName: "성신당 星辰堂",
-  alternates: { canonical: "/" },
+  alternates: {
+    canonical: "/",
+    // 크롤러와 피드 읽는 프로그램이 찾아갈 자리 (app/rss.xml)
+    types: { "application/rss+xml": `${SITE}/rss.xml` },
+  },
   openGraph: {
     type: "website",
     siteName: "성신당 星辰堂",

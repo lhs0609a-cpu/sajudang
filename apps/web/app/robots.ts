@@ -14,8 +14,7 @@ import type { MetadataRoute } from "next";
  *   사람만 보라고 만든 것이 아무나 보는 것이 됩니다.
  *   공유 링크에 생년월일시가 없다 해도 그 사람의 해석입니다.
  */
-const SITE =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://sajudang-three.vercel.app";
+import { SITE } from "@/lib/site";
 
 export default function robots(): MetadataRoute.Robots {
   return {
