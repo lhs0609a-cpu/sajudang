@@ -182,7 +182,10 @@ def plain_profile(f, *, name="풍운도령", lens_id="pungun", include_label=Tru
     # ★ 조사는 **받침을 보고** 답니다 — 「풍운도령가」 「신호을」 이
     #   나가던 자리요 (`bank.josa`).
     from .bank import josa as _josa
-    label = (f'<p class="plain-profile-label">{escape(name)}{_josa(name, "이", "가")} '
+    # ★ `josa` 는 **낱말째** 돌려줍니다 (`josa("나무","이","가")` → "나무가").
+    #   앞에 이름을 또 붙여 「삼거리 노파삼거리 노파가 먼저 읽은…」 이
+    #   나갔습니다 — 스무 명 중 열아홉의 첫 컷 첫 줄이오 (2026-09-25).
+    label = (f'<p class="plain-profile-label">{escape(_josa(name, "이", "가"))} '
              '먼저 읽은 사람의 모습</p>') if include_label else ''
     return (f'<div class="plain-profile">{label}'
             f'<h3>{escape(person)}이오.</h3>'

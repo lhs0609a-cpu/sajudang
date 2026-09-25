@@ -706,11 +706,21 @@ def _axis_aside(f, concern: str, axis4: Optional[str],
     fl = _topic.face_line(f, concern, axis4, slot=slot)
     if not fl:
         return ""
-    return ('<div class="cax"><p class="cnt">적으신 <b>%s</b>로 보면 '
-            '<b>%s</b> 자리는 이렇게 나오오.</p>%s'
+    # ★ 여는 줄은 **첫 자리에만** 답니다 (2026-09-25).
+    #
+    #   이 상자는 1·2·3단 세 자리에 붙는데, 여는 줄이 매번 글자 그대로
+    #   같았습니다 — 「적으신 ISTP 로 보면 몸 자리는 이렇게 나오오.」 가
+    #   한 장에 세 번. 안쪽 글(`face_line`)은 slot 마다 갈리는데 그 앞에
+    #   같은 안내가 서니, 손님 눈에는 같은 상자가 세 번 나온 것입니다.
+    #
+    #   앞 단은 화면에 그대로 남아 있소. 한 번 말한 것을 또 말하지 않습니다
+    #   (괄호를 한 번만 푸는 것과 같은 규칙).
+    head = ('<p class="cnt">적으신 <b>%s</b>로 보면 <b>%s</b> 자리는 이렇게 '
+            '나오오.</p>' % (_html.escape(axis4.upper()), concern_word(concern))
+            ) if slot == 1 else ""
+    return ('<div class="cax">%s%s'
             '<p class="ev"><span class="evk">센 것</span>%s</p></div>'
-            % (_html.escape(axis4.upper()), concern_word(concern),
-               fl["say"], fl["ev"]))
+            % (head, fl["say"], fl["ev"]))
 
 
 def build_hook(f, concern: str, axis4: Optional[str] = None,
@@ -1371,9 +1381,18 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
         s["yes"] = "%s %s" % (s["yes"], reply_line)
         s["no"] = "%s %s" % (s["no"], reply_line)
 
+    # ★ 풀이는 **훅 한 벌 안에서** 한 번입니다 (2026-09-25).
+    #
+    #   여태 단마다 `seen` 을 새로 만들었습니다. 그러면 다섯 단을 지나며
+    #   같은 말이 다섯 번까지 풀립니다 — 재보니 「식신(만들어서 남에게
+    #   내놓는 재주)」 이 훅 하나에 세 번이었습니다.
+    #
+    #   손님이 읽는 것은 단이 아니라 **한 흐름**입니다. 단은 눌러서 여는
+    #   자리이고 앞 단이 화면에 그대로 남아 있으니, 두 번째 괄호는 손님
+    #   눈에 사전이 아니라 잡음입니다 (CLAUDE.md 「한 장에 한 번」).
     boxed: set = set()
+    seen: set = set()
     for s in segs:
-        seen: set = set()
         if s.get("source") and not s.get("source_below"):
             s["source"] = terms.gloss(s["source"], seen, concern, f.sex)
         # ★ 물으신 자리를 함께 넘깁니다 (2026-09-07).
@@ -1382,8 +1401,14 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
         s["html"] = terms.gloss(s["html"], seen, concern, f.sex)
         if s.get("source") and s.get("source_below"):
             s["source"] = terms.gloss(s["source"], seen, concern, f.sex)
-        s["html"] += terms.picture_box(seen - boxed, concern, f.sex)
-        boxed |= seen
+        # ★ 그림 상자도 훅 한 벌에 **한 번**입니다. 단마다 붙으면 다섯
+        #   문단이 사전으로 깔립니다 — 리포트에서 겪은 자리와 같소
+        #   (`report` 의 `boxed_once`).
+        if not boxed:
+            box = terms.picture_box(seen, concern, f.sex)
+            if box:
+                s["html"] += box
+                boxed |= seen
 
     # ★ 뱅크에 박아 둔 「그대」를 그 캐릭터의 호칭으로 바꿉니다.
     #

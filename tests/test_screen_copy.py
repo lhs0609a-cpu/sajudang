@@ -155,7 +155,18 @@ def test_the_parentheses_live_in_the_text_not_the_css():
 def test_a_real_report_explains_its_hard_words():
     f = build_features(build_chart(1997, 3, 22, 14, 10, "F", True, "서울"))
     rep = build_report(f, "t", "pungun", "one", "love", "INFP", name="가은")
-    body = " ".join(_plain(c["html"]) for c in rep["cuts"])
+    # ★ **화면 차례대로** 이어 봅니다 — 근거 줄이 컷 본문 **위**입니다
+    #   (`app/report/[id]/page.tsx` 의 `<ServerText className="src">` 가
+    #   `<div className="cutbody">` 보다 먼저 그려집니다).
+    #
+    #   여태 본문만 보았습니다. 그 사이 근거와 본문이 서로 모르고 각각
+    #   풀어서, 한 컷에 같은 괄호가 두 번 나갔습니다 — 「대운(십 년마다
+    #   바뀌는 삶의 계절)」 이 근거와 본문에 나란히 (2026-09-25).
+    #   짝을 맞추고 나니 이 자가 「본문이 안 푼다」 고 적었는데, 손님은
+    #   그 위 근거 줄에서 이미 읽었습니다. 자가 화면보다 좁으면 고칠 수
+    #   없는 데를 가리킵니다 (`terms.used_here` 머리말과 같은 자리요).
+    body = " ".join(_plain(c.get("source") or "") + " " + _plain(c["html"])
+                    for c in rep["cuts"])
     # ★ 리포트마다 나오는 말이 다릅니다 — 「용신」은 근거 줄에만 있고
     #   본문에는 "필요한 건 쇠" 로 나오기도 합니다. **나온 말만** 봅니다.
     checked = 0

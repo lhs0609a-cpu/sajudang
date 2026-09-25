@@ -283,7 +283,9 @@ def test_모르겠소는_판정하지_않는다(people):
     cut = topic_mod.ask_cut(people[0], "money",
                             {"choice": "pay", "choice2": "dunno"})
     assert cut["statement_id"].endswith("u"), cut["statement_id"]
-    assert "판정 안 함" in cut["source"]
+    # ★ 손님 말로 적습니다 — 「판정 안 함」 은 집 안에서 쓰는 라벨이오
+    #   (2026-09-25). 뜻은 그대로요: 모르는 자리를 판정하지 않습니다.
+    assert "여덟 글자로는 모름" in cut["source"]
 
 
 def test_물음의_답이_리포트에_컷으로_선다(people):

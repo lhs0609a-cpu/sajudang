@@ -360,7 +360,7 @@ def _ground(f, facet: str, key: str) -> str:
         return {'양인': '양인 · 일간 %s · 일지 %s' % (f.day_gan, f.day_ji),
                 '상관': '상관 %d자' % int(g.get('상관', 0)),
                 '편관': '편관 %d자' % int(g.get('편관', 0)),
-                '삼킴': '신강약 %s · 점수 %d' % (f.strength, int(f.strength_score)),
+                '삼킴': _why.strength_seen(f),
                 '보통': '겁재 %d자 · 신강약 %s' % (int(g.get('겁재', 0)), f.strength),
                 }.get(key, '신강약 %s' % f.strength)
     if facet == 'tired':

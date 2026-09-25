@@ -1924,8 +1924,7 @@ def _fx_sewoon_group(f, ctx):
 
 # ── 얼굴 ────────────────────────────────────────────────
 def _fx_strength(f, ctx):
-    return (f.strength == "신약",
-            "신강약 %s · 점수 %d" % (f.strength, int(f.strength_score)))
+    return (f.strength == "신약", _why.strength_seen(f))
 
 
 def _fx_weak_here(f, ctx):
@@ -2176,7 +2175,7 @@ def ask_cut(f, concern: str, payload: dict) -> Optional[dict]:
                         else say["dunno"], w))
     ev = ["%s → %s" % (spec["options"][pick],
                        "글자와 겹침" if hit else
-                       ("글자는 다른 것을 가리킴" if hit is False else "판정 안 함"))]
+                       ("글자는 다른 것을 가리킴" if hit is False else "여덟 글자로는 모름"))]
     # ★ 사실 셋 — 센 값을 앞에 세우고 살림의 말로 짚습니다 (docs/40 §10).
     #
     #   전에는 갈래마다 **사실 하나 · 문장 하나** 였습니다. 그러면
@@ -2201,12 +2200,12 @@ def ask_cut(f, concern: str, payload: dict) -> Optional[dict]:
                             else say2["dunno"], w))
         ev.append("%s → %s" % (spec["options2"][pick2],
                                "글자와 겹침" if hit2 else
-                               ("글자는 다른 것을 가리킴" if hit2 is False else "판정 안 함")))
+                               ("글자는 다른 것을 가리킴" if hit2 is False else "여덟 글자로는 모름")))
     if pick3:
         parts.append(said(spec["lead3"], spec["options3"][pick3]))
         say3 = spec["say3"][pick3]
         parts.append('<p class="hit">%s</p>' % _fmt(say3["dunno"], w))
-        ev.append("%s → 사용자가 원하는 판단" % spec["options3"][pick3])
+        ev.append("%s → 그대가 보자고 한 자리" % spec["options3"][pick3])
     for n in (4, 5):
         value = picks[n]
         options = spec.get("options%d" % n)

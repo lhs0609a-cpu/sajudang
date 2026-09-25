@@ -14,7 +14,27 @@ import CharacterSpeech from './CharacterSpeech';
 import { characterConcern } from '@/lib/character-topic';
 import { useRouter } from 'next/navigation';
 
-export const INLINE_READING_SLOTS = ['spine_depth', 'spine_scene', 'lens_bridge'];
+/**
+ * 무료 구간에서 **잠긴 풀이를 맛보이는 자리.**
+ *
+ * ★ 한 자리뿐입니다 (2026-09-25).
+ *
+ *   손님이 무료 구간 전문을 붙여 놓고 말했습니다 — 「왜 전체가 풀이가
+ *   어렵고 와닿지가 않지? 전체 다 그래.」 세어 보니 한 장에 페이월로
+ *   부르는 말이 **25.6번**이었습니다. 이 상자가 두 번(`spine_depth` ·
+ *   `lens_bridge`), 끝의 페이월이 한 번, 그 셋이 각각 같은 물음을 다시
+ *   내서 「버틸 힘은 있는데…」 한 줄이 한 장에 네 번 섰습니다.
+ *
+ *   읽다가 광고판에 자꾸 부딪히면 손님은 글을 못 믿습니다. 값이 오가는
+ *   자리는 하나로 족합니다 — **뒤쪽 한 곳**에 둡니다. 앞에 두면 그 사람을
+ *   들어 보기 전에 값을 먼저 말하는 셈이고, 무료 구간이 그 사람을 들려
+ *   주려고 있는 자리이기 때문입니다.
+ *
+ *   ★ 어느 자리가 가장 잘 서는지는 **계측이 답할 일**입니다
+ *     (`inline_offer_view` · `inline_offer_click` 이 이미 찍습니다).
+ *     감으로 늘리지 마시오 — 늘리면 또 25번이 됩니다.
+ */
+export const INLINE_READING_SLOTS = ['lens_bridge'];
 
 // Editorial questions, not popularity claims or promised personal outcomes.
 const PAIN_POINTS: Record<string, [string, string, string]> = {
@@ -56,10 +76,19 @@ export default function InlinePaidReading({after, cuts, lensId, onOpen}: {after:
     ?? (cut.id === 'concern_pattern' ? READING_QUESTIONS[concern]
       : ['concern_turn', 'daeun_map'].includes(cut.id) ? '지금과 다음 흐름을 나란히 읽으면 무엇이 달라질까?' : cut.title);
   return <CharacterSpeech lensId={lensId}><aside ref={node} className="inline-paid-reading" data-lens={lensId} data-chapter={cut.id} aria-label={`${lens.name}의 결제 후 공개되는 판정`}>
+    {/* ★ 물음은 **하나**입니다 (2026-09-25).
+     *
+     *   여기 물음이 셋 연달아 섰습니다 — 고민 물음(PAIN_POINTS) · 그 컷이
+     *   답하는 물음(chapterQuestion) · 캐릭터 물음(CHARACTER_QUESTIONS).
+     *   셋이 다 물음표로 끝나니 손님은 무엇에 답을 받는지 모릅니다.
+     *
+     *   남기는 것은 **그 컷이 답하는 물음**입니다 — 값을 치르면 열리는 것이
+     *   그것이기 때문입니다. 고민 물음은 맥락 한 줄로 남기고, 캐릭터 물음은
+     *   뺍니다(무료 끝의 페이월이 이미 냅니다 — 한 장에 네 번 서던 줄이오). */}
     <ReadingSpeaker lensId={lensId} label={['강점이 짐으로 바뀐 정확한 조건', '반복된 장면에서 놓친 결정적 차이', '계속할 것과 멈출 것을 가르는 기준'][index]} />
     <p className="inline-paid-context">{PAIN_POINTS[concern]?.[index] ?? CHARACTER_QUESTIONS[lensId]}</p>
     <h3>{chapterQuestion}</h3>
-    <p className="inline-paid-perspective">{lens.name}의 판정 기준 · {CHARACTER_QUESTIONS[lensId]}</p>
+    <p className="inline-paid-perspective">{lens.name}의 판정 기준</p>
     <blockquote><span>결제 후 열리는 본문의 실제 첫 문장</span><p>{readingText(cut.teaser ?? '')}</p></blockquote>
     <div className="inline-paid-mask" aria-label="결론이 갈리는 다음 해석은 결제 후 공개됩니다">
       <p><strong>여기서 결론이 갈립니다.</strong> 지금 보이는 말 뒤에는 ‘왜 반복되는지’, ‘어느 선택을 멈출지’, ‘언제 다시 확인할지’가 이어집니다.</p>

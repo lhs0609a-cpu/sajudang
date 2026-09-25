@@ -33,6 +33,7 @@ from pathlib import Path
 from typing import Optional
 
 from . import guard, visual
+from . import why as _why
 from .bank import element_word, josa
 from .constants import CHUNG, HAP, ten_god
 
@@ -215,7 +216,7 @@ def blood_cut(f, b: dict) -> dict:
             % (T["BLOOD_DISCLAIMER"], T["BLOOD"][t], T["BLOOD_VS"][f.strength]))
     return {
         "id": "blood", "title": "혈액형과 사주",
-        "source": "%s형 ↔ %s %d" % (t, f.strength, f.strength_score),
+        "source": "%s형 ↔ %s" % (t, _why.strength_seen(f)),
         "html": guard.enforce(body, {"cut": "blood"}),
         "min_level": 0,
         "statement_id": "blood:%s:%s" % (t, f.strength),

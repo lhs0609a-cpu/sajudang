@@ -27,10 +27,14 @@
 .free-depth-essay h3 {font:500 21px/1.65 var(--serif);margin:0 0 18px;letter-spacing:-.025em}
 .free-depth-essay p {font:400 16px/1.95 var(--sans);margin:0 0 18px;word-break:keep-all;overflow-wrap:anywhere}
 .free-depth-essay strong {font-weight:500;color:var(--paper)}
-.practice-steps {padding-left:24px;margin:24px 0}
-.practice-steps li {padding:0 0 18px 8px}
+/* ★ 단계는 **시키는 일이 아니라 그 하나를 하는 순서**입니다 (2026-09-25).
+   단계마다 h3 제목이 붙어 각각 독립 과제로 읽혔습니다 — 한 화면에 시키는
+   일이 넷이 되면 손님은 하나도 안 합니다. 묶음 제목 하나만 남깁니다. */
+.practice-how {margin:20px 0 4px}
+.practice-how > h3 {margin:0;font:500 14px/1.6 var(--sans);color:var(--gold)}
+.practice-steps {padding-left:24px;margin:12px 0 24px}
+.practice-steps li {padding:0 0 14px 8px}
 .practice-steps li::marker {color:var(--gold)}
-.practice-steps h3 {font:500 16px/1.7 var(--sans);margin:0 0 8px}
 .practice-steps p {font:400 15px/1.9 var(--sans);margin:0;word-break:keep-all;overflow-wrap:anywhere}
 .reading-verdict{margin:20px 0;padding:18px;border-left:3px solid var(--gold);background:linear-gradient(100deg,#d5be8412,transparent)}
 .reading-verdict span,.practice-verdict>span,.practice-mission>span,.practice-case>span{display:block;margin-bottom:8px;color:var(--gold);font:500 11px/1.5 var(--sans);letter-spacing:.12em}

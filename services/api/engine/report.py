@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import hashlib
 import re
+from collections import Counter as _Counter
 from typing import Optional
 
 from . import bank as bank_mod
@@ -356,6 +357,40 @@ def _fix_particles(html: str) -> str:
         return ch + tag + want
 
     return _HJOSA.sub(jo, _COPULA.sub(cop, html or ""))
+
+
+# ── 센 수에 **무엇을 센 수인지** 달기 (2026-09-25) ────────────────
+#
+# ★ 손님이 무료 구간을 붙여 놓고 「와닿지 않는다」 했습니다. 세어 보니 한 장에
+#   무엇을 센 수인지 안 적힌 수가 여럿이었습니다 —
+#
+#       정관으로 센 글자가 0 이오          센 것 정관 0 · 편관 0 요
+#       식상 3 · 재성 1 · 중화(3)         쇠 1
+#
+#   이 집은 「근거 줄에 수를 대라」고 정해 두었는데(CLAUDE.md), 수만 대고
+#   **단위를 안 달면** 손님은 그게 글자 수인지 점수인지 모릅니다. 모르는 수는
+#   근거가 아니라 벽입니다 — 「목 0.0 ≤ 1.0」 을 금한 것과 같은 자리요.
+#
+#   글을 쓰는 자리가 여럿이라 한 군데씩 고치면 또 샙니다. 조사 손질과 같이
+#   **마지막에 한 번** 봅니다.
+#
+# ★ 십신·오행·묶음 이름 뒤에 바로 오는 맨 수에만 답니다. 나이·해·희소도처럼
+#   이미 단위가 있는 수는 건드리지 않습니다.
+_COUNT_NAMES = ("비견", "겁재", "식신", "상관", "정재", "편재", "정관", "편관",
+                "정인", "편인", "비겁", "식상", "재성", "관성", "인성",
+                "나무", "불", "흙", "쇠", "물")
+# ★ 낱말과 수 사이에 **괄호 풀이가 낄 수 있습니다.** 그걸 안 넘으면 괄호가
+#   붙은 자리만 단위를 못 받아, 같은 근거가 캐릭터마다 「재성 1」 과
+#   「재성 1자」 로 갈립니다 (`tests/test_voice` 가 잡은 자리요).
+_BARE_COUNT = _re.compile(
+    r"(%s)(</b>)?(<i class=\"gl\">\([^)]*\)</i>)?(\s*)(<b>)?([0-9]+)(</b>)?"
+    r"(?!\s*[0-9]*\s*(?:자|개|곳|명|살|년|해|번|분|%%|째|쌍|줄|위|:|\.|[0-9]))"
+    % "|".join(_COUNT_NAMES))
+
+
+def _name_counts(html: str) -> str:
+    return _BARE_COUNT.sub(
+        lambda m: "".join(x or "" for x in m.groups()) + "자", html or "")
 
 
 def _balanced(s: str) -> bool:
@@ -863,10 +898,12 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         # ★ 이치 열쇠는 **아는 이름**이라야 붙습니다 (engine/why.rule_of).
         #   「오행」 은 그 표에 없는 말이라 이치도 출처도 안 붙었습니다 —
         #   tests/test_evidence 가 24회를 잡았습니다. 신강약으로 답니다.
-        _why.line("%s %d · %s(%d) · 희소도 %s"
+        # ★ 갈래는 **이치와 짝**이라야 합니다. 이치가 「중화라 하오」인데
+        #   출처가 「십신」이면, 손님이 대 볼 자리를 잘못 가리킨 것이오.
+        _why.line("%s %d자 · %s · 희소도 %s"
                   % (element_word(f.weak_el), _visible(f, f.weak_el),
-                     f.strength, f.strength_score, rr["words"]),
-                  f.strength, "십신"),
+                     _why.strength_seen(f), rr["words"]),
+                  f.strength, "강약"),
         heart_mod.solace(f, you, bank_mod.concern_word(concern), rr)
         + ('<p class="tale">%s</p>' % _live("weak_el", f.weak_el).strip()
            if _live_has("weak_el", f.weak_el) else ""),
@@ -1790,8 +1827,8 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
                                         concern)))
     cuts.append(_cut(
         "counter", "내가 틀렸다면",
-        _why.line("%s 주도 %d · %s(%d) · %s %d"
-                  % (top, f.ten_gods[top], f.strength, f.strength_score,
+        _why.line("%s %d자 · %s · %s %d자"
+                  % (top, f.ten_gods[top], _why.strength_seen(f),
                      element_word(f.weak_el), _visible(f, f.weak_el)),
                   top, "십신"),
         depth_mod.counter(f, concern, bank_mod.concern_word(concern)), 2,
@@ -2427,6 +2464,8 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
     #     사전이 깁니다 (CLAUDE.md 「사전을 리포트에 붓기」).
     boxed: set = set()          # 그림 상자 — 한 장에 한 번. 절대 안 비웁니다
     gloss_run = 0               # 풀이를 건 뒤 흐른 글자
+    glossed: _Counter = _Counter()   # 그 말을 한 장에서 몇 번 풀었나 (문턱 2)
+    boxed_once = False          # 그림 상자를 한 번 냈나 — 한 장에 하나요
     tone = view.get("voice")
     # ★ 말버릇은 **어미를 갈아 끼운 뒤**에 답니다.
     #
@@ -2446,10 +2485,50 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
     fig_pick = (ord(f.day_gan) + len(f.weak_el or "") * 7
                 + len(f.strength or "")) % 4
     lc_nth = 0                  # 몇 번째 관점 컷인가
+    # ── 근거 줄의 **이치**는 한 장에 한 번 (2026-09-25) ───────────
+    #
+    # ★ 관측은 컷마다 다른데 꼬리 일흔 자가 한 장에 네 번 깔렸습니다.
+    #   까닭과 셈은 `why.dedupe` 머리말에.
+    #   ★ 관점 컷(`lc_`)과 「어떤 사람인가」는 셈에서 가릅니다 — 아래
+    #     `_own_line` 과 같은 까닭이오. 그 줄들이 섞이면 **어느 공통 컷이
+    #     긴 이치를 갖는지**가 캐릭터마다 갈립니다.
+    _common = [c for c in cuts
+               if not ((c.get("id") or "").startswith("lc_")
+                       or c.get("id") == "portrait")]
+    _trim = _why.dedupe([c.get("source") or "" for c in _common])
+    for c, _s in zip(_common, _trim):
+        if c.get("source"):
+            c["source"] = _s
+    # ── 근거 줄에 괄호를 다는 자리 (2026-09-25) ───────────────────
+    #
+    # * 여태 근거 줄마다 **새 set()** 으로 풀었습니다. 차례에 안 기대려고
+    #   그랬는데, 그 값으로 같은 말이 한 장에 다섯 번 풀렸습니다 —
+    #   「십신(그대를 기준으로 …열 가지)」 5번 · 「대운(십 년마다 …)」 5번.
+    #   한 장에 괄호가 54.9개 박혔고, 그게 손님이 말한 「어렵다」의 정체였습니다.
+    #
+    # * 근거와 본문을 **한 묶음으로, 화면 차례대로** 풉니다.
+    #
+    #   세 번 고쳐 여기 왔습니다. 남기는 기록이오 —
+    #
+    #   (1) 근거 줄끼리만 셌습니다 → 같은 컷의 근거와 본문에 같은 괄호가
+    #       나란히 섰습니다(「대운(십 년마다 바뀌는 삶의 계절)」). 화면은
+    #       근거를 컷 바로 위에 그리니(report/[id] 697) 한 눈에 같이 보입니다.
+    #   (2) 「본문이 푸는 말은 근거가 건너뛰게」 했습니다 → 그 본문이 **더
+    #       뒤**에 오면 손님은 근거를 먼저 읽고 풀이를 못 봅니다.
+    #       tests/test_screen_copy 가 그 자리를 짚었습니다.
+    #   (3) 그래서 **읽는 차례**로 풉니다. 화면 차례가 곧 읽는 차례요.
+    #
+    #   값: 근거 줄의 괄호가 캐릭터마다 갈릴 수 있습니다 — 컷 차례가
+    #   캐릭터마다 다르니까요. 근거의 **내용**(관측·이치·출처)은 한 벌로
+    #   남고 갈리는 것은 읽기 보조뿐이라, 그 값을 치릅니다
+    #   (tests/test_voice.test_the_evidence_line_keeps_its_own_voice).
     for c in cuts:
         # 한 컷 분량쯤 흘렀으면 그 뒤의 말은 **처음 만나는 말**이오.
         if gloss_run >= GLOSS_AGAIN:
-            seen.clear()
+            # ★ 다만 **한 말에 두 번까지**입니다 (2026-09-25). 거리만 보고
+            #   비우면 14,000자 장에서 열다섯 번 비워져, 한 낱말이 다섯 번
+            #   풀립니다. 두 번 푼 말은 계속 닫아 둡니다.
+            seen -= {t for t in seen if glossed[t] < 2}
             gloss_run = 0
         gloss_run += len(_plain(c.get("html") or ""))
         before = set(seen)
@@ -2519,12 +2598,19 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
         #   가운데 하나만 눈에 담기도 합니다. 「사전을 리포트에 붓기」와
         #   다릅니다. 그건 **한 컷 안에** 사전을 편 것이고, 이건 한 줄에
         #   괄호 하나요.
+        # ★ 근거 줄이 **먼저**입니다 — 화면이 컷 위에 그립니다.
+        #   같은 `seen` 을 쓰니 본문에서 또 풀지 않습니다.
         if c.get("source"):
-            c["source"] = _src_you(terms_mod.gloss(c["source"], set(),
-                                                  concern, f.sex))
+            c["source"] = _src_you(terms_mod.drop_echo(
+                terms_mod.gloss(c["source"], seen, concern, f.sex)))
+            for _t in seen - before:
+                glossed[_t] += 1
+            before = set(seen)
         c["html"] = terms_mod.gloss(
             voice_mod.speak(voice_mod.address(c["html"], you), tone), seen,
             concern, f.sex)
+        for _t in seen - before:
+            glossed[_t] += 1
         # ★ 비유 상자도 **그 사람 목소리로** 말해야 합니다.
         #
         #   처음엔 말투를 갈아 끼운 **뒤에** 붙였습니다. 그랬더니
@@ -2545,12 +2631,26 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
         # instead of an interpretation (and duplicated the topic sentence).
         if not (lens_id == "pungun" and c.get("id") == "spine"):
             c["html"] = _flavor.ask(c["html"], lens_id, asked, tone)
-        if not (lens_id == "pungun" and c.get("id") == "spine"):
-            c["html"] += voice_mod.speak(
+        # ★ 그림 상자는 **한 장에 한 번**입니다 (2026-09-25).
+        #
+        #   재 보니 한 장에 상자 넷 · 항목 14.6개 · 746자였고 한 상자에
+        #   열일곱 항목이 든 자리가 있었습니다. 괄호는 값이 싸지만 상자는
+        #   문단이오 — 컷 밑에 문단이 넷 끼면 읽던 줄을 잃습니다.
+        #
+        #   자리는 **처음 모르는 말을 만난 컷**입니다. 그게 이 상자를
+        #   만든 까닭이고(「읽던 자리에서 멀어지면 안 본다」), 차례가
+        #   캐릭터마다 갈리는 것도 그 뜻 그대로입니다 — 사람마다 처음
+        #   만나는 자리가 다르니까요.
+        if (not boxed_once
+                and not (lens_id == "pungun" and c.get("id") == "spine")):
+            _box = voice_mod.speak(
                 voice_mod.address(
                     terms_mod.picture_box((seen - before) - boxed,
                                           concern, f.sex), you),
                 tone)
+            if _box:
+                c["html"] += _box
+                boxed_once = True
         boxed |= (seen - before)
         # ★ 훑어읽기 층 — **맨 끝**입니다 (2026-09-07).
         #
@@ -2579,6 +2679,12 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
             c["source"] = voice_mod.speak(voice_mod.address(c["source"], you), tone)
     # 한자·숫자 뒤 조사 — 모든 층을 입힌 뒤 한 번.
     for c in cuts:
+        # ★ 단위를 조사 **앞에** 답니다. 「정관 0 이오」 에 「자」를 붙이면
+        #   「정관 0자요」 가 되어야 하는데, 조사를 먼저 고치면 「0 이오」 로
+        #   굳어 「0자 이오」 가 나옵니다 (0은 「영」이라 받침이 있소).
+        c["html"] = _name_counts(c["html"])
+        if c.get("source"):
+            c["source"] = _name_counts(c["source"])
         c["html"] = _fix_particles(c["html"])
         c["html"] = _dedupe_adjacent_text(c["html"])
         if c.get("id") == "spine":

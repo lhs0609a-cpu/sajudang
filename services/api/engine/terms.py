@@ -335,6 +335,21 @@ def _ok(text: str, term: str, start: int, end: int,
     #   깨지는 것**입니다. 둘 중에는 앞이 낫습니다.
     if term in WORD_START and _is_hangul(head):
         return False
+    # ★ **출처 묶음표 안은 갈래 이름**이라 용어 자리가 아닙니다 (2026-09-25).
+    #
+    #   「〔자평 명리 · 십신〕」 의 십신은 어디서 온 규칙인지 밝히는 이름이고,
+    #   거기에 「(그대를 기준으로 다른 글자에 붙인 이름 열 가지)」 가 끼면
+    #   출처가 안 보입니다. 줄표(—)와 묶음표에서 이미 겪은 자리요 (`why`).
+    #
+    #   자 한 벌에 둡니다 — 풀이 쪽에서만 막으면 `used_here` 를 쓰는 검사가
+    #   「안 풀어 준다」 고 적습니다. 고칠 수 없는 데를 가리키는 자가 됩니다.
+    #   ★ **짝을 봐야** 합니다. 처음에는 「앞에 〔가 있고 뒤에 〕가 있으면」
+    #     으로 적었는데, 컷을 이어붙인 글에서는 앞 컷의 〔 와 뒤 컷의 〕
+    #     사이 **전부**가 묶음표 안이 되었습니다 — 자를 쓰는 검사가 엉뚱한
+    #     자리를 짚었습니다. 바로 앞 〔 뒤에 〕 가 없을 때만 안입니다.
+    _open = text.rfind("〔", 0, start)
+    if _open >= 0 and "〕" not in text[_open:start] and "〕" in text[end:]:
+        return False
     if term in ONLY_PARTICLE:
         # 조사가 붙었거나, 뒤가 한글이 아닐 때(갑자 한자)만 용어입니다.
         nxt = tail.lstrip()[:1]
@@ -391,6 +406,112 @@ def gloss(html: str, seen: Optional[Set[str]] = None,
         out.append(m.group(0))
         last = m.end()
     out.append(_piece(html[last:], seen, mean))
+    return "".join(out)
+
+
+def _tie(text: str, seen: Set[str], href) -> str:
+    out, last = [], 0
+    for m in _TERMS.finditer(text):
+        term = m.group(0)
+        if term in seen or not _ok(text, term, m.start(), m.end()):
+            continue
+        url = href(term)
+        if not url:
+            continue
+        seen.add(term)
+        out.append(text[last:m.start()])
+        out.append('<a class="gt" href="%s">%s</a>' % (url, term))
+        last = m.end()
+    out.append(text[last:])
+    return "".join(out)
+
+
+_GL_ONE = re.compile(r'<i class="gl">\(([^)]*)\)</i>')
+#: 낱말 + 그 뒤의 괄호. 어느 **말**이 풀렸는지 되읽는 자리요.
+_GL_TERM = re.compile(r'([가-힣]{1,5})(?:</b>)?<i class="gl">\(')
+
+
+def glossed_in(html: str) -> list:
+    """이 덩이에서 **이미 풀린 말**의 목록. 두 번 풀지 않으려고 되읽습니다."""
+    return [m.group(1) for m in _GL_TERM.finditer(html or "")
+            if m.group(1) in MEANING]
+
+
+def drop_echo(line: str) -> str:
+    """
+    괄호가 **같은 줄에서 이미 한 말**이면 그 괄호를 뗍니다.
+
+    ★ 근거 줄에서 이렇게 나가고 있었습니다 (2026-09-25) —
+
+          월지(태어난 달의 아래 글자, 곧 태어난 계절)는 태어난 달의 아래
+          글자, 곧 태어난 계절이라 여덟 글자 가운데 힘이 가장 세오
+
+      괄호(풀이표)와 이치(`why.RULE`)가 **글자 그대로 같은 말**입니다.
+      두 표를 서로 모르게 만들어 붙였으니 생긴 일이고, 손님 눈에는 한 줄이
+      두 배로 길어진 채 같은 말을 두 번 합니다 — 그러면 둘 다 흘립니다
+      (CLAUDE.md 「뜻이 겹치는 표시를 둘 달기」 · 「한 자리를 두 번 말하거든
+      둘이 같은 말인지 보시오」).
+
+      지우는 쪽은 **괄호**입니다. 이치는 그 줄이 있는 까닭이고, 괄호는
+      뜻을 알려 주려고 덧댄 것이라, 뜻이 이미 문장에 있으면 괄호가 잉여요.
+
+    ★ 앞머리로만 대 보면 놓칩니다. 호칭 층(`_src_you`)이 근거
+      줄의 「나」를 「그대」로 갈아 끼우기 때문입니다 —
+
+          정인(**나를** 챙겨 주는 어른과 배움) — 정인은 **그대를** 챙겨 주는
+          어른과 배움이라, 배우고 기대는 힘을 보오
+
+      앞 여섯 자가 「나를 챙겨 주」 대 「그대를 챙겨」 로 갈려 안 걸렸습니다.
+      그래서 **호칭 낱말을 지운 뒤** 가장 긴 토막으로 댑니다.
+    """
+    if not line or "gl" not in line:
+        return line
+
+    def norm(t: str) -> str:
+        t = re.sub(r"(그대|자네|너|당신|나)[를은이가의]?\s*", "", t)
+        return re.sub(r"\s+", "", t)
+
+    def cut(m):
+        mean = m.group(1)
+        rest = norm(_TAGS.sub("", line).replace(mean, "", 1))
+        # 풀이를 쉼표로 자른 가장 긴 토막이 줄 안에 또 있으면 같은 말이오.
+        piece = norm(max(re.split(r"[,·]", mean), key=len))
+        return "" if len(piece) >= 5 and piece in rest else m.group(0)
+
+    return _GL_ONE.sub(cut, line)
+
+
+def link(html: str, href, seen: Optional[Set[str]] = None) -> str:
+    """
+    어려운 말을 **처음 한 번** 그 말의 장으로 잇는다 (`gloss` 의 짝).
+
+    ★ 왜 사전에서는 괄호가 아니라 링크인가
+
+      괄호는 한 장 안에서 풀어 주는 자리입니다. 그런데 사전은 예순 장이
+      한 묶음이고, 같은 괄호가 예순 장에 그대로 깔립니다 — 재보니 한 장
+      1,466자 가운데 197자(13%)가 **예순 장에 똑같은 글**이었습니다.
+      그건 손님 눈에도 색인 눈에도 「같은 장」으로 읽힙니다
+      (`tools/dict_same.py`).
+
+      그리고 사전에서는 링크가 더 맞습니다 — 그 말에는 **제 장이 있고**,
+      한 줄 풀이보다 거기가 자세합니다.
+
+    ★ 자는 한 벌입니다. 여기서 쓰는 `_TERMS` · `_ok` 는 `gloss` 가 쓰는
+      그것입니다. 따로 맞춰 놓으면 낱말 한가운데를 잇는 사고가 이쪽에서
+      다시 납니다 (「아껴지지」 의 「지지」).
+
+    href(term) 이 빈 값을 내면 그 말은 안 잇습니다 — 아직 안 연 장입니다.
+    """
+    if not html:
+        return html
+    if seen is None:
+        seen = set()
+    out, last = [], 0
+    for m in _TAGS.finditer(html):
+        out.append(_tie(html[last:m.start()], seen, href))
+        out.append(m.group(0))
+        last = m.end()
+    out.append(_tie(html[last:], seen, href))
     return "".join(out)
 
 # ══════════════════════════════════════════════════════════
@@ -552,8 +673,32 @@ def picture_of(term):
     return PICTURE.get(term, "")
 
 
+#: 물은 자리에 걸리는 말 — 상자가 넘칠 때 **먼저** 담습니다.
+#
+# ★ 표는 `seed/bank.json` 의 CONCERNAXIS 가 정한 십신 묶음을 그대로
+#   펴 놓은 것입니다. 새 유파 선택이 아니라 이미 있는 가름을 여기서도
+#   보는 것이오 — 두 벌이 되지 않게, 묶음 이름과 그 아래 열 이름만 적습니다.
+_ASKED = {
+    "money": ("재성", "정재", "편재", "식상", "식신", "상관"),
+    "real_estate": ("재성", "정재", "편재", "관성", "정관", "편관"),
+    "work": ("관성", "정관", "편관", "식상", "식신", "상관"),
+    "love": ("재성", "정재", "편재", "관성", "정관", "편관", "일지"),
+    "people": ("비겁", "비견", "겁재", "식상"),
+    "dir": ("인성", "정인", "편인", "용신"),
+    "health": ("용신", "기신", "신강", "신약", "중화"),
+}
+
+#: 한 상자에 담는 항목 수.
+#
+# ★ 재 보니 한 장에 상자 4개 · 항목 14.6개 · 746자였고, 어느 상자에는
+#   **열일곱 항목**이 들었습니다 (2026-09-25). 그건 컷 밑에 붙인 사전이라,
+#   손님은 읽던 자리를 잃습니다 (CLAUDE.md 「사전을 리포트에 붓기」).
+#   셋이면 한 화면에 들고, 읽던 줄로 돌아올 수 있습니다.
+BOX_ROWS = 3
+
+
 def picture_box(terms, concern: Optional[str] = None,
-                sex: Optional[str] = None):
+                sex: Optional[str] = None, limit: int = BOX_ROWS):
     """
     이 컷에서 **처음 나온** 말들의 비유를 한 상자로 묶는다.
 
@@ -563,13 +708,21 @@ def picture_box(terms, concern: Optional[str] = None,
     concern·sex 를 넘기면 **물으신 자리 쪽 비유**로 냅니다. 괄호 풀이와
     같은 층이라야 합니다 — 한쪽만 갈면 「짝을 보는 자리」라 풀어 놓고
     비유는 「달마다 꼬박꼬박 들어오는 삯」이 됩니다.
+
+    ★ `limit` 개까지만 답니다. 넘치면 **먼저 고릅니다** — 물으신 자리에
+      걸리는 말이 앞이오 (`sinsal_read` 가 신살 여덟에서 하던 것과 같은
+      규칙). 못 담긴 말도 괄호로는 이미 풀려 있습니다. 상자는 뜻이 아니라
+      **그림**을 주는 자리라, 덜 줄 수는 있어도 뜻이 빠지지는 않습니다.
     """
     pic = _at(PICTURE_AT, concern, sex)
     rows = [(t, pic.get(t) or PICTURE[t]) for t in terms
             if pic.get(t) or PICTURE.get(t)]
     if not rows:
         return ""
-    rows.sort(key=lambda r: _ORDER.index(r[0]) if r[0] in _ORDER else 999)
+    asked = _ASKED.get(concern or "", ())
+    rows.sort(key=lambda r: (0 if r[0] in asked else 1,
+                             _ORDER.index(r[0]) if r[0] in _ORDER else 999))
+    rows = rows[:max(1, limit)]
     inner = "".join('<p><b>%s</b> %s</p>' % (t, p) for t, p in rows)
     # ★ 상자 제목은 **말이 아니라 표지판**입니다 (2026-09-03).
     #

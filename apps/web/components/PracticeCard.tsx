@@ -30,14 +30,31 @@ export default function PracticeCard({ practice, lensId }: { practice: Practice;
       <span>{practice.specialist_name ?? '이 상담자'}의 날카로운 판정</span>
       <p>{practice.specialist_verdict}</p>
     </div> : <p>{practice.scene}</p>}
+    {/* ★ 시키는 일은 **하나**입니다 (2026-09-25).
+     *
+     *   손님이 무료 구간을 통째로 붙여 놓고 「와닿지 않는다」 했습니다.
+     *   이 카드를 세어 보니 시키는 일이 넷(펼치면 아홉)이었습니다 —
+     *   오늘의 과제 + 단계 셋(각각 h3 제목을 달아 독립 과제처럼 섰습니다)
+     *   + 갈림 + 접힌 다섯. 둘이면 손님은 **하나도** 안 합니다 (CLAUDE.md).
+     *
+     *   글은 그대로 둡니다. 지우면 판정이 얇아집니다 — 「길다고 문장을
+     *   지우기」 금지. 대신 **하나로 묶습니다**: 과제 하나, 그 아래는
+     *   「그 하나를 이렇게」 라고 이름을 붙인 순서요. 제목을 떼니 단계가
+     *   과제로 안 읽힙니다.
+     *
+     *   「QUEST 01」도 걷었습니다 — 영어 속말이고, 하오체 판정 바로 위에서
+     *   말투가 튑니다. */}
     <div className="practice-mission">
-      <span>오늘의 QUEST 01</span>
+      <span>오늘 할 하나</span>
       <h3>{practice.specialist_action ?? practice.action}</h3>
       <p>읽고 끝내지 말고, 오늘 가능한 가장 작은 크기로 실행하시오.</p>
     </div>
-    {practice.steps?.length ? <ol className="practice-steps">{practice.steps.map((step, i) =>
-      <li key={i}><h3>{['장면 하나만 고르기', '한 문장으로 행동하기', '오늘 밤 결과 확인하기'][i] ?? `${i + 1}단계`}</h3><p>{step}</p></li>
-    )}</ol> : null}
+    {practice.steps?.length ? <div className="practice-how">
+      <h3>그 하나를 이렇게 하시오</h3>
+      <ol className="practice-steps">{practice.steps.map((step, i) =>
+        <li key={i}><p>{step}</p></li>
+      )}</ol>
+    </div> : null}
     {practice.decision && <div className="practice-decision"><h3>상황이 다르면 여기서 갈립니다</h3><p>{practice.decision}</p></div>}
     {(practice.focus || practice.mbti || practice.example || practice.trap || practice.review) && <details className="practice-deeper">
       <summary>내 상황에 맞춘 실행 보정까지 보기</summary>

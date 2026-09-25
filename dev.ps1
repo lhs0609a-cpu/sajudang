@@ -33,6 +33,7 @@
     face <id> <파일>  ★ 초상 한 장 넣기 — ✦ 지우고 규격 맞추고 바탕 빼고
     figures        ★ 신살 인물 발주서 13명 (--write)
     drama          ★ 연출 점수 — 다음 화가 보고 싶어지는가 (--why)
+    dull           ★ 한 장 안의 끼어듦 — 같은 괄호·이치·시키는 일 (--show 1)
     loop           ★ 루프 이음새 — 배경이 다시 돌 때 튀는가 (--fix --all)
     flow           전체 플로우 훑기 — 32화면을 실제 브라우저로 열어 확인
     api            API 서버 (http://localhost:8000/docs)
@@ -147,6 +148,9 @@ switch ($Task) {
   "sharp"   { Need-Venv; Push-Location $Root; & $Py tools\sharp_easy.py @Rest; Pop-Location }
   # 쉬운 말 — 스무 사람 · 모든 화면 전부
   "easy"    { Need-Venv; Push-Location $Root; & $Py tools\easy_all.py @Rest; Pop-Location }
+  # 한 장 **안**의 끼어듦 — 같은 괄호·같은 이치·시키는 일·파는 말 (docs/21 §6.9)
+  #   easy 와 다른 것을 잽니다: 앞은 문장 하나가 흐린가, 이건 한 장이 겹치는가
+  "dull"    { Need-Venv; Push-Location $Root; & $Py tools\dull_audit.py @Rest; Pop-Location }
   # 배경이 다시 돌 때 튀는가 (--fix --all 로 고침). ffmpeg 이 필요합니다.
   "loop"    { Need-Venv; Push-Location $Root; & $Py tools\loop_seam.py @Rest; Pop-Location }
   # 그림을 맡기기 **전에** — 명령어가 그 화면에 맞는가

@@ -20,6 +20,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "services" / "api"))
 
+#: 괄호 풀이 — 근거의 **내용**이 아니라 읽기 보조입니다.
+_GL = re.compile(r'<i class="gl">\([^)]*\)</i>')
+
 import pytest                                          # noqa: E402
 
 from engine import lens as lens_mod                    # noqa: E402
@@ -275,7 +278,24 @@ def test_the_evidence_line_keeps_its_own_voice(reports, f):
             if c["id"] == "portrait" or c["id"].startswith("lc_"):
                 continue
             if c["id"] in base:
-                assert c["source"] == V.speak(V.address(base[c["id"]], you), lens_mod.view(lid)['voice']), (lid, c["id"])
+                # ★ **읽기 보조는 뺍니다** (2026-09-25).
+                #
+                #   근거의 내용은 관측 · 이치 · 출처 셋입니다. 괄호 풀이는
+                #   그 위에 덧댄 읽기 보조라, 붙고 안 붙고가 캐릭터마다
+                #   갈릴 수 있습니다 — **본문이 이미 푼 말은 근거에서 안
+                #   풀기** 때문입니다. 그런데 어느 컷이 본문에 서는지는
+                #   캐릭터마다 다릅니다(관점 컷 · 「어떤 사람인가」).
+                #
+                #   두 번 풀지 않으려면 그 짝맞춤을 해야 하고, 그러면 괄호는
+                #   갈립니다. 갈리지 않게 하려면 한 컷에 같은 괄호가 두 번
+                #   나갑니다 — 손님이 본 그 자리요. 셋 다 지킬 수는 없으니,
+                #   **내용은 한 벌**로 두고 보조만 갈리게 합니다.
+                #   지키는 것은 그대로입니다: 근거가 대는 값과 이치와 출처는
+                #   캐릭터가 바꾸지 않습니다.
+                got = _GL.sub("", c["source"])
+                want = _GL.sub("", V.speak(V.address(base[c["id"]], you),
+                                           lens_mod.view(lid)['voice']))
+                assert got == want, (lid, c["id"])
 
 
 def test_the_evidence_line_never_says_I(reports):

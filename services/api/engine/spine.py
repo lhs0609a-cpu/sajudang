@@ -43,6 +43,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Optional
 
+from . import why as _why
 from .constants import ELEMENT_OF_GAN, GENERATES, HIDDEN, TEN_GOD_GROUP, ten_god
 
 SEED = Path(__file__).resolve().parents[3] / "seed" / "spine.json"
@@ -261,9 +262,9 @@ def depth_html(f, sp: dict, concern: Optional[str] = None,
 
 def source(f) -> str:
     nxt = NEXT[f.flow]
-    return ("흐름 %s → %s · %s %d · %s %d · %s(%d)"
+    return ("흐름 %s → %s · %s %d자 · %s %d자 · %s"
             % (f.flow, nxt, f.flow, count(f, f.flow), nxt, count(f, nxt),
-               f.strength, f.strength_score))
+               _why.strength_seen(f)))
 
 
 # ★ 셋째 축 — 흐름 **안에서** 어느 쪽이 센가 (2026-09-11).
