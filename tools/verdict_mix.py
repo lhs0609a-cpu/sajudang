@@ -60,7 +60,22 @@ for p in (ROOT / "services" / "api", ROOT):
     if str(p) not in sys.path:
         sys.path.insert(0, str(p))
 
-from engine.bank import build_hook                  # noqa: E402
+#: 손님이 **실제로 보는** 훅은 `first_reading` 이 만듭니다.
+#
+# ★ 이 자는 `bank.build_hook` 을 부르고 있었습니다 (2026-09-27에 고침).
+#   그런데 그것은 **분석지 한 장**(`engine/summary`)과 도구
+#   (`engine/screenscan`)만 쓰는 자리요. 손님 화면은 `routers/hook` 이
+#   `build_first_reading` 으로 만듭니다.
+#
+#   그래서 이 자가 낸 훅 수치는 전부 **다른 물건의 것**이었습니다. 자를
+#   제품보다 좁게 두는 것보다 나쁩니다 — 좁으면 못 보고 끝나지만, 다른
+#   것을 재면 **고친 줄 알고 넘어갑니다.** 실제로 그렇게 됐습니다:
+#   씨앗 55줄과 교차 줄을 고쳐 배포했는데 손님 화면에는 안 닿았고,
+#   이 자는 「고쳤다」 고 찍었습니다.
+#
+#   ★ 자를 새로 만들 때 **부르는 함수가 라우터가 부르는 것과 같은지**
+#     먼저 보시오.
+from engine.first_reading import build_first_reading   # noqa: E402
 from engine.calendar import build_chart             # noqa: E402
 from engine.features import build_features          # noqa: E402
 from engine.report import build_report              # noqa: E402
@@ -121,8 +136,20 @@ WHY = re.compile(
 #   「마음은 크게 썼을 것이오」 「다툰 뒤 먼저 손 내미는 쪽일 것이오」.
 #   이 집이 일부러 쓰는 꼴이오: 단정이면서 손님이 아니라고 할 수 있는 말.
 #   그걸 못 세면 고친 것이 안 보입니다.
+#: ★ 「**~ 자리요**」 가 이 집의 단정 꼴입니다 (2026-09-27).
+#
+#   자를 제품에 맞추고 나서야 보였습니다. 손님이 보는 첫 화면은 이미
+#   경쟁 이야기를 닫고 단정으로 엽니다 —
+#
+#       「게을러서 흐트러지는 자리가 아니오. 생각이 늘면 끼니와 잠이
+#         먼저 밀리는 자리요.」
+#
+#   Pennington & Hastie 가 말한 **유일함**이 바로 이 꼴이오 — 뻔한 남의
+#   이야기를 먼저 닫아야 확신이 섭니다. 자가 이것을 「그밖」 으로 세면
+#   있는 것을 없다고 적습니다.
 VERDICT = re.compile(
-    r"(사람이|쪽이|편이)[오네요]|(사람이네|사람이오|쪽이네|쪽이오|편이네|편이오)"
+    r"자리(가 아니오|가 아니네|요|네|이오|이네)[.!]?$"
+    r"|(사람이|쪽이|편이)[오네요]|(사람이네|사람이오|쪽이네|쪽이오|편이네|편이오)"
     # ★ 받침이 붙은 꼴을 놓치고 있었습니다 — 「컸을」 「썼을」 「갈」.
     #   한국말은 어간에 받침이 붙어 한 글자가 되니, 앞 글자를 지정하면
     #   반드시 새오 (`terms.WORD_START` 에서 겪은 그 자리요).
@@ -175,7 +202,7 @@ def _page(rng: random.Random) -> dict:
     axis4 = rng.choice((None, "INFP", "ESTJ", "INTP", "ENFJ", "ISTP"))
     f = build_features(build_chart(y, mo, d, h, mi, rng.choice("MF"),
                                    hour_known=rng.random() > 0.15), as_of=AS_OF)
-    segs = build_hook(f, concern, axis4)
+    segs = build_first_reading(f, concern, axis4, name='')
     rep = build_report(f, "m", "nopa", "free", concern, axis4)
     return {"first": plain(segs[0]["html"]),
             "all": [plain(s["html"]) for s in segs]

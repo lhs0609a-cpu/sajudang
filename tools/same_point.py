@@ -59,7 +59,22 @@ for p in (ROOT / "services" / "api", ROOT):
     if str(p) not in sys.path:
         sys.path.insert(0, str(p))
 
-from engine.bank import build_hook                  # noqa: E402
+#: 손님이 **실제로 보는** 훅은 `first_reading` 이 만듭니다.
+#
+# ★ 이 자는 `bank.build_hook` 을 부르고 있었습니다 (2026-09-27에 고침).
+#   그런데 그것은 **분석지 한 장**(`engine/summary`)과 도구
+#   (`engine/screenscan`)만 쓰는 자리요. 손님 화면은 `routers/hook` 이
+#   `build_first_reading` 으로 만듭니다.
+#
+#   그래서 이 자가 낸 훅 수치는 전부 **다른 물건의 것**이었습니다. 자를
+#   제품보다 좁게 두는 것보다 나쁩니다 — 좁으면 못 보고 끝나지만, 다른
+#   것을 재면 **고친 줄 알고 넘어갑니다.** 실제로 그렇게 됐습니다:
+#   씨앗 55줄과 교차 줄을 고쳐 배포했는데 손님 화면에는 안 닿았고,
+#   이 자는 「고쳤다」 고 찍었습니다.
+#
+#   ★ 자를 새로 만들 때 **부르는 함수가 라우터가 부르는 것과 같은지**
+#     먼저 보시오.
+from engine.first_reading import build_first_reading   # noqa: E402
 from engine.calendar import build_chart             # noqa: E402
 from engine.features import build_features          # noqa: E402
 from engine.report import build_report              # noqa: E402
@@ -142,7 +157,7 @@ def _page(rng: random.Random) -> dict:
     axis4 = rng.choice((None, "INFP", "ESTJ", "INTP", "ENFJ", "ISTP"))
     f = build_features(build_chart(y, mo, d, h, mi, rng.choice("MF"),
                                    hour_known=known), as_of=AS_OF)
-    segs = build_hook(f, concern, axis4)
+    segs = build_first_reading(f, concern, axis4, name='')
     rep = build_report(f, "m", "nopa", "free", concern, axis4)
     return {"blocks": [{"id": "훅%s" % s["stage"], "html": s["html"]}
                        for s in segs]
