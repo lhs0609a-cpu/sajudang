@@ -417,8 +417,38 @@ def _wants_spec(f) -> list:
     return out
 
 
+# ── 물으신 자리 ↔ 네 자리 (2026-09-25) ─────────────────────────
+#
+# ★ 이 표가 **화면에 있었습니다.** `Wants.tsx` 가 제 손으로 들고 있었고,
+#   일곱째 고민(부동산)과 몸이 빠져 있었습니다. 그러면 `category[concern]`
+#   이 undefined 가 되어 화면이 `return null` 합니다 —
+#
+#       **부동산·몸을 물은 손님은 결제 직전의 가장 센 장치를 아예 못 봅니다.**
+#
+#   라이브에서 확인했습니다. 서버는 네 자리를 다 만들어 보내는데 화면이
+#   못 찾고 버렸습니다. 값이 오가는 그 자리에서요.
+#
+#   그래서 표를 **서버로 옮깁니다.** 고민 목록은 `schemas.api.Concern` 한
+#   자리에 있고, 새 고민을 열면서 여기를 안 채우면 검사가 잡습니다
+#   (`tests/test_peek.py`). 화면은 `primary` 표시만 봅니다 — 「화면이 제
+#   손으로 세지 마세요」와 같은 까닭이오 (CLAUDE.md).
+#
+# ★ 부동산은 **재물**입니다 — `bank.CONCERN_AXIS` 가 이미 재성으로 봅니다.
+#   몸은 네 이름 가운데 **운명**에 붙입니다. 때(대운)로 보는 자리라 그렇소.
+WANT_OF = {
+    "money": "재물",
+    "real_estate": "재물",
+    "love": "사랑",
+    "people": "사람",
+    "work": "운명",
+    "dir": "운명",
+    "health": "운명",
+}
+
+
 def build_wants(f, locked: list, limit: int = 4,
-                voice: Optional[str] = None, you: Optional[str] = None) -> list:
+                voice: Optional[str] = None, you: Optional[str] = None,
+                concern: Optional[str] = None) -> list:
     """
     네 자리 — 재물 · 사랑 · 운명 · 사람.
 
@@ -427,14 +457,16 @@ def build_wants(f, locked: list, limit: int = 4,
             갈립니다.
 
     돌려주는 것
-        want   자리 이름 (재물 · 사랑 · 운명 · 사람)
-        fact   여는 사실 — 그 사람의 여덟 글자에서 **센 것**
-        ask    무엇을 묻는가
-        head   답의 앞머리 — 진짜 글
-        mask   가린 글자 수. 글자 자체는 안 보냅니다.
-        source 근거 줄 — 가리지 않습니다
-        chars  그 컷 전체 길이
+        want    자리 이름 (재물 · 사랑 · 운명 · 사람)
+        primary 물으신 자리에 답하는 행인가 — 화면이 이것만 봅니다
+        fact    여는 사실 — 그 사람의 여덟 글자에서 **센 것**
+        ask     무엇을 묻는가
+        head    답의 앞머리 — 진짜 글
+        mask    가린 글자 수. 글자 자체는 안 보냅니다.
+        source  근거 줄 — 가리지 않습니다
+        chars   그 컷 전체 길이
     """
+    want_now = WANT_OF.get(concern or "")
     by_id = {str(c.get("id") or ""): c for c in (locked or [])}
     used: set = set()
     rows: list = []
@@ -466,6 +498,7 @@ def build_wants(f, locked: list, limit: int = 4,
         #   둘이 됩니다 (tests/test_peek).
         rows.append({
             "want": want,
+            "primary": want == want_now,
             "fact": voice_mod.speak(voice_mod.address(fact, you), voice),
             "ask": voice_mod.address(ask_of(cid, c.get("title") or ""), you),
             "head": head,
@@ -475,4 +508,12 @@ def build_wants(f, locked: list, limit: int = 4,
         })
         if len(rows) >= limit:
             break
+    # ★ 물으신 자리가 **없으면 첫 행을 세웁니다.**
+    #
+    #   그 자리의 컷이 벽 뒤에 없을 수도 있습니다(`pick` 이 빈손으로 옴).
+    #   그때 아무것도 안 세우면 화면이 통째로 비어, 고치기 전과 같은 꼴이
+    #   됩니다. 물은 자리가 아니라고 말하지는 않습니다 — 그건 이 집이
+    #   이미 하는 일이오 (`topic.LENS_OFF`).
+    if rows and not any(r["primary"] for r in rows):
+        rows[0]["primary"] = True
     return rows

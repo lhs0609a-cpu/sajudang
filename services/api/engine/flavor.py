@@ -139,8 +139,20 @@ def ask(html: str, lens_id: str, seen: Optional[set] = None,
     from . import voice as _voice
     tail = _voice.speak(tail, tone)
     if seen is not None:
-        # 한 장에 넷까지. 그 이상은 버릇이 아니라 말버릇 흉내입니다.
-        if len(seen) >= 4:
+        # ★ 한 장에 **둘까지** (2026-09-25 · docs/45 §4).
+        #
+        #   넷으로 두고 있었습니다. 훅에서 하나가 더 붙어 손님이 한 장에
+        #   다섯 번 되묻는 말을 받았습니다 — 자로 재니 5.0번이오.
+        #
+        #   묻는 꼬리는 스무 명을 갈라 놓는 말버릇이라 **없애지 않습니다.**
+        #   다만 검증된 문턱이 있습니다 — 반영(말해 주는 줄) 대 질문이
+        #   2:1이라야 「캐묻는다」가 아니라 「알아준다」로 읽힙니다
+        #   (MITI 4.2.1 — 이 문턱만은 경험적 근거가 충분하다고 못 박은
+        #   자리요). 한 장에 둘이면 그 비에 듭니다.
+        #
+        #   그리고 확신 있는 판정 뒤에 물음표가 붙으면 판정이 흐려집니다.
+        #   버릇은 두 번으로 충분히 서오.
+        if len(seen) >= 2:
             return html
     m = _LAST_P.search(html)
     if not m:

@@ -30,7 +30,7 @@ from . import terms
 from . import skim as _skim
 from . import voice as _voice
 from . import why as _why
-from .constants import ELEMENT_OF_GAN
+from .constants import ELEMENT_OF_GAN, TEN_GOD_GROUP
 
 SEED = Path(__file__).resolve().parents[3] / "seed"
 
@@ -583,6 +583,51 @@ BLADE_LEAD = {
 }
 
 
+def inherit_line(f) -> str:
+    """
+    물려받은 것과 지금 쓰는 힘을 **맞붙이는** 한 줄. 없으면 빈 문자열.
+
+    ★ 왜 이 줄이 생겼나 (2026-09-25 · docs/45 §9 ③)
+
+      손님이 말했습니다 — 「이런 사람이다, 이런 것 때문에 꼬였을 거다,
+      진짜 헉 소리 나게 만들어야 하는데」. 재 보니 이 집은 축을 **하나씩**
+      말하고 그것을 한 장에 다섯 번 되풀이하고 있었습니다 — 없는 기운을
+      4.3번, 겪은 일을 3.2번, 때를 3.0번. **교차는 한 번도** 없었습니다.
+
+      교차 축 여덟을 3,000명에 대 보니 서로 다른 묶음이 553가지였고 최다가
+      1.6%였습니다. 그중 가장 센 것이 이 짝이오 —
+
+          년주 위 글자 (물려받은 것)  ×  지금 흐름 (쓰는 힘)
+          50가지 짝 · 어긋남 56% · 이음 44%
+
+    ★ 이 줄이 「헉」이 되는 까닭 넷
+
+      ① 원인이 **하나**요 — 두 원인을 대면 한 원인에 4:1로 집니다
+         (Lombrozo 2007)
+      ② 원인이 **사람 밖**에 있소 — 물려받은 것이라 제 탓이 아니오.
+         바깥 원인만 「그럴 수 있다」로 바꿉니다 (Kim & LoSavio 2009 η²=.15)
+      ③ 비용이 이익을 **지나서** 옵니다 — 강점의 그림자요. 관리자 55%가
+         한 가지를 지나치게 쓰는데 **대부분 스스로 모릅니다**
+         (Kaplan & Kaiser 2009). 그래서 이 집이 팔 수 있소
+      ④ 손님이 **대 볼 수 있소** — 년주 두 글자와 십신이오
+
+    ★ 새 점을 치지 않습니다. `f.ancestor` 와 `f.flow` 는 이미 세어져
+      있었고, 한 번도 맞붙여 보지 않았을 뿐이오.
+    """
+    B = bank()
+    tbl = B.get("INHERIT") or {}
+    got = TEN_GOD_GROUP.get((f.ancestor or {}).get("gan_ten_god") or "")
+    now = f.flow
+    row = tbl.get(got)
+    if not row or not now:
+        return ""
+    if got == now:
+        return '<p class="inherit">%s</p>' % row["same"]
+    cost = (B.get("INHERIT_COST") or {}).get(got, "")
+    return ('<p class="inherit">%s %s</p>'
+            % (row["off"].format(now=now), cost))
+
+
 def blade_order(concern: Optional[str], sex: str) -> tuple:
     """이 고민에서 십신을 보는 차례. 앞자리만 옮기고 나머지는 그대로."""
     lead = (BLADE_LEAD.get(concern or "", {}) or {}).get(sex or "", ())
@@ -903,10 +948,19 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
               #   줄**을 이미 내고 있었습니다 — 돈이면 쥐는 자리·드는
               #   힘·드러남, 사랑이면 짝을 보는 글자·앉은 자리. 컷을
               #   새로 만들 것이 없소. 있는 것을 여기서 쓰면 되오.
+              # ★ 몸사림을 **역할 구분**으로 (2026-09-25 · docs/45 §4).
+              #
+              #   전에는 「어떤 사람인지는 세어서 나오지 않소」 였습니다.
+              #   이 단에 「못 한다」 가 셋 겹쳐 있었고(재니 한 장에 5.3번),
+              #   손님은 그걸 「이 집은 아무것도 안 말해 주는구나」 로
+              #   읽습니다. 신뢰를 지키려는 줄이 설득을 죽인 것이오.
+              #
+              #   말을 거두는 대신 **누구 몫인지**를 가릅니다 — 치수는
+              #   이 집이 내고, 크다·작다는 손님이 정하오. 지키는 것은
+              #   그대로이고(검증 불가능한 주장 금지), 그림도 남습니다.
               '<p class="cnt">%s '
-              '여기까지는 센 것이오. 그래서 어떤 사람인지는 세어서 나오지 않소 — '
-              '키를 재는 자처럼, 8글자도 치수는 내되 「크다·작다」를 '
-              '정하지는 않소.</p>'
+              '여기까지는 센 것이오. 8글자는 치수를 내는 자요 — '
+              '키를 재는 자처럼, <b>크다·작다는 그대가 정하오.</b></p>'
               # ★ 물으신 자리의 말이 **꼬리에서** 붙고 있었습니다
               #   (2026-09-19). 마디 맨 끝에 한 줄 얹으니 손님 눈에는
               #   「고민이 바뀌었다」가 아니라 「낱말이 치환됐다」로
@@ -1045,6 +1099,16 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
               # ★ 순서 상자를 보자마자 그 자리의 말로 한 번 옮깁니다.
               #   맨 끝에 붙이면 손님은 상자 셋을 먼저 읽고 넘어갑니다.
               '<div class="seq">%s</div><!--ATASK-->%s'
+              # ★ **이 순서가 어디서 왔는가** — 교차 한 줄 (2026-09-25).
+              #
+              #   순서 상자를 보고 손님이 다음에 묻는 것이 그것이오. 여태
+              #   이 집은 축을 하나씩만 말했고(없는 기운 · 흐름 · 때),
+              #   그걸 한 장에 다섯 번 되풀이했습니다. 교차는 한 번도 없었소.
+              #
+              #   자리는 여기가 맞습니다 — 1단은 「못 한다」 가 셋이라 그
+              #   옆에 두면 날카로운 줄이 뜬 말에 먹힙니다 (docs/45 §2 ·
+              #   희석은 대칭이 아니오). 2단은 되풀이를 다루는 자리요.
+              '%s'
               # 2026-09-21: 넉 자가 이 마디에도 닿게. 넷째 축(slot 3)이오.
               '<p class="sea">%s</p><p class="relief">%s</p>%s%s%s</div>'
               % (ask("2", "그 일이 늘 어디서부터 시작되는지 아시오?"),
@@ -1052,6 +1116,7 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
                  "".join('<div><span>%s</span></div>' % s for s in seq),
                  "".join('<p class="%s">%s</p>' % ("hit" if i == 1 else "", l)
                          for i, l in enumerate(lines)),
+                 inherit_line(f),
                  sea_line,
                  # ★ 위로 자리에서 딴 얘기가 나오면 그건 위로가 아니라
                  #   **안 듣고 있다는 신호**입니다 (2026-09-19).
@@ -1181,8 +1246,17 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
     #   부정해야 걷히오.
     post = ("%s<br />"
             "여덟 글자에서 <b>그대</b>를 뜻하는 글자는 <b>%s</b>요. "
-            "그 힘이 <b>%s</b> 쪽으로 %s, 정작 <b>%s</b> 바닥이오.<br />"
-            "<b>멈추게 붙잡아 줄 것이 없다</b>는 말이오. %s"
+            # ★ 셈과 그 뜻을 **한 줄로** (2026-09-25 · docs/45 §9⑤).
+            #
+            #   두 줄이었습니다 — 「정작 쇠가 바닥이오.」 그리고 「멈추게
+            #   붙잡아 줄 것이 없다는 말이오.」 뒤엣것이 앞엣것의 풀이라,
+            #   손님은 같은 말을 두 번 읽고 둘 다 흘립니다 (CLAUDE.md
+            #   「센 값과 문장이 같은 말을 하게 두기」).
+            #
+            #   그리고 이 「없는 기운」 은 위로 컷(`solace`)이 맡은 자리요.
+            #   재니 한 장에 4.2번 나왔습니다 — 여기서 한 줄로 줄입니다.
+            "그 힘이 <b>%s</b> 쪽으로 %s, 정작 <b>멈추게 붙잡아 줄 %s</b> "
+            "바닥이오.<br />%s"
             % ((bank().get("NAME_NOT", {}) or {}).get(concern)
                or "이건 성격 탓이 아니오. 참고 미뤄 온 것도 그대 탓이 아니오.",
                element_word(ELEMENT_OF_GAN[f.day_gan]),
@@ -1404,7 +1478,17 @@ def build_hook(f, concern: str, axis4: Optional[str] = None,
         # ★ 그림 상자도 훅 한 벌에 **한 번**입니다. 단마다 붙으면 다섯
         #   문단이 사전으로 깔립니다 — 리포트에서 겪은 자리와 같소
         #   (`report` 의 `boxed_once`).
-        if not boxed:
+        #
+        # ★ 다만 **0단에는 안 답니다** (2026-09-25 · docs/45).
+        #
+        #   0단은 손님이 가장 먼저 보는 글이고, 여기서 살지 나갈지가
+        #   정해집니다. 재 보니 상자가 그 화면 글자의 **22%**를 먹고 있어,
+        #   손님이 판정을 읽기 전에 사전을 먼저 읽었습니다.
+        #
+        #   뜻은 괄호가 이미 답니다(「편재(크게 들어오고 크게 나가는 돈)」).
+        #   상자는 **그림**을 주는 자리라 한 단 늦게 봐도 됩니다 —
+        #   The Pattern 이 점성술 용어를 전부 버리고도 서는 까닭이오.
+        if not boxed and s.get("stage") != "0":
             box = terms.picture_box(seen, concern, f.sex)
             if box:
                 s["html"] += box

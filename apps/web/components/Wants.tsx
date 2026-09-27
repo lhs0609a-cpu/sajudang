@@ -1,6 +1,5 @@
 "use client";
 import type { WantRow } from '@shared/chart';
-import { useSession } from '@/lib/store';
 import ServerText from '@/components/ServerText';
 import LockedVeil from '@/components/LockedVeil';
 import CharacterSpeech from './CharacterSpeech';
@@ -36,9 +35,21 @@ const TURNS: Record<string, { question: string; reveal: string }> = {
  *   가리지 않습니다 — 근거는 보이되 규칙만 감춥니다.
  */
 export default function Wants({ rows, onOpen }: { rows: WantRow[]; onOpen?: () => void }) {
-  const concern = useSession(s => s.concern);
-  const category: Record<string,string> = {money:'재물',love:'사랑',people:'사람',work:'운명',dir:'운명'};
-  const relevant = (rows ?? []).filter(r => r.want === category[concern]).slice(0,1);
+  /* ★ 고민 표를 **여기서 들지 않습니다** (2026-09-25).
+   *
+   *   전에는 이 파일이 {money:'재물', love:'사랑', …} 를 제 손으로 들고
+   *   있었고, 일곱째 고민(부동산)과 몸이 빠져 있었습니다. 그러면
+   *   category[concern] 이 undefined 가 되어 아래에서 return null —
+   *
+   *     **부동산·몸을 물은 손님은 결제 직전의 가장 센 장치를 아예 못 봤습니다.**
+   *
+   *   라이브에서 확인했습니다. 서버는 네 자리를 다 만들어 보내는데 화면이
+   *   못 찾고 버렸습니다. 값이 오가는 그 자리에서요.
+   *
+   *   지금은 서버가 `primary` 로 골라 표시합니다 (`engine/peek.WANT_OF`).
+   *   고민이 늘어도 화면은 손댈 데가 없습니다 — 「화면이 제 손으로 세지
+   *   마세요」와 같은 까닭이오. */
+  const relevant = (rows ?? []).filter(r => r.primary).slice(0, 1);
   if (!relevant.length) return null;
   return <CharacterSpeech><section className="wants" aria-label="아직 안 편 네 자리">
     <p className="conversion-kicker">아직 안 편 자리</p>

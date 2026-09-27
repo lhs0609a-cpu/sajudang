@@ -39,6 +39,14 @@ from engine.report import build_report           # noqa: E402
 
 LENSES = ["pungun", "baegun", "cheongam", "sigye"]
 
+#: 고민은 **한 자리**에서 받습니다 — 자를 제품보다 좁게 두면 새 칸의
+#: 사고를 아무 자도 못 봅니다 (CLAUDE.md).
+from typing import get_args                        # noqa: E402
+
+from schemas.api import Concern                    # noqa: E402
+
+CONCERNS = get_args(Concern)
+
 
 @pytest.fixture(scope="module")
 def f():
@@ -222,3 +230,72 @@ def test_the_source_line_calls_the_customer_by_name_too(f):
             line = val[0] if isinstance(val, tuple) else val
             assert not re.search(r"(^|[^가-힣])(나를|나와|나에게|내가|내 편)", line), (
                 "근거의 이치가 제 얘기를 하오 — %s: %s" % (key, line))
+
+
+# ══════════════════════════════════════════════════════════
+# 네 자리 — 물으신 자리가 **반드시 하나** 선다
+# ══════════════════════════════════════════════════════════
+#
+# ★ 왜 검사를 세우나 (2026-09-25)
+#
+#   고민 → 자리 이름 표를 **화면이 제 손으로** 들고 있었습니다
+#   (`Wants.tsx` 의 {money:'재물', love:'사랑', …}). 일곱째 고민(부동산)과
+#   몸이 빠져 있어 `category[concern]` 이 undefined 가 되고, 화면이
+#   `return null` 했습니다 —
+#
+#     **부동산·몸을 물은 손님은 결제 직전의 가장 센 장치를 아예 못 봤습니다.**
+#
+#   라이브에서 확인했습니다. 서버는 네 자리를 다 만들어 보내는데 화면이
+#   못 찾고 버렸습니다. 값이 오가는 그 자리에서요.
+#
+#   이 컴포넌트에는 2026-09-21에 「서버가 내려보내는데 그리는 화면이
+#   없었습니다」 라는 머리말이 달렸습니다. 같은 사고가 **두 번** 났습니다 —
+#   한 번은 안 그려서, 한 번은 새 고민을 열면서 표를 안 채워서.
+#
+#   표는 이제 `engine/peek.WANT_OF` 한 자리에 있고, 아래 셋이 지킵니다.
+def _wants(f, concern, locked=None):
+    from engine.peek import build_wants
+    rep = build_report(f, "t", "nopa", "free", concern, None)
+    return build_wants(f, rep["locked"], concern=concern)
+
+
+@pytest.mark.parametrize("concern", CONCERNS)
+def test_물으신_자리가_반드시_하나_선다(f, concern):
+    rows = _wants(f, concern)
+    assert rows, "%s: 네 자리가 하나도 안 섰소" % concern
+    primary = [r for r in rows if r.get("primary")]
+    assert len(primary) == 1, (
+        "%s: 물으신 자리가 %d개요 — 화면은 하나만 그립니다 (%s)"
+        % (concern, len(primary), [r["want"] for r in primary]))
+
+
+def test_고민_목록이_제품보다_좁지_않다():
+    """
+    ★ 자를 제품보다 좁게 두면 새 칸의 사고를 아무도 못 봅니다 (CLAUDE.md).
+      고민은 `schemas.api.Concern` 한 자리에서 셉니다.
+    """
+    from typing import get_args
+
+    from engine.peek import WANT_OF
+    from schemas.api import Concern
+    missing = [c for c in get_args(Concern) if c not in WANT_OF]
+    assert not missing, (
+        "고민을 열고 `peek.WANT_OF` 를 안 채웠소: %s — 그 고민을 물은 손님은 "
+        "결제 직전 자리를 못 봅니다" % missing)
+
+
+def test_화면이_고민_표를_제_손으로_들지_않는다():
+    """
+    ★ 표가 두 벌이 되면 한 벌만 고쳐 또 샙니다.
+
+    ★ **주석은 셈에서 뺍니다.** 머리말이 옛 표를 「이렇게 틀렸었다」고
+      역사로 적으니, 안 걷으면 자가 제 집 기록을 사고로 셉니다 —
+      `tests/test_seo_surface._code` 에서 겪은 그 자리요.
+    """
+    src = (WEB / "components" / "Wants.tsx").read_text("utf-8")
+    code = re.sub(r"/\*.*?\*/", "", src, flags=re.S)
+    code = re.sub(r"(?m)^\s*//.*$", "", code)
+    assert "r.primary" in code, "화면이 서버 표시를 안 보오"
+    flat = code.replace(" ", "")
+    assert "money:'재물'" not in flat and "money:\"재물\"" not in flat, \
+        "화면이 고민 표를 다시 들었소 — 표는 engine/peek.WANT_OF 한 자리요"

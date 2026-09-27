@@ -190,7 +190,11 @@ def post_report(req: ReportRequest) -> ReportResponse:
     data["wants"] = peek_mod.build_wants(
         f, data["locked"],
         voice=(lens_mod.view(req.lens_id) or {}).get("voice"),
-        you=lens_mod.you_of(req.lens_id, req.name, getattr(f, "sex", None)))
+        you=lens_mod.you_of(req.lens_id, req.name, getattr(f, "sex", None)),
+        # ★ 물으신 자리를 **서버가 골라 표시합니다** (`peek.WANT_OF`).
+        #   화면이 제 손으로 고민 표를 들고 있다가, 부동산·몸이 빠져
+        #   그 두 고민에서 이 자리가 통째로 안 떴습니다.
+        concern=req.concern)
 
     if tier != "free" and req.session_id:
         _mark_opened(req.session_id, tier, req.lens_id)

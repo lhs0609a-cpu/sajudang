@@ -286,6 +286,14 @@ export interface LensPublic {
 export interface WantRow {
   /** 재물 · 사랑 · 운명 · 사람 */
   want: string;
+  /**
+   * 물으신 자리에 답하는 행인가 — 화면은 **이것만** 봅니다.
+   *
+   * ★ 고민 → 자리 이름 표를 화면이 들고 있다가, 부동산·몸이 빠져 그 두
+   *   고민에서 이 자리가 통째로 안 떴습니다 (2026-09-25). 표는 서버
+   *   한 자리에 있습니다 — `engine/peek.WANT_OF`.
+   */
+  primary: boolean;
   /** 여는 사실. 그 사람의 여덟 글자에서 센 것이라 대 볼 수 있습니다. */
   fact: string;
   /** 무엇을 묻는가. */
