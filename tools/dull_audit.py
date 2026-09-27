@@ -49,7 +49,6 @@ import random
 import re
 import statistics
 import sys
-from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -58,32 +57,30 @@ for p in (ROOT / "services" / "api", ROOT):
         sys.path.insert(0, str(p))
 
 from engine import lens as lens_mod                 # noqa: E402
-#: 손님이 **실제로 보는** 훅은 `first_reading` 이 만듭니다.
+#: 손님이 **실제로 받는 글**은 `tools/seen_page` 한 자리에서 받습니다.
 #
 # ★ 이 자는 `bank.build_hook` 을 부르고 있었습니다 (2026-09-27에 고침).
-#   그런데 그것은 **분석지 한 장**(`engine/summary`)과 도구
-#   (`engine/screenscan`)만 쓰는 자리요. 손님 화면은 `routers/hook` 이
-#   `build_first_reading` 으로 만듭니다.
+#   그건 분석지(`engine/summary`)와 도구(`engine/screenscan`)만 쓰는
+#   자리요. 손님 훅은 `routers/hook` 이 만들고, 그 라우터는 네 층을 더
+#   얹습니다 — portrait · topic · specialist · 말투.
 #
-#   그래서 이 자가 낸 훅 수치는 전부 **다른 물건의 것**이었습니다. 자를
+#   그래서 이 자가 낸 훅 수치는 **다른 물건의 것**이었습니다. 자를
 #   제품보다 좁게 두는 것보다 나쁩니다 — 좁으면 못 보고 끝나지만, 다른
 #   것을 재면 **고친 줄 알고 넘어갑니다.** 실제로 그렇게 됐습니다:
-#   씨앗 55줄과 교차 줄을 고쳐 배포했는데 손님 화면에는 안 닿았고,
-#   이 자는 「고쳤다」 고 찍었습니다.
+#   씨앗 55줄을 고쳐 배포했는데 손님 화면에는 안 닿았고 자는 「고쳤다」
+#   고 찍었습니다.
 #
-#   ★ 자를 새로 만들 때 **부르는 함수가 라우터가 부르는 것과 같은지**
-#     먼저 보시오.
-from engine.first_reading import build_first_reading   # noqa: E402
-from engine.calendar import build_chart             # noqa: E402
-from engine.features import build_features          # noqa: E402
-from engine.report import build_report              # noqa: E402
+#   조립을 자마다 흉내 내지 않습니다 — 라우터가 층을 하나 더 얹는 날
+#   자들이 조용히 옛 물건을 재기 시작하오.
+#   `tests/test_seen_page.py` 가 그 어긋남을 셉니다.
+from tools.seen_page import free_page as _free_page   # noqa: E402
+from tools.seen_page import sample as _sample         # noqa: E402
 from schemas.api import Concern                     # noqa: E402
 from typing import get_args
 
 TAG = re.compile(r"<[^>]+>")
 GLOSS = re.compile(r'<i class="gl">\(([^)]*)\)</i>')
 SENT = re.compile(r"[^.?!]+[.?!]")
-AS_OF = date(2026, 8, 27)
 #: 고민 목록은 `schemas.api.Concern` 한 자리에서 받습니다 — 자를 제품보다
 #: 좁게 두면 새 칸의 사고를 아무 자도 못 봅니다 (CLAUDE.md).
 CONCERNS = get_args(Concern)
@@ -156,26 +153,12 @@ def sentences(text: str) -> list:
 
 
 def _one(rng: random.Random) -> dict:
-    y = rng.randint(1960, 2007)
-    mo, d = rng.randint(1, 12), rng.randint(1, 28)
-    h, mi = rng.randint(0, 23), rng.randint(0, 59)
-    sex = rng.choice(("M", "F"))
-    known = rng.random() > 0.15
+    """손님이 받는 글 한 벌. 조립은 `tools/seen_page` 한 자리에서."""
     concern = rng.choice(CONCERNS)
     axis4 = rng.choice((None, "INFP", "ESTJ", "INTP", "ENFJ", "ISTP"))
-    f = build_features(build_chart(y, mo, d, h, mi, sex, hour_known=known),
-                       as_of=AS_OF)
-    segs = build_first_reading(f, concern, axis4, name='')
-    rep = build_report(f, "m", "nopa", "free", concern, axis4)
-    blocks = []
-    for s in segs:
-        blocks.append({"where": "훅%s" % s["stage"], "title": s["label"],
-                       "html": s["html"], "source": s.get("source") or ""})
-    for c in rep["cuts"]:
-        blocks.append({"where": "무료", "title": c["title"],
-                       "html": c["html"], "source": c.get("source") or ""})
-    return {"concern": concern, "axis4": axis4, "blocks": blocks,
-            "locked": rep["locked"]}
+    pg = _free_page(_sample(rng), concern, axis4, lens_id="nopa")
+    return {"concern": concern, "axis4": axis4, "blocks": pg["blocks"],
+            "locked": pg["locked"]}
 
 
 def audit(page: dict) -> dict:

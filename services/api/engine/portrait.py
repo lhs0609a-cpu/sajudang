@@ -241,6 +241,21 @@ VIEW = {
 # 캐릭터를 안 고르고 들어온 자리(훅 첫머리)에서 쓰는 차례.
 DEFAULT_ORDER = ['first', 'talk', 'work', 'close', 'tired', 'age']
 
+#: 값을 치르기 전에 펴는 면의 수. **훅과 풀이가 이 수를 함께 봅니다** —
+#: 훅은 앞에서 이만큼, 풀이는 `skip=HOOK_FACES` 로 그 뒤부터.
+#:
+#: ★ 두 자리에 손으로 적지 마시오. 훅은 3, 풀이는 6 이라 적혀 있었고
+#:   **앞 세 면이 글자 그대로 두 번** 나갔습니다 (제목·근거 줄까지).
+#:   라우터에는 「나머지는 풀이에 있소」 라고 적혀 있었습니다 — 뜻은
+#:   맞는데 수가 두 벌이라 지켜지지 않았습니다.
+HOOK_FACES = 3
+
+# ★ 위 스무 줄은 **앞머리**요 — 그 사람이 먼저 보는 다섯 면이오.
+#   뒤에 남은 면을 붙여 열 면을 채웁니다. 앞머리가 그 캐릭터의 결이고,
+#   꼬리는 「아직 안 그린 면」이라 차례에 뜻이 없으니 `HEAD` 순서로 답니다.
+#   이걸 안 붙이면 풀이가 펼 면이 둘밖에 안 남습니다.
+VIEW = {k: list(v) + [fc for fc in HEAD if fc not in v] for k, v in VIEW.items()}
+
 CLOSING = ('여기까지가 여덟 글자로 읽은 그대의 모습이오. 아닌 대목이 있거든 '
            '그 줄을 빼고 읽으시오 — <b>다 맞는 글은 아무것도 안 맞는 글</b>이오.')
 
@@ -386,19 +401,27 @@ def _lead(lens_id: Optional[str]) -> str:
     return '나는 사람을 볼 때 <b>%s</b>부터 보오. 그 눈으로 그대를 그려 보겠소.' % escape(label)
 
 
-def facets_for(lens_id: Optional[str], n: int) -> list:
+def facets_for(lens_id: Optional[str], n: int, skip: int = 0) -> list:
+    """
+    펼 면의 차례. `skip` 은 **앞에서 건너뛸 면의 수**요.
+
+    ★ 건너뛰는 단위는 **차례의 칸**이지 그려진 줄이 아닙니다. 표에 칸이
+      없는 면은 훅에서도 풀이에서도 안 그려지니(`rows` 가 건너뜀), 칸으로
+      세면 빠지는 면이 없소. 그려진 줄로 세면 훅이 못 그린 면을 풀이도
+      건너뛰게 되오.
+    """
     order = VIEW.get(lens_id or '') or DEFAULT_ORDER
-    return list(order)[:max(1, n)]
+    return list(order)[max(0, skip):max(0, skip) + max(1, n)]
 
 
-def rows(f, lens_id: Optional[str] = None, n: int = 5) -> list:
+def rows(f, lens_id: Optional[str] = None, n: int = 5, skip: int = 0) -> list:
     """
     편 면들. `[{"facet","head","say","ground"}]` — 표에 없으면 **건너뜁니다.**
 
     ★ 없는 칸을 지어내지 않소. 빈 목록이 나오는 것이 정상이오.
     """
     out = []
-    for facet in facets_for(lens_id, n):
+    for facet in facets_for(lens_id, n, skip):
         key = _key(f, facet)
         say = (TABLES.get(facet) or {}).get(key or '')
         if not say:
@@ -409,9 +432,10 @@ def rows(f, lens_id: Optional[str] = None, n: int = 5) -> list:
 
 
 def build(f, lens_id: Optional[str] = None, n: int = 5,
-          you: str = '그대', seen=None, lead: bool = True) -> Optional[dict]:
+          you: str = '그대', seen=None, lead: bool = True,
+          skip: int = 0) -> Optional[dict]:
     """한 컷. `{"id","title","html","source","statement_id"}`"""
-    got = rows(f, lens_id, n)
+    got = rows(f, lens_id, n, skip)
     if not got:
         return None
     parts = []

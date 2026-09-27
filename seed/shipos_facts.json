@@ -1480,6 +1480,7 @@
   "test_screen_declares_name.py",
   "test_screen_snapshot.py",
   "test_screen_top.py",
+  "test_seen_page.py",
   "test_seo_surface.py",
   "test_shipos.py",
   "test_sinsal_figure.py",

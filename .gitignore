@@ -42,3 +42,7 @@ voice_lines.json
 output/
 .vercel
 .env*
+
+# 광고 소재 — 63MB. **일부러 안 담습니다** (CLAUDE.md). `git add -A` 가
+# 끌고 가려 한 적이 있어 여기에 적어 둡니다.
+광고용 이미지/

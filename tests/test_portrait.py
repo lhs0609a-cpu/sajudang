@@ -153,14 +153,34 @@ def test_캐릭터마다_먼저_보는_면이_다르다(chart):
 
 
 @pytest.mark.parametrize('lens_id', sorted(P.VIEW))
-def test_여섯_면이_다_서고_근거에_센_값이_있다(chart, lens_id):
-    got = P.rows(chart, lens_id, 6)
-    assert len(got) == len(P.VIEW[lens_id])
+def test_차례에_든_면이_다_서고_근거에_센_값이_있다(chart, lens_id):
+    """
+    ★ `VIEW` 는 열 면입니다 (2026-09-27). 전에는 다섯이었고 풀이가
+      `n=6` 으로 앞에서부터 폈는데, 훅이 이미 앞 세 면을 폈으므로
+      **세 면이 글자 그대로 두 번** 나갔습니다. 이제 훅이 앞
+      `HOOK_FACES` 면, 풀이가 그 뒤 다섯 면이오.
+
+      여기서 보는 것은 **차례에 든 면이 하나도 안 빠지는가** 요 —
+      표에 칸이 없으면 `rows` 가 조용히 건너뛰므로.
+    """
+    order = P.VIEW[lens_id]
+    assert len(order) == len(P.HEAD), '차례에 열 면이 다 들어야 하오'
+    got = P.rows(chart, lens_id, len(order))
+    assert [r['facet'] for r in got] == list(order)
     for row in got:
         assert row['head'] and row['say'] and row['ground']
     cut = P.build(chart, lens_id, 6)
     assert re.search(r'\d', cut['source']), cut['source']
     assert len(_plain(cut['html'])) > 300
+
+
+@pytest.mark.parametrize('lens_id', sorted(P.VIEW))
+def test_훅과_풀이가_같은_면을_두_번_안_그린다(chart, lens_id):
+    front = P.rows(chart, lens_id, P.HOOK_FACES)
+    rest = P.rows(chart, lens_id, 5, skip=P.HOOK_FACES)
+    assert len(front) == P.HOOK_FACES, lens_id
+    assert len(rest) == 5, lens_id
+    assert not ({r['facet'] for r in front} & {r['facet'] for r in rest})
 
 
 def test_사람이_바뀌면_그림이_바뀐다():

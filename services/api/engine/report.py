@@ -652,7 +652,14 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     # ★ 스무 명이 **같은 사람**을 그립니다 — 갈리는 것은 차례요
     #   (`portrait.VIEW`). 캐릭터가 바뀐다고 그대가 다른 사람이 되면
     #   그건 점이 아니라 소설이오.
-    port = portrait_mod.build(f, lens_id, 6, you=you)
+    # ★ 훅이 앞 세 면을 이미 폈습니다 — 여기서는 **그 뒤부터**요
+    #   (2026-09-27). 전에는 `n=6` 이라 앞 세 면이 제목·근거 줄까지
+    #   글자 그대로 두 번 나갔습니다. 손님이 첫 화면에서 읽은 글을
+    #   일곱째 컷에서 다시 읽으면, 맞는 말이어도 그때부터 훑습니다.
+    #   ★ 여는 줄과 마감 줄은 그대로 둡니다 — 보관함에서 이 한 장만
+    #     다시 펼 때 훅이 없으니, 그 둘이 없으면 면만 덩그러니 섭니다.
+    port = portrait_mod.build(f, lens_id, 5, you=you,
+                              skip=portrait_mod.HOOK_FACES)
     if port:
         cuts.append(_cut("portrait", port["title"], port["source"],
                          port["html"], 0, sid=port["statement_id"]))
