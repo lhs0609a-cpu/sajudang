@@ -75,6 +75,7 @@ from engine import lens as lens_mod                 # noqa: E402
 #   `tests/test_seen_page.py` 가 그 어긋남을 셉니다.
 from tools.seen_page import free_page as _free_page   # noqa: E402
 from tools.seen_page import sample as _sample         # noqa: E402
+from tools.seen_page import lens as _lens_of          # noqa: E402
 from schemas.api import Concern                     # noqa: E402
 from typing import get_args
 
@@ -140,8 +141,12 @@ PLAIN_NUM = re.compile(
     r"\d{4}-\d\d-\d\d|\d{1,2}:\d\d|\d+°|\d{4}\.\d+|-?\d+\.\d+분|\d{4}~|\d+~")
 
 
-def plain(html: str) -> str:
-    return re.sub(r"\s+", " ", _html.unescape(TAG.sub(" ", html or ""))).strip()
+#: ★ `plain` 은 **`seen_page` 한 자리**에서 받습니다 (2026-09-27).
+#:
+#:   자마다 제 손으로 적고 있었더니, 굵게 태그가 낱말을 갈라
+#:   놓는 사고(「자리</b>요」 → 「자리 요」)를 세 번 따로 고쳐야
+#:   했습니다. 문장 끝을 보는 패턴이 전부 새던 자리요.
+from tools.seen_page import plain                      # noqa: E402,F401
 
 
 def sentences(text: str) -> list:
@@ -156,7 +161,8 @@ def _one(rng: random.Random) -> dict:
     """손님이 받는 글 한 벌. 조립은 `tools/seen_page` 한 자리에서."""
     concern = rng.choice(CONCERNS)
     axis4 = rng.choice((None, "INFP", "ESTJ", "INTP", "ENFJ", "ISTP"))
-    pg = _free_page(_sample(rng), concern, axis4, lens_id="nopa")
+    pg = _free_page(_sample(rng), concern, axis4,
+                    lens_id=_lens_of(rng))
     return {"concern": concern, "axis4": axis4, "blocks": pg["blocks"],
             "locked": pg["locked"]}
 

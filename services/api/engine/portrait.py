@@ -433,17 +433,55 @@ def rows(f, lens_id: Optional[str] = None, n: int = 5, skip: int = 0) -> list:
 
 def build(f, lens_id: Optional[str] = None, n: int = 5,
           you: str = '그대', seen=None, lead: bool = True,
-          skip: int = 0) -> Optional[dict]:
-    """한 컷. `{"id","title","html","source","statement_id"}`"""
+          skip: int = 0, cross: bool = False) -> Optional[dict]:
+    """
+    한 컷. `{"id","title","html","source","statement_id"}`
+
+    `cross=True` 면 **첫 화면 차림**이오 — 닫는 단정과 까닭을 답니다
+    (아래 머리말을 보시오). 훅만 켭니다.
+    """
     got = rows(f, lens_id, n, skip)
     if not got:
         return None
     parts = []
+    # ★ 첫 화면은 **네 칸**으로 섭니다 (2026-09-27 · docs/45 §6)
+    #
+    #   재 보니 첫 화면 열 줄에 **단정이 한 줄도 없었습니다** — 100명
+    #   전원. 그림이 36%로 잘 서 있었으나(이 집이 가장 잘 쓴 글이오),
+    #   「헉」 은 그림이 아니라 **경쟁 이야기를 닫는 단정**에서 납니다.
+    #
+    #       ① 닫는 단정   「게으른 자리가 아니오.」              ← 새로
+    #       ② 세우는 단정  「물려받은 것은 배우고 받쳐 주는 자리요.」  ← 새로
+    #       ③ 그 사람의 눈  「나는 …부터 보오」
+    #       ④ 면 (그림)    「일이 들어오면 — …」
+    #       ⑤ 까닭 · 비용  「그런데 지금 쓰는 힘은 … 그래서 …」      ← 새로
+    #       ⑥ 센 값 · 아닌 대목은 빼라
+    #
+    #   ①②⑤ 는 `bank.inherit_parts` 요. 3,000명에 대 보니 여덟 교차 축
+    #   가운데 가장 센 짝이고(년주 위 글자 × 지금 흐름 · 어긋남 62%),
+    #   **한 번도 손님 화면에 안 닿고 있었습니다** — 분석지에만 걸려
+    #   있었소. 새 점을 치는 것이 아니오: 둘 다 이미 세어진 값이오.
+    #
+    #   ★ ①②는 **붙여** 세웁니다. 처음에 ①만 위에 두고 까닭을 그림
+    #     뒤로 보냈더니 자가 단정을 10.2번째 줄에서 처음 만났습니다 —
+    #     닫기만 남고 세우는 줄이 멀어진 것이오.
+    #   ★ 까닭(⑤)은 그림 **뒤**요. 앞에 두면 아직 누구 얘긴지 모르는
+    #     채로 까닭을 듣습니다.
+    cross_html = ''
+    if cross:
+        from .bank import inherit_parts
+        p = inherit_parts(f)
+        if p:
+            parts.append(p['close'])     # ① 닫고
+            parts.append(p['head'])      # ② 곧바로 세운다
+            cross_html = p['body']       # ⑤ 까닭은 그림 뒤로
     if lead:
         parts.append('<p class="pt-lead">%s</p>' % _lead(lens_id))
     for r in got:
         parts.append('<p class="pt-face"><b>%s</b> — %s</p>'
                      % (escape(r['head']), r['say']))
+    if cross_html:
+        parts.append(cross_html)
     # ★ 센 값을 **본문에** 세웁니다 (2026-09-24).
     #
     #   근거 줄에만 두었더니 팩폭 자가 80 을 냈습니다. 이 집이 한 번

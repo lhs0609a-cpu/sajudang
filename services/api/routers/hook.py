@@ -97,7 +97,7 @@ def post_hook(req: HookRequest) -> HookResponse:
         #
         #   값을 치르기 전에 세 면을 보여 줍니다. 나머지는 풀이에 있소.
         port = portrait_mod.build(
-            f, req.lens_id, portrait_mod.HOOK_FACES,
+            f, req.lens_id, portrait_mod.HOOK_FACES, cross=True,
             you=lens_mod.you_word(req.lens_id, req.name, raw.get("sex")))
         if port:
             segs.insert(0, {

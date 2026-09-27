@@ -88,6 +88,7 @@ for p in (ROOT / "services" / "api", ROOT):
 from engine import portrait as _portrait             # noqa: E402
 from tools.seen_page import free_page as _free_page   # noqa: E402
 from tools.seen_page import sample as _sample         # noqa: E402
+from tools.seen_page import lens as _lens_of          # noqa: E402
 from schemas.api import Concern                     # noqa: E402
 
 TAG = re.compile(r"<[^>]+>")
@@ -113,6 +114,7 @@ ASK = re.compile(r"[?？]\s*$")
 #: 사전 — 낱말 뜻을 푸는 줄.
 DICT_ = re.compile(
     r"^(이게 무슨 말인가)|"
+    r"^(년주|월주|일주|시주)\s|"
     r"^(비견|겁재|식신|상관|정재|편재|정관|편관|정인|편인|비겁|식상|재성|"
     r"관성|인성|일간|일지|월지|월주|년주|일주|시주|대운|세운|용신|공망|"
     r"신살|절기|절입|지장간|통근|진태양시|양인|도화|역마|화개|괴강|백호)"
@@ -224,7 +226,7 @@ CUT_OFF = re.compile(
 #: ★ 예순두 줄이 「~는 말이오」 로 끝납니다. 낱말 뜻을 푸는 「사전」 과
 #:   다릅니다 — 문장을 옮기는 것이오. 이 집이 일부러 하는 일이되
 #:   (docs/21 쉬운말), 한 장에 쌓이면 **같은 말을 두 번** 읽는 것입니다.
-RESAY = re.compile(r"(는|란) 말이(오|네|요)[.!]?\s*$|^(쉽게 말하면|곧|즉)")
+RESAY = re.compile(r"(는|란) 말이(오|네|요)[.!]?\s*$|^(쉽게 말하면|곧|즉)(?=\s|$)")
 
 #: 비유 — 물건에 대 보는 줄.
 FIGURE = re.compile(r"(같소|같네|같아요|같습니다|같은 것이|처럼요|셈이(오|네))")
@@ -243,9 +245,11 @@ KEEP = re.compile(
 #:   보이오」 「여기까지는 사람의 모습이오」 「월주 태어난 달의 두
 #:   글자요」 — 손님이 읽을 것이 없는 줄이오. 손님이 「내용만 길고
 #:   뭔소리인지 모르겠다」 고 한 그 자리입니다.
+#   ★ 「월주 태어난 달의 두 글자요」 는 이음이 **아니고 사전**이오 —
+#     명식 컷이 기둥 이름을 푸는 자리요. `DICT_` 로 옮겼습니다. 자가
+#     고칠 데가 아닌 자리를 가리키게 두면 멀쩡한 글을 지웁니다.
 JOINT = re.compile(
     r"^(실제로는|내 눈으로는|여기까지|이 그림이 나온 자리|오늘은|그럼)"
-    r"|^(년주|월주|일주|시주)\s"
     r"|(이렇소|이렇네|보겠소|보겠네|보오[.!]|보네[.!]|짚었소|짚었네)\s*$"
     r"|^(이 캐릭터가 보는 기준|맞았는지 재는 법)")
 
@@ -253,8 +257,12 @@ JOINT = re.compile(
 COUNT = re.compile(r"\d|하나|둘|셋|넷|다섯|여섯|일곱|여덟|아홉|열|없소|없네|비었")
 
 
-def plain(html: str) -> str:
-    return re.sub(r"\s+", " ", _html.unescape(TAG.sub(" ", html or ""))).strip()
+#: ★ `plain` 은 **`seen_page` 한 자리**에서 받습니다 (2026-09-27).
+#:
+#:   자마다 제 손으로 적고 있었더니, 굵게 태그가 낱말을 갈라
+#:   놓는 사고(「자리</b>요」 → 「자리 요」)를 세 번 따로 고쳐야
+#:   했습니다. 문장 끝을 보는 패턴이 전부 새던 자리요.
+from tools.seen_page import plain                      # noqa: E402,F401
 
 
 def sentences(text: str) -> list:
@@ -321,7 +329,8 @@ def _page(rng: random.Random) -> dict:
     concern = rng.choice(CONCERNS)
     axis4 = rng.choice((None, "INFP", "ESTJ", "INTP", "ENFJ", "ISTP"))
     f = _sample(rng)
-    pg = _free_page(f, concern, axis4, lens_id="nopa", voice_on=False)
+    pg = _free_page(f, concern, axis4, lens_id=_lens_of(rng),
+                    voice_on=False)
     return {"first": plain(pg["blocks"][0]["html"]),
             "all": [plain(b["html"]) for b in pg["blocks"]]}
 

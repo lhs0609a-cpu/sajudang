@@ -192,7 +192,7 @@ def plain_profile(f, *, name="풍운도령", lens_id="pungun", include_label=Tru
             f'<p><b>이 장면이 반복되오.</b> {escape(scene)} 잘 풀릴 때는 {flow}에서 힘이 드러나고, '
             f'막힐 때는 문제를 혼자 정리하느라 다음 행동이 늦어지기 쉽소.</p>'
             f'<p class="plain-profile-point"><b>오늘 바꿀 한 가지</b> · {escape(direct_action)}을 먼저 하시오.</p>'
-            f'<p class="plain-profile-evidence">여기까지는 사람의 모습이오. 아래에서 이 판단이 나온 글자와 수를 확인하시오.</p></div>')
+            f'<p class="plain-profile-evidence">아래에서 이 판단이 나온 글자와 수를 확인하시오.</p></div>')
 
 
 def pungun_opening(f, concern: str, *, name="풍운도령") -> str:

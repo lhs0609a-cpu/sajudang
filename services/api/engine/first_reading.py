@@ -45,7 +45,7 @@ from . import why as _why
 
 VERSION = 'first-reading-v3'
 # ★ 글을 고치면 **같이 바꾸시오.** 훅은 하루를 캐시합니다.
-CACHE_VERSION = VERSION + '-verdict1-portrait2'
+CACHE_VERSION = VERSION + '-verdict1-portrait3cross'
 
 CONCERNS = ('money', 'work', 'love', 'people', 'dir', 'health', 'real_estate')
 

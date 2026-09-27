@@ -59,9 +59,36 @@ from engine.report import build_report               # noqa: E402
 
 TAG = re.compile(r"<[^>]+>")
 
+#: 줄을 **끊는** 태그. 이것만 빈칸으로 바꿉니다.
+_BLOCK = re.compile(
+    r"</?(?:p|div|br|li|ul|ol|tr|td|th|table|h[1-6]|section|blockquote)"
+    r"(?![a-zA-Z0-9])[^>]*>",
+    re.I)
+#: 글자 사이에 **끼는** 태그 (굵게·형광펜·링크). 이건 **떼어 붙입니다.**
+_INLINE = re.compile(r"</?[a-zA-Z][^>]*>")
+
 
 def plain(html: str) -> str:
-    return re.sub(r"\s+", " ", _html.unescape(TAG.sub(" ", html or ""))).strip()
+    """
+    태그를 걷은 글.
+
+    ★ 끼는 태그를 빈칸으로 바꾸면 **낱말이 갈라집니다** (2026-09-27).
+
+      이 집은 센 낱말을 굵게 칩니다 — `<b>쥐고 셈하는 자리</b>요.`
+      태그를 전부 빈칸으로 바꾸면 「쥐고 셈하는 자리 **·공백·** 요.」 가
+      되어, 문장 끝을 보는 자(「…자리요」 = 단정)가 **한 줄도** 못
+      셌습니다. 「옳은 말을 하고도 지는 자리 네.」 가 「그밖」 에 앉아
+      있던 진짜 까닭이오.
+
+      줄을 끊는 태그(`<p>` `<br>`)만 빈칸이고, 글자 사이에 끼는
+      태그(`<b>` `<em>` `<mark>` `<a>`)는 **떼어 붙입니다.** HTML 이
+      원래 그렇게 읽힙니다.
+    """
+    t = _html.unescape(html or "")
+    t = _BLOCK.sub(" ", t)
+    t = _INLINE.sub("", t)
+    t = TAG.sub(" ", t)                     # 남은 것(주석 등)은 빈칸으로
+    return re.sub(r"\s+", " ", t).strip()
 
 
 def hook(f, concern: str, axis4=None, lens_id: str = "nopa",
@@ -107,7 +134,7 @@ def hook(f, concern: str, axis4=None, lens_id: str = "nopa",
             })
     # ③ 사람부터 그리는 마디 — **맨 앞**입니다
     port = portrait_mod.build(
-        f, lens_id, portrait_mod.HOOK_FACES,
+        f, lens_id, portrait_mod.HOOK_FACES, cross=True,
         you=lens_mod.you_word(lens_id, name, getattr(f, "sex", None)))
     if port:
         segs.insert(0, {
@@ -201,3 +228,9 @@ def sample(rng, *, hour_known: Optional[bool] = None):
         build_chart(rng.randint(1960, 2007), rng.randint(1, 12),
                     rng.randint(1, 28), rng.randint(0, 23), rng.randint(0, 59),
                     rng.choice("MF"), hour_known=hour_known), as_of=AS_OF)
+
+#: 자들이 **스무 명을 다 보게**. 한 사람만 보면 그 사람 몫 겹침이
+#: 100% 로 찍히고 나머지 열아홉 몫은 한 번도 안 찍힙니다.
+def lens(rng) -> str:
+    """★ 목록은 `engine/lens` **한 자리**에서 받습니다 (손표를 두지 마시오)."""
+    return rng.choice(sorted(x["id"] for x in lens_mod.all_lenses()))

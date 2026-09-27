@@ -34,6 +34,8 @@
     figures        ★ 신살 인물 발주서 13명 (--write)
     drama          ★ 연출 점수 — 다음 화가 보고 싶어지는가 (--why)
     dull           ★ 한 장 안의 끼어듦 — 같은 괄호·이치·시키는 일 (--show 1)
+    point          ★ 같은 **뜻**을 몇 곳에서 말하나 · 설득이 서는가 (--n 100)
+    verdict        ★ 줄마다 무슨 일을 하나 — 단정·그림·인과·이음 (--n 100)
     loop           ★ 루프 이음새 — 배경이 다시 돌 때 튀는가 (--fix --all)
     flow           전체 플로우 훑기 — 32화면을 실제 브라우저로 열어 확인
     api            API 서버 (http://localhost:8000/docs)
@@ -151,6 +153,12 @@ switch ($Task) {
   # 한 장 **안**의 끼어듦 — 같은 괄호·같은 이치·시키는 일·파는 말 (docs/21 §6.9)
   #   easy 와 다른 것을 잽니다: 앞은 문장 하나가 흐린가, 이건 한 장이 겹치는가
   "dull"    { Need-Venv; Push-Location $Root; & $Py tools\dull_audit.py @Rest; Pop-Location }
+  # 같은 **뜻**을 몇 곳에서 말하나. 글자가 아니라 뜻이오 (docs/45 §9 ⑤)
+  #   ★ **곳**을 보시오 — 한 컷이 두 문장으로 말하는 것은 겹침이 아니오
+  "point"   { Need-Venv; Push-Location $Root; & $Py tools\same_point.py @Rest; Pop-Location }
+  # 줄마다 **무슨 일을 하는가** — 단정·그림·끊음·인과·이음 (docs/45 §6)
+  #   ★ 「그밖」 칸이 크면 자를 의심하시오. 백분율은 그다음이오
+  "verdict" { Need-Venv; Push-Location $Root; & $Py tools\verdict_mix.py @Rest; Pop-Location }
   # 배경이 다시 돌 때 튀는가 (--fix --all 로 고침). ffmpeg 이 필요합니다.
   "loop"    { Need-Venv; Push-Location $Root; & $Py tools\loop_seam.py @Rest; Pop-Location }
   # 그림을 맡기기 **전에** — 명령어가 그 화면에 맞는가

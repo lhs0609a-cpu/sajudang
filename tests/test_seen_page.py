@@ -236,3 +236,72 @@ def test_말투_층은_기본으로_걸린다():
     off = seen_page.free_page(f, "money", None, lens_id="nopa", voice_on=False)
     assert seen_page.plain(on["blocks"][0]["html"]) != \
         seen_page.plain(off["blocks"][0]["html"]), "말투 층이 기본으로 안 걸리오"
+
+
+# ══════════════════════════════════════════════════════════
+# ⑥ 첫 화면에 **단정**이 서는가 (docs/45 §6)
+# ══════════════════════════════════════════════════════════
+
+def test_첫_화면이_닫고_곧바로_세운다():
+    """
+    ★ 재 보니 첫 화면 열 줄에 **단정이 한 줄도 없었습니다** — 100명 전원
+      (2026-09-27). 그림이 36%로 잘 서 있었으나, 「헉」 은 그림이 아니라
+      경쟁 이야기를 닫는 단정에서 납니다 (Pennington & Hastie 31%→78%).
+
+      그리고 그 둘은 **붙어** 있어야 합니다. 처음에 닫는 줄만 위에 두고
+      까닭을 그림 뒤로 보냈더니 자가 단정을 10.2번째 줄에서 처음
+      만났습니다 — 닫기만 남고 세우는 줄이 멀어진 것이오.
+    """
+    rng = random.Random(20260927)
+    for lens_id in ("nopa", "eunbyeol", "dongja", "pungun"):
+        for concern in ("money", "love"):
+            f = seen_page.sample(rng, hour_known=True)
+            pg = seen_page.free_page(f, concern, None, lens_id=lens_id,
+                                     voice_on=False)
+            first = pg["blocks"][0]["html"]
+            assert 'class="inherit-close"' in first, (lens_id, concern)
+            i = first.index('class="inherit-close"')
+            j = first.index('class="inherit-head"')
+            assert 0 <= i < j, "닫는 줄과 세우는 줄이 붙어 있지 않소"
+            # 그 사이에 다른 문단이 끼면 안 됩니다.
+            assert first.count("<p", i, j) == 1, first[i:j][:120]
+
+
+def test_교차가_손님_화면에_닿는다():
+    """
+    ★ 교차 줄(`bank.inherit_parts`)은 여덟 축 가운데 가장 센 짝인데
+      (년주 위 글자 × 지금 흐름 · 어긋남 62%) **분석지에만** 걸려
+      있었습니다. 고쳐 배포해도 손님에게 안 닿던 자리요.
+    """
+    rng = random.Random(5)
+    for _ in range(6):
+        f = seen_page.sample(rng)
+        pg = seen_page.free_page(f, "work", None, lens_id="nopa",
+                                 voice_on=False)
+        whole = " ".join(seen_page.plain(b["html"]) for b in pg["blocks"])
+        assert "물려받은 것은" in whole, "교차 줄이 손님 화면에 없소"
+
+
+def test_교차_줄이_한_장에_한_번만_선다():
+    """훅과 풀이가 둘 다 얹으면 또 두 번이오."""
+    rng = random.Random(8)
+    for _ in range(6):
+        f = seen_page.sample(rng)
+        pg = seen_page.free_page(f, "money", None, lens_id="nopa",
+                                 voice_on=False)
+        whole = " ".join(seen_page.plain(b["html"]) for b in pg["blocks"])
+        assert whole.count("물려받은 것은") == 1, whole.count("물려받은 것은")
+
+
+def test_새_클래스가_화면에_있다():
+    """
+    ★ 이 집이 겪은 자리요 — `.dmap` 이 CSS 한 줄 없이 나가 12,900원
+      등급이 「12庚戌상관22辛亥…」 한 덩이로 나갔습니다. `.inherit` 은
+      분석지로 **이미 이틀** 나가고 있었는데 CSS 가 없었습니다.
+    """
+    css = ""
+    for p in (ROOT / "apps" / "web" / "styles").glob("*.css"):
+        css += p.read_text("utf-8")
+    for cls in ("inherit-close", "inherit-head", "inherit"):
+        assert ".%s " % cls in css or ".%s{" % cls in css, \
+            "%s 가 CSS 에 없소" % cls

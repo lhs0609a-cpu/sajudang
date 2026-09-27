@@ -36,7 +36,23 @@
 .pt-close {margin:18px 0 0;padding-top:14px;border-top:1px solid var(--line);
   color:var(--paper3);font-size:13px;line-height:1.8}
 .pt-close b {color:var(--paper2);font-weight:600}
-@media(max-width:480px){.pt-face{line-height:1.85}}
+/* 닫는 단정 — 첫 화면 **맨 첫 줄**이오 (docs/45 §6 ④).
+   뻔한 남의 이야기(「게을러서」)를 먼저 닫는 자리라, 크게 섭니다.
+   ★ 형광펜을 겹쳐 칠하지 마시오 — 한 컷에 결론 표시는 하나요. */
+.inherit-close {margin:0 0 4px;color:var(--paper);font-size:17px;
+  font-weight:600;line-height:1.6;letter-spacing:-.01em}
+/* 세우는 단정 — 닫는 줄에 **붙여** 섭니다. 떼어 놓으면 닫기만 남소. */
+.inherit-head {margin:0 0 16px;color:var(--paper);font-size:17px;
+  font-weight:600;line-height:1.6;letter-spacing:-.01em}
+.inherit-head b {color:var(--gold)}
+/* 까닭 · 비용 — 그림 **뒤**요. 앞에 두면 누구 얘긴지 모르는 채로
+   까닭을 듣습니다. `.inherit` 은 분석지에도 나갑니다. */
+.inherit {margin:16px 0 0;padding:13px 14px;border-radius:8px;
+  background:var(--bg2);border-left:2px solid var(--gold);
+  color:var(--paper);font-size:14px;line-height:1.9}
+.inherit b {color:var(--gold);font-weight:600}
+@media(max-width:480px){.pt-face{line-height:1.85}
+  .inherit-close{font-size:16px}.inherit{padding:12px}}
 
 /* ── 첫 해석 v3 — 가름 · 센 값 · 반증 ─────────────────────────
    ★ 서버가 새 클래스를 내려보내거든 그 클래스가 화면에 있는지 보시오.

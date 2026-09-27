@@ -583,9 +583,13 @@ BLADE_LEAD = {
 }
 
 
-def inherit_line(f) -> str:
+def inherit_line(f, close: bool = False) -> str:
     """
     물려받은 것과 지금 쓰는 힘을 **맞붙이는** 한 줄. 없으면 빈 문자열.
+
+    `close=True` 면 앞에 **닫는 단정** 한 줄을 세웁니다 (`INHERIT_CLOSE`) —
+    첫 화면에서만 씁니다. 까닭(②)과 비용(③)은 이 줄이 이미 대는데
+    닫는 줄(④)이 없었소 (docs/45 §6 · Pennington & Hastie 31%→78%).
 
     ★ 왜 이 줄이 생겼나 (2026-09-25 · docs/45 §9 ③)
 
@@ -614,18 +618,48 @@ def inherit_line(f) -> str:
     ★ 새 점을 치지 않습니다. `f.ancestor` 와 `f.flow` 는 이미 세어져
       있었고, 한 번도 맞붙여 보지 않았을 뿐이오.
     """
+    p = inherit_parts(f)
+    if not p:
+        return ""
+    # ★ `head` 는 **늘** 답니다. 씨앗의 `body` 가 「지금 쓰는 힘도 …」
+    #   로 시작하므로, 머리를 떼면 무엇을 물려받았는지 없이 나갑니다
+    #   (분석지가 그 꼴로 나가던 자리요).
+    return (p["close"] if close else "") + p["head"] + p["body"]
+
+
+def inherit_parts(f) -> dict:
+    """
+    교차 줄을 **세 토막**으로. 없으면 빈 사전.
+
+        close  「게으른 자리가 아니오.」          — 뻔한 남의 이야기를 닫는 줄
+        head   「물려받은 것은 <b>…자리</b>요.」   — 제 것을 세우는 단정
+        body   「그런데 지금 쓰는 힘은 …그래서 …」 — 까닭과 비용
+
+    ★ 왜 토막을 내나 (2026-09-27)
+
+      한 문단에 넷을 다 넣었더니 첫 화면에서 자가 단정을 **10.2번째
+      줄**에서 처음 만났습니다. 닫는 줄과 세우는 줄을 떼어 놓으면
+      닫기만 남소 — Pennington & Hastie 의 31%→78% 는 둘이 **붙어**
+      있을 때 나옵니다. 그래서 `close`+`head` 는 맨 위에 붙여 세우고,
+      까닭(`body`)은 그림 뒤로 보냅니다 (`portrait.build(cross=True)`).
+    """
     B = bank()
     tbl = B.get("INHERIT") or {}
     got = TEN_GOD_GROUP.get((f.ancestor or {}).get("gan_ten_god") or "")
     now = f.flow
     row = tbl.get(got)
     if not row or not now:
-        return ""
-    if got == now:
-        return '<p class="inherit">%s</p>' % row["same"]
-    cost = (B.get("INHERIT_COST") or {}).get(got, "")
-    return ('<p class="inherit">%s %s</p>'
-            % (row["off"].format(now=now), cost))
+        return {}
+    cost = "" if got == now else (B.get("INHERIT_COST") or {}).get(got, "")
+    body = row["same"] if got == now else row["off"].format(now=now)
+    return {
+        "close": '<p class="inherit-close">%s</p>'
+                 % (B.get("INHERIT_CLOSE") or {}).get(got, ""),
+        "head": '<p class="inherit-head">물려받은 것은 <b>%s</b>요.</p>'
+                % row["got"],
+        "body": '<p class="inherit">%s%s</p>'
+                % (body, (" " + cost) if cost else ""),
+    }
 
 
 def blade_order(concern: Optional[str], sex: str) -> tuple:

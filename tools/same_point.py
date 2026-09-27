@@ -76,6 +76,7 @@ for p in (ROOT / "services" / "api", ROOT):
 #   `tests/test_seen_page.py` 가 그 어긋남을 셉니다.
 from tools.seen_page import free_page as _free_page   # noqa: E402
 from tools.seen_page import sample as _sample         # noqa: E402
+from tools.seen_page import lens as _lens_of          # noqa: E402
 from schemas.api import Concern                     # noqa: E402
 
 TAG = re.compile(r"<[^>]+>")
@@ -91,9 +92,12 @@ POINTS = {
         r"크게 넘치지도|크게 안 기울|크게 안 치우친|크게 치우치지 않|"
         r"크게 늘리지도|넘치지도 모자라지도|어느 쪽으로도 크게 안|"
         r"무엇이든 그럭저럭"),
+    # ★ **없음을 가리키는 말이 같은 문장에** 있어야 셉니다 (2026-09-27).
+    #   전에는 「끊고 정리하는」 만으로 걸려, 「쇠가 하는 일은 끊고
+    #   정리하는 일이네」 라는 **낱말 풀이**까지 없는 기운으로 셌습니다.
     "없는 기운": (
-        r"(하나뿐|바닥이|한 자도 없|거의 없|없는 (쇠|불|물|흙|나무))|"
-        r"(끊고 정리하는|아니라고 말하는 힘|잘라 낼 칼|붙잡아 줄 것이 없)"),
+        r"(하나뿐|한 자도 없|거의 없|없는 (쇠|불|물|흙|나무)|바닥이 안 보이"
+        r"|못 가진|가지지 못한|타고나지 못|얇아서|없는 걸로|없는 것을)"),
     "흐름이 새는 자리": (
         r"먼저 베푸|내놓은 것이 부족|만드는 데 먼저|힘이 .{1,3} 쪽으로 빠져|"
         r"손보는 힘만 크고|값을 부르는 힘이 없"),
@@ -134,8 +138,12 @@ CURE = re.compile(
 ASKBACK = re.compile(r"(안 그런가|그렇지 않소|아니오|아시오|묻겠네|묻겠소)[?？]")
 
 
-def plain(html: str) -> str:
-    return re.sub(r"\s+", " ", _html.unescape(TAG.sub(" ", html or ""))).strip()
+#: ★ `plain` 은 **`seen_page` 한 자리**에서 받습니다 (2026-09-27).
+#:
+#:   자마다 제 손으로 적고 있었더니, 굵게 태그가 낱말을 갈라
+#:   놓는 사고(「자리</b>요」 → 「자리 요」)를 세 번 따로 고쳐야
+#:   했습니다. 문장 끝을 보는 패턴이 전부 새던 자리요.
+from tools.seen_page import plain                      # noqa: E402,F401
 
 
 def sentences(text: str) -> list:
@@ -150,7 +158,8 @@ def _page(rng: random.Random) -> dict:
     """손님이 받는 글 한 벌. 조립은 `tools/seen_page` 한 자리에서."""
     concern = rng.choice(CONCERNS)
     axis4 = rng.choice((None, "INFP", "ESTJ", "INTP", "ENFJ", "ISTP"))
-    pg = _free_page(_sample(rng), concern, axis4, lens_id="nopa")
+    pg = _free_page(_sample(rng), concern, axis4,
+                    lens_id=_lens_of(rng))
     return {"blocks": [{"id": b["where"], "html": b["html"]}
                        for b in pg["blocks"]],
             "locked": pg["locked"], "concern": concern}
@@ -191,8 +200,10 @@ def audit(page: dict) -> dict:
 
     return {"chars": len(whole), "cuts": len(bodies),
             "hits": hits,
-            "worst": max((len(v) for v in hits.values()), default=0),
-            "said_twice": sum(1 for v in hits.values() if len(v) > 1),
+            # ★ **곳** 단위요 — 한 컷이 두 문장으로 말하는 것은 겹침이
+            #   아니오. 고칠 수 있는 것은 다른 컷이 또 말하는 자리뿐이오.
+            "worst": max((len(set(v)) for v in hits.values()), default=0),
+            "said_twice": sum(1 for v in hits.values() if len(set(v)) > 1),
             "cant": cant, "keep": keep, "cure": cure, "lines": len(lines),
             "askback": back, "locked": len(page["locked"]),
             "no_teaser": no_teaser}
@@ -218,17 +229,28 @@ def main() -> int:
 
     print("\n  ① 같은 뜻을 되풀이 — 두 번 넘게 말한 자리 %.1f가지 · 최다 %.1f번"
           % (avg(lambda r: r["said_twice"]), avg(lambda r: r["worst"])))
-    tally = collections.Counter()
-    tot = collections.Counter()
+    # ★ **둘 다** 찍습니다 (2026-09-27).
+    #
+    #   문장 수(번)는 한 컷이 얼마나 길게 끄는지를 보이고, 곳 수는
+    #   **다른 컷이 같은 말을 또 하는지**를 보입니다. 고칠 수 있는 것은
+    #   뒤쪽이오 — docs/45 ⑤ 가 정한 단위가 「어느 컷이 맡는가」요.
+    #   문장으로만 세니 `closing_cut` 한 컷이 수와 읽는 법을 두 문장으로
+    #   말하는 자리가 100% 로 찍혔습니다. 거기는 고칠 데가 없소.
+    tally = collections.Counter()      # 두 **곳** 넘게 말한 사람
+    tot = collections.Counter()        # 문장 수
+    spots = collections.Counter()      # 곳 수
     for r in rows:
         for name, where in r["hits"].items():
             tot[name] += len(where)
-            if len(where) > 1:
+            spots[name] += len(set(where))
+            if len(set(where)) > 1:
                 tally[name] += 1
+    print("      %-20s %6s %6s   %s"
+          % ("", "곳", "줄", "두 곳 넘는 사람"))
     for name in POINTS:
-        n = tot[name] / max(1, len(rows))
-        print("      %-20s 한 장에 %4.1f번   두 번 넘는 사람 %3.0f%%"
-              % (name, n, 100 * tally[name] / max(1, len(rows))))
+        k = len(rows) or 1
+        print("      %-20s %5.1f곳 %5.1f줄   %3.0f%%"
+              % (name, spots[name] / k, tot[name] / k, 100 * tally[name] / k))
 
     print("\n  ② 「못 한다」는 말 — 한 장에 %.1f번"
           % avg(lambda r: len(r["cant"])))

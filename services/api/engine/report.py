@@ -41,6 +41,7 @@ from . import free_depth
 from . import consultation
 from . import character_consultation as character_consultation_mod
 from . import opener as opener_mod
+from . import claim as _claim
 from . import portrait as portrait_mod
 from . import probe as probe_mod
 from . import terms as terms_mod
@@ -749,7 +750,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     # ★ 곱하는 축: 약오행(5) × 강오행(5) × 동률 × **주도십신(10)**
     #   전에는 마지막 축이 없어 52가지였고, 한 문장이 8.6%를 가져갔습니다.
     cuts.append(_cut(
-        "lack", "1 · 없는 것부터",
+        "lack", _claim.title("lack", f, "1 · 없는 것부터"),
         # ★ 원점수(`불 0.3`)를 그대로 내면 그건 근거가 아니라 계기판입니다.
         #   손님은 0.3 이 큰지 작은지 모릅니다. 사람 말로 냅니다.
         _why.line(
@@ -804,7 +805,11 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     band = R["band"][rr["band"]]
     parts = rr["parts"]
     cuts.append(_cut(
-        "rarity", "몇이나 되는가",
+        # ★ `per10k` 는 **없을 수 있습니다** (표본에 없는 배치). `int(None)`
+        #   으로 터뜨리지 말고 넘기지 않소 — 그러면 띠만 나갑니다.
+        "rarity", (_claim.rarity(f, rr.get("band", ""),
+                                 rr.get("per10k"))
+                   or "몇이나 되는가"),
         ("표본 %s명 — 인구에서 몇 명인지를 센 것이오. "
          "맞힌다는 말이 아니라 세었다는 말이오 〔희소도 · 표본 계수〕"
          % format(rr["sample"], ",")),
@@ -844,7 +849,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     }[f.strength]
     # ★ 곱하는 축에 **흐름(5)** 을 더했습니다.
     cuts.append(_cut(
-        "why", "2 · 왜 반복되나",
+        "why", _claim.title("why", f, "2 · 왜 반복되나"),
         _why.line("%s %d · %s · %s 흐름"
                   % (top, f.ten_gods[top], f.strength, f.flow), top, "십신"),
         # ★ 주어를 답니다. 여기가 손님이 짚은 자리입니다 (2026-09-02) —
@@ -934,7 +939,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         lean = "어느 한쪽으로 크게 기울지 않았소."
     # ★ 곱하는 축에 **일간(10)** 을 더했습니다.
     cuts.append(_cut(
-        "place", "3 · 어느 자리에서",
+        "place", _claim.title("place", f, "3 · 어느 자리에서"),
         _why.line("일지 %s%s · %s일간 · 관성 %d · 재성 %d · 식상 %d"
                   % (f.day_ji, " 충" if f.ilji_chung else "", f.day_gan,
                      f.gwan, f.jae, f.sik),
@@ -1027,7 +1032,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
                  josa(nxt_tg, "이오.", "요.")))
 
     cuts.append(_cut(
-        "daeun_now", "4 · 지금 어디에",
+        "daeun_now", _claim.title("daeun_now", f, "4 · 지금 어디에"),
         _why.line("대운 %s · %s%s · %d살부터 · 세운 %s%s" % (
             daeun["gz"], f.daeun_ten_god,
             "" if f.daeun_started else " · 진입 전",
@@ -1058,7 +1063,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     tea = bank_mod.tea(f)
     season = bank_mod.born_season(f)
     cuts.append(_cut(
-        "yongsin", "5 · 필요한 것",
+        "yongsin", _claim.title("yongsin", f, "5 · 필요한 것"),
         _why.line("용신 %s(%d) · %s생 · %s %d"
                   % (f.yongsin, _visible(f, f.yongsin), season, top,
                      f.ten_gods[top]),
@@ -1178,7 +1183,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         '첫 대운은 <b>%d살</b>부터요. 그대는 아직 그 나이 전이오.'
         % f.daeun[0]["start_age"])
     cuts.append(_cut(
-        "daeun_map", "6 · 대운 맵",
+        "daeun_map", _claim.title("daeun_map", f, "6 · 대운 맵"),
         _why.line("대운수 %d · %s" % (f.daeun[0]["start_age"],
                                     "순행" if f.forward else "역행"),
                   "대운", ""),
@@ -1328,7 +1333,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         on = []
         body = '<p class="tale">%s</p>' % T["none"]["sinsal"]
     cuts.append(_cut(
-        "sinsal", "이름 붙은 자리",
+        "sinsal", _claim.title("sinsal", f, "이름 붙은 자리"),
         _why.line("신살 %d · 공망 %s" % (len(f.sinsal), f.gongmang),
                   "신살", "신살"),
         body + '<p class="sm">신살 표는 가르치는 학파마다 다르오. 우리가 '
@@ -1372,7 +1377,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
                 % (B["HELPER_NONE_LEAD"][f.strength],
                    B["HELPER_NONE_WAY"][f.yongsin]))
     cuts.append(_cut(
-        "helper", "누가 돕는가",
+        "helper", _claim.title("helper", f, "누가 돕는가"),
         _why.line("길신 %d자리" % len({h["pillar"] for h in f.helpers}),
                   "신살", "신살"),
         body, 0, sid=("helper:%s" % ",".join(
@@ -1387,7 +1392,7 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     bad = ("<p class=\"sm\">이 기둥에 %s도 함께 있소.</p>"
            % " · ".join(a["bad_sinsal"])) if a["bad_sinsal"] else ""
     cuts.append(_cut(
-        "ancestor", "뿌리 · 조상 자리",
+        "ancestor", _claim.title("ancestor", f, "뿌리 · 조상 자리"),
         _why.line("년주 %s · %s / %s"
                   % (a["pillar"], a["gan_ten_god"], a["ji_ten_god"]),
                   "궁위", "신살"),
@@ -1558,7 +1563,8 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
                      '안 적으셨으니 그대의 여덟 글자만으로 보았소.</p>')
 
         cuts.append(_cut(
-            "concern", "7 · 물은 자리와 센 자리",
+            "concern", _claim.title("concern", f, "7 · 물은 자리와 센 자리",
+                                    concern),
             # 훅 2.5단과 **같은 말꼴**로 냅니다 — 「관성 3」이 아니라
             # 「관성이 셋」. 표가 아니라 말이라야 근거로 읽힙니다.
             _why.line("%s → %s %s(%d) · 가장 센 자리 %s · %s"
@@ -1954,8 +1960,12 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         #     「여덟 자에 하나도 없소」 — 0 은 빈칸이 아니라 값입니다.
         '<p class="tale">그대가 물으신 고민은 <b>%s</b>%s. '
         '여덟 글자에서는 %s %s으로 보오. %s</p>'
-        '<p class="tale">오늘은 한 줄 · 강점과 그림자 · 물으신 일에서의 모습 · '
-        '때까지 짚었소.</p>'
+        # ★ 목차 되읊기를 걷었습니다 (2026-09-27 · docs/45 §2).
+        #   「오늘은 한 줄 · 강점과 그림자 · … 짚었소」 는 방금 읽은
+        #   것을 범주 이름으로 다시 말하는 줄이오. 그 바로 뒤가
+        #   이 컷에서 가장 날카로운 줄(`_close_turn` 의 나이)이라,
+        #   덧댄 말이 그 줄을 깎고 있었습니다. 값을 얼마나 받았는지는
+        #   페이월이 **세어서** 말합니다 — 여기서 이름으로 말하지 않소.
         % (word, "이었소" if bank_mod.has_batchim(word) else "였소",
            josa(word, "은", "는"), grp,
            (("%s 여덟 자에 <b>하나도 없소</b>."
