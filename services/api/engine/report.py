@@ -70,6 +70,36 @@ def _dedupe_adjacent_text(html: str) -> str:
         return _ADJACENT_REPEAT.sub(lambda x: x.group("word"), text)
 
     return re.sub(r"[^<>]+", clean, html)
+
+
+#: 소제목 바로 뒤에 다음 소제목이 오거나 덩이가 끝나는 자리.
+_ORPHAN_HEAD = re.compile(
+    r"<h([34])[^>]*>[^<]*</h\1>(?=\s*(?:<h[34]\b|</div>|$))")
+
+
+def _drop_orphan_headings(html: str) -> str:
+    """
+    **속이 빈 소제목**을 걷는다.
+
+    ★ 유료 60/60장에 이런 것이 있었습니다 (2026-09-28) —
+
+          <h4>먼저 짚을 핵심</h4><h4>선택이 갈리는 기준</h4>
+
+      첫 소제목의 문단이 어디선가 지워지고 제목만 남았습니다. 손님 눈에는
+      「먼저 짚을 핵심」 이라 크게 적히고 그 아래가 **비어** 있소 — 값을
+      치른 자리에서 가장 나쁜 꼴입니다.
+
+      지운 쪽을 찾아 고치는 것과 별개로, **속이 빈 제목은 나가지 않아야**
+      합니다. 계산이 없으면 「모르오」 라 쓰고, 글이 없으면 제목도 안
+      답니다 — 같은 규칙이오.
+    """
+    if not html or "<h" not in html:
+        return html
+    prev = None
+    while prev != html:               # 연이어 빈 제목이 둘일 수도 있소
+        prev = html
+        html = _ORPHAN_HEAD.sub("", html)
+    return html
 from .bank import (amount_adj, amount_word, count_word,
                    element_word, josa)
 
@@ -1169,10 +1199,14 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
                ("<b>지금 그 칸에 있소.</b>" if _now_lit else
                 (_dm_next(_ages, f.age or 0)))))
     elif concern:
+        # ★ 「열 칸」 이 박혀 있었습니다 (2026-09-28). 이 표는 사람마다
+        #   칸 수가 다릅니다 — 여덟 칸인 사람에게 「열 칸에 하나도 없소」 가
+        #   나갔고, 같은 컷 위쪽은 「모두 8칸이오」 라 정직하게 적고 있었소.
+        #   한 컷 안에서 수가 어긋난 것이오.
         dm_lit = ('<p class="tale lit"><b>%s</b>을 물으셨는데, 그 자리가 '
-                  '주인공이 되는 칸은 <b>열 칸에 하나도 없소</b>. 드문 일이 '
+                  '주인공이 되는 칸은 <b>%d칸에 하나도 없소</b>. 드문 일이 '
                   '아니오 — 그 자리는 대운이 아니라 여덟 글자에서 봐야 하오.</p>'
-                  % bank_mod.concern_word(concern))
+                  % (bank_mod.concern_word(concern), len(f.daeun)))
     else:
         dm_lit = ""
     dm_where = (
@@ -1419,8 +1453,23 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     if cmp["usable"]:
         note = ('<p class="sm">여덟 자는 바뀌지 않소. 그대가 적은 넉 자는 '
                 '다시 재면 달라지기도 하오 — 그건 그 검사의 성질이오.</p>')
+        # ★ 이 컷만 제목이 **목차**였습니다 (2026-09-28).
+        #
+        #   「7 · 겹친 자리와 어긋난 자리」 — 다른 컷은 `_claim.title` 을
+        #   거쳐 세는 값을 박은 주장으로 나가는데, 이 컷은 안 거쳤습니다.
+        #   게다가 `concern` 의 예비값도 「7 · …」 이라 **7번이 두 개**였소.
+        #
+        #   `_claim.OF` 에 칸을 두지 않은 까닭은 그 표가 `f` 하나만 받는데,
+        #   이 제목은 **손님이 적은 넉 자**가 있어야 세어지기 때문이오.
+        #   그래서 세는 자리에서 바로 짓습니다. 어미는 안 답니다 — 제목은
+        #   표지판이라 말투 층을 안 타오.
+        _same = sum(1 for a, b in zip(bank_mod.axis_string(f), axis4.upper())
+                    if a == b)
+        _axis_title = ("넉 자가 다 겹친 자리" if _same == 4 else
+                       "넉 자 가운데 %s 어긋난 자리"
+                       % josa(count_word(4 - _same), "이", "가"))
         cuts.append(_cut(
-            "axis", "7 · 겹친 자리와 어긋난 자리",
+            "axis", _axis_title,
             _why.line("사주 %s ↔ 입력 %s · 겹친 자리 %d / 4"
                       % (bank_mod.axis_string(f), axis4.upper(),
                          sum(1 for a, b in zip(bank_mod.axis_string(f),
@@ -1895,15 +1944,18 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         (('<p class="tale">%s</p>'
           '<p class="tale">한 줄 「%s」이 가장 잘 빠지는 착각을 막는 일이오. '
           '하나만 하시오.</p>'
-          '<p class="cnt"><b>이 한 가지는 모자란 %s을 메우는 쪽이오 — '
+          '<p class="cnt"><b>이 한 가지는 모자란 %s 메우는 쪽이오 — '
           '여덟 글자 겉에 %d자요.</b></p>'
           '<p class="sm">다음에 오시거든 <b>했는지만</b> 말해 주시오. '
           '했는지 안 했는지 셀 수 없는 말은 처방이 아니라 덕담이오.</p>'
-          % (scn["act"], sp["name"], element_word(f.yongsin),
+          # ★ 「모자란 쇠을」 이 나갔습니다 (2026-09-28). 오행 이름은
+          #   받침이 갈립니다 — 쇠·나무는 받침이 없고 물·불·흙은 있소.
+          %  (scn["act"], sp["name"],
+              josa(element_word(f.yongsin), "을", "를"),
              _visible(f, f.yongsin))) if scn and scn.get("act") else
          ('<p class="tale">%s</p><p class="tale">%s</p>'
           '<p class="tale">%s</p>'
-          '<p class="cnt"><b>이 한 가지는 모자란 %s을 메우는 쪽이오 — '
+          '<p class="cnt"><b>이 한 가지는 모자란 %s 메우는 쪽이오 — '
           '여덟 글자 겉에 %d자요.</b></p>'
           '<p class="sm">다음에 오시거든 <b>했는지만</b> 말해 주시오. '
           '했는지 안 했는지 셀 수 없는 말은 처방이 아니라 덕담이오.</p>'
@@ -1911,7 +1963,8 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
              or B["WEEK_DO"][f.yongsin][season],
              B["WEEK_WHY"][f.yongsin],
              B["WEEK_HOW"][f.day_gan],
-             element_word(f.yongsin), _visible(f, f.yongsin)))),
+             josa(element_word(f.yongsin), "을", "를"),
+             _visible(f, f.yongsin)))),
         0, sid=("week:scene:%s:%s" % (sp["id"], concern)) if scn and scn.get("act")
         else "week:%s:%s:%s@%s" % (f.yongsin, season, f.day_gan, concern)))
 
@@ -2712,12 +2765,29 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
             c["source"] = _name_counts(c["source"])
         c["html"] = _fix_particles(c["html"])
         c["html"] = _dedupe_adjacent_text(c["html"])
+        c["html"] = _drop_orphan_headings(c["html"])
         if c.get("id") == "spine":
             c["html"] = re.sub(
                 r'<p class="tale">\s*이 한 줄이 일에서는.*?</p>',
                 '', c["html"])
     # 사실 장부 — 모든 층을 입힌 뒤, 화면에 나가는 차례대로.
     _ledger(cuts)
+    # ★ **되풀이를 지운 뒤에** 빈 제목을 걷습니다 (2026-09-28).
+    #
+    #   `_ledger` 는 페이지에서 되풀이되는 문장을 지웁니다. 그 문단의
+    #   문장이 전부 지워지면 문단이 비고, 바로 위 소제목만 남습니다 —
+    #   유료 60/60장에 이런 것이 있었습니다:
+    #
+    #       <h4>먼저 짚을 핵심</h4><h4>선택이 갈리는 기준</h4>
+    #
+    #   손님 눈에는 「먼저 짚을 핵심」 이 크게 적히고 그 아래가 **비어**
+    #   있소. 값을 치른 자리에서 가장 나쁜 꼴이오.
+    #
+    #   ★ 걷는 자리가 **지우는 자리 뒤**여야 합니다. 앞에서 걷으면
+    #     그때는 문단이 아직 살아 있어 한 줄도 안 걸립니다 — 처음에
+    #     위 고리에 넣었다가 60장 그대로였습니다.
+    for c in cuts:
+        c["html"] = _drop_orphan_headings(c["html"])
     for l in locked:
         if l.get("source"):
             l["source"] = voice_mod.speak(voice_mod.address(l["source"], you), tone)

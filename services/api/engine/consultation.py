@@ -259,11 +259,15 @@ def render(lens_id, concern, features, topic=None):
         from . import lens
         parts.append(character_consultation.render(
             lens_id, topic, name=lens.public(lens_id)['name']))
-    parts.append('<h4>그대의 답으로 마무리하시오</h4><p>%s 하나를 골라 %s을 적으시오. '
+    # ★ 「금액·용도·선택 이유을 적으시오」 가 나갔습니다 (2026-09-28).
+    #   토씨를 손으로 박으면 자리표시에 무엇이 들어오느냐에 따라 절반이
+    #   비문이 됩니다. 받침을 보고 답니다.
+    from .bank import josa as _josa
+    parts.append('<h4>그대의 답으로 마무리하시오</h4><p>%s 하나를 골라 %s 적으시오. '
                  '위 기준에서 맞는 대목 하나와 다른 대목 하나를 표시하시오. '
                  '다음에 같은 장면이 오면 바꿀 행동 하나를 정하고, 해본 뒤 실제로 달라진 점을 기록하시오. '
                  '해석을 외우는 것보다 내 선택의 근거를 남기는 것이 이 자리의 쓰임이오.</p></div>'
-                 % (escape(scene), escape(record)))
+                 % (escape(scene), _josa(escape(record), "을", "를")))
     return ''.join(parts)
 
 
@@ -325,11 +329,24 @@ def _pungun_first_reading_v3(f, concern: str, *, name="풍운도령") -> str:
     row = cases.get(concern, cases["work"])
     # ★ 뱅크는 하오체 한 벌 — 합쇼체로 쓰면 `voice.speak` 가 손댈 어미가
     #   없어 이 글만 스무 명에게 똑같이 나갑니다 (이 파일 위 주석과 같은 규칙).
-    from .bank import josa as _josa
+    # ★ `josa` 는 **낱말째** 돌려줍니다 (2026-09-28).
+    #
+    #   `<strong>{target}</strong>{josa(target,"을","를")}` 로 써서 굵은 글씨
+    #   바로 뒤에 같은 낱말이 통째로 한 번 더 나갔습니다 —
+    #
+    #     「…기준을 세우는 방식기준을 세우는 방식을 보오.」
+    #
+    #   이 컷이 나온 판 **전부**가 그랬고, 자리가 소제목 바로 아래 굵은
+    #   글씨라 눈에 가장 먼저 듭니다. 문장 되풀이 셈으로는 안 걸립니다
+    #   (한 문장 **안**이라). CLAUDE.md 「`josa` 앞에 낱말을 또 붙이기」에
+    #   적힌 그 사고가 여기 한 자리 더 남아 있었습니다.
+    #
+    #   토씨만 필요한 자리에서는 `has_batchim` 을 보고 토씨만 답니다.
+    from .bank import has_batchim as _batchim
     return (
         '<div class="specialist-opening first-reading-v3">'
         f'<p class="opening-label">{escape(name)} · 첫 해석</p>'
-        f'<h3>이 해석에서 먼저 파악하는 것</h3><p class="reading-target"><strong>{escape(row["target"])}</strong>{_josa(row["target"], "을", "를")} 보오.</p>'
+        f'<h3>이 해석에서 먼저 파악하는 것</h3><p class="reading-target"><strong>{escape(row["target"])}</strong>{"을" if _batchim(row["target"]) else "를"} 보오.</p>'
         f'<h3>핵심 결론</h3><p>{escape(row["verdict"])}</p>'
         f'<h3>이 사람에게 반복되는 장면</h3><p>{escape(row["scene"])}</p>'
         f'<h3>왜 이렇게 읽었는가</h3><p class="opening-evidence">명식의 중심 흐름은 {escape(f.flow)} {flow_count}개, 다음 흐름은 {escape(next_group)} {next_count}개요. '

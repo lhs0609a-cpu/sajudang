@@ -128,12 +128,25 @@ def _routers() -> list[dict]:
                 #   앞의 둘만 세어 갱신 문이 「안 잠김」 으로 나왔습니다.
                 "admin_guard": bool(re.search(
                     r"_guard\(|require_admin|session_of\(|compare_digest\(", body)),
+                # ★ 자격을 **함수로 부르는 문**도 세야 합니다 (2026-09-28).
+                #
+                #   이 자는 본문에 `session_id` 글자가 있는지 봅니다. 그런데
+                #   자격 판정을 한 자리로 모으면(`_granted_tier`) 그 글자가
+                #   본문에서 사라집니다 — 실제로는 지키는데 자가 「안 잠김」
+                #   이라 찍습니다.
+                #
+                #   그렇게 찍히면 다음 사람이 자격 검사를 **하나 더** 붙입니다.
+                #   이 집이 보관함에서 겪은 그 사고요(자격을 세던 다섯 자리가
+                #   서로 달랐습니다). 그래서 **부르는 것도** 지키는 것으로
+                #   셉니다 — 이름이 아니라 지키는가를 봅니다.
                 "session_guard": bool(re.search(
-                    r"session_of\(|session_id|_user_key\(", body)),
+                    r"session_of\(|session_id|_user_key\(|"
+                    r"_granted_tier\(|entitled_tier\(", body)),
                 "ownership_check": bool(re.search(
                     r'session_id.{0,80}!=|!=.{0,80}session_id|'
                     r'"orders:"\s*\+\s*req\.session_id|'
-                    r'get_json\("orders:"', body, re.S)),
+                    r'get_json\("orders:"|'
+                    r'_granted_tier\(|entitled_tier\(', body, re.S)),
             })
     # /health 는 main.py 가 냅니다
     main = (API / "main.py").read_text(encoding="utf-8")

@@ -91,3 +91,20 @@
 .cutbody>.lit{padding:10px 12px;border-left:2px solid var(--gold);background:var(--bg2);border-radius:0 8px 8px 0}
 @media(max-width:479px){.dmap>div{min-width:70px;padding:9px 6px}.dmap b{font-size:var(--fs-5)}}
 @media print{.dmap{flex-wrap:wrap;overflow:visible}.dmap>div{border-color:#bbb;background:transparent}.dmap .lit{background:#f2ece2}}
+
+/* ── 첫머리: 손님이 준 입력으로 우리가 무엇을 했는가 (읽는 글 v2) ──
+ *
+ * ★ 이 줄이 이 집에서 가장 값진 자리입니다. Snyder(1974) 는 **똑같은**
+ *   글을 주고 「무엇에서 나왔다고 말했는지」만 바꿔 수용도를 3.24 →
+ *   4.38 로 올렸습니다(F=7.56, p<.0002). 성신당은 분 단위 · 진태양시 ·
+ *   절입 시각까지 세는데 그걸 말하지 않고 있었습니다.
+ *
+ * ★ 그래서 **본문보다 앞에, 본문과 다른 결로** 세웁니다 — 이 줄은
+ *   해석이 아니라 영수증이오. 재보니 손님이 가장 먼저 읽는 300자에
+ *   댈 수 있는 값이 0~1개였습니다.
+ */
+.derived{margin:0 0 18px;padding:12px 14px;border-left:2px solid var(--gold);
+  background:var(--bg2);border-radius:0 8px 8px 0;
+  font:400 var(--fs-2)/1.85 var(--sans);color:var(--paper2);word-break:keep-all}
+.derived b{color:var(--gold);font-weight:600}
+@media print{.derived{border-left-color:#bbb;background:transparent}}
