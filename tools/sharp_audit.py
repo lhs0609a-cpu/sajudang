@@ -81,8 +81,14 @@ def score(rep: dict) -> dict:
         "근거": sum(1 for s in sents if COUNTED.search(s)) / n,
         "반증": sum(1 for s in sents if NUM.search(s) or WHEN.search(s) or ACT.search(s)) / n,
         "흐림": vague / n,
-        "대조": depth.count('class="vs"'),
-        "뒤집기": depth.count('class="pair"'),
+        # ★ 한 장 **전체**에서 셉니다 (2026-09-28).
+        #
+        #   전에는 `spine_depth` 컷 하나만 보고 있었습니다. 그건 v1 의
+        #   컷 이름이라, 같은 장치를 다른 컷에 두면 자가 0 을 찍습니다 —
+        #   읽는 글 v2 에서 실제로 그랬습니다(대조 0 · 뒤집기 0). 규칙은
+        #   「한 장에 대조 둘 · 뒤집기 셋」 이지 「그 컷에」 가 아니오.
+        "대조": sum(c["html"].count('class="vs"') for c in cuts),
+        "뒤집기": sum(c["html"].count('class="pair"') for c in cuts),
         "행동": "probe" in ids,
         "문장": n,
     }

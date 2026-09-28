@@ -135,14 +135,21 @@ def entitled_tier(session_id: str | None, lens_id: str) -> str:
     return best
 
 
-@router.post("/report", response_model=ReportResponse)
-def post_report(req: ReportRequest) -> ReportResponse:
-    raw = load_features(req.chart_id)
-    try:
-        lens_mod.get(req.lens_id)
-    except lens_mod.LensError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+def _granted_tier(req: ReportRequest) -> str:
+    """
+    **실제로 열어 줄 등급.** 부른 것이 아니라 치른 것이 정합니다.
 
+    ★ 이 셈을 두 벌로 두지 마시오 (2026-09-28)
+
+      읽는 글 v2 를 새 문(`/report/v2`)으로 내면서 이 자리를 옮겼습니다.
+      전에는 `post_report` 안에 붙어 있었는데, 그대로 두고 새 문에서
+      다시 적으면 **자격을 세는 자리가 둘**이 됩니다 — 이 집이 보관함
+      에서 겪은 그 사고요(다섯 자리가 서로 달랐습니다). 한쪽만 고치면
+      값을 안 치른 사람에게 본문이 나갑니다.
+
+      그래서 두 문이 이 함수를 **나눠 씁니다.** 여기만 고치면 둘 다
+      고쳐집니다.
+    """
     # 클라이언트가 부른 티어와 치른 티어 중 **낮은 쪽**으로 냅니다.
     allowed = entitled_tier(req.session_id, req.lens_id)
     tier = req.tier if TIER_RANK[req.tier] <= TIER_RANK[allowed] else allowed
@@ -154,7 +161,7 @@ def post_report(req: ReportRequest) -> ReportResponse:
     #   에서는 보통 "free" 이고, 그러면 자격이 all 이어도 free 가 나갑니다.
     #   무료 구간을 보려면 머리표에 `x-admin-view: guest` 를 실으시오.
     if adminview.on():
-        tier = "all"
+        return "all"
 
     # ★ 「이 자리 하나」는 등급이 같아도 **그 캐릭터를 치른 사람만**입니다.
     #   one 과 sub 이 같은 등급(1)이 되면서, 달삯만 낸 사람이 tier="one"
@@ -163,7 +170,18 @@ def post_report(req: ReportRequest) -> ReportResponse:
     #   같아집니다. 화면의 tier 는 localStorage 에서 오는 값입니다.
     if tier == "one" and allowed != "one":
         tier = allowed
+    return tier
 
+
+@router.post("/report", response_model=ReportResponse)
+def post_report(req: ReportRequest) -> ReportResponse:
+    raw = load_features(req.chart_id)
+    try:
+        lens_mod.get(req.lens_id)
+    except lens_mod.LensError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    tier = _granted_tier(req)
     f = Features(**raw)
     try:
         data = build_report(f, req.chart_id, req.lens_id, tier,
@@ -316,3 +334,116 @@ def post_omnibus(req: OmnibusRequest) -> dict:
         raise HTTPException(status_code=422, detail=str(e))
     _mark_opened(req.session_id, tier)
     return data
+
+
+# ══════════════════════════════════════════════════════════════════
+# POST /v1/report/v2 — 읽는 글 v2 (병행)
+#
+# ★ v1 은 한 줄도 안 건드립니다. 게이트를 넘을 때 넘깁니다
+#   (`tools/page_audit.py`). 그때까지 두 문이 같이 돕니다.
+#
+# ★ 자격은 `_granted_tier` **한 자리**에서 셉니다. 여기서 다시 적으면
+#   자격을 세는 자리가 둘이 되고, 한쪽만 고치는 날 값을 안 치른 사람에게
+#   본문이 나갑니다.
+# ══════════════════════════════════════════════════════════════════
+
+#: v1 의 등급 이름 → v2 의 예산 이름.
+#:
+#: v1 은 `free · one · all · sub` 넉 자리이고, v2 는 **값**으로 셉니다
+#: (`claim.Budget.of`). 「이 자리 하나」(one)는 그 캐릭터의 값이 여는
+#: 층이라 캐릭터 값으로 고릅니다 — 표시가와 청구가를 한 자리에서 보는
+#: 규칙과 같습니다.
+_V2_OF_ALL = "19900"
+_V2_OF_SUB = "9900"
+
+
+def _v2_tier(tier: str, lens_id: str) -> str:
+    if tier == "free":
+        return "free"
+    if tier == "all":
+        return _V2_OF_ALL
+    if tier == "sub":
+        return _V2_OF_SUB
+    # one — 그 캐릭터의 값이 여는 층
+    price = int((lens_mod.public(lens_id) or {}).get("price") or 0)
+    for step in ("19900", "15900", "12900", "9900"):
+        if price >= int(step):
+            return step
+    return "free"
+
+
+@router.post("/report/v2")
+def post_report_v2(req: ReportRequest) -> dict:
+    """
+    읽는 글 v2 — **주장 하나가 단위**입니다.
+
+    돌려주는 것은 화면이 고를 것이 없는 꼴이오 — 차례·잠금·파는 자리까지
+    여기서 정해져 나갑니다. 화면이 고르면 서버가 무엇을 두 번 내보내는지
+    모릅니다 (v1 에서 `spine` 이 본문과 근거 줄까지 두 번 나간 자리요).
+    """
+    from engine import reading
+
+    raw = load_features(req.chart_id)
+    try:
+        lens_mod.get(req.lens_id)
+    except lens_mod.LensError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+    tier = _granted_tier(req)
+    v2 = _v2_tier(tier, req.lens_id)
+    f = Features(**raw)
+    view = lens_mod.view(req.lens_id) or {}
+    tone = view.get("voice")
+    you = lens_mod.you_of(req.lens_id, req.name, getattr(f, "sex", None))
+
+    try:
+        page = reading.build(f, req.concern, v2, lens_id=req.lens_id)
+    except reading.ClaimError as e:
+        # ★ 어긴 채로 내려보내지 않습니다. 계약이 막았다는 것은 글이
+        #   무디거나 되풀이됐다는 뜻이오 — 조용히 내면 그게 v1 이오.
+        raise HTTPException(status_code=500, detail=str(e))
+    except (ValueError, KeyError) as e:
+        raise HTTPException(status_code=422, detail=str(e))
+
+    def say(text: str) -> str:
+        """말투·호칭 층 — v1 과 같은 자리에서 같은 순서로 태웁니다."""
+        from engine import voice as voice_mod
+        return (voice_mod.speak(voice_mod.address(text, you), tone)
+                if tone and text else text)
+
+    cuts = [{
+        "axis": c.axis,
+        "kind": c.kind,
+        # ★ 제목은 말투 층을 **안 탑니다** — 표지판이라 어미가 없습니다.
+        "title": c.verdict,
+        "source": say(c.source),
+        "html": say(c.body),
+        "counted": [x.수 for x in c.counted],
+    } for c in page.claims]
+
+    rx = page.prescription
+    return {
+        "version": 2,
+        "tier": tier,
+        "budget": v2,
+        "thesis": page.thesis,
+        "derived": say(page.derived.html) if page.derived else "",
+        "cuts": cuts,
+        "prescription": {
+            "one": say(rx.한가지), "check": say(rx.확인),
+            "branch": say(rx.갈림), "axis": rx.축,
+        },
+        "appendix": [{
+            "axis": c.axis, "title": c.verdict,
+            "source": say(c.source), "html": say(c.body),
+        } for c in page.appendix],
+        # 파는 말은 **한 곳**. 어느 컷 뒤에 놓을지도 서버가 정합니다.
+        "offer_at": page.offer_at,
+        "locked": [
+            dict(row, need_tier_name=payments.TIER_NAME.get(
+                {"9900": "one", "12900": "one", "15900": "one",
+                 "19900": "all"}.get(row["needs"], "one"), ""))
+            for row in reading.locked_list(f, req.concern, v2)
+        ],
+        "chars": sum(len(c["html"]) for c in cuts),
+    }

@@ -712,6 +712,16 @@
   },
   {
    "admin_guard": false,
+   "file": "services/api/routers/report.py",
+   "handler": "post_report_v2",
+   "id": "POST /v1/report/v2",
+   "method": "POST",
+   "ownership_check": true,
+   "path": "/v1/report/v2",
+   "session_guard": true
+  },
+  {
+   "admin_guard": false,
    "file": "services/api/routers/share.py",
    "handler": "post_summary",
    "id": "POST /v1/summary",
@@ -1467,6 +1477,7 @@
   "test_prompt_gate.py",
   "test_provider_recovery.py",
   "test_rarity.py",
+  "test_reading2.py",
   "test_reading_facts.py",
   "test_reading_workbook.py",
   "test_refund_access.py",
