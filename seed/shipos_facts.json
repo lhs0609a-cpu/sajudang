@@ -1311,16 +1311,6 @@
    "route": "/report/[id]"
   },
   {
-   "file": "apps/web/app/s/[token]/page.tsx",
-   "id": "s1",
-   "route": "/s/[token]"
-  },
-  {
-   "file": "apps/web/app/s/[token]/page.tsx",
-   "id": "s2",
-   "route": "/s/[token]"
-  },
-  {
    "file": "apps/web/app/s/[token]/SharedView.tsx",
    "id": "s1",
    "route": "/s/[token]/SharedView.tsx"
@@ -1329,6 +1319,16 @@
    "file": "apps/web/app/s/[token]/SharedView.tsx",
    "id": "s2",
    "route": "/s/[token]/SharedView.tsx"
+  },
+  {
+   "file": "apps/web/app/s/[token]/page.tsx",
+   "id": "s1",
+   "route": "/s/[token]"
+  },
+  {
+   "file": "apps/web/app/s/[token]/page.tsx",
+   "id": "s2",
+   "route": "/s/[token]"
   },
   {
    "file": "apps/web/app/summary/page.tsx",

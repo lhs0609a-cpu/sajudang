@@ -24,7 +24,9 @@ async function json(url,body){const response=await fetch(url,{...(body?{method:'
   results.push({lens,version:4,changedReading:true,changedAction:true,reviewConsistent:true,unknownHour:true});
  }
  const response=await fetch(site,{signal:AbortSignal.timeout(45000)});assert.equal(response.status,200);
- assert.ok((await response.text()).includes('같은 고민인데, 답은 어떻게 달라지오?'),'A1 update');
+ // Entry is hydrated under Suspense; the HTTP shell need not contain its copy.
+ // check-value-browser.cjs --production verifies the rendered A1 and full flow.
+ assert.ok((await response.text()).includes('/_next/'),'Frontend document');
  fs.mkdirSync(out,{recursive:true});fs.writeFileSync(path.join(out,'production-api.json'),JSON.stringify({checkedAt:new Date().toISOString(),site,api,durable:true,results},null,2));
- console.log('PASS production: 20 characters, 40 reports, 20 hooks, durable storage, A1 update');
+ console.log('PASS production: 20 characters, 40 reports, 20 hooks, durable storage, frontend HTTP');
 })().catch(e=>{console.error(e);process.exitCode=1;});

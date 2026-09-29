@@ -166,7 +166,7 @@ def _screens() -> list[dict]:
     if not WEB.exists():
         return []
     out = []
-    for f in sorted(WEB.glob("app/**/*.tsx")):
+    for f in sorted(WEB.glob("app/**/*.tsx"), key=lambda path: path.relative_to(WEB).as_posix()):
         src = f.read_text(encoding="utf-8", errors="replace")
         m = re.search(r"@screen\s+([a-z0-9 ]+)", src)
         if not m:

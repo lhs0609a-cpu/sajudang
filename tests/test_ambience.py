@@ -8,10 +8,11 @@ ROOT=Path(__file__).resolve().parents[1]
 WEB=ROOT/'apps'/'web'
 
 def test_only_the_requested_original_bgm_is_published():
-    source=ROOT/'BGM'/'moon-thread-loop.mp3'
     directory=WEB/'public'/'audio'/'bgm'
     assert {p.name for p in directory.glob('*.mp3')}=={'moon-thread-loop.mp3'}
-    assert hashlib.sha256(source.read_bytes()).digest()==hashlib.sha256((directory/source.name).read_bytes()).digest()
+    # Verified against the original master; CI does not contain the ignored BGM folder.
+    expected='2d1f1e436b9d2a33c81105b56d91c85c09863da5e46e1a2f45d5e2c7253a207b'
+    assert hashlib.sha256((directory/'moon-thread-loop.mp3').read_bytes()).hexdigest()==expected
 
 def test_sound_control_stays_available_on_entry_and_other_pages():
     """
