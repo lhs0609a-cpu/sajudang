@@ -1,7 +1,7 @@
 const {spawn}=require('node:child_process');
 const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),assert=require('node:assert/strict');
 const production=process.argv.includes('--production');
-const out=path.resolve((process.argv.includes('--population')?'output/reading-10000/':'output/plain-reading/')+(production?'production-screens':'screens'));fs.mkdirSync(out,{recursive:true});
+const out=path.resolve((process.argv.includes('--personalization')?'output/personalization-audit/':process.argv.includes('--population')?'output/reading-10000/':'output/plain-reading/')+(production?'production-screens':'screens'));fs.mkdirSync(out,{recursive:true});
 const base=production?'https://saju.megaload.co.kr':'http://localhost:3038',port=19529,pause=ms=>new Promise(r=>setTimeout(r,ms));
 const browser=spawn('C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',['--headless=new','--no-first-run','--disable-extensions','--disable-sync',`--remote-debugging-port=${port}`,`--user-data-dir=${path.join(os.tmpdir(),'sjd-value-'+process.pid)}`,'about:blank'],{windowsHide:true,stdio:'ignore'});
 (async()=>{

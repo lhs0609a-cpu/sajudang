@@ -1,6 +1,8 @@
 const fs=require('node:fs'),assert=require('node:assert/strict');
 const profiles=require('../apps/web/lib/character-profiles.json');
 const local=process.argv.includes('--local');
+const personalization=process.argv.includes('--personalization');
+const output=personalization?'output/personalization-audit':'output/reading-10000';
 const base=local?'http://127.0.0.1:8018/v1':'https://sajudang-api.fly.dev/v1';
 async function post(route,body){
  const r=await fetch(base+route,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(45000)});
@@ -26,6 +28,12 @@ async function post(route,body){
   assert.ok(report.locked.every(c=>!c.html&&!c.reader_html));
   const depth=report.cuts.find(c=>c.id==='spine_depth');
   if(depth)assert.ok(depth.reader_html.includes('personal-reading'));
+  if(personalization){
+   assert.equal(report.reading_basis.version,'personal-reading-v3');
+   assert.ok(depth?.reader_html.includes('chart-synthesis'),lens+' composite chart reasoning');
+   const scene=report.cuts.find(c=>c.id==='spine_scene');
+   assert.ok(scene?.reader_html.includes('올해 글자가 닿는 생활 자리'),lens+' position-specific timing');
+  }
   const spec=report.asks;
   assert.ok(spec?.options4&&spec?.options5,lens+' character questions');
   if(spec?.options4&&spec?.options5){
@@ -45,7 +53,22 @@ async function post(route,body){
   }
   results.push({lens,readable:true,inputScope:true,selectedAnswers:true,paidContentProtected:true});
  }
- fs.mkdirSync('output/reading-10000',{recursive:true});
- fs.writeFileSync(`output/reading-10000/${local?'local':'production'}-api.json`,JSON.stringify({checkedAt:new Date().toISOString(),results},null,2));
+ const collisionChecks=[];
+ if(personalization){
+  const collisions=JSON.parse(fs.readFileSync('output/personalization-audit/before/collisions.json','utf8'));
+  for(const example of collisions){
+   const texts=[];
+   for(const row of example.pair){
+    const [year,month,day,hour,minute,sex,hour_known]=row.input;
+    const c=await post('/chart',{year,month,day,hour,minute,sex,hour_known,birth_city:'서울'});
+    const r=await post('/report',{chart_id:c.chart_id,lens_id:row.lens,tier:'free',concern:row.concern});
+    texts.push(r.cuts.find(c=>c.id==='spine_depth').reader_html.split('<details')[0].replace(/[0-9一-龥\s]+/g,''));
+   }
+   assert.notEqual(texts[0],texts[1],example.lens+' previously identical core now reflects different chart structure');
+   collisionChecks.push({lens:example.lens,previouslyIdenticalCoreNowDifferent:true});
+  }
+ }
+ fs.mkdirSync(output,{recursive:true});
+ fs.writeFileSync(`${output}/${local?'local':'production'}-api.json`,JSON.stringify({checkedAt:new Date().toISOString(),results,collisionChecks},null,2));
  console.log('PASS all 20 characters: visible input scope, real selected answers, readable reports and hooks, protected paid content');
 })().catch(e=>{console.error(e);process.exitCode=1});

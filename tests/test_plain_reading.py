@@ -70,6 +70,7 @@ def test_every_specialist_delivers_readable_content_without_changing_evidence(f,
         from engine.rarity import look
         from engine.reading_facts import visible_elements
         calculated = {str(v) for v in list(f.ten_gods.values())+list(visible_elements(f).values())}
+        calculated |= {str(v) for v in f.elements.values()}
         calculated |= {str(f.birth_year+int(d['start_age'])) for d in f.daeun}
         calculated |= {str(d['start_age']) for d in f.daeun}
         calculated |= set(re.findall(r'\d+', f'{look(f)["sample"]:,} {look(f)["count"]:,}'))
@@ -83,5 +84,6 @@ def test_pungun_explains_the_year_before_exposing_technical_terms(f):
     visible=cut['reader_html'].split('<details')[0]
     assert '상관' not in visible and '억부법' not in visible
     assert '2026' in visible
-    assert '내 생각을 말하고 일하는 방식을 바꾸는 일' in visible
+    from engine.pungun_timing import EASY
+    assert EASY[f.year_ten_god][0] in visible
     assert 'reading-calculation' in cut['reader_html']

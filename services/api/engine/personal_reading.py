@@ -10,7 +10,7 @@ from .easy_specialists import INTRO
 from .character_consultation import INTERVIEWS
 from .consultation_decisions import decide
 
-VERSION = 'personal-reading-v2'
+VERSION = 'personal-reading-v3'
 TITLES = {
  'chart':'입력한 생년월일로 계산한 사주', 'portrait':'사주에서 읽은 나의 특징',
  'spine':'이 풀이의 핵심', 'concern':'물어본 고민에서 먼저 볼 것',
@@ -96,20 +96,8 @@ def leaders(f):
 
 
 def build_depth(f, lens_id, concern):
-    top=leaders(f); primary=top[0]
-    description=' / '.join(EASY[key][0] for key in top)
-    intro=f'이 사주에서는 “{description}”을 먼저 살펴보오.'
-    if len(top)>1: intro+=' 관련 글자 수가 같아 한 가지 성격으로 정하지는 않소.'
-    helpful,cost,check=TRAITS[primary]
-    parts=[_section('먼저 읽은 특징',intro),
-           _section('이 특징이 도움이 될 때',helpful+' 도움이 되는 특징으로 읽소. '+check),
-           _section('같은 특징이 부담이 될 때',cost+'는 부담이 커질 수 있소. 실제로 그런 일이 있는지 확인하는 기준으로 보시오.')]
-    if len(top)>1:
-        other=TRAITS[top[1]]
-        parts.append(_section('함께 봐야 할 다른 특징',other[0]+'도 살펴보오. '+other[2]))
-    parts.append(_section('물어본 일에 적용하면',EXAMPLES.get(concern,EXAMPLES['dir'])[TEN_GOD_GROUP[primary]]))
-    parts.append(_section('이 상담자가 더 살피는 것',INTRO[lens_id]))
-    return '<div class="personal-reading">'+''.join(parts)+'</div>'
+    from .chart_synthesis import core
+    return core(f,lens_id,concern)
 
 
 def selected(lens_id, topic):
@@ -123,8 +111,9 @@ def selected(lens_id, topic):
 
 
 def build_scene(f, lens_id, concern, topic=None):
+    from .chart_synthesis import analyze, timing_text, contact_text, section, PRIORITY, year_fit
+    synthesis=analyze(f)
     answer=selected(lens_id,topic)
-    current=EASY[f.year_ten_god][0]
     parts=[_section('지금 함께 볼 이야기',INTRO[lens_id])]
     if answer:
         labels,decision=answer
@@ -133,12 +122,16 @@ def build_scene(f, lens_id, concern, topic=None):
     else:
         parts.append(_section('실제 상황과 맞춰볼 곳',EXAMPLES.get(concern,EXAMPLES['dir'])[TEN_GOD_GROUP[f.top_ten_god]]+
                               ' 아직 세부 상황을 듣지 못했으므로 실제로 겪었다고 단정하지 않겠소.'))
-    parts.append(_section(f'{f.year_num}년에 덧붙여 읽는 것',f'올해는 “{current}”을 주제로 읽소. '
-                          '이것은 올해의 사주 글자를 해석한 내용이오. 그 일이 실제로 일어난다는 예고는 아니오.'))
+    parts.append(section('왜 하필 지금 이 이야기를 하는가',*timing_text(f,synthesis)))
+    parts.append(year_fit(f,synthesis))
+    parts.append(section('올해 글자가 닿는 생활 자리',*contact_text(synthesis['year_contacts'],'올해')))
+    parts.append(_section('태어난 사주와 함께 정한 순서',PRIORITY[synthesis['priority']][1]))
     if answer:
         parts.extend([_section('지금 할 한 가지',answer[1]['action']),_section('그다음 확인할 것',answer[1]['review'])])
     else:
         parts.append(_section('생활에서 확인해 보려면',TRAITS[f.year_ten_god][2]))
+    parts.append(_section('해석과 실제 경험을 구분하시오','글자의 관계를 전통적인 뜻으로 읽은 것이며 실제 사건을 확인한 것은 아니오.'+
+                         (' 태어난 시간을 몰라 그 부분은 제외했소.' if not f.hour_known else '')))
     return '<div class="personal-reading">'+''.join(parts)+'</div>'
 
 
@@ -148,6 +141,13 @@ def evidence(original):
 
 def build_paid(cut_id, f, concern):
     """Paid common chapters answer distinct questions, without invented events."""
+    from . import chart_synthesis
+    if cut_id=='why':
+        return chart_synthesis.why(f,concern)
+    if cut_id=='daeun_now':
+        return chart_synthesis.period(f,concern)
+    if cut_id=='yongsin':
+        return chart_synthesis.balance(f,concern)
     group=TEN_GOD_GROUP[f.top_ten_god]
     example=EXAMPLES.get(concern,EXAMPLES['dir'])[group]
     if cut_id=='lack':
@@ -163,28 +163,19 @@ def build_paid(cut_id, f, concern):
                _section('이 숫자를 어떻게 읽을까','글자가 적다는 사실을 재능이나 능력이 부족하다는 뜻으로 읽지는 않소. 아래 글자 속에 담긴 성분까지 세는 계산과도 구분해야 하오.'),
                _section('물어본 일에서 살펴볼 조건',example),
                _section('내 경험으로 확인할 기준','혼자 할 때 막혔던 일이 도움·시간·정보가 생긴 뒤 달라졌는지 보시오. 조건을 바꿔도 같다면 글자의 많고 적음만으로 이유를 정하지 마시오.')]
-    elif cut_id=='why':
-        helpful,cost,check=TRAITS[f.top_ten_god]
-        parts=[_section('반복되는 일을 읽는 출발점',f'그대 사주에서는 “{EASY[f.top_ten_god][0]}”을 먼저 살펴보오. '
-                        '실제 일이 반복되는 이유는 사주만으로 확정할 수 없소.'),
-               _section('같은 방식도 조건에 따라 달라지오',helpful+'는 도움이 될 수 있소. 반면 '+cost+'는 부담이 될 수 있소.'),
-               _section('둘을 구분할 장면',check+' '+example),
-               _section('다르게 해본 뒤 볼 것','방법을 바꾼 뒤 일이 줄었는지, 약속이 분명해졌는지 보시오. 효과가 없다면 내 성격만 탓하기보다 바꿀 수 없는 조건이 무엇인지 확인하시오.')]
+        hidden=[names[k] for k,v in counts.items() if v==0 and f.elements[k]>0]
+        parts.insert(2,_section('겉의 글자와 속의 성분을 함께 보면',
+            ('겉에서는 보이지 않아도 아래 글자 속에 '+ ' · '.join(hidden)+' 성분이 들어 있소. 전혀 없다고 읽으면 이 차이를 놓치오.' if hidden else
+             '겉의 글자 수와 아래 글자 속 성분의 비중은 서로 다른 계산이오. 적은 글자만 채우면 된다는 결론으로 넘어가지 않소.')))
+        synthesis=chart_synthesis.analyze(f)
+        parts.insert(3,chart_synthesis.section('전체 균형에서는 이렇게 읽소',*chart_synthesis.support_text(f,synthesis)))
+        parts.append(_section('이번에 먼저 조정할 것',chart_synthesis.PRIORITY[synthesis['priority']][1]))
     elif cut_id=='rarity':
         from .rarity import look
         row=look(f)
         parts=[_section('비교 표본에서 나온 결과',f'비교 표본 {row["sample"]:,}건 중 그대 사주와 같은 계산 특징을 가진 묶음은 {row["count"]:,}건이오.'),
                _section('무엇이 같다는 뜻인가','글자 구성과 강약, 도움을 뜻하는 조합, 가까운 자리의 충돌을 묶어 비교한 수요. 성격이나 살아온 일이 같은 사람을 센 것은 아니오.'),
                _section('이 결과를 사용할 때','드물다고 더 좋거나, 흔하다고 덜 특별한 것은 아니오. 나와 다른 사람이 같은 설명을 받아도 실제 선택은 각자의 시간·돈·관계 조건에 맞춰야 하오.')]
-    elif cut_id=='daeun_now':
-        if not f.daeun_started or not f.daeun:
-            return '<div class="personal-reading">'+_section('현재 시기','아직 첫 10년 운이 시작되기 전이오. 미래 구간을 현재 이야기처럼 붙이지 않고 올해의 주제부터 살피겠소.')+'</div>'
-        current=f.daeun[f.daeun_now]
-        start=f.birth_year+int(current['start_age'])
-        parts=[_section('지금 이어지는 시기',f'그대는 계산상 {start}년부터 “{EASY[f.daeun_ten_god][1]}”에 들어와 있소.'),
-               _section('올해와 함께 읽으면',f'긴 기간에는 “{EASY[f.daeun_ten_god][0]}”을 살피고, {f.year_num}년에는 “{EASY[f.year_ten_god][0]}”을 더해 읽소.'),
-               _section('생활에서 확인할 일',EXAMPLES.get(concern,EXAMPLES['dir'])[TEN_GOD_GROUP[f.daeun_ten_god]]),
-               _section('시기와 실제 결정을 나누시오','구간의 시작 연도는 정밀한 전환 날짜가 아니오. 운이 바뀌었다는 이유만으로 일을 그만두거나 관계를 정리할 필요는 없소. 바뀐 현실 조건을 함께 확인하시오.')]
     else:
         return None
     return '<div class="personal-reading">'+''.join(parts)+'</div>'
@@ -198,6 +189,8 @@ def paid_evidence(cut_id, f):
         from .rarity import look
         row=look(f)
         detail=f'비교 표본 {row["sample"]}건 · 같은 분류 {row["count"]}건. 전체 인구의 비율이나 적중률을 뜻하지 않습니다.'
+    elif cut_id=='yongsin':
+        detail=f'강약 계산 {f.strength} · 억부법 보완 후보 {f.yongsin}. '+ ' · '.join(f'{k} {v}' for k,v in f.elements.items())
     elif cut_id=='daeun_now':
         current=f.daeun[f.daeun_now] if f.daeun_started and f.daeun else None
         detail=(f'현재 대운 {current["gz"]} · 시작 연 나이 {current["start_age"]} · {f.daeun_ten_god}. ' if current else '첫 대운 진입 전. ')

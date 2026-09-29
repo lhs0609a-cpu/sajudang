@@ -2893,15 +2893,17 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
         authored = personal_reading.build_paid(c['id'], f, concern)
         if c['id'] == 'spine_depth':
             authored = personal_reading.build_depth(f, lens_id, concern)
-            c['reader_title'] = '내 특징이 도움이 될 때와 부담이 될 때'
-        elif c['id'] == 'spine_scene' and lens_id != 'pungun':
+            c['reader_title'] = '내 사주를 함께 읽어 나온 결론'
+        elif c['id'] == 'spine_scene':
             authored = personal_reading.build_scene(f, lens_id, concern, accepted_topic)
-            c['reader_title'] = '내 상황과 올해를 함께 읽으면'
+            c['reader_title'] = '왜 하필 지금 · 내 사주와 올해의 관계'
         if authored:
             authored = voice_mod.speak(voice_mod.address(authored, you), tone)
             evidence = (personal_reading.evidence(c['html']) if c['id'] in {'spine_depth', 'spine_scene'} else
                         personal_reading.paid_evidence(c['id'], f))
             c['reader_html'] = readable_html(authored, concern, f.sex, name) + evidence
+            if c['id']=='spine_scene' and lens_id=='pungun':
+                c['reader_html'] = '<div class="pungun-timing easy-reading">'+c['reader_html']+'</div>'
             if c['id']=='rarity':
                 c['source'] = c['source'].replace('인구에서 몇 명인지를', '비교 표본에서 같은 계산 특징을')
     # These surfaces were outside the HTML reading layer and still contained

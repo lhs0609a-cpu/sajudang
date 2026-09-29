@@ -1427,6 +1427,7 @@
   "test_calendar.py",
   "test_char_stage.py",
   "test_character_contracts.py",
+  "test_chart_synthesis.py",
   "test_chart_version.py",
   "test_claim_title.py",
   "test_claims.py",
