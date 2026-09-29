@@ -76,7 +76,7 @@ export default function NextReading({ cuts, onOpen, lensId: readingLens }: { cut
         <LockedVeil />
         {/* ★ 어느 목패부터 열리는지 같이 적습니다. 이름은 서버가
             실어 보낸 것이오 — 화면이 지어내지 않습니다. */}
-        <p className="preview-answer">이 대목을 읽은 이유와 자세한 해석은 「{active.title}」에서 이어지오.</p>
+        <p className="preview-answer">이 대목을 읽은 이유와 자세한 해석은 「{active.reader_title ?? active.title}」에서 이어지오.</p>
         <small>{active.need_tier_name}부터 열림 · {active.chars.toLocaleString()}자</small>
       </div>
     </article>

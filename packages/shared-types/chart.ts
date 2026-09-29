@@ -289,6 +289,8 @@ export interface LensPublic {
 
 /** 궁금한 네 자리 한 줄. 본문은 안 옵니다 — 앞머리와 **길이**뿐입니다. */
 export interface WantRow {
+  reader_fact?: string;
+  reader_head?: string;
   /** 재물 · 사랑 · 운명 · 사람 */
   want: string;
   /**
@@ -314,6 +316,7 @@ export interface WantRow {
 }
 
 export interface ReportResponse {
+  reading_basis?: {version:string;title:string;birth:string;timing:string;answers:string[];scope:string} | null;
   editorial?: { id:string;version:number;title:string;perspective:string;observation:string;question:string;scene:string;action:string;boundary:string;source_kind:string } | null;
   practice?: { id: string; version: number; source_kind: string; source: string; title: string; scene: string; action: string; steps?: string[]; focus?: string; example?: string; decision?: string; trap?: string; review?: string; mbti?: string; specialist_name?: string; specialist_axis?: string; case_summary?: string; specialist_verdict?: string; specialist_action?: string; specialist_close?: string } | null;
   report_id: string;

@@ -2883,15 +2883,33 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
     if editorial:
         view = {**view, "open": editorial["question"], "close": editorial["action"]}
     from .plain_reading import html as readable_html, text as readable_text
+    from . import personal_reading
+    accepted_topic = (extras or {}).get('topic') if not extra_error else None
     for c in cuts:
         # All specialists and both free/paid tiers share the reading edition.
         # Original calculation prose is retained for evidence and exports.
         c['reader_html'] = readable_html(c['html'], concern, f.sex, name) if c['id'] != 'chart' else c['html']
-        c['reader_title'] = readable_text(c['title'], concern, f.sex, name)
+        c['reader_title'] = personal_reading.TITLES.get(c['id'], readable_text(c['title'], concern, f.sex, name))
+        authored = None
+        if c['id'] == 'spine_depth':
+            authored = personal_reading.build_depth(f, lens_id, concern)
+            c['reader_title'] = '내 특징이 도움이 될 때와 부담이 될 때'
+        elif c['id'] == 'spine_scene' and lens_id != 'pungun':
+            authored = personal_reading.build_scene(f, lens_id, concern, accepted_topic)
+            c['reader_title'] = '내 상황과 올해를 함께 읽으면'
+        if authored:
+            authored = voice_mod.speak(voice_mod.address(authored, you), tone)
+            c['reader_html'] = readable_html(authored, concern, f.sex, name) + personal_reading.evidence(c['html'])
+    # These surfaces were outside the HTML reading layer and still contained
+    # difficult expressions even when the main reading had been simplified.
+    for field, value in practice.items():
+        if isinstance(value, str) and field not in {'id', 'source_kind', 'specialist_name'}:
+            practice[field] = readable_text(value, concern, f.sex, name)
     for item in locked:
-        item['reader_title'] = readable_text(item['title'], concern, f.sex, name)
+        item['reader_title'] = personal_reading.TITLES.get(item['id'], readable_text(item['title'], concern, f.sex, name))
         item['reader_teaser'] = readable_html(item.get('teaser', ''), concern, f.sex, name)
     return {
+        "reading_basis": personal_reading.basis(f, lens_id, concern, accepted_topic),
         "editorial": editorial,
         "practice": practice,
         "report_id": report_id(chart_id, lens_id, tier, concern),

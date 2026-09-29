@@ -62,11 +62,12 @@ def test_every_specialist_delivers_readable_content_without_changing_evidence(f,
     for cut in result['cuts']:
         assert cut['reader_html']
         assert cut['reader_title']
-        assert 'class="gl"' not in cut['reader_html'] or cut['id']=='chart'
+        reading = cut['reader_html'].split('<details')[0]
+        assert 'class="gl"' not in reading or cut['id']=='chart'
         # Prose edits may remove parenthetical glossary numbers, but never invent numbers.
         original = set(re.findall(r'\d+(?:\.\d+)?', cut['html']))
         presented = set(re.findall(r'\d+(?:\.\d+)?', cut['reader_html']))
-        assert presented <= original | {'10'}
+        assert presented <= original | {'10', str(f.year_num)}
     assert all('reader_html' not in cut for cut in result['locked'])
 
 

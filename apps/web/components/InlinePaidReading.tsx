@@ -85,7 +85,7 @@ export default function InlinePaidReading({after, cuts, lensId, onOpen}: {after:
      *   남기는 것은 **그 컷이 답하는 물음**입니다 — 값을 치르면 열리는 것이
      *   그것이기 때문입니다. 고민 물음은 맥락 한 줄로 남기고, 캐릭터 물음은
      *   뺍니다(무료 끝의 페이월이 이미 냅니다 — 한 장에 네 번 서던 줄이오). */}
-    <ReadingSpeaker lensId={lensId} label={['강점이 짐으로 바뀐 정확한 조건', '반복된 장면에서 놓친 결정적 차이', '계속할 것과 멈출 것을 가르는 기준'][index]} />
+    <ReadingSpeaker lensId={lensId} label={['도움이 되던 특징이 부담이 될 때', '비슷한 일이 반복될 때 살필 점', '계속할지 바꿀지 판단하는 기준'][index]} />
     <p className="inline-paid-context">{PAIN_POINTS[concern]?.[index] ?? CHARACTER_QUESTIONS[lensId]}</p>
     <h3>{chapterQuestion}</h3>
     <p className="inline-paid-perspective">{lens.name}이 자세히 살펴볼 내용</p>

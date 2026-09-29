@@ -23,6 +23,7 @@ import NextSeats from "@/components/NextSeats";
 import PracticeCard from "@/components/PracticeCard";
 import ReadingGuide from '@/components/ReadingGuide';
 import FreeReadingDetail, { FREE_DETAIL_IDS } from '@/components/FreeReadingDetail';
+import ReadingBasis from '@/components/ReadingBasis';
 import NextReading from '@/components/NextReading';
 import Wants from '@/components/Wants';
 import { READING_QUESTIONS, freeRevelation } from '@/lib/reading-journey';
@@ -533,6 +534,7 @@ function PayInner() {
             />
           )}
           {/* 상세 해석과 실천을 먼저 전달하고, 이어지는 질문과 가격을 뒤에 둡니다. */}
+          <ReadingBasis basis={free.reading_basis} />
           {(lens?.price ?? 0) > 0 && rejected.length === 0 && <FreeReadingDetail cuts={cuts} locked={free.locked} lensId={s.cur} onOpen={openPrice} />}
           {!rejected.length && free.practice && <PracticeCard key={free.practice.id} practice={free.practice} lensId={s.cur} />}
           <section className="conversion-details reading-evidence" aria-label="무료 해석과 계산 근거">

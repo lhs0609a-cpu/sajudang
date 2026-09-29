@@ -152,11 +152,17 @@ def build(f, concern):
             f'그대의 올해 사주는 “{topic}”에 초점을 두고 읽소. '
             '같은 일을 더 오래 붙잡는 것보다, 지금 어떤 방법이 필요한지 살펴보겠소.')
     strongest = [k for k, v in f.ten_gods.items() if v == max(f.ten_gods.values())]
-    descriptions = ' · '.join(EASY[t][0] for t in strongest)
-    section('그대가 자주 신경 쓰는 일',
-            f'태어난 사주에서는 “{descriptions}”에 해당하는 글자가 가장 많이 보이오. '
-            + ('여러 특징이 함께 보여 한 가지 성격으로 묶지는 않겠소. ' if len(strongest)>1 else '')
-            + '이 일을 중요하게 여기는 편으로 읽을 수 있소. 실제 경험과 맞는지 함께 보시오.')
+    if len(strongest) > 2:
+        section('그대가 자주 신경 쓰는 일',
+                '여러 특징의 글자 수가 같게 나왔소. 한 가지 성격으로 묶기보다 다음 특징을 함께 살피겠소.')
+        parts.append('<ul>'+''.join('<li>'+escape(EASY[t][0])+'</li>' for t in strongest)+'</ul>')
+        parts.append('<p>이 중 실제로 중요하게 여기는 일이 무엇인지 경험과 맞춰 보시오.</p>')
+    else:
+        descriptions = ' · '.join(EASY[t][0] for t in strongest)
+        section('그대가 자주 신경 쓰는 일',
+                f'태어난 사주에서는 “{descriptions}”에 해당하는 글자가 가장 많이 보이오. '
+                + ('여러 특징이 함께 보여 한 가지 성격으로 묶지는 않겠소. ' if len(strongest)>1 else '')
+                + '이 일을 중요하게 여기는 편으로 읽을 수 있소. 실제 경험과 맞는지 함께 보시오.')
     if f.daeun_started and f.daeun:
         current = f.daeun[f.daeun_now]
         start = f.birth_year + int(current['start_age'])

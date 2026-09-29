@@ -98,6 +98,18 @@ def _head(text: str) -> tuple[str, int]:
     return head, max(1, len(text) - len(head))
 
 
+def _reading_sample(body, concern, sex, total_chars=None):
+    """A useful sentence within a strict partial-preview budget, not a full cut."""
+    from .plain_reading import text
+    readable = text(body, concern, sex)
+    budget = min(100, (total_chars if total_chars is not None else len(readable))//3)
+    first = re.split(r'(?<=[.!?])\s+', readable, maxsplit=1)[0]
+    if first and len(first) <= budget:
+        return first, True
+    fragment = readable[:budget].rsplit(' ', 1)[0].rstrip()
+    return fragment or text(_head(body)[0], concern, sex), False
+
+
 # ── 무엇을 묻는가 ─────────────────────────────────────────
 #
 # ★ 컷 제목을 **손님의 말**로 바꿉니다.
@@ -108,9 +120,9 @@ def _head(text: str) -> tuple[str, int]:
 ASK = {
     "daeun_now": "그대가 지금 지나는 십 년은 무엇을 보는 때요?",
     "yongsin": "그대에게 모자라서 채워야 할 것은 무엇이오?",
-    "lack": "그대에게 아예 없는 것은",
+    "lack": "그대 사주에서 적게 보이는 글자는 어떻게 읽을까?",
     "why": "왜 하필 지금 그대인가 하면",
-    "rarity": "만 명 중 그대 같은 사람은",
+    "rarity": "그대 사주와 같은 계산 특징은 비교 표본에서 얼마나 나왔을까?",
     "place": "그대의 돈과 사람이 오가는 곳은",
     "axis": "그대가 적은 성향 네 글자와 사주가 어긋나는 점은",
     "sinsal": "그대 사주에 옛사람이 붙여 둔 이름들은",
@@ -292,6 +304,7 @@ def build_peek(f, chart_id: str, lens_ids: list, concern: str,
             #   실제로 안 보이는 것은 이백 자가 넘는데요. 손님이 무엇을
             #   못 보고 있는지 알아야 값을 잽니다. 글자는 안 보냅니다.
             mask = max(1, int(c.get("chars") or 0) - len(head))
+            sample, complete = _reading_sample(body, rep['concern'], f.sex, int(c.get('chars') or len(body)))
             rows.append({
                 "lens_id": lid,
                 "cut_id": cid,
@@ -302,7 +315,8 @@ def build_peek(f, chart_id: str, lens_ids: list, concern: str,
                 #   부르는 사람이 둘이 됩니다.
                 "ask": voice_mod.speak(voice_mod.address(ask_of(cid, c.get("title") or ""), you), lens_mod.view(lid).get('voice')),
                 "head": head,
-                "reader_head": __import__('engine.plain_reading', fromlist=['text']).text(head, rep['concern'], f.sex),
+                "reader_head": sample,
+                "reader_complete": complete,
                 "mask": mask,
                 "source": c.get("source"),
                 "chars": c.get("chars"),
@@ -497,12 +511,20 @@ def build_wants(f, locked: list, limit: int = 4,
         # ★ 여기도 **하오체 한 벌 · 「그대」 한 벌**로 적고 갈아 끼웁니다.
         #   묻는 말은 「그대」인데 답은 「자네」면 한 상자에 부르는 사람이
         #   둘이 됩니다 (tests/test_peek).
+        from .plain_reading import html as readable_html, text as readable_text
+        from .reading_facts import scope_text
+        spoken_fact = voice_mod.speak(voice_mod.address(fact, you), voice)
+        reader_fact = readable_html(scope_text(spoken_fact, f.hour_known), concern, f.sex)
+        if want == '재물' and _jae(f) == 0:
+            reader_fact += '<span> 글자가 없다는 뜻이며, 돈을 벌 능력이 없다는 뜻은 아닙니다.</span>'
         rows.append({
             "want": want,
             "primary": want == want_now,
             "fact": voice_mod.speak(voice_mod.address(fact, you), voice),
+            "reader_fact": reader_fact,
             "ask": voice_mod.address(ask_of(cid, c.get("title") or ""), you),
             "head": head,
+            "reader_head": readable_text(head, concern, f.sex),
             "mask": max(1, int(c.get("chars") or 0) - len(head)),
             "source": c.get("source"),
             "chars": c.get("chars"),

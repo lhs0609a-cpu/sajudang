@@ -6,9 +6,9 @@ import CharacterSpeech from './CharacterSpeech';
 
 const TURNS: Record<string, { question: string; reveal: string }> = {
   재물: { question: '다만, 돈을 좇는 힘과 내 몫으로 남기는 힘은 같지 않소.', reveal: '내 사주가 재물을 감당하는 방식과 그 이유' },
-  사랑: { question: '끌리는 마음 뒤에, 가까워질수록 드러나는 내 모습은 어떻소?', reveal: '배우자 자리로 읽는 가까운 관계의 모습' },
-  운명: { question: '다음 나이는 보였소. 그렇다면 그때는 무엇이 달라지는 것이오?', reveal: '대운의 흐름과 시기별 해석' },
-  사람: { question: '같은 성향이 어떤 관계에서는 힘이 되고, 어떤 관계에서는 짐이 되는 까닭은?', reveal: '사람과의 관계를 읽는 명식의 단서' },
+  사랑: { question: '끌리는 마음 뒤에, 가까워질수록 드러나는 내 모습은 어떻소?', reveal: '가까운 관계에서 살펴볼 특징과 대화' },
+  운명: { question: '지금과 다음 시기에는 무엇을 다르게 살펴볼까요?', reveal: '10년마다 달라지는 주제와 시기별 해석' },
+  사람: { question: '같은 성향이 어떤 관계에서는 힘이 되고, 어떤 관계에서는 짐이 되는 까닭은?', reveal: '관계에서 살펴볼 사주 특징과 실제 상황' },
 };
 
 /*
@@ -58,11 +58,11 @@ export default function Wants({ rows, onOpen }: { rows: WantRow[]; onOpen?: () =
     {relevant.map((r) => (
       <article className="want" key={r.want}>
         <h3 className="want-name">{r.want}</h3>
-        <ServerText as="p" className="want-fact" html={r.fact} />
+        <ServerText as="p" className="want-fact" html={r.reader_fact ?? r.fact} />
         {TURNS[r.want] && <p className="want-turn">{TURNS[r.want].question}</p>}
         <p className="want-ask">{r.ask}</p>
         <p className="want-head">
-          {r.head}
+          {r.reader_head ?? r.head}
           <span aria-hidden="true"> …</span>
         </p>
         <LockedVeil />

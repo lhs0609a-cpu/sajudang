@@ -8,3 +8,12 @@
 .reading-scope {font-size:13px!important;color:#a8b3a3;font-weight:400!important}
 .reading-voice-body p {max-width:65ch}
 .reader-break {display:block;content:"";margin-top:12px}
+.reading-basis {margin:24px 0;padding:20px;border:1px solid #a9ba8b55;border-radius:16px;background:#1d2a20;line-height:1.75}
+.reading-basis ul {padding-left:20px;margin:8px 0;color:#ebe5d4}
+.reading-basis li {margin:6px 0}
+.reading-basis-answers {font-size:15px;word-break:keep-all;overflow-wrap:anywhere}
+.reading-basis-answers span {display:block;font-size:12px;color:#c1cba9;margin-top:14px}
+.reading-basis summary {font-size:13px;color:var(--gold,#dbc58b);cursor:pointer;padding:10px 0;min-height:44px}
+.reading-basis details p {font-size:14px;color:#d1d8c8;margin:8px 0}
+.personal-reading h3 {margin:26px 0 10px;font-size:18px;line-height:1.5}
+.personal-reading p {line-height:1.9;word-break:keep-all;overflow-wrap:anywhere}

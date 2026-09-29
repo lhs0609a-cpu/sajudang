@@ -3,7 +3,7 @@
 import { CHARACTER_QUESTIONS } from '@/lib/curiosity';
 import { josa } from '@/lib/josa';
 
-type Peek = {lens_id:string;lens_name:string;ask:string;head:string;reader_head?:string;mask:number;source:string|null;chars:number};
+type Peek = {lens_id:string;lens_name:string;ask:string;head:string;reader_head?:string;reader_complete?:boolean;mask:number;source:string|null;chars:number};
 type Reveal = {hook:string;after:[string,string,string]};
 
 const REVEALS:Record<string,Reveal> = {
@@ -41,11 +41,12 @@ export default function CheckoutReveal({lensId,name,peek,cuts,chars,minutes}:{le
       {peek.slice(0,3).map((row,index)=><article key={`${row.lens_id}-${index}`}>
         <small>{row.lens_name} · {row.chars.toLocaleString()}자</small>
         <h4>{row.ask}</h4>
-        <p>{row.reader_head ?? row.head}…</p>
-        <div className="checkout-secret" aria-label={`${row.mask.toLocaleString()}자의 이어지는 해석은 결제 후 공개`}><i/><i/><b>이어지는 해석은 결제 후 읽을 수 있습니다</b></div>
+        <p>{row.reader_head ?? row.head}{row.reader_complete ? '' : '…'}</p>
+        <div className="checkout-secret" aria-label="이어지는 해석은 결제 후 공개"><i/><i/><b>이어지는 해석은 결제 후 읽을 수 있습니다</b></div>
       </article>)}
     </div>:<p className="conversion-note">이 사주로 만든 해석 예시를 불러오고 있소…</p>}
     <div className="checkout-reveal-volume">
+      <p>무료에서는 핵심 특징과 지금 할 일을 읽었습니다. 아래 상품에 포함된 추가 항목에서는 그 특징을 시기·관계·선택 조건과 함께 자세히 읽습니다.</p>
       <span>추가로 읽을 수 있는 분량</span>
       <strong>{cuts}개 질문에 대한 해석 전체</strong>
       <p>{chars.toLocaleString()}자 · 약 {minutes}분. 궁금한 제목을 골라 읽을 수 있습니다. 결제 전에 아래의 포함 내용과 결제 조건을 확인하세요.</p>

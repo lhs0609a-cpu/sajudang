@@ -20,6 +20,7 @@ import ProbeAsk, { type ProbeSpec } from "@/components/ProbeAsk";
 import Reveal from "@/components/Reveal";
 import ReadingGuide from '@/components/ReadingGuide';
 import FreeReadingDetail from '@/components/FreeReadingDetail';
+import ReadingBasis from '@/components/ReadingBasis';
 import { CutArtwork, ReadingPath } from '@/components/ReadingArtwork';
 import ScrollHint from "@/components/ScrollHint";
 import SinsalSlots from "@/components/SinsalSlots";
@@ -481,6 +482,7 @@ function ReportInner() {
             읽히는 것은 맛보기까지. 그 뒤에 흐려진 자락을 이어 붙여
             **이 아래로 더 있다**는 것만 보이오.
         */}
+        {rep.tier === 'free' && <ReadingBasis basis={rep.reading_basis} />}
         {rep.tier === 'free' && <FreeReadingDetail cuts={rep.cuts} lensId={lensId} locked={rep.locked} onOpen={openPrice} />}
         <NextReading lensId={lensId} cuts={rep.locked} onOpen={openPrice} />
         {/*
@@ -830,6 +832,7 @@ function ReportInner() {
           </p>
         </div>
 
+        <ReadingBasis basis={rep.reading_basis} />
         {rep.opening && (
           <p className="saying" dangerouslySetInnerHTML={{ __html: rep.opening }} />
         )}

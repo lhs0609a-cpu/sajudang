@@ -10,7 +10,7 @@ from html.parser import HTMLParser
 
 from .terms import used_here
 
-VERSION = 'plain-reading-v1'
+VERSION = 'plain-reading-v2'
 WORDS = {
     '비견': '독립심', '겁재': '경쟁과 나눌 몫',
     '식신': '꾸준히 만드는 재능', '상관': '표현과 변화 성향',
@@ -42,6 +42,18 @@ WORDS = {
     '양인': '강한 추진력의 상징', '원진': '엇갈림의 상징',
     '귀문': '예민함의 상징', '백호': '강한 긴장의 표시',
     '길신': '좋게 해석하는 상징', '신살': '글자 조합에 붙인 별칭',
+    '식상생재': '표현과 실력을 수입으로 잇는 배치',
+    '관인상생': '책임과 배움이 서로 이어지는 구성',
+    '재다신약': '돈을 다룰 일에 비해 뒷받침이 적은 쪽',
+    '비겁쟁재': '함께 나눌 몫을 살피는 배치',
+    '상관견관': '내 표현과 정해진 규칙이 맞서는 구성',
+    '식신제살': '꾸준한 실력으로 압박에 대응하는 틀',
+    '신강약': '사주에서 나를 돕는 힘의 비중',
+    '관살': '역할과 외부 요구의 상징', '신왕': '나를 돕는 힘이 큰 쪽',
+    '월령': '태어난 달의 계절 조건', '본기': '아래 글자의 중심 성분 표시',
+    '투출': '숨은 성분이 윗줄에도 드러남', '궁위': '사주에서 살피는 생활 자리',
+    '격국': '사주를 읽는 전체 틀', '십성': '사주 속 역할의 구분',
+    '재고': '재물을 모으는 것으로 읽는 표시',
 }
 PHRASES = {
     '선택이 갈리는 기준': '무엇을 보고 결정할까',
@@ -57,6 +69,12 @@ PHRASES = {
     '우선적으로': '먼저', '상대적으로': '비교하면',
     '감당 가능한': '감당할 수 있는', '확인 가능한': '확인할 수 있는',
     '분리하': '따로 나누',
+    '체력이 남는가 모자라는가': '사주에서 나를 돕는 글자가 얼마나 있는가',
+    '도와주는 옛 이름표가 몇인가': '도움을 뜻하는 글자 조합이 있는가',
+    '날카로운 판정': '답에서 먼저 살필 점',
+    '전문 관점': '이 상담자가 살피는 것',
+    '판정 기준': '판단할 기준', '분기점': '선택이 달라지는 지점',
+    '검증하': '확인하', '관찰하': '살펴보',
 }
 _WORDS = re.compile('|'.join(map(re.escape, sorted(WORDS, key=len, reverse=True))))
 _GLOSS = re.compile(r'<i\b[^>]*class=["\']gl["\'][^>]*>.*?</i>', re.S)
@@ -79,10 +97,15 @@ def text(value, concern=None, sex=None, name=None):
         # The old glossary's word-boundary list covers only some terms.
         if match.start() and '가' <= value[match.start()-1] <= '힣':
             return word
+        tail = value[match.end():]
+        # Ordinary negation and stock/reconsideration must keep their meaning.
+        if word == '지지' and re.match(r'\s*(?:않|못|말|마|않으)', tail):
+            return word
+        if word == '재고' and re.match(r'\s*(?:하|해|를\s*(?:확인|세|줄|정리)|가\s*(?:남|없|많))', tail):
+            return word
         if not used_here(value, word, match.start(), match.end()):
             return word
         # Counts describe chart symbols, not an amount of someone's ability.
-        tail = value[match.end():]
         counted = re.match(r'\s*\d+(?:\.\d+)?\s*(?:개|회|자|글자)', tail)
         return words[word] + ('에 해당하는 글자' if counted else '')
 
@@ -149,6 +172,10 @@ class _Reader(HTMLParser):
 def html(value, concern=None, sex=None, name=None):
     if not value:
         return value
+    # Dense evidence stays available without interrupting the explanation.
+    # Match complete paragraphs only; never remove the evidence or alter values.
+    value = re.sub(r'(<p\b[^>]*>이 그림이 나온 자리.*?</p>)',
+                   r'<details class="reading-calculation"><summary>이 설명의 계산 근거</summary>\1</details>', value, flags=re.S)
     reader = _Reader(concern, sex, name)
     reader.feed(_GLOSS.sub('', value))
     reader.close()

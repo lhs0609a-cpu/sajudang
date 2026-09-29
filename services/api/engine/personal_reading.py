@@ -1,0 +1,155 @@
+"""Authored summaries grounded in chart counts and explicitly selected answers.
+
+No invented biography, inferred interview answer, or prediction confidence.
+Original, calculated evidence is retained beside the reading edition.
+"""
+from html import escape
+from .pungun_timing import EASY
+from .constants import TEN_GOD_GROUP
+from .easy_specialists import INTRO
+from .character_consultation import INTERVIEWS
+from .consultation_decisions import decide
+
+VERSION = 'personal-reading-v1'
+TITLES = {
+ 'chart':'입력한 생년월일로 계산한 사주', 'portrait':'사주에서 읽은 나의 특징',
+ 'spine':'이 풀이의 핵심', 'concern':'물어본 고민에서 먼저 볼 것',
+ 'lack':'적게 보이는 글자는 어떻게 읽을까', 'rarity':'다른 사주와 비교한 계산 특징',
+ 'place':'가까운 관계에서 살필 점', 'daeun_now':'지금 이어지는 10년의 주제',
+ 'yongsin':'균형을 위해 보완할 점', 'daeun_map':'시기마다 달라지는 주제',
+ 'sinsal':'글자 조합에 붙은 상징', 'helper':'도움이 되는 조건을 찾는 법',
+ 'ancestor':'태어난 해의 글자로 읽는 배경', 'concern_scale':'이 고민에서 계산한 내용',
+ 'concern_pattern':'여러 특징이 함께 나타날 때', 'concern_turn':'이 고민을 시기와 함께 읽으면',
+ 'concern_face':'내가 고른 성격 유형과 비교하면', 'hindsight':'지나온 경험과 맞춰 볼 점',
+ 'counter':'내 경험과 다르다면', 'why':'이런 설명이 나온 이유',
+ 'solace':'내 잘못으로만 생각하지 않아도 될 일', 'hope':'이미 활용할 수 있는 점',
+ 'week':'이번 주에 해볼 한 가지', 'closing_cut':'끝으로 기억할 것',
+}
+# Useful condition, possible cost, observable way to tell the two apart.
+TRAITS = {
+ '비견': ('스스로 순서를 정하고 끝까지 맡을 수 있을 때', '도움받을 수 있는 일까지 혼자 맡을 때', '혼자 해야 빨라지는 일인지, 함께하면 시간을 줄일 수 있는 일인지 보시오.'),
+ '겁재': ('다른 사람과 역할을 나눠 함께 움직일 때', '사람에게 맞추다가 내 시간과 돈의 한도를 넘을 때', '함께하기로 한 약속에 각자의 몫이 적혀 있는지 보시오.'),
+ '식신': ('익숙한 일을 꾸준히 해서 결과를 쌓을 때', '완성도를 높이느라 끝내거나 보여줄 때를 놓칠 때', '더 고치면 무엇이 좋아지는지 한 가지를 말할 수 있는지 보시오.'),
+ '상관': ('문제를 발견하고 더 나은 방법을 제안할 때', '고쳐야 할 점을 한꺼번에 말해 중요한 제안이 묻힐 때', '불편한 점 다음에 상대가 할 수 있는 요청 하나가 붙어 있는지 보시오.'),
+ '편재': ('새로운 사람이나 일을 만나 기회를 넓힐 때', '여러 제안을 받아들여 쓸 돈과 시간이 흩어질 때', '새 일을 시작한 뒤에도 이미 한 약속을 지킬 여유가 남는지 보시오.'),
+ '정재': ('돈과 일정을 정해 둔 기준에 맞춰 꾸준히 관리할 때', '계획이 바뀔까 봐 필요한 조정까지 미룰 때', '지키려는 기준이 지금도 도움이 되는지, 습관만 남은 것인지 보시오.'),
+ '편관': ('어려운 요구 앞에서 우선순위를 세우고 대응할 때', '급하다는 이유만으로 내 몫이 아닌 일까지 받아들일 때', '마감과 맡을 범위를 함께 정했는지, 급하다는 말만 들었는지 보시오.'),
+ '정관': ('서로 지킬 기준과 맡을 역할이 분명할 때', '기준을 지키려다 내 사정이나 필요한 도움을 말하지 못할 때', '문제가 생겼을 때 약속을 다시 조정할 수 있는지 보시오.'),
+ '편인': ('혼자 깊이 살피며 익숙한 설명을 다시 검토할 때', '생각과 자료가 늘어나는데 실제로 해본 일은 없을 때', '새로 알아본 정보가 다음 행동을 바꾸었는지 보시오.'),
+ '정인': ('배우고 도움받으며 기초를 충분히 다질 때', '준비가 끝났다는 허락을 기다리느라 시작이 늦어질 때', '지금 아는 것만으로 안전하게 해볼 작은 일이 있는지 보시오.'),
+}
+
+# The same calculated group has different practical meanings by concern.
+EXAMPLES = {
+ 'work': {
+  '비겁':'업무를 나눌 때 “누가 무엇을 언제까지 끝낼지”를 적어 보시오.',
+  '식상':'의견을 낼 때 바꾸고 싶은 작업 하나와 그 이유를 함께 말해 보시오.',
+  '재성':'새 업무를 맡기 전에 늘어날 시간과 받을 보상을 함께 확인하시오.',
+  '관성':'마감이 겹치면 “어느 일을 뒤로 미뤄도 되는지”를 먼저 물어보시오.',
+  '인성':'자료를 더 찾기 전에 지금 아는 내용으로 짧은 초안을 만들어 보시오.'},
+ 'money': {
+  '비겁':'함께 쓰는 돈이라면 각자가 낼 금액과 더 내지 않을 한도를 먼저 정하시오.',
+  '식상':'돈을 벌 계획이라면 누가 어떤 결과에 값을 지불하는지부터 확인하시오.',
+  '재성':'들어온 돈에서 고정 지출을 빼고 실제 남는 금액을 비교해 보시오.',
+  '관성':'도와줘야 한다는 부담이 들어도 이미 약속한 지출부터 확인하시오.',
+  '인성':'모르는 비용이나 조건을 적고, 그 답을 확인한 뒤 결정하시오.'},
+ 'love': {
+  '비겁':'서로 혼자 보내고 싶은 시간과 함께할 시간을 말로 맞춰 보시오.',
+  '식상':'서운함을 한꺼번에 설명하기보다 바라는 연락 방식 하나를 말해 보시오.',
+  '재성':'마음의 크기와 실제로 지킬 수 있는 시간·돈의 약속을 따로 보시오.',
+  '관성':'연인 사이에서도 거절하거나 약속을 조정할 수 있는지 보시오.',
+  '인성':'상대의 뜻을 혼자 추측하기보다 실제로 한 말과 다음 행동을 함께 보시오.'},
+ 'people': {
+  '비겁':'부탁을 받으면 함께 맡을 사람과 내 몫을 먼저 정하시오.',
+  '식상':'말이 길어질 때는 상대에게 바라는 행동 하나로 줄여 보시오.',
+  '재성':'도울 마음이 있어도 가능한 금액과 시간을 먼저 말하시오.',
+  '관성':'거절했을 때 상대가 조건을 조정하는지, 죄책감을 주는지 살펴보시오.',
+  '인성':'상대를 이해한 것과 그 부탁을 받아들이는 것을 같은 뜻으로 두지 마시오.'},
+ 'dir': {
+  '비겁':'남의 기대를 빼고도 내가 고르고 싶은 이유가 남는지 적어 보시오.',
+  '식상':'관심 있는 일을 작게 만들어 보여주고 실제 반응을 받아 보시오.',
+  '재성':'좋아 보이는 기회라도 배우는 비용과 생활비를 함께 계산하시오.',
+  '관성':'이름이 좋은 직업인지보다 실제 맡을 업무와 책임을 알아보시오.',
+  '인성':'정보 하나를 더 알면 선택이 바뀌는지부터 확인하시오.'},
+ 'health': {
+  '비겁':'쉴 시간을 만들기 위해 다른 사람과 나눌 일을 찾아보시오.',
+  '식상':'하던 일을 어디서 끝낼지 정하고 남은 일은 따로 적어 두시오.',
+  '재성':'일정과 비용 때문에 휴식을 미루는지 생활 조건을 살펴보시오.',
+  '관성':'모든 부탁을 받아들여 쉬는 시간이 사라지지는 않는지 보시오.',
+  '인성':'휴식법을 더 찾기 전에 잠과 일의 시간을 기록해 보시오.'},
+ 'real_estate': {
+  '비겁':'공동으로 부담한다면 각자 낼 돈과 책임을 문서로 확인하시오.',
+  '식상':'원하는 집의 조건을 모두 늘어놓기보다 꼭 필요한 조건부터 고르시오.',
+  '재성':'매매가뿐 아니라 이자·세금·수리비까지 넣어 감당할 비용을 계산하시오.',
+  '관성':'계약을 서두르라는 말보다 서류와 실제 부담 조건을 확인하시오.',
+  '인성':'모르는 계약 조건은 뜻을 확인하고 필요한 전문가에게 물어보시오.'},
+}
+
+
+def _section(title, body):
+    return f'<h3>{escape(title)}</h3><p>{escape(body)}</p>'
+
+
+def leaders(f):
+    highest=max(f.ten_gods.values())
+    return [key for key,value in f.ten_gods.items() if value==highest]
+
+
+def build_depth(f, lens_id, concern):
+    top=leaders(f); primary=top[0]
+    description=' / '.join(EASY[key][0] for key in top)
+    intro=f'이 사주에서는 “{description}”을 먼저 살펴보오.'
+    if len(top)>1: intro+=' 관련 글자 수가 같아 한 가지 성격으로 정하지는 않소.'
+    helpful,cost,check=TRAITS[primary]
+    parts=[_section('먼저 읽은 특징',intro),
+           _section('이 특징이 도움이 될 때',helpful+' 도움이 되는 특징으로 읽소. '+check),
+           _section('같은 특징이 부담이 될 때',cost+'는 부담이 커질 수 있소. 실제로 그런 일이 있는지 확인하는 기준으로 보시오.')]
+    if len(top)>1:
+        other=TRAITS[top[1]]
+        parts.append(_section('함께 봐야 할 다른 특징',other[0]+'도 살펴보오. '+other[2]))
+    parts.append(_section('물어본 일에 적용하면',EXAMPLES.get(concern,EXAMPLES['dir'])[TEN_GOD_GROUP[primary]]))
+    parts.append(_section('이 상담자가 더 살피는 것',INTRO[lens_id]))
+    return '<div class="personal-reading">'+''.join(parts)+'</div>'
+
+
+def selected(lens_id, topic):
+    row=INTERVIEWS[lens_id]
+    choices=[]
+    for key,options in [('choice4',row[2]),('choice5',row[4])]:
+        option=next((o for o in options if o['id']==(topic or {}).get(key)),None)
+        if not option: return None
+        choices.append(option['label'])
+    return choices,decide(lens_id,topic['choice4'],topic['choice5'])
+
+
+def build_scene(f, lens_id, concern, topic=None):
+    answer=selected(lens_id,topic)
+    current=EASY[f.year_ten_god][0]
+    parts=[_section('지금 함께 볼 이야기',INTRO[lens_id])]
+    if answer:
+        labels,decision=answer
+        parts.extend([_section('직접 고른 상황',f'“{labels[0]}”, “{labels[1]}”이라고 답했소. 이 부분은 생년월일로 짐작한 것이 아니라 직접 고른 답이오.'),
+                      _section('그 답에서 먼저 살필 점',decision['reading'])])
+    else:
+        parts.append(_section('실제 상황과 맞춰볼 곳',EXAMPLES.get(concern,EXAMPLES['dir'])[TEN_GOD_GROUP[f.top_ten_god]]+
+                              ' 아직 세부 상황을 듣지 못했으므로 실제로 겪었다고 단정하지 않겠소.'))
+    parts.append(_section(f'{f.year_num}년에 덧붙여 읽는 것',f'올해는 “{current}”을 주제로 읽소. '
+                          '이것은 올해의 사주 글자를 해석한 내용이오. 그 일이 실제로 일어난다는 예고는 아니오.'))
+    if answer:
+        parts.extend([_section('지금 할 한 가지',answer[1]['action']),_section('그다음 확인할 것',answer[1]['review'])])
+    else:
+        parts.append(_section('생활에서 확인해 보려면',TRAITS[f.year_ten_god][2]))
+    return '<div class="personal-reading">'+''.join(parts)+'</div>'
+
+
+def evidence(original):
+    return '<details class="reading-calculation"><summary>계산과 자세한 풀이 보기</summary>'+original+'</details>'
+
+
+def basis(f,lens_id,concern,topic):
+    answer=selected(lens_id,topic)
+    return {'version':VERSION,'title':'이번 풀이에 반영한 정보',
+            'birth':'태어난 연·월·일·시간' if f.hour_known else '태어난 연·월·일 · 시간은 제외',
+            'timing':f'{f.year_num}년과 현재 10년 운' if f.daeun_started else f'{f.year_num}년 · 첫 10년 운 이전',
+            'answers':answer[0] if answer else [],
+            'scope':'사주에서 읽은 특징과 직접 고른 답을 구분해 설명합니다. 실제 경험과 다르면 경험을 먼저 봅니다.'}

@@ -114,6 +114,7 @@ class ReportRequest(BaseModel):
 
 
 class ReportResponse(BaseModel):
+    reading_basis: Optional[dict] = None
     editorial: Optional[dict] = None
     practice: Optional[dict] = None
     report_id: str
