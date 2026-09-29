@@ -30,7 +30,7 @@ CONCERNS = {
 }
 
 
-def build(f, concern):
+def _calculation(f, concern):
     """Return a self-contained, chart-specific free timing analysis."""
     parts = [f'<p class="timing-summary">그대의 {f.year_num}년을 읽는 중심은 '
              f'{escape(THEMES[f.year_ten_god][0])}이오. '
@@ -115,3 +115,72 @@ def build(f, concern):
     scope = ('출생시가 없어 시주는 제외했소. 시주가 들어오면 강약과 보완 후보, 시지와의 관계가 달라질 수 있소. ' if not f.hour_known else '')
     section('이 해석의 범위', scope + '위 글은 계산된 원국·대운·세운을 전통 명리의 관계로 해석한 것이오. MBTI나 선택형 성격 답변으로 계산을 바꾸지 않았소. 월운·일운과 실제 사건의 발생 여부는 이 분석에 포함하지 않소.')
     return '<div class="pungun-timing">' + ''.join(parts) + '</div>'
+
+
+# The first reading is written for someone who has never studied saju.
+# Technical names and all counted evidence remain in the expandable calculation.
+EASY = {
+    '비견': ('내가 원하는 것을 분명히 하는 일', '남에게 맞추기 전에 내 뜻을 정하는 시기', '같이할 일과 혼자 정할 일을 나누어 보시오.'),
+    '겁재': ('시간과 돈을 누구와 나눌지 정하는 일', '사람들과 함께하면서 내 몫도 챙기는 시기', '함께 시작한다면 비용과 책임을 먼저 나누시오.'),
+    '식신': ('꾸준히 해 온 일을 결과로 만드는 일', '한 가지를 오래 익혀 내 것으로 만드는 시기', '일을 늘리기 전에 지금 하던 일을 끝내는 순서를 정하시오.'),
+    '상관': ('내 생각을 말하고 일하는 방식을 바꾸는 일', '익숙한 방법을 고쳐 보는 시기', '불편하다는 말에 바꾸고 싶은 방법 하나를 덧붙이시오.'),
+    '편재': ('새 기회를 고르고 돈을 쓸 곳을 정하는 일', '새로운 사람과 기회를 넓게 살피는 시기', '좋아 보이는 제안도 쓸 돈과 시간을 먼저 계산하시오.'),
+    '정재': ('들어오고 나가는 돈을 꾸준히 챙기는 일', '돈과 약속을 안정적으로 관리하는 시기', '매번 새 계획을 세우기보다 지킬 수 있는 기준 하나를 정하시오.'),
+    '편관': ('늘어난 요구를 어디까지 받아들일지 정하는 일', '어려운 요구에 대처할 방법을 익히는 시기', '급한 일일수록 마감과 맡을 범위를 먼저 확인하시오.'),
+    '정관': ('내 역할과 책임을 분명히 하는 일', '일의 기준과 책임을 정리하는 시기', '무엇을 잘해야 하는지 평가 기준부터 맞춰 보시오.'),
+    '편인': ('배우던 방법과 생각을 다시 살펴보는 일', '혼자 배우고 생각을 정리하는 시기', '자료를 더 모으기 전에 지금 아는 것으로 작은 결과 하나를 만들어 보시오.'),
+    '정인': ('필요한 도움을 받고 기초를 다지는 일', '배우고 도움받으며 준비하는 시기', '혼자 해결하기 어려운 부분은 무엇을 도와주면 되는지 말하시오.'),
+}
+EXAMPLES = {
+    'work': '회사라면 “지금 방식에서 시간이 가장 오래 걸리는 부분은 여기입니다”처럼 말할 수 있소.',
+    'money': '돈 문제라면 수입만 보지 말고, 그 일을 위해 드는 비용과 시간도 함께 적어 보시오.',
+    'people': '사람 문제라면 “내가 맡을 수 있는 건 여기까지야”처럼 서로 맡을 일을 분명히 할 수 있소.',
+    'love': '연인 사이라면 “알아서 해줬으면 좋겠어”보다 원하는 연락이나 만남을 하나만 말해 보시오.',
+    'dir': '진로라면 직업 이름부터 고르기보다, 일주일 동안 직접 해볼 일 하나로 좁혀 보시오.',
+    'health': '생활을 돌아볼 때는 잠·일·휴식 시간을 함께 보시오. 몸의 증상은 사주로 판단하지 않소.',
+    'real_estate': '집 문제라면 원하는 조건과 매달 감당할 비용을 따로 적어 보시오. 계약 판단은 실제 자료를 확인해야 하오.',
+}
+
+
+def build(f, concern):
+    topic, _, action = EASY[f.year_ten_god]
+    parts = []
+    def section(title, body):
+        parts.append(f'<h3>{escape(title)}</h3><p>{escape(body)}</p>')
+
+    section(f'{f.year_num}년, 먼저 볼 것은 이것이오',
+            f'그대의 올해 사주는 “{topic}”에 초점을 두고 읽소. '
+            '같은 일을 더 오래 붙잡는 것보다, 지금 어떤 방법이 필요한지 살펴보겠소.')
+    strongest = [k for k, v in f.ten_gods.items() if v == max(f.ten_gods.values())]
+    descriptions = ' · '.join(EASY[t][0] for t in strongest)
+    section('그대가 자주 신경 쓰는 일',
+            f'태어난 사주에서는 “{descriptions}”에 해당하는 글자가 가장 많이 보이오. '
+            + ('여러 특징이 함께 보여 한 가지 성격으로 묶지는 않겠소. ' if len(strongest)>1 else '')
+            + '이 일을 중요하게 여기는 편으로 읽을 수 있소. 실제 경험과 맞는지 함께 보시오.')
+    if f.daeun_started and f.daeun:
+        current = f.daeun[f.daeun_now]
+        start = f.birth_year + int(current['start_age'])
+        background = EASY[f.daeun_ten_god][1]
+        same = TEN_GOD_GROUP[f.daeun_ten_god] == TEN_GOD_GROUP[f.year_ten_god]
+        section('왜 지금 이 이야기를 하는가',
+                f'계산상 {start}년부터 이어지는 긴 기간은 “{background}”로 읽소. '
+                f'그 안에서 {f.year_num}년에는 “{topic}”이 더해지오. '
+                + ('몇 년 동안 다뤄 온 주제를 올해 다시 살피는 셈이오.' if same else
+                   '몇 년 동안 중요했던 일과 올해 새로 신경 쓸 일이 다른 셈이오. 둘 중 무엇을 먼저 할지 순서를 정하는 것이 중요하오.'))
+    else:
+        section('왜 지금 이 이야기를 하는가',
+                '아직 첫 10년 운에 들어가기 전이오. 긴 기간의 운을 억지로 붙이지 않고, 태어난 사주와 올해만 비교했소.')
+    practical = {
+        '신강': '계획을 계속 더하기보다, 이미 준비한 것을 밖으로 보여줄 방법을 살펴보시오.',
+        '신약': '해야 할 일이 늘어난다면, 혼자 해낼 수 있는 양과 도움받을 일을 먼저 나누시오.',
+        '중화': '무조건 혼자 밀어붙이거나 전부 남에게 맡길 필요는 없소. 지금 맡은 일의 양과 도움받을 수 있는 조건을 함께 보시오.',
+    }[f.strength]
+    section('내 상황에서는 이렇게 읽으면 되오', practical + ' ' + action)
+    section('생활 속에서 써본다면', EXAMPLES.get(concern, EXAMPLES['dir']))
+    scope = '사주를 이렇게 읽을 수 있다는 설명이오. 어떤 일이 생길 날짜를 정한 것은 아니오.'
+    if not f.hour_known:
+        scope += ' 태어난 시간을 몰라 그 부분은 빼고 읽었소. 시간을 알게 되면 해석이 달라질 수 있소.'
+    parts.append(f'<p class="reading-scope">{escape(scope)}</p>')
+    parts.append('<details class="reading-calculation"><summary>왜 이렇게 읽었는지 · 계산 근거 보기</summary>'
+                 + _calculation(f, concern) + '</details>')
+    return '<div class="pungun-timing easy-reading">' + ''.join(parts) + '</div>'

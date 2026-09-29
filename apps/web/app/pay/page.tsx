@@ -56,7 +56,7 @@ type SubOffer = Awaited<ReturnType<typeof api.subPrepare>>;
 /** 엿보기 한 줄 — 답은 안 옵니다. 앞머리와 가린 글자 수만. */
 interface PeekRow {
   lens_id: string; lens_name: string;
-  ask: string; head: string; mask: number;
+  ask: string; head: string; reader_head?: string; mask: number;
   source: string | null; chars: number;
 }
 
@@ -540,10 +540,11 @@ function PayInner() {
             <p className="conversion-note">{cuts.length}개 항목을 아래에서 바로 읽을 수 있소.</p>
             {rejected.length > 0 && <p className="conversion-note">아래는 응답 전 생년월일과 고민으로 만든 원래 해석이오. 아니라고 답한 대목이 맞는 것으로 바뀐 것은 아니오.</p>}
              {cuts.filter(c => !(lens?.price && rejected.length === 0 && FREE_DETAIL_IDS.has(c.id))).map(c => <section className="blk" key={c.id}>
-               <CutArtwork id={c.id} title={c.title} /><ServerText as="p" className="src" html={`근거 · ${c.source}`} />
+               <CutArtwork id={c.id} title={c.reader_title ?? c.title} />
                <ReadingVoice lensId={s.cur} label={c.id === 'chart' ? '계산 근거' : c.id === 'spine' ? '무료 핵심 해석' : c.id === 'spine_scene' ? '고민 속 장면' : c.id === 'closing_cut' ? '오늘의 결론' : '이 항목의 해석'}>
-                {c.id === "sinsal" ? <SinsalSlots html={c.html} /> : <div dangerouslySetInnerHTML={{__html:c.html}} />}
+                {c.id === "sinsal" ? <SinsalSlots html={c.reader_html ?? c.html} /> : <div dangerouslySetInnerHTML={{__html:c.reader_html ?? c.html}} />}
               </ReadingVoice>
+              <details className="reading-evidence"><summary>왜 이렇게 읽었나요?</summary><ServerText as="p" className="src" html={c.source} /></details>
             </section>)}
           </section>
           {(lens?.price ?? 0) > 0 && rejected.length === 0 && <NextReading cuts={free.locked} onOpen={openPrice} />}
@@ -583,7 +584,7 @@ function PayInner() {
           {(lens?.price ?? 0) > 0 && rejected.length === 0 &&
             <Wants rows={free.wants ?? []} onOpen={openPrice} />}
           {(lens?.price ?? 0) > 0 && <div className="reading-next">
-            <p>{rejected.length ? "맞지 않았던 문장은 버리고, 결제 후 어떤 질문에 답하는지 먼저 보시오." : <>무료에서는 반복 장면과 오늘 행동까지 드렸소. 결제 후에는 <strong>반복 원인·선택 분기·다시 확인할 때</strong>를 제목별로 가릅니다.</>}</p>
+            <p>{rejected.length ? "맞지 않았던 설명은 빼고 읽으시오. 추가 해석의 내용도 먼저 확인할 수 있소." : <>무료 해석을 읽고 더 궁금한 내용이 있다면, <strong>추가로 읽을 제목과 실제 첫 문장</strong>을 먼저 확인하시오.</>}</p>
             <button className="btn" onClick={openPrice}>결제 후 열리는 질문·첫 문장·가격 보기</button>
           </div>}
           <NextSeats />
@@ -619,8 +620,8 @@ function PayInner() {
         {!!t.base_price && t.base_price>t.price && <span><s>{t.base_price.toLocaleString()}원</s> → {t.referral?`함께 보기 ${t.referral.percent}% 할인`:`기간 ${t.promotion?.percent}% 할인`}</span>}
         <PromotionNote value={t.promotion} />
         <span>{t.per_month ? `${t.days ?? 30}일마다 자동 결제` : "한 번 결제 · 영구 열람"}</span>
-        <span>{t.lenses > 1 ? `${t.lenses}명이 같은 명식을 서로 다른 기준으로 판정하오.` : `${charName}${josa(charName,'이','가')} 반복 원인·결정 기준·오늘 행동을 끝까지 가릅니다. 다른 인물은 포함하지 않소.`}</span>
-        <span>{t.cuts}개 질문의 답 · {t.chars.toLocaleString()}자 · 약 {t.minutes}분 · 무료 판정 포함</span>{t.needs_extra_input && <span>선택 입력이 필요한 항목은 무엇을 더 적어야 하는지 결제 전에 밝힙니다.</span>}
+        <span>{t.lenses > 1 ? `${t.lenses}명이 같은 사주를 각자 중요하게 보는 내용으로 풀어 드리오.` : `${charName} 한 명의 자세한 해석이오. 왜 이런 모습이 반복되는지, 결정할 때 무엇을 볼지 함께 읽소.`}</span>
+        <span>{t.cuts}개 항목 · {t.chars.toLocaleString()}자 · 약 {t.minutes}분 · 무료 내용 포함</span>{t.needs_extra_input && <span>더 입력해야 읽을 수 있는 항목은 결제 전에 알려 드리오.</span>}
         <span className="product-action">{pick === t.id ? "선택 완료 · 아래에서 실제 질문과 첫 문장 보기" : "결제 후 받는 답을 먼저 보기 →"}</span>
       </button>
     );
@@ -666,7 +667,7 @@ function PayInner() {
     return (
       <Shell screen="d1" title="추가 해석과 결제" legal onBack={() => router.push("/pay?step=d0")}>
         <div className="conversion-intro consultation-offer">
-          <p className="conversion-kicker">{charName}이 아직 끝내지 않은 판정</p>
+          <p className="conversion-kicker">{charName}의 자세한 해석</p>
           <h1 className="conversion-title">{readingIntent?.question ?? CHARACTER_QUESTIONS[s.cur] ?? READING_QUESTIONS[s.concern]}</h1>
           {readingIntent && <p className="checkout-reading-intent">방금 멈춘 질문은 「{readingIntent.title}」이오. 결제하면 그 질문의 원인·갈림길·행동 판정부터 바로 열립니다.</p>}
           <p className="conversion-lead">무료에서 본 결과 뒤에는 왜 반복됐는지, 무엇을 멈출지, 언제 다시 판단할지가 남아 있소.</p>
@@ -706,7 +707,7 @@ function PayInner() {
                 목패가 서고, 값은 저마다 제 값입니다 (price_of).
           */}
           <details className="otherseats conversion-details">
-            <summary>이 판정 기준이 안 맞소? 다른 전문가 고르기</summary>
+            <summary>다른 해석자의 설명도 살펴보기</summary>
             <p className="lab">이 사람이 아니어도 되오</p>
             <p className="sm">같은 <b>8글자</b>를 <b>20명</b>이 저마다 다른 자리에서 읽소. <mark>값도 저마다 다르오 — 창을 어느 쪽에 내느냐에 따라 방에 드는 햇빛이 달라지는 것과 같소.</mark></p>
             <div className="og c2">

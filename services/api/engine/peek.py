@@ -302,6 +302,7 @@ def build_peek(f, chart_id: str, lens_ids: list, concern: str,
                 #   부르는 사람이 둘이 됩니다.
                 "ask": voice_mod.speak(voice_mod.address(ask_of(cid, c.get("title") or ""), you), lens_mod.view(lid).get('voice')),
                 "head": head,
+                "reader_head": __import__('engine.plain_reading', fromlist=['text']).text(head, rep['concern'], f.sex),
                 "mask": mask,
                 "source": c.get("source"),
                 "chars": c.get("chars"),

@@ -23,11 +23,11 @@ export default function PracticeCard({ practice, lensId }: { practice: Practice;
   return <CharacterSpeech lensId={lensId}><section className="conversion-card" aria-label="해석을 현실에 적용하는 오늘 행동">
     <ArtImage art="action" className="practice-art" />
     <ReadingSpeaker lensId={lensId} label="오늘은 이렇게 해보시오" soft />
-    <p className="conversion-kicker">4단계 · 해석을 현실에 적용 · 오늘 끝낼 한 가지</p>
-    <h2>{practice.specialist_axis ? `${practice.specialist_axis}부터 가르겠소` : practice.title}</h2>
+    <p className="conversion-kicker">4단계 · 내 상황에서 해볼 일</p>
+    <h2>{practice.specialist_axis ? '그래서 지금 무엇을 해볼까' : practice.title}</h2>
     {practice.case_summary && <p className="practice-case"><span>당신이 고른 실제 상황</span><strong>{practice.case_summary}</strong></p>}
     {practice.specialist_verdict ? <div className="practice-verdict">
-      <span>{practice.specialist_name ?? '이 상담자'}의 날카로운 판정</span>
+      <span>{practice.specialist_name ?? '이 상담자'}이 그대의 답에서 읽은 내용</span>
       <p>{practice.specialist_verdict}</p>
     </div> : <p>{practice.scene}</p>}
     {/* ★ 시키는 일은 **하나**입니다 (2026-09-25).

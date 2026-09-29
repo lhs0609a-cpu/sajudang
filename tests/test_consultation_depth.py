@@ -69,7 +69,7 @@ def test_all_twenty_characters_have_distinct_deep_interviews():
         assert spec["q4"] and spec["q5"] and spec["character_axis"]
         topic = {"choice4": row[2][0]["id"], "choice5": row[4][0]["id"]}
         body = character_consultation.render(character, topic, name=character)
-        assert "날카로운 판정" in body and "지금 할 한 가지" in body
+        assert "그대의 답에서 알 수 있는 것" in body and "지금 할 한 가지" in body
         assert row[2][0]["label"] in body and row[4][0]["label"] in body
         assert guard.check(body)[0]
         signatures.add((spec["q4"], spec["q5"], row[5], row[7]))

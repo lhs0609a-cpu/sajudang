@@ -2882,6 +2882,15 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
         editorial = {key:spoken(value) if key not in {'id','version','lens_id','concern'} else value for key,value in editorial.items()}
     if editorial:
         view = {**view, "open": editorial["question"], "close": editorial["action"]}
+    from .plain_reading import html as readable_html, text as readable_text
+    for c in cuts:
+        # All specialists and both free/paid tiers share the reading edition.
+        # Original calculation prose is retained for evidence and exports.
+        c['reader_html'] = readable_html(c['html'], concern, f.sex, name) if c['id'] != 'chart' else c['html']
+        c['reader_title'] = readable_text(c['title'], concern, f.sex, name)
+    for item in locked:
+        item['reader_title'] = readable_text(item['title'], concern, f.sex, name)
+        item['reader_teaser'] = readable_html(item.get('teaser', ''), concern, f.sex, name)
     return {
         "editorial": editorial,
         "practice": practice,

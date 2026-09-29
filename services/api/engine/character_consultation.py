@@ -151,11 +151,11 @@ def render(lens_id, topic, *, name="이 상담자"):
         return ""
     fourth, fifth = _picked(row, topic, 4), _picked(row, topic, 5)
     decision = decide(lens_id, topic['choice4'], topic['choice5'])
-    return (f'<div class="character-case"><h3>{escape(name)}이 사건을 좁혀 본 자리</h3>'
+    return (f'<div class="character-case"><h3>{escape(name)}과 함께 자세히 볼 내용</h3>'
             f'<p class="note">전문 관점 · {escape(row[0])}</p>'
             f'<p><strong>당신이 짚은 현실</strong> · {escape(fourth)} / {escape(fifth)}</p>'
             f'<p class="note">직접 고른 상황을 바탕으로 한 해석이오. 사주로 확인한 사실과는 구분하시오.</p>'
-            f'<h4>날카로운 판정</h4><p>{escape(decision["reading"])}</p>'
+            f'<h4>그대의 답에서 알 수 있는 것</h4><p>{escape(decision["reading"])}</p>'
             f'<h4>지금 할 한 가지</h4><p>{escape(decision["action"])}</p>'
             f'<h4>다시 확인할 기준</h4><p>{escape(decision["review"])}</p>'
             f'<blockquote>{escape(row[7])}</blockquote></div>')

@@ -1471,6 +1471,7 @@
   "test_peek.py",
   "test_pick_affordance.py",
   "test_plain.py",
+  "test_plain_reading.py",
   "test_portrait.py",
   "test_privacy.py",
   "test_production_origins.py",

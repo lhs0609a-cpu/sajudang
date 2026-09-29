@@ -69,6 +69,7 @@ class HookRequest(BaseModel):
 
 
 class HookSegment(BaseModel):
+    reader_html: Optional[str] = None
     stage: str
     label: str
     source: Optional[str]

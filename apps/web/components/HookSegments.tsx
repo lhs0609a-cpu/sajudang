@@ -292,7 +292,7 @@ export default function HookSegments({
               엔진이 어려운 말에 다는 풀이는 `<i class="gl">` 로 싸여
               옵니다. 글자로 꽂으면 손님 눈에 꺾쇠가 그대로 보입니다 —
               「상관<i class="gl">(하고 싶은 말을…)</i>이 둘」. */}
-          <div dangerouslySetInnerHTML={{ __html: seg.html }} />
+          <div dangerouslySetInnerHTML={{ __html: seg.reader_html ?? seg.html }} />
           {seg.source && (
             <details className="hook-evidence"><summary>이 해석은 어디서 나왔소?</summary>
               <ServerText className="src" html={seg.source} />

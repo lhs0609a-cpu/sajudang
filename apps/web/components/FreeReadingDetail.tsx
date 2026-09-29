@@ -16,22 +16,23 @@ export default function FreeReadingDetail({cuts, lensId, locked = [], onOpen}: {
   const rows = cuts.filter(c => FREE_DETAIL_IDS.has(c.id));
   if (!rows.length) return null;
   return <CharacterSpeech lensId={lensId}><section className="free-reading-detail" aria-label="추가 질문을 반영한 무료 상세 해석">
-    <p className="conversion-kicker">{timing ? '3단계 · 왜 하필 지금 · 명식과 현재 운의 분석' : '3단계 · 답을 반영한 해석 · 실제 장면과 반복 조건'}</p>
+    <p className="conversion-kicker">{timing ? '3단계 · 왜 하필 지금 · 올해 내게 중요한 일' : '3단계 · 내 답을 바탕으로 자세히 읽기'}</p>
     {rows.map(c => {
       // Keep valid server HTML blocks intact. Insert the question after the
       // concrete case, before MBTI reflection, while free reading continues.
-      const pivot = c.html.indexOf('<div class="mbti-reading">');
+      const body = c.reader_html ?? c.html;
+      const pivot = body.indexOf('<div class="mbti-reading">');
       const split = c.id === 'spine_scene' && pivot > 0;
       return <article key={c.id}>
-      <ReadingVoice lensId={lensId} label={timing && c.id === 'spine_scene' ? '원국·대운·세운 분석' : '무료 핵심 해석'}>
-        <h2>{c.title}</h2>
-        <div dangerouslySetInnerHTML={{__html:split ? c.html.slice(0,pivot) : c.html}} />
+      <ReadingVoice lensId={lensId} label={timing && c.id === 'spine_scene' ? '태어난 사주와 올해를 함께 읽기' : '무료 핵심 해석'}>
+        <h2>{c.reader_title ?? c.title}</h2>
+        <div dangerouslySetInnerHTML={{__html:split ? body.slice(0,pivot) : body}} />
       </ReadingVoice>
-      <ServerText as="p" className="conversion-note" html={`이렇게 읽은 근거 · ${c.source}`} />
+      <details className="reading-evidence"><summary>왜 이렇게 읽었나요?</summary><ServerText as="p" className="conversion-note" html={c.source} /></details>
       {onOpen && c.id !== 'spine_scene' && <InlinePaidReading after={c.id} cuts={locked} lensId={lensId ?? selected} onOpen={onOpen} />}
-      {split && <ReadingVoice lensId={lensId} label="고른 답을 반영한 해석"><div dangerouslySetInnerHTML={{__html:c.html.slice(pivot)}} /></ReadingVoice>}
+      {split && <ReadingVoice lensId={lensId} label="내 답을 바탕으로 읽기"><div dangerouslySetInnerHTML={{__html:body.slice(pivot)}} /></ReadingVoice>}
     </article>;})}
-    <p className="preview-bridge">{timing ? '원국은 타고난 구조, 대운은 긴 배경, 세운은 올해 더해지는 조건이오. 아래에서는 이 분석과 그대가 답한 실제 상황을 나누어 읽으시오.' : '같은 힘이 어떤 날에는 성과를 만들고, 어떤 날에는 피로만 남겼소. 아래에서는 두 날을 갈라놓은 조건과 오늘 끊을 반복 하나를 판정하오.'}</p>
+    <p className="preview-bridge">사주에서 읽은 내용과 실제로 겪은 일을 함께 보시오. 다음에는 그대가 고른 상황에서 무엇을 해볼지 정리하겠소.</p>
     <FriendInvite />
   </section></CharacterSpeech>;
 }

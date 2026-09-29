@@ -370,7 +370,7 @@ export const api = {
     tier: string; tier_name: string; lenses: number; hidden: number;
     rows: {
       lens_id: string; lens_name: string;
-      ask: string; head: string; mask: number;
+      ask: string; head: string; reader_head?: string; mask: number;
       source: string | null; chars: number;
     }[];
   }>("/v1/pay/peek", req),

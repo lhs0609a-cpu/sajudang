@@ -68,7 +68,8 @@ def scene(f, lens_id, concern, *, revised=False):
         return ''
     title, distinction, a, b, words, review = row
     axis, perspective, _, _ = ROLES[lens_id]
-    diagnosis = METHODS[lens_id][0]
+    from .easy_specialists import INTRO
+    diagnosis = INTRO[lens_id]
     # 센 줄은 마침표 없이 옵니다(`lens_cuts._counted`). 그대로 뒤 문장을
     # 이으면 「…들었소 이 계산을」 이 되어 **어미가 문장 끝이 아니게**
     # 됩니다 — `voice.speak` 가 못 보고 하오체가 남소 (줄표·묶음표에서

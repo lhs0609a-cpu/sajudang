@@ -54,7 +54,7 @@ export default function NextReading({ cuts, onOpen, lensId: readingLens }: { cut
   const lensId = readingLens ?? currentLens;
   const rows = selectPreviewCuts(cuts, concern);
   const active = rows.find(c => c.id === selected) ?? rows[0];
-  const question = (cut: LockedCut) => CHAPTER_QUESTIONS[cut.id.replace(/^lc_/, '')] ?? QUESTIONS[cut.id] ?? cut.title;
+  const question = (cut: LockedCut) => CHAPTER_QUESTIONS[cut.id.replace(/^lc_/, '')] ?? QUESTIONS[cut.id] ?? cut.reader_title ?? cut.title;
   if (!rows.length) return null;
   const rest = cuts.length - rows.length;
   const chars = cuts.reduce((n, c) => n + (c.chars ?? 0), 0);
@@ -72,7 +72,7 @@ export default function NextReading({ cuts, onOpen, lensId: readingLens }: { cut
         <ReadingSpeaker lensId={lensId} label="이어서 들려줄 이야기" />
         <p className="conversion-kicker">결제 후 열리는 답의 실제 첫 문장</p>
         <h3>{question(active)}</h3>
-        <p>{readingText(active.teaser ?? '')}</p>
+        <p>{readingText(active.reader_teaser ?? active.teaser ?? '')}</p>
         <LockedVeil />
         {/* ★ 어느 목패부터 열리는지 같이 적습니다. 이름은 서버가
             실어 보낸 것이오 — 화면이 지어내지 않습니다. */}

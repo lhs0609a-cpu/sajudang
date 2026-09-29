@@ -199,6 +199,7 @@ export interface ChartResponse {
 
 /* ── 훅 ─────────────────────────────────────────────────── */
 export interface HookSegment {
+  reader_html?: string | null;
   stage: string;              // "0" | "1" | "2" | "2.5" | "3"
   label: string;
   source: string | null;
@@ -226,6 +227,8 @@ export interface HookResponse {
 
 /* ── 리포트 ─────────────────────────────────────────────── */
 export interface ReportCut {
+  reader_html?: string;
+  reader_title?: string;
   id: string;
   title: string;
   source: string;
@@ -250,6 +253,8 @@ export interface ReportCut {
  *   이제 서버가 첫 문장을 **잘라서** 내려보냅니다 (engine/report._teaser).
  */
 export interface LockedCut {
+  reader_title?: string;
+  reader_teaser?: string;
   id: string;
   title: string;
   source: string;

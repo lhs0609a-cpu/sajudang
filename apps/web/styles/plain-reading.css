@@ -1,0 +1,10 @@
+.reading-voice-body .easy-reading > h3 {margin:26px 0 10px;font-size:18px;line-height:1.5}
+.reading-voice-body .easy-reading > p {line-height:1.9;margin:0 0 18px;word-break:keep-all;overflow-wrap:anywhere}
+.reading-calculation,.reading-evidence {margin:20px 0;padding:14px 16px;border:1px solid #8c9a7540;border-radius:10px;background:#14201960}
+.reading-calculation > summary,.reading-evidence > summary {cursor:pointer;color:var(--gold,#dbc58b);font-size:13px;line-height:1.6;min-height:28px}
+.reading-calculation[open] > summary,.reading-evidence[open] > summary {margin-bottom:18px}
+.reading-calculation .pungun-timing {font-size:13px;font-weight:400;line-height:1.85;color:#c5cbbf}
+.reading-calculation h3 {font-size:15px;margin:24px 0 8px}
+.reading-scope {font-size:13px!important;color:#a8b3a3;font-weight:400!important}
+.reading-voice-body p {max-width:65ch}
+.reader-break {display:block;content:"";margin-top:12px}

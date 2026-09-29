@@ -693,13 +693,13 @@ function ReportInner() {
         {numbered && i === list.length - 1 && list.length > 1 && (
           <p className="lastcut">이제 마지막 자리요.</p>
         )}
-        <CutArtwork lensId={lensId} id={c.id} title={numbered ? `${i + 1}. ${c.title}` : c.title} />
-        <ServerText className="src" html={c.source} />
+        <CutArtwork lensId={lensId} id={c.id} title={numbered ? `${i + 1}. ${c.reader_title ?? c.title}` : c.reader_title ?? c.title} />
         <ReadingVoice lensId={lensId} soft={['solace', 'hope', 'closing_cut'].includes(c.id)} label={c.id === 'chart' ? '계산 근거' : c.id === 'spine' ? '핵심 해석' : c.id === 'spine_scene' ? '고민 속 장면' : c.id === 'closing_cut' ? '오늘의 결론' : '이 항목의 해석'}>
         {c.id === "sinsal"
-          ? <SinsalSlots html={c.html} />
-          : <div className="cutbody" dangerouslySetInnerHTML={{ __html: c.html }} />}
+          ? <SinsalSlots html={c.reader_html ?? c.html} />
+          : <div className="cutbody" dangerouslySetInnerHTML={{ __html: c.reader_html ?? c.html }} />}
         </ReadingVoice>
+        <details className="reading-evidence"><summary>왜 이렇게 읽었나요?</summary><ServerText className="src" html={c.source} /></details>
         {rep.tier === 'free' && rep.sells && <InlinePaidReading after={c.id} cuts={rep.locked} lensId={lensId} onOpen={openPrice} />}
       </div>
     </Reveal>

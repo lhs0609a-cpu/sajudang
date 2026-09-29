@@ -8,6 +8,7 @@ from engine import character_consultation as character_consultation_mod
 from engine import portrait as portrait_mod
 from engine.first_reading import build_first_reading, CACHE_VERSION as READING_VERSION
 from engine.features import Features
+from engine.plain_reading import html as readable_html, VERSION as PLAIN_VERSION
 from routers.chart import load_features
 from schemas.api import HookRequest, HookResponse
 
@@ -46,7 +47,7 @@ def post_hook(req: HookRequest) -> HookResponse:
     key = store.k_hook(req.chart_id, req.concern, req.axis4 or "",
                        req.lens_id or "",
                        "%s#%d#%s#%s#%s" % (req.name, req.misses, READING_VERSION,
-                                           character_consultation_mod.VERSION, topic_key))
+                                           character_consultation_mod.VERSION + ':' + PLAIN_VERSION, topic_key))
     cached = store.get_json(key)
     if cached is not None:
         return HookResponse(chart_id=req.chart_id, segments=cached, cached=True)
@@ -152,5 +153,7 @@ def post_hook(req: HookRequest) -> HookResponse:
                 if s.get(k):
                     s[k] = voice_mod.speak(voice_mod.address(s[k], lens_mod.you_word(req.lens_id, req.name, raw.get('sex'))), tone)
 
+    for segment in segs:
+        segment['reader_html'] = readable_html(segment.get('html', ''), concern, f.sex, req.name)
     store.set_json(key, segs, ttl=HOOK_TTL)
     return HookResponse(chart_id=req.chart_id, segments=segs, cached=False)

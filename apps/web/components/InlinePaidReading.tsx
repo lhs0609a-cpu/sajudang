@@ -88,10 +88,10 @@ export default function InlinePaidReading({after, cuts, lensId, onOpen}: {after:
     <ReadingSpeaker lensId={lensId} label={['강점이 짐으로 바뀐 정확한 조건', '반복된 장면에서 놓친 결정적 차이', '계속할 것과 멈출 것을 가르는 기준'][index]} />
     <p className="inline-paid-context">{PAIN_POINTS[concern]?.[index] ?? CHARACTER_QUESTIONS[lensId]}</p>
     <h3>{chapterQuestion}</h3>
-    <p className="inline-paid-perspective">{lens.name}의 판정 기준</p>
-    <blockquote><span>결제 후 열리는 본문의 실제 첫 문장</span><p>{readingText(cut.teaser ?? '')}</p></blockquote>
+    <p className="inline-paid-perspective">{lens.name}이 자세히 살펴볼 내용</p>
+    <blockquote><span>추가 해석의 실제 첫 문장</span><p>{readingText(cut.reader_teaser ?? cut.teaser ?? '')}</p></blockquote>
     <div className="inline-paid-mask" aria-label="결론이 갈리는 다음 해석은 결제 후 공개됩니다">
-      <p><strong>여기서 결론이 갈립니다.</strong> 지금 보이는 말 뒤에는 ‘왜 반복되는지’, ‘어느 선택을 멈출지’, ‘언제 다시 확인할지’가 이어집니다.</p>
+      <p><strong>이 항목을 끝까지 읽고 싶다면</strong> 아래에서 포함된 해석과 가격을 확인할 수 있습니다.</p>
       <span aria-hidden="true"><i/><i/><i/></span>
     </div>
     <p className="inline-paid-scope">「{cut.title}」의 원인·분기·행동 판정 · 약 {cut.chars.toLocaleString()}자 · {cut.need_tier_name}부터 열립니다.</p>
@@ -101,7 +101,7 @@ export default function InlinePaidReading({after, cuts, lensId, onOpen}: {after:
       useSession.getState().set({cur:lensId});
       track('price_view','d1');
       router.push(`/pay?step=d1&direct=1&tier=${encodeURIComponent(cut.need_tier)}`);
-    }}>이 풀이 열기 · 결제하기</button>
+    }}>포함된 내용과 가격 보기</button>
     <p className="inline-paid-continue">무료 이야기는 아래에서 계속 읽을 수 있소 ↓</p>
   </aside></CharacterSpeech>;
 }

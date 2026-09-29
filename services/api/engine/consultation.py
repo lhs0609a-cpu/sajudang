@@ -230,21 +230,24 @@ def pungun_opening(f, concern: str, *, name="풍운도령") -> str:
 
 def preview(lens_id, concern):
     from .editorial_questions import question
+    from .easy_specialists import INTRO
     row = METHODS.get(lens_id)
     if row is None:
         return ''
-    return ('<div class="free-depth-essay"><h3>여기서 더 날카롭게 볼 대목</h3>'
+    return ('<div class="free-depth-essay"><h3>다음에 자세히 볼 내용</h3>'
             '<p>%s</p><p><strong>%s</strong></p></div>') % (
-                escape(row[0]), escape(question(lens_id, concern)))
+                escape(INTRO[lens_id]), escape(question(lens_id, concern)))
 
 
 def render(lens_id, concern, features, topic=None):
+    from .easy_specialists import INTRO
     from .editorial import ROLES, CONCERNS
     from .editorial_questions import question
     from .lens_cuts import _counted
     row = METHODS.get(lens_id)
     if row is None or concern not in CONCERNS:
         return ''
+    row = (INTRO[lens_id], *row[1:])
     axis, perspective, _, _ = ROLES[lens_id]
     _, scene, record = CONCERNS[concern]
     evidence = _counted(features, [axis])
