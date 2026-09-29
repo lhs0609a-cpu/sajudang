@@ -11,6 +11,7 @@ from engine.features import Features
 from engine.plain_reading import html as readable_html, VERSION as PLAIN_VERSION
 from routers.chart import load_features
 from schemas.api import HookRequest, HookResponse
+from version import ENGINE_VER
 
 router = APIRouter(prefix="/v1", tags=["hook"])
 
@@ -47,7 +48,7 @@ def post_hook(req: HookRequest) -> HookResponse:
     key = store.k_hook(req.chart_id, req.concern, req.axis4 or "",
                        req.lens_id or "",
                        "%s#%d#%s#%s#%s" % (req.name, req.misses, READING_VERSION,
-                                           character_consultation_mod.VERSION + ':' + PLAIN_VERSION, topic_key))
+                                           character_consultation_mod.VERSION + ':' + PLAIN_VERSION + ':' + ENGINE_VER, topic_key))
     cached = store.get_json(key)
     if cached is not None:
         return HookResponse(chart_id=req.chart_id, segments=cached, cached=True)

@@ -167,6 +167,16 @@ class Daeun:
         return self.gan + self.ji
 
 
+def daeun_periods(month_gan: str, month_ji: str, forward: bool, start: int, count: int = DAEUN_COUNT) -> list:
+    """The same stem/branch sequence for the initial table and later decades."""
+    result = []
+    for i in range(count):
+        offset = (i + 1) if forward else -(i + 1)
+        result.append(Daeun(index=i, gan=GAN[(GAN.index(month_gan)+offset)%10],
+                            ji=JI[(JI.index(month_ji)+offset)%12], start_age=start+i*10))
+    return result
+
+
 @dataclass
 class Chart:
     pillars: list                  # 시각 미상이면 3개 (년월일)
@@ -179,6 +189,7 @@ class Chart:
     hour_known: bool
     sex: str
     saju_year: int
+    birth_year: int                # Civil input year, independent of solar-time correction.
     forward: bool                  # 대운 순행 여부
     daeun_start: float             # 대운수 (소수 포함 원값)
     daeun: list
@@ -306,15 +317,7 @@ def build_chart(year: int, month: int, day: int,
     start = int(raw + 0.5) if DAEUN_ROUNDING == "round" else int(raw)
     start = max(1, start)
 
-    daeun = []
-    for i in range(DAEUN_COUNT):
-        k = (i + 1) if forward else -(i + 1)
-        daeun.append(Daeun(
-            index=i,
-            gan=GAN[(GAN.index(mg) + k) % 10],
-            ji=JI[(JI.index(month_ji) + k) % 12],
-            start_age=start + i * 10,
-        ))
+    daeun = daeun_periods(mg, month_ji, forward, start)
 
     # ⑤ 보정 내역
     note = None
@@ -359,6 +362,7 @@ def build_chart(year: int, month: int, day: int,
         day_gan=dg, day_ji=dj,
         hour_known=hour_known, sex=sex,
         saju_year=saju_year,
+        birth_year=year,
         forward=forward,
         daeun_start=round(raw, 3),
         daeun=daeun,

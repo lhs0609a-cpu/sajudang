@@ -1437,6 +1437,7 @@
   "test_conversion_contracts.py",
   "test_conversion_integrity.py",
   "test_conversion_segments.py",
+  "test_daeun_lifetime.py",
   "test_dict_unique.py",
   "test_divergence.py",
   "test_drama_axes.py",

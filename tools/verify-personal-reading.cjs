@@ -8,6 +8,13 @@ async function post(route,body){
 }
 (async()=>{
  const chart=await post('/chart',{year:1993,month:11,day:25,hour_known:false,sex:'F',birth_city:'서울'});
+ for(const year of [1900,1920,1935]){
+  const old=await post('/chart',{year,month:5,day:17,hour_known:false,sex:'F',birth_city:'서울'});
+  const f=old.features,current=f.daeun[f.daeun_now];
+  assert.ok(current.start_age<=f.age&&f.age<current.start_age+10,'current decade covers '+year);
+ }
+ const boundary=await post('/chart',{year:1951,month:1,day:1,hour:0,minute:0,hour_known:true,sex:'M',birth_city:'서울'});
+ assert.equal(boundary.features.birth_year,1951);
  const results=[];
  for(const [lens,profile] of Object.entries(profiles)){
   const concern=profile.concerns[0]||'work';

@@ -21,6 +21,8 @@ def main():
              ('추가 무료 풀이',before['totals']['free_reports'],after['totals']['free_reports']),
              ('지정 전문 표현 노출',sum(n for _,n in before['hard_terms']),sum(n for _,n in after['hard_terms'])),
              ('200자 넘는 문단',before['totals'].get('long_paragraphs',0),after['totals'].get('long_paragraphs',0)),
+             ('이미 끝난 구간을 현재 운으로 표시',before['totals'].get('expired_current_periods',0),after['totals'].get('expired_current_periods',0)),
+             ('일반어 지지 않다의 잘못된 치환',before['totals'].get('corrupted_negations',0),after['totals'].get('corrupted_negations',0)),
              ('생성·일관성 오류',len(before['errors']),len(after['errors']))]
     table=''.join(f'<tr><th>{escape(label)}</th><td>{a:,}</td><td>{b:,}</td></tr>' for label,a,b in metrics)
     cards=[]; options=[]
@@ -62,6 +64,8 @@ def main():
 - 계산된 강약을 실제 체력으로 표현하던 비교 안내를 수정했다. 글자의 부재가 능력의 부재를 뜻하지 않는다는 설명을 추가했다.
 - 결제 미리보기를 실제 풀이의 제한된 문장으로 개선했다. 무료와 추가 구매의 차이를 설명하며, 결제 전 가격·포함 내용·조건 확인 흐름을 유지했다.
 - 유료 공통 항목 중 부족한 글자·반복 이유·비교 표본·현재 시기 풀이를 다시 썼다. 글자의 부재를 실제 능력 부족으로 단정하지 않으며, 미리보기도 수정된 본문에서 가져온다.
+- 초기 8개 대운 구간을 지난 나이에서도 현재 구간을 정확히 찾도록 같은 간지 진행 규칙으로 표를 연장했다. 이전 계산 캐시와 첫 해석 캐시도 엔진 버전으로 갱신한다. 계산 숫자는 판정 나이를 실제로 포함하는 구간인지 검사한다.
+- 1월 1일 자정 출생의 태양시 보정이 전년으로 넘어가더라도, 출생 연도와 연 나이는 입력한 양력 연도로 유지한다. 사주 글자에 쓰는 보정 시각과 실제 출생 연도를 구분했다.
 
 ## 신뢰와 결제 설계
 

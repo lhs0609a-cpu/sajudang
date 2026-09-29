@@ -19,7 +19,8 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / 'services/api'))
+SOURCE = Path(sys.argv[sys.argv.index('--source')+1]).resolve() if '--source' in sys.argv else ROOT
+sys.path.insert(0, str(SOURCE / 'services/api'))
 from engine.calendar import build_chart
 from engine.features import build_features
 from engine.report import build_report
@@ -41,7 +42,7 @@ class Visible(HTMLParser):
         super().__init__(); self.hidden = 0; self.parts = []
     def handle_starttag(self, tag, attrs):
         if tag in ('details','table'): self.hidden += 1
-        if not self.hidden and tag in ('p','h2','h3','h4','li','br','blockquote'): self.parts.append('\n')
+        if not self.hidden and tag in ('div','p','h2','h3','h4','li','br','blockquote'): self.parts.append('\n')
     def handle_endtag(self, tag):
         if tag in ('details','table'): self.hidden = max(0,self.hidden-1)
     def handle_data(self, data):
@@ -70,6 +71,11 @@ def batch(task):
         concern=concerns[(index//20)%len(concerns)]
         try:
             f=build_features(build_chart(*args),as_of=date(2026,9,29))
+            if f.daeun_started:
+                current=f.daeun[f.daeun_now]
+                if not current['start_age'] <= f.age < current['start_age']+10:
+                    counts['expired_current_periods']+=1
+            counts['current_period_checks']+=1
             spec=enrich_spec(ask_spec(concern),lid,concern)
             topic={'concern':concern}
             for slot in range(1,6):
@@ -87,7 +93,7 @@ def batch(task):
             for c in report['cuts']:
                 if c['id']=='chart': continue
                 value=visible(c['reader_html']); body.append(value)
-                assert '사주의 아랫줄 글자 않' not in value
+                counts['corrupted_negations']+=value.count('사주의 아랫줄 글자 않')
                 normalized=re.sub(r'[0-9一-龥\s]+','',value)
                 cut_hashes.append((c['id'],hashlib.sha256(normalized.encode()).hexdigest()))
                 for m in PATTERN.finditer(value):
@@ -119,6 +125,7 @@ def batch(task):
 def main():
     p=argparse.ArgumentParser(); p.add_argument('--count',type=int,default=10000)
     p.add_argument('--workers',type=int,default=4); p.add_argument('--label',default='baseline')
+    p.add_argument('--source',type=Path)
     opts=p.parse_args(); out=ROOT/'output/reading-10000'/opts.label; out.mkdir(parents=True,exist_ok=True)
     population=samples(opts.count); start=time.monotonic()
     (out/'population.json').write_text(json.dumps(population),encoding='utf-8')
@@ -138,7 +145,8 @@ def main():
     for name,data in [('audit',result),('rows',rows),('examples',examples)]:
         (out/f'{name}.json').write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding='utf-8')
     print(json.dumps({k:v for k,v in result.items() if k not in ('long_paragraph_examples','long_sentence_examples')},ensure_ascii=False),flush=True)
-    return bool(errors) or totals['reports']!=opts.count
+    return bool(errors) or totals['reports']!=opts.count or (opts.label=='final' and
+            (totals['expired_current_periods']>0 or totals['corrupted_negations']>0))
 
 
 if __name__=='__main__': sys.exit(main())

@@ -14,7 +14,7 @@ from datetime import date
 from typing import Optional
 
 from . import sinsal as sinsal_mod
-from .calendar import Chart, Daeun
+from .calendar import Chart, Daeun, daeun_periods
 from .constants import (
     CHUNG, HAP, ELEMENTS, GENERATES, GENERATED_BY, CONTROLS, CONTROLLED_BY,
     ELEMENT_OF_GAN, HIDDEN, TEN_GODS, TEN_GOD_GROUP, FLOWS,
@@ -269,16 +269,24 @@ def build_features(chart: Chart, as_of: Optional[date] = None) -> Features:
         tg, tg_order, day_gan, chart.month_pillar.ji, el)
 
     # 대운 — 현재 구간. 나이는 연 나이(올해 - 태어난 해), 대운수와 같은 기준.
-    age = as_of.year - chart.solar_time.year
+    age = as_of.year - _birth_year(chart)
+    periods = chart.daeun
+    if age >= periods[-1].start_age + 10:
+        # Eight initial decades are a display default, not a lifetime limit.
+        # Include both the actual current decade and the next one, and never
+        # silently label an expired final row as current for older users.
+        count = (age - periods[0].start_age)//10 + 2
+        periods = daeun_periods(chart.month_pillar.gan, chart.month_pillar.ji,
+                               chart.forward, periods[0].start_age, count)
     daeun_list = []
-    for d in chart.daeun:
+    for d in periods:
         daeun_list.append({
             "index": d.index, "gz": d.gz, "gan": d.gan, "ji": d.ji,
             "start_age": d.start_age,
             "ten_god": ten_god(d.gan, day_gan),
         })
     now = 0
-    for i, d in enumerate(chart.daeun):
+    for i, d in enumerate(periods):
         if d.start_age <= age:
             now = i
     # 첫 대운에 아직 들어가지 않은 사람 — '지금 그 대운' 이라고 말하면 거짓말
@@ -342,7 +350,7 @@ def build_features(chart: Chart, as_of: Optional[date] = None) -> Features:
 
 def _birth_year(chart: Chart) -> int:
     """대운 나이 기준이 되는 출생 연도 (양력)."""
-    return chart.solar_time.year
+    return chart.birth_year
 
 
 def _correction_dict(chart: Chart) -> dict:

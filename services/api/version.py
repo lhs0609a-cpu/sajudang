@@ -25,4 +25,4 @@
   0.3.0  홍염을 확정표에 넣음 (docs/14 §2 · 2026-09-07)
 """
 
-ENGINE_VER = "0.3.0"
+ENGINE_VER = "0.3.1"  # Extend the decade table when the current age exceeds its initial range.
