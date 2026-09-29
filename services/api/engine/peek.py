@@ -107,7 +107,7 @@ def _reading_sample(body, concern, sex, total_chars=None):
     if first and len(first) <= budget:
         return first, True
     fragment = readable[:budget].rsplit(' ', 1)[0].rstrip()
-    return fragment or text(_head(body)[0], concern, sex), False
+    return fragment, False
 
 
 # ── 무엇을 묻는가 ─────────────────────────────────────────
@@ -275,6 +275,7 @@ def build_peek(f, chart_id: str, lens_ids: list, concern: str,
         #   「본문을 안 내려보낸다」이지 「본문을 안 읽는다」가 아닙니다.
         full = build_report(f, chart_id, lid, "all", concern, axis4)
         body_of = {c.get("id"): c.get("html") for c in (full.get("cuts") or [])}
+        reader_of = {c.get('id'): c.get('reader_html') for c in full.get('cuts', [])}
         you = lens_mod.you_of(lid, "", getattr(f, "sex", None))
         got = rep.get("locked") or []
         # ★ 여러 사람을 엿볼 때는 **그 사람만 보는 자리**를 먼저 냅니다.
@@ -304,7 +305,15 @@ def build_peek(f, chart_id: str, lens_ids: list, concern: str,
             #   실제로 안 보이는 것은 이백 자가 넘는데요. 손님이 무엇을
             #   못 보고 있는지 알아야 값을 잽니다. 글자는 안 보냅니다.
             mask = max(1, int(c.get("chars") or 0) - len(head))
-            sample, complete = _reading_sample(body, rep['concern'], f.sex, int(c.get('chars') or len(body)))
+            # The visible reading edition may replace a dated interpretation.
+            # Preview that edition, never a sentence from its archived evidence.
+            reading = (reader_of.get(cid) or '').split('<details')[0]
+            if 'personal-reading' in reading:
+                paragraphs = re.findall(r'<p\b[^>]*>(.*?)</p>', reading, re.S)
+                sample_body = _plain(paragraphs[0]) if paragraphs else body
+            else:
+                sample_body = _about_you(cid, _plain(reading), you) or body
+            sample, complete = _reading_sample(sample_body, rep['concern'], f.sex, int(c.get('chars') or len(body)))
             rows.append({
                 "lens_id": lid,
                 "cut_id": cid,
@@ -524,7 +533,7 @@ def build_wants(f, locked: list, limit: int = 4,
             "reader_fact": reader_fact,
             "ask": voice_mod.address(ask_of(cid, c.get("title") or ""), you),
             "head": head,
-            "reader_head": readable_text(head, concern, f.sex),
+            "reader_head": readable_text(_head(_plain(c.get('reader_teaser') or c.get('teaser') or ''))[0], concern, f.sex),
             "mask": max(1, int(c.get("chars") or 0) - len(head)),
             "source": c.get("source"),
             "chars": c.get("chars"),

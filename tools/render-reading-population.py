@@ -28,7 +28,7 @@ def main():
         lens=row['lens']; name=row['report']['lens']['name']; options.append(f'<option value="{lens}">{escape(name)}</option>')
         columns=[]
         for label,example in [('수정 전',old[row['sample']]),('수정 후',row)]:
-            cuts=[c for c in example['report']['cuts'] if c['id'] in ('spine_depth','spine_scene')]
+            cuts=[c for c in example['report']['cuts'] if c['id'] in ('spine_depth','spine_scene','lack','why','rarity','daeun_now')]
             body=''.join(f'<h3>{escape(c.get("reader_title",c["title"]))}</h3>{c["reader_html"]}' for c in cuts)
             columns.append(f'<section><h2>{label}</h2>{body}</section>')
         cards.append(f'<article data-lens="{lens}"><h2>{escape(name)}</h2><p>가상 표본 {row["sample"]+1} · 동일한 출생 정보와 선택 답변 비교</p><div class="columns">'+''.join(columns)+'</div></article>')
@@ -61,6 +61,7 @@ def main():
 - 일반어 ‘지지 않다’를 사주 용어로 오역하던 문제를 고쳤다. 남아 있던 복합 전문용어와 제목을 쉬운 표현으로 바꿨다.
 - 계산된 강약을 실제 체력으로 표현하던 비교 안내를 수정했다. 글자의 부재가 능력의 부재를 뜻하지 않는다는 설명을 추가했다.
 - 결제 미리보기를 실제 풀이의 제한된 문장으로 개선했다. 무료와 추가 구매의 차이를 설명하며, 결제 전 가격·포함 내용·조건 확인 흐름을 유지했다.
+- 유료 공통 항목 중 부족한 글자·반복 이유·비교 표본·현재 시기 풀이를 다시 썼다. 글자의 부재를 실제 능력 부족으로 단정하지 않으며, 미리보기도 수정된 본문에서 가져온다.
 
 ## 신뢰와 결제 설계
 

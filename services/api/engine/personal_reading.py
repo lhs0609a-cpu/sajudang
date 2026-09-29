@@ -10,7 +10,7 @@ from .easy_specialists import INTRO
 from .character_consultation import INTERVIEWS
 from .consultation_decisions import decide
 
-VERSION = 'personal-reading-v1'
+VERSION = 'personal-reading-v2'
 TITLES = {
  'chart':'입력한 생년월일로 계산한 사주', 'portrait':'사주에서 읽은 나의 특징',
  'spine':'이 풀이의 핵심', 'concern':'물어본 고민에서 먼저 볼 것',
@@ -144,6 +144,68 @@ def build_scene(f, lens_id, concern, topic=None):
 
 def evidence(original):
     return '<details class="reading-calculation"><summary>계산과 자세한 풀이 보기</summary>'+original+'</details>'
+
+
+def build_paid(cut_id, f, concern):
+    """Paid common chapters answer distinct questions, without invented events."""
+    group=TEN_GOD_GROUP[f.top_ten_god]
+    example=EXAMPLES.get(concern,EXAMPLES['dir'])[group]
+    if cut_id=='lack':
+        from .reading_facts import visible_elements
+        names={'목':'나무','화':'불','토':'흙','금':'금속','수':'물'}
+        counts=visible_elements(f)
+        lowest=min(counts.values())
+        weak=[names[k] for k,v in counts.items() if v==lowest]
+        phrase=' · '.join(weak)
+        fact=(f'그대 사주에 겉으로 보이지 않는 것은 {phrase}에 해당하는 글자요.' if lowest==0 else
+              f'그대 사주에서 겉으로 가장 적게 보이는 것은 {phrase}에 해당하는 글자요.')
+        parts=[_section('계산에서 확인한 것',fact),
+               _section('이 숫자를 어떻게 읽을까','글자가 적다는 사실을 재능이나 능력이 부족하다는 뜻으로 읽지는 않소. 아래 글자 속에 담긴 성분까지 세는 계산과도 구분해야 하오.'),
+               _section('물어본 일에서 살펴볼 조건',example),
+               _section('내 경험으로 확인할 기준','혼자 할 때 막혔던 일이 도움·시간·정보가 생긴 뒤 달라졌는지 보시오. 조건을 바꿔도 같다면 글자의 많고 적음만으로 이유를 정하지 마시오.')]
+    elif cut_id=='why':
+        helpful,cost,check=TRAITS[f.top_ten_god]
+        parts=[_section('반복되는 일을 읽는 출발점',f'그대 사주에서는 “{EASY[f.top_ten_god][0]}”을 먼저 살펴보오. '
+                        '실제 일이 반복되는 이유는 사주만으로 확정할 수 없소.'),
+               _section('같은 방식도 조건에 따라 달라지오',helpful+'는 도움이 될 수 있소. 반면 '+cost+'는 부담이 될 수 있소.'),
+               _section('둘을 구분할 장면',check+' '+example),
+               _section('다르게 해본 뒤 볼 것','방법을 바꾼 뒤 일이 줄었는지, 약속이 분명해졌는지 보시오. 효과가 없다면 내 성격만 탓하기보다 바꿀 수 없는 조건이 무엇인지 확인하시오.')]
+    elif cut_id=='rarity':
+        from .rarity import look
+        row=look(f)
+        parts=[_section('비교 표본에서 나온 결과',f'비교 표본 {row["sample"]:,}건 중 그대 사주와 같은 계산 특징을 가진 묶음은 {row["count"]:,}건이오.'),
+               _section('무엇이 같다는 뜻인가','글자 구성과 강약, 도움을 뜻하는 조합, 가까운 자리의 충돌을 묶어 비교한 수요. 성격이나 살아온 일이 같은 사람을 센 것은 아니오.'),
+               _section('이 결과를 사용할 때','드물다고 더 좋거나, 흔하다고 덜 특별한 것은 아니오. 나와 다른 사람이 같은 설명을 받아도 실제 선택은 각자의 시간·돈·관계 조건에 맞춰야 하오.')]
+    elif cut_id=='daeun_now':
+        if not f.daeun_started or not f.daeun:
+            return '<div class="personal-reading">'+_section('현재 시기','아직 첫 10년 운이 시작되기 전이오. 미래 구간을 현재 이야기처럼 붙이지 않고 올해의 주제부터 살피겠소.')+'</div>'
+        current=f.daeun[f.daeun_now]
+        start=f.birth_year+int(current['start_age'])
+        parts=[_section('지금 이어지는 시기',f'그대는 계산상 {start}년부터 “{EASY[f.daeun_ten_god][1]}”에 들어와 있소.'),
+               _section('올해와 함께 읽으면',f'긴 기간에는 “{EASY[f.daeun_ten_god][0]}”을 살피고, {f.year_num}년에는 “{EASY[f.year_ten_god][0]}”을 더해 읽소.'),
+               _section('생활에서 확인할 일',EXAMPLES.get(concern,EXAMPLES['dir'])[TEN_GOD_GROUP[f.daeun_ten_god]]),
+               _section('시기와 실제 결정을 나누시오','구간의 시작 연도는 정밀한 전환 날짜가 아니오. 운이 바뀌었다는 이유만으로 일을 그만두거나 관계를 정리할 필요는 없소. 바뀐 현실 조건을 함께 확인하시오.')]
+    else:
+        return None
+    return '<div class="personal-reading">'+''.join(parts)+'</div>'
+
+
+def paid_evidence(cut_id, f):
+    from .reading_facts import visible_elements
+    if cut_id=='lack':
+        detail='겉으로 보이는 글자 수: '+ ' · '.join(f'{k} {v}' for k,v in visible_elements(f).items())
+    elif cut_id=='rarity':
+        from .rarity import look
+        row=look(f)
+        detail=f'비교 표본 {row["sample"]}건 · 같은 분류 {row["count"]}건. 전체 인구의 비율이나 적중률을 뜻하지 않습니다.'
+    elif cut_id=='daeun_now':
+        current=f.daeun[f.daeun_now] if f.daeun_started and f.daeun else None
+        detail=(f'현재 대운 {current["gz"]} · 시작 연 나이 {current["start_age"]} · {f.daeun_ten_god}. ' if current else '첫 대운 진입 전. ')
+        detail+=f'세운 {f.year_num}년 {f.year_gz} · {f.year_ten_god}.'
+    else:
+        detail='십신 글자 수: '+' · '.join(f'{k} {v}' for k,v in f.ten_gods.items())
+        detail+=f'. 강약 계산 {f.strength}. 행동이나 체력을 측정한 값은 아닙니다.'
+    return evidence('<p>'+escape(detail)+'</p>')
 
 
 def basis(f,lens_id,concern,topic):

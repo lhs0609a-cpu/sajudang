@@ -5,7 +5,7 @@ import re
 import pytest
 from engine.calendar import build_chart
 from engine.features import build_features
-from engine.personal_reading import build_depth, build_scene, basis, INTERVIEWS, leaders
+from engine.personal_reading import build_depth, build_scene, build_paid, basis, INTERVIEWS, leaders
 from engine.plain_reading import text, html
 from engine.peek import _reading_sample
 from engine.report import build_report
@@ -94,3 +94,23 @@ def test_dense_evidence_stays_available_without_changing_numbers():
     result=html(raw)
     assert result.startswith('<details') and raw in result
     assert re.findall(r'\d+',result)==['3','2']
+
+
+@pytest.mark.parametrize('cut',['lack','why','rarity','daeun_now'])
+def test_paid_explanations_do_not_treat_chart_symbols_as_proven_biography(f,cut):
+    reading=build_paid(cut,f,'work')
+    assert reading and '못 타고났' not in reading
+    assert '늘었을 것이오' not in reading
+    assert '되풀이는 마음이 아니라' not in reading
+
+
+def test_paid_preview_matches_visible_reading_instead_of_archived_assertion(f):
+    from engine.peek import build_peek
+    row=next(r for r in build_peek(f,'preview',['pungun'],'work',limit=6) if r['cut_id']=='lack')
+    assert '못 타고났' not in row['reader_head']
+    assert '해당하는 글자' in row['reader_head']
+    report=build_report(f,'preview','pungun','free','work')
+    cut=next(c for c in report['locked'] if c['id']=='lack')
+    assert '못 타고났' not in cut['reader_teaser']
+    assert '해당하는 글자' in cut['reader_teaser']
+    assert '물어본 일에서' not in cut['reader_teaser']

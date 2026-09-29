@@ -20,6 +20,7 @@ async function post(route,body){
   const depth=report.cuts.find(c=>c.id==='spine_depth');
   if(depth)assert.ok(depth.reader_html.includes('personal-reading'));
   const spec=report.asks;
+  assert.ok(spec?.options4&&spec?.options5,lens+' character questions');
   if(spec?.options4&&spec?.options5){
    const topic={};for(let i=1;i<=5;i++)topic[i===1?'choice':`choice${i}`]=spec[i===1?'options':`options${i}`][0].id;
    const answered=await post('/report',{...input,extras:{topic}});
@@ -29,6 +30,12 @@ async function post(route,body){
   }
   const hook=await post('/hook',{chart_id:chart.chart_id,lens_id:lens,concern});
   assert.ok(hook.segments.every(s=>s.reader_html));
+  if(lens==='pungun'){
+   const preview=await post('/pay/peek',{chart_id:chart.chart_id,lens_id:lens,tier:'one',concern});
+   const lack=preview.rows.find(r=>r.cut_id==='lack');
+   assert.ok(lack?.reader_head&&!lack.reader_head.includes('못 타고났'));
+   assert.ok(lack.reader_head.includes('해당하는 글자'));
+  }
   results.push({lens,readable:true,inputScope:true,selectedAnswers:true,paidContentProtected:true});
  }
  fs.mkdirSync('output/reading-10000',{recursive:true});

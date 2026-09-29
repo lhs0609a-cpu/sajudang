@@ -2890,7 +2890,7 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
         # Original calculation prose is retained for evidence and exports.
         c['reader_html'] = readable_html(c['html'], concern, f.sex, name) if c['id'] != 'chart' else c['html']
         c['reader_title'] = personal_reading.TITLES.get(c['id'], readable_text(c['title'], concern, f.sex, name))
-        authored = None
+        authored = personal_reading.build_paid(c['id'], f, concern)
         if c['id'] == 'spine_depth':
             authored = personal_reading.build_depth(f, lens_id, concern)
             c['reader_title'] = '내 특징이 도움이 될 때와 부담이 될 때'
@@ -2899,7 +2899,11 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
             c['reader_title'] = '내 상황과 올해를 함께 읽으면'
         if authored:
             authored = voice_mod.speak(voice_mod.address(authored, you), tone)
-            c['reader_html'] = readable_html(authored, concern, f.sex, name) + personal_reading.evidence(c['html'])
+            evidence = (personal_reading.evidence(c['html']) if c['id'] in {'spine_depth', 'spine_scene'} else
+                        personal_reading.paid_evidence(c['id'], f))
+            c['reader_html'] = readable_html(authored, concern, f.sex, name) + evidence
+            if c['id']=='rarity':
+                c['source'] = c['source'].replace('인구에서 몇 명인지를', '비교 표본에서 같은 계산 특징을')
     # These surfaces were outside the HTML reading layer and still contained
     # difficult expressions even when the main reading had been simplified.
     for field, value in practice.items():
@@ -2908,6 +2912,14 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
     for item in locked:
         item['reader_title'] = personal_reading.TITLES.get(item['id'], readable_text(item['title'], concern, f.sex, name))
         item['reader_teaser'] = readable_html(item.get('teaser', ''), concern, f.sex, name)
+        paid_reading = personal_reading.build_paid(item['id'], f, concern)
+        if paid_reading:
+            first_paragraph = re.search(r'<p>(.*?)</p>', paid_reading, re.S)
+            if first_paragraph:
+                first = voice_mod.speak(voice_mod.address(first_paragraph.group(), you), tone)
+                item['reader_teaser'] = readable_html(first, concern, f.sex, name)
+        if item['id']=='rarity' and item.get('source'):
+            item['source'] = item['source'].replace('인구에서 몇 명인지를', '비교 표본에서 같은 계산 특징을')
     return {
         "reading_basis": personal_reading.basis(f, lens_id, concern, accepted_topic),
         "editorial": editorial,

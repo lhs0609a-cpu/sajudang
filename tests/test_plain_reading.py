@@ -67,7 +67,14 @@ def test_every_specialist_delivers_readable_content_without_changing_evidence(f,
         # Prose edits may remove parenthetical glossary numbers, but never invent numbers.
         original = set(re.findall(r'\d+(?:\.\d+)?', cut['html']))
         presented = set(re.findall(r'\d+(?:\.\d+)?', cut['reader_html']))
-        assert presented <= original | {'10', str(f.year_num)}
+        from engine.rarity import look
+        from engine.reading_facts import visible_elements
+        calculated = {str(v) for v in list(f.ten_gods.values())+list(visible_elements(f).values())}
+        calculated |= {str(f.birth_year+int(d['start_age'])) for d in f.daeun}
+        calculated |= {str(d['start_age']) for d in f.daeun}
+        calculated |= set(re.findall(r'\d+', f'{look(f)["sample"]:,} {look(f)["count"]:,}'))
+        calculated |= {str(look(f)['sample']),str(look(f)['count'])}
+        assert presented <= original | calculated | {'10', str(f.year_num)}
     assert all('reader_html' not in cut for cut in result['locked'])
 
 
