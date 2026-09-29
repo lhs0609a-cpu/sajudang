@@ -25,6 +25,8 @@ def test_delivered_reading_replaces_generic_scene_and_mbti(f):
         assert 'mbti-reading' not in c['html']
         assert '괜찮다고 답한 뒤' not in c['html']
         assert '오늘 바로 꺼낼 수 있는 말' not in c['html']
+        assert '그 장면부터 대 보시오' not in c['html']
+        assert 'op-you' not in c['html']
         for value in (f.year_gz, str(f.year_num), f.day_gan, f.strength, f.daeun[f.daeun_now]['gz']):
             assert value in c['html']
 

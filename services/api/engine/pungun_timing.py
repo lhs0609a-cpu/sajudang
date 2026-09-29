@@ -32,7 +32,9 @@ CONCERNS = {
 
 def build(f, concern):
     """Return a self-contained, chart-specific free timing analysis."""
-    parts = []
+    parts = [f'<p class="timing-summary">그대의 {f.year_num}년을 읽는 중심은 '
+             f'{escape(THEMES[f.year_ten_god][0])}이오. '
+             '타고난 구조 위에 지금 어떤 조건이 더해졌는지, 계산된 글자를 하나씩 맞대 보겠소.</p>']
 
     def section(title, text):
         parts.append(f'<h3>{escape(title)}</h3><p>{escape(text)}</p>')

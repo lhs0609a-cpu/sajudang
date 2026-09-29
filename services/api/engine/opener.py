@@ -349,6 +349,9 @@ def apply(cuts: list, f, concern: Optional[str] = None, axis4=None,
     seen = seen if seen is not None else set()
     out = []
     for c in cuts:
+        if (c.get('statement_id') or '').startswith('pungun-timing:'):
+            out.append(c)
+            continue
         say = line(f, c.get('id') or '', concern, axis4)
         if say:
             said = voice.address(
