@@ -13,7 +13,8 @@
 .entry-art::after {content:"";position:absolute;inset:0;background:linear-gradient(0deg,#101a19b3,transparent 55%);pointer-events:none}
 .entry-art figcaption {position:absolute;bottom:16px;left:20px;right:20px;z-index:1;font:400 12px/1.6 var(--serif);color:#f4e8d0;letter-spacing:.07em}
 .entry-art-reading {height:260px!important}
-.entry-art-reading img {object-position:center 34%}
+.entry-art-reading {background:radial-gradient(ellipse at center,#536052,#1b2925)}
+.entry-art-reading img {object-fit:contain;object-position:center top}
 .phone[data-screen="a1"] .scr {padding:0!important;overflow:hidden;border-radius:inherit}
 .entry-welcome {position:relative}
 .entry-cover {position:relative;height:380px}

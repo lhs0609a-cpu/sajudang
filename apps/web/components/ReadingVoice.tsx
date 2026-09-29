@@ -4,13 +4,14 @@ import type { CSSProperties, ReactNode } from 'react';
 import { LENS_BY_ID } from '@/lib/lenses';
 import { useSession } from '@/lib/store';
 import CharacterSpeech from './CharacterSpeech';
+import { PUNGUN_PORTRAIT } from '@/lib/character-media';
 
 /** Keep the speaking character explicit, including reports opened by URL. */
 export function ReadingSpeaker({lensId, label = '함께 짚어볼 이야기', soft = false}: {lensId?: string; label?: string; soft?: boolean}) {
   const selected = useSession(s => s.cur);
   const lens = LENS_BY_ID[lensId ?? selected] ?? LENS_BY_ID.pungun;
   return <div className="reading-speaker" data-speaker={lens.id}>
-    <img key={`${lens.id}:${soft}`} src={`/char/${lens.id}/${soft ? 'bust_soft' : 'bust'}.webp`}
+    <img key={`${lens.id}:${soft}`} src={lens.id === 'pungun' ? PUNGUN_PORTRAIT : `/char/${lens.id}/${soft ? 'bust_soft' : 'bust'}.webp`}
       width={76} height={88} alt="" loading="lazy" decoding="async"
       onError={e => {const img = e.currentTarget; if (!img.dataset.fallback) {img.dataset.fallback = 'true'; img.src = `/char/${lens.id}/bust.webp`;}}} />
     <div><CharacterSpeech lensId={lens.id}><span>{label}</span></CharacterSpeech><strong>{lens.name}</strong><small>{lens.specialty}</small></div>

@@ -57,7 +57,7 @@ const SCREEN_GUIDES: Record<string, Guide> = {
 export function ScreenReadingGuide({ screen }: { screen?: string }) {
   const guide = screen ? SCREEN_GUIDES[screen] : undefined;
   if (!guide) return null;
-  const src = guide.art === "guide" ? "/char/pungun/greet.webp"
+  const src = guide.art === "guide" ? "/char/pungun/bust.webp"
     : guide.art === "people" ? "/images/concerns/people-v1.webp"
     : guide.art === "direction" ? "/images/concerns/dir-v1.webp"
     : `/images/reading/${guide.art}-v1.webp`;

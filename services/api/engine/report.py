@@ -745,12 +745,19 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     #   고민 여섯 칸 (seed/scene.json). 틀릴 수 있는 장면이라야 합니다.
     if scn or concern in free_depth.CONCERNS:
         _sw = bank_mod.concern_word(concern)
+        if lens_id == "pungun":
+            from .pungun_timing import build as timing_reading
+            scene_title = "왜 하필 지금 · 원국과 현재 운의 관계"
+            scene_source = (f"원국 · 득령·득지·오행 가중치 · {f.year_num}년 {f.year_gz} 세운"
+                            " — 일간을 기준으로 원국과 운의 십신·지지 관계를 비교하오 〔자평 명리 · 억부·십신·합충〕")
+            scene_html = timing_reading(f, concern)
+        else:
+            scene_title = ("%s에서 보이는 그대" % _sw) if not _turned else ("%s에서 보이는 그대 — 답으로 고쳐 읽은 모습" % _sw)
+            scene_source = _why.line("한 줄 「%s」 · 물으신 %s" % (sp["name"], _sw), "흐름", "십신")
+            scene_html = __import__('engine.reading_precision', fromlist=['scene']).scene(f, lens_id, concern, revised=bool(_turned)) + _mbti_free(f,axis4,concern)
         cuts.append(_cut(
-            "spine_scene", ("%s에서 보이는 그대" % _sw) if not _turned
-            else ("%s에서 보이는 그대 — 답으로 고쳐 읽은 모습" % _sw),
-            _why.line("한 줄 「%s」 · 물으신 %s" % (sp["name"], _sw), "흐름", "십신"),
-            __import__('engine.reading_precision', fromlist=['scene']).scene(f, lens_id, concern, revised=bool(_turned)) + _mbti_free(f,axis4,concern), 1,
-            sid="scene:v2:%s:%s" % (sp["id"], concern)))
+            "spine_scene", scene_title, scene_source, scene_html, 1,
+            sid=(f"pungun-timing:v1:{f.year_num}:{f.daeun_now}:{concern}" if lens_id == "pungun" else "scene:v2:%s:%s" % (sp["id"], concern))))
     # ★ 다리 — 그 캐릭터가 한 줄을 **제 눈으로** 다시 읽는다 (2026-09-11).
     #   관점 컷이 한 줄을 모른 채 제 말만 하던 자리를 잇습니다.
     _br = spine_mod.bridge(lens_id, f.flow)
@@ -2074,6 +2081,8 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
         #   (2026-09-11). 붙이면 「하나만 하시오」 뒤에 할 일이 또 섭니다.
         if c["id"] == "week" and (c.get("statement_id") or "").startswith("week:scene"):
             continue
+        if lens_id == "pungun" and c["id"] == "spine_scene":
+            continue  # Timing analysis already interprets the concern from its chart evidence.
         line = topic_mod.cut_line(f, c["id"], concern)
         if not line:
             continue

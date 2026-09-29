@@ -1477,6 +1477,7 @@
   "test_prompt_fit.py",
   "test_prompt_gate.py",
   "test_provider_recovery.py",
+  "test_pungun_timing.py",
   "test_rarity.py",
   "test_reading2.py",
   "test_reading_facts.py",

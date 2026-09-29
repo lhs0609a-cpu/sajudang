@@ -275,7 +275,9 @@ def test_the_evidence_line_keeps_its_own_voice(reports, f):
             # ★ 「어떤 사람인가」 도 뺍니다 (2026-09-24). 관점 컷과 같은
             #   까닭이오 — 그 사람이 **어느 면을 먼저 보는가**가 달라서
             #   근거에 대는 값도 달라지오. 사주가 달라진 것이 아니오.
-            if c["id"] == "portrait" or c["id"].startswith("lc_"):
+            # Pungun's spine_scene now reads calculated timing; other specialists
+            # still read concern scenes, so these no longer share evidence.
+            if c["id"] in {"portrait", "spine_scene"} or c["id"].startswith("lc_"):
                 continue
             if c["id"] in base:
                 # ★ **읽기 보조는 뺍니다** (2026-09-25).

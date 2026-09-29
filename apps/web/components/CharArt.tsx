@@ -24,6 +24,7 @@
  */
 import { useEffect, useRef, useState } from "react";
 import type { LensInfo } from "@/lib/lenses";
+import { PUNGUN_PORTRAIT } from "@/lib/character-media";
 import { useSession } from "@/lib/store";
 import PromptModal from "@/components/scene/PromptModal";
 import { playSafely, useSoundOn } from "@/lib/useSound";
@@ -103,7 +104,7 @@ function useBust(id: string, mood: Mood) {
     })();
     return () => { alive = false; };
   }, [id, mood]);
-  return src;
+  return id === "pungun" ? PUNGUN_PORTRAIT : src;
 }
 
 /*
@@ -186,9 +187,9 @@ export default function CharArt({
   greet?: boolean;
 }) {
   const bust = useBust(lens.id, mood);
-  const wantGreet = greet && mood === "base";
+  const wantGreet = lens.id !== "pungun" && greet && mood === "base";
   const hello = useGreet(lens.id, wantGreet);
-  const wantClip = !hello && size !== "chip" && size !== "talk" && mood === "base";
+  const wantClip = lens.id !== "pungun" && !hello && size !== "chip" && size !== "talk" && mood === "base";
   const clip = useClip(lens.id, wantClip && !!bust);
 
   /* 동작 줄이기를 켠 사람에게는 멈춘 그림으로 냅니다 */
@@ -262,7 +263,7 @@ export default function CharArt({
           태엽」이라 적어 두었지요. 손님이 계속 돌라 하셨으니 돕니다.
           대신 소리는 상단바의 ♪ 한 벌이 쥡니다.
       */}
-      {hello && !still ? (
+      {wantGreet && hello && !still ? (
         <video ref={vref} width={w} height={h}
                poster={`/char/${lens.id}/greet.webp`}
                autoPlay loop playsInline preload="auto"
@@ -271,7 +272,7 @@ export default function CharArt({
           {/* 사파리 몫 — VP9 를 못 읽습니다 */}
           <source src={`/char/${lens.id}/greet.mp4`} type="video/mp4" />
         </video>
-      ) : clip && !still ? (
+      ) : wantClip && clip && !still ? (
         <video ref={vref} width={w} height={h} poster={bust ?? undefined}
                autoPlay muted={!snd} playsInline loop aria-label={lens.name}>
           <source src={`/char/${lens.id}/clip.webm`} type="video/webm" />

@@ -2,6 +2,7 @@
 import { useRef } from 'react';
 import { useAmbience } from '@/lib/ambience';
 import type { Concern } from '@/lib/store';
+import { PUNGUN_PORTRAIT } from '@/lib/character-media';
 
 export const ENTRY_QUESTIONS: Record<Concern, { question: string; promise: string; next: string }> = {
   money: { question: '버는 만큼, 내 돈도 남고 있소?', promise: '돈을 버는 방식과 지키는 습관을 함께 보오.', next: '내 돈이 모이는 방식까지 읽기' },
@@ -19,7 +20,7 @@ export default function EntryArt({ scene, caption, priority = false }: {
   const artRef = useRef<HTMLElement>(null);
   useAmbience(scene === 'threshold' ? 'outside' : scene === 'reading' ? 'hall' : 'study', artRef);
   return <figure ref={artRef} className={`entry-art entry-art-${scene}`}>
-    <img src={`/images/entry-v2/${scene}.webp`} alt="" width={1200} height={scene === 'threshold' ? 1800 : 800}
+    <img src={scene === 'reading' ? PUNGUN_PORTRAIT : `/images/entry-v2/${scene}.webp`} alt={scene === 'reading' ? '풍운도령' : ''} width={scene === 'reading' ? 768 : 1200} height={scene === 'reading' ? 1024 : scene === 'threshold' ? 1800 : 800}
       loading={priority ? 'eager' : 'lazy'} fetchPriority={priority ? 'high' : 'auto'} decoding="async" />
     {caption && <figcaption>{caption}</figcaption>}
   </figure>;
