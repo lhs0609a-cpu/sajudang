@@ -30,9 +30,12 @@ async function post(route,body){
   if(depth)assert.ok(depth.reader_html.includes('personal-reading'));
   if(personalization){
    assert.equal(report.reading_basis.version,'personal-reading-v3');
-   assert.ok(depth?.reader_html.includes('chart-synthesis'),lens+' composite chart reasoning');
+   const composite=depth||report.cuts.find(c=>c.id==='yongsin');
+   assert.ok(composite?.reader_html.includes('chart-synthesis'),lens+' composite chart reasoning');
+   if(!depth)assert.equal(report.sells,false,lens+' free-only scope');
    const scene=report.cuts.find(c=>c.id==='spine_scene');
-   assert.ok(scene?.reader_html.includes('올해 글자가 닿는 생활 자리'),lens+' position-specific timing');
+   if(scene)assert.ok(scene.reader_html.includes('올해 글자가 닿는 생활 자리'),lens+' position-specific timing');
+   else assert.equal(report.sells,false,lens+' free-only timing scope');
   }
   const spec=report.asks;
   assert.ok(spec?.options4&&spec?.options5,lens+' character questions');
@@ -62,10 +65,14 @@ async function post(route,body){
     const [year,month,day,hour,minute,sex,hour_known]=row.input;
     const c=await post('/chart',{year,month,day,hour,minute,sex,hour_known,birth_city:'서울'});
     const r=await post('/report',{chart_id:c.chart_id,lens_id:row.lens,tier:'free',concern:row.concern});
-    texts.push(r.cuts.find(c=>c.id==='spine_depth').reader_html.split('<details')[0].replace(/[0-9一-龥\s]+/g,''));
+    const core=r.cuts.find(c=>c.id==='spine_depth');
+    const delivered=core?[core]:r.cuts.filter(c=>['why','daeun_now','yongsin'].includes(c.id));
+    assert.ok(delivered.length,'available composite reading');
+    if(!core)assert.equal(r.sells,false);
+    texts.push(delivered.map(c=>c.reader_html.split('<details')[0]).join('\n').replace(/[0-9一-龥\s]+/g,''));
    }
    assert.notEqual(texts[0],texts[1],example.lens+' previously identical core now reflects different chart structure');
-   collisionChecks.push({lens:example.lens,previouslyIdenticalCoreNowDifferent:true});
+   collisionChecks.push({lens:example.lens,previouslyIdenticalCoreCaseNowDistinguished:true,compared:example.lens==='dongja'?'available free-only chapters':'core'});
   }
  }
  fs.mkdirSync(output,{recursive:true});
