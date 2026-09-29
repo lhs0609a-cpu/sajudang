@@ -1431,6 +1431,7 @@
   "test_claims.py",
   "test_concern_spread.py",
   "test_concern_tables_are_full.py",
+  "test_consultation_decisions.py",
   "test_consultation_depth.py",
   "test_conversion_contracts.py",
   "test_conversion_integrity.py",

@@ -8,6 +8,9 @@ messages, diagnoses, or other sensitive free text.
 """
 from copy import deepcopy
 from html import escape
+from .consultation_decisions import decide
+
+VERSION = 'answer-decisions-v4'
 
 
 def _options(*labels):
@@ -147,11 +150,14 @@ def render(lens_id, topic, *, name="이 상담자"):
     if not row or not topic:
         return ""
     fourth, fifth = _picked(row, topic, 4), _picked(row, topic, 5)
+    decision = decide(lens_id, topic['choice4'], topic['choice5'])
     return (f'<div class="character-case"><h3>{escape(name)}이 사건을 좁혀 본 자리</h3>'
             f'<p class="note">전문 관점 · {escape(row[0])}</p>'
             f'<p><strong>당신이 짚은 현실</strong> · {escape(fourth)} / {escape(fifth)}</p>'
-            f'<h4>날카로운 판정</h4><p>{escape(row[5])}</p>'
-            f'<h4>지금 할 한 가지</h4><p>{escape(row[6])}</p>'
+            f'<p class="note">직접 고른 상황을 바탕으로 한 해석이오. 사주로 확인한 사실과는 구분하시오.</p>'
+            f'<h4>날카로운 판정</h4><p>{escape(decision["reading"])}</p>'
+            f'<h4>지금 할 한 가지</h4><p>{escape(decision["action"])}</p>'
+            f'<h4>다시 확인할 기준</h4><p>{escape(decision["review"])}</p>'
             f'<blockquote>{escape(row[7])}</blockquote></div>')
 
 
@@ -160,10 +166,13 @@ def brief(lens_id, topic, *, name="이 상담자"):
     if not row or not topic or not topic.get("choice4") or not topic.get("choice5"):
         return None
     fourth, fifth = _picked(row, topic, 4), _picked(row, topic, 5)
+    decision = decide(lens_id, topic['choice4'], topic['choice5'])
     return {"title": f"{name}이 먼저 가른 핵심", "axis": row[0],
             "html": (f'<p>말씀하신 장면은 <strong>{escape(fourth)}</strong>, '
                      f'그리고 <strong>{escape(fifth)}</strong> 쪽이오.</p>'
-                     f'<p>{escape(row[5])}</p>'), "close": row[7]}
+                     f'<p>{escape(decision["reading"])}</p>'
+                     f'<p>{escape(decision["action"])}</p>'), "close": row[7],
+            "action": decision['action'], "review": decision['review']}
 
 
 def enrich_practice(practice, lens_id, topic, *, name="이 상담자"):
@@ -174,18 +183,28 @@ def enrich_practice(practice, lens_id, topic, *, name="이 상담자"):
     characters that all feel like the same checklist.
     """
     row = INTERVIEWS.get(lens_id)
-    if not row or not topic or not topic.get("choice4") or not topic.get("choice5"):
+    if not practice or not row or not topic or not topic.get("choice4") or not topic.get("choice5"):
         return practice
     fourth, fifth = _picked(row, topic, 4), _picked(row, topic, 5)
+    decision = decide(lens_id, topic['choice4'], topic['choice5'])
     enriched = deepcopy(practice)
     enriched.update({
         "id": f"{practice.get('id', 'practice')}:{lens_id}",
-        "version": max(3, int(practice.get("version", 1))),
+        "version": max(4, int(practice.get("version", 1))),
         "specialist_name": name,
         "specialist_axis": row[0],
         "case_summary": f"{fourth} / {fifth}",
-        "specialist_verdict": row[5],
-        "specialist_action": row[6],
+        "specialist_verdict": decision['reading'],
+        "specialist_action": decision['action'],
         "specialist_close": row[7],
+        "specialist_review": decision['review'],
+        "source": "직접 고른 두 상황에 따른 실천 제안 · 사주 계산으로 확인한 사실이 아니오",
+        "steps": [f'먼저 답을 확인하시오. {fourth} / {fifth}. 상황이 달라졌다면 답을 고쳐도 되오.',
+                  decision['action'], decision['review']],
+        "decision": decision['reading'],
+        "review": decision['review'],
+        # Generic concern exercises can contradict the selected specialist
+        # (e.g. no contact, rest first). Do not mix them into this action.
+        "focus": row[0], "example": decision['action'], "trap": decision['review'],
     })
     return enriched

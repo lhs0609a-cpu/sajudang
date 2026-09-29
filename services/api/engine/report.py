@@ -707,7 +707,14 @@ def _all_cuts(f, concern: str, you: str, axis4: Optional[str],
     #   (여기 「척추」 는 한 사람의 한 줄이오. 아래 「척추 열 컷」 과 다르오.)
     sp = spine_mod.read(f)
     spine_html = spine_mod.head_html(sp)
-    if lens_id == "pungun":
+    case_brief = character_consultation_mod.brief(
+        lens_id, (extras or {}).get('topic'), name=lens_mod.public(lens_id).get('name', '해석자'))
+    if case_brief:
+        spine_html = ('<div class="specialist-opening"><p class="opening-label">답변으로 좁힌 첫 해석</p>'
+                      + case_brief['html']
+                      + '<p class="opening-boundary">그대가 고른 상황에 따른 해석이오. 아래의 명식 계산과 구분해서 읽으시오.</p></div>'
+                      + spine_html)
+    elif lens_id == "pungun":
         spine_html = consultation.pungun_opening(f, concern)
     else:
         specialist_name = lens_mod.public(lens_id).get("name", "해석자")
@@ -2855,11 +2862,11 @@ def build_report(f, chart_id: str, lens_id: str, tier: str, concern: str,
         practice, lens_id, (extras or {}).get("topic"), name=lens_mod.public(lens_id).get("name", "이 상담자"))
     from .mbti_reading import build as build_mbti
     mbti=build_mbti(f,axis4,concern)
-    if mbti:
+    if mbti and not practice.get('specialist_action'):
         practice['mbti']=guard.enforce(mbti['code']+' · '+mbti['action']+' '+mbti['process'])
         practice['steps']=[guard.enforce(step+' '+extra) for step,extra in zip(practice['steps'],[mbti['evidence'],mbti['dialogue'],mbti['process']])]
     for field in ('title','scene','action','steps','source','focus','example','decision','trap','review','mbti',
-                  'specialist_axis','case_summary','specialist_verdict','specialist_action','specialist_close'):
+                  'specialist_axis','case_summary','specialist_verdict','specialist_action','specialist_close','specialist_review'):
         if field in practice:
             practice[field] = spoken(practice[field])
     if editorial:

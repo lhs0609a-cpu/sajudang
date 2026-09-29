@@ -128,7 +128,35 @@ def test_character_answers_create_a_distinct_specialist_segment(client,chart_id)
     specialist=next(row for row in segments if row['stage']=='specialist')
     assert '거의 나 혼자' in specialist['html']
     assert '감정과 관계' in specialist['html']
-    assert '견딜 수 있다는 사실' in specialist['html']
+    assert '나눌 사람이 없는 구조' in specialist['html']
+    assert '대화를 멈출 때' in specialist['html']
+    action = next(row for row in segments if row['stage'] == '2')
+    assert '대화를 멈출 때' in action['html']
+    assert '다음 대화에서' in action['html']
+
+
+def test_unknown_hour_hook_never_claims_eight_known_characters(client):
+    birth = {**BIRTH, 'hour_known':False, 'hour':None, 'minute':None}
+    cid = client.post('/v1/chart', json=birth).json()['chart_id']
+    spec = client.get('/v1/report/topic/work?lens_id=pungun').json()
+    topic = {('choice' if n == 1 else f'choice{n}'):spec[('options' if n == 1 else f'options{n}')][0]['id']
+             for n in range(1, 6)}
+    result = client.post('/v1/hook', json={'chart_id':cid, 'concern':'work', 'lens_id':'pungun',
+        'topic':topic})
+    assert result.status_code == 200
+    text = str(result.json()['segments'])
+    assert '여덟 글자' not in text
+    assert '여섯 글자' in text
+
+
+def test_consultation_edition_invalidates_hook_cache(client, chart_id, monkeypatch):
+    payload = {'chart_id':chart_id, 'concern':'work', 'lens_id':'pungun'}
+    client.post('/v1/hook', json=payload)
+    assert client.post('/v1/hook', json=payload).json()['cached']
+    monkeypatch.setattr(character_consultation, 'VERSION', 'test-new-consultation-edition')
+    response = client.post('/v1/hook', json=payload)
+    assert response.status_code == 200
+    assert not response.json()['cached']
 
 
 @pytest.mark.parametrize('choice',[

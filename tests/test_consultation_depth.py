@@ -91,8 +91,9 @@ def test_all_twenty_characters_make_today_action_distinct():
         result = character_consultation.enrich_practice(base, character, topic, name=character)
         assert result["specialist_axis"] == row[0]
         assert row[2][0]["label"] in result["case_summary"]
-        assert result["specialist_verdict"] == row[5]
-        assert result["specialist_action"] == row[6]
+        assert result["specialist_verdict"] != row[5]
+        assert result["specialist_action"] != row[6]
+        assert result["specialist_review"]
         assert result["specialist_close"] == row[7]
         assert result["version"] >= 3
         actions.add((result["specialist_verdict"], result["specialist_action"], result["specialist_close"]))

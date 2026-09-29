@@ -252,13 +252,15 @@ def render(lens_id, concern, features, topic=None):
     parts = ['<div class="consultation-method"><h3>%s</h3>' % escape(perspective),
              '<p class="note">명식에서 확인한 것 · %s</p>' % escape(evidence),
              '<p>이 계산을 바탕으로 살펴볼 질문이오. %s</p>' % escape(question(lens_id, concern))]
-    for heading, text in zip(headings, row):
-        parts.append('<h4>%s</h4><p>%s</p>' % (heading, escape(text)))
     if topic and topic.get('choice4') and topic.get('choice5'):
         from . import character_consultation
         from . import lens
         parts.append(character_consultation.render(
             lens_id, topic, name=lens.public(lens_id)['name']))
+        parts.append('</div>')
+        return ''.join(parts)
+    for heading, text in zip(headings, row):
+        parts.append('<h4>%s</h4><p>%s</p>' % (heading, escape(text)))
     # ★ 「금액·용도·선택 이유을 적으시오」 가 나갔습니다 (2026-09-28).
     #   토씨를 손으로 박으면 자리표시에 무엇이 들어오느냐에 따라 절반이
     #   비문이 됩니다. 받침을 보고 답니다.

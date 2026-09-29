@@ -44,7 +44,9 @@ export default function SoundToggle() {
     try {
       setHint(!localStorage.getItem(HINT));
     } catch { /* 저장을 막아 둔 브라우저 */ }
-    return onSoundChange((s) => setOn(s === "on"));
+    const timer = window.setTimeout(() => setHint(false), 6000);
+    const unsubscribe = onSoundChange((s) => setOn(s === "on"));
+    return () => { window.clearTimeout(timer); unsubscribe(); };
   }, []);
 
   return (

@@ -14,7 +14,7 @@ export interface Practice {
   steps?: string[];
   focus?: string; example?: string; decision?: string; trap?: string; review?: string; mbti?: string;
   specialist_name?: string; specialist_axis?: string; case_summary?: string;
-  specialist_verdict?: string; specialist_action?: string; specialist_close?: string;
+  specialist_verdict?: string; specialist_action?: string; specialist_close?: string; specialist_review?: string;
 }
 
 export default function PracticeCard({ practice, lensId }: { practice: Practice; lensId?: string }) {
@@ -47,16 +47,17 @@ export default function PracticeCard({ practice, lensId }: { practice: Practice;
     <div className="practice-mission">
       <span>오늘 할 하나</span>
       <h3>{practice.specialist_action ?? practice.action}</h3>
-      <p>읽고 끝내지 말고, 오늘 가능한 가장 작은 크기로 실행하시오.</p>
+      <p>{practice.specialist_action ? '답한 상황에 맞춰 고른 한 가지요. 쉬거나 멈추는 선택도 충분하오.' : '오늘 가능한 가장 작은 크기로 해보시오.'}</p>
     </div>
-    {practice.steps?.length ? <div className="practice-how">
+    {practice.specialist_review && <div className="practice-decision"><h3>이 행동 뒤에 확인할 것</h3><p>{practice.specialist_review}</p></div>}
+    {!practice.specialist_action && practice.steps?.length ? <div className="practice-how">
       <h3>그 하나를 이렇게 하시오</h3>
       <ol className="practice-steps">{practice.steps.map((step, i) =>
         <li key={i}><p>{step}</p></li>
       )}</ol>
     </div> : null}
-    {practice.decision && <div className="practice-decision"><h3>상황이 다르면 여기서 갈립니다</h3><p>{practice.decision}</p></div>}
-    {(practice.focus || practice.mbti || practice.example || practice.trap || practice.review) && <details className="practice-deeper">
+    {!practice.specialist_action && practice.decision && <div className="practice-decision"><h3>상황이 다르면 여기서 갈립니다</h3><p>{practice.decision}</p></div>}
+    {!practice.specialist_action && (practice.focus || practice.mbti || practice.example || practice.trap || practice.review) && <details className="practice-deeper">
       <summary>내 상황에 맞춘 실행 보정까지 보기</summary>
       <div className="practice-workbook">
         {([['focus','먼저 살필 지점'],['mbti','내 MBTI에 맞춘 실행법'],['example','실제로 적는 예시'],['trap','여기까지 애쓰지는 마시오'],['review','오늘 행동이 끝났다는 기준']] as const).map(([key,title])=>practice[key]
@@ -67,7 +68,10 @@ export default function PracticeCard({ practice, lensId }: { practice: Practice;
     <ServerText as="p" className="conversion-note" html={practice.source} />
     <button className="btn gh" onClick={async () => {
       try {
-        await navigator.clipboard.writeText([practice.specialist_axis, practice.case_summary, practice.specialist_verdict, practice.specialist_action ?? practice.action, ...(practice.steps ?? []).map((step, i) => `${i + 1}. ${step}`), practice.decision, practice.focus, practice.mbti, practice.example, practice.trap, practice.review, practice.specialist_close, practice.source].filter(Boolean).join('\n\n'));
+        const lines = practice.specialist_action
+          ? [practice.specialist_axis, practice.case_summary, practice.specialist_verdict, practice.specialist_action, practice.specialist_review, practice.specialist_close, practice.source]
+          : [practice.title, practice.action, ...(practice.steps ?? []).map((step, i) => `${i + 1}. ${step}`), practice.decision, practice.focus, practice.mbti, practice.example, practice.trap, practice.review, practice.source];
+        await navigator.clipboard.writeText(lines.filter(Boolean).join('\n\n'));
         setSaved(true); setStatus("행동 문장을 복사했소. 원하는 메모에 붙여넣어 보시오.");
         track("practice_saved", "d0");
       } catch { setStatus("자동으로 복사하지 못했소. 위 문장을 길게 눌러 복사해 주시오."); }

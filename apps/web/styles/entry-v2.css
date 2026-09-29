@@ -36,6 +36,8 @@
 .entry-faq {border-bottom:1px solid #83927330;margin:12px 0}
 .entry-faq summary {font:500 13px/1.8 var(--sans);padding:16px 0;cursor:pointer;color:#c6cfbf;min-height:48px}
 .entry-faq p {font:400 13px/1.9 var(--sans);color:#b8c2b4}
+.entry-sample h3 {font:500 18px/1.6 var(--serif);color:#ead6b0;margin:24px 0 8px}
+.entry-sample h3+p {padding-left:14px;border-left:2px solid #d3b78866}
 .phone[data-screen="a1"] .entry-faq {margin:0 32px}
 .phone[data-screen="a1"] .entry-faq:last-child {margin-bottom:28px}
 .entry-input-note {font:400 11px/1.8 var(--sans);color:#aebbab;margin:10px 0 16px}

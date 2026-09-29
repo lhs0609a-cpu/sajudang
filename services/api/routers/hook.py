@@ -1,5 +1,6 @@
 """POST /v1/hook — 무료 훅 5단."""
 from fastapi import APIRouter, HTTPException
+from html import escape
 
 import store
 from engine import bank, lens as lens_mod, topic as topic_mod, voice as voice_mod
@@ -44,7 +45,8 @@ def post_hook(req: HookRequest) -> HookResponse:
         (req.topic or {}).get("choice5", ""))
     key = store.k_hook(req.chart_id, req.concern, req.axis4 or "",
                        req.lens_id or "",
-                       "%s#%d#%s#%s" % (req.name, req.misses, READING_VERSION, topic_key))
+                       "%s#%d#%s#%s#%s" % (req.name, req.misses, READING_VERSION,
+                                           character_consultation_mod.VERSION, topic_key))
     cached = store.get_json(key)
     if cached is not None:
         return HookResponse(chart_id=req.chart_id, segments=cached, cached=True)
@@ -77,6 +79,18 @@ def post_hook(req: HookRequest) -> HookResponse:
                 name=lens_mod.public(req.lens_id)["name"])
                 if req.lens_id else None)
             if specialist:
+                # The action later in the same reading must honor the answer
+                # just used by the specialist, including rest/no-contact.
+                for segment in segs:
+                    if segment['stage'] == '2':
+                        segment.update({
+                            'html': '<p>%s</p><p><strong>해본 뒤 확인할 것</strong> · %s</p>' % (
+                                escape(specialist['action']), escape(specialist['review'])),
+                            'source': '직접 고른 상황에 따른 실천 제안 · 사주 계산으로 확인한 사실이 아니오',
+                            'statement_id': '%s:%s:%s:%s:2' % (
+                                character_consultation_mod.VERSION, req.lens_id,
+                                topic.get('choice4'), topic.get('choice5')),
+                        })
                 segs.insert(1, {
                     'stage':'specialist', 'label':specialist['title'],
                     'html':specialist['html'], 'source':'선택한 상황 · 이 상담자의 전문 판단 기준',
@@ -126,6 +140,11 @@ def post_hook(req: HookRequest) -> HookResponse:
     #
     #   묻는 말과 응답 두 줄도 같이 태웁니다. 대사 세 줄 중 둘만
     #   갈면 그게 더 눈에 띕니다.
+    from engine.reading_facts import scope_text
+    for segment in segs:
+        for field in ('html', 'question', 'yes', 'no', 'source'):
+            if segment.get(field):
+                segment[field] = scope_text(segment[field], f.hour_known)
     tone = lens_mod.view(req.lens_id).get("voice")
     if tone:
         for s in segs:

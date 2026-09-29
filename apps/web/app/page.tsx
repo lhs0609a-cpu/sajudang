@@ -218,6 +218,14 @@ if (step === "a1") {
         <p>그대를 한마디로 정하지 않겠소.<br/>어떤 마음으로 여기까지 왔는지,<br/><b>함께 읽어 보겠소.</b></p>
         <div className="entry-benefits"><span>고민에 맞는 해석</span><span>확인할 수 있는 근거</span><span>오늘 해볼 일 하나</span></div>
       </section>
+      <details className="entry-faq entry-sample"><summary>같은 고민인데, 답은 어떻게 달라지오?</summary>
+        <p className="entry-eyebrow">관계 상담 예시 · 그대의 실제 결과는 아니오</p>
+        <h3>“부탁했는데도 반복돼요.”</h3>
+        <p>원하는 행동을 이미 분명히 말했다면 표현법만 다시 배우라는 답은 부족하오. 다음 약속에서도 반복되면 내가 지킬 경계를 정하시오.</p>
+        <h3>“아직 말하지 못했어요.”</h3>
+        <p>서로 같은 기대를 안다고 가정하지 않겠소. 말할 수 있는 상황이라면 원하는 행동 하나를 먼저 부탁하시오.</p>
+        <p>상담자의 질문에 답하면 첫 요약·깊은 풀이·오늘 행동이 그 답을 따라 달라지오. 명식에서 계산한 근거와 직접 고른 상황은 구분해서 보여드리오.</p>
+      </details>
       <details className="entry-faq"><summary>무엇을 알려주면 되오?</summary><p>생년월일과 성별, 태어난 지역을 알려주시오. 시간과 별칭, 성향은 아는 만큼만 적어도 되오. 전통 사주를 바탕으로 자신을 돌아보는 해석이오.</p></details>
       <details className="entry-faq"><summary>무료에서 정확히 무엇을 받소?</summary><p>타고난 힘, 반복되는 장면, 오늘 끝낼 행동까지 받소. 결제 전에는 추가로 열리는 질문·실제 첫 문장·글자 수·가격을 먼저 보여드리오.</p></details>
       <details className="entry-faq"><summary>읽고 나면 무엇이 남소?</summary><p>반복되는 모습, 그 해석의 근거, 오늘 해볼 행동을 함께 가져가오. 맞지 않는 문장은 아니라고 답해도 좋소. 그 차이부터 다시 짚겠소.</p></details>
